@@ -2,4 +2,4 @@
 // 데이터는 firebase/database.rules.json 의 보안 규칙이 지킨다. 비워 두면 '이 기기 체험 모드'로 동작한다.
 window.DS = window.DS || {};
 DS.FIREBASE = null;
-DS.VERSION = 'citadel-0.1';
+DS.VERSION = 'citadel-0.1.1';

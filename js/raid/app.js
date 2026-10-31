@@ -10,6 +10,7 @@ DS.App = (function () {
 
   async function boot() {
     DS.Art.install();
+    DS.PWA.init();
     try { await DS.Net.init(); } catch (e) { $('#home-msg').textContent = e.message; return; }
     $('#mode').innerHTML = DS.Net.mode === 'local' ? '🧪 이 기기 체험 모드 <span class="muted">(Firebase 미설정 — 같은 브라우저 탭끼리만 연결)</span>' : '🌐 실시간 연결 (Firebase)';
     $('#ver').textContent = DS.VERSION;

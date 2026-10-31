@@ -3,12 +3,13 @@
 ## 한눈에
 | 항목 | 내용 |
 |---|---|
-| 버전 | `citadel-0.1` (2026-10-31) |
+| 버전 | `citadel-0.1.1` (2026-10-31) — 0.1.1: 스탠드얼론 PWA |
 | 형태 | 교실 협동 레이드: 학생 폰 · 교사 폰(리모컨) · 종합상황실(PC 큰 화면) |
 | 엔진 | DIMENSION SLASHER — 엄격 연성 · 첫 연성 예제 · 문제 형식 6종 · 독립 검산 테스트 |
 | 수업 구조 | citadel(`garzondesne-dot/citadel`) 의 클래스룸 레이드를 참고해 새로 짬 (코드는 참고만) |
 | 서버 | Firebase Realtime Database + 익명 로그인 (Apps Script 는 느려서 뺌). 설정 전에는 이 기기 체험 모드 |
 | 내용 | 집합 3차시 「집합 사이의 포함 관계」 (학습지 v2) |
+| 앱 설치 | 스탠드얼론 PWA — 홈 화면 아이콘, 주소창 없이 전체 화면. 안드로이드 [📲 앱으로 설치] 버튼 · 아이폰 공유 → 홈 화면에 추가 안내 |
 | 체험판 | `demo.html` — 가상 학생 6~24명 + 교사 폰 + 종합상황실 + 학생 1명(직접)을 한 화면에 |
 
 ## 수업 흐름 (50분 기준 예시)
@@ -62,7 +63,8 @@
 | `js/raid/control.js` | 교사 기기 공용: 진행 버튼 · 선생님 연성 · 선생님 마지막 공격 |
 | `js/raid/student.js` · `teacher.js` · `hall.js` · `app.js` | 학생 폰 · 교사 폰 · 종합상황실 · 첫 화면 |
 | `firebase/database.rules.json` | 보안 규칙 (`docs/firebase-setup.md`) |
-| `tests/` | `node tests/lesson.test.js`, `node tests/model.test.js` |
+| `manifest.webmanifest`, `sw.js`, `js/engine/pwa.js`, `icons/` | 앱 설치(PWA): 코드는 인터넷 먼저(푸시 즉시 반영), 그림·글꼴은 캐시 먼저(처음 한 번만 받음). 아이콘 = 성채 드래곤 |
+| `tests/` | `node tests/lesson.test.js`, `node tests/model.test.js`, `node tests/pwa.test.js` |
 
 ## 데이터 모양 (Firebase `rooms/{코드}`)
 `meta`(차시·교사 uid) · `hosts`(교사 기기) · `state`(phase·stage·monster·round·result·winner) · `active`(참여 학생) · `players` · `cards` · `help` · `seen` · `subs`(답은 JSON 문자열) · `credits` · `bossAns`. 종합상황실 키는 `secrets/{코드}` (학생은 못 읽음).
@@ -77,6 +79,15 @@
 ## 배포
 - GitHub Pages: 저장소 Settings → Pages → Branch `main` / root → `https://garzondesne-dot.github.io/Citadel-MATH/`
 - Firebase 를 설정하기 전에는 이 기기 체험 모드로만 동작한다 (`docs/firebase-setup.md`).
+
+## PWA 메모
+| 항목 | 내용 |
+|---|---|
+| 오프라인 | 첫 화면은 열리지만 수업은 Firebase 연결이 필요 |
+| 새 버전 | `DS.VERSION` 과 `sw.js` 의 `CACHE` 를 함께 올린다 (테스트가 확인) |
+| 그림 교체 | 그림은 캐시 먼저 → 같은 이름으로 덮으면 학생 폰에 옛 그림이 남는다. 새 이름(`-v3`)으로 넣고 배치표·`sw.js` STATIC 수정 |
+| 아이폰 | 홈 화면 앱은 사파리와 저장 공간이 따로 → 처음 한 번 다시 입장 |
+| 체험판 | `demo.html` 은 PC 용이라 설치 대상 아님 |
 
 ## 알려진 한계 · 다음 후보
 | 항목 | 내용 |

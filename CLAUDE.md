@@ -14,6 +14,7 @@
 - 기술: 빌드 도구 없이 브라우저에서 바로 열리는 HTML5. 스크립트는 `<script>` 순서대로 `window.DS`에 붙는다(ES 모듈 아님). 실시간 동기화는 **Firebase Realtime Database**(`js/config.js`), 비어 있으면 이 기기 체험 모드(localStorage).
 - 그래픽 에셋은 `assets/` 와 배치표 `assets/manifest.js` 로 분리. 코드에 그림 파일 이름을 직접 쓰지 않는다.
 - 규칙·차시·문제를 고치면 `node tests/lesson.test.js` 와 `node tests/model.test.js` 를 반드시 통과시킬 것.
+- **스탠드얼론 PWA**: `manifest.webmanifest` + `sw.js`. 서비스 워커 캐시 이름은 `ds-` + `DS.VERSION` 과 같아야 하고, 새 스크립트를 넣으면 `sw.js` CORE 목록에도 넣는다 (`node tests/pwa.test.js` 가 확인). 그림을 바꾸면 파일 이름을 바꾼다(그림은 캐시 먼저라서).
 - 교과서 PDF·학습지 원본·시트 ID·교사 비밀번호는 저장소에 넣지 않는다. (Firebase 웹 설정값은 공개값이라 커밋해도 된다. 데이터는 `firebase/database.rules.json` 이 지킨다)
 - 푸시 = 학생 화면 즉시 변경(GitHub Pages 배포 후). 수업 직전에는 푸시하지 않는다.
 - DIMENSION SLASHER 본편 v0.3.2 대기 안건(m′ 제한 등)은 이 저장소가 아니라 DIMENSION-SLASHER 저장소 일이다 (`docs/DECISIONS.md` 참고 메모).
