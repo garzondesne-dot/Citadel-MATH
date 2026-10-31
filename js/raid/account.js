@@ -10,6 +10,17 @@ DS.Account = (function () {
   const N = () => DS.Net;
   const fail = (msg) => { const e = new Error(msg); e.user = true; throw e; };
   const DOMAIN = 'citadel.class';
+  // Firebase 로그인 오류 → 우리말 안내
+  function why(e) {
+    const c = (e && e.code) || '';
+    if (c === 'auth/operation-not-allowed') return '서버에서 이메일/비밀번호 로그인이 꺼져 있어요. Firebase 콘솔 → Authentication → 로그인 방법(Sign-in method) → 이메일/비밀번호 → 사용 설정 후 다시 해 주세요.';
+    if (c === 'auth/network-request-failed') return '인터넷 연결을 확인해 주세요.';
+    if (c === 'auth/too-many-requests') return '여러 번 틀려서 잠시 막혔어요. 조금 뒤에 다시 해 주세요.';
+    if (c === 'auth/weak-password') return '비밀번호가 너무 짧아요 (교사는 6자 이상).';
+    if (c === 'PERMISSION_DENIED' || /permission/i.test(e && e.message)) return '권한이 없어요. Firebase 규칙을 최신으로 게시했는지 확인해 주세요.';
+    return null;
+  }
+  const rethrow = (e) => { const m = why(e); if (m) fail(m); throw e; };
 
   // ── 순수 도구 (tests/account.test.js) ──────────────────────
   const classKey = (s) => String(s).trim().replace(/\s+/g, '').replace(/[^0-9A-Za-z가-힣-]/g, '-');
@@ -58,7 +69,7 @@ DS.Account = (function () {
     const gen = acc ? (acc.gen || 0) + 1 : 0;
     try { await N().signUp(email(c, n, gen), pw(pin)); } catch (e) {
       if (e.code === 'auth/email-already-in-use') fail('이미 가입한 번호예요. 로그인해 주세요.');
-      throw e;
+      rethrow(e);
     }
     try { await N().set(`accounts/${c}/${n}`, { uid: N().uid(), gen, hero: Number(hero) || (acc && acc.hero) || 0, at: N().TS }); } catch (e) { await N().signOut(); fail('이미 가입한 번호예요. 로그인해 주세요.'); }
     return me();
@@ -74,7 +85,7 @@ DS.Account = (function () {
       return signUp(c, n, newPin, acc.hero);
     }
     if (!validPin(pin)) fail('비밀번호는 숫자 4자리예요.');
-    try { await N().signIn(email(c, n, acc.gen || 0), pw(pin)); } catch (e) { fail('비밀번호가 달라요. 잊었으면 선생님께 초기화를 부탁해요.'); }
+    try { await N().signIn(email(c, n, acc.gen || 0), pw(pin)); } catch (e) { if (why(e)) rethrow(e); fail('비밀번호가 달라요. 잊었으면 선생님께 초기화를 부탁해요.'); }
     return me();
   }
   // 지금 로그인한 학생 (반·번호·이름·용사)
@@ -98,11 +109,11 @@ DS.Account = (function () {
   async function teacherCreate(id, password) {
     if (String(password).length < 6) fail('교사 비밀번호는 6자 이상이에요.');
     if (await adminExists()) fail('교사 계정이 이미 있어요. 로그인해 주세요.');
-    await N().signUp(teacherEmail(id), password);
-    await N().set(`admins/${N().uid()}`, true);
+    try { await N().signUp(teacherEmail(id), password); } catch (e) { if (e.code === 'auth/email-already-in-use') fail('이미 있는 교사 아이디예요. 로그인해 주세요.'); rethrow(e); }
+    try { await N().set(`admins/${N().uid()}`, true); } catch (e) { rethrow(e); }
   }
   async function teacherLogin(id, password) {
-    try { await N().signIn(teacherEmail(id), password); } catch (e) { fail('교사 아이디나 비밀번호가 달라요.'); }
+    try { await N().signIn(teacherEmail(id), password); } catch (e) { if (why(e)) rethrow(e); fail('교사 아이디나 비밀번호가 달라요.'); }
     if (!(await isAdmin())) { await N().signOut(); fail('교사 계정이 아니에요.'); }
   }
 
