@@ -18,7 +18,7 @@
 | 배포 | ✅ `https://garzondesne-dot.github.io/Citadel-MATH/` (GitHub Pages, main / root) |
 | Firebase | ✅ 프로젝트 `citadel-math` — 익명 로그인 · Realtime DB(싱가포르) · 보안 규칙 게시 · 웹 설정 `js/config.js` |
 | 실기기 확인 | ✅ 교사 새 수업 → QR 입장 → 종합상황실 반영. ⏳ 수업 시작 → 연성 → 전투 → 보스는 체험판(`demo.html`)에서만 확인 |
-| 다음 추천 | A. 폰 2~3대 리허설 → 불편한 점 정리 / B. 1~2차시 추가 / C. 보스 사진·Gemini 채점 |
+| 다음 추천 | **`docs/PLAN.md` 변경 확정안 (1~5단계) — "진행" 승인 대기.** 2026-10-31 결정은 `docs/DECISIONS.md` |
 | 수업 일정 | 정해지면 기록. 수업 전날부터 푸시 금지 |
 
 ## 수업 흐름 (50분 기준 예시)
