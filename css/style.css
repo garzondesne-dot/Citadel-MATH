@@ -71,10 +71,10 @@ input:focus, select:focus { outline: none; border-color: var(--gold); }
 .role { display: flex; flex-direction: column; align-items: center; font: 26px var(--pixel); color: var(--text); background: var(--panel); border: 2px solid var(--line); padding: 10px 4px; cursor: pointer; }
 .role b { font-size: 14px; margin-top: 2px; }
 .role.on { border-color: var(--gold); background: #2a2010; }
-.heroes { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-.hpick { background: #08101e; border: 2px solid var(--line); padding: 2px; cursor: pointer; aspect-ratio: 1; }
+.heroes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.hpick { min-width: 0; background: #08101e; border: 2px solid var(--line); padding: 2px; cursor: pointer; aspect-ratio: 1; }
 .hpick.on { border-color: var(--gold); background: #2a2010; }
-.hpick .art { width: 100%; height: 100%; }
+.hpick .art.hero { width: 100%; height: 100%; }
 
 /* 그림 칸 (assets/manifest.js) */
 .art { display: inline-block; background-repeat: no-repeat; image-rendering: pixelated; vertical-align: middle; flex: none; }
