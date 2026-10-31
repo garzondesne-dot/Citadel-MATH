@@ -1,4 +1,4 @@
-// 첫 화면: 역할 고르기(학생 · 교사 폰 · 종합상황실 · 수업 준비) · 로그인/가입 · 주소로 바로 입장(?role=student&code=…)
+// 첫 화면: 역할 고르기(학생 · 교사[수업 열기 + 수업 준비] · 종합상황실) · 로그인/가입 · 주소로 바로 입장(?role=student&code=…)
 // 학생: 반 · 번호를 고르면 가린 이름(김*우)으로 확인 → 숫자 4자리로 로그인 (처음이면 가입). 이름은 명단에서 나온다.
 // 교사: 교사 계정(아이디 · 비밀번호)으로 로그인해야 새 수업 · 수업 준비를 쓸 수 있다.
 window.DS = window.DS || {};
@@ -24,7 +24,7 @@ DS.App = (function () {
     bind();
     await studentAuth();
     await teacherAuth();
-    const role = q.get('role');
+    const role = q.get('role') === 'prep' ? 'teacher' : q.get('role'); // 수업 준비는 교사 안으로 합침
     if (role) form(role);
     splash(!role && !DS.Scene.get() && !inFrame());
     if (role === 'hall' && q.get('code')) $('#h-code').value = q.get('code');

@@ -30,9 +30,8 @@
     <p id="install-tip" class="install-tip small" hidden>📲 아이폰: 사파리 아래 <b>공유</b> 버튼 → <b>홈 화면에 추가</b> 하면 앱처럼 열려요.</p>
     <div class="roles">
       <button class="role on" data-role="student"><i class="menu-ic" data-ic="student"></i><b>학생</b></button>
-      <button class="role" data-role="teacher"><i class="menu-ic" data-ic="teacher"></i><b>교사 폰</b></button>
+      <button class="role" data-role="teacher"><i class="menu-ic" data-ic="teacher"></i><b>교사</b></button>
       <button class="role" data-role="hall"><i class="menu-ic" data-ic="hall"></i><b>종합상황실</b></button>
-      <button class="role" data-role="prep"><i class="menu-ic" data-ic="prep"></i><b>수업 준비</b></button>
     </div>
 
     <div id="f-student" class="role-form panel framed">
@@ -42,12 +41,17 @@
     <div id="f-teacher" class="role-form panel framed" hidden>
       <div class="t-auth"></div>
       <div class="t-only" hidden>
+        <p class="t-sec"><i class="menu-ic sm" data-ic="teacher"></i><b>수업 열기</b> <span class="muted small">교사 폰</span></p>
         <div class="row2"><label>차시 <select id="lesson"></select></label><label>반 <select id="t-cls"></select></label></div>
         <p class="muted small">반을 고르면 그 반 학생들의 모닥불에 이 차시 차원문이 바로 나타나요.</p>
         <button id="t-new" class="btn primary big">✨ 새 수업 만들기</button>
         <button id="t-resume" class="btn" hidden></button>
         <div class="row2"><label>수업 코드로 이어서 <input id="t-code" inputmode="numeric" maxlength="6" autocomplete="off"></label><button id="t-code-go" class="btn">↩ 이어서</button></div>
-        <p class="muted small">수업 코드(학생용)와 종합상황실 키(PC용)가 만들어져요. 학생 정답·도움 요청은 교사 폰에만 보여요.</p>
+        <p class="muted small">수업 코드(학생용)와 종합상황실 키(PC용)가 만들어져요. 학생 정답·도움 요청은 교사 화면에만 보여요.</p>
+        <p class="t-sec"><i class="menu-ic sm" data-ic="prep"></i><b>수업 준비</b> <span class="muted small">PC 권장</span></p>
+        <label>차시 <select id="p-lesson"></select></label>
+        <button id="p-go" class="btn big">📋 수업 준비 열기</button>
+        <p class="muted small">학생 명단 올리기 · 비밀번호 초기화 · 개념 설명 학습지 이미지 · 몬스터 체력 기준% · 생각 시간</p>
       </div>
     </div>
 
@@ -55,14 +59,6 @@
       <div class="row2"><label>수업 코드 <input id="h-code" inputmode="numeric" maxlength="6" autocomplete="off"></label><label>종합상황실 키 <input id="h-key" type="password" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="••••"></label></div>
       <button id="h-go" class="btn primary big">🖥 종합상황실 열기</button>
       <p class="muted small">교실 PC·TV 화면용. 키는 교사 폰 위쪽에 있어요.</p>
-    </div>
-    <div id="f-prep" class="role-form panel framed" hidden>
-      <div class="t-auth"></div>
-      <div class="t-only" hidden>
-        <label>차시 <select id="p-lesson"></select></label>
-        <button id="p-go" class="btn primary big">📋 수업 준비 열기 (PC)</button>
-        <p class="muted small">학생 명단 올리기 · 비밀번호 초기화 · 개념 설명 학습지 이미지 · 몬스터 체력 기준% 기본값</p>
-      </div>
     </div>
     <p id="home-msg" class="ngc"></p>
     <p class="muted small center"><a href="demo.html">🧪 체험판: 가상 학생 18명과 한 화면에서 해 보기</a></p>
