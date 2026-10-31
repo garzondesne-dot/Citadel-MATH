@@ -7,7 +7,7 @@
 | 형태 | 교실 협동 레이드: 학생 폰 · 교사 폰(리모컨) · 종합상황실(PC 큰 화면) |
 | 엔진 | DIMENSION SLASHER — 엄격 연성 · 첫 연성 예제 · 문제 형식 6종 · 독립 검산 테스트 |
 | 수업 구조 | citadel(`garzondesne-dot/citadel`) 의 클래스룸 레이드를 참고해 새로 짬 (코드는 참고만) |
-| 서버 | Firebase Realtime Database + 익명 로그인 (Apps Script 는 느려서 뺌). 설정 전에는 이 기기 체험 모드 |
+| 서버 | Firebase Realtime Database + 익명 로그인 (Apps Script 는 느려서 뺌). 프로젝트 `citadel-math` (싱가포르, Spark 무료) 연결됨 — `js/config.js`. 주소 끝에 `?local` 을 붙이면 이 기기 체험 모드 |
 | 내용 | 집합 3차시 「집합 사이의 포함 관계」 (학습지 v2) |
 | 앱 설치 | 스탠드얼론 PWA — 홈 화면 아이콘, 주소창 없이 전체 화면. 안드로이드 [📲 앱으로 설치] 버튼 · 아이폰 공유 → 홈 화면에 추가 안내 |
 | 체험판 | `demo.html` — 가상 학생 6~24명 + 교사 폰 + 종합상황실 + 학생 1명(직접)을 한 화면에 |
