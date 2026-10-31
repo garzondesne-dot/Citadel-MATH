@@ -175,7 +175,9 @@ DS.Quiz = (function () {
         prob.options.forEach((o, i) => {
           const b = document.createElement('button');
           b.className = 'choice multi';
-          b.innerHTML = `<span class="no">${'①②③④⑤⑥⑦⑧'[i]}</span><span class="math">${pretty(o)}</span>`;
+          // 보기가 숫자뿐이면 번호(①…)를 붙이지 않는다 (① 1 처럼 헷갈림). 그 밖에는 ①~⑳ (9번째부터 undefined 가 뜨던 것 수정)
+          const mark = /^-?\d+$/.test(String(o)) ? '' : `<span class="no">${i < 20 ? String.fromCharCode(0x2460 + i) : i + 1}</span>`;
+          b.innerHTML = `${mark}<span class="math">${pretty(o)}</span>`;
           b.addEventListener('click', () => {
             if (done) return;
             if (on.has(i)) on.delete(i); else on.add(i);
