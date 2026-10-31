@@ -17,6 +17,18 @@ Firebase 를 연결하면 학생 폰·교사 폰·종합상황실이 인터넷�
 - `databaseURL` 줄이 꼭 있어야 한다 (3번을 먼저 하면 생긴다).
 - 익명 로그인이 막히면: Authentication → 설정 → 승인된 도메인에 `garzondesne-dot.github.io` 추가.
 
+## ⚠ v0.5.0 배포 때 규칙 다시 게시
+Realtime Database → 규칙 → `firebase/database.rules.json` 전체를 붙여 넣고 **게시**. 새로 생긴 경로:
+
+| 경로 | 쓰기 |
+|---|---|
+| `rooms/{코드}/online/{uid}` | 본인 (접속 표시 · 연결이 끊기면 서버가 지움) |
+| `rooms/{코드}/words/{uid}` | 참여 학생 본인 (한마디 20자, 고치기 1번까지) |
+| `rooms/{코드}/hide/{uid}` | 교사 · 종합상황실 (말풍선 숨김) |
+| `unlock/{반}` | 교사 계정 (차시 배포 → 모루 열림, 1~30) |
+| `cards/{반}/{번호}/{카드}` | 그 반·번호 계정 본인 (만든 카드) |
+| `wordLock` | 교사 계정 (다음 차시에도 한마디 잠금) |
+
 ## 보안 규칙 요약 (`firebase/database.rules.json`)
 | 경로 | 쓰기 |
 |---|---|

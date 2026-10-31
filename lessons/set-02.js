@@ -153,7 +153,7 @@
   STEPS.forEach((s) => { if (s.kind === 'monster') Object.assign(s, { title: MONSTERS[s.id].title, special: !!MONSTERS[s.id].special, review: !!MONSTERS[s.id].review }); });
 
   DS.Lessons.register({
-    id: 'set-02',
+    id: 'set-02', no: 2,
     title: '집합의 표현 · 원소의 개수 · 공집합',
     unit: '공통수학2 Ⅱ-1 집합 · 2차시',
     sheet: '학습과정 2차시 v3',

@@ -10,6 +10,7 @@ DS.Nav = (function () {
   let warnAt = null, leaving = false;
   const current = () => (document.querySelector('.screen.active') || {}).id || 'screen-home';
   const ASK = {
+    'screen-camp': null,
     'screen-student': '수업 화면에서 나갈까요?\n수업은 계속되고, 다시 들어오면 기록은 그대로예요.',
     'screen-teacher': '교사 화면에서 나갈까요?\n수업은 계속돼요. "수업 코드로 이어서" 로 다시 들어올 수 있어요.',
     'screen-hall': '종합상황실을 닫고 첫 화면으로 갈까요?\n수업은 계속돼요.',
@@ -19,7 +20,7 @@ DS.Nav = (function () {
   // 첫 화면으로: 화면을 새로 열어 실시간 연결·타이머를 깨끗이 끊는다 (교사 로그인은 같은 탭이라 유지).
   // 방문 기록이 쌓이지 않게 맨 앞 기록(base) 자리에서 새로 연다.
   const ask = (id) => !ASK[id] || window.confirm(ASK[id]);
-  const reopen = () => { leaving = true; location.replace(homeUrl()); };
+  const reopen = () => { leaving = true; DS.Scene.clear(); location.replace(homeUrl()); };
   function leave() { // 화면 왼쪽 위 ≪ 뒤로 (지금 위치 = top)
     const id = current();
     if (id === 'screen-home' || leaving || !ask(id)) return false;
@@ -44,4 +45,14 @@ DS.Nav = (function () {
     window.addEventListener('popstate', onBack);
   }
   return { init, leave, onBack };
+})();
+
+// 지금 보고 있는 장면 (새로고침해도 그 장면으로 돌아가게): 같은 탭의 sessionStorage
+DS.Scene = (function () {
+  const K = `citadel-scene-${(typeof window !== 'undefined' && window.name) || 'main'}`; // 체험판처럼 한 탭에 여러 화면(iframe)이 있어도 섞이지 않게
+  return {
+    save(v) { try { sessionStorage.setItem(K, JSON.stringify(v)); } catch (e) { /* 무시 */ } },
+    get() { try { return JSON.parse(sessionStorage.getItem(K)); } catch (e) { return null; } },
+    clear() { try { sessionStorage.removeItem(K); } catch (e) { /* 무시 */ } },
+  };
 })();

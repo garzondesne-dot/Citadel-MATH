@@ -101,6 +101,10 @@ DS.Sound = (function () {
       tone({ type: 'sine', f0: 210, f1: 120, dur: 0.22, vol: 0.2 });
       noise({ dur: 0.12, vol: 0.12, freq: 400, type: 'lowpass' });
     },
+    // 집중모드: 경고음 두 번
+    warn() {
+      [0, 0.28].forEach((d) => tone({ type: 'square', f0: 880, f1: 660, dur: 0.2, vol: 0.14, delay: d }));
+    },
     // 보스 등장: 땅울림
     rumble() {
       tone({ type: 'sine', f0: 55, f1: 38, dur: 1.4, vol: 0.5 });

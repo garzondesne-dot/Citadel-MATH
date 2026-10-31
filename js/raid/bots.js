@@ -4,6 +4,7 @@ window.DS = window.DS || {};
 
 DS.Bots = (function () {
   const NICK = ['민준', '서연', '도윤', '하은', '시우', '지유', '주원', '서아', '하준', '지안', '은우', '수아', '건우', '윤서', '선우', '채원', '유준', '다은', '이안', '소율', '태윤', '예린', '로운', '하린', '지호', '아린', '준서', '서윤', '현우'];
+  const WORDS = ['벤 다이어그램 이제 알겠다!', '오늘 재밌었어요', '공집합 헷갈렸는데 해결', 'n(∅)=0 외웠다', '재도전 2번 만에 성공!', '다음 던전 언제해요?', '조건제시법 어려워요 ㅠ', '보스 막타 내가 침'];
   let code = null, n = 0, stop = null, R = null, L = null, speed = 1, acc = { item: 0.8, boss: 0.8 };
   const done = new Set();
   const N = () => DS.Net, P = (s) => `rooms/${code}/${s}`;
@@ -34,8 +35,14 @@ DS.Bots = (function () {
   function step() {
     const st = DS.Raid.stepOf(L, R);
     ids().forEach((u, i) => {
-      if (DS.Raid.isLobby(R)) later(`join|${u}`, 300 + i * rand(150, 450), () => N().set(P(`players/${u}`), { num: i + 2, nick: NICK[i % NICK.length], hero: Math.floor(Math.random() * 7), at: N().TS }));
-      if (!(R.active || {})[u] || !st) return;
+      if (DS.Raid.isLobby(R)) later(`join|${u}`, 300 + i * rand(150, 450), () => N().set(P(`players/${u}`), { num: i + 2, nick: NICK[i % NICK.length], hero: Math.floor(Math.random() * 7), fx: DS.FX ? DS.FX.KINDS[i % 6] : 'fire', cls: '1-1', at: N().TS }).then(() => N().set(P(`online/${u}`), true)));
+      if (!(R.active || {})[u]) return;
+      // 마무리: 대기실로 이동 → 한마디
+      if (DS.Raid.isFinale(L, R) || (st && st.kind === 'boss' && DS.Raid.canLobby(L, R, u))) {
+        later(`lobby|${u}`, rand(1500, 6000), () => N().set(P(`players/${u}/lobby`), true));
+        if (DS.Raid.isFinale(L, R) && Math.random() < 0.7) later(`say|${u}`, rand(3000, 15000), () => N().set(P(`words/${u}`), { t: WORDS[i % WORDS.length], n: 1 }));
+      }
+      if (!st) return;
       if (st.kind === 'monster') {
         const rec = DS.Raid.record(L, R, st.id, u);
         const a = rec.nextAttempt;

@@ -85,9 +85,27 @@ check(hl.some((h) => h.uid === 's09' && /재도전까지 2\/4/.test(h.why)), '�
 check(hl.some((h) => h.uid === 's10' && h.why === '2분째 미제출'), '2분째 미제출');
 check(!X.helpList(L, R, 60000).some((h) => h.uid === 's10'), '1분이면 아직 아님');
 
-// 단계 끝
+// 단계 끝 → 마무리(마지막 한마디) → 수업 끝(closed)
 R.state.step = L.steps.length;
-check(X.isEnd(L, R) && !X.stepOf(L, R), '수업 끝');
+check(X.isEnd(L, R) && !X.stepOf(L, R), '마무리 단계');
+check(X.isFinale(L, R) && !X.isClosed(R), '마무리 = 한마디 시간 (아직 닫히지 않음)');
+R.state.closed = true;
+check(!X.isFinale(L, R) && X.isClosed(R), '수업 끝 (학생은 모닥불로)');
+
+// 집중모드 자동: 도입·개념 단계만
+check(L.steps.filter(X.autoFocus).every((s) => s.kind === 'intro' || s.kind === 'concept') && L.steps.some(X.autoFocus), '집중모드 자동 = 도입·개념');
+check(!X.autoFocus(L.steps.find((s) => s.kind === 'monster')) && !X.autoFocus(null), '몬스터에서는 자동으로 꺼짐');
+
+// 만점(보너스 빼고) → 대기실로 이동 · 모루
+const R2 = X.newRoom('222222', 'set-03', 'T', 1000);
+R2.players.a = { num: 1, nick: 'a', hero: 0 }; R2.players.b = { num: 2, nick: 'b', hero: 0 }; R2.active = { a: true, b: true }; R2.state.headcount = 2; R2.state.step = L.steps.length - 1;
+R2.bossAns = { a: { 1: B[1].map((q, i) => (i < L.boss.hpItems ? right(q) : wrong(q))) }, b: { 1: B[1].map((q, i) => (i === 0 || i === 6 ? wrong(q) : right(q))) } }; R2.meta.pct = 100;
+check(X.fullMarks(L, R2, 'a') && X.canLobby(L, R2, 'a'), '체력 문항 전부 도달 = 만점 (보너스는 틀려도)');
+check(!X.fullMarks(L, R2, 'b') && !X.bossHp(L, R2).won && !X.canLobby(L, R2, 'b'), '1번을 틀리면 아직 대기실로 못 감');
+R2.bossAns.b[2] = B[2].map((q) => right(q));
+check(X.fullMarks(L, R2, 'b'), '세트2 에서 맞히면 만점');
+R2.online = { a: true };
+check(X.online(R2, 'a') && !X.online(R2, 'b'), '접속 표시');
 
 if (fail) { console.error(`\n${fail}건 실패`); process.exit(1); }
-console.log('OK: 레이드 — 체력·기준%·데미지(늘어난 만큼)·재도전 2번·전원 제출 뒤 격파·미제출 제외·보스 즉시 승리·7번 보너스·도움 목록 통과');
+console.log('OK: 레이드 — 체력·기준%·데미지(늘어난 만큼)·재도전 2번·전원 제출 뒤 격파·미제출 제외·보스 즉시 승리·7번 보너스·도움 목록·마무리·집중모드·만점 통과');

@@ -74,6 +74,7 @@ DS.Net = (function () {
         setTimeout(() => { const v = clone(at(load(), path)); w.last = JSON.stringify(v); cb(v); }, 0);
         return () => { const i = watchers.indexOf(w); if (i >= 0) watchers.splice(i, 1); };
       },
+      async presence(p) { await this.set(p, true); if (typeof window !== 'undefined') window.addEventListener('pagehide', () => { const t = load(); put(t, p, null); save(t); if (chan) chan.postMessage(1); }); },
       wipe() { save({}); changed(); },
     };
   }
@@ -109,6 +110,11 @@ DS.Net = (function () {
       update: (p, obj) => db.ref(p).update(Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, sv(v)]))),
       remove: (p) => db.ref(p).remove(),
       watch(path, cb) { const r = db.ref(path), f = (s) => cb(s.val()); r.on('value', f); return () => r.off('value', f); },
+      // 접속 표시: 연결될 때마다 true, 끊기면 서버가 지운다
+      async presence(p) {
+        const r = db.ref(p);
+        db.ref('.info/connected').on('value', (s) => { if (s.val() === true) r.onDisconnect().remove().then(() => r.set(true)); });
+      },
     };
     function sv(v) { // 자리표시 → Firebase 서버 시각
       if (v && typeof v === 'object') return v['.sv'] === 'timestamp' ? firebase.database.ServerValue.TIMESTAMP : Object.fromEntries(Object.entries(v).map(([k, x]) => [k, sv(x)]));
@@ -139,6 +145,7 @@ DS.Net = (function () {
     update: (p, o) => api.impl.update(p, o),
     remove: (p) => api.impl.remove(p),
     watch: (p, cb) => api.impl.watch(p, cb),
+    presence: (p) => api.impl.presence(p),
     LocalNet,
   };
   return api;

@@ -52,6 +52,23 @@
               ".validate": "($set === '1' || $set === '2') && newData.isString() && newData.val().length < 20000"
             }
           }
+        },
+        "online": {
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid",
+            ".validate": "newData.val() === true"
+          }
+        },
+        "words": {
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid && root.child('rooms/'+$code+'/active/'+$uid).val() === true",
+            ".validate": "newData.hasChildren(['t', 'n']) && newData.child('t').isString() && newData.child('t').val().length <= 20 && newData.child('n').isNumber() && newData.child('n').val() <= 2"
+          }
+        },
+        "hide": {
+          "$uid": {
+            ".write": "auth != null && (root.child('rooms/'+$code+'/meta/teacher').val() === auth.uid || (root.child('rooms/'+$code+'/hosts/'+auth.uid).isString() && root.child('rooms/'+$code+'/hosts/'+auth.uid).val() === root.child('secrets/'+$code+'/hallKey').val()))"
+          }
         }
       }
     },
@@ -99,6 +116,28 @@
       "$c": {
         "$n": {
           ".write": "auth != null && (root.child('admins/'+auth.uid).val() === true || (newData.child('uid').val() === auth.uid && root.child('roster/'+$c+'/'+$n).exists() && (!data.exists() || data.child('reset').val() === true || data.child('uid').val() === auth.uid)))"
+        }
+      }
+    },
+    "unlock": {
+      ".read": "auth != null",
+      "$c": {
+        ".write": "auth != null && root.child('admins/'+auth.uid).val() === true",
+        ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 30"
+      }
+    },
+    "wordLock": {
+      ".read": "auth != null",
+      ".write": "auth != null && root.child('admins/'+auth.uid).val() === true"
+    },
+    "cards": {
+      "$c": {
+        "$n": {
+          ".read": "auth != null",
+          ".write": "auth != null && root.child('accounts/'+$c+'/'+$n+'/uid').val() === auth.uid",
+          "$card": {
+            ".validate": "newData.val() === true"
+          }
         }
       }
     }

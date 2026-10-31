@@ -177,7 +177,7 @@
   STEPS.forEach((s) => { if (s.kind === 'monster') Object.assign(s, { title: MONSTERS[s.id].title, special: !!MONSTERS[s.id].special }); });
 
   DS.Lessons.register({
-    id: 'set-03',
+    id: 'set-03', no: 3,
     title: '집합 사이의 포함 관계',
     unit: '공통수학2 Ⅱ-1 집합 · 3차시',
     sheet: '학습과정 3차시 v4',

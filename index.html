@@ -31,7 +31,6 @@
     </div>
 
     <div id="f-student" class="role-form panel framed">
-      <label>수업 코드 <input id="s-code" inputmode="numeric" maxlength="6" placeholder="6자리" autocomplete="off"></label>
       <div id="s-auth"></div>
     </div>
 
@@ -64,6 +63,12 @@
   </div>
 </section>
 
+<!-- 모닥불 (학생 개인 대기실): 왼쪽 모루 · 가운데 모닥불 · 오른쪽 차원문 -->
+<section id="screen-camp" class="screen">
+  <button class="nav-back btn small camp-back">≪ 뒤로</button>
+  <div id="camp"></div>
+</section>
+
 <!-- 학생 (스마트폰) -->
 <section id="screen-student" class="screen">
   <div class="wrap">
@@ -90,10 +95,8 @@
     <button class="nav-back btn small">≪ 뒤로</button>
     <div id="h-top" class="h-top framed"></div>
     <div class="h-main">
-      <div class="h-left">
-        <div id="h-arena" class="h-arena framed"></div>
-        <div id="h-roster" class="h-roster"></div>
-      </div>
+      <aside id="h-heroes" class="panel framed h-heroes"></aside>
+      <div id="h-arena" class="h-arena framed"></div>
       <aside class="h-right">
         <div id="h-side" class="panel framed"></div>
         <div id="h-ctrl" class="panel framed h-ctrl"></div>
@@ -117,6 +120,8 @@
     <button id="quiz-next" class="btn primary hidden">해설 확인 · 계속 ▶</button>
   </div>
 </div>
+<div id="focus" class="focus-ov" hidden></div>
+<div id="forge" class="forge-ov" hidden></div>
 <div id="toast" class="toast"></div>
 
 <script src="js/config.js"></script>
@@ -129,13 +134,19 @@
 <script src="lessons/set-02.js"></script>
 <script src="lessons/set-03.js"></script>
 <script src="js/engine/art.js"></script>
+<script src="js/engine/fx.js"></script>
 <script src="js/engine/qrcode.min.js"></script>
 <script src="js/engine/pwa.js"></script>
 <script src="js/raid/net.js"></script>
 <script src="js/raid/model.js"></script>
+<script src="js/raid/words.js"></script>
 <script src="js/raid/actions.js"></script>
 <script src="js/raid/account.js"></script>
 <script src="js/raid/control.js"></script>
+<script src="lessons/unit-set.js"></script>
+<script src="js/raid/cards.js"></script>
+<script src="js/raid/forge.js"></script>
+<script src="js/raid/camp.js"></script>
 <script src="js/raid/student.js"></script>
 <script src="js/raid/teacher.js"></script>
 <script src="js/raid/hall.js"></script>

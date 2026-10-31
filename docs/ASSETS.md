@@ -42,3 +42,10 @@
 ## 받은 묶음 메모
 - `forest-camp-anvil-kit/assets/dungeon-gates.webp` 는 **빈 파일(0바이트)** 이어서 원본 PNG 에서 새로 만들었다.
 - `citadel-assets` 묶음은 지금 쓰는 그림의 원본·백업 (heroes·monsters webp 는 저장소 것이 따로 다시 변환한 판).
+
+## v0.5.0 에서 쓰기 시작한 것
+| 파일 | 쓰임 |
+|---|---|
+| `camp-forest-v1` · `campfire-v1`(8프레임) · `gates-v1` · `camp-trees-v1` · `anvil-v1` | 모닥불 개인 대기실 |
+| `card-frame-v1` · `card-arts-v1` | 기존 카드(`cards-v4`) 8장을 겹쳐 뽑은 공통 금테 + 무기·마법 그림 8칸 (배치표 `cardKit`) |
+| `forge-anvil-v1` · `forge-hammer-v1` | 사용자 제공 sky-hammer-forge 의 위에서 본 모루 · 망치 (배치표 `forge`, 작업면 `face`) |

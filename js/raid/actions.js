@@ -45,13 +45,24 @@ DS.Act = (function () {
     if (dir > 0 && i < 0) {
       const studs = Object.entries(R.players || {}).filter(([, p]) => !p.teacher).map(([u]) => u);
       if (!studs.length) fail('입장한 학생이 없어요.');
-      await N().update(P(code), { active: Object.fromEntries(studs.map((u) => [u, true])), 'state/headcount': studs.length, 'state/step': 0, 'state/stepAt': N().TS });
+      await N().update(P(code), { active: Object.fromEntries(studs.map((u) => [u, true])), 'state/headcount': studs.length, 'state/step': 0, 'state/stepAt': N().TS, 'state/focus': Raid.autoFocus(L.steps[0]) });
+      await unlockFor(L, studs.map((u) => (R.players[u] || {}).cls).filter(Boolean));
       return;
     }
+    if (dir > 0 && i >= L.steps.length) { await N().update(P(code, 'state'), { closed: true, focus: false, stepAt: N().TS }); return; } // 마무리 → 수업 끝 (학생은 모닥불로)
     const next = Math.max(-1, Math.min(L.steps.length, i + dir));
     if (next === i) return;
-    await N().update(P(code, 'state'), { step: next, stepAt: N().TS });
+    await N().update(P(code, 'state'), { step: next, stepAt: N().TS, focus: Raid.autoFocus(L.steps[next]), closed: null });
   }
+  // 모루 레시피는 반마다 "배포한 차시까지" 열린다: unlock/{반} = 가장 큰 차시 번호
+  async function unlockFor(L, classes) {
+    if (!L.no) return;
+    for (const c of [...new Set(classes)]) {
+      const k = String(c).replace(/[.#$/[\]]/g, '_');
+      try { const was = Number(await N().get(`unlock/${k}`)) || 0; if (L.no > was) await N().set(`unlock/${k}`, L.no); } catch (e) { /* 규칙상 교사만 — 실패해도 수업은 계속 */ }
+    }
+  }
+  const setFocus = (code, on) => N().set(P(code, 'state/focus'), !!on);
   const setPct = (code, mid, pct) => N().set(P(code, `state/pct/${mid}`), Math.max(10, Math.min(100, Math.round(pct))));
   // 미제출 학생 빼고 판정 (결석·폰 고장)
   const skip = (code, mid, uids) => N().update(P(code, `state/skip/${mid}`), Object.fromEntries(uids.map((u) => [u, true])));
@@ -63,13 +74,27 @@ DS.Act = (function () {
     const R = await N().get(P(code));
     if (!R || !R.meta) fail('수업 코드가 없어요. 다시 확인해 주세요.');
     const L = DS.Lessons.get(R.meta.lesson);
-    if (L && Raid.isEnd(L, R)) fail('이미 끝난 수업이에요.');
+    if (L && Raid.isClosed(R)) fail('이미 끝난 수업이에요.');
     const me = N().uid();
     const dup = Object.entries(R.players || {}).find(([u, p]) => u !== me && !p.teacher && Number(p.num) === Number(info.num));
     if (dup) fail(`${info.num}번은 이미 입장했어요. 번호를 확인해 주세요.`);
-    await N().set(P(code, `players/${me}`), { num: Number(info.num), nick: String(info.nick).slice(0, 8), hero: Number(info.hero) || 0, ...(info.cls ? { cls: String(info.cls) } : {}), at: N().TS });
+    const was = (R.players || {})[me] || {};
+    await N().set(P(code, `players/${me}`), { num: Number(info.num), nick: String(info.nick).slice(0, 8), hero: Number(info.hero) || 0, fx: info.fx || 'fire', ...(info.cls ? { cls: String(info.cls) } : {}), ...(was.lobby ? { lobby: true } : {}), at: N().TS });
     return R.meta;
   }
+  // 접속 표시: 연결이 끊기면 서버가 지운다 (Firebase onDisconnect)
+  const presence = (code) => N().presence(P(code, `online/${N().uid()}`));
+  const toLobby = (code) => N().set(P(code, `players/${N().uid()}/lobby`), true);
+  // 마지막 한마디: 20자 · 처음 1번 + 고치기 1번 · 욕설은 ＊ 로 가리고 bad 표시 (교사 목록 맨 위)
+  async function say(code, R, text) {
+    const me = N().uid(), was = (R.words || {})[me];
+    if (was && (was.n || 0) >= 2) fail('한마디는 한 번 고칠 수 있어요. 이미 고쳤어요.');
+    const c = DS.Words.clean(text);
+    if (!c.text) fail('한마디를 써 주세요.');
+    await N().set(P(code, `words/${me}`), { t: c.text, bad: c.bad || null, n: (was ? was.n || 1 : 0) + 1 });
+  }
+  const hideWord = (code, uid, on) => N().set(P(code, `hide/${uid}`), on ? true : null);
+  const lockWords = (cls, num, on) => N().set(`wordLock/${String(cls).replace(/[.#$/[\]]/g, '_')}/${num}`, on ? true : null);
   const help = (code, on) => N().set(P(code, `help/${N().uid()}`), on ? true : null);
   async function submit(code, R, mid, attempt, given) {
     const step = DS.Lessons.get(R.meta.lesson).steps[R.state.step];
@@ -89,5 +114,5 @@ DS.Act = (function () {
     return out;
   }
 
-  return { getPrep, setImage, setDefaultPct, createRoom, joinHall, isHost, go, setPct, skip, setActive, clearHelp, join, help, submit, bossAnswer, unpackRoom, P };
+  return { getPrep, setImage, setDefaultPct, createRoom, joinHall, isHost, go, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, bossAnswer, unpackRoom, P };
 })();

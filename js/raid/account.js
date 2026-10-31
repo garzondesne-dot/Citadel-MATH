@@ -60,7 +60,7 @@ DS.Account = (function () {
   // ── 학생 ────────────────────────────────────────────────
   const masks = () => N().get('rosterMask');
   const accountOf = (c, n) => N().get(`accounts/${c}/${n}`);
-  async function signUp(c, n, pin, hero) {
+  async function signUp(c, n, pin, hero, fx) {
     if (!validPin(pin)) fail('비밀번호는 숫자 4자리예요.');
     const m = await N().get(`rosterMask/${c}/${n}`);
     if (!m) fail('명단에 없는 번호예요. 선생님께 말씀드려요.');
@@ -71,18 +71,19 @@ DS.Account = (function () {
       if (e.code === 'auth/email-already-in-use') fail('이미 가입한 번호예요. 로그인해 주세요.');
       rethrow(e);
     }
-    try { await N().set(`accounts/${c}/${n}`, { uid: N().uid(), gen, hero: Number(hero) || (acc && acc.hero) || 0, at: N().TS }); } catch (e) { await N().signOut(); fail('이미 가입한 번호예요. 로그인해 주세요.'); }
+    try { await N().set(`accounts/${c}/${n}`, { uid: N().uid(), gen, hero: hero != null ? Number(hero) : (acc && acc.hero) || 0, fx: fx || (acc && acc.fx) || 'fire', at: N().TS }); } catch (e) { await N().signOut(); fail('이미 가입한 번호예요. 로그인해 주세요.'); }
     return me();
   }
   // 로그인. 초기화된 계정이면 { needNewPin: true } 를 돌려주고, newPin 을 주면 새 로그인을 만들어 연결한다
-  async function login(c, n, pin, newPin) {
+  // 용사·공격 이펙트는 가입할 때 고르고 고정. 초기화(0000) 뒤 새 비밀번호를 정할 때만 다시 고른다 (hero·fx)
+  async function login(c, n, pin, newPin, hero, fx) {
     const acc = await accountOf(c, n);
     if (!acc) fail('아직 가입하지 않은 번호예요. "처음이에요 · 가입" 을 눌러요.');
     if (acc.reset) {
       if (String(pin) !== '0000') fail('선생님이 비밀번호를 초기화했어요. 0000 을 넣어 주세요.');
       if (!newPin) return { needNewPin: true };
       if (newPin === '0000') fail('새 비밀번호는 0000 말고 다른 숫자로 정해요.');
-      return signUp(c, n, newPin, acc.hero);
+      return signUp(c, n, newPin, hero != null ? hero : acc.hero, fx || acc.fx);
     }
     if (!validPin(pin)) fail('비밀번호는 숫자 4자리예요.');
     try { await N().signIn(email(c, n, acc.gen || 0), pw(pin)); } catch (e) { if (why(e)) rethrow(e); fail('비밀번호가 달라요. 잊었으면 선생님께 초기화를 부탁해요.'); }
@@ -96,11 +97,13 @@ DS.Account = (function () {
     if (cache && cache.uid === uid) return cache;
     const all = (await N().get('accounts')) || {};
     for (const [c, byN] of Object.entries(all)) for (const [n, a] of Object.entries(byN || {})) {
-      if (a && a.uid === uid) { const name = await N().get(`roster/${c}/${n}`); cache = { uid, c, n: Number(n), name: name || '', hero: a.hero || 0 }; return cache; }
+      if (a && a.uid === uid) { const name = await N().get(`roster/${c}/${n}`); cache = { uid, c, n: Number(n), name: name || '', hero: a.hero || 0, fx: a.fx || null }; return cache; }
     }
     return null;
   }
   async function setHero(hero) { const m = await me(); if (!m) return; await N().set(`accounts/${m.c}/${m.n}/hero`, Number(hero)); m.hero = Number(hero); }
+  // 이펙트가 생기기 전에 가입한 학생: 처음 한 번만 고른다 (그 뒤 고정)
+  async function setFx(fx) { const m = await me(); if (!m || m.fx) return; await N().set(`accounts/${m.c}/${m.n}/fx`, String(fx)); m.fx = String(fx); }
   async function logout() { cache = null; tsess(false); await N().signOut(); }
 
   // ── 교사 계정 ────────────────────────────────────────────
@@ -129,5 +132,5 @@ DS.Account = (function () {
     tsess(true);
   }
 
-  return { classKey, email, teacherEmail, pw, validPin, mask, parseRoster, uploadRoster, removeStudent, resetAccount, masks, accountOf, signUp, login, me, setHero, logout, adminExists, isAdmin, teacherCreate, teacherLogin, endStaleTeacher };
+  return { classKey, email, teacherEmail, pw, validPin, mask, parseRoster, uploadRoster, removeStudent, resetAccount, masks, accountOf, signUp, login, me, setHero, setFx, logout, adminExists, isAdmin, teacherCreate, teacherLogin, endStaleTeacher };
 })();
