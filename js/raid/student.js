@@ -73,15 +73,15 @@ DS.Student = (function () {
   function battle(body, helpBtn) {
     const rd = R.state.round, sub = (((R.subs || {})[rd.id]) || {})[me];
     const total = DS.Raid.activeIds(R).length, done = DS.Raid.activeIds(R).filter((u) => (((R.subs || {})[rd.id]) || {})[u]).length;
-    const mon = DS.Art.monster(L.stages[R.state.stage].monster, 'idle', 'mid');
+    const mon = DS.Art.monster(L.stages[R.state.stage].monster, 'idle', 'float');
     if (sub) {
-      body.innerHTML = `<div class="panel framed center">${mon}<h2>제출 완료!</h2><p>다른 용사들을 기다려요 <b>${done}/${total}</b></p><p class="muted">정답은 공동 공격이 끝난 뒤에 공개돼요.</p></div>`;
+      body.innerHTML = `<div class="panel framed center"><div class="scene bg-scene">${mon}</div><h2>제출 완료!</h2><p>다른 용사들을 기다려요 <b>${done}/${total}</b></p><p class="muted">정답은 공동 공격이 끝난 뒤에 공개돼요.</p></div>`;
       return;
     }
     const q = DS.Raid.questionFor(L, R, me);
     const seenAt = (((R.seen || {})[rd.id]) || {})[me];
     body.innerHTML = `<div class="panel framed">
-      <div class="battle-top">${mon}<div><b>${esc(L.typeNames[rd.type] || '')}</b>${rd.attempt > 1 ? ` <span class="retry">재도전 ${rd.attempt}</span>` : ''}<br><span class="muted small">제출 ${done}/${total}</span></div><div class="power" id="st-power">⚔ 110</div></div>
+      <div class="scene bg-scene"><div class="scene-bar"><div><b>${esc(L.typeNames[rd.type] || '')}</b>${rd.attempt > 1 ? ` <span class="retry">재도전 ${rd.attempt}</span>` : ''}<br><span class="muted small">제출 ${done}/${total}</span></div><div class="power" id="st-power">⚔ 110</div></div>${mon}</div>
       <div class="q-box"><p class="math">${pretty(q.question)}</p>
         ${answer ? `<p class="ans-ok">✔ 답을 골랐어요 <button class="btn small" id="st-re">다시 풀기</button></p>` : `<button class="btn primary big" id="st-open">📜 문제 풀기</button>`}</div>
       <p class="shelf-title">공격 카드 고르기 <span class="muted small">이 문제에 맞는 카드를!</span></p>
@@ -115,7 +115,7 @@ DS.Student = (function () {
     const ansText = q.type === 'blanks' ? q.items.map((i) => `${i.left} ${i.answer} ${i.right}`).join(', ') : q.type === 'ox' ? (q.answer ? 'O' : 'X') : q.type === 'choice' ? q.choices[q.answerIndex] : q.type === 'subsets' ? DS.SetGen.allSubsets(q.base).map(DS.SetGen.setStr).join(', ') : String(q.answer);
     body.innerHTML = `<div class="panel framed center ${res.success ? 'win' : 'lose'}">
       <h2>${res.success ? '⚔ 공동 공격 성공!' : '💥 공동 공격 실패…'}</h2>
-      <div class="party">${DS.Art.monster(L.stages[R.state.stage].monster, res.success ? 'down' : 'attack', 'mid')}</div>
+      <div class="scene bg-scene">${DS.Art.monster(L.stages[R.state.stage].monster, res.success ? 'down' : 'attack')}</div>
       <p>내 답: <b class="${j.correct ? 'okc' : 'ngc'}">${j.correct ? '정답' : !j.answerOk ? '오답' : '카드가 맞지 않음'}</b>${credit ? ` · 획득 ⚔ ${credit}` : ''}</p>
       <div class="sol"><b>정답</b> <span class="math">${pretty(ansText)}</span><br><span class="math">${pretty(q.solution || '')}</span>${!j.cardOk && j.submitted ? `<br>이 문제에 맞는 카드: ${q.cards.map((c) => esc(L.cards[c].name)).join(', ')}` : ''}</div>
       <p class="muted">${res.success ? '다음 신호를 기다려요.' : '선생님 설명을 듣고, 숫자를 바꿔 다시 도전해요.'}</p></div>`;
@@ -129,8 +129,8 @@ DS.Student = (function () {
     const items = L.boss.sets[bossSet];
     const mine = (ans[bossSet] || []).slice();
     body.innerHTML = `<div class="panel framed">
-      <div class="battle-top">${DS.Art.monster(L.boss.monster, 'idle', 'mid')}<div><b>${esc(L.boss.title)}</b><br><span class="muted small">보스 체력 ${hp.hp} / ${hp.max}</span></div></div>
-      <div class="hpbar"><i style="width:${hp.max ? (100 * hp.hp) / hp.max : 0}%"></i></div>
+      <div class="scene bg-scene"><div class="scene-bar"><div><b>${esc(L.boss.title)}</b><br><span class="muted small">보스 체력 ${hp.hp} / ${hp.max}</span></div></div>${DS.Art.monster(L.boss.monster, hp.hp ? 'idle' : 'down', hp.hp ? 'float' : '')}
+        <div class="hpbar"><i style="width:${hp.max ? (100 * hp.hp) / hp.max : 0}%"></i></div></div>
       <div class="tabs"><button class="tab${bossSet === 1 ? ' on' : ''}" data-s="1">세트 1</button><button class="tab${bossSet === 2 ? ' on' : ''}" data-s="2">세트 2 (재도전)</button></div>
       <div class="boss-items">${items.map((p, i) => `<button class="bitem${m[i] ? ' ok' : mine[i] != null ? ' tried' : ''}" data-i="${i}"><b>${i + 1}번</b> ${m[i] ? '✔ 도달' : mine[i] != null ? '✘ 다시' : '풀기'}</button>`).join('')}</div>
       <p class="muted">맞힌 문항마다 보스에게 100의 피해! 두 세트 중 한 번이라도 맞히면 도달이에요. 학습지에도 풀이를 적어요.</p></div>`;

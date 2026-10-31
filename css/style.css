@@ -131,6 +131,14 @@ input:focus, select:focus { outline: none; border-color: var(--gold); }
 @keyframes pop { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
 /* 전투 (학생) */
+/* 학생 폰 전투 장면: 던전 배경 앞에 몬스터 한 마리 (배경 그림은 배치표 scene) */
+.scene { position: relative; height: 220px; margin: 0 0 8px; border: 2px solid var(--line); overflow: hidden; display: flex; align-items: flex-end; justify-content: center; }
+.scene::after { content: ''; position: absolute; bottom: 14px; left: 50%; width: 140px; height: 20px; transform: translateX(-50%); background: radial-gradient(closest-side, #000c, transparent); }
+.scene .art.monster { width: 160px; height: 160px; margin-bottom: 18px; position: relative; z-index: 1; filter: drop-shadow(0 6px 8px #000c); }
+.scene-bar { position: absolute; top: 0; left: 0; right: 0; z-index: 2; display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; padding: 6px 8px 18px; background: linear-gradient(#0a1424e6, #0a142400); font-size: 14px; }
+.scene-bar .power { font-size: 20px; }
+.scene-bar .muted { color: #c9d4f0; }
+.scene .hpbar { position: absolute; left: 8px; right: 8px; bottom: 6px; z-index: 2; margin: 0; }
 .battle-top { display: flex; align-items: center; gap: 10px; }
 .battle-top > div:nth-child(2) { flex: 1; }
 .power { font-size: 22px; color: var(--gold); }

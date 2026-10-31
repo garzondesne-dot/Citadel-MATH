@@ -15,7 +15,8 @@ DS.Art = (function () {
     return `@font-face{font-family:'Galmuri11';src:url('${a.fonts.pixel}') format('woff2');font-display:swap}
 @font-face{font-family:'Galmuri11';font-weight:700;src:url('${a.fonts.pixelBold}') format('woff2');font-display:swap}
 .framed{border:14px solid transparent;border-image:url('${a.base}${a.frame.src}') ${a.frame.slice} / 14px stretch}
-.bg-dungeon{background-image:linear-gradient(#0a1424aa,#0a1424ee),url('${a.base}${a.background.src}');background-size:cover;background-position:center}`;
+.bg-dungeon{background-image:linear-gradient(#0a1424aa,#0a1424ee),url('${a.base}${a.background.src}');background-size:cover;background-position:center}
+.bg-scene{background-image:linear-gradient(#0a142466,#0a142411 40%,#0a1424dd),url('${a.base}${(a.scene || a.background).src}');background-size:cover;background-position:center 65%}`;
   }
   function install() { const s = document.createElement('style'); s.textContent = css(); document.head.appendChild(s); }
   return { cell, hero, monster, card, install, pos };
