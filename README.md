@@ -1,6 +1,13 @@
 # Citadel-MATH
 
-DIMENSION SLASHER 본편 v0.3.2를 바탕으로 게임 방식을 비튼 수학 교육 게임 (제작: 김찬우 선생님, 공통수학2 Ⅰ 도형의 방정식, 스마트폰).
+고1 공통수학2 집합·포함 관계 협동 수업 도구 (제작: 김찬우 선생님). 학생 폰 · 교사 화면 · PC 공개 화면.
 
-- 문서: [docs/HANDOVER.md](docs/HANDOVER.md) · [docs/DECISIONS.md](docs/DECISIONS.md) · 원본 기록 [docs/origin/](docs/origin/)
-- 테스트: `node tests/mathgen.test.js`, `node tests/game.test.js`
+| 화면 | 주소 (배포 후) |
+|---|---|
+| 학생 | `/` |
+| 교사 | `/teacher.html` |
+| 공개 화면 | `/screen.html` |
+| 상태 확인 | `/api/health` |
+
+- 문서: [HANDOVER](docs/HANDOVER.md) · [DECISIONS](docs/DECISIONS.md) · [배포](docs/deploy-cloudflare.md)
+- 로컬: `npx wrangler pages dev public --d1 DB` → `node tests/smoke.test.js`

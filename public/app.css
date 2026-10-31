@@ -1,0 +1,12 @@
+:root { --bg: #f6f7f9; --fg: #1d2330; --muted: #667085; --ok: #12805c; --bad: #c4320a; --card: #fff; }
+@media (prefers-color-scheme: dark) { :root { --bg: #14171d; --fg: #e8eaf0; --muted: #98a2b3; --ok: #3ccb8f; --bad: #ff7a59; --card: #1e232b; } }
+* { box-sizing: border-box; }
+body { margin: 0; padding: 16px; background: var(--bg); color: var(--fg); font: 18px/1.5 system-ui, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; }
+main { max-width: 640px; margin: 0 auto; }
+h1 { font-size: 1.5rem; margin: 0 0 4px; }
+.role { color: var(--muted); margin: 0 0 16px; }
+.card { background: var(--card); border-radius: 12px; padding: 16px; margin-bottom: 12px; }
+#status { font-size: 0.95rem; color: var(--muted); }
+#status[data-state="ok"] { color: var(--ok); }
+#status[data-state="bad"] { color: var(--bad); }
+nav a { margin-right: 12px; color: inherit; }

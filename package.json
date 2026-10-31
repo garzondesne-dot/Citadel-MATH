@@ -1,0 +1,9 @@
+{
+  "name": "citadel-math",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler pages dev public --d1 DB",
+    "test": "node tests/smoke.test.js"
+  }
+}

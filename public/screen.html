@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>공개 화면 (PC) · Citadel MATH</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<main>
+  <h1>Citadel MATH</h1>
+  <p class="role">공개 화면 (PC)</p>
+  <div class="card">준비 중입니다. 다음 단계에서 반 전체의 공동 진행 상황을 보여 줍니다.</div>
+  <p id="status">확인 중…</p>
+  <nav><a href="/">학생</a><a href="/teacher.html">교사</a><a href="/screen.html">공개 화면</a></nav>
+</main>
+<script type="module">
+  import { showStatus } from './common.js';
+  showStatus(document.getElementById('status'));
+</script>
+</body>
+</html>
