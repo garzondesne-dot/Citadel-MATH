@@ -3,14 +3,14 @@
 //  - 그림·글꼴·아이콘(assets/, icons/): 저장해 둔 것 먼저 → 처음 한 번만 받는다 (그림을 바꾸면 파일 이름을 바꾼다: heroes-v3 …)
 //  - Firebase(다른 주소)는 건드리지 않는다. 수업 진행에는 인터넷이 필요하다
 // 새 버전을 낼 때 CACHE 이름을 'ds-' + DS.VERSION 과 맞춘다 (tests/pwa.test.js 가 확인)
-const CACHE = 'ds-citadel-0.2.0';
+const CACHE = 'ds-citadel-0.3.0';
 const ASSETS = 'ds-assets';
 const CORE = [
   './', './index.html', './css/style.css', './manifest.webmanifest',
   './js/config.js', './assets/manifest.js',
   './js/engine/ui.js', './js/engine/audio.js', './js/engine/setgen.js', './js/engine/quiz.js', './js/engine/lessons.js',
   './lessons/set-03.js', './js/engine/art.js', './js/engine/qrcode.min.js', './js/engine/pwa.js',
-  './js/raid/net.js', './js/raid/model.js', './js/raid/actions.js', './js/raid/control.js',
+  './js/raid/net.js', './js/raid/model.js', './js/raid/actions.js', './js/raid/account.js', './js/raid/control.js',
   './js/raid/student.js', './js/raid/teacher.js', './js/raid/hall.js', './js/raid/prep.js', './js/raid/app.js',
 ];
 const STATIC = [

@@ -2,7 +2,7 @@
   "rules": {
     "secrets": {
       "$code": {
-        ".read": false,
+        ".read": "auth != null && root.child('admins/'+auth.uid).val() === true",
         ".write": "auth != null && !data.exists() && root.child('rooms/'+$code+'/meta/teacher').val() === auth.uid",
         "hallKey": {
           ".validate": "newData.isString() && newData.val().length === 4"
@@ -12,7 +12,7 @@
     "rooms": {
       "$code": {
         ".read": "auth != null",
-        ".write": "auth != null && !data.exists() && newData.child('meta/teacher').val() === auth.uid",
+        ".write": "auth != null && !data.exists() && newData.child('meta/teacher').val() === auth.uid && root.child('admins/'+auth.uid).val() === true",
         "hosts": {
           "$uid": {
             ".write": "auth != null && auth.uid === $uid && newData.val() === root.child('secrets/'+$code+'/hallKey').val()"
@@ -58,7 +58,7 @@
     "prep": {
       "$lesson": {
         ".read": "auth != null",
-        ".write": "auth != null",
+        ".write": "auth != null && root.child('admins/'+auth.uid).val() === true",
         "img": {
           "$slot": {
             ".validate": "newData.isString() && newData.val().length < 2500000 && newData.val().beginsWith('data:image/')"
@@ -66,6 +66,39 @@
         },
         "pct": {
           ".validate": "newData.isNumber() && newData.val() >= 10 && newData.val() <= 100"
+        }
+      }
+    },
+    "admins": {
+      ".read": "auth != null",
+      "$uid": {
+        ".write": "auth != null && auth.uid === $uid && auth.token.firebase.sign_in_provider === 'password' && !root.child('admins').exists()",
+        ".validate": "newData.val() === true"
+      }
+    },
+    "rosterMask": {
+      ".read": "auth != null",
+      ".write": "auth != null && root.child('admins/'+auth.uid).val() === true",
+      "$c": {
+        "$n": {
+          ".validate": "newData.isString() && newData.val().length <= 8"
+        }
+      }
+    },
+    "roster": {
+      ".read": "auth != null && auth.token.firebase.sign_in_provider === 'password'",
+      ".write": "auth != null && root.child('admins/'+auth.uid).val() === true",
+      "$c": {
+        "$n": {
+          ".validate": "newData.isString() && newData.val().length <= 8"
+        }
+      }
+    },
+    "accounts": {
+      ".read": "auth != null",
+      "$c": {
+        "$n": {
+          ".write": "auth != null && (root.child('admins/'+auth.uid).val() === true || (newData.child('uid').val() === auth.uid && root.child('roster/'+$c+'/'+$n).exists() && (!data.exists() || data.child('reset').val() === true || data.child('uid').val() === auth.uid)))"
         }
       }
     }

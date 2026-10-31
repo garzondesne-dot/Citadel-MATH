@@ -1,12 +1,16 @@
-// 첫 화면: 역할 고르기(학생 · 교사 폰 · 종합상황실) · 입장 양식 · 주소로 바로 입장(?role=student&code=…)
+// 첫 화면: 역할 고르기(학생 · 교사 폰 · 종합상황실 · 수업 준비) · 로그인/가입 · 주소로 바로 입장(?role=student&code=…)
+// 학생: 반 · 번호를 고르면 가린 이름(김*우)으로 확인 → 숫자 4자리로 로그인 (처음이면 가입). 이름은 명단에서 나온다.
+// 교사: 교사 계정(아이디 · 비밀번호)으로 로그인해야 새 수업 · 수업 준비를 쓸 수 있다.
 window.DS = window.DS || {};
 
 DS.App = (function () {
   const $ = (s) => document.querySelector(s);
   const { esc } = DS.UI;
+  const A = () => DS.Account;
   const q = new URLSearchParams(location.search);
   const read = (k) => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
-  let hero = 0;
+  const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* 무시 */ } };
+  let hero = 0, sMode = 'login', masks = {}, pending = null;
 
   async function boot() {
     DS.Art.install();
@@ -15,29 +19,22 @@ DS.App = (function () {
     $('#mode').innerHTML = DS.Net.mode === 'local' ? '🧪 이 기기 체험 모드 <span class="muted">(Firebase 미설정 — 같은 브라우저 탭끼리만 연결)</span>' : '🌐 실시간 연결 (Firebase)';
     $('#ver').textContent = DS.VERSION;
     $('#lesson').innerHTML = $('#p-lesson').innerHTML = DS.Lessons.list.map((l) => `<option value="${l.id}">${esc(l.unit || '')} · ${esc(l.title)}</option>`).join('');
-    $('#s-num').innerHTML = Array.from({ length: 30 }, (_, i) => `<option>${i + 1}</option>`).join('');
     const last = read('citadel-student');
-    if (last) { $('#s-code').value = last.code; $('#s-num').value = last.num; $('#s-nick').value = last.nick; hero = last.hero || 0; }
+    if (last && last.code) $('#s-code').value = last.code;
     if (q.get('code')) $('#s-code').value = q.get('code');
-    heroes();
     bind();
+    await studentAuth();
+    await teacherAuth();
     const role = q.get('role');
-    if (role === 'student') form('student');
-    if (role === 'hall') { form('hall'); if (q.get('code')) $('#h-code').value = q.get('code'); }
-    if (role === 'teacher') form('teacher');
-    if (role === 'prep') form('prep');
-    const t = read('citadel-teacher');
-    if (t && t.uid === DS.Net.uid()) { $('#t-resume').hidden = false; $('#t-resume').textContent = `↩ 수업 ${t.code} 이어서 (키 ${t.hallKey})`; }
+    if (role) form(role);
+    if (role === 'hall' && q.get('code')) $('#h-code').value = q.get('code');
     const h = read('citadel-hall');
     if (h) { $('#h-code').value = $('#h-code').value || h.code; $('#h-key').value = h.key; }
     if (q.get('key')) $('#h-key').value = q.get('key');
+    const t = read('citadel-teacher');
     // 바로 열기 (체험판·북마크): ?role=teacher&resume · ?role=hall&code=…&key=…
     if (role === 'teacher' && q.has('resume') && t && t.uid === DS.Net.uid()) $('#t-resume').click();
     if (role === 'hall' && q.get('code') && q.get('key')) $('#h-go').click();
-  }
-  function heroes() {
-    $('#s-heroes').innerHTML = Array.from({ length: DS.ASSETS.heroes.count - 1 }, (_, i) => `<button class="hpick${i === hero ? ' on' : ''}" data-h="${i}">${DS.Art.hero(i, i === hero ? 'attack' : 'idle')}</button>`).join('');
-    $('#s-heroes').querySelectorAll('.hpick').forEach((b) => (b.onclick = () => { hero = Number(b.dataset.h); DS.Sound.clank(); heroes(); }));
   }
   function form(which) {
     document.querySelectorAll('.role-form').forEach((f) => (f.hidden = f.id !== `f-${which}`));
@@ -45,18 +42,118 @@ DS.App = (function () {
   }
   const go = (fn) => async (ev) => {
     const b = ev.currentTarget; b.disabled = true;
-    try { await fn(); } catch (e) { DS.UI.toast(e.message || String(e), 3200); if (!e.user) console.error(e); } finally { b.disabled = false; }
+    try { await fn(); } catch (e) { DS.UI.toast(e.message || String(e), 3600); if (!e.user) console.error(e); } finally { b.disabled = false; }
   };
+  const heroPicker = () => `<p class="shelf-title">내 용사</p><div class="heroes">${Array.from({ length: DS.ASSETS.heroes.count - 1 }, (_, i) => `<button class="hpick${i === hero ? ' on' : ''}" data-h="${i}">${DS.Art.hero(i, i === hero ? 'attack' : 'idle')}</button>`).join('')}</div>`;
+  const bindHeroes = (after) => document.querySelectorAll('#s-auth .hpick').forEach((b) => (b.onclick = () => { hero = Number(b.dataset.h); DS.Sound.clank(); after(); }));
+
+  // ── 학생 로그인 · 가입 ─────────────────────────────────────
+  async function studentAuth() {
+    const box = $('#s-auth');
+    const m = await A().me();
+    if (m) {
+      hero = m.hero;
+      box.innerHTML = `<div class="acc-card"><b>${esc(m.c)} · ${m.n}번 ${esc(m.name)}</b><span class="muted small">로그인됨</span></div>${heroPicker()}
+        <button id="s-go" class="btn primary big">⚔ 던전 입장</button><button id="s-out" class="btn small">다른 사람으로 로그인</button>`;
+      bindHeroes(async () => { await A().setHero(hero); studentAuth(); });
+      $('#s-go').onclick = go(async () => {
+        const code = $('#s-code').value.trim();
+        if (!/^\d{6}$/.test(code)) throw Object.assign(new Error('수업 코드 6자리를 넣어 주세요.'), { user: true });
+        save('citadel-student', { code });
+        await DS.Student.enter(code, { num: m.n, nick: m.name, hero, cls: m.c });
+      });
+      $('#s-out').onclick = go(async () => { await A().logout(); studentAuth(); });
+      return;
+    }
+    masks = (await A().masks()) || {};
+    const classes = Object.keys(masks).sort();
+    const last = read('citadel-acc') || {};
+    if (!classes.length) { box.innerHTML = '<p class="muted">아직 학생 명단이 없어요. 선생님이 "수업 준비"에서 명단을 올리면 로그인할 수 있어요.</p>'; return; }
+    const c = classes.includes(last.c) ? last.c : classes[0];
+    box.innerHTML = `<div class="row2"><label>반 <select id="s-cls">${classes.map((k) => `<option${k === c ? ' selected' : ''}>${esc(k)}</option>`).join('')}</select></label><label>번호 <select id="s-num"></select></label></div>
+      <p class="acc-name" id="s-mask"></p><div id="s-form"></div>`;
+    const nums = () => {
+      const byN = masks[$('#s-cls').value] || {};
+      const ns = Object.keys(byN).map(Number).filter(Boolean).sort((a, b) => a - b);
+      $('#s-num').innerHTML = ns.map((n) => `<option${n === Number(last.n) ? ' selected' : ''}>${n}</option>`).join('');
+      showMask();
+    };
+    const showMask = () => { const v = (masks[$('#s-cls').value] || {})[$('#s-num').value]; $('#s-mask').innerHTML = v ? `이름: <b>${esc(v)}</b> — 내 이름이 맞나요?` : ''; sMode = 'login'; pending = null; drawForm(); };
+    $('#s-cls').onchange = nums; $('#s-num').onchange = showMask;
+    nums();
+  }
+  const pinInput = (id, ph) => `<input id="${id}" type="password" inputmode="numeric" maxlength="4" pattern="[0-9]*" placeholder="${ph}" autocomplete="off">`;
+  function drawForm() {
+    const f = $('#s-form'), c = () => $('#s-cls').value, n = () => Number($('#s-num').value);
+    save('citadel-acc', { c: c(), n: n() });
+    if (sMode === 'login') {
+      f.innerHTML = `<label>비밀번호 (숫자 4자리) ${pinInput('s-pin', '••••')}</label><button id="s-login" class="btn primary big">🔑 로그인</button><button id="s-new" class="btn">처음이에요 · 가입</button>`;
+      $('#s-login').onclick = go(async () => {
+        const r = await A().login(c(), n(), $('#s-pin').value);
+        if (r && r.needNewPin) { sMode = 'newpin'; drawForm(); return; }
+        DS.UI.toast('로그인했어요!'); studentAuth();
+      });
+      $('#s-new').onclick = () => { sMode = 'signup'; drawForm(); };
+    } else if (sMode === 'signup') {
+      f.innerHTML = `<p class="muted small">이름이 맞는지 꼭 확인하고 가입해요. 한 번호는 한 명만 가입할 수 있어요.</p>
+        <div class="row2"><label>비밀번호 4자리 ${pinInput('s-p1', '숫자 4자리')}</label><label>한 번 더 ${pinInput('s-p2', '다시')}</label></div>${heroPicker()}
+        <button id="s-make" class="btn primary big">✨ 가입하기</button><button id="s-back" class="btn small">← 로그인으로</button>`;
+      bindHeroes(() => { const a = $('#s-p1').value, b = $('#s-p2').value; drawForm(); $('#s-p1').value = a; $('#s-p2').value = b; });
+      $('#s-make').onclick = go(async () => {
+        const a = $('#s-p1').value, b = $('#s-p2').value;
+        if (a !== b) throw Object.assign(new Error('두 비밀번호가 달라요.'), { user: true });
+        await A().signUp(c(), n(), a, hero);
+        DS.UI.toast('가입했어요! 비밀번호 4자리를 꼭 기억해요.', 3200); studentAuth();
+      });
+      $('#s-back').onclick = () => { sMode = 'login'; drawForm(); };
+    } else {
+      f.innerHTML = `<p class="gold">선생님이 비밀번호를 초기화했어요. 새 비밀번호를 정해요.</p>
+        <div class="row2"><label>새 비밀번호 4자리 ${pinInput('s-p1', '숫자 4자리')}</label><label>한 번 더 ${pinInput('s-p2', '다시')}</label></div>
+        <button id="s-make" class="btn primary big">🔑 새 비밀번호로 시작</button>`;
+      $('#s-make').onclick = go(async () => {
+        const a = $('#s-p1').value, b = $('#s-p2').value;
+        if (a !== b) throw Object.assign(new Error('두 비밀번호가 달라요.'), { user: true });
+        await A().login(c(), n(), '0000', a);
+        DS.UI.toast('새 비밀번호로 바꿨어요!', 3000); studentAuth();
+      });
+    }
+  }
+
+  // ── 교사 로그인 (교사 폰 · 수업 준비 공통) ─────────────────────
+  async function teacherAuth() {
+    const ok = await A().isAdmin();
+    document.querySelectorAll('.t-only').forEach((e) => (e.hidden = !ok));
+    if (ok) {
+      document.querySelectorAll('.t-auth').forEach((e) => { e.innerHTML = '<div class="acc-card"><b>👩‍🏫 교사 계정</b><span class="muted small">로그인됨</span><button class="btn small t-out">로그아웃</button></div>'; });
+      document.querySelectorAll('.t-out').forEach((b) => (b.onclick = go(async () => { await A().logout(); await teacherAuth(); await studentAuth(); })));
+      const t = read('citadel-teacher');
+      if (t && t.uid === DS.Net.uid()) { $('#t-resume').hidden = false; $('#t-resume').textContent = `↩ 수업 ${t.code} 이어서 (키 ${t.hallKey})`; }
+      return;
+    }
+    const first = !(await A().adminExists());
+    document.querySelectorAll('.t-auth').forEach((e) => {
+      e.innerHTML = `<p class="muted small">${first ? '처음 한 번: 교사 계정을 만들어요. (학생보다 먼저!)' : '교사 계정으로 로그인해요.'}</p>
+        <div class="row2"><label>교사 아이디 <input class="t-id" autocomplete="username" placeholder="영문·숫자"></label><label>비밀번호 <input class="t-pw" type="password" autocomplete="current-password" placeholder="6자 이상"></label></div>
+        <button class="btn primary t-login">${first ? '✨ 교사 계정 만들기' : '🔑 교사 로그인'}</button>`;
+    });
+    document.querySelectorAll('.t-login').forEach((b) => (b.onclick = go(async () => {
+      const box = b.closest('.t-auth'), id = box.querySelector('.t-id').value.trim(), pwd = box.querySelector('.t-pw').value;
+      if (!id) throw Object.assign(new Error('교사 아이디를 넣어 주세요.'), { user: true });
+      if (first) await A().teacherCreate(id, pwd); else await A().teacherLogin(id, pwd);
+      DS.UI.toast('교사 계정으로 로그인했어요.'); await teacherAuth(); await studentAuth();
+    })));
+  }
+
   function bind() {
     document.querySelectorAll('.role').forEach((b) => (b.onclick = () => form(b.dataset.role)));
-    $('#s-go').onclick = go(async () => {
-      const code = $('#s-code').value.trim(), nick = $('#s-nick').value.trim();
-      if (!/^\d{6}$/.test(code)) throw Object.assign(new Error('수업 코드 6자리를 넣어 주세요.'), { user: true });
-      if (!nick) throw Object.assign(new Error('닉네임을 넣어 주세요.'), { user: true });
-      await DS.Student.enter(code, { num: Number($('#s-num').value), nick, hero });
-    });
     $('#t-new').onclick = go(() => DS.Teacher.create($('#lesson').value));
     $('#t-resume').onclick = go(() => { const t = read('citadel-teacher'); return DS.Teacher.open(t.code, t.hallKey); });
+    $('#t-code-go').onclick = go(async () => {
+      const code = $('#t-code').value.trim();
+      if (!/^\d{6}$/.test(code)) throw Object.assign(new Error('수업 코드 6자리를 넣어 주세요.'), { user: true });
+      const sec = await DS.Net.get(`secrets/${code}`).catch(() => null);
+      return DS.Teacher.open(code, sec && sec.hallKey);
+    });
     $('#h-go').onclick = go(() => DS.Hall.enter($('#h-code').value.trim(), $('#h-key').value.trim()));
     $('#p-go').onclick = go(async () => DS.Prep.enter($('#p-lesson').value));
   }

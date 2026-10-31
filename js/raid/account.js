@@ -1,0 +1,110 @@
+// 계정: 반 + 번호 + 숫자 4자리. 이름은 교사가 올린 명단에서 나온다 (학생이 이름을 입력하지 않음).
+// Firebase 이메일 로그인을 쓰되 학생에게는 반·번호·4자리만 보인다 (실제 이메일은 받지 않는다).
+//   roster/{반}/{번호}     = 이름 (로그인한 계정만 읽음)          rosterMask/{반}/{번호} = 가운데를 가린 이름 (로그인 전 확인용)
+//   accounts/{반}/{번호}   = { uid, gen, hero, reset? }        gen = 초기화할 때마다 1씩 (새 로그인을 기존 데이터에 연결)
+//   admins/{uid}           = 교사 계정 (처음 한 번만 만들 수 있음)
+// 초기화: 교사가 reset 표시 → 학생이 0000 으로 로그인 → 새 4자리를 정하면 gen+1 로그인을 만들어 연결
+window.DS = window.DS || {};
+
+DS.Account = (function () {
+  const N = () => DS.Net;
+  const fail = (msg) => { const e = new Error(msg); e.user = true; throw e; };
+  const DOMAIN = 'citadel.class';
+
+  // ── 순수 도구 (tests/account.test.js) ──────────────────────
+  const classKey = (s) => String(s).trim().replace(/\s+/g, '').replace(/[^0-9A-Za-z가-힣-]/g, '-');
+  const email = (c, n, gen) => `s_${encodeURIComponent(c).replace(/%/g, '').toLowerCase()}_${Number(n)}_${gen || 0}@${DOMAIN}`;
+  const teacherEmail = (id) => `t_${String(id).trim().toLowerCase().replace(/[^0-9a-z._-]/g, '')}@${DOMAIN}`;
+  const pw = (pin) => `${pin}#cm`; // Firebase 는 6자 이상이라 4자리 뒤에 앱이 정한 글자를 붙인다
+  const validPin = (pin) => /^\d{4}$/.test(String(pin));
+  function mask(name) {
+    const a = [...String(name).trim()];
+    if (a.length <= 1) return '*';
+    if (a.length === 2) return a[0] + '*';
+    return a[0] + '*'.repeat(a.length - 2) + a[a.length - 1];
+  }
+  // 명단 붙여 넣기: 한 줄에 "번호 이름" (탭·쉼표·공백 구분). 시트에서 복사한 "반 번호 이름" 도 받는다
+  function parseRoster(text, defaultClass) {
+    const out = [], bad = [];
+    String(text).split(/\r?\n/).map((l) => l.trim()).filter(Boolean).forEach((line) => {
+      const p = line.split(/[\t,]+|\s{1,}/).map((x) => x.trim()).filter(Boolean);
+      let c = defaultClass, n, name;
+      if (p.length >= 3 && /^\d+$/.test(p[1])) [c, n, name] = [p[0], p[1], p.slice(2).join('')];
+      else if (p.length >= 2 && /^\d+$/.test(p[0])) [n, name] = [p[0], p.slice(1).join('')];
+      if (!c || !n || !name || Number(n) < 1 || Number(n) > 40 || name.length > 8) { bad.push(line); return; }
+      out.push({ c: classKey(c), n: Number(n), name });
+    });
+    return { rows: out, bad };
+  }
+
+  // ── 명단 (교사) ──────────────────────────────────────────
+  async function uploadRoster(rows) {
+    const patch = {};
+    rows.forEach(({ c, n, name }) => { patch[`roster/${c}/${n}`] = name; patch[`rosterMask/${c}/${n}`] = mask(name); });
+    for (const [k, v] of Object.entries(patch)) await N().set(k, v);
+  }
+  async function removeStudent(c, n) { await N().remove(`roster/${c}/${n}`); await N().remove(`rosterMask/${c}/${n}`); }
+  const resetAccount = (c, n) => N().set(`accounts/${c}/${n}/reset`, true);
+
+  // ── 학생 ────────────────────────────────────────────────
+  const masks = () => N().get('rosterMask');
+  const accountOf = (c, n) => N().get(`accounts/${c}/${n}`);
+  async function signUp(c, n, pin, hero) {
+    if (!validPin(pin)) fail('비밀번호는 숫자 4자리예요.');
+    const m = await N().get(`rosterMask/${c}/${n}`);
+    if (!m) fail('명단에 없는 번호예요. 선생님께 말씀드려요.');
+    const acc = await accountOf(c, n);
+    if (acc && !acc.reset) fail('이미 가입한 번호예요. 로그인해 주세요. (비밀번호를 잊었으면 선생님께 초기화를 부탁해요)');
+    const gen = acc ? (acc.gen || 0) + 1 : 0;
+    try { await N().signUp(email(c, n, gen), pw(pin)); } catch (e) {
+      if (e.code === 'auth/email-already-in-use') fail('이미 가입한 번호예요. 로그인해 주세요.');
+      throw e;
+    }
+    try { await N().set(`accounts/${c}/${n}`, { uid: N().uid(), gen, hero: Number(hero) || (acc && acc.hero) || 0, at: N().TS }); } catch (e) { await N().signOut(); fail('이미 가입한 번호예요. 로그인해 주세요.'); }
+    return me();
+  }
+  // 로그인. 초기화된 계정이면 { needNewPin: true } 를 돌려주고, newPin 을 주면 새 로그인을 만들어 연결한다
+  async function login(c, n, pin, newPin) {
+    const acc = await accountOf(c, n);
+    if (!acc) fail('아직 가입하지 않은 번호예요. "처음이에요 · 가입" 을 눌러요.');
+    if (acc.reset) {
+      if (String(pin) !== '0000') fail('선생님이 비밀번호를 초기화했어요. 0000 을 넣어 주세요.');
+      if (!newPin) return { needNewPin: true };
+      if (newPin === '0000') fail('새 비밀번호는 0000 말고 다른 숫자로 정해요.');
+      return signUp(c, n, newPin, acc.hero);
+    }
+    if (!validPin(pin)) fail('비밀번호는 숫자 4자리예요.');
+    try { await N().signIn(email(c, n, acc.gen || 0), pw(pin)); } catch (e) { fail('비밀번호가 달라요. 잊었으면 선생님께 초기화를 부탁해요.'); }
+    return me();
+  }
+  // 지금 로그인한 학생 (반·번호·이름·용사)
+  let cache = null;
+  async function me() {
+    if (N().provider() !== 'password') return null;
+    const uid = N().uid();
+    if (cache && cache.uid === uid) return cache;
+    const all = (await N().get('accounts')) || {};
+    for (const [c, byN] of Object.entries(all)) for (const [n, a] of Object.entries(byN || {})) {
+      if (a && a.uid === uid) { const name = await N().get(`roster/${c}/${n}`); cache = { uid, c, n: Number(n), name: name || '', hero: a.hero || 0 }; return cache; }
+    }
+    return null;
+  }
+  async function setHero(hero) { const m = await me(); if (!m) return; await N().set(`accounts/${m.c}/${m.n}/hero`, Number(hero)); m.hero = Number(hero); }
+  async function logout() { cache = null; await N().signOut(); }
+
+  // ── 교사 계정 ────────────────────────────────────────────
+  const adminExists = async () => !!(await N().get('admins'));
+  const isAdmin = async () => N().provider() === 'password' && (await N().get(`admins/${N().uid()}`)) === true;
+  async function teacherCreate(id, password) {
+    if (String(password).length < 6) fail('교사 비밀번호는 6자 이상이에요.');
+    if (await adminExists()) fail('교사 계정이 이미 있어요. 로그인해 주세요.');
+    await N().signUp(teacherEmail(id), password);
+    await N().set(`admins/${N().uid()}`, true);
+  }
+  async function teacherLogin(id, password) {
+    try { await N().signIn(teacherEmail(id), password); } catch (e) { fail('교사 아이디나 비밀번호가 달라요.'); }
+    if (!(await isAdmin())) { await N().signOut(); fail('교사 계정이 아니에요.'); }
+  }
+
+  return { classKey, email, teacherEmail, pw, validPin, mask, parseRoster, uploadRoster, removeStudent, resetAccount, masks, accountOf, signUp, login, me, setHero, logout, adminExists, isAdmin, teacherCreate, teacherLogin };
+})();

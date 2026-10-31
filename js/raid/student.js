@@ -11,6 +11,7 @@ DS.Student = (function () {
   let retrying = '';        // '몬스터id|다음 시도' — "다시 도전"을 누른 상태
   let shown = '';           // 결과 연출을 한 번만
   let bossSet = 1;
+  let drawn = '';           // 지금 그려 둔 화면의 서명 — 다른 학생의 제출로 방 값이 바뀌어도 내 화면은 다시 그리지 않는다 (터치가 씹히지 않게)
 
   async function enter(c, info) {
     await DS.Act.join(c, info);
@@ -41,6 +42,8 @@ DS.Student = (function () {
     if (!R.players || !R.players[me]) { $('#st-body').innerHTML = '<div class="panel"><p>입장 정보가 없어요. 처음 화면에서 다시 입장해 주세요.</p></div>'; return; }
     header();
     const body = $('#st-body');
+    const st0 = Raid().stepOf(L, R);
+    if (!st0 || st0.kind !== 'monster') drawn = '';
     if (Raid().isLobby(R)) { body.innerHTML = `<div class="panel framed center"><h2>입장 완료!</h2><p>선생님이 수업을 시작할 때까지 기다려요.</p>${DS.Art.hero(myP().hero, 'walk', 'big')}</div>`; return; }
     if (!(R.active || {})[me]) { body.innerHTML = '<div class="panel framed center"><p>이번 수업 참여 명단에 없어요. 선생님께 말씀드려요.</p></div>'; return; }
     if (Raid().isEnd(L, R)) return endView(body);
@@ -68,6 +71,9 @@ DS.Student = (function () {
     if (fx) { shown = `${mid}|${t.attempt}`; if (label === 'fail') DS.Sound.squish(); else { DS.Sound.slash(); setTimeout(() => DS.Sound.hit(), 160); } }
     const head = { success: '⚔ 공격 성공!', partial: `⚔ 부분 성공 (${t.correct}/${t.total})`, fail: '💨 공격 실패…' }[label];
     const done = Raid().cleared(L, R, mid);
+    const sig = `res|${mid}|${t.attempt}|${done}|${rec.canRetry}|${(R.help || {})[me] ? 1 : 0}`;
+    if (sig === drawn && body.querySelector('.marks')) { hpText(body, hp); return; }
+    drawn = sig;
     body.innerHTML = `<div class="panel framed">${scene(step, rec, hp, fx)}
       <h2 class="res-${label}">${head}</h2>
       <div class="marks">${items.map((q, i) => `<div class="mark ${t.marks[i] ? 'ok' : 'ng'}"><b>${i + 1}</b> ${t.marks[i] ? '✔' : '✘'} <span class="math">${pretty(itemText(q))}</span>${t.marks[i] ? '' : `<br><span class="sol-line math">${pretty(q.solution || '')}</span>`}</div>`).join('')}</div>
@@ -79,6 +85,7 @@ DS.Student = (function () {
     const rb = $('#st-retry');
     if (rb) rb.onclick = () => { retrying = `${mid}|${rec.nextAttempt}`; form = null; DS.Sound.clank(); render(); };
   }
+  const hpText = (body, hp) => { const t = body.querySelector('.scene-bar .muted'); if (t) t.textContent = `레이드 체력 ${hp.left} / ${hp.max}`; };
   const itemText = (q) => (q.type === 'blanks' ? q.items.map((it) => `${it.left} □ ${it.right}`).join('   ') : q.question);
 
   function fightForm(body, step, rec, hp) {
@@ -87,6 +94,9 @@ DS.Student = (function () {
     if (!form || form.key !== key) form = { key, given: items.map((q) => (q.type === 'multi' ? [] : q.type === 'number' ? 0 : null)) };
     const prevWrong = rec.last ? rec.last.marks.map((m) => !m) : [];
     const ready = items.every((q, i) => (q.type === 'multi' ? form.given[i].length > 0 : form.given[i] != null));
+    const sig = `form|${key}|${JSON.stringify(form.given)}|${(R.help || {})[me] ? 1 : 0}`;
+    if (sig === drawn && body.querySelector('.items')) { hpText(body, hp); return; }
+    drawn = sig;
     body.innerHTML = `<div class="panel framed">${scene(step, rec, hp)}
       ${attempt ? `<p class="retry-note">↻ 재도전 ${attempt} — 숫자가 모두 바뀌었어요. 지난번 틀린 칸은 <b class="ngc">✘</b> 표시</p>` : ''}
       ${L.monsters[mid].note ? `<p class="muted small">💡 ${esc(L.monsters[mid].note)}</p>` : ''}

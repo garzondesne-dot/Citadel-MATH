@@ -45,6 +45,7 @@
 <script src="js/raid/net.js"></script>
 <script src="js/raid/model.js"></script>
 <script src="js/raid/actions.js"></script>
+<script src="js/raid/account.js"></script>
 <script src="js/raid/bots.js"></script>
 <script>
 (function () {
@@ -62,17 +63,19 @@
   $('#go').onclick = async () => {
     DS.Bots.stop();
     net.wipe();
-    try { sessionStorage.setItem(`citadel-uid-teacher`, TEACHER); sessionStorage.removeItem('citadel-uid-student'); } catch (e) { /* 무시 */ }
+    try { sessionStorage.setItem(`citadel-uid-teacher`, TEACHER); sessionStorage.removeItem('citadel-uid-student'); sessionStorage.removeItem('citadel-uid-student-acc'); sessionStorage.removeItem('citadel-uid-teacher-acc'); } catch (e) { /* 무시 */ }
     try { localStorage.removeItem('citadel-student'); } catch (e) { /* 무시 */ }
     await net.init();
     net.setUid(TEACHER);
+    // 체험용 명단: 1-1 반 (1번 = 직접 해 보는 학생, 2번부터 가상 학생)
+    await DS.Account.uploadRoster([{ c: '1-1', n: 1, name: '체험학생' }, ...Array.from({ length: 29 }, (_, i) => ({ c: '1-1', n: i + 2, name: DS.Bots.NICK[i] }))]);
     const r = await DS.Act.createRoom('set-03');
     localStorage.setItem('citadel-teacher', JSON.stringify({ code: r.code, hallKey: r.hallKey, uid: TEACHER }));
     frame(0, 'teacher', 'index.html?local&role=teacher&resume');
     frame(1, 'hall', `index.html?local&role=hall&code=${r.code}&key=${r.hallKey}`);
     frame(2, 'student', `index.html?local&role=student&code=${r.code}`);
     DS.Bots.start(r.code, Number($('#n').value), { speed: Number($('#speed').value) });
-    $('#info').textContent = `수업 코드 ${r.code} · 종합상황실 키 ${r.hallKey} — 오른쪽 학생 화면에서 1번으로 입장한 뒤, 교사 폰에서 ▶ 수업 시작`;
+    $('#info').textContent = `수업 코드 ${r.code} · 종합상황실 키 ${r.hallKey} — 오른쪽 학생 화면: 반 1-1 · 1번 → "처음이에요 · 가입"(비밀번호 아무 4자리) → 던전 입장, 그다음 교사 폰에서 ▶`;
   };
 })();
 </script>

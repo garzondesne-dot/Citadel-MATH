@@ -52,5 +52,5 @@ DS.Bots = (function () {
       }
     });
   }
-  return { start, stop: stopAll, given, ids };
+  return { start, stop: stopAll, given, ids, NICK };
 })();

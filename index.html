@@ -32,17 +32,18 @@
 
     <div id="f-student" class="role-form panel framed">
       <label>수업 코드 <input id="s-code" inputmode="numeric" maxlength="6" placeholder="6자리" autocomplete="off"></label>
-      <div class="row2"><label>번호 <select id="s-num"></select></label><label>닉네임 <input id="s-nick" maxlength="8" placeholder="8자 이내" autocomplete="off"></label></div>
-      <p class="shelf-title">내 용사</p>
-      <div id="s-heroes" class="heroes"></div>
-      <button id="s-go" class="btn primary big">⚔ 입장</button>
+      <div id="s-auth"></div>
     </div>
 
     <div id="f-teacher" class="role-form panel framed" hidden>
-      <label>차시 <select id="lesson"></select></label>
-      <button id="t-new" class="btn primary big">✨ 새 수업 만들기</button>
-      <button id="t-resume" class="btn" hidden></button>
-      <p class="muted small">수업 코드(학생용)와 종합상황실 키(PC용)가 만들어져요. 학생 정답·도움 요청은 교사 폰에만 보여요.</p>
+      <div class="t-auth"></div>
+      <div class="t-only" hidden>
+        <label>차시 <select id="lesson"></select></label>
+        <button id="t-new" class="btn primary big">✨ 새 수업 만들기</button>
+        <button id="t-resume" class="btn" hidden></button>
+        <div class="row2"><label>수업 코드로 이어서 <input id="t-code" inputmode="numeric" maxlength="6" autocomplete="off"></label><button id="t-code-go" class="btn">↩ 이어서</button></div>
+        <p class="muted small">수업 코드(학생용)와 종합상황실 키(PC용)가 만들어져요. 학생 정답·도움 요청은 교사 폰에만 보여요.</p>
+      </div>
     </div>
 
     <div id="f-hall" class="role-form panel framed" hidden>
@@ -51,9 +52,12 @@
       <p class="muted small">교실 PC·TV 화면용. 키는 교사 폰 위쪽에 있어요.</p>
     </div>
     <div id="f-prep" class="role-form panel framed" hidden>
-      <label>차시 <select id="p-lesson"></select></label>
-      <button id="p-go" class="btn primary big">📋 수업 준비 열기 (PC)</button>
-      <p class="muted small">개념 설명 단계마다 학습지 이미지를 올리고, 몬스터 체력 기준% 기본값을 정해요.</p>
+      <div class="t-auth"></div>
+      <div class="t-only" hidden>
+        <label>차시 <select id="p-lesson"></select></label>
+        <button id="p-go" class="btn primary big">📋 수업 준비 열기 (PC)</button>
+        <p class="muted small">학생 명단 올리기 · 비밀번호 초기화 · 개념 설명 학습지 이미지 · 몬스터 체력 기준% 기본값</p>
+      </div>
     </div>
     <p id="home-msg" class="ngc"></p>
     <p class="muted small center"><a href="demo.html">🧪 체험판: 가상 학생 18명과 한 화면에서 해 보기</a></p>
@@ -126,6 +130,7 @@
 <script src="js/raid/net.js"></script>
 <script src="js/raid/model.js"></script>
 <script src="js/raid/actions.js"></script>
+<script src="js/raid/account.js"></script>
 <script src="js/raid/control.js"></script>
 <script src="js/raid/student.js"></script>
 <script src="js/raid/teacher.js"></script>

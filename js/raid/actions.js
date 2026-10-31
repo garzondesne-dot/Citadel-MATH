@@ -67,7 +67,7 @@ DS.Act = (function () {
     const me = N().uid();
     const dup = Object.entries(R.players || {}).find(([u, p]) => u !== me && !p.teacher && Number(p.num) === Number(info.num));
     if (dup) fail(`${info.num}번은 이미 입장했어요. 번호를 확인해 주세요.`);
-    await N().set(P(code, `players/${me}`), { num: Number(info.num), nick: String(info.nick).slice(0, 8), hero: Number(info.hero) || 0, at: N().TS });
+    await N().set(P(code, `players/${me}`), { num: Number(info.num), nick: String(info.nick).slice(0, 8), hero: Number(info.hero) || 0, ...(info.cls ? { cls: String(info.cls) } : {}), at: N().TS });
     return R.meta;
   }
   const help = (code, on) => N().set(P(code, `help/${N().uid()}`), on ? true : null);

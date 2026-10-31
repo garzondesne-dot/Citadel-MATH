@@ -373,3 +373,13 @@ input:focus, select:focus { outline: none; border-color: var(--gold); }
 .p-slot-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .p-slot-head b { flex: 1; color: var(--gold); }
 .p-prev { max-width: 100%; max-height: 360px; margin-top: 8px; border: 2px solid var(--line); background: #fff; }
+
+/* ── v0.3 계정 ─────────────────────────────────────────── */
+.acc-card { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; background: #0f3330; border: 2px solid var(--teal); padding: 8px 10px; margin: 6px 0; }
+.acc-card b { flex: 1; }
+.acc-name { font-size: 16px; margin: 6px 0; }
+.acc-name b { color: var(--gold); font-size: 20px; }
+textarea { display: block; width: 100%; font: 15px var(--pixel); color: var(--text); background: #08101e; border: 2px solid var(--line); padding: 8px; margin: 6px 0; }
+.r-table { width: 100%; border-collapse: collapse; margin: 4px 0 10px; font-size: 14px; }
+.r-table th, .r-table td { border: 1px solid var(--line); padding: 4px 6px; text-align: left; }
+.r-table th { color: var(--muted); }

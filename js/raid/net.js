@@ -40,12 +40,29 @@ DS.Net = (function () {
     return {
       mode: 'local',
       async init() {
+        try { const acc = sessionStorage.getItem(`${UIDKEY}-acc`); if (acc) { uid = acc; return uid; } } catch (e) { /* 무시 */ }
         try { uid = sessionStorage.getItem(UIDKEY); } catch (e) { uid = null; }
         if (!uid) { uid = 'u' + Math.random().toString(36).slice(2, 10); try { sessionStorage.setItem(UIDKEY, uid); } catch (e) { /* 무시 */ } }
         return uid;
       },
       uid: () => uid,
       setUid(u) { uid = u; }, // 체험판 가상 학생용
+      // 계정 흉내 (체험 모드): _auth/{이메일} = { pw, uid } — 실제 서버의 이메일 로그인과 같은 모양으로 동작
+      provider: () => { try { return sessionStorage.getItem(`${UIDKEY}-acc`) ? 'password' : 'anonymous'; } catch (e) { return 'anonymous'; } },
+      async signUp(email, pw) {
+        const t = load(), k = email.replace(/[.#$/[\]]/g, '_');
+        if (at(t, `_auth/${k}`)) { const e = new Error('이미 있는 계정이에요.'); e.code = 'auth/email-already-in-use'; throw e; }
+        const u = 'p' + Math.random().toString(36).slice(2, 10);
+        put(t, `_auth/${k}`, { pw, uid: u }); save(t);
+        return this.useAcc(u);
+      },
+      async signIn(email, pw) {
+        const a = at(load(), `_auth/${email.replace(/[.#$/[\]]/g, '_')}`);
+        if (!a || a.pw !== pw) { const e = new Error('번호나 비밀번호가 달라요.'); e.code = 'auth/invalid-credential'; throw e; }
+        return this.useAcc(a.uid);
+      },
+      useAcc(u) { uid = u; try { sessionStorage.setItem(`${UIDKEY}-acc`, u); } catch (e) { /* 무시 */ } return u; },
+      async signOut() { try { sessionStorage.removeItem(`${UIDKEY}-acc`); } catch (e) { /* 무시 */ } uid = null; return this.init(); },
       now: () => Date.now(),
       async get(p) { return clone(at(load(), p)); },
       async set(p, v) { const t = load(); put(t, p, v); save(t); changed(); },
@@ -74,13 +91,18 @@ DS.Net = (function () {
           await Promise.all([script(SDK + 'firebase-auth-compat.js'), script(SDK + 'firebase-database-compat.js')]);
         }
         if (!firebase.apps.length) firebase.initializeApp(cfg);
-        const cred = await firebase.auth().signInAnonymously();
-        uid = cred.user.uid;
+        // 이 기기에 로그인해 둔 계정이 있으면 그대로, 없으면 익명 로그인
+        const prev = await new Promise((res) => { const off = firebase.auth().onAuthStateChanged((u) => { off(); res(u); }); });
+        uid = prev ? prev.uid : (await firebase.auth().signInAnonymously()).user.uid;
         db = firebase.database();
         db.ref('.info/serverTimeOffset').on('value', (s) => { offset = s.val() || 0; });
         return uid;
       },
       uid: () => uid,
+      provider: () => { const u = firebase.auth().currentUser; return u && !u.isAnonymous ? 'password' : 'anonymous'; },
+      async signUp(email, pw) { const c = await firebase.auth().createUserWithEmailAndPassword(email, pw); uid = c.user.uid; return uid; },
+      async signIn(email, pw) { const c = await firebase.auth().signInWithEmailAndPassword(email, pw); uid = c.user.uid; return uid; },
+      async signOut() { await firebase.auth().signOut(); uid = (await firebase.auth().signInAnonymously()).user.uid; return uid; },
       now: () => Date.now() + offset,
       async get(p) { return (await db.ref(p).get()).val(); },
       set: (p, v) => db.ref(p).set(sv(v)),
@@ -107,6 +129,10 @@ DS.Net = (function () {
     get mode() { return api.impl.mode; },
     init: () => api.impl.init(),
     uid: () => api.impl.uid(),
+    provider: () => api.impl.provider(),
+    signUp: (e, p) => api.impl.signUp(e, p),
+    signIn: (e, p) => api.impl.signIn(e, p),
+    signOut: () => api.impl.signOut(),
     now: () => api.impl.now(),
     get: (p) => api.impl.get(p),
     set: (p, v) => api.impl.set(p, v),
