@@ -1,6 +1,9 @@
-# Citadel-MATH
+# Citadel-MATH · 성채 탈환 수학 레이드
 
-DIMENSION SLASHER 본편 v0.3.2를 바탕으로 게임 방식을 비튼 수학 교육 게임 (제작: 김찬우 선생님, 공통수학2 Ⅰ 도형의 방정식, 스마트폰).
+교실 협동 레이드(학생 폰 · 교사 폰 · 종합상황실) + DIMENSION SLASHER 연성 엔진. 제작: 김찬우 선생님 (공통수학2).
+현재 차시: 집합 3차시 「집합 사이의 포함 관계」.
 
-- 문서: [docs/HANDOVER.md](docs/HANDOVER.md) · [docs/DECISIONS.md](docs/DECISIONS.md) · 원본 기록 [docs/origin/](docs/origin/)
-- 테스트: `node tests/mathgen.test.js`, `node tests/game.test.js`
+- 체험판: `demo.html` (가상 학생과 한 화면에서) · 수업: `index.html`
+- 문서: [docs/HANDOVER.md](docs/HANDOVER.md) · [docs/DECISIONS.md](docs/DECISIONS.md) · [docs/firebase-setup.md](docs/firebase-setup.md)
+- 테스트: `node tests/lesson.test.js`, `node tests/model.test.js`
+- 사용한 공개 자료: Galmuri 글꼴(SIL OFL, `assets/fonts/LICENSE-Galmuri.txt`) · qrcode.js(MIT, `js/engine/LICENSE-qrcodejs.txt`)

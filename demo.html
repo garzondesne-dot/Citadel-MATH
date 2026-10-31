@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Citadel-MATH 체험판 · 가상 학생 레이드</title>
+<style>
+  body { margin: 0; background: #060c18; color: #eef2ff; font: 14px 'Noto Sans KR', system-ui, sans-serif; }
+  .bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; padding: 8px 12px; background: #12203a; border-bottom: 2px solid #e8b04a; }
+  .bar b { color: #e8b04a; font-size: 16px; }
+  .bar button, .bar select { font: inherit; color: #eef2ff; background: #1a2c4c; border: 2px solid #2c4370; padding: 5px 10px; cursor: pointer; }
+  .bar button.primary { border-color: #e8b04a; background: #3a2a0c; }
+  .bar .muted { color: #9fb0d8; font-size: 12px; }
+  .stage { display: grid; grid-template-columns: 360px 1fr 360px; gap: 10px; padding: 10px; height: calc(100vh - 56px); box-sizing: border-box; }
+  .dev { display: flex; flex-direction: column; min-width: 0; }
+  .dev p { margin: 0 0 4px; color: #9fb0d8; }
+  .dev p b { color: #4cc9ff; }
+  iframe { flex: 1; width: 100%; border: 3px solid #2c4370; background: #0a1424; }
+  .phone iframe { border-radius: 18px; }
+  .empty { flex: 1; display: flex; align-items: center; justify-content: center; border: 3px dashed #2c4370; color: #9fb0d8; text-align: center; padding: 20px; }
+  @media (max-width: 1100px) { .stage { grid-template-columns: 1fr; height: auto; } iframe { height: 760px; flex: none; } }
+</style>
+</head>
+<body>
+<div class="bar">
+  <b>🧪 Citadel-MATH 체험판</b>
+  <label>가상 학생 <select id="n"><option>6</option><option>12</option><option selected>18</option><option>24</option></select>명</label>
+  <label>속도 <select id="speed"><option value="1">보통</option><option value="2" selected>빠르게</option><option value="4">아주 빠르게</option></select></label>
+  <button id="go" class="primary">▶ 새 체험 수업 시작</button>
+  <span id="info" class="muted">이 컴퓨터 안에서만 돌아가요 (인터넷 서버 사용 안 함). 왼쪽 = 교사 폰 · 가운데 = 종합상황실 · 오른쪽 = 학생 1명(직접 해 보기)</span>
+</div>
+<div class="stage">
+  <div class="dev phone"><p><b>📱 교사 폰</b></p><div class="empty" id="e1">▶ 버튼을 누르면 시작해요</div></div>
+  <div class="dev"><p><b>🖥 종합상황실</b> (교실 TV·PC)</p><div class="empty" id="e2">수업 코드와 키가 자동으로 들어가요</div></div>
+  <div class="dev phone"><p><b>🧑‍🎓 학생 (1번 — 직접 해 보기)</b></p><div class="empty" id="e3">나머지 학생은 가상 학생이 자동으로 풀어요</div></div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="assets/manifest.js"></script>
+<script src="js/engine/ui.js"></script>
+<script src="js/engine/setgen.js"></script>
+<script src="js/engine/quiz.js"></script>
+<script src="js/engine/lessons.js"></script>
+<script src="lessons/set-03.js"></script>
+<script src="js/raid/net.js"></script>
+<script src="js/raid/model.js"></script>
+<script src="js/raid/actions.js"></script>
+<script src="js/raid/bots.js"></script>
+<script>
+(function () {
+  const $ = (s) => document.querySelector(s);
+  const net = DS.Net.LocalNet(); // 체험판은 항상 이 기기 안에서만
+  DS.Net.use(net);
+  const TEACHER = 'demo-teacher';
+  function frame(slot, name, url) {
+    const box = document.querySelectorAll('.dev')[slot];
+    box.querySelectorAll('iframe,.empty').forEach((e) => e.remove());
+    const f = document.createElement('iframe');
+    f.name = name; f.src = url; f.title = name;
+    box.appendChild(f);
+  }
+  $('#go').onclick = async () => {
+    DS.Bots.stop();
+    net.wipe();
+    try { sessionStorage.setItem(`citadel-uid-teacher`, TEACHER); sessionStorage.removeItem('citadel-uid-student'); } catch (e) { /* 무시 */ }
+    try { localStorage.removeItem('citadel-student'); } catch (e) { /* 무시 */ }
+    await net.init();
+    net.setUid(TEACHER);
+    const r = await DS.Act.createRoom('set-03');
+    localStorage.setItem('citadel-teacher', JSON.stringify({ code: r.code, hallKey: r.hallKey, uid: TEACHER }));
+    frame(0, 'teacher', 'index.html?local&role=teacher&resume');
+    frame(1, 'hall', `index.html?local&role=hall&code=${r.code}&key=${r.hallKey}`);
+    frame(2, 'student', `index.html?local&role=student&code=${r.code}`);
+    DS.Bots.start(r.code, Number($('#n').value), { speed: Number($('#speed').value) });
+    $('#info').textContent = `수업 코드 ${r.code} · 종합상황실 키 ${r.hallKey} — 오른쪽 학생 화면에서 1번으로 입장한 뒤, 교사 폰에서 ▶ 수업 시작`;
+  };
+})();
+</script>
+</body>
+</html>

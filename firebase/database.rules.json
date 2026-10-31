@@ -1,0 +1,68 @@
+{
+  "rules": {
+    "secrets": {
+      "$code": {
+        ".read": false,
+        ".write": "auth != null && !data.exists() && root.child('rooms/'+$code+'/meta/teacher').val() === auth.uid",
+        "hallKey": {
+          ".validate": "newData.isString() && newData.val().length === 4"
+        }
+      }
+    },
+    "rooms": {
+      "$code": {
+        ".read": "auth != null",
+        ".write": "auth != null && !data.exists() && newData.child('meta/teacher').val() === auth.uid",
+        "hosts": {
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid && newData.val() === root.child('secrets/'+$code+'/hallKey').val()"
+          }
+        },
+        "state": {
+          ".write": "auth != null && (root.child('rooms/'+$code+'/meta/teacher').val() === auth.uid || (root.child('rooms/'+$code+'/hosts/'+auth.uid).isString() && root.child('rooms/'+$code+'/hosts/'+auth.uid).val() === root.child('secrets/'+$code+'/hallKey').val()))"
+        },
+        "active": {
+          ".write": "auth != null && (root.child('rooms/'+$code+'/meta/teacher').val() === auth.uid || (root.child('rooms/'+$code+'/hosts/'+auth.uid).isString() && root.child('rooms/'+$code+'/hosts/'+auth.uid).val() === root.child('secrets/'+$code+'/hallKey').val()))"
+        },
+        "credits": {
+          ".write": "auth != null && (root.child('rooms/'+$code+'/meta/teacher').val() === auth.uid || (root.child('rooms/'+$code+'/hosts/'+auth.uid).isString() && root.child('rooms/'+$code+'/hosts/'+auth.uid).val() === root.child('secrets/'+$code+'/hallKey').val()))"
+        },
+        "players": {
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid",
+            ".validate": "newData.hasChildren(['num', 'nick', 'hero']) && newData.child('num').isNumber() && newData.child('num').val() >= 0 && newData.child('num').val() <= 40 && newData.child('nick').isString() && newData.child('nick').val().length <= 8"
+          }
+        },
+        "cards": {
+          "$uid": {
+            ".write": "auth != null && (auth.uid === $uid || (root.child('rooms/'+$code+'/meta/teacher').val() === auth.uid || (root.child('rooms/'+$code+'/hosts/'+auth.uid).isString() && root.child('rooms/'+$code+'/hosts/'+auth.uid).val() === root.child('secrets/'+$code+'/hallKey').val())))"
+          }
+        },
+        "help": {
+          "$uid": {
+            ".write": "auth != null && (auth.uid === $uid || (root.child('rooms/'+$code+'/meta/teacher').val() === auth.uid || (root.child('rooms/'+$code+'/hosts/'+auth.uid).isString() && root.child('rooms/'+$code+'/hosts/'+auth.uid).val() === root.child('secrets/'+$code+'/hallKey').val())))"
+          }
+        },
+        "seen": {
+          "$round": {
+            "$uid": {
+              ".write": "auth != null && auth.uid === $uid && !data.exists()"
+            }
+          }
+        },
+        "subs": {
+          "$round": {
+            "$uid": {
+              ".write": "auth != null && root.child('rooms/'+$code+'/state/phase').val() === 'battle' && !data.exists() && (auth.uid === $uid || (root.child('rooms/'+$code+'/meta/teacher').val() === auth.uid || (root.child('rooms/'+$code+'/hosts/'+auth.uid).isString() && root.child('rooms/'+$code+'/hosts/'+auth.uid).val() === root.child('secrets/'+$code+'/hallKey').val())))"
+            }
+          }
+        },
+        "bossAns": {
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid && root.child('rooms/'+$code+'/state/phase').val() === 'boss'"
+          }
+        }
+      }
+    }
+  }
+}
