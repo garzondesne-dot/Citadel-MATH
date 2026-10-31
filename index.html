@@ -3,9 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>DIMENSION SLASHER 번외편 · 포함의 결계</title>
+  <title>DIMENSION SLASHER</title>
   <meta name="theme-color" content="#0b0a12">
-  <meta name="description" content="공통수학2 집합 사이의 포함 관계를 카드 덱빌딩으로 배우는 50분 수업용 게임">
+  <meta name="description" content="공통수학2 도형의 방정식을 카드 덱빌딩 로그라이크로 배우는 게임">
+  <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -23,10 +24,9 @@
   <section id="screen-title" class="screen active">
     <canvas id="title-bg" aria-hidden="true"></canvas>
     <div class="title-wrap">
-      <p class="eyebrow">공통수학2 · Ⅱ-1 집합 · 집합 사이의 포함 관계 <span id="ver-label"></span></p>
-      <h1 class="logo">DIMENSION<br><span>SLASHER</span><b class="beta-badge test-badge">번외편</b></h1>
-      <p class="spin-title">포함의 결계</p>
-      <p class="tagline">몬스터는 곧 문제다. 기호를 벼려 결계를 베어라.</p>
+      <p class="eyebrow">공통수학2 · Ⅰ. 도형의 방정식 <span id="ver-label"></span></p>
+      <h1 class="logo">DIMENSION<br><span>SLASHER</span><b id="beta-badge" class="beta-badge hidden">BETA</b></h1>
+      <p class="tagline">몬스터는 곧 문제다. 공식을 벼려 풀이로 베어라.</p>
       <div class="student-form">
         <p class="sf-title">플레이어 등록</p>
         <div class="sf-row">
@@ -37,11 +37,13 @@
       </div>
       <div class="title-btns">
         <button id="btn-continue" class="btn primary big hidden">▶ 이어하기</button>
-        <button id="btn-start" class="btn primary big">수업 시작</button>
+        <button id="btn-start" class="btn primary big">캠페인 (1~4층)</button>
+        <button id="btn-trial" class="btn boss big">최종보스 체험판</button>
       </div>
-      <div class="title-btns sub"><button class="btn small btn-settings">⚙ 설정</button><button id="btn-report-title" class="btn small">📨 결과 코드</button></div>
+      <div class="title-btns sub"><button id="btn-report-title" class="btn small">📨 결과 보내기</button><button id="btn-install" class="btn small hidden">📲 앱으로 설치</button></div>
       <p id="save-note" class="hint"></p>
-      <p class="hint">1페이즈 전시학습 → 2페이즈 포함 관계 → 3페이즈 형성평가 필드 · 자동 저장</p>
+      <p id="beta-note" class="beta-note hidden">베타 테스트 버전입니다. 헷갈리는 점은 결과 보내기의 한줄평에 남겨 주세요.</p>
+      <p class="hint">PC: 문제 창에서 숫자 1~4로 선택, E로 턴 종료 · 캠페인은 캠프마다 자동 저장</p>
       <p class="credit">제작: 김찬우 선생님</p>
     </div>
   </section>
@@ -49,28 +51,13 @@
   <!-- 프롤로그 -->
   <section id="screen-story" class="screen">
     <div class="story">
-      <p class="loop-big">포함의 결계</p>
-      <p>집합의 탑에 <b class="c-cyan">결계</b>가 쳐졌다. 결계를 지키는 괴물은 하나하나가 <b class="c-gold">풀리지 않은 문제</b>다.</p>
-      <p>캠프의 대장간에서 <b class="c-cyan">∈ · ⊂ · =</b> 같은 기호를 조합해 <b>개념 카드</b>를 벼려라. 새 카드는 처음 한 번 <b>예제</b>를 풀어야 완성된다.</p>
-      <p>전투에서는 카드로 문제를 밝히고(🔍 스캔), 알맞은 풀이 카드로 문제를 맞혀 결계를 깨라.</p>
-      <p class="muted">몬스터는 선생님 신호(해금 코드)에 맞춰 나타난다. 쓰러져도 괜찮다. 시간은 되감긴다.</p>
+      <p class="loop-big">LOOP 001</p>
+      <p>탑의 꼭대기에서 저주에 걸린 순간, 모든 것이 <b>0</b>으로 돌아갔다.</p>
+      <p>이 탑의 괴물은 하나하나가 <b class="c-gold">풀리지 않은 문제</b>다. 칼로 베어도 <b class="c-cyan">결계 보호막</b>에서 막힌다.</p>
+      <p>문제는 처음엔 흐릿하다. <b class="c-cyan">스캔</b>으로 문제를 밝히고, 알맞은 <b class="c-cyan">공식</b>으로 풀이를 한 단계씩 해내야 결계 보호막이 깨진다.</p>
+      <p>캠프의 대장간에서 기억의 부품을 조합해 공식을 벼려라.</p>
+      <p class="muted">쓰러져도 괜찮다. 시간은 되감긴다.</p>
       <button id="btn-story" class="btn primary">캠프로 ▶</button>
-    </div>
-  </section>
-
-  <!-- 자물쇠: 선생님 해금 코드 -->
-  <section id="screen-lock" class="screen">
-    <div class="progress-badge"></div>
-    <div class="story lock-wrap">
-      <div id="lock-box" class="lock-box">
-        <p class="lock-icon">🔒</p>
-        <h2 id="lock-title">다음 몬스터</h2>
-        <p id="lock-desc"></p>
-        <div class="lock-row"><input id="lock-input" type="text" inputmode="numeric" maxlength="4" placeholder="코드" autocomplete="off"><button id="lock-go" class="btn primary big">🔓 열기</button></div>
-        <p id="lock-msg" class="lock-msg"></p>
-      </div>
-      <p id="lock-sheet" class="lock-sheet"></p>
-      <button id="lock-back" class="btn small">⛺ 캠프로 돌아가 복습</button>
     </div>
   </section>
 
@@ -82,21 +69,18 @@
       </div>
       <div class="bar-btns">
         <button id="btn-guide" class="btn small hidden">📖 조합법</button>
-        <button class="btn small btn-settings">⚙</button>
-        <button id="btn-report-camp" class="btn small">📨</button>
+        <button id="btn-report-camp" class="btn small">📨 결과 보내기</button>
         <button class="btn small mute">소리 켬</button>
       </div>
     </header>
-    <div class="progress-badge"></div>
     <p id="camp-next" class="camp-next"></p>
     <div class="camp-tabs">
       <button class="camp-tab on" data-tab="forge">⚒ 대장간</button>
-      <button class="camp-tab" data-tab="deck">🃏 덱 보기 <span id="deck-rule-mini"></span></button>
+      <button class="camp-tab" data-tab="deck">🃏 덱 구성 <span id="deck-rule-mini"></span></button>
     </div>
-    <div id="camp-cheat" class="camp-cheat hidden" hidden>🧪 치트 <button id="cheat-parts" class="btn small">부품 +5</button><button id="cheat-recipes" class="btn small">레시피 전부 발견</button></div>
 
     <div id="tab-forge">
-      <p class="howto">눌러서 모루에 올리고 <b>⚒ 연성</b>! <b>왼쪽 칸부터</b> 채워져요 (순서가 뜻을 바꿔요). 모루 칸을 누르면 빠져요.</p>
+      <p class="howto">눌러서 모루에 올리고 <b>⚒ 연성</b>! 모루 칸을 누르면 빠져요.</p>
       <h3 class="shelf-title">연산 <span class="muted small">무한</span></h3>
       <div id="ops" class="parts shelf ops-shelf"></div>
       <h3 class="shelf-title">부품 가방</h3>
@@ -114,12 +98,6 @@
 
       <h3>카드 보관함 (<span id="store-count">0</span>장) <span class="muted small">누르면 덱 밖·수치 낮은 카드부터 · ▾ 직접 고르기</span></h3>
       <div id="store" class="stack-grid"></div>
-
-      <div id="archive-wrap" class="archive-wrap hidden" hidden>
-        <h3>📜 지난 차원 서고 (<span id="archive-count">0</span>장) <button id="archive-toggle" class="btn small">펼치기 ▾</button></h3>
-        <p class="muted small">다른 차원에서 만든 카드. 꺼내면 이번 차원의 보관함으로 와서 재료나 덱에 쓸 수 있어요.</p>
-        <div id="archive" class="deck-list"></div>
-      </div>
 
       <h3>레시피 도감</h3>
       <div id="recipes" class="recipes"></div>
@@ -139,25 +117,16 @@
       </div>
     </div>
 
-    <div id="tab-gear" class="hidden" hidden>
-      <p class="gear-head">◆ 기억 결정 <b id="gear-crystals">0</b> · 유물 착용 <b id="gear-slots">0 / 3</b></p>
-      <h3>유물</h3>
-      <div id="relic-list" class="relic-list"></div>
-      <h3>물약</h3>
-      <div id="potion-list" class="potion-list"></div>
-    </div>
-
     <div class="depart-row"><button id="depart" class="btn primary big">출발 ▶</button></div>
   </section>
 
   <!-- 전투 -->
   <section id="screen-battle" class="screen">
     <header class="bar">
-      <div><span id="b-loop" class="loop">LOOP 001</span> <span id="b-floor" class="floor"></span> <span id="b-relics" class="b-relics"></span></div>
-      <div class="bar-btns"><button class="btn small btn-settings">⚙</button><button class="btn small mute">소리 켬</button></div>
+      <div><span id="b-loop" class="loop">LOOP 001</span> <span id="b-floor" class="floor"></span></div>
+      <button class="btn small mute">소리 켬</button>
     </header>
 
-    <div class="progress-badge"></div>
     <div class="prob-panel">
       <div class="prob-head"><span class="prob-tag">문제</span><span id="prob-steps" class="steps"></span></div>
       <p id="prob-text" class="prob-text math"></p>
@@ -170,7 +139,7 @@
       <div id="e-intent" class="intent-line"></div>
     </div>
 
-    <div class="stage-wrap"><canvas id="stage"></canvas><canvas id="hero-back" class="hero-back" width="120" height="160"></canvas></div>
+    <div class="stage-wrap"><canvas id="stage"></canvas></div>
 
     <div class="player-hud">
       <div class="hpbar player"><i id="p-hpfill"></i><span id="p-hptext"></span></div>
@@ -183,8 +152,6 @@
       <button id="btn-hold" class="btn small">📌 홀드</button>
       <button id="btn-emergency" class="btn small">⚡ 긴급 연성</button>
       <button id="btn-retreat" class="btn small">⛺ 후퇴</button>
-      <span id="potions" class="potions"></span>
-      <button id="btn-cheat-win" class="btn small cheat hidden">⏭ 즉시 승리</button>
       <button id="end-turn" class="btn end">턴 종료</button>
     </div>
     <p id="hold-hint" class="hold-hint hidden">📌 턴이 끝나도 남길 카드를 누르세요 (기력 1)</p>
@@ -205,13 +172,29 @@
   <!-- 캠페인 클리어 -->
   <section id="screen-clear" class="screen">
     <div class="story">
-      <h2>포함의 결계 돌파!</h2>
-      <p>2ⁿ의 수호자가 쓰러지고 결계가 걷혔다. 집합 사이의 포함 관계를 모두 꿰뚫었다.</p>
-      <p id="clear-title" class="clear-title"></p>
+      <h2>4층 돌파!</h2>
+      <p>원환의 수문장이 무너졌다. 가장 가까운 거리와 가장 먼 거리가 하나의 참격이 되었다.</p>
       <table id="clear-stats" class="stats"></table>
-      <p><button class="btn primary report-btn">📨 결과 코드</button></p>
-      <p class="muted">📝 학습지 형성평가 칸에 오늘 정리한 내용을 적어 보자.</p>
-      <div class="title-btns"><button id="btn-restart" class="btn">타이틀로</button></div>
+      <p><button class="btn primary report-btn">📨 결과 보내기</button></p>
+      <p class="muted">5층 · 거울의 회랑 (도형의 이동) — 개발 중</p>
+      <div class="title-btns">
+        <button id="btn-clear-trial" class="btn boss">최종보스 체험판 도전 ▶</button>
+        <button id="btn-restart" class="btn">처음부터</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 최종보스 체험판 클리어 -->
+  <section id="screen-trial-clear" class="screen">
+    <div class="story">
+      <h2>차원 군주 섬멸!</h2>
+      <p>서술형 풀이 여섯 단계가 하나의 참격이 되었다.</p>
+      <table id="trial-stats" class="stats"></table>
+      <p><button class="btn primary report-btn">📨 결과 보내기</button></p>
+      <div class="title-btns">
+        <button id="btn-trial-again" class="btn boss">다시 도전</button>
+        <button id="btn-trial-title" class="btn">타이틀로</button>
+      </div>
     </div>
   </section>
 
@@ -264,11 +247,7 @@
 <div id="toast" class="toast"></div>
 
 <script src="js/mathgen.js"></script>
-<script src="js/setgen.js"></script>
-<script src="js/codes.js"></script>
-<script src="js/track.js"></script>
 <script src="js/data.js"></script>
-<script src="js/settings.js"></script>
 <script src="js/craft.js"></script>
 <script src="js/cards.js"></script>
 <script src="js/monsters.js"></script>
@@ -283,6 +262,7 @@
 <script src="js/forge.js"></script>
 <script src="js/battle.js"></script>
 <script src="js/titlebg.js"></script>
+<script src="js/pwa.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

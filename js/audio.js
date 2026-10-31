@@ -126,18 +126,6 @@ DS.Sound = (function () {
       tone({ type: 'square', f0: 1600, f1: 3200, dur: 0.12, vol: 0.12 });
       noise({ dur: 0.3, vol: 0.4, freq: 8000, sweepTo: 1500, q: 1.5 });
     },
-    // 보물상자 자물쇠가 풀리는 소리: 철컥 + 짧은 종소리
-    latch() {
-      tone({ type: 'square', f0: 1300, f1: 600, dur: 0.06, vol: 0.12 });
-      noise({ dur: 0.08, vol: 0.25, freq: 2500, delay: 0.05 });
-      tone({ type: 'square', f0: 500, f1: 260, dur: 0.1, vol: 0.12, delay: 0.12 });
-      tone({ type: 'sine', f0: 1046, dur: 0.25, vol: 0.12, delay: 0.32 });
-      tone({ type: 'sine', f0: 1568, dur: 0.4, vol: 0.1, delay: 0.42 });
-    },
-    coin() {
-      tone({ type: 'square', f0: 988, dur: 0.06, vol: 0.08 });
-      tone({ type: 'square', f0: 1319, dur: 0.18, vol: 0.08, delay: 0.06 });
-    },
     victory() {
       [523, 659, 784, 1047].forEach((f, i) => tone({ type: 'triangle', f0: f, dur: 0.45, vol: 0.18, delay: i * 0.12 }));
     },

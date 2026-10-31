@@ -46,13 +46,12 @@ DS.CardKit = (function () {
   };
   const formula = (card) => {
     const d = DS.Cards[card.id];
-    return card.axis === 'y' && d.formulaY ? d.formulaY : d.formula;
+    if (card.axis !== 'y') return d.formula;
+    return d.formulaY || d.formula.replace(/x₂ − x₁/g, 'y₂ − y₁');
   };
-  const cost = (card) => DS.Cards[card.id].cost || 1;
-  // 축 이름: 차이 카드는 가로/세로, 집합·명제·함수 카드는 A/B, p/q, x₁/x₂
+  // ⇄ 로 뒤집은 면의 이름 (차이 카드: 가로·세로, 직선의 방정식: 표준형·일반형)
   const axisLabel = (card) => {
     const d = DS.Cards[card.id];
-    if (!d.axis) return '';
     return d.axisName ? d.axisName[card.axis === 'y' ? 1 : 0] : (card.axis === 'y' ? '세로' : '가로');
   };
   const isScan = (card) => !!card.scan;
@@ -60,22 +59,21 @@ DS.CardKit = (function () {
   // 레어: 이름별로 한 장, 재료로 써도 사라지지 않음 (재연성하면 둘 중 하나를 고름)
   const isRare = (card) => DS.Cards[card.id].tier === 'rare';
 
-  // 덱 규칙: 6~12장, 스캔 카드 4장 이상(그중 그 차원의 기본 카드 1장 이상), 매직 4장 이하
-  function checkDeck(cards, dim = 1) {
+  // 덱 규칙: 6~12장, 스캔 카드 4장 이상(그중 차이 카드 1장 이상), 매직 4장 이하
+  function checkDeck(cards) {
     const R = DS.DeckRules;
-    const basicId = DS.Dims[dim].basic;
     const n = cards.length;
     const scan = cards.filter(isScan).length;
-    const basic = cards.filter((c) => c.id === basicId).length;
+    const diff = cards.filter((c) => c.id === 'diff').length;
     const magic = cards.filter(isMagic).length;
     const rows = [
       { ok: n >= R.min && n <= R.max, label: `덱 ${n}장 (${R.min}~${R.max})` },
       { ok: scan >= R.minScan, label: `스캔 카드 ${scan}/${R.minScan} 이상` },
-      { ok: basic >= R.minBasic, label: `${DS.Cards[basicId].name} 카드 ${basic}/${R.minBasic} 이상` },
+      { ok: diff >= R.minDiff, label: `차이 카드 ${diff}/${R.minDiff} 이상` },
       { ok: magic <= R.maxMagic, label: `매직 ${magic}/${R.maxMagic} 이하` },
     ];
     return { ok: rows.every((r) => r.ok), rows };
   }
 
-  return { roll, statRange, affix, critOf, formula, cost, axisLabel, checkDeck, isScan, isMagic, isRare, uid };
+  return { roll, statRange, affix, critOf, formula, axisLabel, checkDeck, isScan, isMagic, isRare, uid };
 })();

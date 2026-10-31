@@ -1,9 +1,7 @@
-// 번외편 「포함의 결계」 화면 흐름 (50분 수업)
-//  1페이즈 전시학습 → 2페이즈 ① 부분집합 → ② 같은 집합 → 3페이즈 형성평가 필드 (중간보스 2ⁿ의 수호자)
-//  - 몬스터·필드에 자물쇠(lock): 선생님이 알려 주는 해금 코드(DS.Codes, 날마다 바뀜)를 넣어야 들어간다 → 먼저 치고 나가는 학생이 없게
-//  - 캠프의 새 카드(need)를 연성해야 출발. 카드는 처음 만들 때 한 번 예제를 풀어야 완성 (forge.js)
-//  - 문제풀이모드: 선생님이 학생 폰 ⚙ 에 교사 코드를 넣으면 모든 카드 + 체력 1 아래로 안 떨어짐 (자물쇠는 그대로)
-//  - 세이브: 캠프 입장·출발·승리 직후 자동 저장, 진행 기록은 DS.Track 에 쌓인다 (2차: 실시간 전송)
+// 화면 흐름
+//  캠페인: 캠프 → 잡몹 → 캠프 → 보스 (1층, 2층) → 클리어
+//  최종보스 체험판: 41쪽 11번 단독 전투 (필요한 카드는 기억 복원으로 지급)
+//  세이브: 캠페인만 자동 저장 (캠프 입장·출발·승리 직후), 타이틀의 [이어하기]로 저장된 캠프에서 시작
 window.DS = window.DS || {};
 
 (function () {
@@ -20,36 +18,38 @@ window.DS = window.DS || {};
     toastTimer = setTimeout(() => t.classList.remove('show'), ms);
   };
 
-  const newStats = () => ({ asked: 0, correct: 0, steps: 0, crits: 0, wrongTools: 0, emergencies: 0, forgeOK: 0, forgeFails: 0, examples: 0, examplesOK: 0, guideViews: 0, playSec: 0 });
+  const newStats = () => ({ asked: 0, correct: 0, steps: 0, crits: 0, wrongTools: 0, emergencies: 0, forgeOK: 0, forgeFails: 0, guideViews: 0, playSec: 0 });
+  let lastMode = null; // 결과 보내기에 쓸 최근 모드: 'campaign' | 'trial'
   let G;
-  const nodes = DS.Progress.nodes;
-  const battles = nodes.map((n, i) => (n.type === 'battle' ? i : -1)).filter((i) => i >= 0);
-  const craftable = DS.Craft.BOOK.map((r) => r.card);
   function newGame() {
-    const cards = Array.from({ length: DS.Progress.startBasic }, () => K.roll('member'));
+    const cards = Array.from({ length: DS.Progress.startDiff }, () => K.roll('diff'));
     G = {
-      relics: [], equipped: [], potions: [], crystals: 0, practice: {}, dims: new Set([2]),
-      node: 0, maxNode: 0, loop: 1,
-      cards, deckUids: new Set(cards.map((c) => c.uid)),
-      bag: {}, discovered: new Set(['member']), mastery: {}, granted: new Set(), problems: {},
-      stats: newStats(), opened: new Set(), wins: [], solveMode: false, tuts: [],
+      node: 0,
+      maxNode: 0, // 최고 도달 위치 (결과 보내기)
+      loop: 1,
+      cards, // 보관함 (덱 포함 모든 카드)
+      deckUids: new Set(cards.map((c) => c.uid)),
+      bag: {},
+      discovered: new Set(['diff']),
+      mastery: {},
+      unlocked: new Set(), // 발견한 연산 (², √)
+      granted: new Set(), // 부품을 이미 받은 노드
+      problems: {}, // 노드별 문제 (되감기·후퇴 후에도 같은 문제)
+      stats: newStats(),
     };
   }
-  const track = (type, data = {}) => DS.Track.log(type, { node: G ? G.node : 0, ...data });
   const statHooks = (s) => ({
-    onAnswer: (ok) => { s.asked++; if (ok) s.correct++; track('answer', { ok, monster: curMonster() }); },
-    onStep: () => { s.steps++; track('step', { monster: curMonster() }); },
+    onAnswer: (ok) => { s.asked++; if (ok) s.correct++; },
+    onStep: () => { s.steps++; },
     onCrit: () => { s.crits++; },
-    onWrongTool: () => { s.wrongTools++; track('wrongTool', { monster: curMonster() }); },
+    onWrongTool: () => { s.wrongTools++; },
     onEmergency: () => { s.emergencies++; },
   });
-  const curMonster = () => { const n = nodes[G.node]; return n && n.monster ? n.monster : ''; };
 
   function show(id) {
     document.querySelectorAll('.screen').forEach((s) => s.classList.toggle('active', s.id === id));
     window.scrollTo(0, 0);
     if (id === 'screen-title') refreshTitle();
-    updateBadge();
   }
   function refreshTitle() {
     $('#btn-continue').classList.toggle('hidden', !DS.Save.compatible());
@@ -58,186 +58,144 @@ window.DS = window.DS || {};
   function addParts(parts) {
     Object.entries(parts || {}).forEach(([k, v]) => { G.bag[k] = (G.bag[k] || 0) + v; });
   }
-  const prevCamp = (i) => { for (let k = i - 1; k >= 0; k--) if (nodes[k].type === 'camp') return k; return 0; };
-
-  // ── 진행 배지: 화면 위쪽에 크게 (선생님이 돌아다니며 한눈에) ──────────
-  function updateBadge() {
-    if (!G) return;
-    const won = (G.wins || []).length, made = craftable.filter((id) => G.discovered.has(id)).length;
-    const n = nodes[G.node] || {};
-    const phase = n.floor ? DS.Progress.floors[n.floor].title.split(' · ')[0] : '';
-    const dots = battles.map((i) => `<i class="${G.wins.includes(i) ? 'on' : i === G.node ? 'cur' : ''}"></i>`).join('');
-    document.querySelectorAll('.progress-badge').forEach((b) => {
-      b.innerHTML = `<span class="pb-phase">${esc(phase)}</span><span class="pb-dots">${dots}</span>`
-        + `<span class="pb-num">몬스터 <b>${won}/${battles.length}</b> · 연성 <b>${made}/${craftable.length}</b></span>`
-        + (G.solveMode ? '<span class="pb-solve">문제풀이모드</span>' : '');
-    });
+  const nodes = DS.Progress.nodes;
+  // 아직 못 찾은 연산을 자동 해금 (벌 없음): 골렘 입장 때 √, 2층 입장 때 ² (Promise)
+  async function autoUnlock(n) {
+    const miss = (n.autoOps || []).filter((op) => !G.unlocked.has(op));
+    if (!miss.length) return;
+    miss.forEach((op) => G.unlocked.add(op));
+    DS.Save.write(G);
+    const names = miss.map((op) => `${DS.Ops[op].sym} ${DS.Ops[op].name}`).join(', ');
+    await DS.Cinematic.choice(`🔓 ${names} 연산을 깨달았다!`,
+      (miss.includes('root') ? '√ 는 제곱을 되돌린다: 3² = 9 이니까 √9 = 3. ' : '')
+      + (miss.includes('sq') ? '² 는 같은 것을 두 번 곱하는 것: 3 × 3 = 3². ' : '')
+      + '이제 대장간에서 바로 쓸 수 있다.', ['좋아!']);
   }
 
   function goto(i) {
     G.node = i;
     G.maxNode = Math.max(G.maxNode || 0, i);
+    lastMode = 'campaign';
     const n = nodes[i];
-    if (n.lock && !G.opened.has(n.lock)) { showLock(n, i); return; }
     if (n.type === 'camp') enterCamp(n, i);
     else if (n.type === 'battle') startBattle(n, i);
     else showClear();
   }
 
-  // ── 자물쇠: 선생님 신호(해금 코드)를 기다린다 ─────────────────
-  function showLock(n, i) {
-    DS.Save.write(G);
-    track('wait', { lock: n.lock });
-    const isField = n.type === 'camp';
-    $('#lock-title').textContent = isField ? '🔒 형성평가 필드' : '🔒 다음 몬스터';
-    $('#lock-desc').textContent = isField
-      ? '여기부터는 선생님 도움 없이 혼자 한 층을 클리어해요. 선생님이 시작 신호와 코드를 알려 줄 거예요.'
-      : '선생님이 설명을 마치면 해금 코드를 알려 줄 거예요. 코드를 넣으면 몬스터가 나타나요.';
-    $('#lock-sheet').innerHTML = n.sheet ? `📝 기다리는 동안: <b>${esc(n.sheet)}</b>` : '📝 기다리는 동안: 학습지의 빈칸을 채워 보자';
-    $('#lock-input').value = '';
-    $('#lock-msg').textContent = '';
-    $('#lock-back').classList.toggle('hidden', i === 0 || isField);
-    $('#lock-go').onclick = () => {
-      const v = $('#lock-input').value;
-      if (DS.Codes.check(n.lock, v)) {
-        G.opened.add(n.lock);
-        DS.Sound.forge();
-        track('unlock', { lock: n.lock });
-        DS.Save.write(G);
-        DS.UI.toast('🔓 해금! 출발!', 1600);
-        goto(i);
-      } else {
-        DS.Sound.wrong();
-        $('#lock-box').classList.remove('shake'); void $('#lock-box').offsetWidth; $('#lock-box').classList.add('shake');
-        $('#lock-msg').textContent = '코드가 달라요. 선생님이 알려 준 숫자를 다시 확인해요.';
-      }
-    };
-    $('#lock-back').onclick = () => goto(prevCamp(i));
-    show('screen-lock');
-    setTimeout(() => $('#lock-input').focus(), 200);
-  }
-
+  // 캠프에는 다음 상대·문제를 보여 주지 않는다 (조우해야 알 수 있음). 층의 단원 범위만 표시.
   function enterCamp(n, i) {
-    if (!G.granted.has(i)) { addParts(n.parts); G.granted.add(i); }
+    if (!G.granted.has(i)) {
+      addParts(n.parts);
+      // 받는 카드 (원 (일반형) 등): 보관함에만 넣는다 (재료용)
+      Object.entries(n.cards || {}).forEach(([id, k]) => { for (let j = 0; j < k; j++) G.cards.push(K.roll(id)); });
+      G.granted.add(i);
+    }
     DS.Save.write(G);
     const fl = DS.Progress.floors[n.floor];
     $('#camp-sub').textContent = fl.title;
-    $('#camp-next').innerHTML = `<b>범위:</b> ${esc(fl.unit)}`
-      + (n.need ? `<br><b>이번 캠프의 새 카드:</b> ${n.need.map((id) => `<span class="need-chip${G.discovered.has(id) ? ' ok' : ''}">${G.discovered.has(id) ? '✓ ' : ''}${esc(DS.Cards[id].name)}</span>`).join(' ')}` : '');
-    const firstTime = !G.tuts.includes(n.floor);
+    $('#camp-next').innerHTML = `<b>범위:</b> ${esc(fl.unit)} <span class="muted">· 문제는 조우해야 알 수 있다</span>`;
     DS.Forge.open({
-      bag: G.bag, cards: G.cards, deckUids: G.deckUids, discovered: G.discovered, mastery: G.mastery, floor: n.floor, dim: 2,
-      relics: G.relics, equipped: G.equipped, potions: G.potions, crystals: () => 0, need: n.need,
+      bag: G.bag, cards: G.cards, deckUids: G.deckUids, discovered: G.discovered, mastery: G.mastery, floor: n.floor,
+      unlocked: G.unlocked, guideOps: !!n.guide,
+      onUnlock: () => DS.Save.write(G),
       nextTitle: '다음 전투로 출발',
-      onForge: (ok, id) => {
-        if (ok) G.stats.forgeOK++; else G.stats.forgeFails++;
-        track('craft', { ok, card: id });
-        enterCampChips(n);
-        updateBadge();
-      },
-      onExample: (id, ok) => { G.stats.examples++; if (ok) G.stats.examplesOK++; track('example', { card: id, ok }); },
-      tutorial: firstTime && !G.solveMode ? n.floor : 0,
-      onTutorial: (r) => { if (!G.tuts.includes(n.floor)) G.tuts.push(n.floor); G.tutorial = r; DS.Save.write(G); },
-      onDepart: () => { DS.Save.write(G); goto(i + 1); },
+      onForge: (ok) => { if (ok) G.stats.forgeOK = (G.stats.forgeOK || 0) + 1; else G.stats.forgeFails = (G.stats.forgeFails || 0) + 1; },
+      onGuide: () => { G.stats.guideViews = (G.stats.guideViews || 0) + 1; },
+      tutorial: i === 0 && !G.tutorial, // 캠페인 첫 캠프에서 한 번
+      onTutorial: (r) => { G.tutorial = r; DS.Save.write(G); },
+      onDepart: () => goto(i + 1),
     });
     show('screen-camp');
-  }
-  function enterCampChips(n) {
-    if (!n.need) return;
-    $('#camp-next').querySelectorAll('.need-chip').forEach((el, k) => {
-      const id = n.need[k];
-      el.classList.toggle('ok', G.discovered.has(id));
-      el.textContent = `${G.discovered.has(id) ? '✓ ' : ''}${DS.Cards[id].name}`;
-    });
-  }
-
-  // ── 전투 안내 (처음 한 번): 문제 스캔 → 공격 → 결계 보호막 → 풀이 카드 ─────
-  const BATTLE_TIPS = [
-    ['⚔ 전투 안내 1/4 · 몬스터 = 문제', '위쪽 [문제] 창에 문제 조각이 보여요. 처음엔 일부만 보이니 🔍 스캔이 붙은 카드(원소 확인 등)를 내서 문제를 밝혀요.'],
-    ['⚔ 전투 안내 2/4 · 카드 내기', '아래 손패의 카드를 누르면 기력 1을 쓰고 ⚔ 공격 + 🛡 방어 + 🔍 스캔이 한 번에 일어나요. 기력을 다 쓰면 [턴 종료].'],
-    ['⚔ 전투 안내 3/4 · 결계 보호막', '몬스터 체력바의 노란 선(문턱)에 닿으면 공격이 막혀요. 이때는 그 단계를 푸는 풀이 카드(예: 소속 판정)를 내서 문제를 맞혀야 결계가 깨져요. 풀이 카드는 손으로 날아와요!'],
-    ['⚔ 전투 안내 4/4 · 쓰러져도 괜찮아', '체력이 0 이 되면 시간이 되감겨 같은 문제에 다시 도전해요. 벌은 없어요. 막히면 손을 들어 선생님을 불러요!'],
-  ];
-  async function battleTips() {
-    for (const [t, d] of BATTLE_TIPS) await DS.Cinematic.choice(t, d, ['다음 ▶']);
+    autoUnlock(n).then(() => { if (n.autoOps) DS.Forge.refresh(); });
   }
 
   async function startBattle(n, i) {
+    await autoUnlock(n);
     const def = DS.Monsters[n.monster];
     const problem = G.problems[i] || (G.problems[i] = def.makeProblem());
-    DS.Save.write(G, prevCamp(i));
+    DS.Save.write(G, i - 1); // 덱 구성·문제 숫자 저장. 전투 중에 닫으면 직전 캠프에서 이어 함
     show('screen-battle');
-    if (!G.battleTips && !G.solveMode) { G.battleTips = true; await battleTips(); }
-    track('battle', { monster: n.monster });
     DS.Battle.start({
-      def, problem, deck: deckForBattle(), loop: G.loop, mastery: G.mastery,
-      title: DS.Progress.floors[n.floor].title, relics: [], potions: [], practice: {}, solveMode: G.solveMode,
+      def, problem, deck: G.cards.filter((c) => G.deckUids.has(c.uid)), loop: G.loop, mastery: G.mastery,
+      title: DS.Progress.floors[n.floor].title,
       ...statHooks(G.stats),
       onWin: () => afterWin(n, i),
-      onLose: (how) => { G.loop++; track('lose', { monster: n.monster }); if (how === 'camp') goto(prevCamp(i)); else startBattle(n, i); },
-      onRetreat: () => goto(prevCamp(i)),
+      onLose: (how) => { G.loop++; if (how === 'camp') goto(i - 1); else startBattle(n, i); },
+      onRetreat: () => goto(i - 1),
     });
-    updateBadge();
   }
-  // 덱: 문제풀이모드면 모든 풀이 카드를 한 장씩 더 (전투에서만)
-  function deckForBattle() {
-    const deck = G.cards.filter((c) => G.deckUids.has(c.uid));
-    if (!G.solveMode) return deck;
-    const have = new Set(deck.map((c) => c.id));
-    craftable.forEach((id) => { if (!have.has(id)) deck.push(K.roll(id, 'x', { temp: true })); });
-    return deck;
+
+  function partChips(parts) {
+    return Object.entries(parts).map(([id, k]) => {
+      const p = DS.Parts[id];
+      return `<div class="part"><span class="psym math">${pretty(p.sym)}</span><span class="pname">${esc(p.name)}</span><span class="pcount">×${k}</span></div>`;
+    }).join('');
   }
 
   function afterWin(n, i) {
     const def = DS.Monsters[n.monster];
-    if (!G.wins.includes(i)) G.wins.push(i);
-    track('win', { monster: n.monster });
+    if (n.reward) addParts(n.reward);
+    // ² 를 아직 못 찾았으면 차이(가로) 카드 2장 + 힌트 (1층 부담 분산)
+    const nudge = n.nudge === 'sq' && !G.unlocked.has('sq');
+    if (nudge) for (let j = 0; j < 2; j++) G.cards.push(K.roll('diff', 'x'));
+    if (n.unlock) G.discovered.add(n.unlock); // 중간보스 보상: 각성 레시피 해금
     DS.Save.write(G, i + 1);
     const next = nodes[i + 1];
     $('#reward-title').textContent = `${def.name} 해결!`;
-    const left = battles.filter((k) => !G.wins.includes(k)).length;
-    $('#reward-desc').innerHTML = `⭐ 문제를 풀어 결계를 깼다! 남은 몬스터 ${left}마리`
-      + (n.sheet && !n.solo ? `<br><span class="muted">📝 ${esc(n.sheet)} 에 오늘 푼 내용을 정리해 두자.</span>` : '');
-    $('#reward-parts').innerHTML = '';
-    $('#reward-next').textContent = next.type === 'clear' ? '' : next.lock && !G.opened.has(next.lock) ? '다음: 🔒 선생님 신호를 기다려요' : `다음: ${DS.Progress.floors[next.floor].title}`;
-    $('#reward-go').textContent = next.type === 'clear' ? '결과 보기 ▶' : next.type === 'camp' ? '캠프로 ▶' : '다음 몬스터로 ▶';
+    $('#reward-desc').textContent = n.unlock
+      ? `각성 레시피 해금: ${DS.Cards[n.unlock].name} [d ± r]. 최종보스와의 결전에서 다시 깨어난다.`
+      : n.reward ? '문제를 푼 자리에서 새로운 기억의 부품을 얻었다.' : '';
+    if (nudge) $('#reward-desc').textContent += ' 보너스: 차이 카드 2장. 💡 같은 차이 카드 두 장을 곱하기(×)로 모루에 올려 보면…?';
+    $('#reward-parts').innerHTML = n.reward ? partChips(n.reward) : '';
+    $('#reward-next').textContent = next.type === 'clear' ? '' : `다음: ${DS.Progress.floors[next.floor].title}`;
+    $('#reward-go').textContent = next.type === 'clear' ? '결과 보기 ▶' : '캠프로 ▶';
     $('#reward-go').onclick = () => goto(i + 1);
     show('screen-reward');
   }
 
-  function statRows(s) {
+  function statRows(s, loops) {
     const rate = s.asked ? Math.round((100 * s.correct) / s.asked) : 0;
     return `
       <tr><th>푼 문제</th><td>${s.asked}문제 (정답률 ${rate}%)</td></tr>
-      <tr><th>깨뜨린 결계</th><td>${s.steps}단계</td></tr>
-      <tr><th>연성 예제</th><td>${s.examplesOK || 0} / ${s.examples || 0}</td></tr>
-      <tr><th>연성</th><td>성공 ${s.forgeOK || 0}번 · 실패 ${s.forgeFails || 0}번</td></tr>
-      <tr><th>되감기</th><td>${G.loop - 1}번</td></tr>`;
+      <tr><th>해결한 풀이 단계</th><td>${s.steps}단계</td></tr>
+      <tr><th>맞지 않는 도구 시도</th><td>${s.wrongTools}번</td></tr>
+      <tr><th>크리티컬</th><td>${s.crits}번</td></tr>
+      <tr><th>긴급 연성</th><td>${s.emergencies}번</td></tr>
+      <tr><th>되감기</th><td>${loops - 1}번 (LOOP ${String(loops).padStart(3, '0')})</td></tr>`
+      + (s.forgeOK != null ? `<tr><th>연성</th><td>성공 ${s.forgeOK || 0}번 · 실패 ${s.forgeFails || 0}번</td></tr>` : '')
+      + (DS.GUIDE ? `<tr><th>조합법 열람</th><td>${s.guideViews || 0}번</td></tr>` : '');
   }
+
   function showClear() {
-    track('clear');
-    DS.Save.write(G);
-    const s = G.stats, rate = s.asked ? s.correct / s.asked : 0;
-    const title = G.solveMode ? '포함의 견습생' : rate >= 0.85 ? '포함의 대마법사' : rate >= 0.6 ? '포함의 마법사' : '포함의 수련생';
-    $('#clear-title').textContent = `칭호: ${title}`;
-    $('#clear-stats').innerHTML = statRows(s);
+    $('#clear-stats').innerHTML = statRows(G.stats, G.loop) + `<tr><th>보유 카드</th><td>${G.cards.length}장 (덱 ${G.deckUids.size}장)</td></tr>`;
     show('screen-clear');
   }
 
-  // ── 문제풀이모드: 교사 코드 (⚙ 설정) ───────────────────────
-  DS.Settings.onTeacherCode = (v) => {
-    if (!DS.Codes.check('solve', v)) return '코드가 달라요.';
-    if (!G) newGame();
-    G.solveMode = true;
-    craftable.forEach((id) => {
-      G.discovered.add(id);
-      if (!G.cards.some((c) => c.id === id)) { const c = K.roll(id); G.cards.push(c); G.deckUids.add(c.uid); }
+  // ── 최종보스 체험판 ───────────────────────────────────────
+  let T = null;
+  function startTrial(keep) {
+    if (!keep) {
+      T = {
+        loop: 1, problem: DS.Monsters.finalBoss.makeProblem(), stats: newStats(),
+        deck: Array.from({ length: DS.Progress.trialDiff }, () => K.roll('diff')),
+        cleared: false,
+      };
+    }
+    lastMode = 'trial';
+    show('screen-battle');
+    DS.Battle.start({
+      def: DS.Monsters.finalBoss, problem: T.problem, deck: T.deck, loop: T.loop,
+      title: '최종보스 체험판', trial: true,
+      ...statHooks(T.stats),
+      onWin: () => {
+        T.cleared = true;
+        $('#trial-stats').innerHTML = statRows(T.stats, T.loop);
+        show('screen-trial-clear');
+      },
+      onLose: (how) => { T.loop++; if (how === 'camp') show('screen-title'); else startTrial(true); },
+      onRetreat: () => show('screen-title'),
     });
-    track('solveMode');
-    DS.Save.write(G);
-    updateBadge();
-    return 'ok';
-  };
+  }
 
   function bind() {
     DS.Forge.bind();
@@ -246,12 +204,11 @@ window.DS = window.DS || {};
       if (!DS.Report.ensureStudent()) return;
       DS.Sound.unlock();
       if (DS.Save.has()) {
-        const idx = await DS.Cinematic.choice('새로 시작', '저장된 진행을 지우고 처음부터 시작할까요?', ['지우고 새로 시작', '취소']);
+        const idx = await DS.Cinematic.choice('새로 시작', '저장된 캠페인 진행을 지우고 처음부터 시작할까요?', ['지우고 새로 시작', '취소']);
         if (idx !== 0) return;
         DS.Save.clear();
       }
       newGame();
-      track('start');
       show('screen-story');
     });
     $('#btn-continue').addEventListener('click', () => {
@@ -259,24 +216,29 @@ window.DS = window.DS || {};
       DS.Sound.unlock();
       const g = DS.Save.read();
       if (!g) { refreshTitle(); return; }
-      G = { ...g, wins: g.wins || [], tuts: g.tuts || [] };
+      G = g;
       goto(G.node);
     });
+    $('#btn-trial').addEventListener('click', () => { if (!DS.Report.ensureStudent()) return; DS.Sound.unlock(); startTrial(false); });
     DS.Report.bind();
     DS.Report.setCollector(collectReport);
     document.querySelectorAll('#btn-report-title, #btn-report-camp, .report-btn').forEach((b) => b.addEventListener('click', () => DS.Report.open()));
     $('#btn-story').addEventListener('click', () => goto(0));
-    document.querySelectorAll('.btn-settings').forEach((b) => b.addEventListener('click', () => DS.Settings.open()));
     $('#btn-restart').addEventListener('click', () => { newGame(); show('screen-title'); });
-    $('#lock-input').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('#lock-go').click(); });
+    $('#btn-clear-trial').addEventListener('click', () => startTrial(false));
+    $('#btn-trial-again').addEventListener('click', () => startTrial(false));
+    $('#btn-trial-title').addEventListener('click', () => show('screen-title'));
     document.querySelectorAll('.mute').forEach((b) => b.addEventListener('click', () => {
       const m = DS.Sound.toggle();
       document.querySelectorAll('.mute').forEach((x) => { x.textContent = m ? '소리 끔' : '소리 켬'; });
     }));
+    // 키보드: 문제 창에서 1~4로 선택, Enter로 계속 / 전투 중 E로 턴 종료
     window.addEventListener('keydown', (e) => {
-      if (document.querySelector('.cine.qte, .cine.choice')) return;
+      if (document.querySelector('.cine.qte, .cine.choice')) return; // 자체 처리
       const quizOpen = !$('#quiz').classList.contains('hidden');
       if (quizOpen) {
+        const k = Number(e.key);
+        if (k >= 1 && k <= 4) { const b = document.querySelectorAll('#quiz-choices .choice')[k - 1]; if (b) b.click(); }
         if (e.key === 'Enter' && !$('#quiz-next').classList.contains('hidden')) $('#quiz-next').click();
         return;
       }
@@ -285,39 +247,42 @@ window.DS = window.DS || {};
   }
 
   // ── 결과 보내기용 기록 ─────────────────────────────────────
-  function record(g) {
+  function campaignRecord(g) {
     const n = nodes[g.maxNode] || nodes[0];
-    const reached = n.type === 'clear' ? '번외편 클리어' : n.type === 'battle' ? DS.Monsters[n.monster].name : `${DS.Progress.floors[n.floor].title} 캠프`;
-    const s = g.stats || {};
+    const reached = n.type === 'clear' ? '4층 클리어' : n.type === 'battle' ? DS.Monsters[n.monster].name : `${DS.Progress.floors[n.floor].title.split(' · ')[0]} 캠프`;
+    const cleared = nodes.filter((x, i) => x.type === 'battle' && i < g.maxNode).length;
+    const tutorial = g.tutorial === 'done' ? '완료' : g.tutorial === 'skipped' ? '건너뜀' : '-';
+    return { mode: '캠페인', reached, cleared, rewinds: g.loop - 1, tutorial, ...statsRec(g.stats) };
+  }
+  function statsRec(s) {
     return {
-      mode: '번외편 포함의 결계' + (g.solveMode ? ' (문제풀이모드)' : ''), reached, cleared: (g.wins || []).length, rewinds: g.loop - 1, tutorial: '-',
-      asked: s.asked || 0, correct: s.correct || 0, steps: s.steps || 0, wrongTools: s.wrongTools || 0, emergencies: 0,
-      forgeOK: s.forgeOK || 0, forgeFails: s.forgeFails || 0, guideViews: 0, minutes: Math.round((s.playSec || 0) / 60),
+      asked: s.asked || 0, correct: s.correct || 0, steps: s.steps || 0, wrongTools: s.wrongTools || 0, emergencies: s.emergencies || 0,
+      forgeOK: s.forgeOK || 0, forgeFails: s.forgeFails || 0, guideViews: s.guideViews || 0, minutes: Math.round((s.playSec || 0) / 60),
     };
   }
   function collectReport() {
-    if (G && G.node) return record(G);
-    const saved = DS.Save.read();
-    return saved ? record({ ...saved, wins: saved.wins || [] }) : null;
+    if (lastMode === 'trial' && T) {
+      return { mode: '최종보스 체험판', reached: T.cleared ? '체험판 클리어' : `${T.stats.steps}단계 해결`, cleared: T.cleared ? 1 : 0, rewinds: T.loop - 1, tutorial: '-', ...statsRec(T.stats) };
+    }
+    if (lastMode === 'campaign') return campaignRecord(G);
+    const saved = DS.Save.read(); // 새로 연 화면: 저장된 캠페인 기록
+    return saved ? campaignRecord(saved) : null;
   }
+  // 플레이 시간: 타이틀이 아닌 화면에 있는 동안 5초마다 적립 (화면이 숨겨져 있으면 세지 않음)
   setInterval(() => {
-    if (document.hidden || $('#screen-title').classList.contains('active') || !G) return;
-    G.stats.playSec = (G.stats.playSec || 0) + 5;
+    if (document.hidden || $('#screen-title').classList.contains('active')) return;
+    const s = lastMode === 'trial' ? T && T.stats : lastMode === 'campaign' ? G.stats : null;
+    if (s) s.playSec = (s.playSec || 0) + 5;
   }, 5000);
 
-  // ── 타이틀 ───────────────────────────────────────────────
+  // ── 타이틀 화면 ───────────────────────────────────────────
   $('#ver-label').textContent = `· ${DS.VERSION}`;
+  $('#beta-badge').classList.toggle('hidden', !DS.BETA);
+  $('#beta-note').classList.toggle('hidden', !DS.BETA);
   DS.TitleBg($('#title-bg'), () => $('#screen-title').classList.contains('active'));
 
   newGame();
   bind();
+  DS.PWA.init();
   refreshTitle();
-  // 실시간 진행 기록: 새 Code.gs 가 배포돼 있으면 몇 초마다 선생님 시트로. 1분마다 살아 있음 신호(지금 화면)
-  DS.Track.start(() => ({ solve: !!(G && G.solveMode) }));
-  setInterval(() => {
-    if (document.hidden || !G || $('#screen-title').classList.contains('active')) return;
-    const scr = (document.querySelector('.screen.active') || {}).id || '';
-    track('alive', { monster: curMonster(), lock: scr === 'screen-lock' ? (nodes[G.node] || {}).lock : '', card: scr.replace('screen-', '') });
-  }, 60000);
-  DS.Game = { state: () => G, goto: (i) => goto(i) }; // 자동 플레이 테스트용
 })();

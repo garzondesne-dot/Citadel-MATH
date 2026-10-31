@@ -16,13 +16,12 @@ DS.Scene = function (canvas) {
   const nl = (v) => 320 + v * 27;
 
   let B = null; // 전투 상태 (battle.js 가 넘겨줌)
-  let shoulder = false; // 숄더뷰: 주인공은 캔버스 밖(등 뒤)에 따로 그린다
   let map = null; // 좌표평면 → 캔버스 변환
   const bgCache = {};
   const fx = {};
   function resetFx() {
     Object.assign(fx, {
-      slashes: [], parts: [], shards: [], texts: [], rings: [], traces: [], scanT: 0, venn: null,
+      slashes: [], parts: [], shards: [], texts: [], rings: [], traces: [], scanT: 0,
       shake: 0, flash: null, glitch: 0, glitchMax: 1, hitstop: 0, slowmo: false,
       heroDx: 0, enemyDx: 0, enemyFlash: 0, heroFlash: 0, enemyAlpha: 1, shieldFlash: 0,
     });
@@ -218,38 +217,6 @@ DS.Scene = function (canvas) {
     knight: { x: 520, y: GROUND, cx: 0, cy: -80 },
     gatekeeper: { x: 535, y: GROUND, cx: 0, cy: -110 },
   };
-  // v1.0 테스트판: 새 몬스터는 기존 몸체의 색을 돌려 만든다 (hue 회전 각도)
-  const VARIANTS = {
-    archer: ['knight', 110], shiftWraith: ['mask', 170], mirrorWraith: ['mask', 250], mirrorLord: ['gatekeeper', 190],
-    mirrorHound: ['beast', 150], setSlime: ['slime', 80], complGhost: ['mask', 40], vennGolem: ['golem', 100],
-    negShade: ['spider', 290], counterKnight: ['knight', 25], contraWarden: ['gatekeeper', 80],
-    valSlime: ['slime', 260], chimera: ['beast', 300], inverseWitch: ['ringSpirit', 300], asymGhost: ['ringSpirit', 140],
-    rootSnake: ['meteor', 95], asymKing: ['boss', 190], centroid: ['golem', 35], bisector: ['knight', 200],
-    billiard: ['meteor', 200], bikeClub: ['bat', 120], bijection: ['ringSpirit', 40],
-    // 번외편 포함의 결계
-    belongSlime: ['slime', 80], emptyGhost: ['mask', 200], unitGolem: ['golem', 100], includeKnight: ['knight', 200],
-    mirrorTwins: ['mask', 250], collector: ['spider', 120], mixCrab: ['spider', 30], mixWisp: ['meteor', 260],
-    mixKnight: ['knight', 60], powerGuardian: ['gatekeeper', 140],
-  };
-  function hueShift(hex, deg) {
-    const n = parseInt(hex.slice(1), 16);
-    let r = (n >> 16) / 255, g = ((n >> 8) & 255) / 255, b = (n & 255) / 255;
-    const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, d = mx - mn;
-    if (d < 0.04) return hex; // 회색·흰색·검은색은 그대로
-    const sat = d / (1 - Math.abs(2 * l - 1));
-    let h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
-    h = (h * 60 + deg + 360) % 360;
-    const c = (1 - Math.abs(2 * l - 1)) * sat, x = c * (1 - Math.abs(((h / 60) % 2) - 1)), m = l - c / 2;
-    [r, g, b] = h < 60 ? [c, x, 0] : h < 120 ? [x, c, 0] : h < 180 ? [0, c, x] : h < 240 ? [0, x, c] : h < 300 ? [x, 0, c] : [c, 0, x];
-    return '#' + [r, g, b].map((v) => Math.round((v + m) * 255).toString(16).padStart(2, '0')).join('');
-  }
-  const recolor = (list, deg) => list.map(([x, y, w, h, c]) => [x, y, w, h, hueShift(c, deg)]);
-  Object.entries(VARIANTS).forEach(([name, [base, deg]]) => {
-    const b = SPR[base];
-    SPR[name] = { ...b, base, body: recolor(b.body, deg), detail: recolor(b.detail, deg), plates: b.plates && b.plates.map((pl) => recolor(pl, deg)) };
-    ANCHOR[name] = ANCHOR[base];
-  });
-  const baseOf = (kind) => (SPR[kind] && SPR[kind].base) || kind;
 
   function blocks(list, ox, oy, u, white, outline) {
     if (outline) {
@@ -289,12 +256,7 @@ DS.Scene = function (canvas) {
     const fig = B.prob.figure;
     g.fillStyle = '#0f0d1a';
     g.fillRect(0, 0, W, H);
-    if (fig.kind === 'venn') {
-      for (let i = 0; i < 90; i++) {
-        g.fillStyle = `rgba(160,150,220,${0.05 + Math.random() * 0.12})`;
-        g.fillRect(Math.random() * W, Math.random() * GROUND, 2, 2);
-      }
-    } else if (fig.kind === 'numberline') {
+    if (fig.kind === 'numberline') {
       for (let row = 0; row < 14; row++) {
         const off = row % 2 ? 0 : 20;
         for (let col = -1; col < 18; col++) {
@@ -307,9 +269,8 @@ DS.Scene = function (canvas) {
       const { U, ox, oy } = map;
       g.strokeStyle = '#211d3d';
       g.lineWidth = 1;
-      const GU = U < 8 ? U * 10 : U; // 큰 좌표는 10칸 단위 격자
-      for (let x = ((ox % GU) + GU) % GU; x < W; x += GU) { g.beginPath(); g.moveTo(x + 0.5, 0); g.lineTo(x + 0.5, GROUND); g.stroke(); }
-      for (let y = ((oy % GU) + GU) % GU; y < GROUND; y += GU) { g.beginPath(); g.moveTo(0, y + 0.5); g.lineTo(W, y + 0.5); g.stroke(); }
+      for (let x = ((ox % U) + U) % U; x < W; x += U) { g.beginPath(); g.moveTo(x + 0.5, 0); g.lineTo(x + 0.5, GROUND); g.stroke(); }
+      for (let y = ((oy % U) + U) % U; y < GROUND; y += U) { g.beginPath(); g.moveTo(0, y + 0.5); g.lineTo(W, y + 0.5); g.stroke(); }
       g.strokeStyle = '#4b4580';
       g.lineWidth = 2;
       g.beginPath(); g.moveTo(0, oy); g.lineTo(W, oy); g.stroke();
@@ -318,7 +279,7 @@ DS.Scene = function (canvas) {
       g.font = `11px ${FONT}`;
       g.textAlign = 'center';
       const xmin = Math.ceil(-ox / U), xmax = Math.floor((W - ox) / U);
-      const step = U < 8 ? 20 : U < 26 ? 2 : 1;
+      const step = U < 26 ? 2 : 1;
       for (let i = xmin; i <= xmax; i++) if (i && i % step === 0) g.fillText(String(i).replace('-', '−'), ox + i * U, oy + 14);
       g.textAlign = 'right';
       const ymin = Math.ceil((oy - GROUND) / U), ymax = Math.floor(oy / U);
@@ -424,11 +385,6 @@ DS.Scene = function (canvas) {
         labelAt(p, el.label, el.color);
       } else if (el.t === 'label') {
         labelAt(pl(el.x, el.y), el.text, el.color, 0, 0);
-      } else if (el.t === 'curve') {
-        drawCurve(el.f, el.color, el.glow !== false);
-        if (el.asym) drawAsym(el.asym[0], el.asym[1], el.color);
-      } else if (el.t === 'asym') {
-        drawAsym(el.x, el.y, el.color, true);
       } else if (el.t === 'tri') {
         const ps = el.pts.map(([x, y]) => pl(x, y));
         ctx.fillStyle = 'rgba(255,209,102,0.15)';
@@ -448,135 +404,6 @@ DS.Scene = function (canvas) {
     }
   }
 
-  // 함수의 그래프: 화면 폭을 따라 점을 찍고, 값이 없거나(NaN) 크게 튀면(점근선) 선을 끊는다
-  function drawCurve(f, color, withGlow) {
-    const v = map.view, span = (v.y1 - v.y0) * 3;
-    const pass = (lw, col, alpha) => {
-      ctx.globalAlpha = alpha;
-      ctx.strokeStyle = col;
-      ctx.lineWidth = lw;
-      ctx.lineJoin = 'round';
-      ctx.beginPath();
-      let pen = false, prev = null;
-      for (let px = 0; px <= W; px += 2) {
-        const x = (px - map.ox) / map.U, y = f(x);
-        if (!Number.isFinite(y) || Math.abs(y - (v.y0 + v.y1) / 2) > span || (prev != null && Math.abs(y - prev) > span / 2)) { pen = false; prev = Number.isFinite(y) ? y : null; continue; }
-        const p = pl(x, y);
-        if (pen) ctx.lineTo(p.x, p.y); else ctx.moveTo(p.x, p.y);
-        pen = true; prev = y;
-      }
-      ctx.stroke();
-      ctx.globalAlpha = 1;
-    };
-    if (withGlow) pass(9, color, 0.25);
-    pass(3, color, 1);
-  }
-  function drawAsym(px, qy, color, label) {
-    const v = map.view;
-    strokeLine(pl(px, v.y0 - 2), pl(px, v.y1 + 2), color, 1.5, { dash: [5, 6] });
-    strokeLine(pl(v.x0 - 2, qy), pl(v.x1 + 2, qy), color, 1.5, { dash: [5, 6] });
-    if (label) {
-      labelAt(pl(px, v.y1 - 0.6), `x = ${String(px).replace('-', '−')}`, color, 4, 0);
-      labelAt(pl(v.x0 + 0.3, qy), `y = ${String(qy).replace('-', '−')}`, color, 0, -6);
-    }
-  }
-
-  // ── 벤 다이어그램 (Ⅱ 집합과 명제) ─────────────────────────
-  // 전체집합 U(사각형) 안에 A, B 두 원. 원소는 속한 영역에 놓고, 단계마다 영역을 칠한다.
-  const VENN = { x: 168, y: 26, w: 300, h: 250 };
-  function vennLayout(fig) {
-    if (fig.single) return { A: { x: 300, y: 152, r: 78 }, B: null };
-    if (fig.subset) return { A: { x: 300, y: 165, r: 46 }, B: { x: 318, y: 150, r: 100 } };
-    return { A: { x: 268, y: 152, r: 78 }, B: { x: 368, y: 152, r: 78 } };
-  }
-  let shadeCv = null;
-  function vennShade(fig, op, color, alpha) {
-    const L = vennLayout(fig);
-    if (!shadeCv) { shadeCv = document.createElement('canvas'); shadeCv.width = W; shadeCv.height = H; }
-    const g = shadeCv.getContext('2d');
-    g.globalCompositeOperation = 'source-over';
-    g.clearRect(0, 0, W, H);
-    g.fillStyle = color;
-    const circ = (c) => { g.beginPath(); g.arc(c.x, c.y, c.r, 0, Math.PI * 2); g.fill(); };
-    const out = (c) => { if (!c) return; g.globalCompositeOperation = 'destination-out'; circ(c); g.globalCompositeOperation = 'source-over'; };
-    const rect = () => g.fillRect(VENN.x, VENN.y, VENN.w, VENN.h);
-    const A = L.A, Bc = L.B;
-    if (op === 'cap' && Bc) { circ(A); g.globalCompositeOperation = 'destination-in'; circ(Bc); }
-    else if (op === 'cap') circ(A);
-    else if (op === 'cup') { circ(A); if (Bc) circ(Bc); }
-    else if (op === 'diff') { circ(A); out(Bc); }
-    else if (op === 'rdiff' && Bc) { circ(Bc); out(A); }
-    else if (op === 'complA') { rect(); out(A); }
-    else if (op === 'complB') { rect(); out(Bc); }
-    else if (op === 'cupC') { rect(); out(A); out(Bc); }
-    else if (op === 'capC') {
-      rect();
-      g.save(); g.beginPath(); g.arc(A.x, A.y, A.r, 0, Math.PI * 2); g.clip();
-      g.globalCompositeOperation = 'destination-out'; if (Bc) circ(Bc); else circ(A);
-      g.restore();
-    }
-    g.globalCompositeOperation = 'source-over';
-    ctx.globalAlpha = alpha;
-    ctx.drawImage(shadeCv, 0, 0);
-    ctx.globalAlpha = 1;
-  }
-  function vennRegionPos(fig, inA, inB, k) {
-    const L = vennLayout(fig);
-    let ax, ay;
-    if (fig.subset) {
-      if (inA) { ax = L.A.x; ay = L.A.y; } else if (inB) { ax = L.B.x + 50; ay = L.B.y - 45; } else { ax = VENN.x + 30; ay = VENN.y + 30; }
-    } else if (inA && inB) { ax = (L.A.x + L.B.x) / 2; ay = L.A.y; }
-    else if (inA) { ax = L.A.x - (L.B ? 30 : 0); ay = L.A.y; }
-    else if (inB) { ax = L.B.x + 30; ay = L.B.y; }
-    else { ax = VENN.x + 26; ay = VENN.y + 26; return { x: ax + (k % 6) * 30 + (k >= 6 ? 15 : 0), y: k >= 6 ? VENN.y + VENN.h - 18 : ay }; }
-    const col = k % 2, row = Math.floor(k / 2);
-    return { x: ax - 12 + col * 26, y: ay - 26 + row * 22 };
-  }
-  function drawVenn() {
-    const fig = B.prob.figure, L = vennLayout(fig);
-    const shown = fig.scan == null || B.revealed >= fig.scan;
-    // 단계에 따라 칠하기
-    for (const sh of fig.shades || []) {
-      if (B.stepIdx >= (sh.from || 0) && (sh.until == null || B.stepIdx < sh.until) && shown) vennShade(fig, sh.op, '#7df9ff', 0.22);
-    }
-    if (fx.venn && fx.venn.life > 0) vennShade(fig, fx.venn.op, '#ffd166', 0.5 * (fx.venn.life / fx.venn.max));
-    ctx.strokeStyle = '#6f68a8';
-    ctx.lineWidth = 2;
-    if (fig.U) {
-      ctx.strokeRect(VENN.x, VENN.y, VENN.w, VENN.h);
-      labelAt({ x: VENN.x + 4, y: VENN.y + 16 }, fig.counts && fig.counts.U != null && shown ? `U  n(U) = ${fig.counts.U}` : 'U', '#9a95c0', 0, 0);
-    }
-    const names = fig.names || ['A', 'B'];
-    const circle = (c, color, name) => {
-      ctx.strokeStyle = color; ctx.globalAlpha = 0.3; ctx.lineWidth = 9;
-      ctx.beginPath(); ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2); ctx.stroke();
-      ctx.globalAlpha = 1; ctx.lineWidth = 3;
-      ctx.beginPath(); ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2); ctx.stroke();
-      labelAt({ x: c.x - c.r * 0.75, y: c.y - c.r * 0.75 }, name, color, -6, 0);
-    };
-    circle(L.A, '#4cc9ff', names[0]);
-    if (L.B) circle(L.B, '#ff8c3a', names[1]);
-    if (!shown) {
-      labelAt({ x: 290, y: 150 }, '???', '#6f68a8', -12, 4);
-      return;
-    }
-    if (fig.counts) {
-      if (fig.counts.A != null) labelAt({ x: L.A.x - 60, y: L.A.y + L.A.r + 20 }, `n(${names[0]}) = ${fig.counts.A}`, '#4cc9ff', 0, 0);
-      if (L.B && fig.counts.B != null) labelAt({ x: L.B.x - 10, y: L.B.y + L.B.r + 20 }, `n(${names[1]}) = ${fig.counts.B}`, '#ff8c3a', 0, 0);
-    }
-    for (const cl of fig.countLabel || []) if (B.stepIdx >= cl.from) labelAt({ x: VENN.x + 8, y: VENN.y + VENN.h - 10 - 18 * (fig.countLabel.indexOf(cl)) }, cl.text, '#7df9ff', 0, 0);
-    const A = fig.A || [], Bs = fig.B || [];
-    const all = [...new Set([...A, ...Bs, ...(Array.isArray(fig.U) ? fig.U : [])])];
-    const counters = {};
-    ctx.font = `bold 13px ${FONT}`;
-    for (const e of all) {
-      const inA = A.includes(e), inB = Bs.includes(e), key = `${inA}${inB}`;
-      const k = counters[key] = (counters[key] || 0) + 1;
-      const p = vennRegionPos(fig, inA, inB, k - 1);
-      labelAt(p, String(e).replace('-', '−'), inA && inB ? '#ffd166' : inA ? '#bfe9ff' : inB ? '#ffd0a8' : '#9a95c0', 0, 0);
-    }
-  }
-
   // 방패: 방패 직선 위에서 심장의 수선의 발을 중심으로 한 선분
   function shieldSegment(el, half = 2.6) {
     const m = el.m;
@@ -593,7 +420,7 @@ DS.Scene = function (canvas) {
     return { x: a.x + a.cx, y: a.y + a.cy };
   }
   function drawEnemy() {
-    const a = anchor(), kind = baseOf(B.def.sprite), s = SPR[B.def.sprite];
+    const a = anchor(), kind = B.def.sprite, s = SPR[kind];
     const white = fx.enemyFlash > 0;
     const fly = ['bat', 'meteor', 'ringSpirit', 'spider'].includes(kind); // 떠 있는 몬스터는 더 크게 흔들림
     const bob = Math.round(Math.sin(time * (fly ? 6 : 2)) * (fly ? 5 : 2));
@@ -750,12 +577,10 @@ DS.Scene = function (canvas) {
       const key = B.def.sprite + (B.prob.figure.kind);
       if (!bgCache[key]) bgCache[key] = makeBg();
       ctx.drawImage(bgCache[key], 0, 0);
-      if (!shoulder) drawHero();
+      drawHero();
       drawEnemy();
       if (B.prob.figure.kind === 'numberline') drawNumberLine();
-      else if (B.prob.figure.kind === 'venn') { if (fx.enemyAlpha > 0.05) drawVenn(); }
       else if (fx.enemyAlpha > 0.05) drawPlane();
-      if (fx.venn) fx.venn.life -= dt;
       drawFx(dt);
     } else {
       ctx.fillStyle = '#0b0912';
@@ -803,13 +628,13 @@ DS.Scene = function (canvas) {
       });
     }
   }
-  const toCanvas = (x, y) => (B.prob.figure.kind === 'numberline' ? { x: nl(x), y: NL_Y } : map ? pl(x, y) : enemyCenter());
+  const toCanvas = (x, y) => (B.prob.figure.kind === 'numberline' ? { x: nl(x), y: NL_Y } : pl(x, y));
 
   function shatter(kind) {
     const a = anchor();
     if (kind === 'golemArmor') {
       const u = SPR.golem.u;
-      for (const plate of SPR[B.def.sprite].plates || SPR.golem.plates) {
+      for (const plate of SPR.golem.plates) {
         const [x, y, w] = plate[0];
         shards(a.x + (x + w / 2) * u, a.y + y * u, 8, w * u, ['#9fb4c7', '#7d93a8']);
       }
@@ -833,7 +658,7 @@ DS.Scene = function (canvas) {
       }
       text(c.x, c.y - 90, 'BREAK!', '#d6e4f0', 22);
     } else if (kind === 'octagon') {
-      const hy = a.y - 19 * 5;
+      const hy = a.y - 19 * SPR.boss.u;
       for (let k = 0; k < 8; k++) {
         const ang = (k * Math.PI) / 4;
         shards(a.x + Math.cos(ang) * 30, hy + Math.sin(ang) * 30, 4, 10, ['#9fb4c7', '#d6e4f0']);
@@ -863,7 +688,6 @@ DS.Scene = function (canvas) {
     stepFx(f = {}) {
       fx.heroDx = 70;
       const color = f.color || '#ffd166';
-      if (f.venn) fx.venn = { op: f.venn, life: 1.2, max: 1.2 };
       if (f.nslash) slash(nl(f.nslash[0]), NL_Y, nl(f.nslash[1]), NL_Y, '#7df9ff', 7, 0.6);
       if (f.slash) {
         const a = toCanvas(f.slash[0], f.slash[1]), b = toCanvas(f.slash[2], f.slash[3]);
@@ -872,7 +696,7 @@ DS.Scene = function (canvas) {
       }
       if (f.ring) {
         const p = toCanvas(f.ring[0], f.ring[1]);
-        ring(p.x, p.y, '#ffffff', f.ringR && map ? f.ringR * map.U : 6, f.ringR ? 10 : 70, 0.7);
+        ring(p.x, p.y, '#ffffff', f.ringR ? f.ringR * map.U : 6, f.ringR ? 10 : 70, 0.7);
       }
       if (f.triSlash) {
         const t = B.prob.figure.els.find((e) => e.t === 'tri');
@@ -967,8 +791,6 @@ DS.Scene = function (canvas) {
       fade();
     },
     setSlowmo(on) { fx.slowmo = on; },
-    setShoulder(on) { shoulder = !!on; },
-    heroSprite: () => SPR.hero,
     scanFx() {
       fx.scanT = 0.6;
       const c = enemyCenter();

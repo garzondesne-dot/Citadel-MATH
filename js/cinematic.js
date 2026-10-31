@@ -65,7 +65,6 @@ DS.Cinematic = (function () {
 
   // 5초 QTE: 정답이면 true, 오답·시간 초과면 false
   function qte(prob, seconds = 5) {
-    DS.Cinematic.lastQte = prob; // 자동 플레이 테스트용
     return new Promise((resolve) => {
       const el = layer('qte', `<div class="qte-box">
         <p class="qte-title">QTE · 심장 타격</p>

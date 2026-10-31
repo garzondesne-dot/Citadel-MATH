@@ -1,139 +1,150 @@
-// 번외편 「포함의 결계」 데이터: 공통수학2 Ⅱ-1 집합 (2차시 복습 · 3차시 집합 사이의 포함 관계)
-// 50분 수업용. 1페이즈 전시학습 → 2페이즈 포함 관계 (연성 → 문제 → 연성 → 문제) → 3페이즈 형성평가 필드 + 중간보스
-// 엔진은 v1.0 테스트판을 복사해 썼다 (차원·유물·물약·갈림길은 쓰지 않음, 구조만 남김)
-// 몬스터와 문제는 monsters.js, 연성 규칙·예제는 craft.js, 카드 수치·덱 규칙은 cards.js
+// 게임 데이터: 등급, 부품, 연산, 카드 종류, 옵션, 캠페인 진행
+// 몬스터와 문제는 monsters.js, 연성 규칙은 craft.js, 카드 수치·덱 규칙은 cards.js
 window.DS = window.DS || {};
 
 // ── 등급 ─────────────────────────────────────────────────
+// 기본·일반·매직: 재료로 쓰면 사라짐. 레어·유니크·특수는 V0.2.1에서 최종보스 체험판에만 등장.
 DS.Tiers = {
   basic: { name: '기본', crit: 0, critMult: 1.5, affixes: 0 },
   normal: { name: '일반', crit: 0, critMult: 1.5, affixes: 0 },
   magic: { name: '매직', crit: 0.10, critMult: 1.5, affixes: 1 },
   rare: { name: '레어', crit: 0.15, critMult: 1.5, affixes: 2 },
-  unique: { name: '유니크', crit: 0.25, critMult: 2, affixes: 0 },
+  unique: { name: '유니크', crit: 0.25, critMult: 2, affixes: 0 }, // 고정 설계
   special: { name: '특수', crit: 0, critMult: 1.5, affixes: 0 },
 };
 
-// ── 차원: 번외편은 하나 (엔진 호환용) ───────────────────────────
-DS.Dims = {
-  2: { name: 'Ⅱ 집합', short: 'Ⅱ', basic: 'member', color: '#5ce1a5' },
-};
-
 // ── 부품 (부품 가방) ──────────────────────────────────────
-// mid: 바로 다음 연성으로 넘어가는 중간 단계, inf: 무한 제공, floor: 이 층부터 보임
+// mid: 바로 다음 연성으로 넘어가는 중간 단계. inf: 무한 제공(소재로 세지 않음), floor: 무한 부품이 보이기 시작하는 층
 DS.Parts = {
-  elem: { dim: 2, name: '원소', sym: 'a' },
-  setA: { dim: 2, name: '집합 A', sym: 'A' },
-  setB: { dim: 2, name: '집합 B', sym: 'B' },
-  subBA: { dim: 2, name: '반대 방향 포함', sym: 'B ⊂ A', mid: true },
-  nsubBA: { dim: 2, name: '반대 방향 불포함', sym: 'B ⊄ A', mid: true },
-  branch: { dim: 2, name: '두 갈래 (넣는다·뺀다)', sym: '2', inf: true, floor: 4 },
-  fixP: { dim: 2, name: '반드시 포함 p개', sym: 'p' },
-  fixQ: { dim: 2, name: '포함하지 않음 q개', sym: 'q' },
+  // 두 점 재료 (v0.2.2: 통합했던 점을 x₁·x₂로 다시 분리, 분해 때는 적은 쪽부터 돌려받아 짝이 깨지지 않음)
+  x1: { name: '점 x₁', sym: 'x₁' },
+  x2: { name: '점 x₂', sym: 'x₂' },
+  pt1: { name: '한 점', sym: '(x₁, y₁)' },
+  sumSq: { name: '제곱의 합', sym: '(x₂−x₁)²+(y₂−y₁)²', mid: true },
+  slope: { name: '기울기', sym: 'm = (y₂−y₁)/(x₂−x₁)', mid: true },
+  mPrime: { name: 'm′', sym: 'm′', inf: true, floor: 2 },
+  // 3·4층 (원): 원의 방정식·점과 직선 사이의 거리 재료
+  radius: { name: '반지름 r', sym: 'r' },
+  coefSq: { name: '계수 제곱합', sym: 'a² + b²' }, // 직접 √ 를 씌워 계수 길이로 (v0.3.2)
+  normLen: { name: '계수 길이', sym: '√(a² + b²)', mid: true },
+  // 원의 방정식 새 길 (v0.3.2): [원 (일반형)] 카드를 식 분해 → 조각마다 영(零)의 결정을 더해 완전제곱 → 합치기
+  zero: { name: '영(零)의 결정', sym: '0', inf: true, floor: 3 },
+  xPart: { name: 'x 조각', sym: 'x² − 2ax', mid: true },
+  yPart: { name: 'y 조각', sym: 'y² − 2by', mid: true },
+  xSq: { name: 'x 완전제곱', sym: '(x − a)² − a²', mid: true },
+  ySq: { name: 'y 완전제곱', sym: '(y − b)² − b²', mid: true },
+  circR: { name: '원 위의 점 조건', sym: '√((x−a)²+(y−b)²) = r', mid: true },
+  plug: { name: '대입한 값', sym: 'ax₁ + by₁ + c', mid: true },
+  absPlug: { name: '대입값의 절댓값', sym: '|ax₁ + by₁ + c|', mid: true },
 };
 
 // ── 연산 (무한) ──────────────────────────────────────────
-// 순서가 뜻을 바꾸는 연산은 순서를 지켜야 연성된다 (craft.js 의 ordered)
+// discover: 처음엔 잠겨 있고 직접 발견하면 영구 해금 (v0.3.2). hint: 잠긴 연산을 눌렀을 때
 DS.Ops = {
-  in: { sym: '∈', name: '속한다', dims: [2] },
-  count: { sym: 'n( )', name: '원소의 개수', unary: true, dims: [2] },
-  sub: { sym: '⊂', name: '부분집합', floor: 2, dims: [2] },
-  nsub: { sym: '⊄', name: '부분집합 아님', floor: 2, dims: [2] },
-  and: { sym: '이고', name: '그리고', floor: 3, dims: [2] },
-  pow: { sym: 'xⁿ', name: '거듭제곱', floor: 4, dims: [2] },
-  minus: { sym: '−', name: '빼기', floor: 4, dims: [2] },
+  minus: { sym: '−', name: '빼기' },
+  plus: { sym: '+', name: '더하기' },
+  times: { sym: '×', name: '곱하기' },
+  div: { sym: '÷', name: '나누기' },
+  sq: { sym: '²', name: '제곱', unary: true, discover: true, hint: '같은 것을 두 번 곱해 보면…?' },
+  root: { sym: '√', name: '루트', unary: true, discover: true, hint: '제곱을 되돌리는 힘… ² 를 모루에 올렸다가 다시 눌러 꺼내 보면…?', after: 'sq' },
+  abs: { sym: '|·|', name: '절댓값', unary: true },
+  ratio: { sym: 'm : n', name: '내분 비율' },
+  eq: { sym: '=', name: '같다' },
+  subst: { sym: '↦', name: '대입', floor: 3 }, // floor: 이 층부터 보임
+  cmp: { sym: '⋚', name: '비교', floor: 3 },
+  split: { sym: '✂', name: '식 분해', unary: true, floor: 3 }, // 카드 한 장 → 조각 두 개
+  simul: { sym: '{', name: '연립', locked: '다음 버전에서 열림' },
 };
 
 // ── 카드 종류 ────────────────────────────────────────────
-// score: 투자 점수 → 공격 + 방어 합계 = score + 2 ~ score + 4,  tool: 결계 보호막에서 풀이 도구
-// keep: 다음 개념의 재료로 써도 사라지지 않는 기초 개념 카드 (부분집합 → 같은 집합·진부분집합, 개수 → 2ⁿ)
+// score: 투자 점수 = 소재 수 + 연성 횟수 × 2 → 공격 + 방어 합계 = score + 2 ~ score + 4
+// tool: 문턱에서 풀이 도구로 쓰이는 카드 (매직 이상)
+// axis: ⇄ 로 뒤집는 카드 (formulaY: 뒤집었을 때 공식, axisName: [앞면, 뒷면] 이름. 없으면 가로·세로)
+// grant: 연성하지 않고 캠프에서 받는 카드
 DS.Cards = {
-  member: { dim: 2, name: '원소 확인', tier: 'basic', formula: 'a ∈ A ?', score: 4, scan: 'always', desc: '원소가 집합에 있는지 살피며 문제를 밝힌다' },
-  // 1페이즈 (2차시 복습)
-  belong: { dim: 2, name: '소속 판정', tier: 'normal', formula: 'a ∈ A · a ∉ A', score: 6, scan: 'chance', tool: true, desc: '∈ 의 왼쪽은 원소, 오른쪽은 집합' },
-  count: { dim: 2, name: '원소의 개수', tier: 'normal', formula: 'n(A)', score: 6, scan: 'chance', tool: true, keep: true, desc: '집합의 원소를 하나씩 센다. n(∅) = 0' },
-  // 2페이즈 (3차시 포함 관계)
-  subset: { dim: 2, name: '부분집합', tier: 'magic', formula: 'A ⊂ B · A ⊄ B', score: 10, tool: true, keep: true, desc: 'A의 모든 원소가 B에 속하면 A ⊂ B' },
-  equal: { dim: 2, name: '서로 같은 집합', tier: 'magic', formula: 'A ⊂ B 이고 B ⊂ A ⇔ A = B', score: 14, tool: true, desc: '양쪽 방향 모두 포함될 때만 같다' },
-  proper: { dim: 2, name: '진부분집합', tier: 'magic', formula: 'A ⊂ B 이고 A ≠ B', score: 14, tool: true, desc: '부분집합 중 자기 자신을 뺀 것 (2ⁿ − 1 개)' },
-  // 3페이즈 (형성평가 · 중간보스)
-  subsetCount: { dim: 2, name: '부분집합의 개수', tier: 'rare', formula: '2ⁿ', score: 16, tool: true, desc: '원소마다 넣는다·뺀다 두 갈래 → 2 × 2 × … × 2' },
-  fixIn: { dim: 2, name: '반드시 포함', tier: 'rare', formula: '2ⁿ⁻ᵖ', score: 18, tool: true, desc: '특정한 원소 p개를 반드시 포함하는 부분집합의 개수' },
-  fixOut: { dim: 2, name: '포함하지 않음', tier: 'rare', formula: '2ⁿ⁻q', score: 18, tool: true, desc: '특정한 원소 q개를 포함하지 않는 부분집합의 개수' },
-  fixBoth: { dim: 2, name: '포함 · 제외', tier: 'rare', formula: '2ⁿ⁻ᵖ⁻q', score: 22, tool: true, desc: 'p개는 포함하고 q개는 포함하지 않는 부분집합의 개수' },
+  diff: { name: '차이', tier: 'basic', formula: 'x₂ − x₁', score: 4, scan: 'always', axis: true, desc: '두 점의 차이를 재며 상대를 파악한다' },
+  segLen: { name: '선분의 길이', tier: 'normal', formula: '|x₂ − x₁|', score: 6, scan: 'chance', axis: true, tool: true, desc: '수직선 위 두 점 사이 거리' },
+  diffSq: { name: '차이²', tier: 'normal', formula: '(x₂ − x₁)²', score: 6, scan: 'chance', axis: true, desc: '제곱하면 부호가 사라진다' },
+
+  divide: { name: '내분점', tier: 'magic', formula: '(mx₂+nx₁)/(m+n)', score: 4, tool: true, desc: '선분을 m : n으로 나누는 점' },
+  para: { name: '평행 조건', tier: 'magic', formula: 'm = m′', score: 12, tool: true, desc: '두 직선이 평행할 때' },
+  perp: { name: '수직 조건', tier: 'magic', formula: 'mm′ = −1', score: 12, tool: true, desc: '두 직선이 수직일 때' },
+  line: { name: '직선의 방정식', tier: 'magic', formula: 'y − y₁ = m(x − x₁)', formulaY: 'ax + by + c = 0', axis: true, axisName: ['표준형', '일반형'], score: 13, tool: true, desc: '한 점과 기울기로 직선 세우기' },
+  dist: { name: '두 점 사이의 거리', tier: 'magic', formula: '√((x₂−x₁)²+(y₂−y₁)²)', score: 16, tool: true, desc: '좌표평면 위 거리' },
+
+  // 3·4층 (v0.3). 레어: 이름별 1장, 재료로 써도 사라지지 않음, 다시 연성하면 둘 중 하나를 고름
+  genCircle: { name: '원 (일반형)', tier: 'normal', formula: 'x² + y² − 2ax − 2by = 0', score: 4, scan: 'chance', grant: true, desc: '식 분해(✂)로 x 조각과 y 조각으로 쪼갠다' },
+  circle: { name: '원의 방정식', tier: 'rare', formula: '(x−a)²+(y−b)² = r²', score: 21, tool: true, desc: '중심과 반지름' },
+  ptLine: { name: '점과 직선 사이의 거리', tier: 'rare', formula: '|ax₁+by₁+c|/√(a²+b²)', score: 23, tool: true, desc: '수선의 발까지의 거리' },
+  posRel: { name: '원과 직선의 위치 관계', tier: 'magic', formula: 'd < r · d = r · d > r', score: 12, tool: true, desc: '중심과 직선 사이의 거리 d를 반지름 r과 비교' },
+
+  // 전투 중 각성(유니크) · 최종보스 체험판 전용
+  dPlusR: { name: '한계 일도양단', tier: 'unique', formula: 'd − r ≤ h ≤ d + r', tool: true, desc: '원 위의 점에서 직선까지 거리의 범위', fixed: { atk: 30, def: 0, affixes: [['pierce', 1], ['critRate', 25], ['crush', 15]] } },
+  triArea: { name: '정삼각형 넓이', tier: 'special', formula: 'S = h²/√3', score: 8, tool: true, desc: '높이로 나타낸 넓이' },
 };
 
 // ── 디아블로식 옵션 ──────────────────────────────────────
+// 범위: [매직 최소, 매직 최대, 레어 최소, 레어 최대]. 어떤 옵션도 체력 문턱은 넘지 못한다.
 DS.Affixes = {
   pierce: { name: '철갑 관통', range: [1, 1, 1, 1], text: () => '철갑 관통' },
   critRate: { name: '치명타 확률', range: [5, 10, 8, 15], text: (v) => `치명타 확률 +${v}%` },
   critDmg: { name: '치명타 피해', range: [20, 40, 30, 60], text: (v) => `치명타 피해 +${v}%` },
   vuln: { name: '취약 부여', range: [20, 30, 25, 40], text: (v) => `취약 ${v}%` },
+  weak: { name: '약화 부여', range: [20, 30, 25, 40], text: (v) => `약화 ${v}%` },
   bleed: { name: '출혈', range: [2, 3, 3, 5], text: (v) => `출혈 ${v}×2턴` },
+  crush: { name: '분쇄 일격', range: [5, 8, 8, 12], text: (v) => `분쇄 ${v}%` },
   leech: { name: '흡혈', range: [10, 15, 15, 25], text: (v) => `흡혈 ${v}%` },
   counter: { name: '반격 방어', range: [2, 3, 3, 5], text: (v) => `반격 방어 +${v}` },
+  lucky: { name: '행운의 적중', range: [20, 30, 30, 40], text: (v) => `${v}% 기력 +1` },
   draw: { name: '추가 드로우', range: [25, 35, 35, 50], text: (v) => `${v}% 드로우` },
 };
-DS.SCAN_CHANCE = 0.35;
+DS.SCAN_CHANCE = 0.35; // 일반 카드에 스캔이 붙을 확률
 
-// 유물·물약은 번외편에서 쓰지 않는다 (엔진 호환용 빈 목록)
-DS.RELIC_SLOTS = 0;
-DS.Relics = {};
-DS.MAX_POTIONS = 0;
-DS.Potions = {};
+// ── 버전 · 베타 테스트 설정 ─────────────────────────────────
+DS.VERSION = 'citadel-0.1';
+DS.BETA = true; // 베타 테스트 표시(BETA 배지·안내). 정식판에서는 false
+DS.GUIDE = false; // 조합법 전체 공개 창 (v0.2.2에서 끔: 발견하는 재미 유지, 대신 첫 연성 튜토리얼)
+// 결과 보내기: 선생님 구글 시트에 연결한 Apps Script 웹 앱 주소 (GitHub Pages·앱 설치판·파일판이 여기로 POST).
+// Apps Script 웹 앱 안에서 열리면 이 주소 대신 google.script.run 을 쓴다. 비우면 결과 코드만 보여 준다.
+DS.REPORT_URL = ''; // Citadel-MATH: 결과 시트는 아직 정하지 않음 (결과 코드만). DIMENSION SLASHER 시트에 섞이지 않게
 
-// ── 밸런스: 50분 수업이라 몬스터는 짧게 ───────────────────────
-DS.Balance = { hp: 1, atk: 1, crystals: { mob: 0, boss: 0, elite: 0 } };
+// ── 덱 규칙 ──────────────────────────────────────────────
+DS.DeckRules = { min: 6, max: 12, minScan: 4, minDiff: 1, maxMagic: 4 };
 
-// ── 버전 · 설정 ──────────────────────────────────────────
-DS.VERSION = 'citadel-v0.0';
-DS.SPINOFF = true; // 번외편 표시
-DS.BETA = false;
-DS.TEST = false;
-DS.GUIDE = false;
-// 결과 보내기 · 실시간 진행 기록: 본편과 같은 Apps Script 웹 앱 (결과는 '번외편결과' 탭, 진행 기록은 '진행' 탭)
-// 진행 기록은 새 Code.gs 가 배포돼 ?mode=ping 에 답할 때만 보낸다 (track.js)
-DS.REPORT_URL = 'https://script.google.com/macros/s/AKfycbyZD3bDf02Sw89hRrMdwiGMl9Ro42uqFKq1ORqN5hStOw1jsafwBHCkXpni_bPzy7felg/exec';
-DS.TRACK_URL = DS.REPORT_URL;
-DS.REPORT_TAB = '번외편결과';
-// 설정 (⚙): 기기에 저장
-DS.SettingDefs = {
-  stack: { name: '대장간 카드 묶음 보기', desc: '같은 카드를 한 칸에 묶어 보기 (끄면 낱장)', def: false },
-  vibrate: { name: '진동', desc: '공격·방어·피격 때 폰 진동', def: true },
-};
-
-// ── 덱 규칙: 새 카드는 자동으로 덱에 들어간다 ─────────────────
-DS.DeckRules = { min: 6, max: 16, minScan: 4, minBasic: 1, maxMagic: 4 };
-
-// ── 진행 ────────────────────────────────────────────────
-// 층 = 수업의 한 구간. lock: 선생님이 알려 주는 해금 코드가 있어야 들어감 (날짜마다 바뀜, 교사용 화면에서 확인)
-// need: 이 캠프에서 연성해야 출발할 수 있는 카드, sheet: 기다리는 동안 채울 학습지 칸
+// ── 캠페인 진행: 캠프 → 잡몹 → 캠프 → 보스 ───────────────────
 DS.Progress = {
-  startBasic: 6,
-  trialDiff: 6,
+  startDiff: 6, // 시작할 때 받는 랜덤 수치 차이 카드
+  trialDiff: 9,
   floors: {
-    1: { dim: 2, title: '1페이즈 · 집합의 기억', unit: '전시학습: ∈·∉, 조건제시법, 원소의 개수, 공집합 (2차시)' },
-    2: { dim: 2, title: '2페이즈 ① 부분집합', unit: '부분집합 ⊂·⊄, A ⊂ A, ∅ ⊂ A (3차시 STEP 1·2)' },
-    3: { dim: 2, title: '2페이즈 ② 같은 집합', unit: '서로 같은 집합, 진부분집합, 부분집합 모두 구하기 (3차시 STEP 3·4)' },
-    4: { dim: 2, title: '3페이즈 · 형성평가 필드', unit: '선생님 도움 없이 클리어 · 중간보스 2ⁿ의 수호자' },
+    1: { title: '1층 · 수직선의 회랑', unit: '선분의 내분 (교과서 12~17쪽)' },
+    2: { title: '2층 · 직선의 성벽', unit: '직선의 위치 관계 (교과서 18~22쪽)' },
+    3: { title: '3층 · 원환의 신전', unit: '점과 직선 사이의 거리, 원의 방정식 (교과서 23~34쪽)' },
+    4: { title: '4층 · 유성의 관측소', unit: '원과 직선의 위치 관계 (교과서 35~41쪽)' },
   },
-  dimSupply: {},
   nodes: [
-    { type: 'camp', floor: 1, parts: { elem: 4, setA: 4 }, need: ['belong', 'count'] },
-    { type: 'battle', floor: 1, monster: 'belongSlime', lock: 'm1', sheet: '2차시 학습지 문제 2·3번 다시 보기' },
-    { type: 'battle', floor: 1, monster: 'emptyGhost', lock: 'm2', sheet: '2차시 학습지 STEP 4 · 생각 톡톡' },
-    { type: 'camp', floor: 2, parts: { setA: 3, setB: 3, elem: 2 }, need: ['subset'] },
-    { type: 'battle', floor: 2, monster: 'unitGolem', lock: 'm3', sheet: '3차시 학습지 문제 1번 (1)~(4)' },
-    { type: 'battle', floor: 2, monster: 'includeKnight', lock: 'm4', sheet: '3차시 학습지 보강 (5)~(7) · STEP 2' },
-    { type: 'camp', floor: 3, parts: { setA: 4, setB: 4 }, need: ['equal', 'proper'] },
-    { type: 'battle', floor: 3, monster: 'mirrorTwins', lock: 'm5', sheet: '3차시 학습지 문제 2번' },
-    { type: 'battle', floor: 3, monster: 'collector', lock: 'm6', sheet: '3차시 학습지 문제 3번 (부분집합 표)' },
-    { type: 'camp', floor: 4, lock: 'p3', parts: { fixP: 3, fixQ: 3 }, need: ['subsetCount', 'fixIn', 'fixOut', 'fixBoth'], solo: true, sheet: '3차시 학습지 보강: 부분집합의 개수 규칙' },
-    { type: 'battle', floor: 4, monster: 'mixCrab', solo: true },
-    { type: 'battle', floor: 4, monster: 'mixWisp', solo: true },
-    { type: 'battle', floor: 4, monster: 'mixKnight', solo: true },
-    { type: 'battle', floor: 4, monster: 'powerGuardian', solo: true },
+    { type: 'camp', floor: 1, parts: { x1: 6, x2: 6 } },
+    // nudge: ² 를 아직 못 찾았으면 보상에 차이(가로) 카드 2장 + 힌트 / guide: 캠프에서 ²·√ 발견 안내
+    // autoOps: 이 노드에 들어갈 때 아직 못 찾은 연산을 자동 해금 (벌 없음). √ 는 골렘 입장, ² 는 2층 입장
+    { type: 'battle', floor: 1, monster: 'slime', reward: { x1: 4, x2: 4 }, nudge: 'sq' },
+    { type: 'camp', floor: 1, guide: true },
+    { type: 'battle', floor: 1, monster: 'golem', reward: { x1: 6, x2: 6, pt1: 2 }, autoOps: ['root'] },
+    { type: 'camp', floor: 2, autoOps: ['sq', 'root'] },
+    { type: 'battle', floor: 2, monster: 'bat', reward: { x1: 4, x2: 4, pt1: 1 } },
+    { type: 'camp', floor: 2 },
+    { type: 'battle', floor: 2, monster: 'beast' },
+    // 3층 · 4층 (v0.3). 첫 캠프에서 원 단원 부품을 받는다 (옛 저장이 2층 클리어 상태여도 여기서 이어짐)
+    { type: 'camp', floor: 3, parts: { pt1: 4, coefSq: 3, radius: 3, x1: 6, x2: 6 }, cards: { genCircle: 2 } },
+    { type: 'battle', floor: 3, monster: 'spider', reward: { radius: 1, x1: 2, x2: 2 } },
+    { type: 'camp', floor: 3 },
+    { type: 'battle', floor: 3, monster: 'mask', reward: { x1: 3, x2: 3, pt1: 1 } },
+    { type: 'camp', floor: 3 },
+    { type: 'battle', floor: 3, monster: 'ringSpirit', reward: { x1: 4, x2: 4, radius: 2, coefSq: 2, pt1: 3 } },
+    { type: 'camp', floor: 4 },
+    { type: 'battle', floor: 4, monster: 'meteor', reward: { radius: 1, x1: 2, x2: 2 } },
+    { type: 'camp', floor: 4 },
+    { type: 'battle', floor: 4, monster: 'knight', reward: { x1: 3, x2: 3, pt1: 1, radius: 1 } },
+    { type: 'camp', floor: 4 },
+    { type: 'battle', floor: 4, monster: 'gatekeeper', unlock: 'dPlusR' },
     { type: 'clear' },
   ],
 };
-DS.floorDim = () => 2;

@@ -6,11 +6,6 @@
 //  - 전투는 덱의 복사본으로 진행 → 긴급 연성·기억 복원 카드는 전투가 끝나면 사라지고 재료는 원래대로
 //  - 적의 의도에 디버프가 붙으면 플레이어가 취약(받는 피해 ×1.5)·약화(카드 공격 ×0.75)에 걸린다 (풀이 피해는 약화 안 됨)
 //  - 단계에 forge 가 있으면 전투 중 각성: 재료 레어 중 하나는 손에, 나머지는 덱에 있으면 유니크가 연성된다
-// v1.0 테스트판
-//  - 카드 기력(cost), 유물(착용 효과), 물약(기력 없이 사용), 몬스터 강화(DS.Balance)
-//  - 매직·레어 카드는 처음 두 번 공격으로 쓸 때 연습 문제를 풀어야 발동 (숙련 후 생략, 설정에서 끌 수 있음)
-//  - grantAll 층(6층): 결계 보호막에서 풀이 카드가 없으면 기억 복원으로 지급 (최종보스처럼 난이도 완화)
-//  - 치트 모드: 무적, 공격이 결계를 무시, 즉시 승리 버튼
 window.DS = window.DS || {};
 
 DS.Battle = (function () {
@@ -19,49 +14,35 @@ DS.Battle = (function () {
   const { pretty, esc } = DS.UI;
   const K = DS.CardKit;
   const toast = (m, ms) => DS.UI.toast(m, ms);
+  // 진동 (v0.3.1): 폰에서 공격·방어·피격·풀이에 울림. 웹 진동을 지원하지 않는 기기(iPhone Safari 등)는 조용히 무시
+  const vib = (p) => { try { if (navigator.vibrate) navigator.vibrate(p); } catch (e) { /* 무시 */ } };
 
-  const HAND_SIZE = 5, BASE_ENERGY = 3, PLAYER_HP = 50, SAFETY_TURNS = 3, PRACTICE_N = 2;
-  const cheat = () => DS.Settings.get('cheat');
-  const vib = (p) => DS.Settings.vibrate(p);
-  const hasRelic = (id) => B.relics.includes(id);
-  const maxEnergy = () => BASE_ENERGY + (hasRelic('compass') ? 1 : 0);
+  const HAND_SIZE = 5, MAX_ENERGY = 3, PLAYER_HP = 50, SAFETY_TURNS = 3;
   const CIRCLED = '①②③④⑤⑥⑦⑧';
   let B = null, scene = null, busy = false, holdMode = false, hooks = {};
 
   const curStep = () => B.prob.steps[B.stepIdx];
-  const gateFloor = () => (B.stepIdx < B.prob.steps.length && !cheat() ? B.gates[B.stepIdx] : 0);
-  const atGate = () => B.stepIdx < B.prob.steps.length && !cheat() && B.enemy.hp <= B.gates[B.stepIdx];
+  const gateFloor = () => (B.stepIdx < B.prob.steps.length ? B.def.gates[B.stepIdx] : 0);
+  const atGate = () => B.stepIdx < B.prob.steps.length && B.enemy.hp <= gateFloor();
   const needsMet = (step) => B.revealed >= (step.needs || 1);
   const cardDef = (c) => DS.Cards[c.id];
 
   function start(opts) {
     hooks = opts;
     const def = opts.def;
-    const bal = opts.trial ? { hp: 1, atk: 1 } : DS.Balance; // 체험판은 원래 수치
-    const maxHp = Math.round(def.maxHp * bal.hp);
-    const relics = opts.relics || [];
-    const pMax = PLAYER_HP + (relics.includes('ruler') ? 12 : 0) + 5 * relics.filter((r) => DS.Relics[r] && DS.Relics[r].medal).length;
     B = {
-      def, prob: opts.problem, trial: !!opts.trial, mastery: opts.mastery || {}, practice: opts.practice || {},
-      relics, potions: opts.potions || [], grantAll: !!opts.grantAll, atkMul: bal.atk, solveMode: !!opts.solveMode,
-      gates: def.gates.map((g) => Math.round(g * bal.hp)),
+      def, prob: opts.problem, trial: !!opts.trial, mastery: opts.mastery || {},
       stepIdx: 0, mult: def.startMult, atkDown: 0, phaseShown: -1, forged: false,
-      revealed: relics.includes('lens') ? Math.min(2, opts.problem.pieces.length) : 1, gateTurns: 0, emergencyUsed: false, holdUid: null,
-      player: { hp: pMax, max: pMax, block: 0, vuln: 0, weak: 0 },
-      energy: BASE_ENERGY, halfE: 0,
+      revealed: 1, gateTurns: 0, emergencyUsed: false, holdUid: null,
+      player: { hp: PLAYER_HP, max: PLAYER_HP, block: 0, vuln: 0, weak: 0 },
+      energy: MAX_ENERGY,
       draw: DS.MathGen.shuffle(opts.deck.map((c) => ({ ...c, affixes: c.affixes.map((a) => a.slice()) }))),
       hand: [], discard: [], turn: 0,
-      enemy: { hp: maxHp, max: maxHp, block: 0, intent: 0, vuln: null, weak: 0, bleed: null },
+      enemy: { hp: def.maxHp, max: def.maxHp, block: 0, intent: 0, vuln: null, weak: 0, bleed: null },
     };
     holdMode = false;
     if (!scene) scene = DS.Scene($('#stage'));
     scene.setBattle(B);
-    const sh = DS.Settings.get('shoulder');
-    scene.setShoulder(sh);
-    $('#screen-battle').classList.toggle('shoulder', sh);
-    if (sh) drawHeroBack($('#hero-back'));
-    $('#btn-cheat-win').classList.toggle('hidden', !cheat());
-    $('#b-relics').innerHTML = relics.map((r) => `<span title="${esc(DS.Relics[r].name)}: ${esc(DS.Relics[r].desc)}">${DS.Relics[r].icon}</span>`).join('');
     $('#b-floor').textContent = opts.title;
     $('#b-loop').textContent = 'LOOP ' + String(opts.loop).padStart(3, '0');
     busy = true;
@@ -76,9 +57,8 @@ DS.Battle = (function () {
   async function startTurn() {
     busy = true;
     B.turn++;
-    B.player.block = hasRelic('inkpot') ? 3 : 0;
-    B.energy = maxEnergy();
-    if (hasRelic('protractor')) { B.halfE++; if (B.halfE >= 2) { B.halfE = 0; B.energy++; scene.note('각도기: 기력 +1', '#7df9ff'); } }
+    B.player.block = 0;
+    B.energy = MAX_ENERGY;
     B.emergencyUsed = false;
     B.holdUid = null; // 홀드는 한 번의 턴 종료만 버틴다
     const e = B.enemy;
@@ -88,7 +68,7 @@ DS.Battle = (function () {
       if (--e.bleed.turns <= 0) e.bleed = null;
     }
     if (e.hp <= 0) { await victory(); return; }
-    drawCards(HAND_SIZE + (B.turn === 1 && hasRelic('hourglass') ? 2 : 0));
+    drawCards(HAND_SIZE);
     render();
     await ensureTool();
     await safetyNet();
@@ -120,25 +100,6 @@ DS.Battle = (function () {
   async function ensureTool() {
     const step = curStep();
     if (!step || B.hand.some((c) => c.id === step.tool)) return;
-    // 번외편: 결계 보호막에 닿으면 덱에 있는 풀이 카드를 손으로 불러온다 (게임 시스템 때문에 막히지 않게)
-    if (atGate() && step.tool && !step.qte) {
-      for (const pile of [B.draw, B.discard]) {
-        const k = pile.findIndex((c) => c.id === step.tool);
-        if (k >= 0) {
-          B.hand.push(pile.splice(k, 1)[0]);
-          scene.note(`${DS.Cards[step.tool].name} 카드가 손으로 날아왔다!`, '#7df9ff');
-          render();
-          return;
-        }
-      }
-      // 문제풀이모드: 카드가 없어도 지급
-      if (B.solveMode) {
-        await DS.Cinematic.grant(step.tool);
-        B.hand.push(takeOrMake(step.tool));
-        render();
-        return;
-      }
-    }
     // 전투 중 각성 (유니크): 체험판은 바로, 캠페인은 재료 레어 하나는 손에·나머지는 덱에 있을 때
     if (step.forge && !B.forged) {
       const from = step.forge.from;
@@ -156,8 +117,7 @@ DS.Battle = (function () {
         toast(`${from.map((id) => DS.Cards[id].name).join(' + ')} 레어가 손과 덱에 있으면 전투 중에 각성할 수 있다…`, 3200);
       }
     }
-    // 체험판: 단계마다 지급 / grantAll 층(6층): 결계 보호막에 닿았을 때만 지급
-    if (B.trial ? !step.grant : !(B.grantAll && atGate() && step.tool && !step.qte)) return;
+    if (!B.trial || !step.grant) return;
     await DS.Cinematic.grant(step.tool);
     B.hand.push(takeOrMake(step.tool));
     render();
@@ -224,9 +184,8 @@ DS.Battle = (function () {
     $('#e-name').textContent = def.name;
     $('#e-hpfill').style.width = (100 * e.hp) / e.max + '%';
     $('#e-hptext').textContent = `${e.hp} / ${e.max}`;
-    // 문턱 표시는 치트 모드에서도 남긴다 (치트는 막는 힘만 끈다: 흐리게 보이고 통과)
-    $('#e-gates').innerHTML = B.gates.map((g, i) => (i < B.stepIdx || g <= 0 ? ''
-      : `<i class="gate${i === B.stepIdx ? ' cur' : ''}${cheat() ? ' ghost' : ''}" style="left:${(100 * g) / e.max}%"></i>`)).join('');
+    $('#e-gates').innerHTML = def.gates.map((g, i) => (i < B.stepIdx || g <= 0 ? ''
+      : `<i class="gate${i === B.stepIdx ? ' cur' : ''}" style="left:${(100 * g) / e.max}%"></i>`)).join('');
     $('#e-status').innerHTML = statusChips();
     const it = def.intents[e.intent % def.intents.length];
     const v = enemyDamage(it);
@@ -240,10 +199,7 @@ DS.Battle = (function () {
     $('#p-block').textContent = p.block ? `방어 ${p.block}` : '';
     $('#p-status').innerHTML = (p.vuln ? `<span class="chip weak">취약 ${p.vuln}턴</span>` : '')
       + (p.weak ? `<span class="chip down">약화 ${p.weak}턴</span>` : '');
-    $('#p-energy').innerHTML = '<i class="on"></i>'.repeat(Math.min(B.energy, 7)) + '<i></i>'.repeat(Math.max(0, maxEnergy() - B.energy))
-      + (hasRelic('protractor') ? `<i class="half${B.halfE ? ' on' : ''}" title="각도기: 다음 턴 기력 +½"></i>` : '');
-    $('#potions').innerHTML = B.potions.map((id, k) => `<button class="btn small potion" data-k="${k}" title="${esc(DS.Potions[id].desc)}"${busy ? ' disabled' : ''}>${DS.Potions[id].icon}</button>`).join('');
-    $('#potions').querySelectorAll('.potion').forEach((b) => b.addEventListener('click', () => usePotion(Number(b.dataset.k))));
+    $('#p-energy').innerHTML = '<i class="on"></i>'.repeat(Math.min(B.energy, 6)) + '<i></i>'.repeat(Math.max(0, MAX_ENERGY - B.energy));
     $('#p-piles').textContent = `덱 ${B.draw.length} · 버림 ${B.discard.length}`;
 
     const hand = $('#hand');
@@ -251,7 +207,6 @@ DS.Battle = (function () {
     B.hand.forEach((c, i) => hand.appendChild(cardEl(c, i)));
     $('#end-turn').disabled = busy;
     $('#btn-hold').disabled = busy || B.energy < 1;
-    $('#btn-cheat-win').disabled = busy;
     $('#btn-hold').classList.toggle('on', holdMode);
     $('#btn-emergency').disabled = busy || B.energy < 1 || B.emergencyUsed || !emergencyOptions().length;
     $('#btn-retreat').disabled = busy;
@@ -261,11 +216,9 @@ DS.Battle = (function () {
   function cardEl(c, i) {
     const el = document.createElement('button');
     el.className = `card tier-${cardDef(c).tier}`;
-    if (busy || (B.energy < K.cost(c) && !holdMode)) el.classList.add('dim');
+    if (busy || (B.energy < 1 && !holdMode)) el.classList.add('dim');
     if (c.uid === B.holdUid) el.classList.add('held');
-    const d = cardDef(c);
-    const left = !B.trial && DS.Settings.get('practice') && ['magic', 'rare'].includes(d.tier) && DS.MathGen.PRACTICE[c.id] ? PRACTICE_N - (B.practice[c.id] || 0) : 0;
-    el.innerHTML = DS.UI.cardInner(c, { battle: true, practiceLeft: left });
+    el.innerHTML = DS.UI.cardInner(c, { battle: true });
     el.addEventListener('click', () => play(i));
     return el;
   }
@@ -282,35 +235,15 @@ DS.Battle = (function () {
       DS.Sound.wrong();
       return;
     }
-    const solving = gate && def.tool && card.id === step.tool && !step.qte;
-    const cost = solving ? 1 : K.cost(card); // 풀이는 항상 기력 1
-    if (B.energy < cost) { toast(cost > 1 ? `기력이 부족하다 (이 카드는 기력 ${cost})` : '기력이 부족하다'); DS.Sound.wrong(); return; }
+    if (B.energy < 1) { toast('기력이 부족하다'); DS.Sound.wrong(); return; }
     busy = true;
     DS.Sound.card();
-    // 연습 문제: 매직·레어 카드를 결계가 아닌 곳에서 처음 두 번 쓸 때 (맞히면 발동, 틀리면 해설 후 손에 그대로)
-    const needPractice = !gate && !B.trial && DS.Settings.get('practice') && ['magic', 'rare'].includes(def.tier)
-      && (B.practice[card.id] || 0) < PRACTICE_N && DS.MathGen.PRACTICE[card.id];
-    if (needPractice) {
-      render();
-      const n = B.practice[card.id] || 0;
-      const ok = await DS.Challenge.resolve(def, DS.MathGen.PRACTICE[card.id](), { tag: `📝 연습 ${n + 1}/${PRACTICE_N}` });
-      if (hooks.onPractice) hooks.onPractice(card.id, ok);
-      if (!ok) {
-        toast('수식이 흐트러졌다… 카드는 손에 그대로, 기력도 그대로. 다시 도전!', 2400);
-        scene.fizzle();
-        busy = false;
-        render();
-        return;
-      }
-      B.practice[card.id] = n + 1;
-      scene.note(B.practice[card.id] >= PRACTICE_N ? `${def.name} 숙련! 이제 문제 없이 발동` : `연습 성공 (${B.practice[card.id]}/${PRACTICE_N})`, '#5ce1a5');
-    }
-    B.energy -= cost;
+    B.energy -= 1;
     B.hand.splice(i, 1);
     if (card.uid === B.holdUid) B.holdUid = null;
     render();
 
-    if (solving) {
+    if (gate && def.tool && card.id === step.tool && !step.qte) {
       const prob = step.challenge();
       const ok = await DS.Challenge.resolve(def, prob);
       if (hooks.onAnswer) hooks.onAnswer(ok);
@@ -319,20 +252,18 @@ DS.Battle = (function () {
     } else if (gate) {
       // 맞지 않는 카드: 공격은 튕기고 방어·스캔은 적용
       scene.wrongTool();
-      DS.Sound.wrong();
       vib([120, 60, 120]);
+      DS.Sound.wrong();
       toast(def.tool ? `이 도구로는 지금 단계를 풀 수 없어요. 목표: ${step.goal}`
         : '결계 보호막! 공격은 튕겨 나간다. 이 단계를 푸는 풀이 카드가 필요하다.', 2600);
       if (hooks.onWrongTool && def.tool) hooks.onWrongTool();
       if (card.atk > 0) scene.gateLock();
-      if (hasRelic('eraser')) { B.energy += cost; scene.note('지우개: 기력 그대로', '#7df9ff'); }
       await guardAndScan(card);
     } else {
       await useCard(card);
     }
     B.discard.push(card);
     if (B.enemy.hp <= 0) { await victory(); return; }
-    if (atGate()) await ensureTool(); // 결계에 닿으면 덱의 풀이 카드를 손으로 (번외편)
     busy = false;
     render();
   }
@@ -379,7 +310,7 @@ DS.Battle = (function () {
     if (card) {
       const c = K.critOf(card);
       crit = c.rate > 0 && Math.random() < c.rate;
-      if (crit) { dmg *= c.mult; if (hooks.onCrit) hooks.onCrit(); vib([0, 30, 40, 70]); }
+      if (crit) { dmg *= c.mult; if (hooks.onCrit) hooks.onCrit(); }
     }
     const pierce = card && K.affix(card, 'pierce') > 0;
     if (!flat) {
@@ -400,7 +331,7 @@ DS.Battle = (function () {
     if (e.hp - d < floor) { d = Math.max(0, e.hp - floor); locked = true; }
     e.hp -= d;
     DS.Sound.hit();
-    if (crit) DS.Sound.crit();
+    if (crit) { DS.Sound.crit(); vib([0, 30, 40, 70]); }
     scene.enemyHit(d, note || '', crit);
     if (absorbed) scene.blocked(absorbed);
     if (card) applyOnHit(card, d);
@@ -439,7 +370,7 @@ DS.Battle = (function () {
     scene.note(pen.label);
     render();
     await wait(350);
-    await hitEnemy(step.dmg + (hasRelic('calculator') ? 6 : 0), { card });
+    await hitEnemy(step.dmg, { card });
     await checkPhase();
     if (step.then === 'qte') await runQTE();
     else await ensureTool();
@@ -547,7 +478,7 @@ DS.Battle = (function () {
 
   // ── 적 턴 ────────────────────────────────────────────────
   function enemyDamage(it) {
-    const base = Math.max(0, Math.round(it.v * B.atkMul) - B.atkDown);
+    const base = Math.max(0, it.v - B.atkDown);
     return Math.round(base * (1 - B.enemy.weak / 100) * (B.player.vuln ? 1.5 : 1)); // 플레이어 취약: ×1.5
   }
   async function endTurn() {
@@ -569,10 +500,9 @@ DS.Battle = (function () {
     const blocked = Math.min(p.block, dmg);
     p.block -= blocked;
     dmg -= blocked;
-    if (cheat()) dmg = 0; // 치트: 무적
-    p.hp = Math.max(B.solveMode ? 1 : 0, p.hp - dmg); // 문제풀이모드: 체력이 1 아래로 내려가지 않음
-    if (dmg > 0) vib([60, 40, 60]);
+    p.hp = Math.max(0, p.hp - dmg);
     DS.Sound.enemyAtk();
+    if (dmg > 0) vib([60, 40, 60]);
     scene.enemyAttack(dmg, blocked);
     if (dmg > 0) setTimeout(() => DS.Sound.hurt(), 120);
     e.intent++;
@@ -610,48 +540,7 @@ DS.Battle = (function () {
     hooks.onWin();
   }
 
-  // 숄더뷰: 주인공의 등 (픽셀 블록, 화면 왼쪽 아래에 크게)
-  function drawHeroBack(cv) {
-    const g = cv.getContext('2d'), u = 5, ox = 60, oy = 158;
-    g.clearRect(0, 0, cv.width, cv.height);
-    const body = [
-      [-4, -5, 3, 5, '#3a2e2a'], [1, -5, 3, 5, '#3a2e2a'],
-      [-6, -18, 12, 14, '#5a2590'], [-7, -20, 14, 4, '#5c6b80'],
-      [-4, -26, 8, 6, '#8a94a6'], [-1, -28, 2, 2, '#c0392b'],
-      [7, -21, 3, 8, '#5c6b80'], [8, -35, 2, 14, '#e0e6f0'], [6, -21, 6, 1, '#e8b04a'],
-    ];
-    const detail = [[-6, -18, 12, 1, '#7a3ab8'], [-1, -16, 2, 10, '#46207a'], [-4, -26, 8, 1, '#c9d1de'], [8, -35, 1, 1, '#ffffff'], [-7, -20, 14, 1, '#8a94a6']];
-    g.fillStyle = '#0b0912';
-    body.forEach(([x, y, w, h]) => g.fillRect(ox + (x - 1) * u, oy + (y - 1) * u, (w + 2) * u, (h + 2) * u));
-    [...body, ...detail].forEach(([x, y, w, h, c]) => { g.fillStyle = c; g.fillRect(ox + x * u, oy + y * u, w * u, h * u); });
-  }
-
-  // ── 물약 (기력 없이, 결계 보호막은 못 깸) ──────────────────────
-  async function usePotion(k) {
-    if (busy || !B) return;
-    const id = B.potions[k];
-    if (!id) return;
-    B.potions.splice(k, 1);
-    if (hooks.onPotion) hooks.onPotion(id);
-    DS.Sound.magic();
-    const p = B.player;
-    if (id === 'heal') { const h = Math.min(15, p.max - p.hp); p.hp += h; scene.note(`회복 +${h}`, '#5ce1a5'); }
-    else if (id === 'scan') { await scan(); await scan(); }
-    else if (id === 'energy') { B.energy += 2; scene.note('기력 +2', '#7df9ff'); }
-    else if (id === 'guard') { p.block += 12; scene.heroGuard(12); }
-    render();
-  }
-  // 치트: 즉시 승리
-  async function cheatWin() {
-    if (busy || !B || !cheat()) return;
-    busy = true;
-    B.stepIdx = B.prob.steps.length;
-    B.enemy.hp = 0;
-    await victory();
-  }
-
   function bind() {
-    $('#btn-cheat-win').addEventListener('click', cheatWin);
     $('#end-turn').addEventListener('click', endTurn);
     $('#btn-hold').addEventListener('click', toggleHold);
     $('#btn-emergency').addEventListener('click', emergency);
@@ -664,10 +553,9 @@ DS.Battle = (function () {
     const s = curStep();
     return {
       busy, stepIdx: B.stepIdx, tool: s ? s.tool : null, qte: !!(s && s.qte), needs: s ? s.needs : 0,
-      revealed: B.revealed, pieces: B.prob.pieces.length, atGate: atGate(), energy: B.energy, gates: B.gates.slice(), maxHp: B.enemy.max,
+      revealed: B.revealed, pieces: B.prob.pieces.length, atGate: atGate(), energy: B.energy,
       hp: B.enemy.hp, floor: gateFloor(), playerHp: B.player.hp, emergency: emergencyOptions().length, holdUid: B.holdUid,
-      hand: B.hand.map((c) => ({ id: c.id, uid: c.uid, atk: c.atk, def: c.def, scan: c.scan, tool: !!cardDef(c).tool, temp: c.temp, cost: K.cost(c) })),
-      practice: { ...B.practice }, potions: B.potions.slice(),
+      hand: B.hand.map((c) => ({ id: c.id, uid: c.uid, atk: c.atk, def: c.def, scan: c.scan, tool: !!cardDef(c).tool, temp: c.temp })),
     };
   }
 
