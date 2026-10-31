@@ -35,6 +35,10 @@ DS.ASSETS = {
     box: { art: [62, 24, 292, 186], body: [72, 214, 270, 172], plate: [92, 398, 230, 48], gem: [166, 418, 52, 74] } },
   // 모루 연성창: 위에서 본 모루(작업면 = face, 그림 비율 0~1) · 망치
   forge: { anvil: { src: 'forge-anvil-v1.webp', w: 820, h: 509, face: [0.273, 0.328, 0.830, 0.734] }, hammer: { src: 'forge-hammer-v1.webp', w: 420, h: 435 } },
+  // 브랜드: 공통 = 배경 · 메뉴 아이콘(학생 · 교사 · 종합상황실 · 수업 준비 · 로그인), 에디션 = 제목 화면 · 머리 배너 · 로고 (과목이 늘면 에디션만 바꿈)
+  brand: { name: '모두의 던전', edition: '공통수학2', full: '모두의 던전 : 공통수학2', tagline: '함께 풀고, 모두 함께 돌파하라',
+    bg: 'brand-bg-v1.webp', menu: { src: 'menu-icons-v1.webp', cols: 5, kinds: { student: 0, teacher: 1, hall: 2, prep: 3, login: 4 } },
+    title: 'brand-m2-title-v1.webp', header: 'brand-m2-header-v1.webp', logo: 'brand-m2-logo-v1.webp' },
   panels: { src: 'ui-panels-v1.webp', cols: 2, rows: 2, kinds: { inventory: 0, paper: 1, dialog: 2, reward: 3 } }, // 남색 인벤토리 · 양피지 문제지 · 청록 대화창 · 보라 보상창
   fonts: { pixel: 'assets/fonts/Galmuri11.woff2', pixelBold: 'assets/fonts/Galmuri11-Bold.woff2' },
 };

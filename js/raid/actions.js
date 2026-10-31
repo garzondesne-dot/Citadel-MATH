@@ -15,17 +15,28 @@ DS.Act = (function () {
   const setDefaultPct = (lessonId, pct) => N().set(prepPath(lessonId, 'pct'), Number(pct));
 
   // ── 교사 ────────────────────────────────────────────────
-  async function createRoom(lessonId) {
+  const ck = (c) => String(c).replace(/[.#$/[\]]/g, '_');
+  // cls: 이 수업을 여는 반 → 그 반 학생들의 모닥불에 이 차시 차원문이 실시간으로 나타난다 (live/{반})
+  async function createRoom(lessonId, cls) {
     let code;
     for (let i = 0; i < 20; i++) { code = String(100000 + Math.floor(Math.random() * 900000)); if (!(await N().get(P(code, 'meta')))) break; }
     let pct = null;
     try { pct = await N().get(prepPath(lessonId, 'pct')); } catch (e) { /* 준비 안 했으면 차시 기본값 */ }
     const room = Raid.newRoom(code, lessonId, N().uid(), N().now(), pct);
+    if (cls) room.meta.cls = String(cls);
+    let think = null;
+    try { think = await N().get(prepPath(lessonId, 'think')); } catch (e) { /* 기본 5초 */ }
+    room.meta.think = think != null ? Number(think) : 5;
     room.meta.created = N().TS;
     room.state.stepAt = N().TS;
     const hallKey = String(1000 + Math.floor(Math.random() * 9000));
     await N().set(P(code), room);
     await N().set(`secrets/${code}`, { hallKey }); // 학생은 읽을 수 없는 곳 (Firebase 규칙)
+    if (cls) {
+      const L = DS.Lessons.get(lessonId);
+      await N().set(`live/${ck(cls)}`, { code, lesson: lessonId, no: (L && L.no) || 0, theme: (L && L.theme) || '', open: true, at: N().TS });
+      await unlockFor(L, [cls]);
+    }
     return { code, hallKey };
   }
   async function joinHall(code, key) {
@@ -49,7 +60,12 @@ DS.Act = (function () {
       await unlockFor(L, studs.map((u) => (R.players[u] || {}).cls).filter(Boolean));
       return;
     }
-    if (dir > 0 && i >= L.steps.length) { await N().update(P(code, 'state'), { closed: true, focus: false, stepAt: N().TS }); return; } // 마무리 → 수업 끝 (학생은 모닥불로)
+    if (dir > 0 && i >= L.steps.length) { // 마무리 → 수업 끝 (학생은 모닥불로 · 차원문은 꺼진 채 남음)
+      await N().update(P(code, 'state'), { closed: true, focus: false, stepAt: N().TS });
+      const cls = (R.meta || {}).cls;
+      if (cls) { const lv = await N().get(`live/${ck(cls)}`).catch(() => null); if (lv && lv.code === code) await N().set(`live/${ck(cls)}/open`, false); }
+      return;
+    }
     const next = Math.max(-1, Math.min(L.steps.length, i + dir));
     if (next === i) return;
     await N().update(P(code, 'state'), { step: next, stepAt: N().TS, focus: Raid.autoFocus(L.steps[next]), closed: null });
@@ -62,6 +78,7 @@ DS.Act = (function () {
       try { const was = Number(await N().get(`unlock/${k}`)) || 0; if (L.no > was) await N().set(`unlock/${k}`, L.no); } catch (e) { /* 규칙상 교사만 — 실패해도 수업은 계속 */ }
     }
   }
+  const setThink = (lessonId, sec) => N().set(prepPath(lessonId, 'think'), Number(sec));
   const setFocus = (code, on) => N().set(P(code, 'state/focus'), !!on);
   const setPct = (code, mid, pct) => N().set(P(code, `state/pct/${mid}`), Math.max(10, Math.min(100, Math.round(pct))));
   // 미제출 학생 빼고 판정 (결석·폰 고장)
@@ -79,7 +96,7 @@ DS.Act = (function () {
     const dup = Object.entries(R.players || {}).find(([u, p]) => u !== me && !p.teacher && Number(p.num) === Number(info.num));
     if (dup) fail(`${info.num}번은 이미 입장했어요. 번호를 확인해 주세요.`);
     const was = (R.players || {})[me] || {};
-    await N().set(P(code, `players/${me}`), { num: Number(info.num), nick: String(info.nick).slice(0, 8), hero: Number(info.hero) || 0, fx: info.fx || 'fire', ...(info.cls ? { cls: String(info.cls) } : {}), ...(was.lobby ? { lobby: true } : {}), at: N().TS });
+    await N().set(P(code, `players/${me}`), { num: Number(info.num), nick: String(info.nick).slice(0, 8), hero: Number(info.hero) || 0, fx: info.fx || 'flame', ...(info.cls ? { cls: String(info.cls) } : {}), ...(was.lobby ? { lobby: true } : {}), at: N().TS });
     return R.meta;
   }
   // 접속 표시: 연결이 끊기면 서버가 지운다 (Firebase onDisconnect)
@@ -114,5 +131,5 @@ DS.Act = (function () {
     return out;
   }
 
-  return { getPrep, setImage, setDefaultPct, createRoom, joinHall, isHost, go, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, bossAnswer, unpackRoom, P };
+  return { getPrep, setImage, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, bossAnswer, unpackRoom, P };
 })();

@@ -10,8 +10,8 @@ DS.Teacher = (function () {
   // 교사 폰에서는 종합상황실 키를 바로 보여 준다 (종합상황실 입력칸만 **** 로 가림 — 사용자 결정 v0.5.0)
   const keyHtml = () => `<b>${esc($('#t-key').textContent) || '—'}</b>`;
 
-  async function create(lessonId) {
-    const r = await DS.Act.createRoom(lessonId);
+  async function create(lessonId, cls) {
+    const r = await DS.Act.createRoom(lessonId, cls);
     try { localStorage.setItem('citadel-teacher', JSON.stringify({ code: r.code, hallKey: r.hallKey, uid: DS.Net.uid() })); } catch (e) { /* 무시 */ }
     return open(r.code, r.hallKey);
   }

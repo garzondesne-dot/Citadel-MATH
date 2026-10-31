@@ -13,7 +13,7 @@ DS.Student = (function () {
   let form = null;          // 풀고 있는 시도 { key, given: [] }
   let retrying = '';        // '몬스터id|다음 시도' — "다시 도전"을 누른 상태
   let shown = '';           // 결과 연출을 한 번만
-  let bossSet = 1;
+  let bossSet = 1, bossThink = 0;
   let drawn = '';           // 지금 그려 둔 화면의 서명 — 다른 학생의 제출로 방 값이 바뀌어도 내 화면은 다시 그리지 않는다 (터치가 씹히지 않게)
 
   let info0 = null, focusWas = false, cleared0 = false, locked = false;
@@ -85,11 +85,11 @@ DS.Student = (function () {
     const sig = `lobby|${after}|${others.length}|${JSON.stringify(w || null)}|${finale}|${full}|${(R.hide || {})[me] ? 1 : 0}`;
     if (sig === drawn && body.querySelector('.lobby-scene')) return;
     drawn = sig;
-    const crowd = others.map(([, p], k) => `<div class="lb-h" style="left:${12 + ((k * 37) % 76)}%;bottom:${8 + (k % 3) * 9}%">${DS.Art.hero(p.hero, 'idle', `small ${after && finale ? 'jump' : 'huff'}`)}<i class="shadow"></i></div>`).join('');
+    const crowd = others.map(([, p], k) => `<div class="lb-h${k % 2 ? ' face-l' : ''}" style="left:${12 + ((k * 37) % 76)}%;bottom:${8 + (k % 3) * 9}%">${DS.Art.hero(p.hero, 'idle', `small ${after && finale ? 'pairhop' : 'huff'}`)}<i class="shadow"></i></div>`).join('');
     body.innerHTML = `<div class="panel framed">
       <div class="lobby-scene bg-scene th-${L.theme || ''}"><p class="lb-title">${after ? '🏆 ' : '⚔ '}${esc(dungeonName())} ${after ? '클리어!' : '단체 대기실'}</p>
-        <div class="lb-h teacher" style="left:50%;bottom:20%">${DS.Art.hero(DS.ASSETS.heroes.teacher, 'idle', after && finale ? 'jump' : 'huff')}<i class="shadow"></i></div>
-        ${crowd}<div class="lb-h me" style="left:34%;bottom:12%">${DS.Art.hero(myP().hero, 'idle', after && finale ? 'jump' : 'huff')}<i class="shadow"></i>${w && !(R.hide || {})[me] ? `<span class="lb-say">${esc(w.t)}</span>` : ''}</div>
+        <div class="lb-h teacher" style="left:50%;bottom:20%">${DS.Art.hero(DS.ASSETS.heroes.teacher, 'idle', after && finale ? 'pairhop' : 'huff')}<i class="shadow"></i></div>
+        ${crowd}<div class="lb-h me" style="left:34%;bottom:12%">${DS.Art.hero(myP().hero, 'idle', after && finale ? 'pairhop' : 'huff')}<i class="shadow"></i>${w && !(R.hide || {})[me] ? `<span class="lb-say">${esc(w.t)}</span>` : ''}</div>
         <p class="lb-greet">${after ? '모두 수고했네! 오늘 배운 것 한마디씩 남기게' : `${L.no ? `${L.no}차시 ` : ''}${esc(L.title.split('·')[0].trim())} 던전에 온 것을 환영하네!`}</p></div>
       ${after ? `<div class="stamp-bar">📮 반드시 학습지 확인도장 받아가세요.</div>${wordsForm(w)}${full ? '<button class="btn forge-btn big" id="st-forge">⚒ 모루로 가기 <span class="small">(형성평가 만점 특전)</span></button>' : '<p class="muted small center">형성평가를 다 맞히면 ⚒ 모루가 열려요 — 세트2 로 다시 도전해 봐요!</p>'}`
         : '<p class="center">선생님이 수업을 시작할 때까지 기다려요. 학습지를 꺼내 두세요!</p>'}</div>`;
@@ -112,11 +112,27 @@ DS.Student = (function () {
   const bindLobby = () => { const b = $('#st-lobby'); if (b) b.onclick = () => DS.Control.run(async () => { await DS.Act.toLobby(code); drawn = ''; }); };
 
   // ── 몬스터와 1:1 대치 ─────────────────────────────────────
+  // 1:1 대치: 왼쪽 내 용사(머리 위 = 남은 도전 기회 ●●●, 같이 움직임) vs 오른쪽 몬스터(아래 체력 칸)
+  // cls: 'hit'(공격 성공 → 용사 돌진) · 'miss'(실패 → 축 처짐, 잠깐)
   function scene(step, rec, hp, cls = '') {
     const segs = Array.from({ length: rec.total }, (_, i) => `<i class="${i < rec.best ? 'gone' : ''}"></i>`).join('');
-    return `<div class="scene bg-scene th-${L.theme || ''} ${cls}${step.special ? ' special' : ''}"><div class="scene-bar"><div><b>${step.special ? '⭐ 난입! ' : step.review ? '📖 ' : ''}${esc(step.title)}</b><br><span class="muted small">레이드 체력 ${hp.left} / ${hp.max}</span></div></div>
-      ${DS.Art.monster(L.monsters[step.id].sprite, Raid().cleared(L, R, step.id) ? 'down' : 'idle', Raid().cleared(L, R, step.id) ? '' : 'float')}
-      <div class="segs" title="내가 맞힌 만큼 칸이 깨져요">${segs}</div></div>`;
+    const left = Math.max(0, Raid().RETRIES + 1 - rec.tries.length), done = Raid().cleared(L, R, step.id);
+    const pips = Array.from({ length: Raid().RETRIES + 1 }, (_, i) => `<i class="${i < left ? 'on' : ''}"></i>`).join('');
+    return `<div class="scene enc bg-scene th-${L.theme || ''} ${cls}${step.special ? ' special' : ''}"><div class="scene-bar"><div><b>${step.special ? '⭐ 난입! ' : step.review ? '📖 ' : ''}${esc(step.title)}</b><br><span class="muted small">레이드 체력 ${hp.left} / ${hp.max}</span></div></div>
+      <div class="enc-hero"><div class="enc-tries" title="남은 도전 기회">${pips}</div>${DS.Art.hero(myP().hero, done ? 'attack' : 'idle', done ? 'pairhop' : cls === 'miss' ? 'slump' : 'huff')}<i class="shadow"></i></div>
+      <div class="enc-mon">${DS.Art.monster(L.monsters[step.id].sprite, done ? 'down' : 'idle', done ? '' : 'float')}<div class="segs" title="내가 맞힌 만큼 칸이 깨져요">${segs}</div></div></div>`;
+  }
+  // 생각 시간: 틀린 칸이 있으면 해설은 읽을 수 있고 「다시 도전」만 잠깐 잠긴다 (수업 준비에서 0·5·10·15초, 기본 5초)
+  const thinkSec = () => { const t = (R.meta || {}).think; return t != null ? Number(t) : 5; };
+  const thinkUntil = {};
+  function thinkTimer(btn, key, label) {
+    const tick = () => {
+      const left = Math.ceil(((thinkUntil[key] || 0) - Date.now()) / 1000);
+      if (!btn.isConnected) return;
+      if (left > 0) { btn.disabled = true; btn.innerHTML = `🤔 생각 시간 ${left}… <span class="small">해설을 읽어 봐요</span>`; setTimeout(tick, 250); }
+      else { btn.disabled = false; btn.innerHTML = label; }
+    };
+    tick();
   }
   function monsterView(body, step) {
     const mid = step.id, rec = Raid().record(L, R, mid, me), hp = Raid().monsterHp(L, R, mid);
@@ -125,7 +141,8 @@ DS.Student = (function () {
     const t = rec.last, label = Raid().resultLabel(t);
     const items = Raid().itemsFor(L, R, mid, me, t.attempt);
     const fx = `${mid}|${t.attempt}` !== shown ? (label === 'fail' ? 'miss' : 'hit') : '';
-    if (fx) { shown = `${mid}|${t.attempt}`; if (label === 'fail') DS.Sound.squish(); else { DS.Sound.slash(); setTimeout(() => DS.Sound.hit(), 160); setTimeout(() => { const sc = body.querySelector('.scene'); if (sc) DS.FX.play(sc, myP().fx || 'fire', { perfect: label === 'success', scale: label === 'success' ? 0.42 : 0.3 }); }, 60); } }
+    if (fx && t.correct < t.total && thinkSec() > 0) thinkUntil[`${mid}|${t.attempt}`] = Date.now() + thinkSec() * 1000;
+    if (fx) { shown = `${mid}|${t.attempt}`; if (label === 'fail') DS.Sound.squish(); else { DS.Sound.slash(); setTimeout(() => DS.Sound.hit(), 160); setTimeout(() => { const sc = body.querySelector('.scene'); if (sc) DS.FX.play(sc, myP().fx || 'flame', { perfect: label === 'success', scale: label === 'success' ? 0.42 : 0.3 }); }, 60); } }
     const head = { success: '⚔ 공격 성공!', partial: `⚔ 부분 성공 (${t.correct}/${t.total})`, fail: '💨 공격 실패…' }[label];
     const done = Raid().cleared(L, R, mid);
     const sig = `res|${mid}|${t.attempt}|${done}|${rec.canRetry}|${(R.help || {})[me] ? 1 : 0}`;
@@ -140,7 +157,7 @@ DS.Student = (function () {
       ${helpBtn()}</div>`;
     bindHelp();
     const rb = $('#st-retry');
-    if (rb) rb.onclick = () => { retrying = `${mid}|${rec.nextAttempt}`; form = null; DS.Sound.clank(); render(); };
+    if (rb) { thinkTimer(rb, `${mid}|${t.attempt}`, '↻ 다시 도전'); rb.onclick = () => { retrying = `${mid}|${rec.nextAttempt}`; form = null; DS.Sound.clank(); render(); }; }
   }
   // 보기 글자: 'venn:B|1 2 3 6' 은 벤 다이어그램 그림으로
   function optHtml(o) {
@@ -237,6 +254,8 @@ DS.Student = (function () {
     body.querySelectorAll('.bitem').forEach((b) => b.addEventListener('click', async () => {
       const i = Number(b.dataset.i);
       if (m[i]) { DS.UI.toast('이미 도달한 문항이에요.'); return; }
+      const wait = Math.ceil((bossThink - Date.now()) / 1000);
+      if (wait > 0) { DS.UI.toast(`🤔 생각 시간 ${wait}초 — 방금 틀린 문항을 학습지에서 다시 살펴봐요`); return; }
       const prob = bossSet === 1 ? { ...items[i], question: `📄 학습지 형성평가 ${i + 1}번을 보고 답해요` } : items[i];
       const r = await DS.Quiz.ask({ name: `형성평가 ${i + 1}번`, formula: bossSet === 1 ? '세트 1 · 학습지' : '세트 2 · 숫자 바뀜' }, prob, { collect: true, tag: '👑 보스' });
       const next = (ans[bossSet] || Array(L.boss.items).fill(null)).slice();
@@ -244,13 +263,14 @@ DS.Student = (function () {
       next[i] = r.given;
       await DS.Act.bossAnswer(code, bossSet, next);
       const ok = DS.Quiz.grade(items[i], r.given);
-      DS.UI.toast(ok ? `✔ ${i + 1}번 도달! 보스에게 데미지` : `✘ ${i + 1}번은 아직… ${bossSet === 1 ? '세트 2 로' : '다시'} 도전!`, 2600);
-      if (ok) { DS.Sound.slash(); setTimeout(() => DS.Sound.hit(), 160); const sc = document.querySelector('#st-body .scene'); if (sc) DS.FX.play(sc, myP().fx || 'fire', { scale: 0.32 }); } else DS.Sound.squish();
+      if (!ok && thinkSec() > 0) bossThink = Date.now() + thinkSec() * 1000;
+      DS.UI.toast(ok ? `✔ ${i + 1}번 도달! 보스에게 데미지` : `✘ ${i + 1}번은 아직… 🤔 ${thinkSec()}초 생각하고 ${bossSet === 1 ? '세트 2 로' : '다시'} 도전!`, 2600);
+      if (ok) { DS.Sound.slash(); setTimeout(() => DS.Sound.hit(), 160); const sc = document.querySelector('#st-body .scene'); if (sc) DS.FX.play(sc, myP().fx || 'flame', { scale: 0.32 }); } else DS.Sound.squish();
     }));
   }
   function endView(body) {
     const m = Raid().mastery(L, R, me).slice(0, L.boss.hpItems).filter(Boolean).length;
-    body.innerHTML = `<div class="panel framed center win"><h2>🏆 오늘의 던전 클리어!</h2><p class="muted small">형성평가 ${m} / ${L.boss.hpItems}${Raid().fullMarks(L, R, me) ? ' 만점!' : ''}</p>${DS.Art.hero(myP().hero, 'attack', 'big')}
+    body.innerHTML = `<div class="panel framed center win"><h2>🏆 오늘의 던전 클리어!</h2><p class="muted small">형성평가 ${m} / ${L.boss.hpItems}${Raid().fullMarks(L, R, me) ? ' 만점!' : ''}</p>${DS.Art.hero(myP().hero, 'attack', 'big pairhop')}
       <div class="stamp-bar">📮 반드시 학습지 확인도장 받아가세요.</div>${lobbyBtn()}
       <p class="muted small">게임 기록은 수학 성적이 아니에요. 오늘 배운 것을 학습지에 정리해요.</p></div>`;
     bindLobby();

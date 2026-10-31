@@ -1,12 +1,15 @@
 // 모닥불 (학생 개인 대기실 · 혼자만의 공간): 로그인하면 여기로 온다. 가로로 넘겨 보는 숲 야영지.
-// 왼쪽 ⚒ 모루 → 연성창 (수업 코드 없이 언제나) · 가운데 🔥 모닥불 + 내 용사(씩씩) · 오른쪽 🌀 차원문 → 수업 코드 → 던전 단체 대기실
+// 왼쪽 ⚒ 모루 → 연성창 (수업 코드 없이 언제나) · 가운데 🔥 모닥불 + 내 용사(씩씩) · 오른쪽 🌀 차원문
+// 차원문: 선생님이 우리 반 수업을 열면 그 차시 던전 테마의 포털이 실시간으로 나타난다(live/{반}) → 누르면 코드 없이 입장.
+//         수업이 끝나면 마지막 포털이 꺼진(봉쇄) 채로 남는다. ⚙ 설정: 용사 · 공격 이펙트 바꾸기 (잠긴 것은 조건 표시)
 window.DS = window.DS || {};
 
 DS.Camp = (function () {
   const $ = (s) => document.querySelector(s);
   const { esc } = DS.UI;
   const C = () => DS.ASSETS.camp, base = () => DS.ASSETS.base;
-  let me = null, fireT = 0, code0 = '';
+  let me = null, fireT = 0, code0 = '', live = null, liveStop = null, liveSeen = '';
+  const ck = (c) => String(c).replace(/[.#$/[\]]/g, '_');
   const today = () => new Date().toISOString().slice(0, 10);
   const stampToday = () => { try { return localStorage.getItem('citadel-stamp') === today(); } catch (e) { return false; } };
 
@@ -15,7 +18,28 @@ DS.Camp = (function () {
     DS.UI.show('screen-camp');
     DS.Scene.save({ role: 'camp' });
     render();
-    if (code0) setTimeout(gate, 300); // QR 로 들어왔으면 차원문 창을 바로
+    if (liveStop) liveStop();
+    liveStop = DS.Net.watch(`live/${ck(m.c)}`, (v) => {
+      const was = live; live = v;
+      if (!document.getElementById('screen-camp').classList.contains('active')) return;
+      drawGate();
+      if (v && v.open && (!was || !was.open || was.code !== v.code) && liveSeen !== v.code) { liveSeen = v.code; showGate(); DS.Sound.correct(); DS.UI.toast(`🌀 ${v.no ? `${v.no}차시 ` : ''}던전이 열렸어요! 차원문을 눌러 들어가요`, 4200); }
+    });
+    if (code0) setTimeout(codeGate, 300); // QR 로 들어왔으면 코드 창을 바로
+  }
+  const D = () => DS.ASSETS.dungeons;
+  // 열린 차원문이 폰 화면 밖이면 그쪽으로 밀어 보여 준다 (모닥불 · 내 용사도 함께 보이게 오른쪽 끝)
+  function showGate(smooth = true) {
+    const sc = document.getElementById('camp-scroll'); if (!sc) return;
+    sc.scrollTo({ left: sc.scrollWidth - sc.clientWidth, behavior: smooth ? 'smooth' : 'auto' });
+  }
+  function drawGate() {
+    const el = document.getElementById('camp-gate'); if (!el) return;
+    if (!live || !live.theme) { el.className = 'camp-gate empty'; el.innerHTML = '<span class="camp-label dim">🌀 차원문 자리 — 선생님이 수업을 열면 나타나요</span>'; return; }
+    const i = D().ids.indexOf(live.theme), name = i >= 0 ? D().names[i] : '던전';
+    el.className = `camp-gate ${live.open ? 'open appear' : 'closed'}`;
+    el.innerHTML = `<i class="camp-portal" style="background-image:url('${base()}${D().portal(live.theme)}');background-position:${live.open ? '0%' : '100%'} 0"></i>
+      <span class="camp-label">${live.open ? `🌀 ${live.no ? `${live.no}차시 ` : ''}${esc(name)} · 입장!` : `🔒 지난 던전 · ${esc(name)}`}</span>`;
   }
   // 그림 칸 하나 (배치표 시트에서 열·행)
   const sheet = (s, col, row, cls, style = '') => `<i class="${cls}" style="background-image:url('${base()}${s.src}');background-size:${s.cols * 100}% ${(s.rows || 1) * 100}%;background-position:${s.cols > 1 ? (col / (s.cols - 1)) * 100 : 0}% ${(s.rows || 1) > 1 ? (row / (s.rows - 1)) * 100 : 0}%;${style}"></i>`;
@@ -25,20 +49,27 @@ DS.Camp = (function () {
   }
   function render() {
     const c = C();
-    $('#camp').innerHTML = `<div class="camp-top"><b>🔥 ${esc(me.name)}의 모닥불</b><span class="muted small">${esc(me.c)} · ${me.n}번 — 왼쪽 ⚒ 모루 · 오른쪽 🌀 차원문</span></div>
+    $('#camp').innerHTML = `<div class="camp-top"><b>🔥 ${esc(me.name)}의 모닥불</b><span class="muted small">${esc(me.c)} · ${me.n}번 — 왼쪽 ⚒ 모루 · 오른쪽 🌀 차원문</span><button class="btn small camp-set" id="camp-set">⚙ 설정</button></div>
       ${stampToday() ? '<div class="stamp-bar">📮 반드시 학습지 확인도장 받아가세요.</div>' : ''}
       <div class="camp-scroll" id="camp-scroll"><div class="camp-stage" style="background-image:url('${base()}${c.bg}')">
         ${tree(0, 'back', 'left:2%;bottom:30%;height:46%')}${tree(2, 'back', 'left:60%;bottom:32%;height:40%')}
         <button class="camp-anvil" id="camp-anvil" aria-label="모루">${sheet(c.anvil, c.anvil.states.idle, 0, 'camp-anvil-img')}<span class="camp-label">⚒ 모루</span></button>
         <div class="camp-fire">${sheet(c.fire, 0, 0, 'camp-fire-img', '')}</div>
         <div class="camp-hero">${DS.Art.hero(me.hero, 'idle', 'huff')}<i class="shadow"></i></div>
-        <button class="camp-gate" id="camp-gate" aria-label="차원문">${sheet(c.gate, c.gate.states.on, 0, 'camp-gate-img')}<span class="camp-label">🌀 차원문 · 수업 입장</span></button>
+        <button class="camp-gate empty" id="camp-gate" aria-label="차원문"></button>
         ${tree(3, 'front', 'left:-4%;bottom:-6%;height:52%')}${tree(1, 'front', 'right:-3%;bottom:-4%;height:58%')}
       </div></div>
-      <p class="muted small center">← 화면을 옆으로 밀어 둘러봐요 →</p>`;
-    const sc = $('#camp-scroll'); requestAnimationFrame(() => { sc.scrollLeft = (sc.scrollWidth - sc.clientWidth) / 2; });
+      <p class="muted small center">← 화면을 옆으로 밀어 둘러봐요 → <button class="btn small" id="camp-code">코드로 입장</button></p>`;
+    const sc = $('#camp-scroll'); requestAnimationFrame(() => { if (live && live.open) showGate(false); else sc.scrollLeft = (sc.scrollWidth - sc.clientWidth) / 2; });
     $('#camp-anvil').onclick = () => DS.Forge.open(me);
-    $('#camp-gate').onclick = gate;
+    $('#camp-gate').onclick = () => {
+      if (live && live.open) return DS.Control.run(() => enterCode(live.code));
+      if (live) DS.UI.toast('지난 던전은 닫혔어요. 선생님이 다음 수업을 열면 새 차원문이 나타나요.', 3200);
+      else DS.UI.toast('아직 열린 던전이 없어요. 선생님이 수업을 열면 차원문이 나타나요.', 3200);
+    };
+    $('#camp-code').onclick = codeGate;
+    $('#camp-set').onclick = settings;
+    drawGate();
     animateFire();
   }
   function animateFire() {
@@ -52,8 +83,12 @@ DS.Camp = (function () {
       el.style.backgroundPosition = `${(col / (f.cols - 1)) * 100}% ${(row / (f.rows - 1)) * 100}%`;
     }, f.ms);
   }
-  // 차원문: 수업 코드 → 던전 단체 대기실
-  function gate() {
+  async function enterCode(code) {
+    try { localStorage.setItem('citadel-student', JSON.stringify({ code })); } catch (e) { /* 무시 */ }
+    await DS.Student.enter(code, { num: me.n, nick: me.name, hero: me.hero, fx: me.fx || 'flame', cls: me.c });
+  }
+  // 코드로 입장 (QR · 만약을 위해)
+  function codeGate() {
     let last = ''; try { last = (JSON.parse(localStorage.getItem('citadel-student')) || {}).code || ''; } catch (e) { /* 무시 */ }
     const el = document.createElement('div'); el.className = 'modal camp-modal';
     el.innerHTML = `<div class="quiz-box framed"><h2>🌀 차원문</h2><p>선생님이 알려 준 <b>수업 코드 6자리</b>를 넣으면 던전 대기실로 넘어가요.</p>
@@ -64,11 +99,29 @@ DS.Camp = (function () {
     el.querySelector('#g-go').onclick = () => DS.Control.run(async () => {
       const code = el.querySelector('#g-code').value.trim();
       if (!/^\d{6}$/.test(code)) throw Object.assign(new Error('수업 코드 6자리를 넣어 주세요.'), { user: true });
-      try { localStorage.setItem('citadel-student', JSON.stringify({ code })); } catch (e) { /* 무시 */ }
-      await DS.Student.enter(code, { num: me.n, nick: me.name, hero: me.hero, fx: me.fx || 'fire', cls: me.c });
+      await enterCode(code);
       el.remove(); code0 = '';
     });
   }
+  // ⚙ 설정: 용사 · 공격 이펙트 (잠긴 것은 🔒 + 조건)
+  async function settings() {
+    const L = await DS.Account.looks(me);
+    let hero = me.hero, fx = me.fx || 'flame';
+    const el = document.createElement('div'); el.className = 'modal camp-modal';
+    const draw = () => {
+      el.innerHTML = `<div class="quiz-box framed set-box"><h2>⚙ 설정</h2>
+        <p class="shelf-title">내 용사</p><div class="heroes set-grid">${L.heroes.map((h) => `<button class="hpick${h.id === hero ? ' on' : ''}${h.open ? '' : ' lock'}" data-h="${h.id}" title="${esc(h.cond || '')}">${DS.Art.hero(h.id, h.id === hero ? 'attack' : 'idle')}${h.open ? '' : '<b class="lk">🔒</b>'}</button>`).join('')}</div>
+        <p class="muted small">✨ 추가 용사 첫 번째: 1~3차시 도감 <b>${L.got} / ${L.need}</b>장 모으면 열려요 · 나머지는 추후 공개</p>
+        <p class="shelf-title">공격 이펙트</p><div class="fxs">${L.fx.map((f) => `<button class="fxpick${f.id === fx ? ' on' : ''}${f.open ? '' : ' lock'}" data-fx="${f.id}"><canvas width="150" height="90" data-still="${f.id}"></canvas><span>${f.open ? DS.FX.NAMES[f.id] : '🔒 추후 공개'}</span></button>`).join('')}</div>
+        <div class="row"><button class="btn" id="set-x">닫기</button><button class="btn primary" id="set-ok">저장</button></div></div>`;
+      el.querySelectorAll('canvas[data-still]').forEach((c) => DS.FX.still(c, c.dataset.still));
+      el.querySelectorAll('[data-h]').forEach((b) => (b.onclick = () => { const h = L.heroes.find((x) => x.id === Number(b.dataset.h)); if (!h.open) { DS.UI.toast(`🔒 ${h.cond}`); return; } hero = h.id; DS.Sound.clank(); draw(); }));
+      el.querySelectorAll('[data-fx]').forEach((b) => (b.onclick = () => { const f = L.fx.find((x) => x.id === b.dataset.fx); if (!f.open) { DS.UI.toast('🔒 해금 조건은 추후 공개'); return; } fx = f.id; draw(); DS.FX.play(el.querySelector(`[data-fx="${fx}"]`), fx, { scale: 0.45 }); DS.Sound.hit(); }));
+      el.querySelector('#set-x').onclick = () => el.remove();
+      el.querySelector('#set-ok').onclick = () => DS.Control.run(async () => { await DS.Account.setLook(hero, fx); me.hero = hero; me.fx = fx; el.remove(); DS.UI.toast('저장했어요! 다음 입장부터 적용돼요.'); render(); });
+    };
+    draw(); document.body.appendChild(el);
+  }
   const back = () => (me ? enter(me) : null);
-  return { enter, back, stampToday, markStamp: () => { try { localStorage.setItem('citadel-stamp', today()); } catch (e) { /* 무시 */ } } };
+  return { enter, back, settings, stampToday, markStamp: () => { try { localStorage.setItem('citadel-stamp', today()); } catch (e) { /* 무시 */ } } };
 })();

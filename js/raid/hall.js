@@ -89,8 +89,8 @@ DS.Hall = (function () {
       <p class="lb2-sub">${finale ? '오늘 배운 것 한마디씩 남기고 가자' : `${esc(L.title)} — 선생님 주위로 모여라`}</p>
       ${finale ? `<div class="lb2-cnt">💬 ${words.length} / ${n}</div>` : `<div class="lb2-qr"><div id="h-qr" class="qr"></div><b>${code}</b><span>QR · 수업 코드</span></div>`}
       <div class="lb2-say teacher">${finale ? '모두 수고했네! 오늘 배운 것 한마디씩 남기게' : `${L.no ? `${L.no}차시 ` : ''}${esc(L.title.split('·')[0].trim())} 던전에 온 것을 환영하네!`}</div>
-      <div class="lb2-h teacher" style="left:50%;top:60%">${DS.Art.hero(DS.ASSETS.heroes.teacher, finale ? 'attack' : 'idle', finale ? 'jump' : 'huff')}<i class="shadow"></i><span class="nm gold">선생님</span></div>
-      ${pos.map((o, i) => `<div class="lb2-h" style="left:${o.x}%;top:${o.y}%;--sz:${size}px;animation-delay:${(i * 0.13) % 0.9}s"><span class="nm">${o.p.num} ${esc(o.p.nick)}</span><div class="${o.flip ? 'face-l' : ''}">${DS.Art.hero(o.p.hero, finale && i % 3 === 0 ? 'attack' : 'idle', finale ? 'jump' : 'huff')}</div><i class="shadow"></i>${finale && words.includes(o.u) ? `<span class="lb2-bub" data-u="${o.u}">${esc(R.words[o.u].t)}</span>` : ''}</div>`).join('')}
+      <div class="lb2-h teacher" style="left:50%;top:60%">${DS.Art.hero(DS.ASSETS.heroes.teacher, finale ? 'attack' : 'idle', finale ? 'pairhop' : 'huff')}<i class="shadow"></i><span class="nm gold">선생님</span></div>
+      ${pos.map((o, i) => `<div class="lb2-h" style="left:${o.x}%;top:${o.y}%;--sz:${size}px;animation-delay:${(i * 0.13) % 0.9}s"><span class="nm">${o.p.num} ${esc(o.p.nick)}</span><div class="${(finale ? i % 2 === 1 : o.flip) ? 'face-l' : ''}">${DS.Art.hero(o.p.hero, 'idle', finale ? 'pairhop' : 'huff')}</div><i class="shadow"></i>${finale && words.includes(o.u) ? `<span class="lb2-bub" data-u="${o.u}">${esc(R.words[o.u].t)}</span>` : ''}</div>`).join('')}
       ${finale ? '<div class="stamp-bar wide">📮 반드시 학습지 확인도장 받아가세요.</div>' : ''}
       ${Raid().focusOn(R) ? '<div class="h-focus-badge">⚠ 집중모드</div>' : ''}</div>`;
     if (!finale && window.QRCode) new QRCode($('#h-qr'), { text: studentUrl(), width: 150, height: 150 });
@@ -152,7 +152,7 @@ DS.Hall = (function () {
     const clr = $('#r-clear');
     if (f.done) {
       clr.hidden = false; clr.className = 'raid-clear'; clr.innerHTML = step.kind === 'boss' ? '🎉 보스 격파! 모두 함께 이겼다!' : '⚔ 몬스터 격파!';
-      if (wonFx !== built) { wonFx = built; setTimeout(() => { const m = $('#rm'); if (m) m.innerHTML = DS.Art.monster(f.sprite, 'down'); DS.Sound.correct(); document.querySelectorAll('.fh2 .art').forEach((h) => h.classList.add('cheer')); }, 600); }
+      if (wonFx !== built) { wonFx = built; setTimeout(() => { const m = $('#rm'); if (m) m.innerHTML = DS.Art.monster(f.sprite, 'down'); DS.Sound.correct(); document.querySelectorAll('.fh2').forEach((h, k) => { const a = h.querySelector('.art'); if (!a) return; a.parentElement.classList.toggle('face-l', k % 2 === 1); a.classList.add('pairhop'); a.style.animationDelay = `${(k % 2) * 0.22}s`; }); }, 600); }
     } else if (step.kind === 'monster' && !wait.length && f.hp.left > 0) {
       clr.hidden = false; clr.className = 'raid-clear note'; clr.innerHTML = `모두 공격했다! 남은 체력 ${f.hp.left} — 재도전으로 더 공격하자`;
     } else clr.hidden = true;
@@ -173,7 +173,7 @@ DS.Hall = (function () {
       setTimeout(() => {
         if (ok) {
           DS.Sound.hit();
-          const p = (R.players[a.u] || {}).fx || 'fire';
+          const p = (R.players[a.u] || {}).fx || 'flame';
           DS.FX.play(arena, p, { x: mr.left - ar.left + mr.width / 2, y: mr.top - ar.top + mr.height / 2, scale: Math.min(ar.width, ar.height) / (perfect ? 900 : 1150), perfect });
           m0.classList.remove('flash'); void m0.offsetWidth; m0.classList.add('flash');
           const fx = $('#rm-fx');

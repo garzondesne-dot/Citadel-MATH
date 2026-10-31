@@ -8,7 +8,7 @@ DS.Nav = (function () {
   const EXIT_MS = 2500;
   const embedded = (() => { try { return window.top !== window.self; } catch (e) { return true; } })();
   let warnAt = null, leaving = false;
-  const current = () => (document.querySelector('.screen.active') || {}).id || 'screen-home';
+  const current = () => { const id = (document.querySelector('.screen.active') || {}).id || 'screen-home'; return id === 'screen-splash' ? 'screen-home' : id; };
   const ASK = {
     'screen-camp': null,
     'screen-student': '수업 화면에서 나갈까요?\n수업은 계속되고, 다시 들어오면 기록은 그대로예요.',

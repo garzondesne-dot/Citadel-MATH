@@ -35,7 +35,7 @@ DS.Bots = (function () {
   function step() {
     const st = DS.Raid.stepOf(L, R);
     ids().forEach((u, i) => {
-      if (DS.Raid.isLobby(R)) later(`join|${u}`, 300 + i * rand(150, 450), () => N().set(P(`players/${u}`), { num: i + 2, nick: NICK[i % NICK.length], hero: Math.floor(Math.random() * 7), fx: DS.FX ? DS.FX.KINDS[i % 6] : 'fire', cls: '1-1', at: N().TS }).then(() => N().set(P(`online/${u}`), true)));
+      if (DS.Raid.isLobby(R)) later(`join|${u}`, 300 + i * rand(150, 450), () => N().set(P(`players/${u}`), { num: i + 2, nick: NICK[i % NICK.length], hero: Math.floor(Math.random() * 7), fx: DS.FX ? DS.FX.BASE[i % 6] : 'flame', cls: '1-1', at: N().TS }).then(() => N().set(P(`online/${u}`), true)));
       if (!(R.active || {})[u]) return;
       // 마무리: 대기실로 이동 → 한마디
       if (DS.Raid.isFinale(L, R) || (st && st.kind === 'boss' && DS.Raid.canLobby(L, R, u))) {

@@ -15,7 +15,7 @@ DS.App = (function () {
   async function boot() {
     DS.Art.install();
     DS.PWA.init();
-    try { await DS.Net.init(); } catch (e) { $('#home-msg').textContent = e.message; return; }
+    try { await DS.Net.init(); } catch (e) { DS.UI.show('screen-home'); $('#home-msg').textContent = e.message; return; }
     try { if (await A().endStaleTeacher()) DS.UI.toast('앱을 다시 켜서 교사 계정은 로그아웃했어요.', 3200); } catch (e) { console.error(e); }
     DS.Nav.init();
     $('#mode').innerHTML = DS.Net.mode === 'local' ? '🧪 이 기기 체험 모드 <span class="muted">(Firebase 미설정 — 같은 브라우저 탭끼리만 연결)</span>' : '🌐 실시간 연결 (Firebase)';
@@ -26,6 +26,7 @@ DS.App = (function () {
     await teacherAuth();
     const role = q.get('role');
     if (role) form(role);
+    splash(!role && !DS.Scene.get() && !inFrame());
     if (role === 'hall' && q.get('code')) $('#h-code').value = q.get('code');
     const h = read('citadel-hall');
     if (h) { $('#h-code').value = $('#h-code').value || h.code; $('#h-key').value = h.key; }
@@ -49,7 +50,16 @@ DS.App = (function () {
       else if (sc.role === 'prep' && sc.lesson && (await A().isAdmin())) await DS.Prep.enter(sc.lesson);
     } catch (e) { DS.Scene.clear(); DS.UI.toast(e.message || String(e), 3200); }
   }
-  const info = (m) => ({ num: m.n, nick: m.name, hero: m.hero, fx: m.fx || 'fire', cls: m.c });
+  const info = (m) => ({ num: m.n, nick: m.name, hero: m.hero, fx: m.fx || 'flame', cls: m.c });
+  // 시작 화면: 큰 제목 그림 → 화면을 터치하면 첫 화면 (주소로 바로 들어오거나 새로고침 복귀 · 체험판 안에서는 건너뜀)
+  const inFrame = () => { try { return window.top !== window.self; } catch (e) { return true; } };
+  function splash(on) {
+    if (!on) { DS.UI.show('screen-home'); return; }
+    DS.UI.show('screen-splash');
+    $('#splash-ver').textContent = DS.VERSION;
+    const go1 = () => { $('#splash').onclick = null; DS.Sound.clank(); DS.UI.show('screen-home'); };
+    $('#splash').onclick = go1;
+  }
   function form(which) {
     document.querySelectorAll('.role-form').forEach((f) => (f.hidden = f.id !== `f-${which}`));
     document.querySelectorAll('.role').forEach((b) => b.classList.toggle('on', b.dataset.role === which));
@@ -58,8 +68,8 @@ DS.App = (function () {
     const b = ev.currentTarget; b.disabled = true;
     try { await fn(); } catch (e) { DS.UI.toast(e.message || String(e), 3600); if (!e.user) console.error(e); } finally { b.disabled = false; }
   };
-  let fx = 'fire';
-  const fxPicker = (title = '내 공격 이펙트') => `<p class="shelf-title">${title}</p><div class="fxs">${DS.FX.KINDS.map((k) => `<button class="fxpick${k === fx ? ' on' : ''}" data-fx="${k}"><canvas width="150" height="90" data-still="${k}"></canvas><span>${DS.FX.NAMES[k]}</span></button>`).join('')}</div>`;
+  let fx = 'flame';
+  const fxPicker = (title = '내 공격 이펙트') => `<p class="shelf-title">${title}</p><div class="fxs">${DS.FX.BASE.map((k) => `<button class="fxpick${k === fx ? ' on' : ''}" data-fx="${k}"><canvas width="150" height="90" data-still="${k}"></canvas><span>${DS.FX.NAMES[k]}</span></button>`).join('')}</div>`;
   function bindFx(after) {
     document.querySelectorAll('#s-auth canvas[data-still]').forEach((c) => DS.FX.still(c, c.dataset.still));
     document.querySelectorAll('#s-auth .fxpick').forEach((b) => (b.onclick = () => { fx = b.dataset.fx; document.querySelectorAll('#s-auth .fxpick').forEach((x) => x.classList.toggle('on', x === b)); DS.FX.play(b, fx, { scale: 0.22 }); DS.Sound.hit(); if (after) after(); }));
@@ -73,13 +83,11 @@ DS.App = (function () {
     const m = await A().me();
     if (m) {
       hero = m.hero;
-      const needFx = !m.fx;
       box.innerHTML = `<div class="acc-card"><b>${esc(m.c)} · ${m.n}번 ${esc(m.name)}</b><span class="muted small">로그인됨</span></div>
-        <div class="me-hero">${DS.Art.hero(m.hero, 'idle', 'big huff')}<div><p class="gold">내 용사 · 고정</p><p>${needFx ? '공격 이펙트를 아직 안 골랐어요' : DS.FX.NAMES[m.fx]}</p></div></div>
-        ${needFx ? `${fxPicker('공격 이펙트 고르기 (한 번만 · 고르면 고정)')}<button id="s-fx" class="btn primary">✨ 이 이펙트로 정하기</button>` : '<button id="s-go" class="btn primary big">🔥 모닥불로 가기</button>'}
+        <div class="me-hero">${DS.Art.hero(m.hero, 'idle', 'big huff')}<div><p class="gold">내 용사 · ${DS.FX.NAMES[m.fx] || ''}</p><p class="muted small">모닥불 ⚙ 설정에서 바꿀 수 있어요</p></div></div>
+        <button id="s-go" class="btn primary big">🔥 모닥불로 가기</button>
         <button id="s-out" class="btn small">다른 사람으로 로그인</button>`;
-      if (needFx) { bindFx(); $('#s-fx').onclick = go(async () => { await A().setFx(fx); DS.UI.toast('이펙트를 정했어요!'); studentAuth(); }); }
-      else $('#s-go').onclick = go(() => DS.Camp.enter(m, q.get('code')));
+      $('#s-go').onclick = go(() => DS.Camp.enter(m, q.get('code')));
       $('#s-out').onclick = go(async () => { await A().logout(); studentAuth(); });
       return;
     }
@@ -115,7 +123,7 @@ DS.App = (function () {
     } else if (sMode === 'signup') {
       f.innerHTML = `<p class="muted small">이름이 맞는지 꼭 확인하고 가입해요. 한 번호는 한 명만 가입할 수 있어요.</p>
         <div class="row2"><label>비밀번호 4자리 ${pinInput('s-p1', '숫자 4자리')}</label><label>한 번 더 ${pinInput('s-p2', '다시')}</label></div>${heroPicker()}${fxPicker()}
-        <p class="lock-note">🔒 가입하면 용사·이펙트는 고정돼요 (바꾸려면 선생님께 — 비밀번호 초기화 때 다시 골라요)</p>
+        <p class="muted small">용사·이펙트는 나중에 모닥불 ⚙ 설정에서 언제든 바꿀 수 있어요.</p>
         <button id="s-make" class="btn primary big">✨ 가입하기</button><button id="s-back" class="btn small">← 로그인으로</button>`;
       bindHeroes(() => { const a = $('#s-p1').value, b = $('#s-p2').value; drawForm(); $('#s-p1').value = a; $('#s-p2').value = b; });
       bindFx();
@@ -129,14 +137,11 @@ DS.App = (function () {
     } else {
       f.innerHTML = `<p class="gold">선생님이 비밀번호를 초기화했어요. 새 비밀번호를 정해요.</p>
         <div class="row2"><label>새 비밀번호 4자리 ${pinInput('s-p1', '숫자 4자리')}</label><label>한 번 더 ${pinInput('s-p2', '다시')}</label></div>
-        <p class="muted small">초기화했으니 용사·이펙트도 다시 고를 수 있어요.</p>${heroPicker()}${fxPicker()}
         <button id="s-make" class="btn primary big">🔑 새 비밀번호로 시작</button>`;
-      bindHeroes(() => { const a = $('#s-p1').value, b = $('#s-p2').value; drawForm(); $('#s-p1').value = a; $('#s-p2').value = b; });
-      bindFx();
       $('#s-make').onclick = go(async () => {
         const a = $('#s-p1').value, b = $('#s-p2').value;
         if (a !== b) throw Object.assign(new Error('두 비밀번호가 달라요.'), { user: true });
-        await A().login(c(), n(), '0000', a, hero, fx);
+        await A().login(c(), n(), '0000', a);
         DS.UI.toast('새 비밀번호로 바꿨어요!', 3000); studentAuth();
       });
     }
@@ -149,6 +154,8 @@ DS.App = (function () {
     if (ok) {
       document.querySelectorAll('.t-auth').forEach((e) => { e.innerHTML = '<div class="acc-card"><b>👩‍🏫 교사 계정</b><span class="muted small">로그인됨</span><button class="btn small t-out">로그아웃</button></div>'; });
       document.querySelectorAll('.t-out').forEach((b) => (b.onclick = go(async () => { await A().logout(); await teacherAuth(); await studentAuth(); })));
+      const cs = Object.keys((await A().masks()) || {}).sort();
+      $('#t-cls').innerHTML = cs.length ? cs.map((c) => `<option>${esc(c)}</option>`).join('') : '<option value="">(명단 없음 — 수업 준비에서 올려요)</option>';
       const t = read('citadel-teacher');
       if (t && t.uid === DS.Net.uid()) { $('#t-resume').hidden = false; $('#t-resume').textContent = `↩ 수업 ${t.code} 이어서`; }
       return;
@@ -175,7 +182,9 @@ DS.App = (function () {
         const R0 = await DS.Net.get(`rooms/${t.code}`).catch(() => null);
         if (R0 && R0.meta && !(R0.state || {}).closed && !confirm(`진행 중인 수업 ${t.code} 가 있어요.\n새로 만들면 학생들은 새 코드로 다시 들어와야 해요.\n정말 새 수업을 만들까요?`)) return;
       }
-      await DS.Teacher.create($('#lesson').value);
+      const cls = $('#t-cls').value;
+      if (!cls) throw Object.assign(new Error('수업을 여는 반을 골라 주세요. (명단에 있는 반)'), { user: true });
+      await DS.Teacher.create($('#lesson').value, cls);
     });
     $('#t-resume').onclick = go(() => { const t = read('citadel-teacher'); return DS.Teacher.open(t.code, t.hallKey); });
     $('#t-code-go').onclick = go(async () => {

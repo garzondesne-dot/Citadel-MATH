@@ -28,6 +28,8 @@ Realtime Database → 규칙 → `firebase/database.rules.json` 전체를 붙여
 | `unlock/{반}` | 교사 계정 (차시 배포 → 모루 열림, 1~30) |
 | `cards/{반}/{번호}/{카드}` | 그 반·번호 계정 본인 (만든 카드) |
 | `wordLock` | 교사 계정 (다음 차시에도 한마디 잠금) |
+| `live/{반}` (v0.5.1) | 교사 계정 (반별 차원문: 수업 만들 때 열림 · 끝나면 꺼짐) |
+| `prep/{차시}/think` (v0.5.1) | 교사 계정 (생각 시간 0~30초) |
 
 ## 보안 규칙 요약 (`firebase/database.rules.json`)
 | 경로 | 쓰기 |

@@ -49,3 +49,13 @@
 | `camp-forest-v1` · `campfire-v1`(8프레임) · `gates-v1` · `camp-trees-v1` · `anvil-v1` | 모닥불 개인 대기실 |
 | `card-frame-v1` · `card-arts-v1` | 기존 카드(`cards-v4`) 8장을 겹쳐 뽑은 공통 금테 + 무기·마법 그림 8칸 (배치표 `cardKit`) |
 | `forge-anvil-v1` · `forge-hammer-v1` | 사용자 제공 sky-hammer-forge 의 위에서 본 모루 · 망치 (배치표 `forge`, 작업면 `face`) |
+
+## v0.5.1 브랜드 (사용자 제공 everyone-dungeon-math2 · everyone-menu-icons)
+| 파일 | 쓰임 | 구분 |
+|---|---|---|
+| `brand-m2-title-v1` | 시작 화면 (제목 · 에디션 포함 세로 그림) | 에디션 |
+| `brand-m2-header-v1` · `brand-m2-logo-v1` | 첫 화면 머리 배너 · 투명 로고(예비) | 에디션 |
+| `brand-bg-v1` | 글자 없는 세로 배경 (예비) | 공용 |
+| `menu-icons-v1` | 학생 · 교사 · 종합상황실 · 수업 준비 · 로그인 아이콘 5칸 (두 묶음의 아이콘은 같은 파일) | 공용 |
+| `icons/*.png` | 앱 아이콘 (icon.webp 에서 192 · 512 · 둥근 512 · 180) | 에디션 |
+| `heroes-extra-v1` | 추가 용사 8종 (설정에서 잠금 · 첫 번째는 1~3차시 도감 완성 보상) | 공용 |

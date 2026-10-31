@@ -71,11 +71,11 @@ DS.Account = (function () {
       if (e.code === 'auth/email-already-in-use') fail('이미 가입한 번호예요. 로그인해 주세요.');
       rethrow(e);
     }
-    try { await N().set(`accounts/${c}/${n}`, { uid: N().uid(), gen, hero: hero != null ? Number(hero) : (acc && acc.hero) || 0, fx: fx || (acc && acc.fx) || 'fire', at: N().TS }); } catch (e) { await N().signOut(); fail('이미 가입한 번호예요. 로그인해 주세요.'); }
+    try { await N().set(`accounts/${c}/${n}`, { uid: N().uid(), gen, hero: hero != null ? Number(hero) : (acc && acc.hero) || 0, fx: fx || (acc && acc.fx) || 'flame', at: N().TS }); } catch (e) { await N().signOut(); fail('이미 가입한 번호예요. 로그인해 주세요.'); }
     return me();
   }
   // 로그인. 초기화된 계정이면 { needNewPin: true } 를 돌려주고, newPin 을 주면 새 로그인을 만들어 연결한다
-  // 용사·공격 이펙트는 가입할 때 고르고 고정. 초기화(0000) 뒤 새 비밀번호를 정할 때만 다시 고른다 (hero·fx)
+  // 초기화(0000) 뒤에는 새 비밀번호만 정한다. 용사·이펙트는 그대로 (⚙ 설정에서 언제든 바꿈)
   async function login(c, n, pin, newPin, hero, fx) {
     const acc = await accountOf(c, n);
     if (!acc) fail('아직 가입하지 않은 번호예요. "처음이에요 · 가입" 을 눌러요.');
@@ -97,13 +97,32 @@ DS.Account = (function () {
     if (cache && cache.uid === uid) return cache;
     const all = (await N().get('accounts')) || {};
     for (const [c, byN] of Object.entries(all)) for (const [n, a] of Object.entries(byN || {})) {
-      if (a && a.uid === uid) { const name = await N().get(`roster/${c}/${n}`); cache = { uid, c, n: Number(n), name: name || '', hero: a.hero || 0, fx: a.fx || null }; return cache; }
+      if (a && a.uid === uid) { const name = await N().get(`roster/${c}/${n}`); cache = { uid, c, n: Number(n), name: name || '', hero: a.hero || 0, fx: DS.FX ? DS.FX.usable(a.fx || 'flame') : a.fx || 'flame' }; return cache; }
     }
     return null;
   }
   async function setHero(hero) { const m = await me(); if (!m) return; await N().set(`accounts/${m.c}/${m.n}/hero`, Number(hero)); m.hero = Number(hero); }
-  // 이펙트가 생기기 전에 가입한 학생: 처음 한 번만 고른다 (그 뒤 고정)
-  async function setFx(fx) { const m = await me(); if (!m || m.fx) return; await N().set(`accounts/${m.c}/${m.n}/fx`, String(fx)); m.fx = String(fx); }
+  async function setFx(fx) { const m = await me(); if (!m) return; await N().set(`accounts/${m.c}/${m.n}/fx`, String(fx)); m.fx = String(fx); }
+  // ⚙ 설정: 용사 · 이펙트 바꾸기. 잠긴 것은 고를 수 없다 (looks() 로 확인)
+  async function setLook(hero, fx) {
+    const m = await me(); if (!m) return;
+    const L = await looks(m);
+    if (!L.heroes.find((h) => h.id === Number(hero) && h.open)) fail('아직 잠긴 용사예요.');
+    if (!L.fx.find((f) => f.id === fx && f.open)) fail('아직 잠긴 이펙트예요.');
+    await N().update(`accounts/${m.c}/${m.n}`, { hero: Number(hero), fx: String(fx) }); m.hero = Number(hero); m.fx = String(fx);
+  }
+  // 고를 수 있는 용사 · 이펙트 목록 (잠금 · 해금 조건)
+  // 기본 용사 0~6 · 기본 이펙트 6종 = 열림. 추가 용사 8번 = 1~3차시 도감 15장 완성 보상, 9~15번 · 화려한 이펙트 = 추후 공개
+  async function looks(m) {
+    m = m || (await me());
+    const owned = (m && (await N().get(`cards/${String(m.c).replace(/[.#$/[\]]/g, '_')}/${m.n}`).catch(() => null))) || {};
+    const need = DS.Unit ? DS.Unit.CARDS.filter((c) => c.no <= 3) : [];
+    const got = need.filter((c) => owned[c.id]).length;
+    const heroes = Array.from({ length: 7 }, (_, i) => ({ id: i, open: true }))
+      .concat(Array.from({ length: 8 }, (_, i) => ({ id: 8 + i, open: i === 0 && need.length > 0 && got === need.length, cond: i === 0 ? `1~3차시 도감 ${got} / ${need.length}장 모으면 열려요` : '해금 조건은 추후 공개' })));
+    const fx = DS.FX.BASE.map((k) => ({ id: k, open: true })).concat(DS.FX.FANCY.map((k) => ({ id: k, open: false, cond: '해금 조건은 추후 공개' })));
+    return { heroes, fx, got, need: need.length };
+  }
   async function logout() { cache = null; tsess(false); await N().signOut(); }
 
   // ── 교사 계정 ────────────────────────────────────────────
@@ -132,5 +151,5 @@ DS.Account = (function () {
     tsess(true);
   }
 
-  return { classKey, email, teacherEmail, pw, validPin, mask, parseRoster, uploadRoster, removeStudent, resetAccount, masks, accountOf, signUp, login, me, setHero, setFx, logout, adminExists, isAdmin, teacherCreate, teacherLogin, endStaleTeacher };
+  return { classKey, email, teacherEmail, pw, validPin, mask, parseRoster, uploadRoster, removeStudent, resetAccount, masks, accountOf, signUp, login, me, setHero, setFx, setLook, looks, logout, adminExists, isAdmin, teacherCreate, teacherLogin, endStaleTeacher };
 })();

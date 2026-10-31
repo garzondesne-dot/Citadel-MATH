@@ -1,16 +1,60 @@
-// 공격 이펙트 6종 (캔버스 애니메이션). 학생이 가입할 때 하나 고르고 고정 → 공격 성공 때 몬스터 위에서 터진다.
+// 공격 이펙트 (캔버스 애니메이션). 기본 6종(작고 적당한 크기, 모두 열림) + 화려한 6종(🔒 해금 조건은 추후 공개).
+// 학생은 ⚙ 설정에서 기본 6종 중 하나를 고른다 → 공격 성공 때 몬스터 위에서 터진다.
 // play(상자, 종류, { x, y, scale, perfect }) : 상자(position: relative) 위에 캔버스를 잠깐 띄워 0.9초(만점 1.3초) 동안 그린다.
 // still(캔버스, 종류) : 고르기 화면용 정지 그림.
 window.DS = window.DS || {};
 
 DS.FX = (function () {
-  const KINDS = ['fire', 'lightning', 'ice', 'stars', 'slash', 'vortex'];
-  const NAMES = { fire: '🔥 화염 폭발', lightning: '⚡ 천둥 낙뢰', ice: '❄ 얼음 파쇄', stars: '✨ 별빛 폭죽', slash: '⚔ 삼연 참격', vortex: '🌀 차원 소용돌이' };
+  const BASE = ['cut', 'flame', 'spark', 'frost', 'twinkle', 'orb'];           // 기본 (열림)
+  const FANCY = ['fire', 'lightning', 'ice', 'stars', 'slash', 'vortex'];     // 화려 (잠금)
+  const KINDS = BASE.concat(FANCY);
+  const NAMES = { cut: '⚔ 베기', flame: '🔥 불꽃', spark: '⚡ 번개', frost: '❄ 얼음', twinkle: '✨ 별', orb: '🔮 마법탄',
+    fire: '🔥 화염 폭발', lightning: '⚡ 천둥 낙뢰', ice: '❄ 얼음 파쇄', stars: '✨ 별빛 폭죽', slash: '⚔ 삼연 참격', vortex: '🌀 차원 소용돌이' };
+  // 잠긴 이펙트를 가진 계정은 같은 계열 기본 이펙트로 (해금되면 그대로 씀)
+  const BASE_OF = { fire: 'flame', lightning: 'spark', ice: 'frost', stars: 'twinkle', slash: 'cut', vortex: 'orb' };
+  const usable = (k, unlocked = {}) => (BASE.includes(k) || (FANCY.includes(k) && unlocked[k]) ? k : BASE_OF[k] || 'flame');
   const rng = (s) => () => (s = (s * 1664525 + 1013904223) >>> 0) / 4294967296;
   function star(g, x, y, r, n = 5, ins = 0.45) { g.beginPath(); for (let i = 0; i < n * 2; i++) { const a = (Math.PI * i) / n - Math.PI / 2, rr = i % 2 ? r * ins : r; g.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr); } g.closePath(); g.fill(); }
   function glow(g, x, y, r, c0, c1) { if (r <= 0) return; const gr = g.createRadialGradient(x, y, 0, x, y, r); gr.addColorStop(0, c0); gr.addColorStop(1, c1); g.fillStyle = gr; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); }
   // t: 0→1 진행, k: 크기, R: 이번 재생의 난수(같은 재생 안에서는 같은 모양)
   const DRAW = {
+    // ── 기본 6종: 작고 짧게 (몬스터 크기의 절반 정도) ──
+    cut(g, x, y, k, t) {
+      g.globalCompositeOperation = 'lighter';
+      const p = Math.min(1, t * 2.5);
+      g.save(); g.translate(x, y); g.rotate(-0.6);
+      g.strokeStyle = 'rgba(255,255,255,.95)'; g.lineWidth = 7 * k; g.lineCap = 'round';
+      g.beginPath(); g.moveTo(-90 * k, 0); g.lineTo(-90 * k + 180 * k * p, 0); g.stroke();
+      g.strokeStyle = 'rgba(170,220,255,.6)'; g.lineWidth = 18 * k; g.stroke(); g.restore();
+      glow(g, x, y, 40 * k, 'rgba(255,255,255,.8)', 'rgba(170,220,255,0)');
+    },
+    flame(g, x, y, k, t, R) {
+      g.globalCompositeOperation = 'lighter'; glow(g, x, y, 70 * k, 'rgba(255,220,140,.9)', 'rgba(255,90,0,0)');
+      for (let i = 0; i < 18; i++) { const a = R() * 7, d = (20 + R() * 60) * k * (0.5 + t); g.fillStyle = `rgba(255,${(120 + R() * 110) | 0},40,.85)`; g.beginPath(); g.arc(x + Math.cos(a) * d, y + Math.sin(a) * d - t * 20 * k, (3 + R() * 4) * k, 0, 7); g.fill(); }
+    },
+    spark(g, x, y, k, t, R, frame) {
+      g.globalCompositeOperation = 'lighter'; glow(g, x, y, 60 * k, 'rgba(220,240,255,.85)', 'rgba(90,140,255,0)');
+      if (t < 0.6) { const B = rng(3 + Math.floor(frame / 3)); g.strokeStyle = '#fff'; g.lineWidth = 3 * k; g.beginPath(); g.moveTo(x - 10 * k, y - 110 * k); for (let i = 1; i <= 5; i++) g.lineTo(x + (B() - 0.5) * 30 * k, y - 110 * k + i * 22 * k); g.stroke(); }
+      for (let i = 0; i < 12; i++) { const a = R() * 7, d = R() * 50 * k * (0.5 + t); g.fillStyle = '#cfe6ff'; g.fillRect(x + Math.cos(a) * d, y + Math.sin(a) * d, 3 * k, 3 * k); }
+    },
+    frost(g, x, y, k, t, R) {
+      g.globalCompositeOperation = 'lighter'; glow(g, x, y, 60 * k, 'rgba(210,250,255,.8)', 'rgba(80,170,255,0)'); g.globalCompositeOperation = 'source-over';
+      for (let i = 0; i < 8; i++) { const a = (i / 8) * 7, l = (30 + R() * 24) * k, off = 12 * k + t * 18 * k; g.save(); g.translate(x, y); g.rotate(a); g.fillStyle = '#dff8ff'; g.strokeStyle = '#7fd0ff'; g.lineWidth = 1.5 * k; g.beginPath(); g.moveTo(off, 0); g.lineTo(off + l * 0.4, -6 * k); g.lineTo(off + l, 0); g.lineTo(off + l * 0.4, 6 * k); g.closePath(); g.fill(); g.stroke(); g.restore(); }
+    },
+    twinkle(g, x, y, k, t, R) {
+      const C = ['#ffd84a', '#ff8ad8', '#8ae8ff', '#b6ff8a'];
+      g.globalCompositeOperation = 'lighter'; glow(g, x, y, 50 * k, 'rgba(255,255,220,.7)', 'rgba(255,230,160,0)');
+      for (let i = 0; i < 8; i++) { const a = (i / 8) * 7 + t, d = (25 + t * 55) * k; g.fillStyle = C[i % 4]; star(g, x + Math.cos(a) * d, y + Math.sin(a) * d, 9 * k); }
+      g.fillStyle = '#fff'; star(g, x, y, 16 * k, 4, 0.3);
+    },
+    orb(g, x, y, k, t) {
+      g.globalCompositeOperation = 'lighter';
+      const r = (18 + t * 50) * k;
+      glow(g, x, y, r * 1.6, 'rgba(210,150,255,.9)', 'rgba(120,40,220,0)');
+      g.strokeStyle = 'rgba(240,210,255,.9)'; g.lineWidth = 3 * k; g.beginPath(); g.arc(x, y, r, 0, 7); g.stroke();
+      g.beginPath(); g.arc(x, y, r * 0.6, t * 6, t * 6 + 4); g.stroke();
+    },
+    // ── 화려한 6종 (잠금) ──
     fire(g, x, y, k, t, R) {
       g.globalCompositeOperation = 'lighter';
       glow(g, x, y, 170 * k, 'rgba(255,240,180,.95)', 'rgba(255,80,0,0)');
@@ -65,7 +109,8 @@ DS.FX = (function () {
   }
   // 상자 위에서 한 번 터뜨린다 (x·y: 상자 안 좌표, 없으면 가운데)
   function play(box, kind, opt = {}) {
-    if (!box || !KINDS.includes(kind)) kind = 'fire';
+    if (!box) return;
+    if (!KINDS.includes(kind)) kind = 'flame';
     const r = box.getBoundingClientRect(), dpr = Math.min(2, window.devicePixelRatio || 1);
     const cv = document.createElement('canvas'); cv.className = 'fx-canvas';
     cv.width = Math.max(1, r.width * dpr); cv.height = Math.max(1, r.height * dpr);
@@ -86,5 +131,5 @@ DS.FX = (function () {
     const g = cv.getContext('2d'); g.clearRect(0, 0, cv.width, cv.height);
     frameAt(g, kind, cv.width / 2, cv.height * 0.5, Math.min(cv.width, cv.height) / 480, 0.45, 7, 0);
   }
-  return { KINDS, NAMES, play, still };
+  return { KINDS, BASE, FANCY, NAMES, BASE_OF, usable, play, still };
 })();

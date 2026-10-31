@@ -467,7 +467,7 @@ i.shadow { display: block; position: absolute; left: 50%; bottom: -4px; width: 7
 .camp-tree { position: absolute; display: block; background-repeat: no-repeat; pointer-events: none; }
 .camp-tree.back { z-index: 1; filter: brightness(.75); }
 .camp-tree.front { z-index: 6; filter: brightness(.55); }
-.camp-anvil, .camp-gate { position: absolute; z-index: 3; background: none; border: 0; padding: 0; cursor: pointer; display: flex; flex-direction: column; align-items: center; }
+.camp-anvil, .camp-gate { position: absolute; z-index: 7; background: none; border: 0; padding: 0; cursor: pointer; display: flex; flex-direction: column; align-items: center; }
 .camp-anvil { left: 14%; bottom: 20%; width: 15%; }
 .camp-anvil-img { display: block; width: 100%; aspect-ratio: 362 / 362; background-repeat: no-repeat; filter: drop-shadow(0 6px 6px #000c); }
 .camp-gate { left: 74%; bottom: 22%; width: 20%; }
@@ -614,3 +614,55 @@ body.forge-open { overflow: hidden; }
 .fg-reveal .mcard { animation: pop 0.5s; filter: drop-shadow(0 0 24px #fff) drop-shadow(0 0 40px #ffcf5a); }
 .fg-name { font-size: 22px; color: #ffe7a8; }
 #quiz { z-index: 60; }
+
+/* ═══════════ v0.5.1 브랜드: 모두의 던전 : 공통수학2 ═══════════ */
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.brand-head { position: relative; margin: 4px 0 6px; }
+.brand-head .brand-ver { position: absolute; right: 6px; bottom: 2px; font-size: 11px; color: var(--muted); }
+.menu-ic { display: inline-block; width: 44px; height: 44px; background-repeat: no-repeat; image-rendering: auto; }
+.role .menu-ic { display: block; margin: 0 auto 2px; }
+#screen-splash { position: fixed; inset: 0; z-index: 30; background: #06101b; }
+.splash { position: absolute; inset: 0; background-size: cover; background-position: center top; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: max(14vh, 70px); }
+@media (min-aspect-ratio: 3/4) { .splash { background-size: contain; background-repeat: no-repeat; background-color: #06101b; } }
+.splash-tap { margin: 0; padding: 8px 20px; font-size: clamp(18px, 4.6vw, 26px); color: #fff; text-shadow: 0 2px 0 #000, 0 0 12px #5ae8ff; background: #06101bb0; border: 2px solid #e8b85a; animation: tapBlink 1.4s ease-in-out infinite; }
+@keyframes tapBlink { 50% { opacity: 0.35; } }
+.splash-ver { margin: 10px 0 0; font-size: 11px; color: #8fa3c8; }
+
+/* 클리어 축하: 두 명씩 마주 보고 번갈아 두 번 콩콩 + 반짝임 (제공 모션 팩 success) */
+.pairhop { animation: pairhop 1.4s ease-in-out infinite; transform-origin: 50% 100%; position: relative; }
+.pairhop::after { content: ''; position: absolute; left: 50%; top: -12%; width: 6px; height: 14px; background: #f8db78; box-shadow: -4px 4px 0 -1px #f8db78, 4px 4px 0 -1px #f8db78; transform: translateX(-50%); animation: twinkleUp 1.4s ease-in-out infinite; }
+@keyframes pairhop { 0%, 100% { transform: translate(0, 0) rotate(0); } 8% { transform: translate(2%, -16%) rotate(3deg); } 16% { transform: translate(3%, 0) scale(1.04, .96); } 25% { transform: translate(4%, -11%) rotate(-2deg); } 34% { transform: translate(3%, 0) scale(1.03, .97); } 50% { transform: translate(0, 0); } }
+@keyframes twinkleUp { 0%, 100% { opacity: 0; transform: translate(-50%, 0) scale(.6); } 30% { opacity: 1; transform: translate(-50%, -6px) scale(1); } 60% { opacity: 0; } }
+/* 실패: 몸을 낮추고 기울여 축 처짐 (잠깐) */
+.slump { animation: slump 1.6s ease-out forwards; transform-origin: 50% 100%; }
+@keyframes slump { 0% { transform: none; } 30% { transform: scale(1, .86) rotate(6deg) translateY(2px); } 75% { transform: scale(1, .86) rotate(5deg) translateY(2px); } 100% { transform: none; } }
+/* 1:1 대치 화면 */
+.scene.enc { display: block; height: 240px; }
+.enc-hero { position: absolute; left: 10%; bottom: 14px; z-index: 2; display: flex; flex-direction: column; align-items: center; transition: transform .3s; }
+.enc-hero .art { width: 96px; height: 96px; }
+.enc-tries { display: flex; gap: 4px; margin-bottom: 2px; padding: 2px 6px; background: #000a; border: 1px solid #e8b85a; }
+.enc-tries i { width: 10px; height: 10px; border-radius: 50%; background: #333a4d; border: 1px solid #000; }
+.enc-tries i.on { background: #ffcf5a; box-shadow: 0 0 5px #ffb04a; }
+.scene.enc.hit .enc-hero { animation: encDash .7s ease-in-out; }
+@keyframes encDash { 40% { transform: translateX(130%) scale(1.1); } 55% { transform: translateX(118%) scale(1.1); } 100% { transform: none; } }
+.enc-mon { position: absolute; right: 6%; bottom: 10px; display: flex; flex-direction: column; align-items: center; z-index: 1; }
+.enc-mon .art.monster { width: 150px; height: 150px; margin: 0; filter: drop-shadow(0 6px 8px #000c); }
+.scene.enc .segs { position: static; margin-top: 2px; width: 150px; }
+.scene.enc.special .enc-mon .art.monster { filter: drop-shadow(0 6px 8px #000c) hue-rotate(200deg) saturate(1.4); }
+.scene.enc.hit .enc-mon .art.monster { animation: flashRW 0.5s 2; }
+.scene.enc.miss .enc-mon .art.monster { animation: none; }
+/* 모닥불 차원문(차시 포털) · 설정 */
+.camp-gate.empty { width: 18%; min-height: 30%; justify-content: flex-end; }
+.camp-label.dim { opacity: .75; animation: none; white-space: normal; text-align: center; }
+.camp-portal { display: block; width: 100%; aspect-ratio: 417 / 471; background-size: 200% 100%; background-repeat: no-repeat; filter: drop-shadow(0 0 18px #6fd0ff99); }
+.camp-gate.open .camp-portal { animation: float 3s ease-in-out infinite; }
+.camp-gate.appear .camp-portal { animation: portalIn 1.1s ease-out, float 3s 1.1s ease-in-out infinite; }
+@keyframes portalIn { 0% { transform: scale(.1); opacity: 0; filter: brightness(4); } 60% { transform: scale(1.15); opacity: 1; } 100% { transform: scale(1); } }
+.camp-gate.closed .camp-portal { filter: grayscale(.6) brightness(.6); }
+.camp-top { position: relative; }
+.camp-set { position: absolute; right: 10px; top: 10px; }
+.set-box { max-height: 92dvh; overflow-y: auto; }
+.set-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
+.hpick.lock, .fxpick.lock { filter: grayscale(1) brightness(.5); position: relative; }
+.hpick .lk { position: absolute; right: 2px; top: 0; font-size: 14px; }
+.hpick { position: relative; }
