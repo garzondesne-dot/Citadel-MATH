@@ -6,7 +6,9 @@ DS.Teacher = (function () {
   const $ = (s) => document.querySelector(s);
   const { esc } = DS.UI;
   const C = () => DS.Control, Raid = () => DS.Raid;
-  let code = null, L = null, R = null, raw = null, stop = null, tick = 0;
+  let code = null, L = null, R = null, raw = null, stop = null, tick = 0, showKey = 0;
+  // 종합상황실 키는 화면에 **** 로 가린다 (교실 화면에 비칠 수 있어서). [보기] 를 누르면 5초만 보인다
+  const keyHtml = () => (Date.now() < showKey ? `<b>${esc($('#t-key').textContent)}</b>` : '<b>****</b> <button class="btn small t-keyshow">보기</button>');
 
   async function create(lessonId) {
     const r = await DS.Act.createRoom(lessonId);
@@ -29,7 +31,7 @@ DS.Teacher = (function () {
   function render() {
     const studs = Object.keys(R.players || {}).filter((u) => !R.players[u].teacher);
     const total = L.steps.length, i = R.state.step ?? -1;
-    $('#t-head').innerHTML = `<div><b>수업 ${code}</b> <span class="muted small">${esc(L.title)}</span><br><span class="muted small">종합상황실 키 <b>${esc($('#t-key').textContent)}</b> · 입장 ${studs.length}${Raid().isLobby(R) ? '' : ` · 대기실 인원 ${Raid().headcount(R)}`}</span></div>
+    $('#t-head').innerHTML = `<div><b>수업 ${code}</b> <span class="muted small">${esc(L.title)}</span><br><span class="muted small">종합상황실 키 ${keyHtml()} · 입장 ${studs.length}${Raid().isLobby(R) ? '' : ` · 대기실 인원 ${Raid().headcount(R)}`}</span></div>
       <div class="phase-pill">${i < 0 ? '대기' : i >= total ? '끝' : `${i + 1}/${total}`}</div>`;
     $('#t-tabs').innerHTML = '';
     const body = $('#t-body');
@@ -38,6 +40,7 @@ DS.Teacher = (function () {
       <p class="t-next muted small">다음 ▶ <b>${esc(C().nextName(L, R))}</b></p>
       <div class="t-pad"><button class="btn t-back" id="t-back"${i < 0 ? ' disabled' : ''}>◀<br>뒤로</button><button class="btn primary t-fwd" id="t-fwd"${i >= total ? ' disabled' : ''}>▶<br>앞으로</button></div>`;
     if (Raid().isLobby(R)) drawQR();
+    document.querySelectorAll('.t-keyshow').forEach((b) => (b.onclick = () => { showKey = Date.now() + 5000; render(); setTimeout(() => { if (R) render(); }, 5100); }));
     C().bindPct(body, code, R, L);
     body.querySelectorAll('[data-help]').forEach((b) => (b.onclick = () => C().run(() => DS.Act.clearHelp(code, b.dataset.help))));
     $('#t-fwd').onclick = () => C().run(() => C().forward(code, R, L));
@@ -56,7 +59,7 @@ DS.Teacher = (function () {
   }
   function lobby() {
     const studs = Object.entries(R.players || {}).filter(([, p]) => !p.teacher).sort((a, b) => a[1].num - b[1].num);
-    return `<div class="panel framed"><p class="stage-name">학생 입장</p><div class="qr-row"><div id="t-qr" class="qr"></div><div><p>수업 코드 <b class="big-code">${code}</b></p><p class="muted small break">${esc(studentUrl())}</p><p class="muted small">종합상황실(PC): 첫 화면 → 종합상황실 → 코드 ${code} · 키 ${esc($('#t-key').textContent)}</p></div></div>
+    return `<div class="panel framed"><p class="stage-name">학생 입장</p><div class="qr-row"><div id="t-qr" class="qr"></div><div><p>수업 코드 <b class="big-code">${code}</b></p><p class="muted small break">${esc(studentUrl())}</p><p class="muted small">종합상황실(PC): 첫 화면 → 종합상황실 → 코드 ${code} · 키는 위쪽 [보기]</p></div></div>
       <div class="chips">${studs.map(([, p]) => `<span class="chip">${p.num}번 ${esc(p.nick)}</span>`).join('') || '<span class="muted">아직 아무도 없어요</span>'}</div></div>`;
   }
   function drawQR() {

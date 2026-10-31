@@ -127,7 +127,7 @@ DS.App = (function () {
       document.querySelectorAll('.t-auth').forEach((e) => { e.innerHTML = '<div class="acc-card"><b>👩‍🏫 교사 계정</b><span class="muted small">로그인됨</span><button class="btn small t-out">로그아웃</button></div>'; });
       document.querySelectorAll('.t-out').forEach((b) => (b.onclick = go(async () => { await A().logout(); await teacherAuth(); await studentAuth(); })));
       const t = read('citadel-teacher');
-      if (t && t.uid === DS.Net.uid()) { $('#t-resume').hidden = false; $('#t-resume').textContent = `↩ 수업 ${t.code} 이어서 (키 ${t.hallKey})`; }
+      if (t && t.uid === DS.Net.uid()) { $('#t-resume').hidden = false; $('#t-resume').textContent = `↩ 수업 ${t.code} 이어서`; }
       return;
     }
     const first = !(await A().adminExists());
