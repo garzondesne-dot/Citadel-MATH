@@ -383,3 +383,9 @@ textarea { display: block; width: 100%; font: 15px var(--pixel); color: var(--te
 .r-table { width: 100%; border-collapse: collapse; margin: 4px 0 10px; font-size: 14px; }
 .r-table th, .r-table td { border: 1px solid var(--line); padding: 4px 6px; text-align: left; }
 .r-table th { color: var(--muted); }
+
+/* ── v0.4 2차시: 고르기 · O/X · 벤 다이어그램 보기 ─────────── */
+.item-opts.col { flex-direction: column; }
+.item-opts .opt { text-align: left; padding: 8px 10px; font-size: 15px; }
+.venn { width: 170px; height: 74px; display: block; color: var(--text); }
+.choice.on .venn { color: #ffe7a8; }

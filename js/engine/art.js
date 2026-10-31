@@ -8,7 +8,13 @@ DS.Art = (function () {
     return `<i class="art ${sheet} ${cls}" style="background-image:url('${A().base}${s.src}');background-size:${s.cols * 100}% ${s.rows * 100}%;background-position:${pos(col, s.cols, row, s.rows)}"></i>`;
   }
   const hero = (n, pose = 'idle', cls = '') => cell('heroes', A().heroes.poses[pose] || 0, ((n % A().heroes.count) + A().heroes.count) % A().heroes.count, `hero ${cls}`);
-  const monster = (n, pose = 'idle', cls = '') => cell('monsters', A().monsters.poses[pose] || 0, n % A().monsters.rows, `monster ${cls}`);
+  // n = 숫자(기본 시트) 또는 'extra:3' · 'new:5' (추가 시트)
+  const SHEETS = { extra: 'monstersExtra', new: 'monstersNew' };
+  function monster(n, pose = 'idle', cls = '') {
+    const [k, i] = typeof n === 'string' && n.includes(':') ? n.split(':') : [null, n];
+    const sheet = SHEETS[k] || 'monsters', s = A()[sheet];
+    return cell(sheet, s.poses[pose] || 0, Number(i) % s.rows, `monster ${cls}`);
+  }
   const card = (art, cls = '') => cell('cards', art % A().cards.cols, Math.floor(art / A().cards.cols) % A().cards.rows, `card-art ${cls}`);
   function css() { // 글꼴·프레임·배경을 배치표에서
     const a = A();
@@ -16,7 +22,8 @@ DS.Art = (function () {
 @font-face{font-family:'Galmuri11';font-weight:700;src:url('${a.fonts.pixelBold}') format('woff2');font-display:swap}
 .framed{border:14px solid transparent;border-image:url('${a.base}${a.frame.src}') ${a.frame.slice} / 14px stretch}
 .bg-dungeon{background-image:linear-gradient(#0a1424aa,#0a1424ee),url('${a.base}${a.background.src}');background-size:cover;background-position:center}
-.bg-scene{background-image:linear-gradient(#0a142466,#0a142411 40%,#0a1424dd),url('${a.base}${(a.scene || a.background).src}');background-size:cover;background-position:center 65%}`;
+.bg-scene{background-image:linear-gradient(#0a142466,#0a142411 40%,#0a1424dd),url('${a.base}${(a.scene || a.background).src}');background-size:cover;background-position:center 65%}
+${(a.dungeons ? a.dungeons.ids : []).map((id) => `.bg-scene.th-${id}{background-image:linear-gradient(#0a142455,#0a142400 40%,#0a1424cc),url('${a.base}${a.dungeons.bg(id)}')}`).join('\n')}`;
   }
   function install() { const s = document.createElement('style'); s.textContent = css(); document.head.appendChild(s); }
   return { cell, hero, monster, card, install, pos };

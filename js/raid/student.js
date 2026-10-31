@@ -57,7 +57,7 @@ DS.Student = (function () {
   // ── 몬스터와 1:1 대치 ─────────────────────────────────────
   function scene(step, rec, hp, cls = '') {
     const segs = Array.from({ length: rec.total }, (_, i) => `<i class="${i < rec.best ? 'gone' : ''}"></i>`).join('');
-    return `<div class="scene bg-scene ${cls}${step.special ? ' special' : ''}"><div class="scene-bar"><div><b>${step.special ? '⭐ 난입! ' : ''}${esc(step.title)}</b><br><span class="muted small">레이드 체력 ${hp.left} / ${hp.max}</span></div></div>
+    return `<div class="scene bg-scene th-${L.theme || ''} ${cls}${step.special ? ' special' : ''}"><div class="scene-bar"><div><b>${step.special ? '⭐ 난입! ' : step.review ? '📖 ' : ''}${esc(step.title)}</b><br><span class="muted small">레이드 체력 ${hp.left} / ${hp.max}</span></div></div>
       ${DS.Art.monster(L.monsters[step.id].sprite, Raid().cleared(L, R, step.id) ? 'down' : 'idle', Raid().cleared(L, R, step.id) ? '' : 'float')}
       <div class="segs" title="내가 맞힌 만큼 칸이 깨져요">${segs}</div></div>`;
   }
@@ -85,6 +85,12 @@ DS.Student = (function () {
     const rb = $('#st-retry');
     if (rb) rb.onclick = () => { retrying = `${mid}|${rec.nextAttempt}`; form = null; DS.Sound.clank(); render(); };
   }
+  // 보기 글자: 'venn:B|1 2 3 6' 은 벤 다이어그램 그림으로
+  function optHtml(o) {
+    const m = /^venn:([^|]*)\|(.*)$/.exec(o);
+    if (!m) return `<span class="math">${pretty(o)}</span>`;
+    return `<svg class="venn" viewBox="0 0 160 70" aria-label="벤 다이어그램 ${esc(m[1])}: ${esc(m[2])}"><ellipse cx="80" cy="38" rx="72" ry="28" fill="none" stroke="currentColor" stroke-width="2"/><text x="80" y="11" font-size="11" text-anchor="middle" fill="currentColor" font-style="italic">${esc(m[1])}</text><text x="80" y="44" font-size="15" text-anchor="middle" fill="currentColor">${esc(m[2])}</text></svg>`;
+  }
   const hpText = (body, hp) => { const t = body.querySelector('.scene-bar .muted'); if (t) t.textContent = `레이드 체력 ${hp.left} / ${hp.max}`; };
   const itemText = (q) => (q.type === 'blanks' ? q.items.map((it) => `${it.left} □ ${it.right}`).join('   ') : q.question);
 
@@ -106,7 +112,10 @@ DS.Student = (function () {
     bindHelp();
     body.querySelectorAll('[data-pick]').forEach((b) => b.addEventListener('click', () => {
       const [i, v] = b.dataset.pick.split('|'); const k = Number(i);
-      if (items[k].type === 'multi') { const s = new Set(form.given[k]); const n = Number(v); if (s.has(n)) s.delete(n); else s.add(n); form.given[k] = [...s].sort((a, b2) => a - b2); }
+      const t = items[k].type;
+      if (t === 'multi') { const s = new Set(form.given[k]); const n = Number(v); if (s.has(n)) s.delete(n); else s.add(n); form.given[k] = [...s].sort((a, b2) => a - b2); }
+      else if (t === 'choice') form.given[k] = Number(v);
+      else if (t === 'ox') form.given[k] = v === 'O';
       else form.given[k] = [v];
       DS.Sound.clank(); render();
     }));
@@ -132,6 +141,15 @@ DS.Student = (function () {
       return `<div class="item">${tag}<div class="item-q">${pretty(q.question)}</div>
         <div class="item-opts pickset">${q.options.map((o, k) => `<button class="choice chipset${on.has(k) ? ' on' : ''}" data-pick="${i}|${k}"><span class="math">${pretty(o)}</span></button>`).join('')}</div></div>`;
     }
+    if (q.type === 'choice') {
+      return `<div class="item">${tag}<div class="item-q">${pretty(q.question)}</div>
+        <div class="item-opts col">${q.choices.map((o, k) => `<button class="choice opt${form.given[i] === k ? ' on' : ''}" data-pick="${i}|${k}">${optHtml(o)}</button>`).join('')}</div></div>`;
+    }
+    if (q.type === 'ox') {
+      const v = form.given[i];
+      return `<div class="item">${tag}<div class="item-q">${pretty(q.question)}</div>
+        <div class="item-opts">${['O', 'X'].map((o) => `<button class="choice sym${v === (o === 'O') ? ' on' : ''}" data-pick="${i}|${o}">${o}</button>`).join('')}</div></div>`;
+    }
     // number: 다이얼 (십의 자리 · 일의 자리)
     const v = form.given[i], t = Math.floor(v / 10), o = v % 10;
     return `<div class="item">${tag}<div class="item-q">${pretty(q.question)}</div>
@@ -145,12 +163,12 @@ DS.Student = (function () {
     const items = L.boss.sets[bossSet];
     const mine = (ans[bossSet] || []).slice();
     body.innerHTML = `<div class="panel framed">
-      <div class="scene bg-scene boss${hp.won ? '' : ' quake-once'}"><div class="scene-bar"><div><b>👑 ${esc(L.boss.title)}</b><br><span class="muted small">보스 체력 ${hp.left} / ${hp.max}</span></div></div>${DS.Art.monster(L.boss.sprite, hp.won ? 'down' : 'idle', hp.won ? '' : 'float')}
+      <div class="scene bg-scene th-${L.theme || ''} boss${hp.won ? '' : ' quake-once'}"><div class="scene-bar"><div><b>👑 ${esc(L.boss.title)}</b><br><span class="muted small">보스 체력 ${hp.left} / ${hp.max}</span></div></div>${DS.Art.monster(L.boss.sprite, hp.won ? 'down' : 'idle', hp.won ? '' : 'float')}
         <div class="hpbar"><i style="width:${hp.max ? (100 * hp.left) / hp.max : 0}%"></i></div></div>
       ${hp.won ? '<h2 class="okc center">🎉 보스 격파! 모두 함께 이겼어요!</h2>' : ''}
       <div class="tabs"><button class="tab${bossSet === 1 ? ' on' : ''}" data-s="1">세트 1</button><button class="tab${bossSet === 2 ? ' on' : ''}" data-s="2">세트 2 (재도전)</button></div>
       <div class="boss-items">${items.map((p, i) => `<button class="bitem${m[i] ? ' ok' : mine[i] != null ? ' tried' : ''}${i >= L.boss.hpItems ? ' bonus' : ''}" data-i="${i}"><b>${i + 1}번${i >= L.boss.hpItems ? ' ⭐' : ''}</b> ${m[i] ? '✔ 도달' : mine[i] != null ? '✘ 다시' : '풀기'}</button>`).join('')}</div>
-      <p class="muted small">맞힌 문항마다 보스에게 1 데미지! ⭐ 7번(보강·도전)은 보너스. 세트1 에서 틀린 문항은 세트2 로 다시 도전해요.</p></div>`;
+      <p class="muted small">맞힌 문항마다 보스에게 1 데미지!${L.boss.items > L.boss.hpItems ? ` ⭐ ${L.boss.hpItems + 1}번부터는 보너스.` : ''} 세트1 에서 틀린 문항은 세트2 로 다시 도전해요.</p></div>`;
     body.querySelectorAll('.tab').forEach((b) => b.addEventListener('click', () => { bossSet = Number(b.dataset.s); render(); }));
     body.querySelectorAll('.bitem').forEach((b) => b.addEventListener('click', async () => {
       const i = Number(b.dataset.i);

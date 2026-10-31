@@ -77,8 +77,8 @@ DS.Hall = (function () {
     const f = fightOf(step);
     const heroes = studs().filter(([u]) => (R.active || {})[u]);
     $('#h-roster').hidden = true;
-    $('#h-arena').innerHTML = `<div class="raid bg-scene ${step.kind === 'boss' ? 'boss quake' : ''}${step.special ? ' special' : ''}">
-      <div class="raid-top"><b>${step.kind === 'boss' ? '👑 ' : step.special ? '⭐ ' : ''}${esc(f.title)}</b><div class="raid-hp"><i id="rh-bar"></i><span id="rh-txt"></span></div></div>
+    $('#h-arena').innerHTML = `<div class="raid bg-scene th-${L.theme || ''} ${step.kind === 'boss' ? 'boss quake' : ''}${step.special ? ' special' : ''}">
+      <div class="raid-top"><b>${step.kind === 'boss' ? '👑 ' : step.special ? '⭐ ' : step.review ? '📖 ' : ''}${esc(f.title)}</b><div class="raid-hp"><i id="rh-bar"></i><span id="rh-txt"></span></div></div>
       ${step.special ? '<div class="raid-banner">⭐ 스페셜 몬스터 난입!</div>' : step.kind === 'boss' ? '<div class="raid-banner boss">👑 보스 출현!</div>' : ''}
       <div class="raid-field">${heroes.map(([u, p], k) => `<div class="fh" id="fh-${u}" style="--r:${k % 3};--c:${Math.floor(k / 3)}"><span class="fh-name">${p.num} ${esc(p.nick)}</span>${DS.Art.hero(p.hero, 'idle')}</div>`).join('')}</div>
       <div class="raid-mon" id="rm">${DS.Art.monster(f.sprite, 'idle', 'float')}<div id="rm-fx"></div></div>

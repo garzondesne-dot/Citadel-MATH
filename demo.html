@@ -24,6 +24,7 @@
 <body>
 <div class="bar">
   <b>🧪 Citadel-MATH 체험판</b>
+  <label>차시 <select id="ls"><option value="set-02">2차시</option><option value="set-03" selected>3차시</option></select></label>
   <label>가상 학생 <select id="n"><option>6</option><option>12</option><option selected>18</option><option>24</option></select>명</label>
   <label>속도 <select id="speed"><option value="1">보통</option><option value="2" selected>빠르게</option><option value="4">아주 빠르게</option></select></label>
   <button id="go" class="primary">▶ 새 체험 수업 시작</button>
@@ -41,6 +42,7 @@
 <script src="js/engine/setgen.js"></script>
 <script src="js/engine/quiz.js"></script>
 <script src="js/engine/lessons.js"></script>
+<script src="lessons/set-02.js"></script>
 <script src="lessons/set-03.js"></script>
 <script src="js/raid/net.js"></script>
 <script src="js/raid/model.js"></script>
@@ -69,7 +71,7 @@
     net.setUid(TEACHER);
     // 체험용 명단: 1-1 반 (1번 = 직접 해 보는 학생, 2번부터 가상 학생)
     await DS.Account.uploadRoster([{ c: '1-1', n: 1, name: '체험학생' }, ...Array.from({ length: 29 }, (_, i) => ({ c: '1-1', n: i + 2, name: DS.Bots.NICK[i] }))]);
-    const r = await DS.Act.createRoom('set-03');
+    const r = await DS.Act.createRoom($('#ls').value);
     localStorage.setItem('citadel-teacher', JSON.stringify({ code: r.code, hallKey: r.hallKey, uid: TEACHER }));
     frame(0, 'teacher', 'index.html?local&role=teacher&resume');
     frame(1, 'hall', `index.html?local&role=hall&code=${r.code}&key=${r.hallKey}`);
