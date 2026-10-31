@@ -61,6 +61,8 @@ function verify(q, label) {
 check(L.steps.map((s) => s.id).join() === 'r0,c1,m1,s1,c2,m2,c3,m3,c4,m4,s2,boss', `순서 ${L.steps.map((s) => s.id)}`);
 check(L.steps.filter((s) => s.special).map((s) => s.id).join() === 's1,s2' && L.steps[0].review, '보강 = 스페셜, 첫 몬스터 = 복습');
 check(L.theme === '02-deep-forest', '테마 = 깊은 숲');
+// PDF 자르기 위치: 개념 설명 칸마다 있고, A4 쪽 안에 들어간다
+L.steps.filter((s) => s.kind === 'intro' || s.kind === 'concept').forEach((s) => { const rs = (L.crops || {})[s.id]; check(rs && rs.length && rs.every((r) => r.p >= 1 && r.p <= 2 && r.x >= 0 && r.y >= 0 && r.w > 0.1 && r.h > 0.05 && r.x + r.w <= 1 && r.y + r.h <= 1), `${s.id}: PDF 자르기 위치`); });
 
 // 2. 학습지 첫 시도
 const it = (id) => L.items(id, 'x', 0);

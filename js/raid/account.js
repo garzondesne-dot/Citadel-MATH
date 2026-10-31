@@ -101,9 +101,19 @@ DS.Account = (function () {
     return null;
   }
   async function setHero(hero) { const m = await me(); if (!m) return; await N().set(`accounts/${m.c}/${m.n}/hero`, Number(hero)); m.hero = Number(hero); }
-  async function logout() { cache = null; await N().signOut(); }
+  async function logout() { cache = null; tsess(false); await N().signOut(); }
 
   // ── 교사 계정 ────────────────────────────────────────────
+  // 교사 로그인은 이 탭(앱)이 열려 있는 동안만: 표시를 sessionStorage 에 두고, 앱을 다시 켰을 때 표시가 없으면 로그아웃한다.
+  // (새로고침은 sessionStorage 가 남아서 유지된다. 학생 로그인은 계속 유지)
+  const TSESS = 'citadel-tsess';
+  function tsess(on) { try { if (on) sessionStorage.setItem(TSESS, '1'); else sessionStorage.removeItem(TSESS); } catch (e) { /* 무시 */ } }
+  const tsessOn = () => { try { return sessionStorage.getItem(TSESS) === '1'; } catch (e) { return false; } };
+  async function endStaleTeacher() {
+    if (tsessOn() || !(await isAdmin())) return false;
+    await logout();
+    return true;
+  }
   const adminExists = async () => !!(await N().get('admins'));
   const isAdmin = async () => N().provider() === 'password' && (await N().get(`admins/${N().uid()}`)) === true;
   async function teacherCreate(id, password) {
@@ -111,11 +121,13 @@ DS.Account = (function () {
     if (await adminExists()) fail('교사 계정이 이미 있어요. 로그인해 주세요.');
     try { await N().signUp(teacherEmail(id), password); } catch (e) { if (e.code === 'auth/email-already-in-use') fail('이미 있는 교사 아이디예요. 로그인해 주세요.'); rethrow(e); }
     try { await N().set(`admins/${N().uid()}`, true); } catch (e) { rethrow(e); }
+    tsess(true);
   }
   async function teacherLogin(id, password) {
     try { await N().signIn(teacherEmail(id), password); } catch (e) { if (why(e)) rethrow(e); fail('교사 아이디나 비밀번호가 달라요.'); }
     if (!(await isAdmin())) { await N().signOut(); fail('교사 계정이 아니에요.'); }
+    tsess(true);
   }
 
-  return { classKey, email, teacherEmail, pw, validPin, mask, parseRoster, uploadRoster, removeStudent, resetAccount, masks, accountOf, signUp, login, me, setHero, logout, adminExists, isAdmin, teacherCreate, teacherLogin };
+  return { classKey, email, teacherEmail, pw, validPin, mask, parseRoster, uploadRoster, removeStudent, resetAccount, masks, accountOf, signUp, login, me, setHero, logout, adminExists, isAdmin, teacherCreate, teacherLogin, endStaleTeacher };
 })();

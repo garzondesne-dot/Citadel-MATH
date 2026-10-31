@@ -101,10 +101,10 @@ DS.Hall = (function () {
     const wait = step.kind === 'monster' ? Raid().waiting(L, R, step.id) : [];
     const clr = $('#r-clear');
     if (f.done) {
-      clr.hidden = false; clr.innerHTML = step.kind === 'boss' ? '🎉 보스 격파! 모두 함께 이겼다!' : '⚔ 몬스터 격파!';
+      clr.hidden = false; clr.className = 'raid-clear'; clr.innerHTML = step.kind === 'boss' ? '🎉 보스 격파! 모두 함께 이겼다!' : '⚔ 몬스터 격파!';
       if (wonFx !== built) { wonFx = built; setTimeout(() => { const m = $('#rm'); if (m) m.innerHTML = DS.Art.monster(f.sprite, 'down'); DS.Sound.correct(); document.querySelectorAll('.fh .art').forEach((h) => h.classList.add('cheer')); }, 600); }
     } else if (step.kind === 'monster' && !wait.length && f.hp.left > 0) {
-      clr.hidden = false; clr.innerHTML = `모두 공격했다! 남은 체력 ${f.hp.left} — 재도전으로 더 공격하자`;
+      clr.hidden = false; clr.className = 'raid-clear note'; clr.innerHTML = `모두 공격했다! 남은 체력 ${f.hp.left} — 재도전으로 더 공격하자`;
     } else clr.hidden = true;
     play();
   }

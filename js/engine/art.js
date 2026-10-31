@@ -13,7 +13,9 @@ DS.Art = (function () {
   function monster(n, pose = 'idle', cls = '') {
     const [k, i] = typeof n === 'string' && n.includes(':') ? n.split(':') : [null, n];
     const sheet = SHEETS[k] || 'monsters', s = A()[sheet];
-    return cell(sheet, s.poses[pose] || 0, Number(i) % s.rows, `monster ${cls}`);
+    const row = Number(i) % s.rows;
+    // 오른쪽을 보고 그려진 몬스터는 좌우를 뒤집어 왼쪽(용사 쪽)을 보게 한다 (배치표 flip)
+    return cell(sheet, s.poses[pose] || 0, row, `monster${(s.flip || []).includes(row) ? ' flip' : ''} ${cls}`);
   }
   const card = (art, cls = '') => cell('cards', art % A().cards.cols, Math.floor(art / A().cards.cols) % A().cards.rows, `card-art ${cls}`);
   function css() { // 글꼴·프레임·배경을 배치표에서

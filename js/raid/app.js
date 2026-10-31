@@ -16,6 +16,8 @@ DS.App = (function () {
     DS.Art.install();
     DS.PWA.init();
     try { await DS.Net.init(); } catch (e) { $('#home-msg').textContent = e.message; return; }
+    try { if (await A().endStaleTeacher()) DS.UI.toast('앱을 다시 켜서 교사 계정은 로그아웃했어요.', 3200); } catch (e) { console.error(e); }
+    DS.Nav.init();
     $('#mode').innerHTML = DS.Net.mode === 'local' ? '🧪 이 기기 체험 모드 <span class="muted">(Firebase 미설정 — 같은 브라우저 탭끼리만 연결)</span>' : '🌐 실시간 연결 (Firebase)';
     $('#ver').textContent = DS.VERSION;
     $('#lesson').innerHTML = $('#p-lesson').innerHTML = DS.Lessons.list.map((l) => `<option value="${l.id}">${esc(l.unit || '')} · ${esc(l.title)}</option>`).join('');

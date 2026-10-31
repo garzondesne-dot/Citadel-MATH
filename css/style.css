@@ -83,6 +83,7 @@ input:focus, select:focus { outline: none; border-color: var(--gold); }
 .art.hero.big { width: 120px; height: 120px; }
 .art.hero.huge { width: 200px; height: 200px; }
 .art.monster { width: 64px; height: 64px; }
+.art.flip { scale: -1 1; } /* 좌우 뒤집기: transform 애니메이션(둥실·흔들림)과 따로 움직인다 */
 .art.monster.mid { width: 92px; height: 92px; }
 .art.monster.huge { width: min(46vh, 340px); height: min(46vh, 340px); }
 .art.card-art { width: 54px; height: 54px; }
@@ -365,7 +366,8 @@ input:focus, select:focus { outline: none; border-color: var(--gold); }
 #rm-fx { position: absolute; inset: 0; pointer-events: none; }
 .dmg { position: absolute; top: 20%; font-size: 46px; color: #ffe066; text-shadow: 3px 3px 0 #a0102a; animation: dmgUp 1.1s ease-out forwards; }
 @keyframes dmgUp { from { transform: translateY(0) scale(0.8); opacity: 1; } to { transform: translateY(-90px) scale(1.2); opacity: 0; } }
-.raid-clear { position: absolute; left: 50%; top: 42%; z-index: 4; transform: translateX(-50%); font-size: 40px; color: #ffe7a8; text-shadow: 3px 3px 0 #000; background: #0a1424aa; padding: 6px 20px; white-space: nowrap; }
+.raid-clear { position: absolute; left: 50%; top: 42%; z-index: 4; transform: translateX(-50%); font-size: clamp(22px, 3.2vw, 40px); color: #ffe7a8; text-shadow: 3px 3px 0 #000; background: #0a1424aa; padding: 6px 20px; max-width: 92%; width: max-content; text-align: center; }
+.raid-clear.note { top: auto; bottom: 3%; font-size: clamp(14px, 1.6vw, 22px); text-shadow: 2px 2px 0 #000; } /* 모두 공격했다: 아래쪽에 작게 (용사·몬스터를 가리지 않게) */
 .art.cheer { animation: float 0.6s ease-in-out infinite; }
 
 /* 수업 준비 (PC) */
@@ -389,3 +391,25 @@ textarea { display: block; width: 100%; font: 15px var(--pixel); color: var(--te
 .item-opts .opt { text-align: left; padding: 8px 10px; font-size: 15px; }
 .venn { width: 170px; height: 74px; display: block; color: var(--text); }
 .choice.on .venn { color: #ffe7a8; }
+
+/* ≪ 뒤로 (왼쪽 위 · 휴대폰 뒤로 가기와 같은 동작) */
+.nav-back { display: inline-block; margin: 0 0 8px; padding: 4px 12px; font-size: 14px; opacity: 0.9; }
+.hall { position: relative; }
+.hall > .nav-back { position: absolute; top: 16px; left: 18px; margin: 0; z-index: 5; }
+.hall > .h-top { padding-left: 112px; }
+
+/* 수업 준비: 이미지 칸 고르기 · 붙여넣기 · PDF 자르기 조정 */
+.p-slot { cursor: pointer; outline: none; }
+.p-slot.sel { box-shadow: 0 0 0 3px var(--gold); }
+.p-slot.over { box-shadow: 0 0 0 3px #6fd0ff; }
+.p-paste { color: var(--gold); margin: 6px 0 0; }
+.p-prev.draft { outline: 3px dashed var(--gold); }
+.crop-ed { cursor: default; }
+.crop-ed .row { flex-wrap: wrap; align-items: center; gap: 6px; }
+.crop-page { position: relative; max-width: 760px; margin: 8px 0; user-select: none; touch-action: none; background: #fff; }
+.crop-page img { display: block; width: 100%; }
+.crop-box { position: absolute; border: 2px dashed #2a6df4; background: #2a6df41a; cursor: move; }
+.crop-box.on { border: 3px solid #e0412f; background: #e0412f1a; }
+.crop-box .h { position: absolute; width: 14px; height: 14px; background: #e0412f; }
+.crop-box .h.tl { left: -8px; top: -8px; cursor: nwse-resize; }
+.crop-box .h.br { right: -8px; bottom: -8px; cursor: nwse-resize; }

@@ -2,7 +2,8 @@
 // 차시를 추가하려면 → lessons/ 에 파일 하나 + index.html 의 <script> 한 줄 + tests 에 검산 (docs/HANDOVER.md "차시 추가")
 //
 // pack = {   (v0.2.0 레이드 형식)
-//   id, title, unit, sheet(학습지 이름), goal, defaultPct(몬스터 체력 기준%, 90),
+//   id, title, unit, sheet(학습지 이름), goal, defaultPct(몬스터 체력 기준%, 90), theme(던전 배경 id),
+//   crops: { 칸id: [{ p: 쪽, x, y, w, h }] }   // 레이드용 학습지 PDF 에서 [개념] 칸을 자를 위치 (A4 비율 0~1). 수업 준비 'PDF 한 번에 넣기'
 //   steps: [{ kind: 'intro'|'concept'|'monster'|'boss', id, title, say?, special? }],   // 학습지 순서 = 수업 순서
 //   monsters: { id: { title, sprite, special?, note?, make(attempt, rng) → [소문제] } },  // attempt 0 = 학습지 그대로, 1·2 = 숫자 바꾼 재도전
 //   items(id, seed, attempt) → 소문제 배열 (DS.Quiz 형식 + check: 검산 정보)
