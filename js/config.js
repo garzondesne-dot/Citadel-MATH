@@ -10,4 +10,4 @@ DS.FIREBASE = {
   messagingSenderId: '434932944226',
   appId: '1:434932944226:web:0763464faf9dde9639b03b',
 };
-DS.VERSION = 'citadel-0.5.2';
+DS.VERSION = 'citadel-0.5.3';

@@ -671,3 +671,9 @@ body.forge-open { overflow: hidden; }
 .t-sec { display: flex; align-items: center; gap: 6px; margin: 12px 0 4px; padding-top: 8px; border-top: 1px dashed var(--line); color: var(--gold); }
 .t-only .t-sec:first-child { border-top: 0; padding-top: 0; margin-top: 4px; }
 .menu-ic.sm { width: 28px; height: 28px; }
+
+/* 문제 위 학습지 꼬리표 · 문제 속 벤 다이어그램 그림 (v0.5.3) */
+.sheet-tag { display: inline-block; margin-left: 6px; padding: 0 6px; font-size: 11px; color: #9fe3ff; background: #10243a; border: 1px solid #2c4c70; vertical-align: middle; }
+#quiz-q .sheet-tag { display: block; width: max-content; margin: 0 0 4px; }
+.venn-q { margin: 4px 0; max-width: 220px; }
+.venn-q .venn { width: 100%; height: auto; color: var(--text); }

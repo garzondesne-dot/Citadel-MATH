@@ -9,6 +9,20 @@ DS.UI = {
   pretty(s) {
     return DS.UI.esc(s).replace(/((?:\d*√)?\d+)\/(\d+)/g, '<span class="fr"><span>$1</span><span>$2</span></span>').replace(/\n/g, '<br>');
   },
+  // 벤 다이어그램 그림 (이름, 원소 글자)
+  venn(name, elems) {
+    const e = DS.UI.esc;
+    return `<svg class="venn" viewBox="0 0 160 70" aria-label="벤 다이어그램 ${e(name)}: ${e(elems)}"><ellipse cx="80" cy="38" rx="72" ry="28" fill="none" stroke="currentColor" stroke-width="2"/><text x="80" y="11" font-size="11" text-anchor="middle" fill="currentColor" font-style="italic">${e(name)}</text><text x="80" y="44" font-size="15" text-anchor="middle" fill="currentColor">${e(elems)}</text></svg>`;
+  },
+  // 문제 글: pretty + [[venn:이름|원소]] 를 그림으로 (학습지 그림 문항을 앱에서도 보이게)
+  rich(s) {
+    return String(s).split(/(\[\[venn:[^|\]]*\|[^\]]*\]\])/).map((part) => {
+      const m = /^\[\[venn:([^|\]]*)\|([^\]]*)\]\]$/.exec(part);
+      return m ? `<div class="venn-q">${DS.UI.venn(m[1], m[2])}</div>` : DS.UI.pretty(part);
+    }).join('');
+  },
+  // 글로만 보여 줄 때 (결과 목록 등): 그림 표시를 짧은 글로
+  plain(s) { return String(s).replace(/\[\[venn:([^|\]]*)\|([^\]]*)\]\]/g, '[벤 다이어그램 $1: $2] '); },
   toast(msg, ms = 2200) {
     if (typeof document === 'undefined') return;
     const t = document.querySelector('#toast');

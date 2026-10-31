@@ -42,7 +42,7 @@ DS.Quiz = (function () {
       const root = $('#quiz');
       $('#quiz-card').textContent = (opt.tag ? opt.tag + ' · ' : '') + (card.name || '');
       $('#quiz-formula').innerHTML = pretty(card.formula || '');
-      $('#quiz-q').innerHTML = pretty(prob.question);
+      $('#quiz-q').innerHTML = (opt.ref ? `<span class="sheet-tag">📄 ${DS.UI.esc(opt.ref)}</span>` : '') + DS.UI.rich(prob.question);
       const sol = $('#quiz-sol'), next = $('#quiz-next'), box = $('#quiz-choices');
       sol.classList.add('hidden');
       next.classList.add('hidden');

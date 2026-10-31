@@ -1,7 +1,7 @@
 // 학생 화면 (스마트폰): 모닥불 → 차원문(수업 코드) → 던전 단체 대기실 → [개념 설명(집중모드) → 몬스터와 1:1 대치] … → 보스(형성평가)
 //   → 클리어(📮 확인도장 · 🏕 대기실로 이동) → 단체 대기실(마지막 한마디 · 만점이면 ⚒ 모루) → 수업 끝 → 모닥불
 // 몬스터: 소문제를 모두 풀고 제출하면 바로 채점 → 공격 성공(내 이펙트) / 부분 성공 / 실패 → 재도전 2번까지(숫자가 모두 바뀜)
-// 문제 규칙 A: 첫 시도(세트1)는 "📄 학습지 문제 n (k)" + 답 칸만 → 학습지를 보고 푼다. 재도전(세트2)은 숫자가 바뀌니 폰에 문제 전체.
+// 문제는 언제나 앱에 전부 보인다. 첫 시도(세트1)는 위에 작은 "📄 학습지 문제 n (k)" 꼬리표, 재도전(세트2)은 "🔄 숫자가 바뀌었어요".
 // 집중모드(state.focus)가 켜지면 어떤 장면이든 위에 반투명 막 + 빨간 ⚠ WARNING 으로 멈춘다.
 window.DS = window.DS || {};
 
@@ -162,11 +162,10 @@ DS.Student = (function () {
   // 보기 글자: 'venn:B|1 2 3 6' 은 벤 다이어그램 그림으로
   function optHtml(o) {
     const m = /^venn:([^|]*)\|(.*)$/.exec(o);
-    if (!m) return `<span class="math">${pretty(o)}</span>`;
-    return `<svg class="venn" viewBox="0 0 160 70" aria-label="벤 다이어그램 ${esc(m[1])}: ${esc(m[2])}"><ellipse cx="80" cy="38" rx="72" ry="28" fill="none" stroke="currentColor" stroke-width="2"/><text x="80" y="11" font-size="11" text-anchor="middle" fill="currentColor" font-style="italic">${esc(m[1])}</text><text x="80" y="44" font-size="15" text-anchor="middle" fill="currentColor">${esc(m[2])}</text></svg>`;
+    return m ? DS.UI.venn(m[1], m[2]) : `<span class="math">${pretty(o)}</span>`;
   }
   const hpText = (body, hp) => { const t = body.querySelector('.scene-bar .muted'); if (t) t.textContent = `레이드 체력 ${hp.left} / ${hp.max}`; };
-  const itemText = (q) => (q.type === 'blanks' ? q.items.map((it) => `${it.left} □ ${it.right}`).join('   ') : q.question);
+  const itemText = (q) => (q.type === 'blanks' ? q.items.map((it) => `${it.left} □ ${it.right}`).join('   ') : DS.UI.plain(q.question));
 
   function fightForm(body, step, rec, hp) {
     const mid = step.id, attempt = rec.nextAttempt, key = `${mid}|${attempt}`;
@@ -180,7 +179,6 @@ DS.Student = (function () {
     body.innerHTML = `<div class="panel framed">${scene(step, rec, hp)}
       ${attempt ? `<p class="retry-note">↻ 재도전 ${attempt} — 숫자가 모두 바뀌었어요. 지난번 틀린 칸은 <b class="ngc">✘</b> 표시</p>` : ''}
       ${L.monsters[mid].note ? `<p class="muted small">💡 ${esc(L.monsters[mid].note)}</p>` : ''}
-      ${attempt ? '' : '<p class="sheet-note">📄 첫 시도는 <b>학습지</b>를 보고 풀어요. 폰에는 답만!</p>'}
       <div class="items">${items.map((q, i) => itemHtml(q, i, prevWrong[i], attempt ? null : `${step.sheet || step.title} (${i + 1})`)).join('')}</div>
       <button class="btn primary big" id="st-go"${ready ? '' : ' disabled'}>⚔ 공격!</button>
       ${helpBtn()}</div>`;
@@ -204,14 +202,12 @@ DS.Student = (function () {
       try { await DS.Act.submit(code, raw, mid, attempt, given); retrying = ''; form = null; } catch (e) { DS.UI.toast(e.message); }
     };
   }
-  // ref: 첫 시도면 '문제 1 (2)' 처럼 학습지 문항 이름 → 문제 글은 감추고 답 칸만 (규칙 A)
+  // ref: 첫 시도면 '문제 1 (2)' 처럼 학습지 문항 이름 → 문제 위에 작은 꼬리표 (같은 문제를 학습지에서 바로 찾게)
   function itemHtml(q, i, wasWrong, ref) {
-    const tag = `<span class="item-no">${i + 1}${wasWrong ? ' <b class="ngc">✘</b>' : ''}</span>`;
-    const qText = (t) => (ref ? `<div class="item-q ref">📄 학습지 <b>${esc(ref)}</b></div>` : `<div class="item-q">${pretty(t)}</div>`);
+    const tag = `<span class="item-no">${i + 1}${wasWrong ? ' <b class="ngc">✘</b>' : ''}${ref ? ` <span class="sheet-tag">📄 ${esc(ref)}</span>` : ''}</span>`;
+    const qText = (t) => `<div class="item-q">${DS.UI.rich(t)}</div>`;
     if (q.type === 'blanks') {
       const it = q.items[0], v = (form.given[i] || [])[0];
-      if (ref) return `<div class="item">${tag}<div class="item-q ref">📄 학습지 <b>${esc(ref)}</b> · □ 에 들어갈 기호 <b class="bl-box">${v ? esc(v) : '□'}</b></div>
-        <div class="item-opts">${q.options.map((o) => `<button class="choice sym${v === o ? ' on' : ''}" data-pick="${i}|${esc(o)}">${esc(o)}</button>`).join('')}</div></div>`;
       return `<div class="item">${tag}<div class="item-q math">${pretty(it.left)} <b class="bl-box">${v ? esc(v) : '□'}</b> ${pretty(it.right)}</div>
         <div class="item-opts">${q.options.map((o) => `<button class="choice sym${v === o ? ' on' : ''}" data-pick="${i}|${esc(o)}">${esc(o)}</button>`).join('')}</div></div>`;
     }
@@ -247,7 +243,7 @@ DS.Student = (function () {
       ${hp.won ? '<h2 class="okc center">🎉 보스 격파! 모두 함께 이겼어요!</h2>' : ''}
       <div class="tabs"><button class="tab${bossSet === 1 ? ' on' : ''}" data-s="1">세트 1</button><button class="tab${bossSet === 2 ? ' on' : ''}" data-s="2">세트 2 (재도전)</button></div>
       <div class="boss-items">${items.map((p, i) => `<button class="bitem${m[i] ? ' ok' : mine[i] != null ? ' tried' : ''}${i >= L.boss.hpItems ? ' bonus' : ''}" data-i="${i}"><b>${i + 1}번${i >= L.boss.hpItems ? ' ⭐' : ''}</b> ${m[i] ? '✔ 도달' : mine[i] != null ? '✘ 다시' : '풀기'}</button>`).join('')}</div>
-      <p class="muted small">세트1 = 📄 학습지 형성평가를 보고 답만 · 세트2 = 숫자가 바뀐 문제(폰에 전부). 맞힌 문항마다 보스에게 1 데미지!${L.boss.items > L.boss.hpItems ? ` ⭐ ${L.boss.hpItems + 1}번부터는 보너스.` : ''}</p>
+      <p class="muted small">세트1 = 학습지 형성평가와 같은 문제 · 세트2 = 숫자가 바뀐 문제. 맞힌 문항마다 보스에게 1 데미지!${L.boss.items > L.boss.hpItems ? ` ⭐ ${L.boss.hpItems + 1}번부터는 보너스.` : ''}</p>
       ${Raid().canLobby(L, R, me) ? `<div class="stamp-bar">📮 반드시 학습지 확인도장 받아가세요.</div>${lobbyBtn()}` : ''}</div>`;
     bindLobby();
     body.querySelectorAll('.tab').forEach((b) => b.addEventListener('click', () => { bossSet = Number(b.dataset.s); render(); }));
@@ -256,8 +252,7 @@ DS.Student = (function () {
       if (m[i]) { DS.UI.toast('이미 도달한 문항이에요.'); return; }
       const wait = Math.ceil((bossThink - Date.now()) / 1000);
       if (wait > 0) { DS.UI.toast(`🤔 생각 시간 ${wait}초 — 방금 틀린 문항을 학습지에서 다시 살펴봐요`); return; }
-      const prob = bossSet === 1 ? { ...items[i], question: `📄 학습지 형성평가 ${i + 1}번을 보고 답해요` } : items[i];
-      const r = await DS.Quiz.ask({ name: `형성평가 ${i + 1}번`, formula: bossSet === 1 ? '세트 1 · 학습지' : '세트 2 · 숫자 바뀜' }, prob, { collect: true, tag: '👑 보스' });
+      const r = await DS.Quiz.ask({ name: `형성평가 ${i + 1}번`, formula: bossSet === 1 ? '세트 1' : '세트 2 · 🔄 숫자가 바뀌었어요' }, items[i], { collect: true, tag: '👑 보스', ref: bossSet === 1 ? `학습지 형성평가 ${i + 1}번` : '' });
       const next = (ans[bossSet] || Array(L.boss.items).fill(null)).slice();
       while (next.length < L.boss.items) next.push(null);
       next[i] = r.given;
