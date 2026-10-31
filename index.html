@@ -27,6 +27,7 @@
       <button class="role on" data-role="student">🧑‍🎓<b>학생</b></button>
       <button class="role" data-role="teacher">📱<b>교사 폰</b></button>
       <button class="role" data-role="hall">🖥<b>종합상황실</b></button>
+      <button class="role" data-role="prep">📋<b>수업 준비</b></button>
     </div>
 
     <div id="f-student" class="role-form panel framed">
@@ -48,6 +49,11 @@
       <div class="row2"><label>수업 코드 <input id="h-code" inputmode="numeric" maxlength="6" autocomplete="off"></label><label>종합상황실 키 <input id="h-key" inputmode="numeric" maxlength="4" autocomplete="off"></label></div>
       <button id="h-go" class="btn primary big">🖥 종합상황실 열기</button>
       <p class="muted small">교실 PC·TV 화면용. 키는 교사 폰 위쪽에 있어요.</p>
+    </div>
+    <div id="f-prep" class="role-form panel framed" hidden>
+      <label>차시 <select id="p-lesson"></select></label>
+      <button id="p-go" class="btn primary big">📋 수업 준비 열기 (PC)</button>
+      <p class="muted small">개념 설명 단계마다 학습지 이미지를 올리고, 몬스터 체력 기준% 기본값을 정해요.</p>
     </div>
     <p id="home-msg" class="ngc"></p>
     <p class="muted small center"><a href="demo.html">🧪 체험판: 가상 학생 18명과 한 화면에서 해 보기</a></p>
@@ -89,6 +95,11 @@
   </div>
 </section>
 
+<!-- 수업 준비 (PC) -->
+<section id="screen-prep" class="screen">
+  <div class="wrap wide"><div id="p-body"></div><p class="center"><a href="index.html">← 첫 화면</a></p></div>
+</section>
+
 <!-- 문제 창 (DIMENSION SLASHER 엔진) -->
 <div id="quiz" class="modal hidden" role="dialog" aria-modal="true">
   <div class="quiz-box framed">
@@ -110,7 +121,6 @@
 <script src="js/engine/lessons.js"></script>
 <script src="lessons/set-03.js"></script>
 <script src="js/engine/art.js"></script>
-<script src="js/engine/forge.js"></script>
 <script src="js/engine/qrcode.min.js"></script>
 <script src="js/engine/pwa.js"></script>
 <script src="js/raid/net.js"></script>
@@ -120,6 +130,7 @@
 <script src="js/raid/student.js"></script>
 <script src="js/raid/teacher.js"></script>
 <script src="js/raid/hall.js"></script>
+<script src="js/raid/prep.js"></script>
 <script src="js/raid/app.js"></script>
 </body>
 </html>

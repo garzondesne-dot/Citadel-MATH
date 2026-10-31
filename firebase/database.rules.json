@@ -24,18 +24,10 @@
         "active": {
           ".write": "auth != null && (root.child('rooms/'+$code+'/meta/teacher').val() === auth.uid || (root.child('rooms/'+$code+'/hosts/'+auth.uid).isString() && root.child('rooms/'+$code+'/hosts/'+auth.uid).val() === root.child('secrets/'+$code+'/hallKey').val()))"
         },
-        "credits": {
-          ".write": "auth != null && (root.child('rooms/'+$code+'/meta/teacher').val() === auth.uid || (root.child('rooms/'+$code+'/hosts/'+auth.uid).isString() && root.child('rooms/'+$code+'/hosts/'+auth.uid).val() === root.child('secrets/'+$code+'/hallKey').val()))"
-        },
         "players": {
           "$uid": {
             ".write": "auth != null && auth.uid === $uid",
             ".validate": "newData.hasChildren(['num', 'nick', 'hero']) && newData.child('num').isNumber() && newData.child('num').val() >= 0 && newData.child('num').val() <= 40 && newData.child('nick').isString() && newData.child('nick').val().length <= 8"
-          }
-        },
-        "cards": {
-          "$uid": {
-            ".write": "auth != null && (auth.uid === $uid || (root.child('rooms/'+$code+'/meta/teacher').val() === auth.uid || (root.child('rooms/'+$code+'/hosts/'+auth.uid).isString() && root.child('rooms/'+$code+'/hosts/'+auth.uid).val() === root.child('secrets/'+$code+'/hallKey').val())))"
           }
         },
         "help": {
@@ -43,24 +35,37 @@
             ".write": "auth != null && (auth.uid === $uid || (root.child('rooms/'+$code+'/meta/teacher').val() === auth.uid || (root.child('rooms/'+$code+'/hosts/'+auth.uid).isString() && root.child('rooms/'+$code+'/hosts/'+auth.uid).val() === root.child('secrets/'+$code+'/hallKey').val())))"
           }
         },
-        "seen": {
-          "$round": {
-            "$uid": {
-              ".write": "auth != null && auth.uid === $uid && !data.exists()"
-            }
-          }
-        },
         "subs": {
-          "$round": {
+          "$mid": {
             "$uid": {
-              ".write": "auth != null && root.child('rooms/'+$code+'/state/phase').val() === 'battle' && !data.exists() && (auth.uid === $uid || (root.child('rooms/'+$code+'/meta/teacher').val() === auth.uid || (root.child('rooms/'+$code+'/hosts/'+auth.uid).isString() && root.child('rooms/'+$code+'/hosts/'+auth.uid).val() === root.child('secrets/'+$code+'/hallKey').val())))"
+              "$attempt": {
+                ".write": "auth != null && auth.uid === $uid && !data.exists() && root.child('rooms/'+$code+'/active/'+$uid).val() === true && ($attempt === '0' || $attempt === '1' || $attempt === '2')",
+                ".validate": "newData.isString() && newData.val().length < 20000"
+              }
             }
           }
         },
         "bossAns": {
           "$uid": {
-            ".write": "auth != null && auth.uid === $uid && root.child('rooms/'+$code+'/state/phase').val() === 'boss'"
+            ".write": "auth != null && auth.uid === $uid && root.child('rooms/'+$code+'/active/'+$uid).val() === true",
+            "$set": {
+              ".validate": "($set === '1' || $set === '2') && newData.isString() && newData.val().length < 20000"
+            }
           }
+        }
+      }
+    },
+    "prep": {
+      "$lesson": {
+        ".read": "auth != null",
+        ".write": "auth != null",
+        "img": {
+          "$slot": {
+            ".validate": "newData.isString() && newData.val().length < 2500000 && newData.val().beginsWith('data:image/')"
+          }
+        },
+        "pct": {
+          ".validate": "newData.isNumber() && newData.val() >= 10 && newData.val() <= 100"
         }
       }
     }

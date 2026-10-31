@@ -96,6 +96,16 @@ DS.Sound = (function () {
       [660, 880, 1320].forEach((f, i) => tone({ type: 'triangle', f0: f, dur: 0.25, vol: 0.18, delay: i * 0.07 }));
     },
     wrong() { tone({ type: 'sawtooth', f0: 220, f1: 110, dur: 0.35, vol: 0.13 }); },
+    // 공격 실패: 물렁한 소리 (아무 일도 일어나지 않음)
+    squish() {
+      tone({ type: 'sine', f0: 210, f1: 120, dur: 0.22, vol: 0.2 });
+      noise({ dur: 0.12, vol: 0.12, freq: 400, type: 'lowpass' });
+    },
+    // 보스 등장: 땅울림
+    rumble() {
+      tone({ type: 'sine', f0: 55, f1: 38, dur: 1.4, vol: 0.5 });
+      noise({ dur: 1.2, vol: 0.3, freq: 220, type: 'lowpass' });
+    },
     // 대장간 망치질 + 반짝임
     forge() {
       tone({ type: 'square', f0: 1800, f1: 900, dur: 0.12, vol: 0.12 });

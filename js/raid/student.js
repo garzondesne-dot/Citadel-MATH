@@ -1,11 +1,16 @@
-// 학생 화면 (스마트폰): 입장 → 대기 → 연성 → 필드 → 전투(카드 + 답 제출) → 결과 → 보스(형성평가) → 트로피
+// 학생 화면 (스마트폰): 입장 → 대기실 → [개념 설명(선생님에게 주목) → 몬스터와 1:1 대치] … → 보스(형성평가) → 끝
+// 몬스터: 소문제를 모두 풀고 제출하면 바로 채점 → 공격 성공 / 부분 성공 / 실패 → 재도전 2번까지(숫자가 모두 바뀜)
 window.DS = window.DS || {};
 
 DS.Student = (function () {
   const $ = (s) => document.querySelector(s);
   const { esc, pretty } = DS.UI;
-  let code = null, L = null, R = null, raw = null, me = null, forge = null, stop = null, timer = 0;
-  let answer = null, chosen = null, lastPhase = '', lastRound = '', lastStage = -1;
+  const Raid = () => DS.Raid;
+  let code = null, L = null, R = null, raw = null, me = null, stop = null;
+  let form = null;          // 풀고 있는 시도 { key, given: [] }
+  let retrying = '';        // '몬스터id|다음 시도' — "다시 도전"을 누른 상태
+  let shown = '';           // 결과 연출을 한 번만
+  let bossSet = 1;
 
   async function enter(c, info) {
     await DS.Act.join(c, info);
@@ -21,136 +26,138 @@ DS.Student = (function () {
       render();
     });
   }
-  const owned = () => new Set(Object.keys(((R.cards || {})[me]) || {}));
   const myP = () => (R.players || {})[me] || {};
 
   function header() {
-    const p = myP(), st = L.stages[R.state.stage] || {};
-    const won = Object.keys((R.credits || {})[me] || {}).length;
-    $('#st-head').innerHTML = `${DS.Art.hero(p.hero || 0, R.state.phase === 'result' ? (R.state.result && R.state.result.success ? 'attack' : 'fall') : 'idle', 'me')}
-      <div><b>${p.num}번 ${esc(p.nick || '')}</b><br><span class="muted small">수업 ${code} · ${esc(L.title)}</span></div>
-      <div class="st-badge">${R.state.phase === 'boss' || R.state.phase === 'victory' ? '보스' : esc(st.step || '')}<br><small>처치 ${won}</small></div>`;
+    const p = myP(), step = Raid().stepOf(L, R);
+    $('#st-head').innerHTML = `${DS.Art.hero(p.hero || 0, 'idle', 'me')}
+      <div><b>${p.num}번 ${esc(p.nick || '')}</b><br><span class="muted small">${esc(L.unit)} · ${esc(L.title)}</span></div>
+      <div class="st-badge">${Raid().isLobby(R) ? '대기실' : Raid().isEnd(L, R) ? '끝' : step.kind === 'boss' ? '보스' : step.kind === 'monster' ? (step.special ? '스페셜' : '전투') : '설명'}</div>`;
   }
+  const helpBtn = () => `<button class="btn small help${(R.help || {})[me] ? ' on' : ''}" id="st-help">${(R.help || {})[me] ? '🙋 도움 요청 중 (누르면 취소)' : '🙋 도움 요청'}</button>`;
+  function bindHelp() { const b = $('#st-help'); if (b) b.onclick = () => DS.Act.help(code, !(R.help || {})[me]); }
 
   function render() {
     if (!R.players || !R.players[me]) { $('#st-body').innerHTML = '<div class="panel"><p>입장 정보가 없어요. 처음 화면에서 다시 입장해 주세요.</p></div>'; return; }
     header();
-    const ph = R.state.phase, body = $('#st-body');
-    const rd = R.state.round;
-    if (ph !== lastPhase || R.state.stage !== lastStage || (rd && rd.id !== lastRound)) { answer = null; chosen = null; forge = null; }
-    lastPhase = ph; lastRound = rd ? rd.id : ''; lastStage = R.state.stage;
-    clearInterval(timer);
-    const helpBtn = `<button class="btn small help${(R.help || {})[me] ? ' on' : ''}" id="st-help">${(R.help || {})[me] ? '🙋 도움 요청 중 (누르면 취소)' : '🙋 도움 요청'}</button>`;
-    const active = !!(R.active || {})[me];
-    if (ph === 'lobby') { body.innerHTML = `<div class="panel framed center"><h2>입장 완료!</h2><p>선생님이 수업을 시작할 때까지 기다려요.</p>${DS.Art.hero(myP().hero, 'walk', 'big')}</div>`; return; }
-    if (!active && ph !== 'victory') { body.innerHTML = '<div class="panel framed center"><p>이번 전투 참여 명단에 없어요. 선생님께 말씀드려요.</p></div>'; return; }
-    if (ph === 'forge') {
-      const st = L.stages[R.state.stage];
-      if (!forge) {
-        body.innerHTML = `<div class="panel framed"><p class="stage-name">⚒ ${esc(st.step)} · ${esc(st.name)}</p><p class="intro">${pretty(st.intro)}</p><div id="st-forge"></div>${helpBtn}</div>`;
-        forge = DS.Forge.mount($('#st-forge'), { lesson: L, stage: () => R.state.stage, owned, seed: me, onCraft: (id) => DS.Act.craft(code, me, id) });
-        bindHelp();
-      } else forge.redraw();
-      return;
-    }
-    if (ph === 'field') {
-      body.innerHTML = `<div class="panel framed center"><h2>몬스터가 다가온다…</h2><p>선생님 신호를 기다려요. 내 카드:</p><div class="mycards">${cardsHtml(false)}</div>${helpBtn}</div>`;
-      bindHelp(); return;
-    }
-    if (ph === 'battle') return battle(body, helpBtn);
-    if (ph === 'result') return result(body);
-    if (ph === 'boss') return bossView(body);
-    if (ph === 'victory') return victoryView(body);
-  }
-  function bindHelp() { const b = $('#st-help'); if (b) b.onclick = () => DS.Act.help(code, !(R.help || {})[me]); }
-  function cardsHtml(pick) {
-    const have = [...owned()].filter((c) => L.cards[c]);
-    if (!have.length) return '<p class="muted">아직 카드가 없어요.</p>';
-    return have.map((c) => `<button class="gcard${chosen === c ? ' on' : ''}" data-c="${c}"${pick ? '' : ' disabled'}>${DS.Art.card(L.cards[c].art)}<b>${esc(L.cards[c].name)}</b><span class="math">${pretty(L.cards[c].formula)}</span><small>⚔ 100</small></button>`).join('');
+    const body = $('#st-body');
+    if (Raid().isLobby(R)) { body.innerHTML = `<div class="panel framed center"><h2>입장 완료!</h2><p>선생님이 수업을 시작할 때까지 기다려요.</p>${DS.Art.hero(myP().hero, 'walk', 'big')}</div>`; return; }
+    if (!(R.active || {})[me]) { body.innerHTML = '<div class="panel framed center"><p>이번 수업 참여 명단에 없어요. 선생님께 말씀드려요.</p></div>'; return; }
+    if (Raid().isEnd(L, R)) return endView(body);
+    const step = Raid().stepOf(L, R);
+    if (step.kind === 'monster') return monsterView(body, step);
+    if (step.kind === 'boss') return bossView(body);
+    body.innerHTML = `<div class="panel framed center attend"><p class="attend-tag">📣 알림</p><h2>선생님에게 주목하세요</h2><p>${step.kind === 'intro' ? '수업을 시작합니다.' : '개념 설명을 시작합니다.'}</p>
+      <p class="stage-name">${esc(step.title)}</p><p class="intro">${pretty(step.say || '')}</p>${DS.Art.hero(myP().hero, 'idle', 'big')}<p class="muted small">학습지를 펴고 선생님 설명을 들어요.</p></div>`;
   }
 
-  // ── 전투: 문제 보기(공격력 110 → 100 시작) → 답 → 카드 고르기 → 공격 ──
-  function battle(body, helpBtn) {
-    const rd = R.state.round, sub = (((R.subs || {})[rd.id]) || {})[me];
-    const total = DS.Raid.activeIds(R).length, done = DS.Raid.activeIds(R).filter((u) => (((R.subs || {})[rd.id]) || {})[u]).length;
-    const mon = DS.Art.monster(L.stages[R.state.stage].monster, 'idle', 'float');
-    if (sub) {
-      body.innerHTML = `<div class="panel framed center"><div class="scene bg-scene">${mon}</div><h2>제출 완료!</h2><p>다른 용사들을 기다려요 <b>${done}/${total}</b></p><p class="muted">정답은 공동 공격이 끝난 뒤에 공개돼요.</p></div>`;
-      return;
-    }
-    const q = DS.Raid.questionFor(L, R, me);
-    const seenAt = (((R.seen || {})[rd.id]) || {})[me];
-    body.innerHTML = `<div class="panel framed">
-      <div class="scene bg-scene"><div class="scene-bar"><div><b>${esc(L.typeNames[rd.type] || '')}</b>${rd.attempt > 1 ? ` <span class="retry">재도전 ${rd.attempt}</span>` : ''}<br><span class="muted small">제출 ${done}/${total}</span></div><div class="power" id="st-power">⚔ 110</div></div>${mon}</div>
-      <div class="q-box"><p class="math">${pretty(q.question)}</p>
-        ${answer ? `<p class="ans-ok">✔ 답을 골랐어요 <button class="btn small" id="st-re">다시 풀기</button></p>` : `<button class="btn primary big" id="st-open">📜 문제 풀기</button>`}</div>
-      <p class="shelf-title">공격 카드 고르기 <span class="muted small">이 문제에 맞는 카드를!</span></p>
-      <div class="mycards">${cardsHtml(true)}</div>
-      <button class="btn primary big" id="st-go"${answer && chosen ? '' : ' disabled'}>⚔ 공격!</button>
-      ${helpBtn}</div>`;
+  // ── 몬스터와 1:1 대치 ─────────────────────────────────────
+  function scene(step, rec, hp, cls = '') {
+    const segs = Array.from({ length: rec.total }, (_, i) => `<i class="${i < rec.best ? 'gone' : ''}"></i>`).join('');
+    return `<div class="scene bg-scene ${cls}${step.special ? ' special' : ''}"><div class="scene-bar"><div><b>${step.special ? '⭐ 난입! ' : ''}${esc(step.title)}</b><br><span class="muted small">레이드 체력 ${hp.left} / ${hp.max}</span></div></div>
+      ${DS.Art.monster(L.monsters[step.id].sprite, Raid().cleared(L, R, step.id) ? 'down' : 'idle', Raid().cleared(L, R, step.id) ? '' : 'float')}
+      <div class="segs" title="내가 맞힌 만큼 칸이 깨져요">${segs}</div></div>`;
+  }
+  function monsterView(body, step) {
+    const mid = step.id, rec = Raid().record(L, R, mid, me), hp = Raid().monsterHp(L, R, mid);
+    const wantRetry = retrying === `${mid}|${rec.nextAttempt}` && rec.canRetry;
+    if (!rec.submitted || wantRetry) return fightForm(body, step, rec, hp);
+    const t = rec.last, label = Raid().resultLabel(t);
+    const items = Raid().itemsFor(L, R, mid, me, t.attempt);
+    const fx = `${mid}|${t.attempt}` !== shown ? (label === 'fail' ? 'miss' : 'hit') : '';
+    if (fx) { shown = `${mid}|${t.attempt}`; if (label === 'fail') DS.Sound.squish(); else { DS.Sound.slash(); setTimeout(() => DS.Sound.hit(), 160); } }
+    const head = { success: '⚔ 공격 성공!', partial: `⚔ 부분 성공 (${t.correct}/${t.total})`, fail: '💨 공격 실패…' }[label];
+    const done = Raid().cleared(L, R, mid);
+    body.innerHTML = `<div class="panel framed">${scene(step, rec, hp, fx)}
+      <h2 class="res-${label}">${head}</h2>
+      <div class="marks">${items.map((q, i) => `<div class="mark ${t.marks[i] ? 'ok' : 'ng'}"><b>${i + 1}</b> ${t.marks[i] ? '✔' : '✘'} <span class="math">${pretty(itemText(q))}</span>${t.marks[i] ? '' : `<br><span class="sol-line math">${pretty(q.solution || '')}</span>`}</div>`).join('')}</div>
+      ${done ? '<p class="okc big-msg">🎉 몬스터 격파! 다음 신호를 기다려요.</p>'
+        : rec.canRetry ? `<p>다시 해 보겠습니까? <span class="muted small">(남은 기회 ${Raid().RETRIES - rec.tries.length + 1}번 · 숫자가 모두 바뀌어요)</span></p><button class="btn primary big" id="st-retry">↻ 다시 도전</button>`
+        : `<p class="muted">${rec.allRight ? '멋져요! 다른 용사들을 기다려요.' : '재도전 기회를 모두 썼어요. 해설을 보며 학습지에 정리해요.'} 데미지 <b>${rec.best}</b></p>`}
+      ${helpBtn()}</div>`;
     bindHelp();
-    const open = async () => {
-      await DS.Act.seen(code, raw);
-      const r = await DS.Quiz.ask({ name: L.typeNames[rd.type] || '문제', formula: '' }, q, { collect: true, tag: '⚔ 전투' });
-      answer = r;
-      render();
-    };
-    const ob = $('#st-open'); if (ob) ob.onclick = open;
-    const rb = $('#st-re'); if (rb) rb.onclick = open;
-    body.querySelectorAll('.gcard').forEach((b) => b.addEventListener('click', () => { chosen = b.dataset.c; DS.Sound.clank(); render(); }));
+    const rb = $('#st-retry');
+    if (rb) rb.onclick = () => { retrying = `${mid}|${rec.nextAttempt}`; form = null; DS.Sound.clank(); render(); };
+  }
+  const itemText = (q) => (q.type === 'blanks' ? q.items.map((it) => `${it.left} □ ${it.right}`).join('   ') : q.question);
+
+  function fightForm(body, step, rec, hp) {
+    const mid = step.id, attempt = rec.nextAttempt, key = `${mid}|${attempt}`;
+    const items = Raid().itemsFor(L, R, mid, me, attempt);
+    if (!form || form.key !== key) form = { key, given: items.map((q) => (q.type === 'multi' ? [] : q.type === 'number' ? 0 : null)) };
+    const prevWrong = rec.last ? rec.last.marks.map((m) => !m) : [];
+    const ready = items.every((q, i) => (q.type === 'multi' ? form.given[i].length > 0 : form.given[i] != null));
+    body.innerHTML = `<div class="panel framed">${scene(step, rec, hp)}
+      ${attempt ? `<p class="retry-note">↻ 재도전 ${attempt} — 숫자가 모두 바뀌었어요. 지난번 틀린 칸은 <b class="ngc">✘</b> 표시</p>` : ''}
+      ${L.monsters[mid].note ? `<p class="muted small">💡 ${esc(L.monsters[mid].note)}</p>` : ''}
+      <div class="items">${items.map((q, i) => itemHtml(q, i, prevWrong[i])).join('')}</div>
+      <button class="btn primary big" id="st-go"${ready ? '' : ' disabled'}>⚔ 공격!</button>
+      ${helpBtn()}</div>`;
+    bindHelp();
+    body.querySelectorAll('[data-pick]').forEach((b) => b.addEventListener('click', () => {
+      const [i, v] = b.dataset.pick.split('|'); const k = Number(i);
+      if (items[k].type === 'multi') { const s = new Set(form.given[k]); const n = Number(v); if (s.has(n)) s.delete(n); else s.add(n); form.given[k] = [...s].sort((a, b2) => a - b2); }
+      else form.given[k] = [v];
+      DS.Sound.clank(); render();
+    }));
+    body.querySelectorAll('[data-dial]').forEach((b) => b.addEventListener('click', () => {
+      const [i, d] = b.dataset.dial.split('|').map(Number);
+      form.given[i] = Math.max(0, Math.min(99, form.given[i] + d));
+      DS.Sound.clank(); render();
+    }));
     $('#st-go').onclick = async () => {
-      if (!answer || !chosen) return;
-      try { await DS.Act.submit(code, raw, chosen, answer.given); DS.Sound.slash(); } catch (e) { DS.UI.toast(e.message); }
+      const given = items.map((q, i) => (q.type === 'blanks' ? form.given[i] : q.type === 'number' ? Number(form.given[i]) : form.given[i]));
+      try { await DS.Act.submit(code, raw, mid, attempt, given); retrying = ''; form = null; } catch (e) { DS.UI.toast(e.message); }
     };
-    // 준비 공격력: 문제를 본 시각부터 1초에 1씩 (최저 100)
-    const tick = () => { const el = $('#st-power'); if (!el) return; const s = (((R.seen || {})[rd.id]) || {})[me]; el.textContent = `⚔ ${s ? DS.Raid.points(DS.Net.now() - s) : 110}`; };
-    tick(); timer = setInterval(tick, 500);
-    if (!seenAt && !answer) { /* 문제는 버튼을 눌러야 열림 */ }
+  }
+  function itemHtml(q, i, wasWrong) {
+    const tag = `<span class="item-no">${i + 1}${wasWrong ? ' <b class="ngc">✘</b>' : ''}</span>`;
+    if (q.type === 'blanks') {
+      const it = q.items[0], v = (form.given[i] || [])[0];
+      return `<div class="item">${tag}<div class="item-q math">${pretty(it.left)} <b class="bl-box">${v ? esc(v) : '□'}</b> ${pretty(it.right)}</div>
+        <div class="item-opts">${q.options.map((o) => `<button class="choice sym${v === o ? ' on' : ''}" data-pick="${i}|${esc(o)}">${esc(o)}</button>`).join('')}</div></div>`;
+    }
+    if (q.type === 'multi') {
+      const on = new Set(form.given[i]);
+      return `<div class="item">${tag}<div class="item-q">${pretty(q.question)}</div>
+        <div class="item-opts pickset">${q.options.map((o, k) => `<button class="choice chipset${on.has(k) ? ' on' : ''}" data-pick="${i}|${k}"><span class="math">${pretty(o)}</span></button>`).join('')}</div></div>`;
+    }
+    // number: 다이얼 (십의 자리 · 일의 자리)
+    const v = form.given[i], t = Math.floor(v / 10), o = v % 10;
+    return `<div class="item">${tag}<div class="item-q">${pretty(q.question)}</div>
+      <div class="dial"><div class="wheel"><button data-dial="${i}|10">▲</button><b>${t}</b><button data-dial="${i}|-10">▼</button></div><div class="wheel"><button data-dial="${i}|1">▲</button><b>${o}</b><button data-dial="${i}|-1">▼</button></div><span class="dial-val">= ${v}</span></div></div>`;
   }
 
-  function result(body) {
-    const res = R.state.result || {}, rd = R.state.round;
-    const j = DS.Raid.judge(L, R, me), q = DS.Raid.questionFor(L, R, me);
-    const credit = (((R.credits || {})[me]) || {})[`m${R.state.monster}`];
-    const ansText = q.type === 'blanks' ? q.items.map((i) => `${i.left} ${i.answer} ${i.right}`).join(', ') : q.type === 'ox' ? (q.answer ? 'O' : 'X') : q.type === 'choice' ? q.choices[q.answerIndex] : q.type === 'subsets' ? DS.SetGen.allSubsets(q.base).map(DS.SetGen.setStr).join(', ') : String(q.answer);
-    body.innerHTML = `<div class="panel framed center ${res.success ? 'win' : 'lose'}">
-      <h2>${res.success ? '⚔ 공동 공격 성공!' : '💥 공동 공격 실패…'}</h2>
-      <div class="scene bg-scene">${DS.Art.monster(L.stages[R.state.stage].monster, res.success ? 'down' : 'attack')}</div>
-      <p>내 답: <b class="${j.correct ? 'okc' : 'ngc'}">${j.correct ? '정답' : !j.answerOk ? '오답' : '카드가 맞지 않음'}</b>${credit ? ` · 획득 ⚔ ${credit}` : ''}</p>
-      <div class="sol"><b>정답</b> <span class="math">${pretty(ansText)}</span><br><span class="math">${pretty(q.solution || '')}</span>${!j.cardOk && j.submitted ? `<br>이 문제에 맞는 카드: ${q.cards.map((c) => esc(L.cards[c].name)).join(', ')}` : ''}</div>
-      <p class="muted">${res.success ? '다음 신호를 기다려요.' : '선생님 설명을 듣고, 숫자를 바꿔 다시 도전해요.'}</p></div>`;
-  }
-
-  // ── 보스: 형성평가 1~6번 (세트1 → 못 맞힌 문항은 세트2 로 재도전) ──
-  let bossSet = 1;
+  // ── 보스: 형성평가 1~7번 (세트1 → 틀린 문항은 세트2) ──────────────
   function bossView(body) {
-    const m = DS.Raid.mastery(L, R, me), ans = ((R.bossAns || {})[me]) || {};
-    const hp = DS.Raid.bossHp(L, R);
+    const m = Raid().mastery(L, R, me), ans = ((R.bossAns || {})[me]) || {};
+    const hp = Raid().bossHp(L, R);
     const items = L.boss.sets[bossSet];
     const mine = (ans[bossSet] || []).slice();
     body.innerHTML = `<div class="panel framed">
-      <div class="scene bg-scene"><div class="scene-bar"><div><b>${esc(L.boss.title)}</b><br><span class="muted small">보스 체력 ${hp.hp} / ${hp.max}</span></div></div>${DS.Art.monster(L.boss.monster, hp.hp ? 'idle' : 'down', hp.hp ? 'float' : '')}
-        <div class="hpbar"><i style="width:${hp.max ? (100 * hp.hp) / hp.max : 0}%"></i></div></div>
+      <div class="scene bg-scene boss${hp.won ? '' : ' quake-once'}"><div class="scene-bar"><div><b>👑 ${esc(L.boss.title)}</b><br><span class="muted small">보스 체력 ${hp.left} / ${hp.max}</span></div></div>${DS.Art.monster(L.boss.sprite, hp.won ? 'down' : 'idle', hp.won ? '' : 'float')}
+        <div class="hpbar"><i style="width:${hp.max ? (100 * hp.left) / hp.max : 0}%"></i></div></div>
+      ${hp.won ? '<h2 class="okc center">🎉 보스 격파! 모두 함께 이겼어요!</h2>' : ''}
       <div class="tabs"><button class="tab${bossSet === 1 ? ' on' : ''}" data-s="1">세트 1</button><button class="tab${bossSet === 2 ? ' on' : ''}" data-s="2">세트 2 (재도전)</button></div>
-      <div class="boss-items">${items.map((p, i) => `<button class="bitem${m[i] ? ' ok' : mine[i] != null ? ' tried' : ''}" data-i="${i}"><b>${i + 1}번</b> ${m[i] ? '✔ 도달' : mine[i] != null ? '✘ 다시' : '풀기'}</button>`).join('')}</div>
-      <p class="muted">맞힌 문항마다 보스에게 100의 피해! 두 세트 중 한 번이라도 맞히면 도달이에요. 학습지에도 풀이를 적어요.</p></div>`;
+      <div class="boss-items">${items.map((p, i) => `<button class="bitem${m[i] ? ' ok' : mine[i] != null ? ' tried' : ''}${i >= L.boss.hpItems ? ' bonus' : ''}" data-i="${i}"><b>${i + 1}번${i >= L.boss.hpItems ? ' ⭐' : ''}</b> ${m[i] ? '✔ 도달' : mine[i] != null ? '✘ 다시' : '풀기'}</button>`).join('')}</div>
+      <p class="muted small">맞힌 문항마다 보스에게 1 데미지! ⭐ 7번(보강·도전)은 보너스. 세트1 에서 틀린 문항은 세트2 로 다시 도전해요.</p></div>`;
     body.querySelectorAll('.tab').forEach((b) => b.addEventListener('click', () => { bossSet = Number(b.dataset.s); render(); }));
     body.querySelectorAll('.bitem').forEach((b) => b.addEventListener('click', async () => {
       const i = Number(b.dataset.i);
       if (m[i]) { DS.UI.toast('이미 도달한 문항이에요.'); return; }
       const r = await DS.Quiz.ask({ name: `형성평가 ${i + 1}번`, formula: `세트 ${bossSet}` }, items[i], { collect: true, tag: '👑 보스' });
       const next = (ans[bossSet] || Array(L.boss.items).fill(null)).slice();
+      while (next.length < L.boss.items) next.push(null);
       next[i] = r.given;
       await DS.Act.bossAnswer(code, bossSet, next);
       const ok = DS.Quiz.grade(items[i], r.given);
-      DS.UI.toast(ok ? `✔ ${i + 1}번 도달! 보스에게 100의 피해` : `✘ ${i + 1}번은 아직… 해설을 떠올리며 ${bossSet === 1 ? '세트 2 로' : '다시'} 도전!`, 2600);
-      if (ok) DS.Sound.correct(); else DS.Sound.wrong();
+      DS.UI.toast(ok ? `✔ ${i + 1}번 도달! 보스에게 데미지` : `✘ ${i + 1}번은 아직… ${bossSet === 1 ? '세트 2 로' : '다시'} 도전!`, 2600);
+      if (ok) { DS.Sound.slash(); setTimeout(() => DS.Sound.hit(), 160); } else DS.Sound.squish();
     }));
   }
-  function victoryView(body) {
-    const w = R.state.winner;
-    body.innerHTML = `<div class="panel framed center win"><h2>🏆 성채 탈환!</h2><p>모두에게 트로피를 드립니다.</p><div class="trophy">🏆</div>${DS.Art.hero(myP().hero, 'attack', 'big')}
-      ${w ? `<p>최고 용사: <b>${w.num}번 ${esc(w.nick)}</b>${w.uid === me ? ' — 바로 당신!' : ''}</p>` : ''}<p class="muted">게임 기록은 수학 성적이 아니에요. 오늘 배운 것을 학습지에 정리해요.</p></div>`;
+  function endView(body) {
+    body.innerHTML = `<div class="panel framed center win"><h2>🏆 오늘의 던전 클리어!</h2>${DS.Art.hero(myP().hero, 'attack', 'big')}
+      <p class="muted">게임 기록은 수학 성적이 아니에요. 오늘 배운 것을 학습지에 정리해요.</p></div>`;
   }
   return { enter };
 })();

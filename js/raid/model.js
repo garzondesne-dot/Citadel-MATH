@@ -1,91 +1,77 @@
-// 협동 레이드 규칙 (화면·서버와 분리된 순수 함수 — tests/model.test.js 로 검증)
-// 방 상태(room) 모양 (Firebase rooms/{code} 아래 그대로):
-//   meta:    { lesson, created, teacher(uid), version }
-//   hosts:   { uid: true }                  교사 기기(교사 폰·종합상황실)
-//   state:   { phase, stage, monster, round, result, boss, winner }
-//            phase: lobby → forge → field → battle → result → (forge/field …) → boss → victory
-//   active:  { uid: true }                  이번 수업 참여 학생 (교사가 시작할 때 정함)
-//   players: { uid: { num, nick, hero, at, teacher? } }
-//   cards:   { uid: { cardId: true } }      연성한 카드 (교사도)
-//   help:    { uid: true }                  도움 요청
-//   seen:    { roundId: { uid: ms } }       문제를 처음 본 시각 (공격력 110 → 100)
-//   subs:    { roundId: { uid: { card, given, at } } }
-//   credits: { uid: { monsterKey: 점수 } }  몬스터마다 첫 정답만
-//   bossAns: { uid: { 1: [답 6개], 2: [...] } }
-// citadel 수업 규칙: docs/DECISIONS.md "수업 규칙"
+// 수업 규칙 (순수 함수 — 화면·서버와 분리, tests/model.test.js 가 검증)
+// 방 데이터 rooms/{코드}:
+//   meta:    { lesson, created, teacher, code, pct }        pct = 기준% 기본값 (수업 준비 화면에서 정함, 없으면 차시 기본 90)
+//   state:   { step, stepAt, headcount, pct: { 몬스터id: % }, skip: { 몬스터id: { uid: true } } }
+//            step: -1 = 대기실(입장), 0 … steps.length-1 = 수업 단계, steps.length = 수업 끝
+//   players: { uid: { num, nick, hero, teacher? } } · active: { uid: true } (수업 시작 때 대기실 인원)
+//   subs:    { 몬스터id: { uid: { 0: 답(JSON), 1: …, 2: … } } }   attempt 0 = 첫 시도, 1·2 = 재도전
+//   bossAns: { uid: { 1: [답 7개](JSON), 2: [...] } } · help: { uid: true }
+// 필드 몬스터 = 공동 체력 레이드: 체력 = ⌊대기실 인원 × 소문제 수 × 기준%⌋, 데미지 = 학생마다 가장 많이 맞힌 소문제 수(늘어난 만큼만)
+//   전원이 한 번 이상 제출(제외된 학생 빼고)한 뒤 체력이 0 이하면 격파. 보스는 체력 0 이 되는 즉시 승리.
 window.DS = window.DS || {};
 
 DS.Raid = (function () {
-  const PHASES = ['lobby', 'forge', 'field', 'battle', 'result', 'boss', 'victory'];
+  const RETRIES = 2; // 재도전 2번 → 시도는 최대 3번
   const keys = (o) => Object.keys(o || {});
-  const activeIds = (R) => keys(R.active).filter((u) => R.active[u]).sort((a, b) => num(R, a) - num(R, b));
   const num = (R, uid) => ((R.players || {})[uid] || {}).num || 0;
+  const activeIds = (R) => keys(R.active).filter((u) => R.active[u]).sort((a, b) => num(R, a) - num(R, b));
   const teacherUid = (R) => (R.meta || {}).teacher;
-  const owns = (R, uid, card) => !!(((R.cards || {})[uid] || {})[card]);
-  // 시드: 라운드 + 사람 → 학생마다 숫자가 다른 문제 (교사도 같은 함수로 채점)
-  const seedOf = (roundId, uid) => `${roundId}|${uid}`;
 
-  function newRoom(code, lessonId, teacher, now) {
+  function newRoom(code, lessonId, teacher, now, pct) {
     return {
-      meta: { lesson: lessonId, created: now, teacher, version: 1, code },
+      meta: { lesson: lessonId, created: now, teacher, version: 2, code, ...(pct ? { pct } : {}) },
       hosts: { [teacher]: true },
-      state: { phase: 'lobby', stage: 0, monster: 0, round: null, result: null, boss: null, winner: null },
+      state: { step: -1, stepAt: now, headcount: 0 },
       players: { [teacher]: { num: 0, nick: '선생님', hero: 7, at: now, teacher: true } },
     };
   }
 
-  // 공격력: 문제를 본 뒤 110 에서 1초에 1씩 줄어 최저 100. 교사는 100. 제출 시각으로 고정
-  const points = (ms) => 100 + Math.max(0, 10 - Math.floor(Math.max(0, ms) / 1000));
+  // ── 단계 ─────────────────────────────────────────────────
+  const stepOf = (L, R) => { const i = (R.state || {}).step; return i >= 0 && i < L.steps.length ? L.steps[i] : null; };
+  const isLobby = (R) => ((R.state || {}).step ?? -1) < 0;
+  const isEnd = (L, R) => ((R.state || {}).step ?? -1) >= L.steps.length;
 
-  // 이 라운드에서 각자 받는 문제
-  function questionFor(L, R, uid) {
-    const rd = R.state.round;
-    return rd ? L.question(rd.type, seedOf(rd.id, uid)) : null;
+  // ── 문제·답 ──────────────────────────────────────────────
+  const seedOf = (R, uid) => `${(R.meta || {}).code}|${uid}`;
+  const itemsFor = (L, R, mid, uid, attempt) => L.items(mid, seedOf(R, uid), attempt);
+  const attemptsOf = (R, mid, uid) => {
+    const a = (((R.subs || {})[mid]) || {})[uid] || {};
+    return keys(a).map(Number).sort((x, y) => x - y).map((k) => ({ attempt: k, given: a[k] }));
+  };
+  // 한 번의 시도 채점: 소문제마다 정답 여부
+  function gradeAttempt(L, R, mid, uid, attempt, given) {
+    const items = itemsFor(L, R, mid, uid, attempt);
+    const marks = items.map((q, i) => given != null && given[i] != null && DS.Quiz.grade(q, given[i]));
+    return { marks, correct: marks.filter(Boolean).length, total: items.length };
   }
-  // 참여자(학생 + 교사) 중 이 유형에 맞는 카드가 하나도 없는 사람 → 소환을 막는다
-  function missingFor(L, R, type) {
-    const probe = L.question(type, 'probe');
-    return [...activeIds(R), teacherUid(R)].filter((u) => !probe.cards.some((c) => owns(R, u, c)));
+  // 학생의 기록: 시도별 결과 · 가장 많이 맞힌 수(=데미지) · 남은 재도전
+  function record(L, R, mid, uid) {
+    const tries = attemptsOf(R, mid, uid).map((t) => ({ ...t, ...gradeAttempt(L, R, mid, uid, t.attempt, t.given) }));
+    const best = tries.reduce((m, t) => Math.max(m, t.correct), 0);
+    const total = L.monsters[mid] ? itemsFor(L, R, mid, uid, 0).length : 0;
+    const last = tries[tries.length - 1] || null;
+    const allRight = !!last && last.correct === last.total;
+    return { tries, best, total, last, allRight, submitted: tries.length > 0, canRetry: tries.length > 0 && tries.length <= RETRIES && !tries.some((t) => t.correct === t.total), nextAttempt: tries.length };
   }
-  // 단계 카드를 모두 갖췄는지 (교사 화면 준비 표시용)
-  function stageReady(L, R, uid) {
-    const st = L.stages[R.state.stage];
-    return st.cards.every((c) => owns(R, uid, c));
-  }
+  const resultLabel = (t) => (!t ? '' : t.correct === t.total ? 'success' : t.correct === 0 ? 'fail' : 'partial');
 
-  // 교사 마지막 제출 가능: 학생 전원 제출 뒤
-  function allStudentsSubmitted(R) {
-    const rd = R.state.round, subs = ((R.subs || {})[rd && rd.id]) || {};
-    return !!rd && activeIds(R).every((u) => subs[u]);
+  // ── 체력 ─────────────────────────────────────────────────
+  const headcount = (R) => (R.state || {}).headcount || activeIds(R).length;
+  const pctOf = (L, R, mid) => { const p = ((R.state || {}).pct || {})[mid]; return p != null ? p : ((R.meta || {}).pct || L.defaultPct || 90); };
+  const skipped = (R, mid) => ((R.state || {}).skip || {})[mid] || {};
+  function monsterHp(L, R, mid) {
+    const n = L.monsters[mid] ? itemsFor(L, R, mid, '_', 0).length : 0;
+    const pct = pctOf(L, R, mid);
+    const max = Math.floor((headcount(R) * n * pct) / 100);
+    const dmg = activeIds(R).reduce((a, u) => a + record(L, R, mid, u).best, 0);
+    return { max, dmg, left: Math.max(0, max - dmg), pct, items: n };
   }
+  const waiting = (L, R, mid) => activeIds(R).filter((u) => !skipped(R, mid)[u] && !record(L, R, mid, u).submitted);
+  const allSubmitted = (L, R, mid) => waiting(L, R, mid).length === 0;
+  const cleared = (L, R, mid) => allSubmitted(L, R, mid) && monsterHp(L, R, mid).left <= 0;
 
-  // 판정: 카드가 그 문제에 맞고 답이 맞아야 정답. 교사 포함 전원 정답이면 공동 공격 성공
-  function judge(L, R, uid) {
-    const rd = R.state.round, s = (((R.subs || {})[rd.id]) || {})[uid];
-    if (!s) return { submitted: false, correct: false };
-    const q = questionFor(L, R, uid);
-    const cardOk = q.cards.includes(s.card) && owns(R, uid, s.card);
-    const answerOk = DS.Quiz.grade(q, s.given);
-    return { submitted: true, correct: cardOk && answerOk, cardOk, answerOk, card: s.card };
-  }
-  function resolve(L, R) {
-    const rd = R.state.round, t = teacherUid(R);
-    const people = [...activeIds(R), t];
-    const per = {}, credits = {};
-    const mkey = `m${R.state.monster}`;
-    people.forEach((u) => {
-      const j = judge(L, R, u);
-      per[u] = j;
-      if (u === t || !j.correct) return;
-      if ((((R.credits || {})[u]) || {})[mkey] != null) return; // 같은 몬스터는 첫 정답만
-      const sub = R.subs[rd.id][u], seen = (((R.seen || {})[rd.id]) || {})[u];
-      credits[u] = { [mkey]: points(seen != null ? sub.at - seen : 0) };
-    });
-    const success = people.every((u) => per[u].correct);
-    return { success, per, credits };
-  }
-
-  // 보스(형성평가): 문항별로 세트1·세트2 중 한 번이라도 맞히면 도달. 문항당 기여 100
+  // ── 보스 (형성평가) ───────────────────────────────────────
+  // 문항별로 세트1·세트2 중 한 번이라도 맞히면 도달. 체력 = ⌊인원 × hpItems(6) × 기준%⌋, 7번(보너스)도 맞히면 1 데미지
   function mastery(L, R, uid) {
     const ans = ((R.bossAns || {})[uid]) || {};
     return Array.from({ length: L.boss.items }, (_, i) => [1, 2].some((set) => {
@@ -94,22 +80,26 @@ DS.Raid = (function () {
     }));
   }
   function bossHp(L, R) {
-    const ids = activeIds(R);
-    const max = ids.length * L.boss.items * 100;
-    const dmg = ids.reduce((a, u) => a + mastery(L, R, u).filter(Boolean).length * 100, 0);
-    return { max, hp: Math.max(0, max - dmg), allReached: ids.every((u) => mastery(L, R, u).every(Boolean)) };
+    const pct = pctOf(L, R, 'boss');
+    const max = Math.floor((headcount(R) * L.boss.hpItems * pct) / 100);
+    const dmg = activeIds(R).reduce((a, u) => a + mastery(L, R, u).filter(Boolean).length, 0);
+    return { max, dmg, left: Math.max(0, max - dmg), pct, won: max > 0 && dmg >= max };
   }
 
-  // 최고 용사: 일반전 점수 + 보스 기여. 동점이면 추첨, 교사 제외
-  function winner(L, R, rnd = Math.random) {
-    const ids = activeIds(R);
-    if (!ids.length) return null;
-    const total = (u) => keys((R.credits || {})[u]).reduce((a, k) => a + R.credits[u][k], 0) + mastery(L, R, u).filter(Boolean).length * 100;
-    const max = Math.max(...ids.map(total));
-    const tied = ids.filter((u) => total(u) === max);
-    const u = tied[Math.floor(rnd() * tied.length)];
-    return { uid: u, num: num(R, u), nick: R.players[u].nick, hero: R.players[u].hero, score: max, tie: tied.length > 1 };
+  // ── 도움 필요 (교사 폰) ───────────────────────────────────
+  // 직접 요청 · 재도전까지 다 썼는데 다 맞히지 못함 · 몬스터가 나온 지 2분이 지나도 미제출
+  function helpList(L, R, now) {
+    const step = stepOf(L, R), out = [];
+    activeIds(R).forEach((u) => {
+      if ((R.help || {})[u]) { out.push({ uid: u, why: '직접 요청', level: 2 }); return; }
+      if (step && step.kind === 'monster') {
+        const rec = record(L, R, step.id, u);
+        if (rec.submitted && !rec.canRetry && !rec.tries.some((t) => t.correct === t.total)) out.push({ uid: u, why: `재도전까지 ${rec.best}/${rec.total}`, level: 1 });
+        else if (!rec.submitted && now - ((R.state || {}).stepAt ?? now) > 120000) out.push({ uid: u, why: '2분째 미제출', level: 0 });
+      }
+    });
+    return out.sort((a, b) => b.level - a.level || num(R, a.uid) - num(R, b.uid));
   }
 
-  return { PHASES, activeIds, teacherUid, owns, seedOf, newRoom, points, questionFor, missingFor, stageReady, allStudentsSubmitted, judge, resolve, mastery, bossHp, winner };
+  return { RETRIES, activeIds, teacherUid, num, newRoom, stepOf, isLobby, isEnd, seedOf, itemsFor, attemptsOf, gradeAttempt, record, resultLabel, headcount, pctOf, monsterHp, waiting, allSubmitted, cleared, mastery, bossHp, helpList };
 })();

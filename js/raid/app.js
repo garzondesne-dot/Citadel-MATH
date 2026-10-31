@@ -14,7 +14,7 @@ DS.App = (function () {
     try { await DS.Net.init(); } catch (e) { $('#home-msg').textContent = e.message; return; }
     $('#mode').innerHTML = DS.Net.mode === 'local' ? '🧪 이 기기 체험 모드 <span class="muted">(Firebase 미설정 — 같은 브라우저 탭끼리만 연결)</span>' : '🌐 실시간 연결 (Firebase)';
     $('#ver').textContent = DS.VERSION;
-    $('#lesson').innerHTML = DS.Lessons.list.map((l) => `<option value="${l.id}">${esc(l.unit || '')} · ${esc(l.title)}</option>`).join('');
+    $('#lesson').innerHTML = $('#p-lesson').innerHTML = DS.Lessons.list.map((l) => `<option value="${l.id}">${esc(l.unit || '')} · ${esc(l.title)}</option>`).join('');
     $('#s-num').innerHTML = Array.from({ length: 30 }, (_, i) => `<option>${i + 1}</option>`).join('');
     const last = read('citadel-student');
     if (last) { $('#s-code').value = last.code; $('#s-num').value = last.num; $('#s-nick').value = last.nick; hero = last.hero || 0; }
@@ -25,6 +25,7 @@ DS.App = (function () {
     if (role === 'student') form('student');
     if (role === 'hall') { form('hall'); if (q.get('code')) $('#h-code').value = q.get('code'); }
     if (role === 'teacher') form('teacher');
+    if (role === 'prep') form('prep');
     const t = read('citadel-teacher');
     if (t && t.uid === DS.Net.uid()) { $('#t-resume').hidden = false; $('#t-resume').textContent = `↩ 수업 ${t.code} 이어서 (키 ${t.hallKey})`; }
     const h = read('citadel-hall');
@@ -57,6 +58,7 @@ DS.App = (function () {
     $('#t-new').onclick = go(() => DS.Teacher.create($('#lesson').value));
     $('#t-resume').onclick = go(() => { const t = read('citadel-teacher'); return DS.Teacher.open(t.code, t.hallKey); });
     $('#h-go').onclick = go(() => DS.Hall.enter($('#h-code').value.trim(), $('#h-key').value.trim()));
+    $('#p-go').onclick = go(async () => DS.Prep.enter($('#p-lesson').value));
   }
   return { boot };
 })();
