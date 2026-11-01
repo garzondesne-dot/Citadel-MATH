@@ -6,7 +6,7 @@ DS.Teacher = (function () {
   const $ = (s) => document.querySelector(s);
   const { esc } = DS.UI;
   const C = () => DS.Control, Raid = () => DS.Raid;
-  let code = null, L = null, R = null, raw = null, stop = null, tick = 0, showKey = 0;
+  let code = null, L = null, R = null, raw = null, stop = null, tick = 0, showKey = 0, videos = {}, vStop = null, vLesson = '';
   // 교사 폰에서는 종합상황실 키를 바로 보여 준다 (종합상황실 입력칸만 **** 로 가림 — 사용자 결정 v0.5.0)
   const keyHtml = () => `<b>${esc($('#t-key').textContent) || '—'}</b>`;
 
@@ -25,7 +25,9 @@ DS.Teacher = (function () {
     DS.Scene.save({ role: 'teacher', code: c, hallKey: hallKey || '' });
     $('#t-key').textContent = hallKey || '';
     if (stop) stop();
-    stop = DS.Net.watch(`rooms/${code}`, (v) => { if (!v) return; raw = v; R = DS.Act.unpackRoom(v); L = DS.Lessons.get(R.meta.lesson); render(); DS.Act.admitLate(code, R, L); });
+    stop = DS.Net.watch(`rooms/${code}`, (v) => { if (!v) return; raw = v; R = DS.Act.unpackRoom(v); L = DS.Lessons.get(R.meta.lesson);
+      if (vLesson !== L.id) { vLesson = L.id; if (vStop) vStop(); vStop = DS.Net.watch(`prep/${L.id}/video`, (x) => { videos = x || {}; if (R) render(); }); }
+      render(); DS.Act.admitLate(code, R, L); });
     clearInterval(tick); tick = setInterval(() => { if (R) render(); }, 15000); // "2분째 미제출" 갱신
   }
   const studentUrl = () => `${location.origin}${location.pathname.replace(/[^/]*$/, '')}index.html?role=student&code=${code}${DS.Net.mode === 'local' ? '&local' : ''}`;
@@ -38,12 +40,12 @@ DS.Teacher = (function () {
     $('#t-tabs').innerHTML = '';
     const body = $('#t-body');
     const live = !Raid().isLobby(R) && !Raid().isClosed(R);
-    body.innerHTML = `<div class="panel framed t-now">${now()}${C().pctHtml(L, R)}${live ? C().sheetBtn(L, R) + C().focusBtn(R) : ''}</div>
+    body.innerHTML = `<div class="panel framed t-now">${now()}${C().pctHtml(L, R)}${live ? C().videoBtn(L, R, videos) + C().sheetBtn(L, R) + C().focusBtn(R) : ''}</div>
       ${Raid().isLobby(R) ? lobby() : Raid().isEnd(L, R) ? `<div class="panel framed">${C().wordsHtml(R)}</div>` : helpPanel()}
       <p class="t-next muted small">다음 ▶ <b>${esc(C().nextName(L, R))}</b></p>
       <div class="t-pad"><button class="btn t-back" id="t-back"${i < 0 ? ' disabled' : ''}>◀<br>뒤로</button><button class="btn primary t-fwd" id="t-fwd"${Raid().isClosed(R) ? ' disabled' : ''}>▶<br>${Raid().isFinale(L, R) ? '수업 끝' : '앞으로'}</button></div>`;
     if (Raid().isLobby(R)) drawQR();
-    C().bindPct(body, code, R, L); C().bindFocus(body, code, R); C().bindSheet(body, code, R); C().bindWords(body, code, R);
+    C().bindPct(body, code, R, L); C().bindFocus(body, code, R); C().bindSheet(body, code, R); C().bindVideo(body, code, R); C().bindWords(body, code, R);
     body.querySelectorAll('[data-help]').forEach((b) => (b.onclick = () => C().run(() => DS.Act.clearHelp(code, b.dataset.help))));
     $('#t-fwd').onclick = () => C().run(() => C().forward(code, R, L));
     $('#t-back').onclick = () => C().run(() => C().back(code, R, L));

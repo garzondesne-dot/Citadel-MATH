@@ -70,7 +70,7 @@ DS.Act = (function () {
     }
     const next = Math.max(-1, Math.min(L.steps.length, i + dir));
     if (next === i) return;
-    await N().update(P(code, 'state'), { step: next, stepAt: N().TS, focus: Raid.autoFocus(L.steps[next]), closed: null, sheet: null }); // 단계가 바뀌면 문제 화면은 닫힘
+    await N().update(P(code, 'state'), { step: next, stepAt: N().TS, focus: Raid.autoFocus(L.steps[next]), closed: null, sheet: null, video: null }); // 단계가 바뀌면 문제 화면 · 영상은 닫힘
   }
   // 모루 레시피는 반마다 "배포한 차시까지" 열린다: unlock/{반} = 가장 큰 차시 번호
   async function unlockFor(L, classes) {
@@ -83,6 +83,7 @@ DS.Act = (function () {
   const setThink = (lessonId, sec) => N().set(prepPath(lessonId, 'think'), Number(sec));
   // 📄 문제 화면: 종합상황실에 지금 문제의 학습지 이미지를 크게 (교사 해설용, 레이드는 뒤에서 계속)
   const setSheet = (code, on) => N().set(P(code, 'state/sheet'), on ? true : null);
+  const setVideoOn = (code, stepId) => N().set(P(code, 'state/video'), stepId || null); // 🎬 큰 화면에 설명 영상 (null = 닫기)
   const setFocus = (code, on) => N().set(P(code, 'state/focus'), !!on);
   const setPct = (code, mid, pct) => N().set(P(code, `state/pct/${mid}`), Math.max(10, Math.min(100, Math.round(pct))));
   // 미제출 학생 빼고 판정 (결석·폰 고장)
@@ -153,5 +154,5 @@ DS.Act = (function () {
     return out;
   }
 
-  return { endClass, admitLate, getPrep, setImage, setVideo, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, bossAnswer, unpackRoom, P };
+  return { setVideoOn, endClass, admitLate, getPrep, setImage, setVideo, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, bossAnswer, unpackRoom, P };
 })();

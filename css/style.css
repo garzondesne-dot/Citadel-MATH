@@ -888,3 +888,8 @@ details.panel[open] > summary::before { content: '▾ '; }
 .t-room.on { border-color: #5ad08a; box-shadow: inset 3px 0 0 #5ad08a; }
 .t-room b { display: block; font-size: 14px; }
 .t-room .t-x { color: #ff9a8a; }
+/* v0.8.6 🎬 큰 화면 설명 영상 */
+.h-video-ov { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center; background: #020611d9; }
+.h-video-box { width: min(78vw, 140vh); }
+.h-video-box .h-ctitle { text-align: center; margin: 0 0 8px; }
+.video-btn.on { border-color: #ff6a6a; color: #ffd0d0; }
