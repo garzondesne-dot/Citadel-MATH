@@ -13,6 +13,7 @@ DS.Teacher = (function () {
   async function create(lessonId, cls) {
     const r = await DS.Act.createRoom(lessonId, cls);
     try { localStorage.setItem('citadel-teacher', JSON.stringify({ code: r.code, hallKey: r.hallKey, uid: DS.Net.uid() })); } catch (e) { /* 무시 */ }
+    try { const a = JSON.parse(localStorage.getItem('citadel-rooms')) || []; a.unshift({ code: r.code, cls: cls || '', lesson: lessonId, uid: DS.Net.uid(), at: Date.now() }); localStorage.setItem('citadel-rooms', JSON.stringify(a.slice(0, 30))); } catch (e) { /* 무시 */ } // 📋 만든 수업 목록
     return open(r.code, r.hallKey);
   }
   async function open(c, hallKey) {

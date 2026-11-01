@@ -879,3 +879,12 @@ details.panel[open] > summary::before { content: '▾ '; }
 .fc-shape { display: flex; gap: 4px; }
 .fc-chip { min-width: 30px; height: 38px; padding: 0 4px; display: inline-flex; align-items: center; justify-content: center; background: var(--fc-mat) center / 100% 100%; color: #201a11; font: 700 14px var(--math); }
 .fc-chip.op { background-image: var(--fc-op); color: #ffe29a; }
+/* v0.8.4 교사 메뉴: 차시 한 줄 크게 · 반은 아래 작게 · 📋 만든 수업 */
+.t-lesson { display: block; }
+.t-lesson select { font-size: 16px; }
+.t-cls-row { display: flex; justify-content: flex-end; margin-top: 6px; }
+.t-cls-row label { width: 46%; min-width: 140px; }
+.t-room { display: grid; grid-template-columns: 1fr auto auto; gap: 6px; align-items: center; padding: 6px 8px; margin: 4px 0; border: 1px solid #2a3c66; background: #0b1430; }
+.t-room.on { border-color: #5ad08a; box-shadow: inset 3px 0 0 #5ad08a; }
+.t-room b { display: block; font-size: 14px; }
+.t-room .t-x { color: #ff9a8a; }
