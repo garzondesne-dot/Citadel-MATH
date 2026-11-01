@@ -41,6 +41,8 @@ DS.ASSETS = {
     box: { art: [62, 24, 292, 186], body: [72, 214, 270, 172], plate: [92, 398, 230, 48], gem: [166, 418, 52, 74] } },
   // 모루 연성창: 위에서 본 모루(작업면 = face, 그림 비율 0~1) · 망치
   forge: { anvil: { src: 'forge-anvil-v1.webp', w: 820, h: 509, face: [0.273, 0.328, 0.830, 0.734] }, hammer: { src: 'forge-hammer-v1.webp', w: 420, h: 435 } },
+  // 연성창 C안 「황금 보강 망치」 (v0.9.0 · 사용자 제공): 모루 · 망치 머리 · 재료 카드 틀(밝은 면) · 연산 카드 틀(어두운 면) · 연성 버튼 · 공방 배경. 카드 틀은 같은 3:4
+  forgeC: { anvil: 'forgec-anvil-v1.webp', hammer: 'forgec-hammer-v1.webp', material: 'forgec-material-v1.webp', operator: 'forgec-operator-v1.webp', button: 'forgec-button-v1.webp', bg: 'forgec-background-v1.webp' },
   // 브랜드: 공통 = 배경 · 메뉴 아이콘(학생 · 교사 · 종합상황실 · 수업 준비 · 로그인), 에디션 = 제목 화면 · 머리 배너 · 로고 (과목이 늘면 에디션만 바꿈)
   brand: { name: '모두의 던전', edition: '공통수학2', full: '모두의 던전 : 공통수학2', tagline: '함께 풀고, 모두 함께 돌파하라',
     bg: 'brand-bg-v1.webp', menu: { src: 'menu-icons-v1.webp', cols: 5, kinds: { student: 0, teacher: 1, hall: 2, prep: 3, login: 4 } },
