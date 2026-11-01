@@ -69,7 +69,7 @@ DS.Hall = (function () {
     const on = list.filter(([u]) => Raid().online(R, u)).length;
     $('#h-heroes').innerHTML = `<p class="shelf-title">⚔ 용사단 <span class="muted">${Raid().isLobby(R) ? `입장 ${list.length}` : `접속 ${on} / ${list.length}`}</span></p>
       <div class="hrow teach">${DS.Art.hero(DS.ASSETS.heroes.teacher, 'idle', 'mini')}<b>선생님</b><i class="dot"></i></div>
-      ${list.map(([u, p]) => `<div class="hrow">${DS.Art.hero(p.hero, 'idle', 'mini')}<span>${p.num} ${esc(p.nick)}</span>${st(u, p)}<i class="dot${Raid().online(R, u) || Raid().isLobby(R) ? '' : ' off'}"></i></div>`).join('')}
+      ${list.map(([u, p]) => `<div class="hrow">${DS.Art.hero(p.hero, 'idle', 'mini')}<span>${DS.Titles.nameHtml(p, { size: 16 })}</span>${st(u, p)}<i class="dot${Raid().online(R, u) || Raid().isLobby(R) ? '' : ' off'}"></i></div>`).join('')}
       <p class="muted small h-legend">● 접속 · ○ 끊김 — 정답·오답 글자는 띄우지 않아요</p>`;
   }
 
@@ -92,7 +92,7 @@ DS.Hall = (function () {
       ${finale ? `<div class="lb2-cnt">💬 ${words.length} / ${n}</div>` : `<div class="lb2-qr"><div id="h-qr" class="qr"></div><b>${code}</b><span>QR · 수업 코드</span></div>`}
       <div class="lb2-say teacher">${finale ? '모두 수고했네! 오늘 배운 것 한마디씩 남기게' : `${L.no ? `${L.no}차시 ` : ''}${esc(L.title.split('·')[0].trim())} 던전에 온 것을 환영하네!`}</div>
       <div class="lb2-h teacher" style="left:50%;top:60%">${DS.Art.hero(DS.ASSETS.heroes.teacher, finale ? 'attack' : 'idle', finale ? 'pairhop' : 'huff')}<i class="shadow"></i><span class="nm gold">선생님</span></div>
-      ${pos.map((o, i) => `<div class="lb2-h" style="left:${o.x}%;top:${o.y}%;--sz:${size}px;animation-delay:${(i * 0.13) % 0.9}s"><span class="nm">${o.p.num} ${esc(o.p.nick)}</span><div class="${(finale ? i % 2 === 1 : o.flip) ? 'face-l' : ''}">${DS.Art.hero(o.p.hero, 'idle', finale ? 'pairhop' : 'huff')}</div><i class="shadow"></i>${finale && words.includes(o.u) ? `<span class="lb2-bub" data-u="${o.u}">${esc(R.words[o.u].t)}</span>` : ''}</div>`).join('')}
+      ${pos.map((o, i) => `<div class="lb2-h" style="left:${o.x}%;top:${o.y}%;--sz:${size}px;animation-delay:${(i * 0.13) % 0.9}s"><span class="nm">${DS.Titles.nameHtml(o.p, { size: 16 })}</span><div class="${(finale ? i % 2 === 1 : o.flip) ? 'face-l' : ''}">${DS.Art.hero(o.p.hero, 'idle', finale ? 'pairhop' : 'huff')}</div><i class="shadow"></i>${finale && words.includes(o.u) ? `<span class="lb2-bub" data-u="${o.u}">${esc(R.words[o.u].t)}</span>` : ''}</div>`).join('')}
       ${finale ? '<div class="stamp-bar wide">📮 반드시 학습지 확인도장 받아가세요.</div>' : ''}
       ${Raid().focusOn(R) ? '<div class="h-focus-badge">⚠ 집중모드</div>' : ''}</div>`;
     if (!finale && window.QRCode) new QRCode($('#h-qr'), { text: studentUrl(), width: 150, height: 150 });
@@ -133,7 +133,7 @@ DS.Hall = (function () {
       <div class="raid-top"><b>${step.kind === 'boss' ? '👑 ' : step.special ? '⭐ ' : step.review ? '📖 ' : ''}${esc(f.title)}</b><div class="raid-hp"><i id="rh-bar"></i><span id="rh-txt"></span></div></div>
       ${step.special ? '<div class="raid-banner">⭐ 스페셜 몬스터 난입!</div>' : step.kind === 'boss' ? '<div class="raid-banner boss">👑 보스 출현!</div>' : ''}
       <div class="raid2-shadow"></div><div class="raid2-mon" id="rm">${DS.Art.monster(f.sprite, 'idle', 'float')}<div id="rm-fx"></div></div>
-      ${pos.map((o) => `<div class="fh2" id="fh-${o.u}" style="left:${o.x}%;top:${o.y}%"><span class="fh-name">${o.p.num} ${esc(o.p.nick)}</span><div class="${o.x > 50 ? 'face-l' : ''}">${DS.Art.hero(o.p.hero, 'idle')}</div><i class="shadow"></i></div>`).join('')}
+      ${pos.map((o) => `<div class="fh2" id="fh-${o.u}" style="left:${o.x}%;top:${o.y}%"><span class="fh-name">${DS.Titles.nameHtml(o.p, { size: 16 })}</span><div class="${o.x > 50 ? 'face-l' : ''}">${DS.Art.hero(o.p.hero, 'idle')}</div><i class="shadow"></i></div>`).join('')}
       <div class="raid-clear" id="r-clear" hidden></div><div class="h-focus-badge">⚠ 집중모드</div>
     </div>`;
     seen = attacks(step);

@@ -57,7 +57,7 @@ DS.Result = (function () {
   // 저장용 요약 (records/{반}/{번호}/{차시})
   const summary = (r, code) => ({ at: (DS.Net || {}).TS || Date.now(), code: String(code || ''), no: r.no,
     conc: Object.fromEntries(Object.entries(r.conc).map(([c, v]) => [c, [v.ok, v.total]])), names: r.titles,
-    miss: r.mons.filter((m) => m.miss).map((m) => m.id), weak: r.weak, boss: r.boss.mast.filter(Boolean).length, bossN: r.boss.hp, xp: DS.Grow ? DS.Grow.sum(r.parts) : 0 });
+    miss: r.mons.filter((m) => m.miss).map((m) => m.id), weak: r.weak, boss: r.boss.mast.filter(Boolean).length, bossN: r.boss.hp, won: !!r.boss.won, fixed: r.fixed || 0, perfects: r.perfects || 0, xp: DS.Grow ? DS.Grow.sum(r.parts) : 0 });
 
   const dots = (ok, total) => Array.from({ length: Math.min(total, 10) }, (_, i) => `<i class="${i < Math.round((ok / total) * Math.min(total, 10)) ? 'on' : ''}"></i>`).join('');
   // 복습 추천 버튼: 학습지 개념 · 보강던전(그 개념의 보강) · 영상

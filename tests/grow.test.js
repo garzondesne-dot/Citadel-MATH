@@ -1,7 +1,7 @@
 // 성장 · 보강던전 · 개인 결과 검증: node tests/grow.test.js
 // (1) EXP 표 · 레벨 경계 · 칭호  (2) 보강 인장 · 화려한 이펙트 해금 (인장 1·2·4·6·8·10개)  (3) 개인 결과: 첫 시도 / 고침 / 못 맞힘 · 개념별 · 복습 추천
 const load = require('./load');
-const DS = load(['js/engine/ui.js', 'js/engine/setgen.js', 'js/engine/quiz.js', 'js/engine/lessons.js', 'lessons/set-02.js', 'lessons/set-03.js', 'lessons/set-04.js', 'js/engine/fx.js', 'js/raid/model.js', 'js/raid/grow.js', 'js/raid/bonus.js', 'js/raid/result.js']);
+const DS = load(['assets/manifest.js', 'js/engine/ui.js', 'js/engine/setgen.js', 'js/engine/quiz.js', 'js/engine/lessons.js', 'lessons/set-02.js', 'lessons/set-03.js', 'lessons/set-04.js', 'js/engine/fx.js', 'js/raid/model.js', 'js/raid/grow.js', 'js/raid/bonus.js', 'js/raid/result.js', 'lessons/unit-set.js', 'js/raid/titles.js']);
 let fail = 0;
 const check = (c, m) => { if (!c) { fail++; console.error('FAIL:', m); } };
 const G = DS.Grow, B = DS.Bonus, X = DS.Raid;
@@ -67,5 +67,18 @@ R2.state.closed = true; check(X.lateIds(R2).length === 0, '끝난 수업은 해�
 const now = 10 * X.LIVE_MS;
 check(X.liveOpen({ open: true, at: now - 1000 }, now) && !X.liveOpen({ open: true, at: now - X.LIVE_MS - 1 }, now) && !X.liveOpen({ open: false, at: now }, now), '차원문 2시간 지나면 꺼진 것으로');
 
+// ── 5. v0.9.1 호칭 · 메달 ───────────────────────────────
+const T = DS.Titles, ids = (d) => T.earned(d).map((t) => t.id);
+const empty = { records: {}, cards: {}, xp: 0, bonus: {} };
+check(ids(empty).join() === 'dawn,lv1', `처음엔 [새벽의 개척자] + 레벨 칭호만 (${ids(empty)})`);
+check(T.get('dawn').tier === 'p' && T.get('dawn').medal, '새벽의 개척자 = 보라 · 메달');
+const d1 = { records: { 'set-04': { won: true, boss: 5, bossN: 5, fixed: 4 } }, cards: { belong: true }, xp: 120, bonus: {} };
+const e1 = ids(d1);
+check(['first', 'slayer', 'smith', 'dg-set-04', 'lv2', 'lv3'].every((k) => e1.includes(k)) && !e1.includes('grit') && !e1.includes('sage'), `첫 출정 · 보스 토벌 · 첫 연성 · 빙결 동굴 정복 · Lv 칭호 (${e1})`);
+check(T.get('dg-set-04').name === '빙결 동굴 정복' && T.get('dg-set-04').medal[0] === 'dungeon', '던전 정복 = 그 던전 테마 메달');
+check(ids({ ...d1, records: { a: { fixed: 6 }, b: { fixed: 4 } } }).includes('grit'), '끈기의 용사 = 고친 문제 누적 10');
+check(!T.earned({ ...d1, xp: 1e6 }).some((t) => t.id === 'king'), '집합의 지배자는 추후 공개 (잠김)');
+check(T.all().every((t) => T.TIER[t.tier]), '모든 호칭에 등급');
+
 if (fail) { console.error(`\n${fail}건 실패`); process.exit(1); }
-console.log('OK: 성장 — 첫 출정 · 늦게 온 학생 · 차원문 2시간 · EXP · 레벨 · 칭호 · 보강 인장 → 이펙트 해금 · 개인 결과(처음/고침/못 맞힘 · 개념별 · 복습 추천) 통과');
+console.log('OK: 성장 — 호칭·메달 · 첫 출정 · 늦게 온 학생 · 차원문 2시간 · EXP · 레벨 · 칭호 · 보강 인장 → 이펙트 해금 · 개인 결과(처음/고침/못 맞힘 · 개념별 · 복습 추천) 통과');

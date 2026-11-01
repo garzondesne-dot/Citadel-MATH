@@ -46,7 +46,7 @@ DS.Camp = (function () {
   }
   function render() {
     const c = C();
-    $('#camp').innerHTML = `<div class="camp-top"><b>🔥 ${esc(me.name)}의 모닥불</b><span class="muted small">${esc(me.c)} · ${me.n}번${DS.Grow ? ` · <b class="gold" id="camp-lv">Lv.-</b>` : ''}</span><button class="btn small camp-set" id="camp-set">⚙ 설정</button></div>
+    $('#camp').innerHTML = `<div class="camp-top"><b>🔥 ${esc(me.name)}의 모닥불</b><span class="muted small">${DS.Titles && (me.title || 'dawn') !== 'none' ? `${DS.Titles.nameHtml({ title: me.title || 'dawn', nick: '' }, { num: false, size: 16 })} · ` : ''}${esc(me.c)} · ${me.n}번${DS.Grow ? ` · <b class="gold" id="camp-lv">Lv.-</b>` : ''}</span><button class="btn small camp-set" id="camp-set">⚙ 설정</button></div>
       ${stampToday() ? '<div class="stamp-bar">📮 반드시 학습지 확인도장 받아가세요.</div>' : ''}
       <div class="camp-stage" style="background-image:url('${base()}${c.bg}')">
         ${tree(0, 'back', 'left:2%;bottom:30%;height:46%')}${tree(2, 'back', 'left:60%;bottom:32%;height:40%')}
@@ -128,7 +128,7 @@ DS.Camp = (function () {
   async function enterCode(code) {
     if (me.test && DS.Test.active()) return DS.Test.join(code); // 🧪 테스트 모닥불
     try { localStorage.setItem('citadel-student', JSON.stringify({ code })); } catch (e) { /* 무시 */ }
-    await DS.Student.enter(code, { num: me.n, nick: me.name, hero: me.hero, fx: me.fx || 'flame', cls: me.c });
+    await DS.Student.enter(code, { num: me.n, nick: me.name, hero: me.hero, fx: me.fx || 'flame', cls: me.c, title: me.title || 'dawn' });
   }
   // 📜 복습 노트: 차시별 결과 · 개념별 첫 시도 · 복습 추천 (records/{반}/{번호})
   async function note() {
@@ -161,19 +161,23 @@ DS.Camp = (function () {
   // ⚙ 설정: 용사 · 공격 이펙트 (잠긴 것은 🔒 + 조건)
   async function settings() {
     const L = await DS.Account.looks(me);
-    let hero = me.hero, fx = me.fx || 'flame';
+    let hero = me.hero, fx = me.fx || 'flame', title = me.title || 'dawn';
+    const TD = DS.Titles ? await DS.Titles.data(me).catch(() => ({})) : {}, got = DS.Titles ? DS.Titles.earned(TD).map((t) => t.id) : [];
     const el = document.createElement('div'); el.className = 'modal camp-modal';
     const draw = () => {
       el.innerHTML = `<div class="quiz-box framed set-box"><h2>⚙ 설정</h2>
         <p class="shelf-title">내 용사</p><div class="heroes set-grid">${L.heroes.map((h) => `<button class="hpick${h.id === hero ? ' on' : ''}${h.open ? '' : ' lock'}" data-h="${h.id}" title="${esc(h.cond || '')}">${DS.Art.hero(h.id, h.id === hero ? 'attack' : 'idle')}${h.open ? '' : '<b class="lk">🔒</b>'}</button>`).join('')}</div>
         <p class="muted small">✨ 추가 용사: ① 1~3차시 도감 <b>${L.got} / ${L.need}</b>장 · ② 🎁 첫 레이드 클리어 · 나머지는 추후 공개</p>
+        <p class="shelf-title">🏅 호칭 <span class="muted small">얻은 ${got.length}개 · 고른 호칭이 이름 앞에 붙어요</span></p>
+        <div class="ttl-grid">${[{ id: 'none', name: '달지 않기', tier: 'w', cond: '' }, ...DS.Titles.all()].map((t) => { const has = t.id === 'none' || got.includes(t.id); return `<button class="ttl-pick ${DS.Titles.TIER[t.tier].cls}${t.id === title ? ' on' : ''}${has ? '' : ' lock'}" data-ttl="${t.id}" title="${esc(t.cond || '')}">${has ? DS.Titles.medal(t, 22) : '🔒'}<span>${esc(t.name)}</span>${has ? '' : `<small>${esc(t.cond)}</small>`}</button>`; }).join('')}</div>
         <p class="shelf-title">공격 이펙트 <span class="muted small">화려한 이펙트 = 📘 보강 인장 ${L.seals || 0}개 모음</span></p><div class="fxs">${L.fx.map((f) => `<button class="fxpick${f.id === fx ? ' on' : ''}${f.open ? '' : ' lock'}" data-fx="${f.id}"><canvas width="150" height="90" data-still="${f.id}"></canvas><span>${f.open ? DS.FX.NAMES[f.id] : `🔒 ${esc(f.cond || '추후 공개')}`}</span></button>`).join('')}</div>
         <div class="row"><button class="btn" id="set-x">닫기</button><button class="btn primary" id="set-ok">저장</button></div></div>`;
       el.querySelectorAll('canvas[data-still]').forEach((c) => DS.FX.still(c, c.dataset.still));
       el.querySelectorAll('[data-h]').forEach((b) => (b.onclick = () => { const h = L.heroes.find((x) => x.id === Number(b.dataset.h)); if (!h.open) { DS.UI.toast(`🔒 ${h.cond}`); return; } hero = h.id; DS.Sound.clank(); draw(); }));
       el.querySelectorAll('[data-fx]').forEach((b) => (b.onclick = () => { const f = L.fx.find((x) => x.id === b.dataset.fx); if (!f.open) { DS.UI.toast(`🔒 ${f.cond || '해금 조건은 추후 공개'} — 보강던전에서 인장을 모아요`, 3200); return; } fx = f.id; draw(); DS.FX.play(el.querySelector(`[data-fx="${fx}"]`), fx, { scale: 0.45 }); DS.Sound.hit(); }));
+      el.querySelectorAll('[data-ttl]').forEach((b) => (b.onclick = () => { if (b.classList.contains('lock')) { DS.UI.toast(`🔒 ${b.title}`, 2600); return; } title = b.dataset.ttl; DS.Sound.clank(); draw(); }));
       el.querySelector('#set-x').onclick = () => el.remove();
-      el.querySelector('#set-ok').onclick = () => DS.Control.run(async () => { if (me.test) DS.Test.setLook(hero, fx); else await DS.Account.setLook(hero, fx); me.hero = hero; me.fx = fx; el.remove(); DS.UI.toast('저장했어요! 다음 입장부터 적용돼요.'); render(); });
+      el.querySelector('#set-ok').onclick = () => DS.Control.run(async () => { if (me.test) DS.Test.setLook(hero, fx); else { await DS.Account.setLook(hero, fx); if (title !== (me.title || 'dawn')) await DS.Account.setTitle(title); } me.title = title; me.hero = hero; me.fx = fx; el.remove(); DS.UI.toast('저장했어요! 다음 입장부터 적용돼요.'); render(); });
     };
     draw(); document.body.appendChild(el);
   }

@@ -30,10 +30,11 @@ DS.Bonus = (function () {
   }
   const fxCond = (i) => `📘 보강 인장 ${UNLOCK[i]}개`;
 
-  async function enter(m) {
-    me = m;
-    no = Number(await N().get(`unlock/${ck(m.c)}`).catch(() => 0)) || 0;
-    mine = (await N().get(`bonus/${ck(m.c)}/${m.n}`).catch(() => null)) || {};
+  let preview = false; // 교사 대기공간: 모든 차시 미리 보기 (기록 저장 안 함)
+  async function enter(m, opt = {}) {
+    me = m; preview = !!opt.preview;
+    no = preview ? Number(opt.no) || 0 : Number(await N().get(`unlock/${ck(m.c)}`).catch(() => 0)) || 0;
+    mine = preview ? {} : (await N().get(`bonus/${ck(m.c)}/${m.n}`).catch(() => null)) || {};
     DS.UI.show('screen-bonus');
     render();
   }
@@ -44,7 +45,7 @@ DS.Bonus = (function () {
   }
   function render() {
     const open = lessons().filter((l) => l.no <= no), sl = seals(mine), nextFx = UNLOCK.findIndex((u) => sl.length < u);
-    $('#bonus').innerHTML = `<div class="bn-top"><button class="btn small" id="bn-back">≪ 모닥불로</button><b>📘 보강던전</b><span class="bn-seal">📘 인장 ${sl.length}개</span></div>
+    $('#bonus').innerHTML = `<div class="bn-top"><button class="btn small" id="bn-back">≪ ${preview ? '교사 대기공간' : '모닥불로'}</button><b>📘 보강던전</b><span class="bn-seal">📘 인장 ${sl.length}개</span></div>
       <div class="bn-portals">
         <div class="bn-portal on"><i style="background-image:url('${DS.ASSETS.base}${DS.ASSETS.dportals.bonus}')"></i><b>보강던전</b><span class="muted small">차시 보강 · 혼자</span></div>
         <div class="bn-portal lock" data-lock="mid"><i style="background-image:url('${DS.ASSETS.base}${DS.ASSETS.dportals.mid}')"></i><b>🔒 중단원던전</b><span class="muted small">중단원을 마치면</span></div>
@@ -52,7 +53,7 @@ DS.Bonus = (function () {
       </div>
       <p class="bn-fx">✨ 화려한 이펙트: ${nextFx < 0 ? '모두 열렸어요!' : `인장 <b>${UNLOCK[nextFx]}개</b>가 되면 「${esc(DS.FX.NAMES[DS.FX.FANCY[nextFx]])}」이 열려요 (지금 ${sl.length}개)`}</p>
       ${open.length ? open.map((l) => card(l, sl.includes(l.id))).join('') : `<div class="panel framed"><p class="muted">${no ? '4차시부터 보강던전이 열려요. (2 · 3차시 보강은 수업 레이드에 있었어요)' : '선생님이 우리 반 수업을 열면 그 차시 보강던전이 열려요.'}</p></div>`}`;
-    $('#bn-back').onclick = () => DS.Camp.enter(me);
+    $('#bn-back').onclick = () => (preview ? DS.TCamp.back() : DS.Camp.enter(me));
     document.querySelectorAll('[data-lock]').forEach((b) => (b.onclick = () => DS.UI.toast(b.dataset.lock === 'mid' ? '🔒 중단원던전은 「집합」 단원을 마치면 열려요 (준비 중)' : '🔒 대단원던전은 「집합과 명제」를 마치면 열려요 (준비 중)', 3200)));
     document.querySelectorAll('[data-fight]').forEach((b) => (b.onclick = () => { const [lid, mid] = b.dataset.fight.split('|'); DS.Control.run(() => fight(DS.Lessons.get(lid), mid)); }));
   }
@@ -102,7 +103,7 @@ DS.Bonus = (function () {
       rec.tries = tries;
       const patch = { tries, at: N().TS };
       if (cleared) patch.clear = true;
-      await N().update(`bonus/${ck(me.c)}/${me.n}/${L.id}/${mid}`, patch).catch(() => {});
+      if (!preview) await N().update(`bonus/${ck(me.c)}/${me.n}/${L.id}/${mid}`, patch).catch(() => {});
       mine[L.id] = mine[L.id] || {}; mine[L.id][mid] = Object.assign({}, mine[L.id][mid], { tries, clear: cleared || (mine[L.id][mid] || {}).clear });
       if (cleared) return win();
       if (left <= 0) {
@@ -119,7 +120,7 @@ DS.Bonus = (function () {
     const win = async () => {
       const sealed = !sealedBefore && seals(mine).includes(L.id);
       DS.Sound.correct();
-      if (DS.Grow && !clearedBefore) DS.Grow.add(me, { bonusClear: 1, seal: sealed ? 1 : 0 }).catch(() => {});
+      if (DS.Grow && !clearedBefore && !preview) DS.Grow.add(me, { bonusClear: 1, seal: sealed ? 1 : 0 }).catch(() => {});
       const fx = sealed ? DS.FX.FANCY.find((k, i) => seals(mine).length === UNLOCK[i]) : null;
       const act = draw('', `<p class="okc"><b>🎉 처치!</b>${sealed ? ` <b class="gold">📘 ${L.no}차시 보강 인장을 얻었어요!</b>` : ''}${fx ? `<br>✨ 화려한 이펙트 「${esc(DS.FX.NAMES[fx])}」이 열렸어요! ⚙ 설정에서 바꿀 수 있어요` : ''}</p>`);
       act.innerHTML = '<button class="btn primary" id="bf-out">보강던전으로</button>';
