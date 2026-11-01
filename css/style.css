@@ -732,3 +732,100 @@ body:has(#test-bar) #screen-student .wrap { padding-bottom: 90px; max-width: 460
 .x-warn { background: #3a2c10; padding: 6px 8px; margin: 6px 0; font-size: 13px; }
 .item-text, .q-text { width: 100%; font-size: 18px; padding: 8px; margin-top: 4px; }
 .q-text { margin-bottom: 8px; }
+
+/* ── v0.8.0 모닥불 선택 연출 · 차원문 고정 · 보강던전 포털 ───────────────── */
+#screen-camp .camp-gate.open .camp-portal { animation: portalPulse 2.6s ease-in-out infinite; }
+#screen-camp .camp-gate.appear .camp-portal { animation: portalIn 1.1s ease-out, portalPulse 2.6s 1.1s ease-in-out infinite; }
+.camp-gate-img { animation: none; }
+@keyframes portalPulse { 50% { filter: drop-shadow(0 0 26px #6fd0ffcc) brightness(1.18); } }
+.camp-bonus { position: absolute; z-index: 4; left: 31%; bottom: 36%; width: 15%; background: none; border: 0; padding: 0; cursor: pointer; display: flex; flex-direction: column; align-items: center; }
+.camp-bonus-img { display: block; width: 100%; aspect-ratio: 2 / 3; background-size: contain; background-repeat: no-repeat; background-position: center; animation: bonusPulse 3s ease-in-out infinite; }
+@keyframes bonusPulse { 50% { filter: brightness(1.25); } }
+.camp-bonus .camp-label { margin-top: -10%; }
+/* 선택: 흰 번쩍 → 금빛 외곽선 반짝 + ▼ + 눌림 반동 */
+.camp-anvil, .camp-gate, .camp-bonus { --ol: #fff; }
+.picked { animation: pickPop .35s ease-out; }
+.picked > i, .picked > .camp-portal { animation: pickGlow .7s ease-out 2 !important; }
+.picked::before { content: '▼'; position: absolute; top: -18%; left: 50%; transform: translateX(-50%); color: #ffd35a; font-size: clamp(16px, 4vw, 26px); text-shadow: 0 0 8px #ffb000; animation: pickArrow .45s ease-in-out infinite alternate; z-index: 9; pointer-events: none; }
+.picked .camp-label { color: #ffe39a; text-shadow: 0 0 8px #ffb000; }
+@keyframes pickPop { 0% { transform: scale(1); } 30% { transform: scale(.9, .86); } 65% { transform: scale(1.06); } 100% { transform: scale(1); } }
+@keyframes pickGlow {
+  0% { filter: drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) brightness(1.8); }
+  40% { filter: drop-shadow(2px 0 0 #ffd35a) drop-shadow(-2px 0 0 #ffd35a) drop-shadow(0 2px 0 #ffd35a) drop-shadow(0 -2px 0 #ffd35a) drop-shadow(0 0 14px #ffb000) brightness(1.25); }
+  100% { filter: drop-shadow(2px 0 0 #ffd35a) drop-shadow(-2px 0 0 #ffd35a) drop-shadow(0 2px 0 #ffd35a) drop-shadow(0 -2px 0 #ffd35a) drop-shadow(0 0 6px #ffb000); }
+}
+@keyframes pickArrow { to { transform: translate(-50%, 6px); } }
+.nope { animation: nope .4s; }
+.nope > i { filter: grayscale(1) brightness(.7); }
+@keyframes nope { 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
+.camp-hero { transition: transform .5s cubic-bezier(.3, 1.4, .5, 1); }
+.camp-hero.dash { transform: translateX(var(--dx, 0)) translateY(-8%); }
+.camp-hero.face-left .art { transform: scaleX(-1); }
+/* 한국어 줄바꿈: 낱말 중간에서 끊지 않기 (명제 단원 문장 문제) */
+.quiz-q, .choice, .sol, .bl-side, .blank-row { word-break: keep-all; overflow-wrap: anywhere; }
+.choices.q-blanks .choice.sym, .bl-opts .choice { white-space: nowrap; }
+.bl-opts { flex-wrap: wrap; }
+
+/* ── v0.8.0 보강던전 ───────────────────────────────────── */
+#screen-bonus { background: radial-gradient(ellipse at 50% 0%, #10224a, #050a18 70%); }
+.bn-top { display: flex; align-items: center; gap: 8px; margin: 6px 0 8px; }
+.bn-top b { font-size: 18px; color: #8fd0ff; flex: 1; }
+.bn-seal { color: #ffd35a; font-size: 14px; }
+.bn-portals { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 6px; }
+.bn-portal { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 4px; border: 1px solid #2a3c66; background: #08112688; cursor: pointer; }
+.bn-portal i { width: 70%; aspect-ratio: 2 / 3; background-size: contain; background-repeat: no-repeat; background-position: center; }
+.bn-portal.on { border-color: #6fb8ff; box-shadow: 0 0 12px #3d8cff66 inset; }
+.bn-portal.on i { animation: bonusPulse 3s ease-in-out infinite; }
+.bn-portal.lock i { filter: grayscale(.75) brightness(.5); }
+.bn-portal b { font-size: 13px; }
+.bn-fx { font-size: 13px; color: #cfe3ff; margin: 4px 0 8px; }
+.bn-card .bn-h { display: flex; justify-content: space-between; align-items: center; gap: 6px; margin: 0 0 6px; }
+.bn-card.sealed { border-color: #6fb8ff; }
+.bn-stamp { color: #8fd0ff; font-size: 13px; border: 1px solid #6fb8ff; padding: 1px 6px; }
+.bn-row { display: flex; align-items: center; gap: 8px; padding: 4px 0; border-top: 1px dashed #24345a; }
+.bn-row .art.monster { width: 46px; height: 46px; margin: 0; flex: none; }
+.bn-row span { flex: 1; }
+.bn-row.clear span { color: #9fe3c9; }
+.bn-fight { position: fixed; inset: 0; z-index: 40; background: #050a18; display: flex; flex-direction: column; overflow-y: auto; }
+.bn-fight .scene { min-height: 46dvh; }
+.bf-body { padding: 10px 14px; max-width: 640px; margin: 0 auto; width: 100%; }
+.bn-sheet { display: block; width: 100%; height: auto; background: #fff; }
+.sheet-modal .quiz-box, .video-modal .quiz-box { max-width: 760px; width: calc(100vw - 24px); }
+.video-frame { position: relative; width: 100%; aspect-ratio: 16 / 9; background: #000; }
+.video-frame iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+/* 학생 관리 · 수업 준비 접기 */
+.st-cls { flex-wrap: wrap; }
+.st-add { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 8px; }
+.st-add label { width: auto; flex: 0 1 140px; }
+.st-scroll { overflow-x: auto; }
+.st-act { white-space: nowrap; }
+.st-act .btn { margin: 1px; }
+.linkish { background: none; border: 0; color: #9fd0ff; text-decoration: underline; cursor: pointer; font: inherit; padding: 0; }
+.st-detail { max-width: 720px; width: calc(100vw - 24px); max-height: 90dvh; overflow-y: auto; }
+.p-fold .p-slot-head { align-items: center; }
+.p-state { font-size: 13px; }
+.p-thumb { height: 34px; width: auto; border: 1px solid #334; background: #fff; }
+.p-video { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 6px; font-size: 13px; }
+.p-video input { flex: 1 1 260px; width: auto; margin: 0; font-size: 14px; padding: 4px 6px; }
+details.panel > summary { cursor: pointer; list-style: none; }
+details.panel > summary::-webkit-details-marker { display: none; }
+details.panel > summary::before { content: '▸ '; color: #ffcf5a; }
+details.panel[open] > summary::before { content: '▾ '; }
+/* ── v0.8.0 오늘의 전투 결과 · 레벨 ───────────────────────── */
+.rs-box { max-width: 560px; width: calc(100vw - 24px); max-height: 92dvh; overflow-y: auto; }
+.rs-lv { padding: 8px; border: 1px solid #e8b85a; background: #1a1408; margin: 6px 0; }
+.rs-lv.up { animation: lvUp 1.2s ease-out; box-shadow: 0 0 18px #ffcf5a88; }
+@keyframes lvUp { 0% { transform: scale(.8); filter: brightness(2); } 60% { transform: scale(1.04); } 100% { transform: scale(1); } }
+.rs-bar { position: relative; height: 14px; background: #222b40; margin-top: 4px; border: 1px solid #000; }
+.rs-bar i { position: absolute; left: 0; top: 0; bottom: 0; background: linear-gradient(90deg, #ffb000, #ffe08a); }
+.rs-bar span { position: relative; display: block; text-align: center; font-size: 11px; line-height: 14px; color: #fff; text-shadow: 0 1px 2px #000; }
+.rs-why { font-size: 12px; color: #d8d0b8; }
+.rs-t td:first-child { width: 55%; }
+.rs-c { display: flex; align-items: center; gap: 8px; font-size: 14px; padding: 2px 0; }
+.rs-c > span:first-child { flex: 1; }
+.rs-dots { display: inline-flex; gap: 3px; }
+.rs-dots i { width: 9px; height: 9px; border-radius: 50%; background: #333a4d; }
+.rs-dots i.on { background: #6fe0b0; }
+.rs-rec { padding: 6px; border: 1px dashed #6fb8ff; margin: 4px 0; }
+.rs-hist { padding: 6px 0; border-top: 1px dashed #334; }
+.st-scroll td, .st-scroll th { white-space: nowrap; }

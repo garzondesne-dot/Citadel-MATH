@@ -12,6 +12,7 @@ DS.Act = (function () {
   const prepPath = (lessonId, sub = '') => `prep/${lessonId}${sub ? '/' + sub : ''}`;
   const getPrep = (lessonId) => N().get(prepPath(lessonId));
   const setImage = (lessonId, slot, dataUrl) => N().set(prepPath(lessonId, `img/${slot}`), dataUrl || null);
+  const setVideo = (lessonId, slot, url) => N().set(prepPath(lessonId, `video/${slot}`), url || null); // 🎬 설명 영상 링크 (유튜브 · 드라이브)
   const setDefaultPct = (lessonId, pct) => N().set(prepPath(lessonId, 'pct'), Number(pct));
 
   // ── 교사 ────────────────────────────────────────────────
@@ -134,5 +135,5 @@ DS.Act = (function () {
     return out;
   }
 
-  return { getPrep, setImage, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, bossAnswer, unpackRoom, P };
+  return { getPrep, setImage, setVideo, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, bossAnswer, unpackRoom, P };
 })();

@@ -193,6 +193,6 @@
     // 소문제 목록: 같은 시드 → 같은 문제 (학생 기기와 교사 기기가 각자 만들어 채점이 같다)
     items(id, seed, attempt) { return MONSTERS[id].make(attempt, DS.Rng(`${seed}|${id}|${attempt}`)); },
     COND,
-    boss: { title: '3차시 형성평가 · 포함의 성주', sprite: 2, items: 7, hpItems: 6, sets: BOSS },
+    boss: { title: '3차시 형성평가 · 포함의 성주', sprite: 2, items: 7, hpItems: 6, sets: BOSS, tags: ['c1', 'c2', 'c2', 'c3', 'c3', 'c2', 'c3'] }, // tags: 문항별 개념 (개인 결과 · 복습 추천)
   });
 })();

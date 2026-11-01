@@ -86,6 +86,11 @@
         },
         "think": {
           ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 30"
+        },
+        "video": {
+          "$slot": {
+            ".validate": "newData.isString() && newData.val().length < 300 && (newData.val().beginsWith('https://youtu.be/') || newData.val().beginsWith('https://www.youtube.com/') || newData.val().beginsWith('https://youtube.com/') || newData.val().beginsWith('https://m.youtube.com/') || newData.val().beginsWith('https://drive.google.com/'))"
+          }
         }
       }
     },
@@ -135,6 +140,7 @@
     },
     "cards": {
       "$c": {
+        ".read": "auth != null && root.child('admins/'+auth.uid).val() === true",
         "$n": {
           ".read": "auth != null",
           ".write": "auth != null && root.child('accounts/'+$c+'/'+$n+'/uid').val() === auth.uid",
@@ -154,6 +160,49 @@
       ".read": "auth != null",
       "$id": {
         ".write": "auth != null && root.child('admins/'+auth.uid).val() === true"
+      }
+    },
+    "bonus": {
+      "$c": {
+        ".read": "auth != null && root.child('admins/'+auth.uid).val() === true",
+        "$n": {
+          ".read": "auth != null",
+          ".write": "auth != null && root.child('accounts/'+$c+'/'+$n+'/uid').val() === auth.uid",
+          "$lesson": {
+            "$mid": {
+              ".validate": "newData.hasChildren(['tries']) && newData.child('tries').isNumber() && newData.child('tries').val() >= 1 && newData.child('tries').val() <= 999"
+            }
+          }
+        }
+      }
+    },
+    "xp": {
+      "$c": {
+        ".read": "auth != null && root.child('admins/'+auth.uid).val() === true",
+        "$n": {
+          ".read": "auth != null && (root.child('accounts/'+$c+'/'+$n+'/uid').val() === auth.uid || root.child('admins/'+auth.uid).val() === true)",
+          ".write": "auth != null && root.child('accounts/'+$c+'/'+$n+'/uid').val() === auth.uid",
+          "total": {
+            ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000"
+          },
+          "log": {
+            "$k": {
+              ".validate": "newData.hasChildren(['xp']) && newData.child('xp').isNumber() && newData.child('xp').val() >= 0 && newData.child('xp').val() <= 300"
+            }
+          }
+        }
+      }
+    },
+    "records": {
+      "$c": {
+        ".read": "auth != null && root.child('admins/'+auth.uid).val() === true",
+        "$n": {
+          ".read": "auth != null && (root.child('accounts/'+$c+'/'+$n+'/uid').val() === auth.uid || root.child('admins/'+auth.uid).val() === true)",
+          ".write": "auth != null && root.child('accounts/'+$c+'/'+$n+'/uid').val() === auth.uid",
+          "$lesson": {
+            ".validate": "newData.hasChildren(['at'])"
+          }
+        }
       }
     }
   }

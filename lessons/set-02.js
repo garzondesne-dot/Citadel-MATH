@@ -167,6 +167,6 @@
     steps: STEPS,
     monsters: MONSTERS,
     items(id, seed, attempt) { return MONSTERS[id].make(attempt, DS.Rng(`${seed}|${id}|${attempt}`)); },
-    boss: { title: '2차시 형성평가 · 숲의 수호자', sprite: 'new:6', items: 5, hpItems: 5, sets: BOSS },
+    boss: { title: '2차시 형성평가 · 숲의 수호자', sprite: 'new:6', items: 5, hpItems: 5, sets: BOSS, tags: ['c1', 'c1', 'c2', 'c4', 'c4'] }, // tags: 문항별 개념 (개인 결과 · 복습 추천)
   });
 })();

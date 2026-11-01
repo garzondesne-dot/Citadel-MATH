@@ -96,7 +96,7 @@ DS.Forge = (function () {
     $('#forge').appendChild(el);
     DS.Sound.correct();
     el.querySelector('#fg-keep').onclick = () => DS.Control.run(async () => {
-      if (first) { await N().set(`cards/${key(me.c)}/${me.n}/${c.id}`, true); owned[c.id] = true; }
+      if (first) { await N().set(`cards/${key(me.c)}/${me.n}/${c.id}`, true); owned[c.id] = true; if (DS.Grow) DS.Grow.add(me, { card: 1 }, `card_${c.id}`).catch(() => {}); }
       slots = { l: null, op: null, r: null }; pick = 'l'; el.remove(); render();
       if (first && have().length === opened().length) DS.UI.toast('🎉 열린 레시피를 모두 모았어요! (도감 완성 특전은 곧)', 4000);
     });

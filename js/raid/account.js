@@ -97,7 +97,7 @@ DS.Account = (function () {
     if (cache && cache.uid === uid) return cache;
     const all = (await N().get('accounts')) || {};
     for (const [c, byN] of Object.entries(all)) for (const [n, a] of Object.entries(byN || {})) {
-      if (a && a.uid === uid) { const name = await N().get(`roster/${c}/${n}`); cache = { uid, c, n: Number(n), name: name || '', hero: a.hero || 0, fx: DS.FX ? DS.FX.usable(a.fx || 'flame') : a.fx || 'flame' }; return cache; }
+      if (a && a.uid === uid) { const name = await N().get(`roster/${c}/${n}`); cache = { uid, c, n: Number(n), name: name || '', hero: a.hero || 0, fx: DS.FX ? (DS.FX.KINDS.includes(a.fx) ? a.fx : 'flame') : a.fx || 'flame' }; return cache; }
     }
     return null;
   }
@@ -120,8 +120,11 @@ DS.Account = (function () {
     const got = need.filter((c) => owned[c.id]).length;
     const heroes = Array.from({ length: 7 }, (_, i) => ({ id: i, open: true }))
       .concat(Array.from({ length: 8 }, (_, i) => ({ id: 8 + i, open: i === 0 && need.length > 0 && got === need.length, cond: i === 0 ? `1~3차시 도감 ${got} / ${need.length}장 모으면 열려요` : '해금 조건은 추후 공개' })));
-    const fx = DS.FX.BASE.map((k) => ({ id: k, open: true })).concat(DS.FX.FANCY.map((k) => ({ id: k, open: false, cond: '해금 조건은 추후 공개' })));
-    return { heroes, fx, got, need: need.length };
+    // 화려한 이펙트 = 📘 보강던전 인장 1 · 2 · 4 · 6 · 8 · 10개에서 하나씩 (v0.8.0)
+    const bonus = (m && DS.Bonus && (await N().get(`bonus/${String(m.c).replace(/[.#$/[\]]/g, '_')}/${m.n}`).catch(() => null))) || {};
+    const fo = DS.Bonus ? DS.Bonus.fxOpen(bonus) : {}, seals = DS.Bonus ? DS.Bonus.seals(bonus).length : 0;
+    const fx = DS.FX.BASE.map((k) => ({ id: k, open: true })).concat(DS.FX.FANCY.map((k, i) => ({ id: k, open: !!fo[k], cond: DS.Bonus ? DS.Bonus.fxCond(i) : '해금 조건은 추후 공개' })));
+    return { heroes, fx, got, need: need.length, seals };
   }
   async function logout() { cache = null; tsess(false); await N().signOut(); }
 

@@ -17,10 +17,15 @@ DS.ASSETS = {
     names: ['에메랄드 멧돼지', '화염 도마뱀', '장갑 외눈괴물', '이끼 미믹', '자수정 박쥐', '태엽 딱정벌레', '서리 늑대', '버섯 기사', '마법책 정령', '흑요석 미노타우로스'] },
   monstersNew: { src: 'monsters-new-v1.webp', cols: 3, rows: 10, poses: { idle: 0, attack: 1, down: 2 },
     names: ['수정 아홀로틀', '선인장 수호수', '등불 유령', '번개 독수리', '자수정 슬라임', '해바라기 정령', '흑요석 표범', '용암 게', '황금 스카라베', '별빛 해파리'] },
+  // 왕관 몬스터 10종 (v0.8.0 · 사용자 제공 · 배경 제거 + 왼쪽(용사 쪽)을 보게 뒤집음 · 칸 340×340): 'crown:번호'
+  monstersCrown: { src: 'monsters-crown-v1.webp', cols: 3, rows: 10, poses: { idle: 0, attack: 1, down: 2 },
+    names: ['에메랄드 왕관 슬라임', '루비 박쥐', '사파이어 뿔벌레', '자수정 뼈뱀', '버섯 전사', '자수정 눈알 문어', '이끼 골렘', '서리 왕관 늑대', '덩굴 미믹', '청록 수정룡'] },
   // 던전 테마 10종: 던전 안 전투 배경(dg-) + 같은 번호의 포털(portal-, 2열: 활성 / 봉쇄). 차시 파일의 theme 으로 고른다
   dungeons: { ids: ['01-burrow', '02-deep-forest', '03-dimensional', '04-mine', '05-ruins', '06-frost', '07-volcano', '08-crypt', '09-underwater', '10-sky'],
     names: ['땅굴', '깊은 숲 성역', '차원 균열 지대', '폐광 갱도', '고대 유적 심장부', '빙결 동굴', '화산 심연', '망자의 지하 묘실', '수중 신전', '천공 성소'],
     bg: (id) => `dg-${id}-v1.webp`, portal: (id) => `portal-${id}-v1.webp` },
+  // 특수 차원문 3종 (투명 배경 · 400×600): 보강던전(파랑) · 중단원던전(보라) · 대단원던전(빨강). 원본 무손실은 assets/img/dportal-*-v1.png
+  dportals: { bonus: 'dportal-bonus-v1.webp', mid: 'dportal-mid-v1.webp', big: 'dportal-big-v1.webp' },
   fields: { forest: 'field-forest-v1.webp', lava: 'field-lava-v1.webp', ice: 'field-ice-v1.webp' }, // 전투 배경 (달빛 숲 유적 · 화산 대장간 · 빙결 신전)
   camp: {
     bg: 'camp-forest-v1.webp',                                   // 어두운 숲 야영지 (텐트 포함, 모닥불·입구는 따로)

@@ -13,8 +13,8 @@ DS.Art = (function () {
     if (n >= 8 && n < 16 && A().heroesExtra) return cell('heroesExtra', A().heroesExtra.poses[pose] || 0, n - 8, `hero ${cls}`);
     return cell('heroes', A().heroes.poses[pose] || 0, ((n % A().heroes.count) + A().heroes.count) % A().heroes.count, `hero ${cls}`);
   };
-  // n = 숫자(기본 시트) 또는 'extra:3' · 'new:5' (추가 시트)
-  const SHEETS = { extra: 'monstersExtra', new: 'monstersNew' };
+  // n = 숫자(기본 시트) 또는 'extra:3' · 'new:5' · 'crown:7' (추가 시트)
+  const SHEETS = { extra: 'monstersExtra', new: 'monstersNew', crown: 'monstersCrown' };
   function monster(n, pose = 'idle', cls = '') {
     const [k, i] = typeof n === 'string' && n.includes(':') ? n.split(':') : [null, n];
     const sheet = SHEETS[k] || 'monsters', s = A()[sheet];

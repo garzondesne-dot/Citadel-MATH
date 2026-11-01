@@ -39,7 +39,14 @@ DS.Student = (function () {
   }
   const acc = () => ({ c: info0.cls, n: info0.num, name: info0.nick, hero: info0.hero, fx: info0.fx });
   // 수업이 끝나면 모닥불로
-  function toCamp() { if (stop) stop(); stop = null; focus(false); if (test) { const t = test; test = null; t.exit(); return; } DS.Camp.enter(acc()); }
+  // v0.8.0: 수업이 끝나면 ⚔ 오늘의 전투 결과(개인) → 모닥불 (「⚔ 보강던전」 추천을 누르면 보강던전으로)
+  function toCamp() {
+    if (stop) stop(); stop = null; focus(false);
+    const t = test; test = null;
+    const go = (bonus) => { if (t) { t.exit(); return; } if (bonus && DS.Bonus) DS.Bonus.enter(acc()); else DS.Camp.enter(acc()); };
+    if (DS.Result && L && R && me && Raid().activeIds(R).includes(me)) return DS.Result.show(L, R, me, t ? null : acc(), code, go).catch(() => go());
+    go();
+  }
   const stop0 = () => { if (stop) stop(); stop = null; focus(false); test = null; };
   // 집중모드 막
   function focus(on) {

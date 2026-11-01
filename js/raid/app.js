@@ -55,6 +55,7 @@ DS.App = (function () {
       } else if (sc.role === 'teacher' && sc.code && (await A().isAdmin())) await DS.Teacher.open(sc.code, sc.hallKey);
       else if (sc.role === 'hall' && sc.code) await DS.Hall.enter(sc.code, sc.key);
       else if (sc.role === 'prep' && sc.lesson && (await A().isAdmin())) await DS.Prep.enter(sc.lesson);
+      else if (sc.role === 'students' && (await A().isAdmin())) await DS.Students.enter();
     } catch (e) { DS.Scene.clear(); DS.UI.toast(e.message || String(e), 3200); }
   }
   const info = (m) => ({ num: m.n, nick: m.name, hero: m.hero, fx: m.fx || 'flame', cls: m.c });
@@ -208,6 +209,7 @@ DS.App = (function () {
     });
     $('#h-go').onclick = go(() => DS.Hall.enter($('#h-code').value.trim(), $('#h-key').value.trim()));
     $('#p-go').onclick = go(async () => DS.Prep.enter($('#p-lesson').value));
+    $('#s-go').onclick = go(async () => DS.Students.enter());
     $('#x-go').onclick = go(async () => { if (!(await A().isAdmin())) throw Object.assign(new Error('교사 계정으로 로그인해야 해요.'), { user: true }); await DS.Test.start($('#x-lesson').value); });
   }
   return { boot, fillLessons };
