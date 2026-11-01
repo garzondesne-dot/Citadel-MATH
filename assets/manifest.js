@@ -24,7 +24,7 @@ DS.ASSETS = {
   fields: { forest: 'field-forest-v1.webp', lava: 'field-lava-v1.webp', ice: 'field-ice-v1.webp' }, // 전투 배경 (달빛 숲 유적 · 화산 대장간 · 빙결 신전)
   camp: {
     bg: 'camp-forest-v1.webp',                                   // 어두운 숲 야영지 (텐트 포함, 모닥불·입구는 따로)
-    fire: { src: 'campfire-v1.webp', cols: 4, rows: 2, frames: 8, ms: 110 }, // 모닥불 8프레임, 110ms 반복
+    fire: { src: 'campfire-v2.webp', cols: 4, rows: 2, frames: 8, ms: 120 }, // 모닥불 8프레임: v2 = 돌·장작은 모든 프레임에 같게 고정하고 불꽃만 바뀜 (예전 v1 은 프레임마다 자리가 달라 통째로 흔들렸음)
     gate: { src: 'gates-v1.webp', cols: 2, rows: 1, states: { on: 0, off: 1 } }, // 던전 차원문: 활성 / 꺼짐
     trees: { src: 'camp-trees-v1.webp', cuts: [0, 630, 1020, 1550, 2048], base: 2048, names: ['활엽수', '침엽수', '고목', '전경 나무'] }, // 폭이 달라 cuts 비율로 자름
     anvil: { src: 'anvil-v1.webp', cols: 3, rows: 1, states: { idle: 0, forging: 1, done: 2 } }, // 모루: 대기 / 연성 중 / 완성
