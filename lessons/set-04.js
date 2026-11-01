@@ -192,6 +192,9 @@
       // ⚔ 보강던전 칸 (학생이 「📄 학습지 보기」로 본다)
       b1: [{ p: 1, x: 0.5095, y: 0.526, w: 0.45, h: 0.0967 }], b2: [{ p: 2, x: 0.0405, y: 0.1897, w: 0.45, h: 0.0967 }], b3: [{ p: 2, x: 0.0405, y: 0.5685, w: 0.45, h: 0.1067 }] },
     theme: '06-frost', // 던전 테마: 빙결 동굴 (배경 dg-06 · 포털 portal-06)
+    // 🎬 기본 설명 영상 (모션그래픽, 사용자 드라이브 「학습지 > 결과물」 · 링크 공유). 수업 준비에서 다른 영상을 넣으면 그것이 우선
+    videos: { c1: 'https://drive.google.com/file/d/1k_NsW69Vn9KXEBeDEErYXixmp2pDYmzl/view', m1: 'https://drive.google.com/file/d/1SJAtj8g00NpyR9nD0jnJGnhJmncPTPes/view', b1: 'https://drive.google.com/file/d/1SJAtj8g00NpyR9nD0jnJGnhJmncPTPes/view', c2: 'https://drive.google.com/file/d/1VDWhVFYNolKlIN0jrP0vqyP9PUAkzcS9/view', m2: 'https://drive.google.com/file/d/1VDWhVFYNolKlIN0jrP0vqyP9PUAkzcS9/view', b2: 'https://drive.google.com/file/d/1VDWhVFYNolKlIN0jrP0vqyP9PUAkzcS9/view',
+      c3: 'https://drive.google.com/file/d/1ZjVOBjXZD4JT_5sR1X631gxe7PgjHFrt/view', m3: 'https://drive.google.com/file/d/1ZjVOBjXZD4JT_5sR1X631gxe7PgjHFrt/view', b3: 'https://drive.google.com/file/d/1BzRRSWAWdJZHpwE2KD-LkVqlvzIZvNix/view' },
     goal: '교집합과 합집합을 구한다 · 서로소인 두 집합을 찾는다 · 합집합의 원소의 개수를 구한다',
     defaultPct: 90,
     steps: STEPS,

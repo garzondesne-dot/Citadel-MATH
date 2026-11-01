@@ -16,6 +16,8 @@ DS.Video = (function () {
   // v0.8.7: 영상 파일 직접 올리기 — prep/{차시}/video/{칸} = 'file', 실제 파일은 prepVideo/{차시}/{칸} (재생할 때만 받아 옴)
   const MAX = 3 * 1024 * 1024; // 3MB 까지
   const ok = (v) => v === 'file' || !!embed(v);
+  // 칸의 영상: 수업 준비에서 넣은 것(prep.video) → 없으면 차시 파일의 기본 영상(L.videos)
+  const pick = (L, prepVideos, slot) => ((prepVideos || {})[slot] || ((L && L.videos) || {})[slot] || '');
   const blobs = {};
   async function fileUrl(lesson, slot) {
     const k = `${lesson}/${slot}`;
@@ -42,5 +44,5 @@ DS.Video = (function () {
     attach(el, url, ref).catch((e) => DS.UI.toast(e.message || '영상을 불러오지 못했어요.'));
     return true;
   }
-  return { kind, embed, ok, open, frameHtml, attach, fileUrl, MAX };
+  return { kind, embed, ok, pick, open, frameHtml, attach, fileUrl, MAX };
 })();

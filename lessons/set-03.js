@@ -186,6 +186,7 @@
       // 문제 · 보강 · 형성평가 (교사 「📄 문제 화면」 해설용)
       m1: [{ p: 1, x: 0.5116, y: 0.403, w: 0.4458, h: 0.1321 }], s1: [{ p: 1, x: 0.5116, y: 0.536, w: 0.4458, h: 0.1146 }], m2: [{ p: 2, x: 0.0426, y: 0.2454, w: 0.4458, h: 0.1043 }], m3: [{ p: 2, x: 0.0426, y: 0.5342, w: 0.4458, h: 0.2238 }], s2: [{ p: 2, x: 0.5116, y: 0.0984, w: 0.4458, h: 0.2266 }], boss: [{ p: 2, x: 0.5116, y: 0.3232, w: 0.4458, h: 0.4239 }] },
     theme: '05-ruins', // 던전 테마: 고대 유적 (배경 dg-05 · 포털 portal-05)
+    videos: { m3: 'https://drive.google.com/file/d/1KyFTfHSvN-KJfxr2qAnNo2VLQJhCu4LG/view', s2: 'https://drive.google.com/file/d/1KyFTfHSvN-KJfxr2qAnNo2VLQJhCu4LG/view' }, // 🎬 기본 설명 영상 (모션그래픽 06 부분집합의 개수)
     goal: '부분집합의 뜻을 알고 ⊂, ⊄ 로 나타낸다 · 서로 같은 집합을 찾는다 · 부분집합을 모두 구한다',
     defaultPct: 90,
     steps: STEPS,

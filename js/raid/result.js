@@ -56,7 +56,7 @@ DS.Result = (function () {
   function recs(L, r, prep, inClass) {
     if (!r.weak.length) return '<p class="okc">👍 오늘 개념을 고르게 잘 해냈어요! 보강던전에서 인장을 모아 보세요.</p>';
     return r.weak.map((c) => {
-      const img = DS.Act.hasImg(prep, c), vid = (prep.video || {})[c], bon = (L.bonus || []).filter((b) => b.concept === c);
+      const img = DS.Act.hasImg(prep, c), vid = DS.Video.pick(L, prep.video, c), bon = (L.bonus || []).filter((b) => b.concept === c);
       return `<div class="rs-rec"><b>📌 ${esc(r.titles[c] || c)}</b> <span class="muted small">첫 시도 ${r.conc[c].ok} / ${r.conc[c].total}</span>
         <div class="row">${img ? `<button class="btn small" data-img="${c}">📄 학습지 개념 보기</button>` : ''}${bon.length ? (inClass ? `<span class="muted small">📘 수업이 끝나면 보강던전 · ${esc(bon[0].title)}</span>` : `<button class="btn small" data-bonus="1">⚔ 보강던전 · ${esc(bon[0].title)}</button>`) : ''}${vid && DS.Video.ok(vid) ? `<button class="btn small" data-vid="${c}">🎬 설명 영상</button>` : ''}</div></div>`;
     }).join('');
@@ -104,7 +104,7 @@ DS.Result = (function () {
       if (!src) { DS.UI.toast('아직 이 개념의 학습지 이미지가 없어요.'); return; }
       const v = document.createElement('div'); v.className = 'modal sheet-modal'; v.innerHTML = `<div class="quiz-box framed"><div class="quiz-head"><b>📄 ${esc(r.titles[b.dataset.img] || '')}</b><button class="btn small" data-x>✕ 닫기</button></div><img class="bn-sheet" src="${src}" alt="학습지"></div>`; v.querySelector('[data-x]').onclick = () => v.remove(); document.body.appendChild(v);
     })));
-    el.querySelectorAll('[data-vid]').forEach((b) => (b.onclick = () => DS.Video.open(prep.video[b.dataset.vid], r.titles[b.dataset.vid], { lesson: L.id, slot: b.dataset.vid })));
+    el.querySelectorAll('[data-vid]').forEach((b) => (b.onclick = () => DS.Video.open(DS.Video.pick(L, prep.video, b.dataset.vid), r.titles[b.dataset.vid], { lesson: L.id, slot: b.dataset.vid })));
     el.querySelectorAll('[data-bonus]').forEach((b) => (b.onclick = () => { el.remove(); then(true); }));
     el.querySelector('#rs-ok').onclick = () => { el.remove(); then(); };
     return null;

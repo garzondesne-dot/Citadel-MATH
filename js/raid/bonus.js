@@ -72,7 +72,7 @@ DS.Bonus = (function () {
     const solved = new Array(n).fill(false);
     const el = document.createElement('div'); el.className = 'bn-fight';
     document.body.appendChild(el);
-    const img = DS.Act.hasImg(prep, mid), vid = (prep.video || {})[mid] || (prep.video || {})[(L.bonus.find((b) => b.id === mid) || {}).concept];
+    const img = DS.Act.hasImg(prep, mid), cslot = (L.bonus.find((b) => b.id === mid) || {}).concept, vslot = DS.Video.pick(L, prep.video, mid) ? mid : cslot, vid = DS.Video.pick(L, prep.video, vslot);
     const draw = (cls = '', msg = '') => {
       const pips = Array.from({ length: TRIES }, (_, i) => `<i class="${i < left ? 'on' : ''}"></i>`).join('');
       const segs = solved.map((s) => `<i class="${s ? 'gone' : ''}"></i>`).join('');
@@ -85,7 +85,7 @@ DS.Bonus = (function () {
           <div class="row" id="bf-act"></div></div>`;
       el.querySelector('#bf-x').onclick = () => { el.remove(); render(); };
       const sh = el.querySelector('#bf-sheet'); if (sh) sh.onclick = () => DS.Control.run(async () => { const src = (prep.img || {})[mid] || (await DS.Act.prepImg(L.id, mid)); if (src) sheet(src, mon.title); else DS.UI.toast('아직 이 칸의 학습지 이미지가 없어요.'); });
-      const vb = el.querySelector('#bf-vid'); if (vb) vb.onclick = () => DS.Video.open(vid, mon.title, { lesson: L.id, slot: (prep.video || {})[mid] ? mid : (L.bonus.find((b) => b.id === mid) || {}).concept });
+      const vb = el.querySelector('#bf-vid'); if (vb) vb.onclick = () => DS.Video.open(vid, mon.title, { lesson: L.id, slot: vslot });
       return el.querySelector('#bf-act');
     };
     const round = async () => {
