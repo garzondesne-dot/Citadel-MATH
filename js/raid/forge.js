@@ -19,7 +19,7 @@ DS.Forge = (function () {
     $('#forge').hidden = false; document.body.classList.add('forge-open');
     render();
   }
-  function close() { $('#forge').hidden = true; document.body.classList.remove('forge-open'); }
+  function close() { $('#forge').hidden = true; document.body.classList.remove('forge-open'); if (DS.Camp && DS.Camp.refresh) DS.Camp.refresh(); }
   const opened = () => U().opens(no);
   const have = () => opened().filter((c) => owned[c.id]);
 

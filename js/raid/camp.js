@@ -28,11 +28,8 @@ DS.Camp = (function () {
     if (code0) setTimeout(codeGate, 300); // QR 로 들어왔으면 코드 창을 바로
   }
   const D = () => DS.ASSETS.dungeons;
-  // 열린 차원문이 폰 화면 밖이면 그쪽으로 밀어 보여 준다 (모닥불 · 내 용사도 함께 보이게 오른쪽 끝)
-  function showGate(smooth = true) {
-    const sc = document.getElementById('camp-scroll'); if (!sc) return;
-    sc.scrollTo({ left: sc.scrollWidth - sc.clientWidth, behavior: smooth ? 'smooth' : 'auto' });
-  }
+  // 한 화면에 전체가 보이므로 차원문이 열리면 반짝 강조만
+  function showGate() { const g = document.getElementById('camp-gate'); if (g) { g.classList.remove('flash'); void g.offsetWidth; g.classList.add('flash'); } }
   function drawGate() {
     const el = document.getElementById('camp-gate'); if (!el) return;
     if (!live || !live.theme) { el.className = 'camp-gate empty'; el.innerHTML = '<span class="camp-label dim">🌀 차원문 자리 — 선생님이 수업을 열면 나타나요</span>'; return; }
@@ -51,16 +48,17 @@ DS.Camp = (function () {
     const c = C();
     $('#camp').innerHTML = `<div class="camp-top"><b>🔥 ${esc(me.name)}의 모닥불</b><span class="muted small">${esc(me.c)} · ${me.n}번 — 왼쪽 ⚒ 모루 · 오른쪽 🌀 차원문</span><button class="btn small camp-set" id="camp-set">⚙ 설정</button></div>
       ${stampToday() ? '<div class="stamp-bar">📮 반드시 학습지 확인도장 받아가세요.</div>' : ''}
-      <div class="camp-scroll" id="camp-scroll"><div class="camp-stage" style="background-image:url('${base()}${c.bg}')">
+      <div class="camp-stage" style="background-image:url('${base()}${c.bg}')">
         ${tree(0, 'back', 'left:2%;bottom:30%;height:46%')}${tree(2, 'back', 'left:60%;bottom:32%;height:40%')}
         <button class="camp-anvil" id="camp-anvil" aria-label="모루">${sheet(c.anvil, c.anvil.states.idle, 0, 'camp-anvil-img')}<span class="camp-label">⚒ 모루</span></button>
         <div class="camp-fire">${sheet(c.fire, 0, 0, 'camp-fire-img', '')}</div>
         <div class="camp-hero">${DS.Art.hero(me.hero, 'idle', 'huff')}<i class="shadow"></i></div>
         <button class="camp-gate empty" id="camp-gate" aria-label="차원문"></button>
-        ${tree(3, 'front', 'left:-4%;bottom:-6%;height:52%')}${tree(1, 'front', 'right:-3%;bottom:-4%;height:58%')}
-      </div></div>
-      <p class="muted small center">← 화면을 옆으로 밀어 둘러봐요 → <button class="btn small" id="camp-code">코드로 입장</button></p>`;
-    const sc = $('#camp-scroll'); requestAnimationFrame(() => { if (live && live.open) showGate(false); else sc.scrollLeft = (sc.scrollWidth - sc.clientWidth) / 2; });
+        ${tree(3, 'front', 'left:-6%;bottom:-6%;height:44%')}${tree(1, 'front', 'right:-5%;bottom:-4%;height:48%')}
+      </div>
+      <div class="camp-bar"><span class="muted small">⚒ 모루는 왼쪽 · 🌀 차원문은 오른쪽</span><button class="btn small" id="camp-code">코드로 입장</button></div>
+      <div class="camp-forge panel framed" id="camp-forge"><p class="muted small">연성 정보를 불러오는 중…</p></div>`;
+    forgeInfo();
     $('#camp-anvil').onclick = () => DS.Forge.open(me);
     $('#camp-gate').onclick = () => {
       if (live && live.open) return DS.Control.run(() => enterCode(live.code));
@@ -71,6 +69,25 @@ DS.Camp = (function () {
     $('#camp-set').onclick = settings;
     drawGate();
     animateFire();
+  }
+  // 하단: 연성 정보 (열린 차시 · 도감 진행 · 최근 카드 · 다음 힌트 · 숨겨진 용사까지)
+  async function forgeInfo() {
+    const el = document.getElementById('camp-forge'); if (!el || !DS.Unit) return;
+    const no = Number(await DS.Net.get(`unlock/${ck(me.c)}`).catch(() => 0)) || 0;
+    const owned = (await DS.Net.get(`cards/${ck(me.c)}/${me.n}`).catch(() => null)) || {};
+    const open = DS.Unit.opens(no), have = open.filter((c) => owned[c.id]);
+    const need3 = DS.Unit.CARDS.filter((c) => c.no <= 3), got3 = need3.filter((c) => owned[c.id]).length;
+    const next = open.find((c) => !owned[c.id]);
+    const pct = open.length ? Math.round((100 * have.length) / open.length) : 0;
+    if (!document.getElementById('camp-forge')) return;
+    el.innerHTML = !no ? `<p class="cf-h">⚒ 연성 도감</p><p class="muted small">선생님이 우리 반 수업(2차시부터)을 열면 레시피가 열려요.</p>`
+      : `<div class="cf-row"><p class="cf-h">⚒ 연성 도감 <span class="muted small">${no}차시까지 열림</span></p><button class="btn small primary" id="cf-open">모루 열기</button></div>
+      <div class="cf-bar"><i style="width:${pct}%"></i><span>${have.length} / ${open.length}장</span></div>
+      <div class="cf-cards">${have.slice(-4).reverse().map((c) => DS.Card.html(c, { w: 62 })).join('') || '<span class="muted small">아직 만든 카드가 없어요 — 모루에서 첫 카드를 만들어 봐요!</span>'}</div>
+      ${next ? `<p class="cf-hint">💡 다음 레시피 힌트: <b>${esc(next.hint)}</b></p>` : '<p class="cf-hint okc">🎉 열린 레시피를 모두 모았어요!</p>'}
+      <p class="muted small">✨ 숨겨진 용사: 1~3차시 도감 <b>${got3} / ${need3.length}</b>장 모으면 열려요</p>`;
+    const b = document.getElementById('cf-open'); if (b) b.onclick = () => DS.Forge.open(me);
+    el.querySelectorAll('.mcard').forEach((c) => (c.onclick = () => DS.Forge.open(me)));
   }
   function animateFire() {
     clearInterval(fireT);
@@ -123,5 +140,5 @@ DS.Camp = (function () {
     draw(); document.body.appendChild(el);
   }
   const back = () => (me ? enter(me) : null);
-  return { enter, back, settings, stampToday, markStamp: () => { try { localStorage.setItem('citadel-stamp', today()); } catch (e) { /* 무시 */ } } };
+  return { enter, back, settings, refresh: () => { if (document.getElementById('camp-forge')) forgeInfo(); }, stampToday, markStamp: () => { try { localStorage.setItem('citadel-stamp', today()); } catch (e) { /* 무시 */ } } };
 })();
