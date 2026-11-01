@@ -11,7 +11,14 @@ DS.Act = (function () {
   // ── 수업 준비 (PC): 차시별 개념 설명 이미지 · 기준% 기본값 ──────────
   const prepPath = (lessonId, sub = '') => `prep/${lessonId}${sub ? '/' + sub : ''}`;
   const getPrep = (lessonId) => N().get(prepPath(lessonId));
-  const setImage = (lessonId, slot, dataUrl) => N().set(prepPath(lessonId, `img/${slot}`), dataUrl || null);
+  const setImage = async (lessonId, slot, dataUrl) => { await N().set(prepPath(lessonId, `img/${slot}`), dataUrl || null); await N().set(prepPath(lessonId, `has/${slot}`), dataUrl ? true : null); };
+  // v0.8.8: 학생 폰은 차시 정보 전체(학습지 이미지 모두)를 받지 않는다 → 가벼운 정보(영상 링크 · 이미지 있음 표시)만 먼저, 이미지는 누를 때 한 장씩
+  async function prepLite(lessonId) {
+    const [video, has] = await Promise.all([N().get(prepPath(lessonId, 'video')).catch(() => null), N().get(prepPath(lessonId, 'has')).catch(() => null)]);
+    return { video: video || {}, has: has || null };
+  }
+  const prepImg = (lessonId, slot) => N().get(prepPath(lessonId, `img/${slot}`)).catch(() => null);
+  const hasImg = (p, slot) => !!((p.img || {})[slot] || (p.has ? p.has[slot] : true)); // 표시가 없던 예전 자료는 일단 버튼을 보여 주고 누를 때 확인
   const setVideo = (lessonId, slot, url) => N().set(prepPath(lessonId, `video/${slot}`), url || null); // 🎬 설명 영상 링크 (유튜브 · 드라이브) 또는 'file'
   // 🎞 영상 파일 직접 올리기 (v0.8.7): 파일은 prepVideo/{차시}/{칸} 에 따로 (학생이 차시 정보를 읽을 때 같이 받지 않게), 표시는 video/{칸} = 'file'
   async function setVideoFile(lessonId, slot, dataUrl) {
@@ -159,5 +166,5 @@ DS.Act = (function () {
     return out;
   }
 
-  return { setVideoFile, setVideoOn, endClass, admitLate, getPrep, setImage, setVideo, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, bossAnswer, unpackRoom, P };
+  return { prepLite, prepImg, hasImg, setVideoFile, setVideoOn, endClass, admitLate, getPrep, setImage, setVideo, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, bossAnswer, unpackRoom, P };
 })();

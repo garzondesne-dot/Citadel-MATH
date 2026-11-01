@@ -39,7 +39,7 @@ DS.Bonus = (function () {
   }
   async function prepOf(id) {
     if (DS.Test && DS.Test.active() && DS.Test.prep(id)) return DS.Test.prep(id);
-    if (!prepCache[id]) prepCache[id] = (await N().get(`prep/${id}`).catch(() => null)) || {};
+    if (!prepCache[id]) prepCache[id] = await DS.Act.prepLite(id); // 이미지는 누를 때 한 장만 (v0.8.8)
     return prepCache[id];
   }
   function render() {
@@ -72,7 +72,7 @@ DS.Bonus = (function () {
     const solved = new Array(n).fill(false);
     const el = document.createElement('div'); el.className = 'bn-fight';
     document.body.appendChild(el);
-    const img = (prep.img || {})[mid], vid = (prep.video || {})[mid] || (prep.video || {})[(L.bonus.find((b) => b.id === mid) || {}).concept];
+    const img = DS.Act.hasImg(prep, mid), vid = (prep.video || {})[mid] || (prep.video || {})[(L.bonus.find((b) => b.id === mid) || {}).concept];
     const draw = (cls = '', msg = '') => {
       const pips = Array.from({ length: TRIES }, (_, i) => `<i class="${i < left ? 'on' : ''}"></i>`).join('');
       const segs = solved.map((s) => `<i class="${s ? 'gone' : ''}"></i>`).join('');
@@ -84,7 +84,7 @@ DS.Bonus = (function () {
           <div class="row">${img ? '<button class="btn small" id="bf-sheet">📄 학습지 보기</button>' : ''}${vid && DS.Video.ok(vid) ? '<button class="btn small" id="bf-vid">🎬 설명 보기</button>' : ''}</div>
           <div class="row" id="bf-act"></div></div>`;
       el.querySelector('#bf-x').onclick = () => { el.remove(); render(); };
-      const sh = el.querySelector('#bf-sheet'); if (sh) sh.onclick = () => sheet(img, mon.title);
+      const sh = el.querySelector('#bf-sheet'); if (sh) sh.onclick = () => DS.Control.run(async () => { const src = (prep.img || {})[mid] || (await DS.Act.prepImg(L.id, mid)); if (src) sheet(src, mon.title); else DS.UI.toast('아직 이 칸의 학습지 이미지가 없어요.'); });
       const vb = el.querySelector('#bf-vid'); if (vb) vb.onclick = () => DS.Video.open(vid, mon.title, { lesson: L.id, slot: (prep.video || {})[mid] ? mid : (L.bonus.find((b) => b.id === mid) || {}).concept });
       return el.querySelector('#bf-act');
     };
