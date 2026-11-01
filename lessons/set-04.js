@@ -202,6 +202,7 @@
     bonus: ['b1', 'b2', 'b3'].map((id) => ({ id, title: MONSTERS[id].title, concept: MONSTERS[id].concept })),
     items(id, seed, attempt) { return MONSTERS[id].make(attempt, DS.Rng(`${seed}|${id}|${attempt}`)); },
     WORDS,
+    next: { title: '5차시 · 여집합과 차집합', ask: '우리 반 전체에서 안경 쓴 친구를 빼면, 남은 친구들은 어떤 집합일까?', link: '오늘 배운 교집합(∩)으로 차집합을 A − B = A ∩ Bᶜ 처럼 나타낼 수 있어요.' }, // 다음 수업 (초안)
     boss: { title: '4차시 형성평가 · 서리 늑대', sprite: 'crown:7', items: 6, hpItems: 5, sets: BOSS, tags: ['c1', 'c2', 'c3', 'c1', 'c3', 'c1'] },
   });
 })();

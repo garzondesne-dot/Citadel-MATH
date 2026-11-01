@@ -27,7 +27,7 @@ DS.Teacher = (function () {
     if (stop) stop();
     stop = DS.Net.watch(`rooms/${code}`, (v) => { if (!v) return; raw = v; R = DS.Act.unpackRoom(v); L = DS.Lessons.get(R.meta.lesson);
       if (vLesson !== L.id) { vLesson = L.id; if (vStop) vStop(); vStop = DS.Net.watch(`prep/${L.id}/video`, (x) => { videos = x || {}; if (R) render(); }); }
-      render(); DS.Act.admitLate(code, R, L); });
+      render(); DS.Act.admitLate(code, R, L); DS.Act.markBossWin(code, R, L); });
     clearInterval(tick); tick = setInterval(() => { if (R) render(); }, 15000); // "2분째 미제출" 갱신
   }
   const studentUrl = () => `${location.origin}${location.pathname.replace(/[^/]*$/, '')}index.html?role=student&code=${code}${DS.Net.mode === 'local' ? '&local' : ''}`;
@@ -40,12 +40,13 @@ DS.Teacher = (function () {
     $('#t-tabs').innerHTML = '';
     const body = $('#t-body');
     const live = !Raid().isLobby(R) && !Raid().isClosed(R);
-    body.innerHTML = `<div class="panel framed t-now">${now()}${C().pctHtml(L, R)}${live ? C().videoBtn(L, R, videos) + C().sheetBtn(L, R) + C().focusBtn(R) : ''}</div>
+    body.innerHTML = `<div class="panel framed t-now">${now()}${C().pctHtml(L, R)}${live ? C().videoBtn(L, R, videos) + C().sheetBtn(L, R) + C().focusBtn(R) : ''}${Raid().isEnd(L, R) || Raid().isClosed(R) ? '<button class="btn sc-btn" id="t-news">🏫 우리 반 수업 소식 만들기</button>' : ''}</div>
       ${Raid().isLobby(R) ? lobby() : Raid().isEnd(L, R) ? `<div class="panel framed">${C().wordsHtml(R)}</div>` : helpPanel()}
       <p class="t-next muted small">다음 ▶ <b>${esc(C().nextName(L, R))}</b></p>
       <div class="t-pad"><button class="btn t-back" id="t-back"${i < 0 ? ' disabled' : ''}>◀<br>뒤로</button><button class="btn primary t-fwd" id="t-fwd"${Raid().isClosed(R) ? ' disabled' : ''}>▶<br>${Raid().isFinale(L, R) ? '수업 끝' : '앞으로'}</button></div>`;
     if (Raid().isLobby(R)) drawQR();
     C().bindPct(body, code, R, L); C().bindFocus(body, code, R); C().bindSheet(body, code, R); C().bindVideo(body, code, R); C().bindWords(body, code, R);
+    const nb = $('#t-news'); if (nb) nb.onclick = () => C().run(() => DS.ShareCard.preview((praise) => DS.ShareCard.klass({ L, R, cls: R.meta.cls, praise }), `우리 반 수업 소식 · ${L.no ? `${L.no}차시 ` : ''}${L.title}`, `🏫 ${R.meta.cls ? `${R.meta.cls}반 ` : ''}공통수학2 ${L.title} 수업 소식`, { praise: true }));
     body.querySelectorAll('[data-help]').forEach((b) => (b.onclick = () => C().run(() => DS.Act.clearHelp(code, b.dataset.help))));
     $('#t-fwd').onclick = () => C().run(() => C().forward(code, R, L));
     $('#t-back').onclick = () => C().run(() => C().back(code, R, L));

@@ -108,6 +108,14 @@ DS.Act = (function () {
     const cls = R.meta.cls;
     if (cls) { const lv = await N().get(`live/${ck(cls)}`).catch(() => null); if (lv && lv.code === code) await N().set(`live/${ck(cls)}/open`, false); }
   }
+  // 🏫 보스 격파 시각 (우리 반 수업 소식의 「보스까지 걸린 시간」): 보스 단계에서 격파되면 한 번만 적는다
+  let bossMarked = '';
+  function markBossWin(code, R, L) {
+    const st = Raid.stepOf(L, R), s = R.state || {};
+    if (!st || st.kind !== 'boss' || s.bossWonAt || bossMarked === code || !Raid.bossHp(L, R).won) return;
+    bossMarked = code;
+    N().update(P(code, 'state'), { bossWonAt: N().TS, bossFrom: s.stepAt || null }).catch(() => { bossMarked = ''; });
+  }
   // 늦게 온 학생: 참여 명단에 넣고, 지금 몬스터는 기다리지 않게 건너뜀 (교사 · 종합상황실 기기에서)
   const admitting = {};
   async function admitLate(code, R, L) {
@@ -166,5 +174,5 @@ DS.Act = (function () {
     return out;
   }
 
-  return { prepLite, prepImg, hasImg, setVideoFile, setVideoOn, endClass, admitLate, getPrep, setImage, setVideo, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, bossAnswer, unpackRoom, P };
+  return { markBossWin, prepLite, prepImg, hasImg, setVideoFile, setVideoOn, endClass, admitLate, getPrep, setImage, setVideo, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, bossAnswer, unpackRoom, P };
 })();

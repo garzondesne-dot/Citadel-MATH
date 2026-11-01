@@ -23,7 +23,7 @@ DS.Hall = (function () {
       raw = v; R = DS.Act.unpackRoom(v);
       const first = !L;
       L = DS.Lessons.get(R.meta.lesson);
-      if (DS.Act.isHost(R)) DS.Act.admitLate(code, R, L);
+      if (DS.Act.isHost(R)) { DS.Act.admitLate(code, R, L); DS.Act.markBossWin(code, R, L); }
       if (first) { if (stopPrep) stopPrep(); stopPrep = DS.Net.watch(`prep/${L.id}`, (p) => { prep = p || {}; built = ''; if (R) render(); }); }
       render();
     });
