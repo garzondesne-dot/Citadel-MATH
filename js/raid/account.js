@@ -97,7 +97,7 @@ DS.Account = (function () {
     if (cache && cache.uid === uid) return cache;
     const all = (await N().get('accounts')) || {};
     for (const [c, byN] of Object.entries(all)) for (const [n, a] of Object.entries(byN || {})) {
-      if (a && a.uid === uid) { const name = await N().get(`roster/${c}/${n}`); cache = { uid, c, n: Number(n), name: name || '', hero: a.hero || 0, fx: DS.FX ? (DS.FX.KINDS.includes(a.fx) ? a.fx : 'flame') : a.fx || 'flame' }; return cache; }
+      if (a && a.uid === uid) { const name = await N().get(`roster/${c}/${n}`); cache = { uid, c, n: Number(n), name: name || '', title: a.title || 'dawn', hero: a.hero || 0, fx: DS.FX ? (DS.FX.KINDS.includes(a.fx) ? a.fx : 'flame') : a.fx || 'flame' }; return cache; }
     }
     return null;
   }
@@ -110,6 +110,12 @@ DS.Account = (function () {
     if (!L.heroes.find((h) => h.id === Number(hero) && h.open)) fail('아직 잠긴 용사예요.');
     if (!L.fx.find((f) => f.id === fx && f.open)) fail('아직 잠긴 이펙트예요.');
     await N().update(`accounts/${m.c}/${m.n}`, { hero: Number(hero), fx: String(fx) }); m.hero = Number(hero); m.fx = String(fx);
+  }
+  // 🏅 호칭 고르기 (v0.9.1): 얻은 호칭만 · 'none' = 달지 않음
+  async function setTitle(id) {
+    const m = await me(); if (!m) return;
+    if (id !== 'none') { const d = await DS.Titles.data(m); if (!DS.Titles.earned(d).some((t) => t.id === id)) fail('아직 얻지 못한 호칭이에요.'); }
+    await N().update(`accounts/${m.c}/${m.n}`, { title: String(id) }); m.title = String(id);
   }
   // 고를 수 있는 용사 · 이펙트 목록 (잠금 · 해금 조건)
   // 기본 용사 0~6 · 기본 이펙트 6종 = 열림. 추가 용사 8번 = 1~3차시 도감 15장 완성 보상, 9~15번 · 화려한 이펙트 = 추후 공개
@@ -156,5 +162,5 @@ DS.Account = (function () {
     tsess(true);
   }
 
-  return { classKey, email, teacherEmail, pw, validPin, mask, parseRoster, uploadRoster, removeStudent, resetAccount, masks, accountOf, signUp, login, me, setHero, setFx, setLook, looks, logout, adminExists, isAdmin, teacherCreate, teacherLogin, endStaleTeacher };
+  return { classKey, email, teacherEmail, pw, validPin, mask, parseRoster, uploadRoster, removeStudent, resetAccount, masks, accountOf, signUp, login, me, setHero, setFx, setLook, setTitle, looks, logout, adminExists, isAdmin, teacherCreate, teacherLogin, endStaleTeacher };
 })();

@@ -37,7 +37,7 @@ DS.Student = (function () {
       render();
     });
   }
-  const acc = () => ({ c: info0.cls, n: info0.num, name: info0.nick, hero: info0.hero, fx: info0.fx });
+  const acc = () => ({ c: info0.cls, n: info0.num, name: info0.nick, hero: info0.hero, fx: info0.fx, title: info0.title });
   // 수업이 끝나면 모닥불로
   // v0.8.0: 수업이 끝나면 ⚔ 오늘의 전투 결과(개인) → 모닥불 (「⚔ 보강던전」 추천을 누르면 보강던전으로)
   function toCamp() {
@@ -63,7 +63,7 @@ DS.Student = (function () {
   function header() {
     const p = myP(), step = Raid().stepOf(L, R);
     $('#st-head').innerHTML = `${DS.Art.hero(p.hero || 0, 'idle', 'me')}
-      <div><b>${p.num}번 ${esc(p.nick || '')}</b><br><span class="muted small">${esc(L.unit)} · ${esc(L.title)}</span></div>
+      <div><b>${DS.Titles ? DS.Titles.nameHtml(p, { beon: true }) : `${p.num}번 ${esc(p.nick || '')}`}</b><br><span class="muted small">${esc(L.unit)} · ${esc(L.title)}</span></div>
       <div class="st-badge">${Raid().isLobby(R) || myP().lobby ? '대기실' : Raid().isEnd(L, R) ? '마무리' : step.kind === 'boss' ? '보스' : step.kind === 'monster' ? (step.special ? '스페셜' : '전투') : '설명'}</div>`;
   }
   const helpBtn = () => `<button class="btn small help${(R.help || {})[me] ? ' on' : ''}" id="st-help">${(R.help || {})[me] ? '🙋 도움 요청 중 (누르면 취소)' : '🙋 도움 요청'}</button>`;

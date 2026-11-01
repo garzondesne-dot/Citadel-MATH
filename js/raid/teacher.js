@@ -6,6 +6,7 @@ DS.Teacher = (function () {
   const $ = (s) => document.querySelector(s);
   const { esc } = DS.UI;
   const C = () => DS.Control, Raid = () => DS.Raid;
+  let wasClosed = null, curKey = '';
   let code = null, L = null, R = null, raw = null, stop = null, tick = 0, showKey = 0, videos = {}, vStop = null, vLesson = '';
   // 교사 폰에서는 종합상황실 키를 바로 보여 준다 (종합상황실 입력칸만 **** 로 가림 — 사용자 결정 v0.5.0)
   const keyHtml = () => `<b>${esc($('#t-key').textContent) || '—'}</b>`;
@@ -14,20 +15,22 @@ DS.Teacher = (function () {
     const r = await DS.Act.createRoom(lessonId, cls);
     try { localStorage.setItem('citadel-teacher', JSON.stringify({ code: r.code, hallKey: r.hallKey, uid: DS.Net.uid() })); } catch (e) { /* 무시 */ }
     try { const a = JSON.parse(localStorage.getItem('citadel-rooms')) || []; a.unshift({ code: r.code, cls: cls || '', lesson: lessonId, uid: DS.Net.uid(), at: Date.now() }); localStorage.setItem('citadel-rooms', JSON.stringify(a.slice(0, 30))); } catch (e) { /* 무시 */ } // 📋 만든 수업 목록
-    return open(r.code, r.hallKey);
+    return DS.TCamp.enter({ code: r.code, hallKey: r.hallKey }); // v0.9.1: 새 수업은 교사 대기공간(QR)에서 시작
   }
   async function open(c, hallKey) {
     const R0 = await DS.Net.get(`rooms/${c}`);
     if (!R0 || !R0.meta) throw Object.assign(new Error('수업을 찾을 수 없어요.'), { user: true });
     if (R0.meta.teacher !== DS.Net.uid()) throw Object.assign(new Error('이 기기에서 만든 수업이 아니에요.'), { user: true });
-    code = c;
+    code = c; wasClosed = null; curKey = hallKey || '';
     DS.UI.show('screen-teacher');
     DS.Scene.save({ role: 'teacher', code: c, hallKey: hallKey || '' });
     $('#t-key').textContent = hallKey || '';
     if (stop) stop();
     stop = DS.Net.watch(`rooms/${code}`, (v) => { if (!v) return; raw = v; R = DS.Act.unpackRoom(v); L = DS.Lessons.get(R.meta.lesson);
       if (vLesson !== L.id) { vLesson = L.id; if (vStop) vStop(); vStop = DS.Net.watch(`prep/${L.id}/video`, (x) => { videos = x || {}; if (R) render(); }); }
-      render(); DS.Act.admitLate(code, R, L); DS.Act.markBossWin(code, R, L); });
+      render(); DS.Act.admitLate(code, R, L); DS.Act.markBossWin(code, R, L);
+      // 수업 끝 → 교사 대기공간 (꺼진 차원문 + 🏫 우리 반 수업 소식)
+      const cl = DS.Raid.isClosed(R); if (wasClosed === false && cl && document.getElementById('screen-teacher').classList.contains('active')) { if (stop) stop(); stop = null; DS.TCamp.enter({ code, hallKey: curKey }); } wasClosed = cl; });
     clearInterval(tick); tick = setInterval(() => { if (R) render(); }, 15000); // "2분째 미제출" 갱신
   }
   const studentUrl = () => `${location.origin}${location.pathname.replace(/[^/]*$/, '')}index.html?role=student&code=${code}${DS.Net.mode === 'local' ? '&local' : ''}`;
@@ -65,7 +68,7 @@ DS.Teacher = (function () {
   function lobby() {
     const studs = Object.entries(R.players || {}).filter(([, p]) => !p.teacher).sort((a, b) => a[1].num - b[1].num);
     return `<div class="panel framed"><p class="stage-name">학생 입장</p><div class="qr-row"><div id="t-qr" class="qr"></div><div><p>수업 코드 <b class="big-code">${code}</b></p><p class="muted small break">${esc(studentUrl())}</p><p class="muted small">종합상황실(PC): 첫 화면 → 종합상황실 → 코드 ${code} · 키는 위쪽 [보기]</p></div></div>
-      <div class="chips">${studs.map(([, p]) => `<span class="chip">${p.num}번 ${esc(p.nick)}</span>`).join('') || '<span class="muted">아직 아무도 없어요</span>'}</div></div>`;
+      <div class="chips">${studs.map(([, p]) => `<span class="chip">${DS.Titles.nameHtml(p, { beon: true, size: 14 })}</span>`).join('') || '<span class="muted">아직 아무도 없어요</span>'}</div></div>`;
   }
   function drawQR() {
     const el = $('#t-qr');

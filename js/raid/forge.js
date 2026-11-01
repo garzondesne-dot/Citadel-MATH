@@ -13,10 +13,11 @@ DS.Forge = (function () {
   const tok = (t) => (t && t.startsWith('card:') ? U().card(t.slice(5)) : null);
   const symOf = (t) => { if (!t) return ''; const c = tok(t); if (c) return c.short || c.name; const m = U().MATS.find((x) => x.id === t); return m ? m.sym : t; };
 
-  async function open(m) {
-    me = m; tab = 'forge'; slots = { l: null, op: null, r: null }; pick = 'l';
-    no = Number(await N().get(`unlock/${key(m.c)}`).catch(() => 0)) || 0;
-    owned = (await N().get(`cards/${key(m.c)}/${m.n}`).catch(() => null)) || {};
+  let preview = false; // 교사 대기공간: 모든 차시 미리 보기 (저장하지 않음)
+  async function open(m, opt = {}) {
+    me = m; tab = 'forge'; slots = { l: null, op: null, r: null }; pick = 'l'; preview = !!opt.preview;
+    no = preview ? Number(opt.no) || 0 : Number(await N().get(`unlock/${key(m.c)}`).catch(() => 0)) || 0;
+    owned = preview ? {} : (await N().get(`cards/${key(m.c)}/${m.n}`).catch(() => null)) || {};
     $('#forge').hidden = false; document.body.classList.add('forge-open');
     render();
   }
@@ -146,7 +147,7 @@ DS.Forge = (function () {
     $('#forge').appendChild(el);
     DS.Sound.correct();
     el.querySelector('#fg-keep').onclick = () => DS.Control.run(async () => {
-      if (first) { await N().set(`cards/${key(me.c)}/${me.n}/${c.id}`, true); owned[c.id] = true; if (DS.Grow) DS.Grow.add(me, { card: 1 }, `card_${c.id}`).catch(() => {}); }
+      if (first) { if (!preview) { await N().set(`cards/${key(me.c)}/${me.n}/${c.id}`, true); if (DS.Grow) DS.Grow.add(me, { card: 1 }, `card_${c.id}`).catch(() => {}); } owned[c.id] = true; }
       slots = { l: null, op: null, r: null }; pick = 'l'; el.remove(); render();
       if (first && have().length === opened().length) DS.UI.toast('🎉 열린 레시피를 모두 모았어요! (도감 완성 특전은 곧)', 4000);
     });

@@ -139,7 +139,7 @@ DS.Act = (function () {
     const dup = Object.entries(R.players || {}).find(([u, p]) => u !== me && !p.teacher && Number(p.num) === Number(info.num));
     if (dup) fail(`${info.num}번은 이미 입장했어요. 번호를 확인해 주세요.`);
     const was = (R.players || {})[me] || {};
-    await N().set(P(code, `players/${me}`), { num: Number(info.num), nick: String(info.nick).slice(0, 8), hero: Number(info.hero) || 0, fx: info.fx || 'flame', ...(info.cls ? { cls: String(info.cls) } : {}), ...(was.lobby ? { lobby: true } : {}), at: N().TS });
+    await N().set(P(code, `players/${me}`), { num: Number(info.num), nick: String(info.nick).slice(0, 8), hero: Number(info.hero) || 0, fx: info.fx || 'flame', ...(info.cls ? { cls: String(info.cls) } : {}), ...(info.title ? { title: String(info.title).slice(0, 24) } : {}), ...(was.lobby ? { lobby: true } : {}), at: N().TS });
     return R.meta;
   }
   // 접속 표시: 연결이 끊기면 서버가 지운다 (Firebase onDisconnect)

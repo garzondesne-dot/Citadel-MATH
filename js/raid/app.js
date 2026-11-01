@@ -56,9 +56,10 @@ DS.App = (function () {
       else if (sc.role === 'hall' && sc.code) await DS.Hall.enter(sc.code, sc.key);
       else if (sc.role === 'prep' && sc.lesson && (await A().isAdmin())) await DS.Prep.enter(sc.lesson);
       else if (sc.role === 'students' && (await A().isAdmin())) await DS.Students.enter();
+      else if (sc.role === 'tcamp' && (await A().isAdmin())) await DS.TCamp.enter(sc);
     } catch (e) { DS.Scene.clear(); DS.UI.toast(e.message || String(e), 3200); }
   }
-  const info = (m) => ({ num: m.n, nick: m.name, hero: m.hero, fx: m.fx || 'flame', cls: m.c });
+  const info = (m) => ({ num: m.n, nick: m.name, hero: m.hero, fx: m.fx || 'flame', cls: m.c, title: m.title || 'dawn' });
   // 시작 화면: 큰 제목 그림 → 화면을 터치하면 첫 화면 (주소로 바로 들어오거나 새로고침 복귀 · 체험판 안에서는 건너뜀)
   const inFrame = () => { try { return window.top !== window.self; } catch (e) { return true; } };
   function splash(on) {

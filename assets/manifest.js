@@ -25,6 +25,10 @@ DS.ASSETS = {
     names: ['땅굴', '깊은 숲 성역', '차원 균열 지대', '폐광 갱도', '고대 유적 심장부', '빙결 동굴', '화산 심연', '망자의 지하 묘실', '수중 신전', '천공 성소'],
     bg: (id) => `dg-${id}-v1.webp`, portal: (id) => `portal-${id}-v1.webp` },
   // 특수 차원문 3종 (투명 배경 · 400×600): 보강던전(파랑) · 중단원던전(보라) · 대단원던전(빨강). 원본 무손실은 assets/img/dportal-*-v1.png
+  // 메달 (v0.9.1 · 사용자 제공 · 5열 × 2행): rank = 업적 · 성장 10종, dungeon = 던전 테마 01~10 정복
+  medals: { rank: { src: 'medals-rank-v1.webp', cols: 5, rows: 2 }, dungeon: { src: 'medals-dungeon-v1.webp', cols: 5, rows: 2 } },
+  // 교사 대기공간 배경 (v0.9.1 · 푸른 숲 성소, 사용자 제공)
+  tcamp: { bg: 'tcamp-sanctuary-v1.webp' },
   trophy: 'trophy-v1.webp', // 클리어 · 수업 끝 트로피 (사용자 제공, 투명 배경)
   dportals: { bonus: 'dportal-bonus-v1.webp', mid: 'dportal-mid-v1.webp', big: 'dportal-big-v1.webp' },
   fields: { forest: 'field-forest-v1.webp', lava: 'field-lava-v1.webp', ice: 'field-ice-v1.webp' }, // 전투 배경 (달빛 숲 유적 · 화산 대장간 · 빙결 신전)
