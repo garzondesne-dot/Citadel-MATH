@@ -106,7 +106,9 @@ DS.App = (function () {
     }
     masks = (await A().masks()) || {};
     const classes = Object.keys(masks).sort();
-    const last = read('citadel-acc') || {};
+    // v0.8.3: 반·번호는 미리 고르지 않는다 (여럿이 쓰는 기기에서 남의 이름이 보이지 않게). 예전 버전이 저장한 값도 지움
+    try { localStorage.removeItem('citadel-acc'); } catch (e) { /* 무시 */ }
+    const last = {};
     if (!classes.length) { box.innerHTML = '<p class="muted">아직 학생 명단이 없어요. 선생님이 "수업 준비"에서 명단을 올리면 로그인할 수 있어요.</p>'; return; }
     // v0.8.1: 처음엔 빈칸 (남의 이름이 보이지 않게). 이 폰에서 로그인한 적 있는 학생만 그 반·번호를 미리 고름
     const c = classes.includes(last.c) ? last.c : '';
@@ -131,7 +133,7 @@ DS.App = (function () {
   const pinInput = (id, ph) => `<input id="${id}" type="password" inputmode="numeric" maxlength="4" pattern="[0-9]*" placeholder="${ph}" autocomplete="off">`;
   function drawForm() {
     const f = $('#s-form'), c = () => $('#s-cls').value, n = () => Number($('#s-num').value);
-    const remember = () => save('citadel-acc', { c: c(), n: n() }); // 로그인 · 가입에 성공했을 때만 이 폰에 기억
+    const remember = () => {}; // 반·번호는 기억하지 않는다 (v0.8.3)
     if (sMode === 'login') {
       f.innerHTML = `<label>비밀번호 (숫자 4자리) ${pinInput('s-pin', '••••')}</label><button id="s-login" class="btn primary big">🔑 로그인</button><button id="s-new" class="btn">처음이에요 · 가입</button>`;
       $('#s-login').onclick = go(async () => {
