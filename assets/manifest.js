@@ -25,6 +25,7 @@ DS.ASSETS = {
     names: ['땅굴', '깊은 숲 성역', '차원 균열 지대', '폐광 갱도', '고대 유적 심장부', '빙결 동굴', '화산 심연', '망자의 지하 묘실', '수중 신전', '천공 성소'],
     bg: (id) => `dg-${id}-v1.webp`, portal: (id) => `portal-${id}-v1.webp` },
   // 특수 차원문 3종 (투명 배경 · 400×600): 보강던전(파랑) · 중단원던전(보라) · 대단원던전(빨강). 원본 무손실은 assets/img/dportal-*-v1.png
+  trophy: 'trophy-v1.webp', // 클리어 · 수업 끝 트로피 (사용자 제공, 투명 배경)
   dportals: { bonus: 'dportal-bonus-v1.webp', mid: 'dportal-mid-v1.webp', big: 'dportal-big-v1.webp' },
   fields: { forest: 'field-forest-v1.webp', lava: 'field-lava-v1.webp', ice: 'field-ice-v1.webp' }, // 전투 배경 (달빛 숲 유적 · 화산 대장간 · 빙결 신전)
   camp: {
@@ -41,9 +42,9 @@ DS.ASSETS = {
   // 모루 연성창: 위에서 본 모루(작업면 = face, 그림 비율 0~1) · 망치
   forge: { anvil: { src: 'forge-anvil-v1.webp', w: 820, h: 509, face: [0.273, 0.328, 0.830, 0.734] }, hammer: { src: 'forge-hammer-v1.webp', w: 420, h: 435 } },
   // 브랜드: 공통 = 배경 · 메뉴 아이콘(학생 · 교사 · 종합상황실 · 수업 준비 · 로그인), 에디션 = 제목 화면 · 머리 배너 · 로고 (과목이 늘면 에디션만 바꿈)
-  brand: { name: '모두와 던전', edition: '공통수학2', full: '모두와 던전 : 공통수학2', tagline: '함께 풀고, 모두 함께 돌파하라',
+  brand: { name: '모두의 던전', edition: '공통수학2', full: '모두의 던전 : 공통수학2', tagline: '함께 풀고, 모두 함께 돌파하라',
     bg: 'brand-bg-v1.webp', menu: { src: 'menu-icons-v1.webp', cols: 5, kinds: { student: 0, teacher: 1, hall: 2, prep: 3, login: 4 } },
-    title: 'brand-m2-title-v2.webp', header: 'brand-m2-header-v2.webp', logo: 'brand-m2-logo-v2.webp' },
+    title: 'brand-m2-title-v3.webp', header: 'brand-m2-header-v3.webp', logo: 'brand-m2-logo-v3.webp' },
   panels: { src: 'ui-panels-v1.webp', cols: 2, rows: 2, kinds: { inventory: 0, paper: 1, dialog: 2, reward: 3 } }, // 남색 인벤토리 · 양피지 문제지 · 청록 대화창 · 보라 보상창
   fonts: { pixel: 'assets/fonts/Galmuri11.woff2', pixelBold: 'assets/fonts/Galmuri11-Bold.woff2' },
 };

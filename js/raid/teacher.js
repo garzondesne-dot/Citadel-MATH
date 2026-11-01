@@ -24,7 +24,7 @@ DS.Teacher = (function () {
     DS.Scene.save({ role: 'teacher', code: c, hallKey: hallKey || '' });
     $('#t-key').textContent = hallKey || '';
     if (stop) stop();
-    stop = DS.Net.watch(`rooms/${code}`, (v) => { if (!v) return; raw = v; R = DS.Act.unpackRoom(v); L = DS.Lessons.get(R.meta.lesson); render(); });
+    stop = DS.Net.watch(`rooms/${code}`, (v) => { if (!v) return; raw = v; R = DS.Act.unpackRoom(v); L = DS.Lessons.get(R.meta.lesson); render(); DS.Act.admitLate(code, R, L); });
     clearInterval(tick); tick = setInterval(() => { if (R) render(); }, 15000); // "2분째 미제출" 갱신
   }
   const studentUrl = () => `${location.origin}${location.pathname.replace(/[^/]*$/, '')}index.html?role=student&code=${code}${DS.Net.mode === 'local' ? '&local' : ''}`;
@@ -74,5 +74,5 @@ DS.Teacher = (function () {
       ${list.map((h) => `<button class="t-help ${why[h.level]}" data-help="${h.uid}"><b>${esc(C().name(R, h.uid))}</b><span>${esc(h.why)}</span></button>`).join('') || '<p class="muted small">지금은 없어요 👍</p>'}</div>`;
   }
 
-  return { create, open };
+  return { create, open, code: () => code };
 })();

@@ -21,17 +21,21 @@ DS.Nav = (function () {
   // 방문 기록이 쌓이지 않게 맨 앞 기록(base) 자리에서 새로 연다.
   const ask = (id) => !ASK[id] || window.confirm(ASK[id]);
   const reopen = () => { leaving = true; DS.Scene.clear(); location.replace(homeUrl()); };
+  // v0.8.1: 교사 화면에서 나갈 때 한 번 더 — [확인] 수업 끝내기 / [취소] 잠깐 나가기 (수업은 계속 · 교사 메뉴에서 이어서)
+  const END = '수업도 끝낼까요?\n\n[확인] 수업 끝내기 — 학생은 결과를 보고 모닥불로, 차원문은 꺼져요\n[취소] 잠깐 나가기 — 수업은 계속돼요 (교사 메뉴에서 이어서)';
+  const endHook = (id) => (id === 'screen-teacher' && DS.Teacher && DS.Teacher.code && DS.Teacher.code() && window.confirm(END) ? DS.Act.endClass(DS.Teacher.code()).catch(() => {}) : null);
   function leave() { // 화면 왼쪽 위 ≪ 뒤로 (지금 위치 = top)
     const id = current();
     if (id === 'screen-home' || leaving || !ask(id)) return false;
-    if (embedded || !(history.state && history.state.cm === 'top')) reopen(); else { leaving = 'back'; history.back(); } // → popstate 에서 base 자리에 새로 연다
+    const go = () => { if (embedded || !(history.state && history.state.cm === 'top')) reopen(); else { leaving = 'back'; history.back(); } }; // → popstate 에서 base 자리에 새로 연다
+    const p = endHook(id); if (p) { leaving = true; p.then(() => { leaving = false; go(); }); } else go();
     return true;
   }
   function onBack() { // 휴대폰 뒤로 가기 (지금 위치 = base)
     if (leaving === 'back') { reopen(); return; }
     if (leaving) return;
     const id = current();
-    if (id !== 'screen-home') { if (ask(id)) reopen(); else history.pushState({ cm: 'top' }, ''); return; }
+    if (id !== 'screen-home') { if (ask(id)) { const p = endHook(id); if (p) { leaving = true; p.then(reopen); } else reopen(); } else history.pushState({ cm: 'top' }, ''); return; }
     // 경고하는 동안은 막지 않으므로 그사이 한 번 더 누르면 앱이 꺼진다. 시간이 지나면 다시 막는다
     DS.UI.toast('한 번 더 누르면 앱이 꺼져요', EXIT_MS);
     clearTimeout(warnAt);

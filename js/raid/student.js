@@ -20,7 +20,7 @@ DS.Student = (function () {
   let test = null;          // 🧪 테스트 모드: { prep: 학습지 이미지, exit() } — 이 기기 안에서만, 집중모드 대신 학습지 이미지
   async function enter(c, info, opt = {}) {
     test = opt.test || null;
-    cleared0 = false; drawn = ''; shown = ''; form = null; retrying = ''; bossSet = 1; othersSeen = {};
+    cleared0 = false; resulted = false; drawn = ''; shown = ''; form = null; retrying = ''; bossSet = 1; othersSeen = {};
     await DS.Act.join(c, info);
     code = c; info0 = info;
     me = DS.Net.uid();
@@ -44,7 +44,7 @@ DS.Student = (function () {
     if (stop) stop(); stop = null; focus(false);
     const t = test; test = null;
     const go = (bonus) => { if (t) { t.exit(); return; } if (bonus && DS.Bonus) DS.Bonus.enter(acc()); else DS.Camp.enter(acc()); };
-    if (DS.Result && L && R && me && Raid().activeIds(R).includes(me)) return DS.Result.show(L, R, me, t ? null : acc(), code, go).catch(() => go());
+    if (!resulted && DS.Result && L && R && me && Raid().activeIds(R).includes(me)) return DS.Result.show(L, R, me, t ? null : acc(), code, go).catch(() => go()); // 결과를 못 보고 끝났을 때만
     go();
   }
   const stop0 = () => { if (stop) stop(); stop = null; focus(false); test = null; };
@@ -79,8 +79,9 @@ DS.Student = (function () {
     const st0 = Raid().stepOf(L, R);
     if (!st0 || st0.kind !== 'monster') drawn = '';
     if (Raid().isLobby(R)) return lobbyView(body, false);
-    if (!(R.active || {})[me]) { body.innerHTML = '<div class="panel framed center"><p>이번 수업 참여 명단에 없어요. 선생님께 말씀드려요.</p></div>'; return; }
+    if (!(R.active || {})[me]) { body.innerHTML = '<div class="panel framed center"><p>⏳ 늦게 들어왔어요 — <b>다음 몬스터부터</b> 함께해요!</p><p class="muted small">잠시 뒤에도 그대로면 선생님께 말씀드려요 (선생님 폰이나 큰 화면이 켜져 있어야 들어가져요)</p></div>'; return; }
     if (Raid().canLobby(L, R, me) && !cleared0) { cleared0 = true; DS.Camp.markStamp(); }
+    if (Raid().isEnd(L, R) && !resulted) showResult(); // 마무리 단계가 되면 아직 못 본 학생도 결과를 본다
     if (myP().lobby) return lobbyView(body, true);
     if (Raid().isEnd(L, R)) return endView(body);
     const step = Raid().stepOf(L, R);
@@ -108,7 +109,7 @@ DS.Student = (function () {
     drawn = sig;
     const crowd = others.map(([, p], k) => `<div class="lb-h${k % 2 ? ' face-l' : ''}" style="left:${12 + ((k * 37) % 76)}%;bottom:${8 + (k % 3) * 9}%">${DS.Art.hero(p.hero, 'idle', `small ${after && finale ? 'pairhop' : 'huff'}`)}<i class="shadow"></i></div>`).join('');
     body.innerHTML = `<div class="panel framed">
-      <div class="lobby-scene bg-scene th-${L.theme || ''}"><p class="lb-title">${after ? '🏆 ' : '⚔ '}${esc(dungeonName())} ${after ? '클리어!' : '단체 대기실'}</p>
+      <div class="lobby-scene bg-scene th-${L.theme || ''}"><p class="lb-title">${after ? `<i class="trophy-img sm" style="background-image:url('${DS.ASSETS.base}${DS.ASSETS.trophy}')"></i> ` : '⚔ '}${esc(dungeonName())} ${after ? '클리어!' : '단체 대기실'}</p>
         <div class="lb-h teacher" style="left:50%;bottom:20%">${DS.Art.hero(DS.ASSETS.heroes.teacher, 'idle', after && finale ? 'pairhop' : 'huff')}<i class="shadow"></i></div>
         ${crowd}<div class="lb-h me" style="left:34%;bottom:12%">${DS.Art.hero(myP().hero, 'idle', after && finale ? 'pairhop' : 'huff')}<i class="shadow"></i>${w && !(R.hide || {})[me] ? `<span class="lb-say">${esc(w.t)}</span>` : ''}</div>
         <p class="lb-greet">${after ? '모두 수고했네! 오늘 배운 것 한마디씩 남기게' : `${L.no ? `${L.no}차시 ` : ''}${esc(L.title.split('·')[0].trim())} 던전에 온 것을 환영하네!`}</p></div>
@@ -127,10 +128,17 @@ DS.Student = (function () {
   }
   function bindWords() {
     document.querySelectorAll('[data-chip]').forEach((b) => (b.onclick = () => { $('#st-word').value = b.dataset.chip; }));
-    const sb = $('#st-say'); if (sb) sb.onclick = () => DS.Control.run(async () => { await DS.Act.say(code, R, $('#st-word').value); DS.UI.toast('한마디를 남겼어요!'); drawn = ''; });
+    const sb = $('#st-say'); if (sb) sb.onclick = () => DS.Control.run(async () => { await DS.Act.say(code, R, $('#st-word').value); DS.UI.toast('한마디를 남겼어요!'); drawn = ''; if (DS.Grow && !test) DS.Grow.add(acc(), { words: 1 }, `words_${code}`).catch(() => {}); });
   }
   const lobbyBtn = () => (Raid().canLobby(L, R, me) ? '<button class="btn primary big" id="st-lobby">🏕 대기실로 이동</button>' : '<button class="btn big" disabled>🏕 대기실로 이동 (보스를 쓰러뜨리거나 다 맞히면 켜져요)</button>');
-  const bindLobby = () => { const b = $('#st-lobby'); if (b) b.onclick = () => DS.Control.run(async () => { await DS.Act.toLobby(code); drawn = ''; }); };
+  // v0.8.1: 형성평가를 마치고 「대기실로 이동」 → ⚔ 오늘의 전투 결과 → 단체 대기실 (결과는 수업 끝이 아니라 여기서)
+  let resulted = false;
+  const showResult = () => new Promise((res) => {
+    if (resulted || !DS.Result || !Raid().activeIds(R).includes(me)) return res();
+    resulted = true;
+    DS.Result.show(L, R, me, test ? null : acc(), code, () => res(), { inClass: true }).catch(() => res());
+  });
+  const bindLobby = () => { const b = $('#st-lobby'); if (b) b.onclick = () => DS.Control.run(async () => { await showResult(); await DS.Act.toLobby(code); drawn = ''; }); };
 
   // ── 몬스터와 1:1 대치 ─────────────────────────────────────
   function sheetModal(step) {
@@ -325,7 +333,7 @@ DS.Student = (function () {
   }
   function endView(body) {
     const m = Raid().mastery(L, R, me).slice(0, L.boss.hpItems).filter(Boolean).length;
-    body.innerHTML = `<div class="panel framed center win"><h2>🏆 오늘의 던전 클리어!</h2><p class="muted small">형성평가 ${m} / ${L.boss.hpItems}${Raid().fullMarks(L, R, me) ? ' 만점!' : ''}</p>${DS.Art.hero(myP().hero, 'attack', 'big pairhop')}
+    body.innerHTML = `<div class="panel framed center win"><h2><i class="trophy-img sm" style="background-image:url('${DS.ASSETS.base}${DS.ASSETS.trophy}')"></i> 오늘의 던전 클리어!</h2><p class="muted small">형성평가 ${m} / ${L.boss.hpItems}${Raid().fullMarks(L, R, me) ? ' 만점!' : ''}</p>${DS.Art.hero(myP().hero, 'attack', 'big pairhop')}
       <div class="stamp-bar">📮 반드시 학습지 확인도장 받아가세요.</div>${lobbyBtn()}
       <p class="muted small">게임 기록은 수학 성적이 아니에요. 오늘 배운 것을 학습지에 정리해요.</p></div>`;
     bindLobby();

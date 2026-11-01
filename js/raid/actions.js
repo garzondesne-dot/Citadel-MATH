@@ -88,6 +88,24 @@ DS.Act = (function () {
   // 미제출 학생 빼고 판정 (결석·폰 고장)
   const skip = (code, mid, uids) => N().update(P(code, `state/skip/${mid}`), Object.fromEntries(uids.map((u) => [u, true])));
   const setActive = (code, uid, on) => N().set(P(code, `active/${uid}`), on ? true : null);
+  // v0.8.1: 어느 단계에서든 수업 끝 (선생님이 나가면서 · 교사 메뉴 「⏹ 끝내기」) → 학생은 결과 → 모닥불, 차원문 꺼짐
+  async function endClass(code) {
+    const R = await N().get(P(code)); if (!R || !R.meta) return;
+    await N().update(P(code, 'state'), { closed: true, focus: false, stepAt: N().TS });
+    const cls = R.meta.cls;
+    if (cls) { const lv = await N().get(`live/${ck(cls)}`).catch(() => null); if (lv && lv.code === code) await N().set(`live/${ck(cls)}/open`, false); }
+  }
+  // 늦게 온 학생: 참여 명단에 넣고, 지금 몬스터는 기다리지 않게 건너뜀 (교사 · 종합상황실 기기에서)
+  const admitting = {};
+  async function admitLate(code, R, L) {
+    const late = Raid.lateIds(R).filter((u) => !admitting[u]); if (!late.length) return;
+    const step = Raid.stepOf(L, R);
+    late.forEach((u) => { admitting[u] = true; });
+    const patch = {};
+    late.forEach((u) => { patch[`active/${u}`] = true; if (step && step.kind === 'monster') patch[`state/skip/${step.id}/${u}`] = true; });
+    await N().update(P(code), patch).catch(() => {});
+    late.forEach((u) => { delete admitting[u]; });
+  }
   const clearHelp = (code, uid) => N().remove(P(code, `help/${uid}`));
 
   // ── 학생 ────────────────────────────────────────────────
@@ -135,5 +153,5 @@ DS.Act = (function () {
     return out;
   }
 
-  return { getPrep, setImage, setVideo, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, bossAnswer, unpackRoom, P };
+  return { endClass, admitLate, getPrep, setImage, setVideo, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, bossAnswer, unpackRoom, P };
 })();

@@ -829,3 +829,8 @@ details.panel[open] > summary::before { content: '▾ '; }
 .rs-rec { padding: 6px; border: 1px dashed #6fb8ff; margin: 4px 0; }
 .rs-hist { padding: 6px 0; border-top: 1px dashed #334; }
 .st-scroll td, .st-scroll th { white-space: nowrap; }
+/* v0.8.1 트로피 그림 */
+.trophy-img { display: inline-block; width: 1.6em; height: 1.6em; vertical-align: middle; background-size: contain; background-repeat: no-repeat; background-position: center; filter: drop-shadow(0 0 8px #ffcf5a88); }
+.trophy .trophy-img { width: min(34vh, 260px); height: min(34vh, 260px); animation: trophyIn 1.2s ease-out; }
+.trophy-img.sm { width: 1.5em; height: 1.5em; margin-right: .2em; }
+@keyframes trophyIn { 0% { transform: scale(.3) rotate(-10deg); opacity: 0; filter: brightness(3); } 70% { transform: scale(1.08); } 100% { transform: scale(1); } }

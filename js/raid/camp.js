@@ -20,10 +20,10 @@ DS.Camp = (function () {
     render();
     if (liveStop) liveStop();
     liveStop = DS.Net.watch(`live/${ck(m.c)}`, (v) => {
-      const was = live; live = v;
+      const was = live; live = v && v.open && !DS.Raid.liveOpen(v, Date.now()) ? Object.assign({}, v, { open: false }) : v;
       if (!document.getElementById('screen-camp').classList.contains('active')) return;
       drawGate();
-      if (v && v.open && (!was || !was.open || was.code !== v.code) && liveSeen !== v.code) { liveSeen = v.code; showGate(); forgeInfo(); DS.Sound.correct(); DS.UI.toast(`🌀 ${v.no ? `${v.no}차시 ` : ''}던전이 열렸어요! 차원문을 눌러 들어가요`, 4200); }
+      if (live && live.open && (!was || !was.open || was.code !== live.code) && liveSeen !== live.code) { liveSeen = live.code; showGate(); forgeInfo(); DS.Sound.correct(); DS.UI.toast(`🌀 ${live.no ? `${live.no}차시 ` : ''}던전이 열렸어요! 차원문을 눌러 들어가요`, 4200); }
     });
     if (code0) setTimeout(codeGate, 300); // QR 로 들어왔으면 코드 창을 바로
   }
@@ -166,7 +166,7 @@ DS.Camp = (function () {
     const draw = () => {
       el.innerHTML = `<div class="quiz-box framed set-box"><h2>⚙ 설정</h2>
         <p class="shelf-title">내 용사</p><div class="heroes set-grid">${L.heroes.map((h) => `<button class="hpick${h.id === hero ? ' on' : ''}${h.open ? '' : ' lock'}" data-h="${h.id}" title="${esc(h.cond || '')}">${DS.Art.hero(h.id, h.id === hero ? 'attack' : 'idle')}${h.open ? '' : '<b class="lk">🔒</b>'}</button>`).join('')}</div>
-        <p class="muted small">✨ 추가 용사 첫 번째: 1~3차시 도감 <b>${L.got} / ${L.need}</b>장 모으면 열려요 · 나머지는 추후 공개</p>
+        <p class="muted small">✨ 추가 용사: ① 1~3차시 도감 <b>${L.got} / ${L.need}</b>장 · ② 🎁 첫 레이드 클리어 · 나머지는 추후 공개</p>
         <p class="shelf-title">공격 이펙트 <span class="muted small">화려한 이펙트 = 📘 보강 인장 ${L.seals || 0}개 모음</span></p><div class="fxs">${L.fx.map((f) => `<button class="fxpick${f.id === fx ? ' on' : ''}${f.open ? '' : ' lock'}" data-fx="${f.id}"><canvas width="150" height="90" data-still="${f.id}"></canvas><span>${f.open ? DS.FX.NAMES[f.id] : `🔒 ${esc(f.cond || '추후 공개')}`}</span></button>`).join('')}</div>
         <div class="row"><button class="btn" id="set-x">닫기</button><button class="btn primary" id="set-ok">저장</button></div></div>`;
       el.querySelectorAll('canvas[data-still]').forEach((c) => DS.FX.still(c, c.dataset.still));

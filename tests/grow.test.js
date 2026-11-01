@@ -56,5 +56,16 @@ check(/서로소/.test(DS.Result.history({ 'set-04': Object.assign({}, sm, { at:
 // 2·3차시 형성평가 문항마다 개념 표시
 ['set-02', 'set-03', 'set-04'].forEach((id) => { const l = DS.Lessons.get(id); check((l.boss.tags || []).length === l.boss.items && l.boss.tags.every((t) => l.steps.some((s) => s.id === t)), `${id}: 형성평가 개념 표시`); });
 
+// ── 4. v0.8.1: 첫 출정 · 늦게 온 학생 · 차원문 2시간 ─────────────
+check(G.lines({ first: 43 })[0].n === 1 && G.lines({ first: 43 })[0].xp === 43, '첫 출정 축하는 ×n 없이 한 줄');
+check(!('words' in r.parts), '마지막 한마디 EXP 는 결과가 아니라 한마디를 남길 때');
+const R2 = X.newRoom('222222', L.id, 'T', 0, 90); R2.players = { a: { num: 1, nick: '가', hero: 0 }, b: { num: 2, nick: '나', hero: 0 }, T: { teacher: true, num: 0, nick: '선생님', hero: 0 } };
+check(X.lateIds(R2).length === 0, '대기실(시작 전)에는 늦게 온 학생 없음');
+R2.active = { a: true }; R2.state.step = 1;
+check(X.lateIds(R2).join() === 'b', '시작 뒤 들어온 학생 = 늦게 온 학생 (교사 제외)');
+R2.state.closed = true; check(X.lateIds(R2).length === 0, '끝난 수업은 해당 없음');
+const now = 10 * X.LIVE_MS;
+check(X.liveOpen({ open: true, at: now - 1000 }, now) && !X.liveOpen({ open: true, at: now - X.LIVE_MS - 1 }, now) && !X.liveOpen({ open: false, at: now }, now), '차원문 2시간 지나면 꺼진 것으로');
+
 if (fail) { console.error(`\n${fail}건 실패`); process.exit(1); }
-console.log('OK: 성장 — EXP · 레벨 · 칭호 · 보강 인장 → 이펙트 해금 · 개인 결과(처음/고침/못 맞힘 · 개념별 · 복습 추천) 통과');
+console.log('OK: 성장 — 첫 출정 · 늦게 온 학생 · 차원문 2시간 · EXP · 레벨 · 칭호 · 보강 인장 → 이펙트 해금 · 개인 결과(처음/고침/못 맞힘 · 개념별 · 복습 추천) 통과');

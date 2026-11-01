@@ -23,6 +23,7 @@ DS.Hall = (function () {
       raw = v; R = DS.Act.unpackRoom(v);
       const first = !L;
       L = DS.Lessons.get(R.meta.lesson);
+      if (DS.Act.isHost(R)) DS.Act.admitLate(code, R, L);
       if (first) { if (stopPrep) stopPrep(); stopPrep = DS.Net.watch(`prep/${L.id}`, (p) => { prep = p || {}; built = ''; if (R) render(); }); }
       render();
     });
@@ -41,7 +42,7 @@ DS.Hall = (function () {
     el.classList.toggle('focus-on', Raid().focusOn(R) && !Raid().isLobby(R));
     if (step && (step.kind === 'monster' || step.kind === 'boss')) { const key = `f${i}`; if (built !== key) buildFight(step, key); else updateFight(step); sheetOverlay(step); return; }
     clearInterval(bubbleT);
-    if (Raid().isClosed(R)) { built = 'closed'; el.innerHTML = `<div class="h-victory"><div class="trophy">🏆</div><h1>수업 끝!</h1><p class="muted">모두 모닥불로 돌아갔어요. 게임 기록은 수학 성적이 아니에요.</p><div class="stamp-bar big">📮 반드시 학습지 확인도장 받아가세요.</div></div>`; return; }
+    if (Raid().isClosed(R)) { built = 'closed'; el.innerHTML = `<div class="h-victory"><div class="trophy"><i class="trophy-img" style="background-image:url('${DS.ASSETS.base}${DS.ASSETS.trophy}')"></i></div><h1>수업 끝!</h1><p class="muted">모두 모닥불로 돌아갔어요. 게임 기록은 수학 성적이 아니에요.</p><div class="stamp-bar big">📮 반드시 학습지 확인도장 받아가세요.</div></div>`; return; }
     if (Raid().isLobby(R) || Raid().isFinale(L, R)) return lobbyScene(Raid().isFinale(L, R));
     const key = `c${i}|${(prep.img || {})[step.id] ? 1 : 0}`;
     if (built === key) return;
@@ -85,7 +86,7 @@ DS.Hall = (function () {
     });
     const words = finale ? Object.entries(R.words || {}).filter(([u]) => !(R.hide || {})[u]).map(([u]) => u) : [];
     $('#h-arena').innerHTML = `<div class="h-lobby2 bg-scene th-${L.theme || ''}${finale ? ' finale' : ''}">
-      <p class="lb2-title">${finale ? `🏆 ${esc(dungeonName())} 클리어!` : `⚔ ${esc(dungeonName())} · 던전 입장!`}</p>
+      <p class="lb2-title">${finale ? `<i class="trophy-img sm" style="background-image:url('${DS.ASSETS.base}${DS.ASSETS.trophy}')"></i> ${esc(dungeonName())} 클리어!` : `⚔ ${esc(dungeonName())} · 던전 입장!`}</p>
       <p class="lb2-sub">${finale ? '오늘 배운 것 한마디씩 남기고 가자' : `${esc(L.title)} — 선생님 주위로 모여라`}</p>
       ${finale ? `<div class="lb2-cnt">💬 ${words.length} / ${n}</div>` : `<div class="lb2-qr"><div id="h-qr" class="qr"></div><b>${code}</b><span>QR · 수업 코드</span></div>`}
       <div class="lb2-say teacher">${finale ? '모두 수고했네! 오늘 배운 것 한마디씩 남기게' : `${L.no ? `${L.no}차시 ` : ''}${esc(L.title.split('·')[0].trim())} 던전에 온 것을 환영하네!`}</div>

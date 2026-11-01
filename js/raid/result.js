@@ -43,7 +43,7 @@ DS.Result = (function () {
     const words = !!((R.words || {})[uid] || {}).t;
     const order = Object.keys(conc).filter((c) => conc[c].total);
     const weak = order.map((c) => ({ c, r: conc[c].ok / conc[c].total })).filter((x) => x.r < 0.8).sort((a, b) => a.r - b.r).slice(0, 2).map((x) => x.c);
-    const parts = { join: 1, submit: submits, correct: best + mast.filter(Boolean).length, fixed: fixed + bossFixed, bossWin: bossWin ? 1 : 0, perfect: perfect ? 1 : 0, words: words ? 1 : 0 };
+    const parts = { join: 1, submit: submits, correct: best + mast.filter(Boolean).length, fixed: fixed + bossFixed, bossWin: bossWin ? 1 : 0, perfect: perfect ? 1 : 0 }; // 마지막 한마디 EXP 는 한마디를 남길 때 따로 (v0.8.1)
     return { lesson: L.id, no: L.no || 0, title: L.title, mons, boss: { set1, mast, tried: bossTried, hp: L.boss.hpItems }, conc, titles, weak, parts };
   }
   // 저장용 요약 (records/{반}/{번호}/{차시})
@@ -53,23 +53,32 @@ DS.Result = (function () {
 
   const dots = (ok, total) => Array.from({ length: Math.min(total, 10) }, (_, i) => `<i class="${i < Math.round((ok / total) * Math.min(total, 10)) ? 'on' : ''}"></i>`).join('');
   // 복습 추천 버튼: 학습지 개념 · 보강던전(그 개념의 보강) · 영상
-  function recs(L, r, prep) {
+  function recs(L, r, prep, inClass) {
     if (!r.weak.length) return '<p class="okc">👍 오늘 개념을 고르게 잘 해냈어요! 보강던전에서 인장을 모아 보세요.</p>';
     return r.weak.map((c) => {
       const img = (prep.img || {})[c], vid = (prep.video || {})[c], bon = (L.bonus || []).filter((b) => b.concept === c);
       return `<div class="rs-rec"><b>📌 ${esc(r.titles[c] || c)}</b> <span class="muted small">첫 시도 ${r.conc[c].ok} / ${r.conc[c].total}</span>
-        <div class="row">${img ? `<button class="btn small" data-img="${c}">📄 학습지 개념 보기</button>` : ''}${bon.length ? `<button class="btn small" data-bonus="1">⚔ 보강던전 · ${esc(bon[0].title)}</button>` : ''}${vid && DS.Video.embed(vid) ? `<button class="btn small" data-vid="${c}">🎬 설명 영상</button>` : ''}</div></div>`;
+        <div class="row">${img ? `<button class="btn small" data-img="${c}">📄 학습지 개념 보기</button>` : ''}${bon.length ? (inClass ? `<span class="muted small">📘 수업이 끝나면 보강던전 · ${esc(bon[0].title)}</span>` : `<button class="btn small" data-bonus="1">⚔ 보강던전 · ${esc(bon[0].title)}</button>`) : ''}${vid && DS.Video.embed(vid) ? `<button class="btn small" data-vid="${c}">🎬 설명 영상</button>` : ''}</div></div>`;
     }).join('');
   }
   // 학생 폰: 수업이 끝나면 한 번 (같은 수업은 다시 저장하지 않음)
-  async function show(L, R, uid, me, code, then) {
+  // opt.inClass: 형성평가 직후(수업 중) — 보강던전 버튼 대신 「대기실로」 (v0.8.1)
+  async function show(L, R, uid, me, code, then, opt = {}) {
     const r = compute(L, R, uid);
-    let g = null;
+    let g = null, first = false;
     const seenKey = `citadel-result-${code}`;
     let seen = false; try { seen = localStorage.getItem(seenKey) === '1'; } catch (e) { /* 무시 */ }
     if (me && me.c != null && me.n) {
+      // 🎁 첫 레이드 특전 (v0.8.1): 처음 쌓는 기록이면 「첫 출정 축하」 EXP 로 레벨업 보장 + 추가 용사(두 번째) 해금
+      const prev = await DS.Net.get(`records/${ck(me.c)}/${me.n}`).catch(() => null);
+      first = !prev || !Object.keys(prev).length;
+      if (first && DS.Grow) {
+        const cur = await DS.Grow.mine(me).catch(() => DS.Grow.level(0)), base = DS.Grow.sum(r.parts);
+        r.parts.first = Math.max(40, cur.next - cur.into - base + 1);
+      }
       try { await DS.Net.set(`records/${ck(me.c)}/${me.n}/${L.id}`, summary(r, code)); } catch (e) { /* 저장 실패해도 결과는 보여 준다 */ }
       if (DS.Grow) g = await DS.Grow.add(me, r.parts, `raid_${code}`).catch(() => null);
+      if (!g) first = false;
     }
     if (seen && !g) return then();
     try { localStorage.setItem(seenKey, '1'); } catch (e) { /* 무시 */ }
@@ -81,12 +90,13 @@ DS.Result = (function () {
     el.innerHTML = `<div class="quiz-box framed rs-box"><h2>⚔ 오늘의 전투 결과</h2><p class="muted small">${esc(L.unit || '')} · ${esc(L.title)} — 성적이 아니라 다음에 볼 것을 알려 주는 기록이에요</p>
       ${lv ? `<div class="rs-lv${up ? ' up' : ''}"><b>${up ? '🎉 레벨 업! ' : ''}Lv.${lv.lv} ${esc(lv.title)}</b>${g && g.gained ? ` <span class="gold">+${g.gained} EXP</span>` : ''}<div class="rs-bar"><i style="width:${Math.round((100 * lv.into) / lv.next)}%"></i><span>${lv.into} / ${lv.next}</span></div></div>` : ''}
       ${g && g.gained ? `<p class="rs-why">${DS.Grow.lines(r.parts).map((l) => `${esc(l.why)} ${l.n > 1 ? `×${l.n} ` : ''}<b>+${l.xp}</b>`).join(' · ')}</p>` : ''}
+      ${first ? `<div class="rs-perk"><b>🎁 첫 출정 특전!</b> 새 용사가 합류했어요 ${DS.Art.hero(9, 'attack', 'pairhop')}<span class="muted small">모닥불 ⚙ 설정에서 고를 수 있어요</span></div>` : ''}
       <p class="shelf-title">몬스터별</p><table class="r-table rs-t">${r.mons.map((m) => `<tr><td>${esc(m.title)}</td><td>${mark(m)}</td></tr>`).join('')}
         <tr><td>👑 형성평가</td><td>${r.boss.tried ? `${r.boss.mast.slice(0, r.boss.hp).filter(Boolean).length} / ${r.boss.hp}${r.boss.mast.length > r.boss.hp && r.boss.mast[r.boss.hp] ? ' + 보너스 ✔' : ''}` : '<span class="muted">— 안 함</span>'}</td></tr></table>
       <p class="muted small">✔ 처음에 맞힘 · 🔁 재도전으로 고침 · ✖ 끝까지 못 맞힘</p>
       <p class="shelf-title">개념별 (첫 시도)</p>${Object.entries(r.conc).map(([c, v]) => `<div class="rs-c"><span>${esc(r.titles[c] || c)}</span><span class="rs-dots">${dots(v.ok, v.total)}</span><span class="muted small">${v.ok} / ${v.total}</span></div>`).join('')}
-      <p class="shelf-title">복습 추천</p>${recs(L, r, prep)}
-      <div class="row"><button class="btn primary big" id="rs-ok">🔥 모닥불로</button></div></div>`;
+      <p class="shelf-title">복습 추천</p>${recs(L, r, prep, opt.inClass)}
+      <div class="row"><button class="btn primary big" id="rs-ok">${opt.inClass ? '🏕 대기실로' : '🔥 모닥불로'}</button></div></div>`;
     document.body.appendChild(el);
     if (up) DS.Sound.correct();
     el.querySelectorAll('[data-img]').forEach((b) => (b.onclick = () => { const v = document.createElement('div'); v.className = 'modal sheet-modal'; v.innerHTML = `<div class="quiz-box framed"><div class="quiz-head"><b>📄 ${esc(r.titles[b.dataset.img] || '')}</b><button class="btn small" data-x>✕ 닫기</button></div><img class="bn-sheet" src="${prep.img[b.dataset.img]}" alt="학습지"></div>`; v.querySelector('[data-x]').onclick = () => v.remove(); document.body.appendChild(v); }));

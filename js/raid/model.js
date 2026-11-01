@@ -98,6 +98,11 @@ DS.Raid = (function () {
   // 대기실로 이동 버튼: 보스 격파(반 전체) 또는 내가 만점
   const canLobby = (L, R, uid) => isEnd(L, R) || bossHp(L, R).won || fullMarks(L, R, uid);
   const online = (R, uid) => !!(R.online || {})[uid];
+  // 늦게 온 학생 (v0.8.1): 수업이 시작된 뒤 들어와 참여 명단에 없는 학생 → 교사 · 종합상황실 기기가 다음 몬스터부터 넣는다
+  const lateIds = (R) => (((R.state || {}).step ?? -1) < 0 || isClosed(R) ? [] : keys(R.players).filter((u) => !R.players[u].teacher && !(R.active || {})[u]));
+  // 차원문이 열린 지 오래되면(기본 2시간) 꺼진 것으로 본다 — 선생님이 수업 끝을 안 누르고 나간 경우
+  const LIVE_MS = 2 * 60 * 60 * 1000;
+  const liveOpen = (live, now) => !!(live && live.open && !(typeof live.at === 'number' && now - live.at > LIVE_MS));
 
   // ── 도움 필요 (교사 폰) ───────────────────────────────────
   // 직접 요청 · 재도전까지 다 썼는데 다 맞히지 못함 · 몬스터가 나온 지 2분이 지나도 미제출
@@ -114,5 +119,5 @@ DS.Raid = (function () {
     return out.sort((a, b) => b.level - a.level || num(R, a.uid) - num(R, b.uid));
   }
 
-  return { RETRIES, activeIds, teacherUid, num, newRoom, stepOf, isLobby, isEnd, isFinale, isClosed, focusOn, sheetOn, autoFocus, fullMarks, canLobby, online, seedOf, itemsFor, attemptsOf, gradeAttempt, record, resultLabel, headcount, pctOf, monsterHp, waiting, allSubmitted, cleared, mastery, bossHp, helpList };
+  return { RETRIES, LIVE_MS, lateIds, liveOpen, activeIds, teacherUid, num, newRoom, stepOf, isLobby, isEnd, isFinale, isClosed, focusOn, sheetOn, autoFocus, fullMarks, canLobby, online, seedOf, itemsFor, attemptsOf, gradeAttempt, record, resultLabel, headcount, pctOf, monsterHp, waiting, allSubmitted, cleared, mastery, bossHp, helpList };
 })();

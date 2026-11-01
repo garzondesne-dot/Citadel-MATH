@@ -118,8 +118,10 @@ DS.Account = (function () {
     const owned = (m && (await N().get(`cards/${String(m.c).replace(/[.#$/[\]]/g, '_')}/${m.n}`).catch(() => null))) || {};
     const need = DS.Unit ? DS.Unit.CARDS.filter((c) => c.no <= 3) : [];
     const got = need.filter((c) => owned[c.id]).length;
+    const rec = (m && (await N().get(`records/${String(m.c).replace(/[.#$/[\]]/g, '_')}/${m.n}`).catch(() => null))) || {};
+    const raided = Object.keys(rec).length > 0; // 🎁 첫 레이드 특전: 추가 용사 두 번째
     const heroes = Array.from({ length: 7 }, (_, i) => ({ id: i, open: true }))
-      .concat(Array.from({ length: 8 }, (_, i) => ({ id: 8 + i, open: i === 0 && need.length > 0 && got === need.length, cond: i === 0 ? `1~3차시 도감 ${got} / ${need.length}장 모으면 열려요` : '해금 조건은 추후 공개' })));
+      .concat(Array.from({ length: 8 }, (_, i) => ({ id: 8 + i, open: (i === 0 && need.length > 0 && got === need.length) || (i === 1 && raided), cond: i === 0 ? `1~3차시 도감 ${got} / ${need.length}장 모으면 열려요` : i === 1 ? '🎁 첫 레이드를 마치면 열려요' : '해금 조건은 추후 공개' })));
     // 화려한 이펙트 = 📘 보강던전 인장 1 · 2 · 4 · 6 · 8 · 10개에서 하나씩 (v0.8.0)
     const bonus = (m && DS.Bonus && (await N().get(`bonus/${String(m.c).replace(/[.#$/[\]]/g, '_')}/${m.n}`).catch(() => null))) || {};
     const fo = DS.Bonus ? DS.Bonus.fxOpen(bonus) : {}, seals = DS.Bonus ? DS.Bonus.seals(bonus).length : 0;

@@ -7,8 +7,8 @@ DS.Grow = (function () {
   const N = () => DS.Net;
   const ck = (c) => String(c).replace(/[.#$/[\]]/g, '_');
   // 얻는 방법 → EXP
-  const XP = { join: 10, submit: 2, correct: 1, fixed: 3, bossWin: 10, perfect: 5, words: 2, bonusClear: 5, seal: 10, card: 3 };
-  const WHY = { join: '레이드 참여', submit: '몬스터에 제출', correct: '맞힌 소문제', fixed: '재도전으로 고친 소문제', bossWin: '보스 처치 참여', perfect: '형성평가 만점', words: '마지막 한마디', bonusClear: '보강던전 처치', seal: '보강 인장', card: '모루 첫 카드' };
+  const XP = { first: 1, join: 10, submit: 2, correct: 1, fixed: 3, bossWin: 10, perfect: 5, words: 2, bonusClear: 5, seal: 10, card: 3 };
+  const WHY = { first: '🎁 첫 출정 축하', join: '레이드 참여', submit: '몬스터에 제출', correct: '맞힌 소문제', fixed: '재도전으로 고친 소문제', bossWin: '보스 처치 참여', perfect: '형성평가 만점', words: '마지막 한마디', bonusClear: '보강던전 처치', seal: '보강 인장', card: '모루 첫 카드' };
   const TITLES = ['견습 용사', '풋내기 용사', '용사', '숙련 용사', '기사', '정예 기사', '기사단장', '수호자', '영웅', '전설의 용사'];
   // Lv.L → L+1 에 필요한 EXP = 40 + 20 × (L − 1) — 수업 한 번(약 50~80)에 처음엔 자주, 갈수록 천천히
   const need = (lv) => 40 + 20 * (lv - 1);
@@ -19,7 +19,7 @@ DS.Grow = (function () {
     return { lv, title, into: rest, next: need(lv), total: Number(total) || 0 };
   }
   const sum = (parts) => Object.entries(parts || {}).reduce((a, [k, v]) => a + (XP[k] || 0) * (Number(v) || 0), 0);
-  const lines = (parts) => Object.entries(parts || {}).filter(([k, v]) => XP[k] && v).map(([k, v]) => ({ why: WHY[k], n: v, xp: XP[k] * v }));
+  const lines = (parts) => Object.entries(parts || {}).filter(([k, v]) => XP[k] && v).map(([k, v]) => ({ why: WHY[k], n: k === 'first' ? 1 : v, xp: XP[k] * v }));
   const path = (m) => `xp/${ck(m.c)}/${m.n}`;
   // 쌓기 (key 가 있으면 같은 key 는 한 번만) → { before, after, gained }
   async function add(m, parts, key) {

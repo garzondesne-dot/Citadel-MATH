@@ -108,29 +108,36 @@ DS.App = (function () {
     const classes = Object.keys(masks).sort();
     const last = read('citadel-acc') || {};
     if (!classes.length) { box.innerHTML = '<p class="muted">아직 학생 명단이 없어요. 선생님이 "수업 준비"에서 명단을 올리면 로그인할 수 있어요.</p>'; return; }
-    const c = classes.includes(last.c) ? last.c : classes[0];
-    box.innerHTML = `<div class="row2"><label>반 <select id="s-cls">${classes.map((k) => `<option${k === c ? ' selected' : ''}>${esc(k)}</option>`).join('')}</select></label><label>번호 <select id="s-num"></select></label></div>
+    // v0.8.1: 처음엔 빈칸 (남의 이름이 보이지 않게). 이 폰에서 로그인한 적 있는 학생만 그 반·번호를 미리 고름
+    const c = classes.includes(last.c) ? last.c : '';
+    box.innerHTML = `<div class="row2"><label>반 <select id="s-cls"><option value=""${c ? '' : ' selected'}>반 선택</option>${classes.map((k) => `<option${k === c ? ' selected' : ''}>${esc(k)}</option>`).join('')}</select></label><label>번호 <select id="s-num"></select></label></div>
       <p class="acc-name" id="s-mask"></p><div id="s-form"></div>`;
     const nums = () => {
       const byN = masks[$('#s-cls').value] || {};
       const ns = Object.keys(byN).map(Number).filter(Boolean).sort((a, b) => a - b);
-      $('#s-num').innerHTML = ns.map((n) => `<option${n === Number(last.n) ? ' selected' : ''}>${n}</option>`).join('');
+      const pre = $('#s-cls').value === last.c ? Number(last.n) : 0;
+      $('#s-num').innerHTML = `<option value=""${pre ? '' : ' selected'}>번호 선택</option>` + ns.map((n) => `<option${n === pre ? ' selected' : ''}>${n}</option>`).join('');
       showMask();
     };
-    const showMask = () => { const v = (masks[$('#s-cls').value] || {})[$('#s-num').value]; $('#s-mask').innerHTML = v ? `이름: <b>${esc(v)}</b> — 내 이름이 맞나요?` : ''; sMode = 'login'; pending = null; drawForm(); };
+    const showMask = () => {
+      const v = (masks[$('#s-cls').value] || {})[$('#s-num').value];
+      $('#s-mask').innerHTML = v ? `이름: <b>${esc(v)}</b> — 내 이름이 맞나요?` : '<span class="muted small">반과 번호를 골라요</span>';
+      sMode = 'login'; pending = null;
+      if (v) drawForm(); else $('#s-form').innerHTML = '';
+    };
     $('#s-cls').onchange = nums; $('#s-num').onchange = showMask;
     nums();
   }
   const pinInput = (id, ph) => `<input id="${id}" type="password" inputmode="numeric" maxlength="4" pattern="[0-9]*" placeholder="${ph}" autocomplete="off">`;
   function drawForm() {
     const f = $('#s-form'), c = () => $('#s-cls').value, n = () => Number($('#s-num').value);
-    save('citadel-acc', { c: c(), n: n() });
+    const remember = () => save('citadel-acc', { c: c(), n: n() }); // 로그인 · 가입에 성공했을 때만 이 폰에 기억
     if (sMode === 'login') {
       f.innerHTML = `<label>비밀번호 (숫자 4자리) ${pinInput('s-pin', '••••')}</label><button id="s-login" class="btn primary big">🔑 로그인</button><button id="s-new" class="btn">처음이에요 · 가입</button>`;
       $('#s-login').onclick = go(async () => {
         const r = await A().login(c(), n(), $('#s-pin').value);
         if (r && r.needNewPin) { sMode = 'newpin'; drawForm(); return; }
-        DS.UI.toast('로그인했어요!'); studentAuth();
+        remember(); DS.UI.toast('로그인했어요!'); studentAuth();
       });
       $('#s-new').onclick = () => { sMode = 'signup'; drawForm(); };
     } else if (sMode === 'signup') {
@@ -144,7 +151,7 @@ DS.App = (function () {
         const a = $('#s-p1').value, b = $('#s-p2').value;
         if (a !== b) throw Object.assign(new Error('두 비밀번호가 달라요.'), { user: true });
         await A().signUp(c(), n(), a, hero, fx);
-        DS.UI.toast('가입했어요! 비밀번호 4자리를 꼭 기억해요.', 3200); studentAuth();
+        remember(); DS.UI.toast('가입했어요! 비밀번호 4자리를 꼭 기억해요.', 3200); studentAuth();
       });
       $('#s-back').onclick = () => { sMode = 'login'; drawForm(); };
     } else {
@@ -155,7 +162,7 @@ DS.App = (function () {
         const a = $('#s-p1').value, b = $('#s-p2').value;
         if (a !== b) throw Object.assign(new Error('두 비밀번호가 달라요.'), { user: true });
         await A().login(c(), n(), '0000', a);
-        DS.UI.toast('새 비밀번호로 바꿨어요!', 3000); studentAuth();
+        remember(); DS.UI.toast('새 비밀번호로 바꿨어요!', 3000); studentAuth();
       });
     }
   }
@@ -171,6 +178,7 @@ DS.App = (function () {
       $('#t-cls').innerHTML = cs.length ? cs.map((c) => `<option>${esc(c)}</option>`).join('') : '<option value="">(명단 없음 — 수업 준비에서 올려요)</option>';
       const t = read('citadel-teacher');
       if (t && t.uid === DS.Net.uid()) { $('#t-resume').hidden = false; $('#t-resume').textContent = `↩ 수업 ${t.code} 이어서`; }
+      liveList(cs);
       return;
     }
     const first = !(await A().adminExists());
@@ -211,6 +219,19 @@ DS.App = (function () {
     $('#p-go').onclick = go(async () => DS.Prep.enter($('#p-lesson').value));
     $('#s-go').onclick = go(async () => DS.Students.enter());
     $('#x-go').onclick = go(async () => { if (!(await A().isAdmin())) throw Object.assign(new Error('교사 계정으로 로그인해야 해요.'), { user: true }); await DS.Test.start($('#x-lesson').value); });
+  }
+  // v0.8.1: 교사 메뉴 「진행 중인 수업」 — 수업 끝을 안 누르고 나갔어도 여기서 이어서 · 끝내기 (다른 기기에서도)
+  async function liveList(cs) {
+    const box = $('#t-live'); if (!box) return;
+    const rows = [];
+    for (const c of cs) {
+      const lv = await DS.Net.get(`live/${String(c).replace(/[.#$/[\]]/g, '_')}`).catch(() => null);
+      if (lv && lv.open && lv.code) rows.push({ c, lv, stale: !DS.Raid.liveOpen(lv, Date.now()) });
+    }
+    box.innerHTML = rows.length ? `<p class="t-sec"><b>⏳ 진행 중인 수업</b></p>${rows.map((r) => `<div class="wrow"><span>${r.lv.no ? `${r.lv.no}차시 · ` : ''}${esc(r.c)} <span class="muted small">코드 ${esc(r.lv.code)}${r.stale ? ' · 2시간 지남 (학생 화면에선 꺼짐)' : ''}</span></span>
+      <button class="btn small" data-lgo="${esc(r.lv.code)}">↩ 이어서</button><button class="btn small" data-lend="${esc(r.lv.code)}">⏹ 끝내기</button></div>`).join('')}` : '';
+    box.querySelectorAll('[data-lgo]').forEach((b) => (b.onclick = () => DS.Control.run(async () => { const sec = await DS.Net.get(`secrets/${b.dataset.lgo}`).catch(() => null); await DS.Teacher.open(b.dataset.lgo, sec && sec.hallKey); })));
+    box.querySelectorAll('[data-lend]').forEach((b) => (b.onclick = () => DS.Control.run(async () => { if (!confirm(`수업 ${b.dataset.lend} 을(를) 끝낼까요? 학생은 결과를 보고 모닥불로 가고, 차원문은 꺼져요.`)) return; await DS.Act.endClass(b.dataset.lend); DS.UI.toast('수업을 끝냈어요.'); liveList(cs); })));
   }
   return { boot, fillLessons };
 })();
