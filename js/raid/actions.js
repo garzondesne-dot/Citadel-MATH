@@ -12,7 +12,12 @@ DS.Act = (function () {
   const prepPath = (lessonId, sub = '') => `prep/${lessonId}${sub ? '/' + sub : ''}`;
   const getPrep = (lessonId) => N().get(prepPath(lessonId));
   const setImage = (lessonId, slot, dataUrl) => N().set(prepPath(lessonId, `img/${slot}`), dataUrl || null);
-  const setVideo = (lessonId, slot, url) => N().set(prepPath(lessonId, `video/${slot}`), url || null); // 🎬 설명 영상 링크 (유튜브 · 드라이브)
+  const setVideo = (lessonId, slot, url) => N().set(prepPath(lessonId, `video/${slot}`), url || null); // 🎬 설명 영상 링크 (유튜브 · 드라이브) 또는 'file'
+  // 🎞 영상 파일 직접 올리기 (v0.8.7): 파일은 prepVideo/{차시}/{칸} 에 따로 (학생이 차시 정보를 읽을 때 같이 받지 않게), 표시는 video/{칸} = 'file'
+  async function setVideoFile(lessonId, slot, dataUrl) {
+    if (dataUrl) { await N().set(`prepVideo/${lessonId}/${slot}`, dataUrl); await setVideo(lessonId, slot, 'file'); }
+    else { await setVideo(lessonId, slot, null); await N().remove(`prepVideo/${lessonId}/${slot}`).catch(() => {}); }
+  }
   const setDefaultPct = (lessonId, pct) => N().set(prepPath(lessonId, 'pct'), Number(pct));
 
   // ── 교사 ────────────────────────────────────────────────
@@ -154,5 +159,5 @@ DS.Act = (function () {
     return out;
   }
 
-  return { setVideoOn, endClass, admitLate, getPrep, setImage, setVideo, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, bossAnswer, unpackRoom, P };
+  return { setVideoFile, setVideoOn, endClass, admitLate, getPrep, setImage, setVideo, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, bossAnswer, unpackRoom, P };
 })();
