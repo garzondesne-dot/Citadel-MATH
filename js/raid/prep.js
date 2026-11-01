@@ -21,7 +21,7 @@ DS.Prep = (function () {
     DS.UI.show('screen-prep');
     document.onpaste = onPaste;
     stops.forEach((f) => f()); stops = [
-      DS.Net.watch(`prep/${L.id}`, (v) => { data = v || {}; render(); }),
+      DS.Net.watch(`prep/${L.id}`, (v) => { data = v || {}; render(); const miss = Object.keys(data.img || {}).filter((k) => !(data.has || {})[k]); if (miss.length) miss.forEach((k) => DS.Net.set(`prep/${L.id}/has/${k}`, true).catch(() => {})); }),
     ];
   }
   function render() {
