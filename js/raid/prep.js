@@ -76,7 +76,7 @@ DS.Prep = (function () {
     const video = `<div class="p-video"><span>🎬 설명 영상</span><input data-vid="${s.id}" placeholder="유튜브 · 구글 드라이브 주소 (없으면 비워 두기)" value="${esc(isFile ? '' : vid || '')}"><button class="btn small" data-vsave="${s.id}">링크 저장</button>
       <label class="btn small">🎞 파일 올리기<input type="file" accept="video/mp4,video/webm,video/*" data-vfile="${s.id}" hidden></label>
       ${isFile ? `<span class="okc small">🎞 올린 영상 파일</span><button class="btn small" data-vplay="${s.id}">▶ 미리보기</button><button class="btn small" data-vdel="${s.id}">지우기</button>`
-        : vid ? `<span class="muted small">${DS.Video && DS.Video.kind(vid) ? DS.Video.kind(vid) : '⚠ 알 수 없는 주소'}</span>` : '<span class="muted small">링크 또는 mp4 파일 (3MB 이하) · 큰 화면 「🎬 설명 영상 틀기」 · 보강던전에서 재생</span>'}</div>`;
+        : vid ? `<span class="muted small">${DS.Video && DS.Video.kind(vid) ? DS.Video.kind(vid) : '⚠ 알 수 없는 주소'}</span>` : (L.videos || {})[s.id] ? `<span class="okc small">🎬 기본 영상 연결됨 (모션그래픽)</span><button class="btn small" data-vdef="${s.id}">▶ 미리보기</button>` : '<span class="muted small">링크 또는 mp4 파일 (3MB 이하) · 큰 화면 「🎬 설명 영상 틀기」 · 보강던전에서 재생</span>'}</div>`;
     return `<div class="panel framed p-slot${sel === s.id ? ' sel' : ''}" data-box="${s.id}" tabindex="0">${head.replace('</div>', `<button class="btn small" data-fold="${s.id}">접기 ▴</button></div>`)}${body}${video}${sel === s.id && editing !== s.id ? '<p class="p-paste small">📋 지금 Ctrl+V 하면 이 칸에 들어가요</p>' : ''}</div>`;
   }
   const up = (slot, url, msg = '올렸어요!') => DS.Control.run(async () => { await DS.Act.setImage(L.id, slot, url); delete draft[slot]; DS.UI.toast(msg); render(); });
@@ -104,6 +104,7 @@ DS.Prep = (function () {
       await DS.Act.setVideoFile(L.id, inp.dataset.vfile, url); DS.UI.toast(`🎞 영상을 올렸어요 (${(f.size / 1048576).toFixed(1)}MB)`);
     })));
     document.querySelectorAll('[data-vdel]').forEach((b) => (b.onclick = () => DS.Control.run(async () => { if (confirm('올린 영상을 지울까요?')) { await DS.Act.setVideoFile(L.id, b.dataset.vdel, null); DS.UI.toast('영상을 지웠어요.'); } })));
+    document.querySelectorAll('[data-vdef]').forEach((b) => (b.onclick = () => DS.Video.open(L.videos[b.dataset.vdef], '기본 영상 미리보기')));
     document.querySelectorAll('[data-vplay]').forEach((b) => (b.onclick = () => DS.Video.open('file', '미리보기', { lesson: L.id, slot: b.dataset.vplay })));
     document.querySelectorAll('[data-slot]').forEach((inp) => (inp.onchange = () => { const f = inp.files[0]; if (f) putFile(inp.dataset.slot, f); }));
     document.querySelectorAll('[data-del]').forEach((b) => (b.onclick = () => DS.Control.run(async () => { if (confirm('이 이미지를 지울까요?')) await DS.Act.setImage(L.id, b.dataset.del, null); })));

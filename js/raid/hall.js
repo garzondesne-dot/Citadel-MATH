@@ -194,7 +194,7 @@ DS.Hall = (function () {
   // 🎬 설명 영상 (v0.8.6): 교사 폰 · 이 화면의 「🎬 설명 영상 틀기」 → 큰 화면 위에 재생. 이미지(개념 · 문제 화면)는 그대로 두고 그 위에 뜬다
   let videoKey = '';
   function videoOverlay(step) {
-    const url = step && (prep.video || {})[step.id], on = !!step && Raid().videoOn(R, step.id) && url && DS.Video.ok(url);
+    const url = step && DS.Video.pick(L, prep.video, step.id), on = !!step && Raid().videoOn(R, step.id) && url && DS.Video.ok(url);
     let ov = document.getElementById('h-video-ov');
     if (!on) { if (ov) ov.remove(); videoKey = ''; return; }
     const k = `${step.id}|${url}`;
