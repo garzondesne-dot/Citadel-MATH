@@ -17,13 +17,16 @@ DS.Student = (function () {
   let drawn = '';           // 지금 그려 둔 화면의 서명 — 다른 학생의 제출로 방 값이 바뀌어도 내 화면은 다시 그리지 않는다 (터치가 씹히지 않게)
 
   let info0 = null, focusWas = false, cleared0 = false, locked = false;
-  async function enter(c, info) {
+  let test = null;          // 🧪 테스트 모드: { prep: 학습지 이미지, exit() } — 이 기기 안에서만, 집중모드 대신 학습지 이미지
+  async function enter(c, info, opt = {}) {
+    test = opt.test || null;
+    cleared0 = false; drawn = ''; shown = ''; form = null; retrying = ''; bossSet = 1; othersSeen = {};
     await DS.Act.join(c, info);
     code = c; info0 = info;
     me = DS.Net.uid();
-    try { localStorage.setItem('citadel-student', JSON.stringify({ code: c, ...info })); } catch (e) { /* 무시 */ }
+    if (!test) { try { localStorage.setItem('citadel-student', JSON.stringify({ code: c, ...info })); } catch (e) { /* 무시 */ } }
     DS.UI.show('screen-student');
-    DS.Scene.save({ role: 'student', code: c });
+    if (!test) DS.Scene.save({ role: 'student', code: c });
     DS.Act.presence(c).catch(() => {});
     locked = !!(info.cls && (await DS.Net.get(`wordLock/${String(info.cls).replace(/[.#$/[\]]/g, '_')}/${info.num}`).catch(() => null)));
     if (stop) stop();
@@ -36,7 +39,8 @@ DS.Student = (function () {
   }
   const acc = () => ({ c: info0.cls, n: info0.num, name: info0.nick, hero: info0.hero, fx: info0.fx });
   // 수업이 끝나면 모닥불로
-  function toCamp() { if (stop) stop(); stop = null; focus(false); DS.Camp.enter(acc()); }
+  function toCamp() { if (stop) stop(); stop = null; focus(false); if (test) { const t = test; test = null; t.exit(); return; } DS.Camp.enter(acc()); }
+  const stop0 = () => { if (stop) stop(); stop = null; focus(false); test = null; };
   // 집중모드 막
   function focus(on) {
     const el = $('#focus');
@@ -62,7 +66,8 @@ DS.Student = (function () {
     if (Raid().isClosed(R)) return toCamp();
     if (!R.players || !R.players[me]) { $('#st-body').innerHTML = '<div class="panel"><p>입장 정보가 없어요. 처음 화면에서 다시 입장해 주세요.</p></div>'; return; }
     header();
-    focus(Raid().focusOn(R) && !Raid().isLobby(R));
+    focus(!test && Raid().focusOn(R) && !Raid().isLobby(R));
+    if (test && test.onRender) test.onRender(L, R);
     const body = $('#st-body');
     const st0 = Raid().stepOf(L, R);
     if (!st0 || st0.kind !== 'monster') drawn = '';
@@ -72,8 +77,17 @@ DS.Student = (function () {
     if (myP().lobby) return lobbyView(body, true);
     if (Raid().isEnd(L, R)) return endView(body);
     const step = Raid().stepOf(L, R);
-    if (step.kind === 'monster') return monsterView(body, step);
+    if (step.kind === 'monster') { monsterView(body, step); if (test || Raid().activeIds(R).length <= 6) othersFx(step, body); return; }
     if (step.kind === 'boss') return bossView(body);
+    if (test) { // 테스트 모드: 개념 설명 = 학습지 이미지를 폰에 크게
+      const img = (test.prep.img || {})[step.id], sig = `concept|${step.id}|${img ? img.length : 0}`;
+      if (drawn === sig && body.querySelector('.t-concept')) return;
+      drawn = sig;
+      body.innerHTML = `<div class="panel framed t-concept"><p class="attend-tag">📣 ${step.kind === 'intro' ? '도입' : '개념 설명'}</p><h2>${esc(step.title)}</h2>
+        ${img ? `<img class="t-sheet" src="${img}" alt="${esc(step.title)} 학습지">` : '<p class="muted small">수업 준비에서 이 단계 학습지 이미지를 넣으면 여기에 보여요.</p>'}
+        <p class="intro">${pretty(step.say || '')}</p></div>`;
+      return;
+    }
     body.innerHTML = `<div class="panel framed center attend"><p class="attend-tag">📣 알림</p><h2>선생님에게 주목하세요</h2><p>${step.kind === 'intro' ? '수업을 시작합니다.' : '개념 설명을 시작합니다.'}</p>
       <p class="stage-name">${esc(step.title)}</p><p class="intro">${pretty(step.say || '')}</p>${DS.Art.hero(myP().hero, 'idle', 'big huff')}<p class="muted small">학습지를 펴고 선생님 설명을 들어요.</p></div>`;
   }
@@ -112,6 +126,30 @@ DS.Student = (function () {
   const bindLobby = () => { const b = $('#st-lobby'); if (b) b.onclick = () => DS.Control.run(async () => { await DS.Act.toLobby(code); drawn = ''; }); };
 
   // ── 몬스터와 1:1 대치 ─────────────────────────────────────
+  function sheetModal(step) {
+    const img = (test.prep.img || {})[step.id]; if (!img) return;
+    const el = document.createElement('div'); el.className = 'modal t-sheet-modal';
+    el.innerHTML = `<div class="quiz-box framed"><p class="gold">📄 ${esc(step.title || '형성평가')} · 학습지</p><img class="t-sheet" src="${img}" alt="학습지"><button class="btn primary" id="ts-x">닫기</button></div>`;
+    document.body.appendChild(el); el.querySelector('#ts-x').onclick = () => el.remove();
+  }
+  // 함께 싸우는 친구(테스트 모드의 가상 친구 · 인원이 적을 때)의 공격을 내 대치 화면에도 작게 보여 준다
+  let othersSeen = {};
+  function othersFx(step, body) {
+    const now = {};
+    Raid().activeIds(R).forEach((u) => { if (u !== me) now[u] = Raid().record(L, R, step.id, u); });
+    const key = step.id;
+    const was = othersSeen[key] || {};
+    othersSeen[key] = Object.fromEntries(Object.entries(now).map(([u, r]) => [u, { n: r.tries.length, best: r.best }]));
+    const sc = body.querySelector('.scene'); if (!sc || !Object.keys(was).length && !test) return;
+    Object.entries(now).forEach(([u, r]) => {
+      const w = was[u] || { n: 0, best: 0 };
+      if (r.tries.length <= w.n) return;
+      const p = R.players[u] || {}, dmg = Math.max(0, r.best - w.best);
+      if (dmg) DS.FX.play(sc, p.fx || 'flame', { scale: 0.18, x: sc.clientWidth * (0.7 + Math.random() * 0.1), y: sc.clientHeight * 0.55 });
+      const t = document.createElement('span'); t.className = 'ally-hit'; t.textContent = dmg ? `${p.nick} −${dmg}` : `${p.nick} 💨`;
+      t.style.left = `${55 + Math.random() * 25}%`; sc.appendChild(t); setTimeout(() => t.remove(), 1300);
+    });
+  }
   // 1:1 대치: 왼쪽 내 용사(머리 위 = 남은 도전 기회 ●●●, 같이 움직임) vs 오른쪽 몬스터(아래 체력 칸)
   // cls: 'hit'(공격 성공 → 용사 돌진) · 'miss'(실패 → 축 처짐, 잠깐)
   function scene(step, rec, hp, cls = '') {
@@ -119,6 +157,7 @@ DS.Student = (function () {
     const left = Math.max(0, Raid().RETRIES + 1 - rec.tries.length), done = Raid().cleared(L, R, step.id);
     const pips = Array.from({ length: Raid().RETRIES + 1 }, (_, i) => `<i class="${i < left ? 'on' : ''}"></i>`).join('');
     return `<div class="scene enc bg-scene th-${L.theme || ''} ${cls}${step.special ? ' special' : ''}"><div class="scene-bar"><div><b>${step.special ? '⭐ 난입! ' : step.review ? '📖 ' : ''}${esc(step.title)}</b><br><span class="muted small">레이드 체력 ${hp.left} / ${hp.max}</span></div></div>
+      ${test ? `<div class="enc-friends">${Raid().activeIds(R).filter((u) => u !== me).slice(0, 4).map((u) => DS.Art.hero((R.players[u] || {}).hero || 0, 'idle', 'huff')).join('')}</div>` : ''}
       <div class="enc-hero"><div class="enc-tries" title="남은 도전 기회">${pips}</div>${DS.Art.hero(myP().hero, done ? 'attack' : 'idle', done ? 'pairhop' : cls === 'miss' ? 'slump' : 'huff')}<i class="shadow"></i></div>
       <div class="enc-mon">${DS.Art.monster(L.monsters[step.id].sprite, done ? 'down' : 'idle', done ? '' : 'float')}<div class="segs" title="내가 맞힌 만큼 칸이 깨져요">${segs}</div></div></div>`;
   }
@@ -154,8 +193,10 @@ DS.Student = (function () {
       ${done ? '<p class="okc big-msg">🎉 몬스터 격파! 다음 신호를 기다려요.</p>'
         : rec.canRetry ? `<p>다시 해 보겠습니까? <span class="muted small">(남은 기회 ${Raid().RETRIES - rec.tries.length + 1}번 · 숫자가 모두 바뀌어요)</span></p><button class="btn primary big" id="st-retry">↻ 다시 도전</button>`
         : `<p class="muted">${rec.allRight ? '멋져요! 다른 용사들을 기다려요.' : '재도전 기회를 모두 썼어요. 해설을 보며 학습지에 정리해요.'} 데미지 <b>${rec.best}</b></p>`}
-      ${helpBtn()}</div>`;
+      ${test && (test.prep.img || {})[mid] ? '<button class="btn small" id="st-sheet">📄 학습지 보기 (문제 해설)</button>' : ''}
+      ${test ? '' : helpBtn()}</div>`;
     bindHelp();
+    const sb = $('#st-sheet'); if (sb) sb.onclick = () => sheetModal(step);
     const rb = $('#st-retry');
     if (rb) { thinkTimer(rb, `${mid}|${t.attempt}`, '↻ 다시 도전'); rb.onclick = () => { retrying = `${mid}|${rec.nextAttempt}`; form = null; DS.Sound.clank(); render(); }; }
   }
@@ -270,5 +311,5 @@ DS.Student = (function () {
       <p class="muted small">게임 기록은 수학 성적이 아니에요. 오늘 배운 것을 학습지에 정리해요.</p></div>`;
     bindLobby();
   }
-  return { enter };
+  return { enter, stop: stop0 };
 })();

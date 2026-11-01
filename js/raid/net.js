@@ -12,13 +12,13 @@ DS.Net = (function () {
   const clone = (v) => (v === undefined ? null : JSON.parse(JSON.stringify(v)));
 
   // ── local ───────────────────────────────────────────────
-  function LocalNet() {
-    const KEY = 'citadel-local-db';
+  function LocalNet(dbKey) {
+    const KEY = dbKey || 'citadel-local-db'; // 테스트 모드는 따로 ('citadel-test-db')
     const frame = (typeof window !== 'undefined' && window.name) || 'main';
     const UIDKEY = `citadel-uid-${frame}`;
     let uid = null;
     const watchers = [];
-    const chan = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel('citadel-local') : null;
+    const chan = typeof BroadcastChannel !== 'undefined' ? new BroadcastChannel(KEY) : null;
     const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } };
     const save = (t) => { try { localStorage.setItem(KEY, JSON.stringify(t)); } catch (e) { /* 무시 */ } };
     const at = (t, p) => split(p).reduce((o, k) => (o && typeof o === 'object' ? o[k] : undefined), t);

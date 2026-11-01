@@ -688,3 +688,17 @@ body.forge-open { overflow: hidden; }
 .p-kind.q { background: #10324a; color: #9fe3ff; }
 /* 학습지 이미지는 큰 화면 높이에 맞춰 키운다 (작은 칸 이미지도 크게) */
 .h-concept .h-sheet img, .h-sheet-ov .h-sheet img { height: calc(100dvh - 170px); width: auto; max-width: 96%; object-fit: contain; image-rendering: auto; }
+
+/* 🧪 테스트 모드 (v0.6.1) */
+.test-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 44; display: flex; align-items: center; gap: 6px; padding: 8px 10px calc(8px + env(safe-area-inset-bottom)); background: #2a1608f2; border-top: 3px solid #ffcf5a; }
+.test-bar b { color: #ffcf5a; white-space: nowrap; }
+.test-bar .tb-step { flex: 1; font-size: 12px; color: #ffe7a8; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.test-bar .btn.primary { padding: 8px 14px; }
+body:has(#test-bar) #screen-student .wrap { padding-bottom: 90px; max-width: 460px; }
+.t-concept h2 { margin: 4px 0 8px; color: var(--gold); }
+.t-sheet { display: block; width: 100%; height: auto; background: #fff; border: 2px solid #8a6a2c; margin: 6px 0; touch-action: pinch-zoom; }
+.t-sheet-modal .quiz-box { max-height: 92dvh; overflow-y: auto; }
+.t-ic { font-size: 22px; }
+.enc-friends { position: absolute; left: 1%; bottom: 8px; display: flex; gap: 0; z-index: 1; opacity: .9; }
+.enc-friends .art { width: 44px; height: 44px; margin-right: -12px; }
+.ally-hit { position: absolute; top: 30%; z-index: 21; font-size: 13px; font-weight: 700; color: #ffe066; text-shadow: 1px 1px 0 #000, 0 0 6px #000; animation: dmgUp 1.2s ease-out forwards; pointer-events: none; white-space: nowrap; }

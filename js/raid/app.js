@@ -20,7 +20,7 @@ DS.App = (function () {
     DS.Nav.init();
     $('#mode').innerHTML = DS.Net.mode === 'local' ? '🧪 이 기기 체험 모드 <span class="muted">(Firebase 미설정 — 같은 브라우저 탭끼리만 연결)</span>' : '🌐 실시간 연결 (Firebase)';
     $('#ver').textContent = DS.VERSION;
-    $('#lesson').innerHTML = $('#p-lesson').innerHTML = DS.Lessons.list.map((l) => `<option value="${l.id}">${esc(l.unit || '')} · ${esc(l.title)}</option>`).join('');
+    $('#lesson').innerHTML = $('#p-lesson').innerHTML = $('#x-lesson').innerHTML = DS.Lessons.list.map((l) => `<option value="${l.id}">${esc(l.unit || '')} · ${esc(l.title)}</option>`).join('');
     bind();
     await studentAuth();
     await teacherAuth();
@@ -195,6 +195,7 @@ DS.App = (function () {
     });
     $('#h-go').onclick = go(() => DS.Hall.enter($('#h-code').value.trim(), $('#h-key').value.trim()));
     $('#p-go').onclick = go(async () => DS.Prep.enter($('#p-lesson').value));
+    $('#x-go').onclick = go(async () => { if (!(await A().isAdmin())) throw Object.assign(new Error('교사 계정으로 로그인해야 해요.'), { user: true }); await DS.Test.start($('#x-lesson').value); });
   }
   return { boot };
 })();
