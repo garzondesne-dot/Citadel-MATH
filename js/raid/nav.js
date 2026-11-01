@@ -1,5 +1,5 @@
 // 「≪ 뒤로」: 화면 왼쪽 위 버튼 · 휴대폰 뒤로 가기(버튼·제스처) 를 같은 동작으로 묶는다
-// - 학생 · 교사 폰 · 종합상황실 · 수업 준비 → 첫 화면으로 (수업 화면이면 한 번 확인. 수업은 계속되고, 다시 들어오면 기록 그대로)
+// - v0.8.5: 바로 전 화면으로 (수업 화면 → 모닥불, 교사 화면 · 수업 준비 · 학생 관리 → 교사 메뉴 …). 수업 화면이면 한 번 확인. 수업은 계속되고, 다시 들어오면 기록 그대로
 // - 첫 화면에서 휴대폰 뒤로 가기 → "한 번 더 누르면 앱이 꺼져요" 경고 뒤, 2.5초 안에 한 번 더 누르면 꺼진다
 // 체험판(demo.html)처럼 다른 화면 안(iframe)에 들어 있으면 방문 기록은 건드리지 않고 버튼만 쓴다.
 window.DS = window.DS || {};
@@ -20,7 +20,20 @@ DS.Nav = (function () {
   // 첫 화면으로: 화면을 새로 열어 실시간 연결·타이머를 깨끗이 끊는다 (교사 로그인은 같은 탭이라 유지).
   // 방문 기록이 쌓이지 않게 맨 앞 기록(base) 자리에서 새로 연다.
   const ask = (id) => !ASK[id] || window.confirm(ASK[id]);
-  const reopen = () => { leaving = true; DS.Scene.clear(); location.replace(homeUrl()); };
+  // v0.8.5: ≪ 뒤로 = 바로 전 화면 (화면을 새로 열어 실시간 연결은 깨끗이 끊되, 시작 화면부터가 아니라 한 단계 위로)
+  //  수업 화면(학생) · 보강던전 → 모닥불 / 교사 화면 · 수업 준비 · 학생 관리 → 교사 메뉴 / 모닥불 → 학생 첫 화면 / 종합상황실 → 종합상황실 입력
+  const UP = { 'screen-student': 'camp', 'screen-bonus': 'camp', 'screen-teacher': 'teacher', 'screen-prep': 'teacher', 'screen-students': 'teacher', 'screen-camp': 'student', 'screen-hall': 'hall' };
+  const reopen = () => {
+    leaving = true;
+    const up = UP[current()];
+    DS.Scene.clear();
+    if (up === 'camp') DS.Scene.save({ role: 'camp' });
+    const q = new URLSearchParams(location.search), out = new URLSearchParams();
+    if (q.has('local')) out.set('local', '');
+    if (up && up !== 'camp') out.set('role', up);
+    const qs = out.toString().replace('local=', 'local');
+    location.replace(`${location.pathname}${qs ? `?${qs}` : ''}`);
+  };
   // v0.8.1: 교사 화면에서 나갈 때 한 번 더 — [확인] 수업 끝내기 / [취소] 잠깐 나가기 (수업은 계속 · 교사 메뉴에서 이어서)
   const END = '수업도 끝낼까요?\n\n[확인] 수업 끝내기 — 학생은 결과를 보고 모닥불로, 차원문은 꺼져요\n[취소] 잠깐 나가기 — 수업은 계속돼요 (교사 메뉴에서 이어서)';
   const endHook = (id) => (id === 'screen-teacher' && DS.Teacher && DS.Teacher.code && DS.Teacher.code() && window.confirm(END) ? DS.Act.endClass(DS.Teacher.code()).catch(() => {}) : null);
