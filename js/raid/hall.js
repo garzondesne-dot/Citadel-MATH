@@ -38,6 +38,7 @@ DS.Hall = (function () {
     $('#h-top').innerHTML = `<b>${esc(L.unit)} · ${esc(L.title)}</b><span>${esc(C().stepName(L, R))}</span><span class="muted">수업 코드 <b>${code}</b></span>`;
     heroes(); side(i);
     const step = Raid().stepOf(L, R);
+    videoOverlay(step);
     const el = $('#h-arena');
     el.classList.toggle('focus-on', Raid().focusOn(R) && !Raid().isLobby(R));
     if (step && (step.kind === 'monster' || step.kind === 'boss')) { const key = `f${i}`; if (built !== key) buildFight(step, key); else updateFight(step); sheetOverlay(step); return; }
@@ -190,6 +191,21 @@ DS.Hall = (function () {
     setTimeout(() => { playing = false; play(); }, 350);
   }
 
+  // 🎬 설명 영상 (v0.8.6): 교사 폰 · 이 화면의 「🎬 설명 영상 틀기」 → 큰 화면 위에 재생. 이미지(개념 · 문제 화면)는 그대로 두고 그 위에 뜬다
+  let videoKey = '';
+  function videoOverlay(step) {
+    const url = step && (prep.video || {})[step.id], on = !!step && Raid().videoOn(R, step.id) && url && DS.Video.embed(url);
+    let ov = document.getElementById('h-video-ov');
+    if (!on) { if (ov) ov.remove(); videoKey = ''; return; }
+    const k = `${step.id}|${url}`;
+    if (ov && k === videoKey) return;
+    if (!ov) { ov = document.createElement('div'); ov.id = 'h-video-ov'; ov.className = 'h-video-ov'; document.getElementById('screen-hall').appendChild(ov); }
+    videoKey = k;
+    const src = DS.Video.embed(url) + (/youtube/.test(DS.Video.embed(url)) ? '&autoplay=1' : '');
+    ov.innerHTML = `<div class="h-video-box"><p class="h-ctitle">🎬 ${esc(step.title || '설명 영상')}</p><div class="video-frame"><iframe src="${src}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+      <div class="row"><span class="muted small">드라이브 영상은 ▶ 를 눌러 재생 · 교사 폰 「🎬 영상 닫기」로도 닫혀요</span><button class="btn" id="h-video-x">✕ 영상 닫기</button></div></div>`;
+    ov.querySelector('#h-video-x').onclick = () => C().run(() => DS.Act.setVideoOn(code, null));
+  }
   // 📄 문제 화면: 교사가 켜면 지금 문제의 학습지 이미지를 레이드 위에 크게 (레이드는 뒤에서 계속, 끄면 그대로 보임)
   let sheetKey = '';
   function sheetOverlay(step) {
@@ -211,8 +227,8 @@ DS.Hall = (function () {
       ${Raid().isEnd(L, R) ? `<div class="h-words">${C().wordsHtml(R)}</div>` : ''}`;
     C().bindWords($('#h-side'), code, R);
     const el = $('#h-ctrl'), live = !Raid().isLobby(R) && !Raid().isClosed(R);
-    el.innerHTML = `${C().pctHtml(L, R)}<p class="muted small">다음 ▶ ${esc(C().nextName(L, R))}</p><div class="row"><button class="btn" id="h-back"${i < 0 ? ' disabled' : ''}>◀ 뒤로</button><button class="btn primary" id="h-fwd"${Raid().isClosed(R) ? ' disabled' : ''}>${Raid().isFinale(L, R) ? '수업 끝 ▶' : '앞으로 ▶'}</button></div>${live ? C().sheetBtn(L, R) + C().focusBtn(R) : ''}`;
-    C().bindPct(el, code, R, L); C().bindFocus(el, code, R); C().bindSheet(el, code, R);
+    el.innerHTML = `${C().pctHtml(L, R)}<p class="muted small">다음 ▶ ${esc(C().nextName(L, R))}</p><div class="row"><button class="btn" id="h-back"${i < 0 ? ' disabled' : ''}>◀ 뒤로</button><button class="btn primary" id="h-fwd"${Raid().isClosed(R) ? ' disabled' : ''}>${Raid().isFinale(L, R) ? '수업 끝 ▶' : '앞으로 ▶'}</button></div>${live ? C().videoBtn(L, R, prep.video) + C().sheetBtn(L, R) + C().focusBtn(R) : ''}`;
+    C().bindPct(el, code, R, L); C().bindFocus(el, code, R); C().bindSheet(el, code, R); C().bindVideo(el, code, R);
     $('#h-fwd').onclick = () => C().run(() => C().forward(code, R, L));
     $('#h-back').onclick = () => C().run(() => C().back(code, R, L));
   }
