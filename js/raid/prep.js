@@ -10,7 +10,8 @@ DS.Prep = (function () {
   const A = () => DS.Account;
   let L = null, data = {}, roster = {}, accounts = {}, stops = [];
   let sel = null, pages = [], thumbs = [], draft = {}, editing = null, piece = 0;
-  const slotSteps = () => L.steps.filter((s) => s.kind === 'intro' || s.kind === 'concept');
+  // 이미지 칸: 도입·개념(설명 때 크게) + 문제·보강·형성평가(교사가 「📄 문제 화면」을 누르면 해설용으로 크게)
+  const slotSteps = () => L.steps.map((s) => (s.kind === 'boss' ? { ...s, title: s.title || L.boss.title } : s));
 
   async function enter(lessonId) {
     if (!(await A().isAdmin())) throw Object.assign(new Error('교사 계정으로 로그인해야 해요.'), { user: true });
@@ -53,7 +54,8 @@ DS.Prep = (function () {
   }
   function slotHtml(s) {
     const img = (data.img || {})[s.id], d = draft[s.id];
-    const head = `<div class="p-slot-head"><b>${esc(s.title)}</b><label class="btn small">🖼 고르기<input type="file" accept="image/*" data-slot="${s.id}" hidden></label>
+    const kind = s.kind === 'intro' || s.kind === 'concept' ? '<span class="p-kind">설명 때 크게</span>' : '<span class="p-kind q">📄 문제 화면 (교사 해설용)</span>';
+    const head = `<div class="p-slot-head"><b>${esc(s.title)}</b>${kind}<label class="btn small">🖼 고르기<input type="file" accept="image/*" data-slot="${s.id}" hidden></label>
       ${pages.length ? `<button class="btn small" data-edit="${s.id}">✏ 자르기 ${d ? '조정' : 'PDF 에서'}</button>` : ''}${img && !d ? `<button class="btn small" data-del="${s.id}">지우기</button>` : ''}</div>`;
     const body = editing === s.id ? editorHtml(s.id)
       : d ? `<img class="p-prev draft" src="${d.url}" alt="${esc(s.title)} 미리보기"><p class="gold small">미리보기 — 아직 안 올렸어요${d.guess ? ' (자를 위치 정보가 없어 대충 잘랐어요. 조정해 주세요)' : ''}</p>
@@ -134,13 +136,15 @@ DS.Prep = (function () {
       const pg = pages[Math.min(pages.length, Math.max(1, r.p)) - 1];
       return { pg, sx: r.x * pg.width, sy: r.y * pg.height, sw: r.w * pg.width, sh: r.h * pg.height };
     });
-    const W = Math.max(...parts.map((q) => q.sw)), k = Math.min(1, 1400 / W);
+    const W = Math.max(...parts.map((q) => q.sw)), k = Math.min(1, 1280 / W);
     const cv = document.createElement('canvas'); cv.width = Math.round(W * k); cv.height = Math.round(parts.reduce((a, q) => a + q.sh, 0) * k);
     const g = cv.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, cv.width, cv.height);
     let y = 0;
     parts.forEach((q) => { g.drawImage(q.pg, q.sx, q.sy, q.sw, q.sh, 0, y, q.sw * k, q.sh * k); y += q.sh * k; });
-    return cv.toDataURL('image/jpeg', 0.85);
+    return toUrl(cv);
   }
+  // 서버 부하 줄이기: WebP 품질 0.85 (같은 화질에서 JPEG 보다 30% 안팎 작음). WebP 를 못 만드는 기기면 JPEG
+  function toUrl(cv) { const w = cv.toDataURL('image/webp', 0.85); return /^data:image\/webp/.test(w) ? w : cv.toDataURL('image/jpeg', 0.82); }
 
   // ── 자르기 조정: 쪽 그림 위의 틀을 끌어 옮기고, 모서리로 크기를 바꾼다 ─────────
   function editorHtml(id) {
@@ -219,7 +223,7 @@ DS.Prep = (function () {
     })));
   }
 
-  // 가로 최대 1400px · JPEG 0.82 로 줄인다 (Realtime Database 한 칸에 담기 좋게)
+  // 가로 최대 1280px · WebP 0.85 로 줄인다 (Realtime Database 한 칸에 담기 좋게)
   function shrink(file) {
     return new Promise((res, rej) => {
       const rd = new FileReader();
@@ -228,10 +232,10 @@ DS.Prep = (function () {
         const img = new Image();
         img.onerror = () => rej(new Error('이미지 파일이 아니에요.'));
         img.onload = () => {
-          const k = Math.min(1, 1400 / img.width), cv = document.createElement('canvas');
+          const k = Math.min(1, 1280 / img.width), cv = document.createElement('canvas');
           cv.width = Math.round(img.width * k); cv.height = Math.round(img.height * k);
           const g = cv.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, cv.width, cv.height); g.drawImage(img, 0, 0, cv.width, cv.height);
-          res(cv.toDataURL('image/jpeg', 0.82));
+          res(toUrl(cv));
         };
         img.src = rd.result;
       };

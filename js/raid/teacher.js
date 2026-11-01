@@ -37,12 +37,12 @@ DS.Teacher = (function () {
     $('#t-tabs').innerHTML = '';
     const body = $('#t-body');
     const live = !Raid().isLobby(R) && !Raid().isClosed(R);
-    body.innerHTML = `<div class="panel framed t-now">${now()}${C().pctHtml(L, R)}${live ? C().focusBtn(R) : ''}</div>
+    body.innerHTML = `<div class="panel framed t-now">${now()}${C().pctHtml(L, R)}${live ? C().sheetBtn(L, R) + C().focusBtn(R) : ''}</div>
       ${Raid().isLobby(R) ? lobby() : Raid().isEnd(L, R) ? `<div class="panel framed">${C().wordsHtml(R)}</div>` : helpPanel()}
       <p class="t-next muted small">다음 ▶ <b>${esc(C().nextName(L, R))}</b></p>
       <div class="t-pad"><button class="btn t-back" id="t-back"${i < 0 ? ' disabled' : ''}>◀<br>뒤로</button><button class="btn primary t-fwd" id="t-fwd"${Raid().isClosed(R) ? ' disabled' : ''}>▶<br>${Raid().isFinale(L, R) ? '수업 끝' : '앞으로'}</button></div>`;
     if (Raid().isLobby(R)) drawQR();
-    C().bindPct(body, code, R, L); C().bindFocus(body, code, R); C().bindWords(body, code, R);
+    C().bindPct(body, code, R, L); C().bindFocus(body, code, R); C().bindSheet(body, code, R); C().bindWords(body, code, R);
     body.querySelectorAll('[data-help]').forEach((b) => (b.onclick = () => C().run(() => DS.Act.clearHelp(code, b.dataset.help))));
     $('#t-fwd').onclick = () => C().run(() => C().forward(code, R, L));
     $('#t-back').onclick = () => C().run(() => C().back(code, R, L));

@@ -54,6 +54,9 @@ DS.Control = (function () {
     armed = ''; await Act().go(code, R, L, 1); return true;
   }
   const focusBtn = (R) => `<button class="btn focus-btn${Raid().focusOn(R) ? ' on' : ''}" data-focus>${Raid().focusOn(R) ? '🔴 집중모드 끄기' : '🔴 집중모드 켜기'}</button>`;
+  // 📄 문제 화면 버튼 (문제 · 보강 · 형성평가 단계에서만)
+  const sheetBtn = (L, R) => { const st = Raid().stepOf(L, R); return st && (st.kind === 'monster' || st.kind === 'boss') ? `<button class="btn sheet-btn${Raid().sheetOn(R) ? ' on' : ''}" data-sheet>${Raid().sheetOn(R) ? '⚔ 레이드 화면으로' : '📄 문제 화면 (학습지 해설)'}</button>` : ''; };
+  const bindSheet = (el, code, R) => el.querySelectorAll('[data-sheet]').forEach((b) => (b.onclick = () => run(() => Act().setSheet(code, !Raid().sheetOn(R)))));
   const bindFocus = (el, code, R) => el.querySelectorAll('[data-focus]').forEach((b) => (b.onclick = () => run(() => Act().setFocus(code, !Raid().focusOn(R)))));
 
   // 기준% 조절 (몬스터·보스 단계에서)
@@ -84,5 +87,5 @@ DS.Control = (function () {
     })));
   }
 
-  return { name, run, wordsHtml, bindWords, stepName, nextName, stepTitles, FINALE, forward, back, pctHtml, bindPct, focusBtn, bindFocus, esc };
+  return { name, run, wordsHtml, bindWords, stepName, nextName, stepTitles, FINALE, forward, back, pctHtml, bindPct, focusBtn, bindFocus, sheetBtn, bindSheet, esc };
 })();

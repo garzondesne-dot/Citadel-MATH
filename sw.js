@@ -3,7 +3,7 @@
 //  - 그림·글꼴·아이콘(assets/, icons/): 저장해 둔 것 먼저 → 처음 한 번만 받는다 (그림을 바꾸면 파일 이름을 바꾼다: heroes-v3 …)
 //  - Firebase(다른 주소)는 건드리지 않는다. 수업 진행에는 인터넷이 필요하다
 // 새 버전을 낼 때 CACHE 이름을 'ds-' + DS.VERSION 과 맞춘다 (tests/pwa.test.js 가 확인)
-const CACHE = 'ds-citadel-0.5.3';
+const CACHE = 'ds-citadel-0.6.0';
 const ASSETS = 'ds-assets';
 const CORE = [
   './', './index.html', './css/style.css', './manifest.webmanifest',
@@ -14,11 +14,11 @@ const CORE = [
   './lessons/unit-set.js', './js/raid/cards.js', './js/raid/forge.js', './js/raid/camp.js', './js/raid/student.js', './js/raid/teacher.js', './js/raid/hall.js', './js/raid/prep.js', './js/raid/nav.js', './js/raid/app.js',
 ];
 const STATIC = [
-  './assets/img/heroes-v2.webp', './assets/img/monsters-v2.webp', './assets/img/cards-v4.webp', './assets/img/frame-v2.webp', './assets/img/dungeon.webp', './assets/img/monsters-new-v1.webp', './assets/img/dg-02-deep-forest-v1.webp', './assets/img/dg-05-ruins-v1.webp', './assets/img/brand-m2-title-v1.webp', './assets/img/brand-m2-header-v1.webp', './assets/img/brand-bg-v1.webp', './assets/img/menu-icons-v1.webp', './assets/img/heroes-extra-v1.webp', './assets/img/card-frame-v1.webp', './assets/img/card-arts-v1.webp', './assets/img/forge-anvil-v1.webp', './assets/img/forge-hammer-v1.webp', './assets/img/camp-forest-v1.webp', './assets/img/campfire-v1.webp', './assets/img/gates-v1.webp', './assets/img/camp-trees-v1.webp', './assets/img/anvil-v1.webp',
+  './assets/art/heroes-v2.webp', './assets/art/monsters-v2.webp', './assets/art/cards-v4.webp', './assets/art/frame-v2.webp', './assets/art/dungeon.webp', './assets/art/monsters-new-v1.webp', './assets/art/dg-02-deep-forest-v1.webp', './assets/art/dg-05-ruins-v1.webp', './assets/art/brand-m2-title-v2.webp', './assets/art/brand-m2-header-v2.webp', './assets/art/brand-bg-v1.webp', './assets/art/menu-icons-v1.webp', './assets/art/heroes-extra-v1.webp', './assets/art/card-frame-v1.webp', './assets/art/card-arts-v1.webp', './assets/art/forge-anvil-v1.webp', './assets/art/forge-hammer-v1.webp', './assets/art/camp-forest-v1.webp', './assets/art/campfire-v1.webp', './assets/art/portal-02-deep-forest-v1.webp', './assets/art/portal-05-ruins-v1.webp', './assets/art/camp-trees-v1.webp', './assets/art/anvil-v1.webp',
   './assets/fonts/Galmuri11.woff2', './assets/fonts/Galmuri11-Bold.woff2',
   './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-512.png', './icons/apple-touch-icon.png',
 ];
-const isStatic = (url) => /\/(assets\/(img|fonts)|icons)\//.test(url.pathname);
+const isStatic = (url) => /\/(assets\/(img|art|fonts)|icons)\//.test(url.pathname);
 
 self.addEventListener('install', (e) => {
   e.waitUntil(Promise.all([

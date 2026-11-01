@@ -35,6 +35,7 @@ DS.Raid = (function () {
   const isFinale = (L, R) => isEnd(L, R) && !(R.state || {}).closed;
   const isClosed = (R) => !!(R.state || {}).closed;
   const focusOn = (R) => !!(R.state || {}).focus;
+  const sheetOn = (R) => !!(R.state || {}).sheet; // 📄 문제 화면 (교사 해설)
   const autoFocus = (step) => !!step && (step.kind === 'intro' || step.kind === 'concept'); // 이 단계로 들어가면 집중모드 자동
 
   // ── 문제·답 ──────────────────────────────────────────────
@@ -113,5 +114,5 @@ DS.Raid = (function () {
     return out.sort((a, b) => b.level - a.level || num(R, a.uid) - num(R, b.uid));
   }
 
-  return { RETRIES, activeIds, teacherUid, num, newRoom, stepOf, isLobby, isEnd, isFinale, isClosed, focusOn, autoFocus, fullMarks, canLobby, online, seedOf, itemsFor, attemptsOf, gradeAttempt, record, resultLabel, headcount, pctOf, monsterHp, waiting, allSubmitted, cleared, mastery, bossHp, helpList };
+  return { RETRIES, activeIds, teacherUid, num, newRoom, stepOf, isLobby, isEnd, isFinale, isClosed, focusOn, sheetOn, autoFocus, fullMarks, canLobby, online, seedOf, itemsFor, attemptsOf, gradeAttempt, record, resultLabel, headcount, pctOf, monsterHp, waiting, allSubmitted, cleared, mastery, bossHp, helpList };
 })();

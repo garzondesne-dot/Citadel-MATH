@@ -39,7 +39,7 @@ DS.Hall = (function () {
     const step = Raid().stepOf(L, R);
     const el = $('#h-arena');
     el.classList.toggle('focus-on', Raid().focusOn(R) && !Raid().isLobby(R));
-    if (step && (step.kind === 'monster' || step.kind === 'boss')) { const key = `f${i}`; if (built !== key) buildFight(step, key); else updateFight(step); return; }
+    if (step && (step.kind === 'monster' || step.kind === 'boss')) { const key = `f${i}`; if (built !== key) buildFight(step, key); else updateFight(step); sheetOverlay(step); return; }
     clearInterval(bubbleT);
     if (Raid().isClosed(R)) { built = 'closed'; el.innerHTML = `<div class="h-victory"><div class="trophy">🏆</div><h1>수업 끝!</h1><p class="muted">모두 모닥불로 돌아갔어요. 게임 기록은 수학 성적이 아니에요.</p><div class="stamp-bar big">📮 반드시 학습지 확인도장 받아가세요.</div></div>`; return; }
     if (Raid().isLobby(R) || Raid().isFinale(L, R)) return lobbyScene(Raid().isFinale(L, R));
@@ -189,6 +189,20 @@ DS.Hall = (function () {
     setTimeout(() => { playing = false; play(); }, 350);
   }
 
+  // 📄 문제 화면: 교사가 켜면 지금 문제의 학습지 이미지를 레이드 위에 크게 (레이드는 뒤에서 계속, 끄면 그대로 보임)
+  let sheetKey = '';
+  function sheetOverlay(step) {
+    const arena = $('#h-arena'), img = (prep.img || {})[step.id], on = Raid().sheetOn(R);
+    let ov = document.getElementById('h-sheet-ov');
+    if (!on) { if (ov) ov.remove(); sheetKey = ''; return; }
+    if (!ov) { ov = document.createElement('div'); ov.id = 'h-sheet-ov'; ov.className = 'h-sheet-ov'; arena.appendChild(ov); sheetKey = ''; }
+    const k = `${step.id}|${img ? img.length : 0}`;
+    if (k === sheetKey) return;
+    sheetKey = k;
+    ov.innerHTML = `<p class="h-ctitle">📄 ${esc(step.kind === 'boss' ? L.boss.title : step.title)} · 문제 해설</p>
+      <div class="h-sheet">${img ? `<img src="${img}" alt="${esc(step.title || '')} 학습지">` : `<div class="h-sheet-empty">📄 이 문제의 학습지 이미지가 아직 없어요<br><span class="muted small">교사 → 수업 준비 → '${esc(step.title || '형성평가')}' 칸에 넣으면 여기에 떠요</span></div>`}</div>`;
+  }
+
   // ── 오른쪽: 수업 순서 · ◀ ▶ · 기준% · 집중모드 · 말풍선 ──────
   function side(i) {
     const titles = C().stepTitles(L);
@@ -196,8 +210,8 @@ DS.Hall = (function () {
       ${Raid().isEnd(L, R) ? `<div class="h-words">${C().wordsHtml(R)}</div>` : ''}`;
     C().bindWords($('#h-side'), code, R);
     const el = $('#h-ctrl'), live = !Raid().isLobby(R) && !Raid().isClosed(R);
-    el.innerHTML = `${C().pctHtml(L, R)}<p class="muted small">다음 ▶ ${esc(C().nextName(L, R))}</p><div class="row"><button class="btn" id="h-back"${i < 0 ? ' disabled' : ''}>◀ 뒤로</button><button class="btn primary" id="h-fwd"${Raid().isClosed(R) ? ' disabled' : ''}>${Raid().isFinale(L, R) ? '수업 끝 ▶' : '앞으로 ▶'}</button></div>${live ? C().focusBtn(R) : ''}`;
-    C().bindPct(el, code, R, L); C().bindFocus(el, code, R);
+    el.innerHTML = `${C().pctHtml(L, R)}<p class="muted small">다음 ▶ ${esc(C().nextName(L, R))}</p><div class="row"><button class="btn" id="h-back"${i < 0 ? ' disabled' : ''}>◀ 뒤로</button><button class="btn primary" id="h-fwd"${Raid().isClosed(R) ? ' disabled' : ''}>${Raid().isFinale(L, R) ? '수업 끝 ▶' : '앞으로 ▶'}</button></div>${live ? C().sheetBtn(L, R) + C().focusBtn(R) : ''}`;
+    C().bindPct(el, code, R, L); C().bindFocus(el, code, R); C().bindSheet(el, code, R);
     $('#h-fwd').onclick = () => C().run(() => C().forward(code, R, L));
     $('#h-back').onclick = () => C().run(() => C().back(code, R, L));
   }

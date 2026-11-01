@@ -1,8 +1,8 @@
-// 그래픽 에셋 배치표: 그림 파일과 칸 배치만 적는다. 그림을 바꾸려면 assets/img 의 파일과 이 표만 고치면 된다 (코드 수정 없음).
+// 그래픽 에셋 배치표: 그림 파일과 칸 배치만 적는다. 그림을 바꾸려면 assets/art 의 파일과 이 표만 고치면 된다 (코드 수정 없음).
 // 칸 위치: 열(col)·행(row) 번호 → CSS background-position 으로 계산 (js/engine/art.js)
 window.DS = window.DS || {};
 DS.ASSETS = {
-  base: 'assets/img/',
+  base: 'assets/art/', // 압축본 (v0.6.0: 화면 크기에 맞춰 WebP 품질 90 — 원본 무손실은 저장소 기록에)
   heroes: { src: 'heroes-v2.webp', cols: 4, rows: 8, poses: { idle: 0, walk: 1, attack: 2, fall: 3 }, count: 8, teacher: 7 },
   monsters: { src: 'monsters-v2.webp', cols: 3, rows: 3, poses: { idle: 0, attack: 1, down: 2 }, names: ['수정 슬라임', '바위 골렘', '성채 드래곤'], flip: [1] }, // flip: 오른쪽을 보고 그려진 줄 (용사는 왼쪽에 선다)
   cards: { src: 'cards-v4.webp', cols: 4, rows: 2 }, // 카드 그림 8칸: 0 소속 · 1 개수 · 2 공집합 · 3 포함 · 4 반례 · 5 같음 · 6 부분집합 목록 · 7 개수의 비밀
@@ -36,9 +36,9 @@ DS.ASSETS = {
   // 모루 연성창: 위에서 본 모루(작업면 = face, 그림 비율 0~1) · 망치
   forge: { anvil: { src: 'forge-anvil-v1.webp', w: 820, h: 509, face: [0.273, 0.328, 0.830, 0.734] }, hammer: { src: 'forge-hammer-v1.webp', w: 420, h: 435 } },
   // 브랜드: 공통 = 배경 · 메뉴 아이콘(학생 · 교사 · 종합상황실 · 수업 준비 · 로그인), 에디션 = 제목 화면 · 머리 배너 · 로고 (과목이 늘면 에디션만 바꿈)
-  brand: { name: '모두의 던전', edition: '공통수학2', full: '모두의 던전 : 공통수학2', tagline: '함께 풀고, 모두 함께 돌파하라',
+  brand: { name: '모두와 던전', edition: '공통수학2', full: '모두와 던전 : 공통수학2', tagline: '함께 풀고, 모두 함께 돌파하라',
     bg: 'brand-bg-v1.webp', menu: { src: 'menu-icons-v1.webp', cols: 5, kinds: { student: 0, teacher: 1, hall: 2, prep: 3, login: 4 } },
-    title: 'brand-m2-title-v1.webp', header: 'brand-m2-header-v1.webp', logo: 'brand-m2-logo-v1.webp' },
+    title: 'brand-m2-title-v2.webp', header: 'brand-m2-header-v2.webp', logo: 'brand-m2-logo-v2.webp' },
   panels: { src: 'ui-panels-v1.webp', cols: 2, rows: 2, kinds: { inventory: 0, paper: 1, dialog: 2, reward: 3 } }, // 남색 인벤토리 · 양피지 문제지 · 청록 대화창 · 보라 보상창
   fonts: { pixel: 'assets/fonts/Galmuri11.woff2', pixelBold: 'assets/fonts/Galmuri11-Bold.woff2' },
 };

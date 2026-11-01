@@ -59,3 +59,8 @@
 | `menu-icons-v1` | 학생 · 교사 · 종합상황실 · 수업 준비 · 로그인 아이콘 5칸 (두 묶음의 아이콘은 같은 파일) | 공용 |
 | `icons/*.png` | 앱 아이콘 (icon.webp 에서 192 · 512 · 둥근 512 · 180) | 에디션 |
 | `heroes-extra-v1` | 추가 용사 8종 (설정에서 잠금 · 첫 번째는 1~3차시 도감 완성 보상) | 공용 |
+
+## v0.6.0 압축 · 이름 변경
+- 게임이 쓰는 폴더 = **`assets/art`** (배치표 `base`). `assets/img` 원본을 화면 크기에 맞춰 WebP 품질 90(알파 100)으로 줄인 것. 포털은 가로 600px.
+- 새 그림을 넣을 때: 원본은 `assets/img`, 압축본(같은 이름)은 `assets/art` 에 두고 배치표에 이름을 적는다. 그림을 바꾸면 이름을 바꾼다(캐시).
+- 브랜드: 「모두와 던전 : 공통수학2」 `brand-m2-title-v2` · `brand-m2-header-v2` · `brand-m2-logo-v2` · `icons/*` (사용자 제공 moduwa-dungeon-math2-light)

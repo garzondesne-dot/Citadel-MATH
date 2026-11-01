@@ -32,7 +32,7 @@ DS.PWA = (function () {
     });
     window.addEventListener('appinstalled', () => {
       btn.hidden = true;
-      DS.UI.toast('앱으로 설치했어요! 홈 화면의 모두의 던전 아이콘으로 열어요.');
+      DS.UI.toast('앱으로 설치했어요! 홈 화면의 모두와 던전 아이콘으로 열어요.');
     });
   }
   return { init, standalone };
