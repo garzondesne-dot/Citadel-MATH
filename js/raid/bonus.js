@@ -81,11 +81,11 @@ DS.Bonus = (function () {
           <div class="enc-hero"><div class="enc-tries" title="남은 도전 기회">${pips}</div>${DS.Art.hero(me.hero || 0, done ? 'attack' : 'idle', done ? 'pairhop' : cls === 'miss' ? 'slump' : 'huff')}<i class="shadow"></i></div>
           <div class="enc-mon">${DS.Art.monster(mon.sprite, done ? 'down' : 'idle', done ? '' : 'float')}<div class="segs">${segs}</div></div></div>
         <div class="bf-body">${msg}${mon.note ? `<p class="muted small">💡 ${esc(mon.note)}</p>` : ''}
-          <div class="row">${img ? '<button class="btn small" id="bf-sheet">📄 학습지 보기</button>' : ''}${vid && DS.Video.embed(vid) ? '<button class="btn small" id="bf-vid">🎬 설명 보기</button>' : ''}</div>
+          <div class="row">${img ? '<button class="btn small" id="bf-sheet">📄 학습지 보기</button>' : ''}${vid && DS.Video.ok(vid) ? '<button class="btn small" id="bf-vid">🎬 설명 보기</button>' : ''}</div>
           <div class="row" id="bf-act"></div></div>`;
       el.querySelector('#bf-x').onclick = () => { el.remove(); render(); };
       const sh = el.querySelector('#bf-sheet'); if (sh) sh.onclick = () => sheet(img, mon.title);
-      const vb = el.querySelector('#bf-vid'); if (vb) vb.onclick = () => DS.Video.open(vid, mon.title);
+      const vb = el.querySelector('#bf-vid'); if (vb) vb.onclick = () => DS.Video.open(vid, mon.title, { lesson: L.id, slot: (prep.video || {})[mid] ? mid : (L.bonus.find((b) => b.id === mid) || {}).concept });
       return el.querySelector('#bf-act');
     };
     const round = async () => {

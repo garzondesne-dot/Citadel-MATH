@@ -72,8 +72,11 @@ DS.Prep = (function () {
         <div class="row"><button class="btn primary small" data-up="${s.id}">✅ 이 칸 올리기</button><button class="btn small" data-undo="${s.id}">버리기</button></div>`
       : img ? `<img class="p-prev" src="${img}" alt="${esc(s.title)}">`
       : '<p class="muted small">아직 없음 — 이 칸을 누르고 <b>Ctrl+V</b> (스크린샷 붙여넣기) · 이미지 끌어다 놓기 · 🖼 고르기</p>';
-    const video = `<div class="p-video"><span>🎬 설명 영상 링크</span><input data-vid="${s.id}" placeholder="유튜브 · 구글 드라이브 주소 (없으면 비워 두기)" value="${esc(vid || '')}"><button class="btn small" data-vsave="${s.id}">저장</button>
-      ${vid ? `<span class="muted small">${DS.Video && DS.Video.kind(vid) ? DS.Video.kind(vid) : '⚠ 알 수 없는 주소'}</span>` : '<span class="muted small">보강던전 · 큰 화면에서 「🎬 설명 보기」로 재생</span>'}</div>`;
+    const isFile = vid === 'file';
+    const video = `<div class="p-video"><span>🎬 설명 영상</span><input data-vid="${s.id}" placeholder="유튜브 · 구글 드라이브 주소 (없으면 비워 두기)" value="${esc(isFile ? '' : vid || '')}"><button class="btn small" data-vsave="${s.id}">링크 저장</button>
+      <label class="btn small">🎞 파일 올리기<input type="file" accept="video/mp4,video/webm,video/*" data-vfile="${s.id}" hidden></label>
+      ${isFile ? `<span class="okc small">🎞 올린 영상 파일</span><button class="btn small" data-vplay="${s.id}">▶ 미리보기</button><button class="btn small" data-vdel="${s.id}">지우기</button>`
+        : vid ? `<span class="muted small">${DS.Video && DS.Video.kind(vid) ? DS.Video.kind(vid) : '⚠ 알 수 없는 주소'}</span>` : '<span class="muted small">링크 또는 mp4 파일 (3MB 이하) · 큰 화면 「🎬 설명 영상 틀기」 · 보강던전에서 재생</span>'}</div>`;
     return `<div class="panel framed p-slot${sel === s.id ? ' sel' : ''}" data-box="${s.id}" tabindex="0">${head.replace('</div>', `<button class="btn small" data-fold="${s.id}">접기 ▴</button></div>`)}${body}${video}${sel === s.id && editing !== s.id ? '<p class="p-paste small">📋 지금 Ctrl+V 하면 이 칸에 들어가요</p>' : ''}</div>`;
   }
   const up = (slot, url, msg = '올렸어요!') => DS.Control.run(async () => { await DS.Act.setImage(L.id, slot, url); delete draft[slot]; DS.UI.toast(msg); render(); });
@@ -89,8 +92,19 @@ DS.Prep = (function () {
     document.querySelectorAll('[data-vsave]').forEach((b) => (b.onclick = () => DS.Control.run(async () => {
       const id = b.dataset.vsave, v = document.querySelector(`[data-vid="${id}"]`).value.trim();
       if (v && !(DS.Video && DS.Video.embed(v))) throw Object.assign(new Error('유튜브 또는 구글 드라이브 주소만 넣을 수 있어요.'), { user: true });
+      if ((data.video || {})[id] === 'file') await DS.Act.setVideoFile(L.id, id, null); // 링크로 바꾸면 올린 파일은 지움
       await DS.Act.setVideo(L.id, id, v || null); DS.UI.toast(v ? '영상 링크를 저장했어요.' : '영상 링크를 지웠어요.');
     })));
+    document.querySelectorAll('[data-vfile]').forEach((inp) => (inp.onchange = () => DS.Control.run(async () => {
+      const f = inp.files[0]; if (!f) return;
+      if (!/^video\//.test(f.type)) throw Object.assign(new Error('영상 파일(mp4)만 올릴 수 있어요.'), { user: true });
+      if (f.size > DS.Video.MAX) throw Object.assign(new Error(`영상이 너무 커요 (${(f.size / 1048576).toFixed(1)}MB). 3MB 이하로 줄여 주세요 — 짧게 자르거나 화질을 720p 이하로.`), { user: true });
+      DS.UI.toast('영상을 올리는 중…', 4000);
+      const url = await new Promise((res, rej) => { const rd = new FileReader(); rd.onload = () => res(rd.result); rd.onerror = () => rej(new Error('영상을 읽지 못했어요.')); rd.readAsDataURL(f); });
+      await DS.Act.setVideoFile(L.id, inp.dataset.vfile, url); DS.UI.toast(`🎞 영상을 올렸어요 (${(f.size / 1048576).toFixed(1)}MB)`);
+    })));
+    document.querySelectorAll('[data-vdel]').forEach((b) => (b.onclick = () => DS.Control.run(async () => { if (confirm('올린 영상을 지울까요?')) { await DS.Act.setVideoFile(L.id, b.dataset.vdel, null); DS.UI.toast('영상을 지웠어요.'); } })));
+    document.querySelectorAll('[data-vplay]').forEach((b) => (b.onclick = () => DS.Video.open('file', '미리보기', { lesson: L.id, slot: b.dataset.vplay })));
     document.querySelectorAll('[data-slot]').forEach((inp) => (inp.onchange = () => { const f = inp.files[0]; if (f) putFile(inp.dataset.slot, f); }));
     document.querySelectorAll('[data-del]').forEach((b) => (b.onclick = () => DS.Control.run(async () => { if (confirm('이 이미지를 지울까요?')) await DS.Act.setImage(L.id, b.dataset.del, null); })));
     document.querySelectorAll('[data-up]').forEach((b) => (b.onclick = () => up(b.dataset.up, draft[b.dataset.up].url)));

@@ -58,7 +58,7 @@ DS.Control = (function () {
   const sheetBtn = (L, R) => { const st = Raid().stepOf(L, R); return st && (st.kind === 'monster' || st.kind === 'boss') ? `<button class="btn sheet-btn${Raid().sheetOn(R) ? ' on' : ''}" data-sheet>${Raid().sheetOn(R) ? '⚔ 레이드 화면으로' : '📄 문제 화면 (학습지 해설)'}</button>` : ''; };
   const bindSheet = (el, code, R) => el.querySelectorAll('[data-sheet]').forEach((b) => (b.onclick = () => run(() => Act().setSheet(code, !Raid().sheetOn(R)))));
   // 🎬 설명 영상 버튼 (v0.8.6): 수업 준비에서 이 단계에 영상 링크를 넣었을 때만. 누르면 종합상황실에 크게 재생 · 한 번 더 누르면 닫기 (이미지는 그대로)
-  const videoBtn = (L, R, videos) => { const st = Raid().stepOf(L, R); if (!st || !(videos || {})[st.id] || !DS.Video.embed(videos[st.id])) return ''; const on = Raid().videoOn(R, st.id);
+  const videoBtn = (L, R, videos) => { const st = Raid().stepOf(L, R); if (!st || !(videos || {})[st.id] || !DS.Video.ok(videos[st.id])) return ''; const on = Raid().videoOn(R, st.id);
     return `<button class="btn video-btn${on ? ' on' : ''}" data-video="${st.id}">${on ? '🎬 영상 닫기' : '🎬 설명 영상 틀기 (큰 화면)'}</button>`; };
   const bindVideo = (el, code, R) => el.querySelectorAll('[data-video]').forEach((b) => (b.onclick = () => run(() => Act().setVideoOn(code, Raid().videoOn(R, b.dataset.video) ? null : b.dataset.video))));
   const bindFocus = (el, code, R) => el.querySelectorAll('[data-focus]').forEach((b) => (b.onclick = () => run(() => Act().setFocus(code, !Raid().focusOn(R)))));

@@ -72,6 +72,15 @@
         }
       }
     },
+    "prepVideo": {
+      "$lesson": {
+        ".read": "auth != null",
+        "$slot": {
+          ".write": "auth != null && root.child('admins/'+auth.uid).val() === true",
+          ".validate": "newData.isString() && newData.val().length < 4500000 && newData.val().beginsWith('data:video/')"
+        }
+      }
+    },
     "prep": {
       "$lesson": {
         ".read": "auth != null",
@@ -89,7 +98,7 @@
         },
         "video": {
           "$slot": {
-            ".validate": "newData.isString() && newData.val().length < 300 && (newData.val().beginsWith('https://youtu.be/') || newData.val().beginsWith('https://www.youtube.com/') || newData.val().beginsWith('https://youtube.com/') || newData.val().beginsWith('https://m.youtube.com/') || newData.val().beginsWith('https://drive.google.com/'))"
+            ".validate": "newData.isString() && newData.val().length < 300 && (newData.val() === 'file' || newData.val().beginsWith('https://youtu.be/') || newData.val().beginsWith('https://www.youtube.com/') || newData.val().beginsWith('https://youtube.com/') || newData.val().beginsWith('https://m.youtube.com/') || newData.val().beginsWith('https://drive.google.com/'))"
           }
         }
       }

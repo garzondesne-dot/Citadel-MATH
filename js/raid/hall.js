@@ -194,17 +194,17 @@ DS.Hall = (function () {
   // 🎬 설명 영상 (v0.8.6): 교사 폰 · 이 화면의 「🎬 설명 영상 틀기」 → 큰 화면 위에 재생. 이미지(개념 · 문제 화면)는 그대로 두고 그 위에 뜬다
   let videoKey = '';
   function videoOverlay(step) {
-    const url = step && (prep.video || {})[step.id], on = !!step && Raid().videoOn(R, step.id) && url && DS.Video.embed(url);
+    const url = step && (prep.video || {})[step.id], on = !!step && Raid().videoOn(R, step.id) && url && DS.Video.ok(url);
     let ov = document.getElementById('h-video-ov');
     if (!on) { if (ov) ov.remove(); videoKey = ''; return; }
     const k = `${step.id}|${url}`;
     if (ov && k === videoKey) return;
     if (!ov) { ov = document.createElement('div'); ov.id = 'h-video-ov'; ov.className = 'h-video-ov'; document.getElementById('screen-hall').appendChild(ov); }
     videoKey = k;
-    const src = DS.Video.embed(url) + (/youtube/.test(DS.Video.embed(url)) ? '&autoplay=1' : '');
-    ov.innerHTML = `<div class="h-video-box"><p class="h-ctitle">🎬 ${esc(step.title || '설명 영상')}</p><div class="video-frame"><iframe src="${src}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div>
+    ov.innerHTML = `<div class="h-video-box"><p class="h-ctitle">🎬 ${esc(step.title || '설명 영상')}</p><div class="video-frame">${DS.Video.frameHtml(url, true)}</div>
       <div class="row"><span class="muted small">드라이브 영상은 ▶ 를 눌러 재생 · 교사 폰 「🎬 영상 닫기」로도 닫혀요</span><button class="btn" id="h-video-x">✕ 영상 닫기</button></div></div>`;
     ov.querySelector('#h-video-x').onclick = () => C().run(() => DS.Act.setVideoOn(code, null));
+    DS.Video.attach(ov, url, { lesson: L.id, slot: step.id }).catch((e) => DS.UI.toast(e.message || '영상을 불러오지 못했어요.'));
   }
   // 📄 문제 화면: 교사가 켜면 지금 문제의 학습지 이미지를 레이드 위에 크게 (레이드는 뒤에서 계속, 끄면 그대로 보임)
   let sheetKey = '';
