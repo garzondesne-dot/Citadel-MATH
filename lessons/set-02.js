@@ -167,6 +167,8 @@
     steps: STEPS,
     monsters: MONSTERS,
     items(id, seed, attempt) { return MONSTERS[id].make(attempt, DS.Rng(`${seed}|${id}|${attempt}`)); },
+    // 📘 오늘의 수학 노트 · 우리 반 수업 소식의 「다음 수업」 (초안 — 사용자 확인 전)
+    next: { title: '3차시 · 집합 사이의 포함 관계', ask: '어떤 그룹의 멤버가 다른 그룹에 모두 들어 있다면, 두 집합은 어떤 관계일까?', link: '오늘 배운 「원소가 집합에 속한다(∈)」에서 「집합이 집합에 포함된다(⊂)」로 넓혀 가요.' },
     boss: { title: '2차시 형성평가 · 숲의 수호자', sprite: 'new:6', items: 5, hpItems: 5, sets: BOSS, tags: ['c1', 'c1', 'c2', 'c4', 'c4'] }, // tags: 문항별 개념 (개인 결과 · 복습 추천)
   });
 })();

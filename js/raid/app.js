@@ -249,9 +249,13 @@ DS.App = (function () {
       const L = DS.Lessons.get(r.lesson);
       return `<div class="t-room${r.open ? ' on' : ''}"><div><b>${esc(r.cls || '-')}반 · ${L && L.no ? `${L.no}차시 ` : ''}${esc(L ? L.title : r.lesson || '')}</b>
         <span class="muted small">코드 ${esc(r.code)} · ${r.open ? (r.step >= 0 ? '🟢 진행 중' : '🟡 대기실') : '⚪ 끝남'}${when(r.at) ? ` · ${when(r.at)}` : ''}</span></div>
-        <button class="btn small" data-lgo="${esc(r.code)}">↩ 들어가기</button><button class="btn small t-x" data-lx="${esc(r.code)}" data-lcls="${esc(r.cls || '')}" data-lopen="${r.open ? 1 : 0}" aria-label="없애기">✕</button></div>`;
+        <button class="btn small" data-lgo="${esc(r.code)}">↩ 들어가기</button>${r.step >= 0 ? `<button class="btn small" data-lnews="${esc(r.code)}" title="우리 반 수업 소식">🏫</button>` : ''}<button class="btn small t-x" data-lx="${esc(r.code)}" data-lcls="${esc(r.cls || '')}" data-lopen="${r.open ? 1 : 0}" aria-label="없애기">✕</button></div>`;
     }).join('')}` : '';
     box.querySelectorAll('[data-lgo]').forEach((b) => (b.onclick = () => DS.Control.run(async () => { const sec = await DS.Net.get(`secrets/${b.dataset.lgo}`).catch(() => null); await DS.Teacher.open(b.dataset.lgo, sec && sec.hallKey); })));
+    box.querySelectorAll('[data-lnews]').forEach((b) => (b.onclick = () => DS.Control.run(async () => {
+      const R = DS.Act.unpackRoom(await DS.Net.get(`rooms/${b.dataset.lnews}`)); const L = DS.Lessons.get(R.meta.lesson);
+      await DS.ShareCard.preview((praise) => DS.ShareCard.klass({ L, R, cls: R.meta.cls, praise }), `우리 반 수업 소식 · ${L.no ? `${L.no}차시 ` : ''}${L.title}`, `🏫 ${R.meta.cls ? `${R.meta.cls}반 ` : ''}공통수학2 ${L.title} 수업 소식`, { praise: true });
+    })));
     box.querySelectorAll('[data-lx]').forEach((b) => (b.onclick = () => DS.Control.run(async () => {
       const code = b.dataset.lx, open = b.dataset.lopen === '1';
       if (!confirm(open ? `수업 ${code} 을(를) 끝내고 목록에서 없앨까요?\n학생은 결과를 보고 모닥불로 가고, 차원문은 사라져요.` : `수업 ${code} 을(를) 목록에서 없앨까요?\n(모닥불의 꺼진 차원문도 사라져요)`)) return;

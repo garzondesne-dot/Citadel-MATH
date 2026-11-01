@@ -194,6 +194,7 @@
     // 소문제 목록: 같은 시드 → 같은 문제 (학생 기기와 교사 기기가 각자 만들어 채점이 같다)
     items(id, seed, attempt) { return MONSTERS[id].make(attempt, DS.Rng(`${seed}|${id}|${attempt}`)); },
     COND,
+    next: { title: '4차시 · 교집합과 합집합', ask: '선생님 폰과 내 폰에 둘 다 있는 앱은? 둘 중 하나라도 있는 앱은 모두 몇 개?', link: '오늘 배운 부분집합(⊂)을 이용해 두 집합의 공통 부분(∩)과 합친 집합(∪)을 만들어요.' }, // 다음 수업 (초안)
     boss: { title: '3차시 형성평가 · 포함의 성주', sprite: 2, items: 7, hpItems: 6, sets: BOSS, tags: ['c1', 'c2', 'c2', 'c3', 'c3', 'c2', 'c3'] }, // tags: 문항별 개념 (개인 결과 · 복습 추천)
   });
 })();

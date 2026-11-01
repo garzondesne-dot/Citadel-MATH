@@ -23,7 +23,7 @@ DS.Result = (function () {
   function compute(L, R, uid) {
     const X = DS.Raid, { map, titles } = conceptMap(L), conc = {};
     const bump = (c, ok) => { conc[c] = conc[c] || { ok: 0, total: 0 }; conc[c].total++; if (ok) conc[c].ok++; };
-    let submits = 0, best = 0, fixed = 0;
+    let submits = 0, best = 0, fixed = 0, perfects = 0, fixEx = null;
     const mons = L.steps.filter((s) => s.kind === 'monster').map((s) => {
       const rec = X.record(L, R, s.id, uid);
       const n = rec.total, first = rec.tries[0];
@@ -32,6 +32,12 @@ DS.Result = (function () {
       if (rec.submitted) firstOk.forEach((ok) => bump(map[s.id], ok)); // 안 한 몬스터는 개념 이해도에 넣지 않는다 (늦게 들어온 학생)
       submits += rec.tries.length; best += rec.best;
       const fx = everOk.filter((ok, i) => ok && !firstOk[i]).length; fixed += fx;
+      if (rec.submitted && n && firstOk.every(Boolean)) perfects++; // ⚡ PERFECT = 첫 시도에 모두 맞힘
+      if (!fixEx && fx) { // 📘 내가 고친 문제 하나 (처음엔 틀렸다가 고친 것 — 마지막으로 맞힌 시도의 문제와 풀이)
+        const i = everOk.findIndex((ok, k) => ok && !firstOk[k]), t = rec.tries.find((x) => x.marks[i]);
+        const q = t ? X.itemsFor(L, R, s.id, uid, t.attempt)[i] : null;
+        if (q) fixEx = { where: s.title, q, concept: map[s.id] };
+      }
       return { id: s.id, title: s.title, concept: map[s.id], n, tried: rec.submitted, first: firstOk.filter(Boolean).length, fixed: fx, miss: everOk.filter((ok) => !ok).length };
     });
     const ans = ((R.bossAns || {})[uid]) || {}, tags = L.boss.tags || [];
@@ -44,7 +50,9 @@ DS.Result = (function () {
     const order = Object.keys(conc).filter((c) => conc[c].total);
     const weak = order.map((c) => ({ c, r: conc[c].ok / conc[c].total })).filter((x) => x.r < 0.8).sort((a, b) => a.r - b.r).slice(0, 2).map((x) => x.c);
     const parts = { join: 1, submit: submits, correct: best + mast.filter(Boolean).length, fixed: fixed + bossFixed, bossWin: bossWin ? 1 : 0, perfect: perfect ? 1 : 0 }; // 마지막 한마디 EXP 는 한마디를 남길 때 따로 (v0.8.1)
-    return { lesson: L.id, no: L.no || 0, title: L.title, mons, boss: { set1, mast, tried: bossTried, hp: L.boss.hpItems }, conc, titles, weak, parts };
+    const hp = X.bossHp(L, R), bossShare = hp.max ? Math.min(100, Math.round((100 * mast.filter(Boolean).length) / hp.max)) : 0;
+    return { lesson: L.id, no: L.no || 0, title: L.title, mons, boss: { set1, mast, tried: bossTried, hp: L.boss.hpItems, won: hp.won, share: bossShare }, conc, titles, weak, parts, perfects, fixed: fixed + bossFixed, fixEx,
+      words: words ? String(((R.words || {})[uid] || {}).t) : '' };
   }
   // 저장용 요약 (records/{반}/{번호}/{차시})
   const summary = (r, code) => ({ at: (DS.Net || {}).TS || Date.now(), code: String(code || ''), no: r.no,
@@ -65,13 +73,14 @@ DS.Result = (function () {
   // opt.inClass: 형성평가 직후(수업 중) — 보강던전 버튼 대신 「대기실로」 (v0.8.1)
   async function show(L, R, uid, me, code, then, opt = {}) {
     const r = compute(L, R, uid);
-    let g = null, first = false;
+    let g = null, first = false, raids = 1;
     const seenKey = `citadel-result-${code}`;
     let seen = false; try { seen = localStorage.getItem(seenKey) === '1'; } catch (e) { /* 무시 */ }
     if (me && me.c != null && me.n) {
       // 🎁 첫 레이드 특전 (v0.8.1): 처음 쌓는 기록이면 「첫 출정 축하」 EXP 로 레벨업 보장 + 추가 용사(두 번째) 해금
       const prev = await DS.Net.get(`records/${ck(me.c)}/${me.n}`).catch(() => null);
       first = !prev || !Object.keys(prev).length;
+      raids = Object.keys(prev || {}).filter((k) => k !== L.id).length + 1; // 🔥 n번째 출전
       if (first && DS.Grow) {
         const cur = await DS.Grow.mine(me).catch(() => DS.Grow.level(0)), base = DS.Grow.sum(r.parts);
         r.parts.first = Math.max(40, cur.next - cur.into - base + 1);
@@ -96,6 +105,7 @@ DS.Result = (function () {
       <p class="muted small">✔ 처음에 맞힘 · 🔁 재도전으로 고침 · ✖ 끝까지 못 맞힘</p>
       <p class="shelf-title">개념별 (첫 시도)</p>${Object.entries(r.conc).map(([c, v]) => `<div class="rs-c"><span>${esc(r.titles[c] || c)}</span><span class="rs-dots">${dots(v.ok, v.total)}</span><span class="muted small">${v.ok} / ${v.total}</span></div>`).join('')}
       <p class="shelf-title">복습 추천</p>${recs(L, r, prep, opt.inClass)}
+      <p class="shelf-title">📤 카톡으로 보내기</p><div class="row rs-share"><button class="btn" id="rs-card1">⚔ 전투 기록 보내기</button><button class="btn" id="rs-card2">📘 수학 노트 보내기</button></div>
       <div class="row"><button class="btn primary big" id="rs-ok">${opt.inClass ? '🏕 대기실로' : '🔥 모닥불로'}</button></div></div>`;
     document.body.appendChild(el);
     if (up) DS.Sound.correct();
@@ -107,6 +117,11 @@ DS.Result = (function () {
     el.querySelectorAll('[data-vid]').forEach((b) => (b.onclick = () => DS.Video.open(DS.Video.pick(L, prep.video, b.dataset.vid), r.titles[b.dataset.vid], { lesson: L.id, slot: b.dataset.vid })));
     el.querySelectorAll('[data-bonus]').forEach((b) => (b.onclick = () => { el.remove(); then(true); }));
     el.querySelector('#rs-ok').onclick = () => { el.remove(); then(); };
+    const who = { name: (me && me.name) || '용사', hero: me ? me.hero : (DS.Test && DS.Test.active() ? 0 : 0) };
+    if (!who.name || who.name === '용사') { try { const p = (R.players || {})[uid] || {}; who.name = p.nick || who.name; who.hero = p.hero || who.hero; } catch (e) { /* 무시 */ } }
+    const no = L.no ? `${L.no}차시 ` : '';
+    el.querySelector('#rs-card1').onclick = () => DS.Control.run(() => DS.ShareCard.preview(() => DS.ShareCard.battle({ L, r, me: who, lv, gained: g ? g.gained : 0, up, first, raids }), `오늘의 전투 기록 · ${no}${L.title}`, `⚔ 모두의 던전 ${no}${L.title} 클리어!${lv ? ` Lv.${lv.lv} ${lv.title}` : ''}${g && g.gained ? ` (+${g.gained} EXP)` : ''}`));
+    el.querySelector('#rs-card2').onclick = () => DS.Control.run(() => DS.ShareCard.preview(() => DS.ShareCard.math({ L, r, me: who }), `오늘의 수학 노트 · ${no}${L.title}`, `📘 공통수학2 ${no}${L.title} — 오늘 배운 것과 다음 수업`));
     return null;
   }
   // 교사 학생 관리 · 학생 복습 노트: 차시별 기록 (records/{반}/{번호})

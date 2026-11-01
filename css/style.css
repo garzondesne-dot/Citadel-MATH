@@ -884,7 +884,7 @@ details.panel[open] > summary::before { content: '▾ '; }
 .t-lesson select { font-size: 16px; }
 .t-cls-row { display: flex; justify-content: flex-end; margin-top: 6px; }
 .t-cls-row label { width: 46%; min-width: 140px; }
-.t-room { display: grid; grid-template-columns: 1fr auto auto; gap: 6px; align-items: center; padding: 6px 8px; margin: 4px 0; border: 1px solid #2a3c66; background: #0b1430; }
+.t-room { display: grid; grid-template-columns: 1fr auto auto auto; gap: 6px; align-items: center; padding: 6px 8px; margin: 4px 0; border: 1px solid #2a3c66; background: #0b1430; }
 .t-room.on { border-color: #5ad08a; box-shadow: inset 3px 0 0 #5ad08a; }
 .t-room b { display: block; font-size: 14px; }
 .t-room .t-x { color: #ff9a8a; }
@@ -895,3 +895,10 @@ details.panel[open] > summary::before { content: '▾ '; }
 .video-frame video { position: absolute; inset: 0; width: 100%; height: 100%; background: #000; }
 .h-video-box .h-ctitle { text-align: center; margin: 0 0 8px; }
 .video-btn.on { border-color: #ff6a6a; color: #ffd0d0; }
+
+/* v0.9.0 📤 공유 카드 */
+.sc-box { max-width: 520px; width: calc(100vw - 24px); max-height: 94dvh; overflow-y: auto; }
+.sc-img img { display: block; width: 100%; height: auto; border-radius: 8px; box-shadow: 0 6px 20px #0008; margin: 6px 0; }
+.sc-box label input { width: 100%; }
+.rs-share .btn { flex: 1; }
+.sc-btn { display: block; width: 100%; margin-top: 8px; border-color: #5ad08a; }
