@@ -10,7 +10,7 @@ DS.App = (function () {
   const q = new URLSearchParams(location.search);
   const read = (k) => { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } };
   const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* 무시 */ } };
-  let hero = 0, sMode = 'login', masks = {}, pending = null;
+  let hero = 0, sMode = 'login', masks = {}, pending = null, pendingTest = null;
 
   async function boot() {
     DS.Art.install();
@@ -35,6 +35,12 @@ DS.App = (function () {
     // 바로 열기 (체험판·북마크): ?role=teacher&resume · ?role=hall&code=…&key=…
     if (role === 'teacher' && q.has('resume') && t && t.uid === DS.Net.uid()) $('#t-resume').click();
     if (role === 'hall' && q.get('code') && q.get('key')) { $('#h-go').click(); return; }
+    // 🧪 바로 시작 링크: ?role=teacher&test=set-02 → 교사 로그인돼 있으면 곧바로 테스트 모드 (아니면 로그인 뒤 시작)
+    if (role === 'teacher' && DS.Lessons.get(q.get('test'))) {
+      $('#x-lesson').value = q.get('test');
+      if (await A().isAdmin()) { await DS.Test.start(q.get('test')).catch((e) => DS.UI.toast(e.message)); return; }
+      pendingTest = q.get('test'); DS.UI.toast('교사 로그인하면 테스트가 바로 시작돼요.', 3200);
+    }
     await resume();
   }
   // 새로고침(아래로 당기기 등) 뒤 보던 장면으로 바로 돌아간다 (같은 탭의 sessionStorage)
@@ -171,6 +177,7 @@ DS.App = (function () {
       if (!id) throw Object.assign(new Error('교사 아이디를 넣어 주세요.'), { user: true });
       if (first) await A().teacherCreate(id, pwd); else await A().teacherLogin(id, pwd);
       DS.UI.toast('교사 계정으로 로그인했어요.'); await teacherAuth(); await studentAuth();
+      if (pendingTest) { const t = pendingTest; pendingTest = null; await DS.Test.start(t); }
     })));
   }
 
