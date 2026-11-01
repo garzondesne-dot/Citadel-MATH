@@ -702,3 +702,5 @@ body:has(#test-bar) #screen-student .wrap { padding-bottom: 90px; max-width: 460
 .enc-friends { position: absolute; left: 1%; bottom: 8px; display: flex; gap: 0; z-index: 1; opacity: .9; }
 .enc-friends .art { width: 44px; height: 44px; margin-right: -12px; }
 .ally-hit { position: absolute; top: 30%; z-index: 21; font-size: 13px; font-weight: 700; color: #ffe066; text-shadow: 1px 1px 0 #000, 0 0 6px #000; animation: dmgUp 1.2s ease-out forwards; pointer-events: none; white-space: nowrap; }
+
+.item-q.bl-q { font-size: 14px; color: #cfe0ff; margin-bottom: 2px; }

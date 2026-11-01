@@ -249,7 +249,8 @@ DS.Student = (function () {
     const qText = (t) => `<div class="item-q">${DS.UI.rich(t)}</div>`;
     if (q.type === 'blanks') {
       const it = q.items[0], v = (form.given[i] || [])[0];
-      return `<div class="item">${tag}<div class="item-q math">${pretty(it.left)} <b class="bl-box">${v ? esc(v) : '□'}</b> ${pretty(it.right)}</div>
+      // 문제 상황(예: A = {1, 3, 5} 일 때 …)을 먼저 보여 주고, 그 아래에 □ 식
+      return `<div class="item">${tag}${q.question ? `<div class="item-q bl-q">${DS.UI.rich(q.question)}</div>` : ''}<div class="item-q math">${pretty(it.left)} <b class="bl-box">${v ? esc(v) : '□'}</b> ${pretty(it.right)}</div>
         <div class="item-opts">${q.options.map((o) => `<button class="choice sym${v === o ? ' on' : ''}" data-pick="${i}|${esc(o)}">${esc(o)}</button>`).join('')}</div></div>`;
     }
     if (q.type === 'multi') {

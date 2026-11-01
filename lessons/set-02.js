@@ -41,8 +41,8 @@
       const n = a === 0 ? 6 : r.pick([4, 8, 9, 10, 12]);
       return [
         choose(w.q, w.c, w.ans, w.sol, { word: w.c[w.ans] }, r),
-        sym(`A = ${st(A)} 일 때, □ 안에 ∈ 또는 ∉`, String(yes), 'A', '∈', `${yes} 은(는) A 의 원소 → ∈`, { elem: yes, set: A }),
-        sym(`A = ${st(A)} 일 때, □ 안에 ∈ 또는 ∉`, String(no), 'A', '∉', `${no} 은(는) A 에 없다 → ∉`, { elem: no, set: A }),
+        sym(`A = ${st(A)} 일 때, □ 안에 ∈ 또는 ∉ 를 쓰시오.`, String(yes), 'A', '∈', `${yes} 은(는) A 의 원소 → ∈`, { elem: yes, set: A }),
+        sym(`A = ${st(A)} 일 때, □ 안에 ∈ 또는 ∉ 를 쓰시오.`, String(no), 'A', '∉', `${no} 은(는) A 에 없다 → ∉`, { elem: no, set: A }),
         pickNums(`${n}의 약수의 집합을 원소나열법으로 — 원소를 모두 고르시오.`, divisors(n), Math.max(10, n), `${n} = ${divisors(n).filter((d) => d * d <= n).map((d) => `${d}×${n / d}`).join(' = ')} → ${st(divisors(n))}`, { divOf: n }),
       ];
     } },
