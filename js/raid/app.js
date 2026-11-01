@@ -70,7 +70,9 @@ DS.App = (function () {
   }
   // 차시 고르기 목록 (코드 차시 + 엑셀 차시)
   function fillLessons() {
-    const opts = DS.Lessons.list.map((l) => `<option value="${l.id}">${l.sheetLesson ? '📊 ' : ''}${esc(l.unit || '')} · ${esc(l.title)}</option>`).join('');
+    // v0.8.4: 차시 번호 · 제목을 앞에 (칸이 좁아도 무엇인지 보이게), 차시 순서대로
+    const unitShort = (u) => String(u || '').replace(/^공통수학2\s*/, '').replace(/\s*·\s*\d+차시$/, '');
+    const opts = DS.Lessons.list.slice().sort((a, b) => (a.no || 99) - (b.no || 99)).map((l) => `<option value="${l.id}">${l.sheetLesson ? '📊 ' : ''}${l.no ? `${l.no}차시 · ` : ''}${esc(l.title)}${l.unit ? ` (${esc(unitShort(l.unit))})` : ''}</option>`).join('');
     ['#lesson', '#p-lesson', '#x-lesson'].forEach((k) => { const el = $(k); if (el) { const v = el.value; el.innerHTML = opts; if (v) el.value = v; } });
   }
   function form(which) {
@@ -179,7 +181,7 @@ DS.App = (function () {
       const cs = Object.keys((await A().masks()) || {}).sort();
       $('#t-cls').innerHTML = cs.length ? cs.map((c) => `<option>${esc(c)}</option>`).join('') : '<option value="">(명단 없음 — 수업 준비에서 올려요)</option>';
       const t = read('citadel-teacher');
-      if (t && t.uid === DS.Net.uid()) { $('#t-resume').hidden = false; $('#t-resume').textContent = `↩ 수업 ${t.code} 이어서`; }
+      $('#t-resume').hidden = true; // 「📋 만든 수업」 목록으로 합침 (v0.8.4)
       liveList(cs);
       return;
     }
@@ -222,18 +224,43 @@ DS.App = (function () {
     $('#s-go').onclick = go(async () => DS.Students.enter());
     $('#x-go').onclick = go(async () => { if (!(await A().isAdmin())) throw Object.assign(new Error('교사 계정으로 로그인해야 해요.'), { user: true }); await DS.Test.start($('#x-lesson').value); });
   }
-  // v0.8.1: 교사 메뉴 「진행 중인 수업」 — 수업 끝을 안 누르고 나갔어도 여기서 이어서 · 끝내기 (다른 기기에서도)
+  // v0.8.4: 교사 메뉴 「📋 만든 수업」 — 반 · 차시 · 코드 · 진행 중/끝남 → [↩ 들어가기] [✕ 없애기]
+  // 목록 = 반마다 마지막 차원문(live/{반}, 다른 기기에서 만든 것도) + 이 기기에서 만든 수업 기록(citadel-rooms)
+  const ROOMS = 'citadel-rooms';
+  const roomsGet = () => { try { return JSON.parse(localStorage.getItem(ROOMS)) || []; } catch (e) { return []; } };
+  const roomsSet = (a) => { try { localStorage.setItem(ROOMS, JSON.stringify(a.slice(0, 30))); } catch (e) { /* 무시 */ } };
   async function liveList(cs) {
     const box = $('#t-live'); if (!box) return;
-    const rows = [];
+    const me = DS.Net.uid(), byCode = {};
+    roomsGet().filter((r) => r.uid === me).forEach((r) => { byCode[r.code] = { ...r }; });
     for (const c of cs) {
-      const lv = await DS.Net.get(`live/${String(c).replace(/[.#$/[\]]/g, '_')}`).catch(() => null);
-      if (lv && lv.open && lv.code) rows.push({ c, lv, stale: !DS.Raid.liveOpen(lv, Date.now()) });
+      const lv = await DS.Net.get(`live/${String(c).replace(/[.#$/[\\]]/g, '_')}`).catch(() => null);
+      if (lv && lv.code) byCode[lv.code] = { ...(byCode[lv.code] || {}), code: lv.code, cls: c, lesson: lv.lesson, no: lv.no, at: byCode[lv.code] ? byCode[lv.code].at : lv.at, live: lv };
     }
-    box.innerHTML = rows.length ? `<p class="t-sec"><b>⏳ 진행 중인 수업</b></p>${rows.map((r) => `<div class="wrow"><span>${r.lv.no ? `${r.lv.no}차시 · ` : ''}${esc(r.c)} <span class="muted small">코드 ${esc(r.lv.code)}${r.stale ? ' · 2시간 지남 (학생 화면에선 꺼짐)' : ''}</span></span>
-      <button class="btn small" data-lgo="${esc(r.lv.code)}">↩ 이어서</button><button class="btn small" data-lend="${esc(r.lv.code)}">⏹ 끝내기</button></div>`).join('')}` : '';
+    const list = await Promise.all(Object.values(byCode).map(async (r) => {
+      const st = await DS.Net.get(`rooms/${r.code}/state`).catch(() => null), meta = await DS.Net.get(`rooms/${r.code}/meta`).catch(() => null);
+      if (!meta) return null; // 이미 없는 수업
+      const open = !(st && st.closed) && (!r.live || DS.Raid.liveOpen(r.live, Date.now()));
+      return { ...r, lesson: r.lesson || meta.lesson, cls: r.cls || meta.cls, open, step: st ? st.step : -1 };
+    }));
+    const rows = list.filter(Boolean).sort((x, y) => (y.open - x.open) || ((Number(y.at) || 0) - (Number(x.at) || 0)));
+    const when = (t) => { const d = new Date(Number(t)); return Number(t) ? `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}` : ''; };
+    box.innerHTML = rows.length ? `<p class="t-sec"><b>📋 만든 수업</b> <span class="muted small">들어가기 · 없애기</span></p>${rows.map((r) => {
+      const L = DS.Lessons.get(r.lesson);
+      return `<div class="t-room${r.open ? ' on' : ''}"><div><b>${esc(r.cls || '-')}반 · ${L && L.no ? `${L.no}차시 ` : ''}${esc(L ? L.title : r.lesson || '')}</b>
+        <span class="muted small">코드 ${esc(r.code)} · ${r.open ? (r.step >= 0 ? '🟢 진행 중' : '🟡 대기실') : '⚪ 끝남'}${when(r.at) ? ` · ${when(r.at)}` : ''}</span></div>
+        <button class="btn small" data-lgo="${esc(r.code)}">↩ 들어가기</button><button class="btn small t-x" data-lx="${esc(r.code)}" data-lcls="${esc(r.cls || '')}" data-lopen="${r.open ? 1 : 0}" aria-label="없애기">✕</button></div>`;
+    }).join('')}` : '';
     box.querySelectorAll('[data-lgo]').forEach((b) => (b.onclick = () => DS.Control.run(async () => { const sec = await DS.Net.get(`secrets/${b.dataset.lgo}`).catch(() => null); await DS.Teacher.open(b.dataset.lgo, sec && sec.hallKey); })));
-    box.querySelectorAll('[data-lend]').forEach((b) => (b.onclick = () => DS.Control.run(async () => { if (!confirm(`수업 ${b.dataset.lend} 을(를) 끝낼까요? 학생은 결과를 보고 모닥불로 가고, 차원문은 꺼져요.`)) return; await DS.Act.endClass(b.dataset.lend); DS.UI.toast('수업을 끝냈어요.'); liveList(cs); })));
+    box.querySelectorAll('[data-lx]').forEach((b) => (b.onclick = () => DS.Control.run(async () => {
+      const code = b.dataset.lx, open = b.dataset.lopen === '1';
+      if (!confirm(open ? `수업 ${code} 을(를) 끝내고 목록에서 없앨까요?\n학생은 결과를 보고 모닥불로 가고, 차원문은 사라져요.` : `수업 ${code} 을(를) 목록에서 없앨까요?\n(모닥불의 꺼진 차원문도 사라져요)`)) return;
+      if (open) await DS.Act.endClass(code);
+      const cls = b.dataset.lcls;
+      if (cls) { const k = `live/${String(cls).replace(/[.#$/[\\]]/g, '_')}`; const lv = await DS.Net.get(k).catch(() => null); if (lv && lv.code === code) await DS.Net.remove(k).catch(() => {}); }
+      roomsSet(roomsGet().filter((r) => r.code !== code));
+      DS.UI.toast('목록에서 없앴어요.'); liveList(cs);
+    })));
   }
   return { boot, fillLessons };
 })();
