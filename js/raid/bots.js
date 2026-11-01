@@ -19,6 +19,7 @@ DS.Bots = (function () {
       case 'blanks': { const g = q.items.map((i) => i.answer); if (!right) g[0] = q.options.find((o) => o !== g[0]); return g; }
       case 'ox': return right ? q.answer : !q.answer;
       case 'number': return right ? q.answer : q.answer + 1;
+      case 'text': return right ? q.answers[0] : '모름';
       case 'multi': return right ? q.answer.slice() : q.answer.slice(1).concat(q.options.findIndex((_, i) => !q.answer.includes(i)));
       case 'subsets': { const all = S.allSubsets(q.base); return right ? all : all.slice(1); }
       default: return right ? q.answerIndex : (q.answerIndex + 1) % q.choices.length;

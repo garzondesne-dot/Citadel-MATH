@@ -16,6 +16,7 @@ DS.Quiz = (function () {
       case 'blanks': return prob.items.every((it, k) => given[k] === it.answer);
       case 'ox': return given === prob.answer;
       case 'number': return Number(given) === prob.answer;
+      case 'text': return (prob.answers || []).some((a) => String(a).replace(/\s+/g, '').toLowerCase() === String(given == null ? '' : given).replace(/\s+/g, '').toLowerCase());
       case 'multi': return given.slice().sort().join(',') === prob.answer.slice().sort().join(',');
       case 'subsets': {
         const want = new Set(S().allSubsets(prob.base).map(S().key));
@@ -170,6 +171,20 @@ DS.Quiz = (function () {
           finish(ok, ok ? '' : `정답은 ${String(prob.answer).replace('-', '−')}`);
         });
         sub.disabled = true;
+      } else if (t === 'text') {
+        // 단답: 짧은 글자 입력 (띄어쓰기 · 대소문자 무시, 정답 여러 개 허용)
+        const inp = document.createElement('input');
+        inp.className = 'q-text'; inp.maxLength = 40; inp.placeholder = '답을 입력하세요'; inp.autocomplete = 'off';
+        box.appendChild(inp);
+        const sub = submitBtn('제출', () => {
+          const v = inp.value.trim(); if (!v) return;
+          if (collect(v)) return;
+          inp.disabled = true;
+          const ok = grade(prob, v);
+          finish(ok, ok ? '' : `정답은 ${prob.answers[0]}`);
+        });
+        inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') sub.click(); });
+        setTimeout(() => inp.focus(), 50);
       } else if (t === 'multi') {
         const on = new Set();
         prob.options.forEach((o, i) => {

@@ -20,7 +20,8 @@ DS.App = (function () {
     DS.Nav.init();
     $('#mode').innerHTML = DS.Net.mode === 'local' ? '🧪 이 기기 체험 모드 <span class="muted">(Firebase 미설정 — 같은 브라우저 탭끼리만 연결)</span>' : '🌐 실시간 연결 (Firebase)';
     $('#ver').textContent = DS.VERSION;
-    $('#lesson').innerHTML = $('#p-lesson').innerHTML = $('#x-lesson').innerHTML = DS.Lessons.list.map((l) => `<option value="${l.id}">${esc(l.unit || '')} · ${esc(l.title)}</option>`).join('');
+    await DS.SheetLesson.loadAll(); // 엑셀로 만든 차시 (서버 sheets/)
+    fillLessons();
     bind();
     await studentAuth();
     await teacherAuth();
@@ -65,6 +66,11 @@ DS.App = (function () {
     $('#splash-ver').textContent = DS.VERSION;
     const go1 = () => { $('#splash').onclick = null; DS.Sound.clank(); DS.UI.show('screen-home'); };
     $('#splash').onclick = go1;
+  }
+  // 차시 고르기 목록 (코드 차시 + 엑셀 차시)
+  function fillLessons() {
+    const opts = DS.Lessons.list.map((l) => `<option value="${l.id}">${l.sheetLesson ? '📊 ' : ''}${esc(l.unit || '')} · ${esc(l.title)}</option>`).join('');
+    ['#lesson', '#p-lesson', '#x-lesson'].forEach((k) => { const el = $(k); if (el) { const v = el.value; el.innerHTML = opts; if (v) el.value = v; } });
   }
   function form(which) {
     document.querySelectorAll('.role-form').forEach((f) => (f.hidden = f.id !== `f-${which}`));
@@ -204,6 +210,6 @@ DS.App = (function () {
     $('#p-go').onclick = go(async () => DS.Prep.enter($('#p-lesson').value));
     $('#x-go').onclick = go(async () => { if (!(await A().isAdmin())) throw Object.assign(new Error('교사 계정으로 로그인해야 해요.'), { user: true }); await DS.Test.start($('#x-lesson').value); });
   }
-  return { boot };
+  return { boot, fillLessons };
 })();
 window.addEventListener('DOMContentLoaded', () => DS.App.boot());

@@ -725,3 +725,10 @@ body:has(#test-bar) #screen-student .wrap { padding-bottom: 90px; max-width: 460
 .cf-bar span { position: relative; display: block; text-align: center; font-size: 12px; line-height: 14px; text-shadow: 1px 1px 0 #000; }
 .cf-cards { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; min-height: 84px; }
 .cf-hint { margin: 6px 0 2px; font-size: 13px; }
+
+/* 엑셀 차시 · 단답 (v0.7.0) */
+.x-prev { margin-top: 8px; border-top: 1px dashed var(--line); padding-top: 8px; }
+.x-err { background: #4a1414; padding: 6px 8px; margin: 6px 0; font-size: 13px; }
+.x-warn { background: #3a2c10; padding: 6px 8px; margin: 6px 0; font-size: 13px; }
+.item-text, .q-text { width: 100%; font-size: 18px; padding: 8px; margin-top: 4px; }
+.q-text { margin-bottom: 8px; }

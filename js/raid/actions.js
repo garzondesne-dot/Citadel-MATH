@@ -26,7 +26,8 @@ DS.Act = (function () {
     if (cls) room.meta.cls = String(cls);
     let think = null;
     try { think = await N().get(prepPath(lessonId, 'think')); } catch (e) { /* 기본 5초 */ }
-    room.meta.think = think != null ? Number(think) : 5;
+    const Lp = DS.Lessons.get(lessonId);
+    room.meta.think = think != null ? Number(think) : Lp && Lp.think != null ? Lp.think : 5;
     room.meta.created = N().TS;
     room.state.stepAt = N().TS;
     const hallKey = String(1000 + Math.floor(Math.random() * 9000));

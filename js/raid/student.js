@@ -189,7 +189,7 @@ DS.Student = (function () {
     drawn = sig;
     body.innerHTML = `<div class="panel framed">${scene(step, rec, hp, fx)}
       <h2 class="res-${label}">${head}</h2>
-      <div class="marks">${items.map((q, i) => `<div class="mark ${t.marks[i] ? 'ok' : 'ng'}"><b>${i + 1}</b> ${t.marks[i] ? '✔' : '✘'} <span class="math">${pretty(itemText(q))}</span>${t.marks[i] ? '' : `<br><span class="sol-line math">${pretty(q.solution || '')}</span>`}</div>`).join('')}</div>
+      <div class="marks">${items.map((q, i) => `<div class="mark ${t.marks[i] ? 'ok' : 'ng'}"><b>${i + 1}</b> ${t.marks[i] ? '✔' : '✘'} <span class="math">${pretty(itemText(q))}</span>${t.marks[i] ? '' : `<br><span class="sol-line math">${pretty(solOf(q))}</span>`}</div>`).join('')}</div>
       ${done ? '<p class="okc big-msg">🎉 몬스터 격파! 다음 신호를 기다려요.</p>'
         : rec.canRetry ? `<p>다시 해 보겠습니까? <span class="muted small">(남은 기회 ${Raid().RETRIES - rec.tries.length + 1}번 · 숫자가 모두 바뀌어요)</span></p><button class="btn primary big" id="st-retry">↻ 다시 도전</button>`
         : `<p class="muted">${rec.allRight ? '멋져요! 다른 용사들을 기다려요.' : '재도전 기회를 모두 썼어요. 해설을 보며 학습지에 정리해요.'} 데미지 <b>${rec.best}</b></p>`}
@@ -207,13 +207,14 @@ DS.Student = (function () {
   }
   const hpText = (body, hp) => { const t = body.querySelector('.scene-bar .muted'); if (t) t.textContent = `레이드 체력 ${hp.left} / ${hp.max}`; };
   const itemText = (q) => (q.type === 'blanks' ? q.items.map((it) => `${it.left} □ ${it.right}`).join('   ') : DS.UI.plain(q.question));
+  const solOf = (q) => q.solution || (q.type === 'text' ? `정답: ${q.answers.join(' / ')}` : '');
 
   function fightForm(body, step, rec, hp) {
     const mid = step.id, attempt = rec.nextAttempt, key = `${mid}|${attempt}`;
     const items = Raid().itemsFor(L, R, mid, me, attempt);
-    if (!form || form.key !== key) form = { key, given: items.map((q) => (q.type === 'multi' ? [] : q.type === 'number' ? 0 : null)) };
+    if (!form || form.key !== key) form = { key, given: items.map((q) => (q.type === 'multi' ? [] : q.type === 'number' ? 0 : q.type === 'text' ? '' : null)) };
     const prevWrong = rec.last ? rec.last.marks.map((m) => !m) : [];
-    const ready = items.every((q, i) => (q.type === 'multi' ? form.given[i].length > 0 : form.given[i] != null));
+    const ready = items.every((q, i) => (q.type === 'multi' ? form.given[i].length > 0 : q.type === 'text' ? String(form.given[i] || '').trim() !== '' : form.given[i] != null));
     const sig = `form|${key}|${JSON.stringify(form.given)}|${(R.help || {})[me] ? 1 : 0}`;
     if (sig === drawn && body.querySelector('.items')) { hpText(body, hp); return; }
     drawn = sig;
@@ -232,6 +233,13 @@ DS.Student = (function () {
       else if (t === 'ox') form.given[k] = v === 'O';
       else form.given[k] = [v];
       DS.Sound.clank(); render();
+    }));
+    // 단답 입력: 다시 그리지 않고 값만 기억 (글자 입력 중에 화면이 바뀌지 않게) · 공격 버튼만 켜고 끔
+    body.querySelectorAll('[data-text]').forEach((inp) => inp.addEventListener('input', () => {
+      form.given[Number(inp.dataset.text)] = inp.value;
+      const ok = items.every((q, j) => (q.type === 'multi' ? form.given[j].length > 0 : q.type === 'text' ? String(form.given[j] || '').trim() !== '' : form.given[j] != null));
+      const go = $('#st-go'); if (go) go.disabled = !ok;
+      drawn = `form|${key}|${JSON.stringify(form.given)}|${(R.help || {})[me] ? 1 : 0}`;
     }));
     body.querySelectorAll('[data-dial]').forEach((b) => b.addEventListener('click', () => {
       const [i, d] = b.dataset.dial.split('|').map(Number);
@@ -266,6 +274,9 @@ DS.Student = (function () {
       const v = form.given[i];
       return `<div class="item">${tag}${qText(q.question)}
         <div class="item-opts">${['O', 'X'].map((o) => `<button class="choice sym${v === (o === 'O') ? ' on' : ''}" data-pick="${i}|${o}">${o}</button>`).join('')}</div></div>`;
+    }
+    if (q.type === 'text') { // 단답: 글자 입력
+      return `<div class="item">${tag}${qText(q.question)}<input class="item-text" data-text="${i}" maxlength="40" placeholder="답을 입력하세요" value="${esc(form.given[i] || '')}" autocomplete="off"></div>`;
     }
     // number: 다이얼 (십의 자리 · 일의 자리)
     const v = form.given[i], t = Math.floor(v / 10), o = v % 10;

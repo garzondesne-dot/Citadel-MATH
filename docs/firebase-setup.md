@@ -30,6 +30,7 @@ Realtime Database → 규칙 → `firebase/database.rules.json` 전체를 붙여
 | `wordLock` | 교사 계정 (다음 차시에도 한마디 잠금) |
 | `live/{반}` (v0.5.1) | 교사 계정 (반별 차원문: 수업 만들 때 열림 · 끝나면 꺼짐) |
 | `prep/{차시}/think` (v0.5.1) | 교사 계정 (생각 시간 0~30초) |
+| `sheets/{id}` (v0.7.0) | 교사 계정 (엑셀로 만든 차시). 읽기는 로그인한 누구나 (학생 폰이 문제를 받아야 함) |
 
 ## 보안 규칙 요약 (`firebase/database.rules.json`)
 | 경로 | 쓰기 |

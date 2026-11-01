@@ -31,6 +31,7 @@ DS.Prep = (function () {
     const keep = { text: $('#r-text') ? $('#r-text').value : '', cls: $('#r-cls') ? $('#r-cls').value : null };
     $('#p-body').innerHTML = `<div class="panel framed"><h2>📋 수업 준비</h2><p class="muted small">명단·이미지는 Firebase 에만 저장돼요 (저장소에는 올라가지 않아요).</p></div>
       ${rosterPanel()}
+      ${sheetPanel()}
       <div class="panel framed"><h2>${esc(L.unit)} ${esc(L.title)}</h2>
         <p class="muted small">학습지: ${esc(L.sheet || '')} · 이미지는 종합상황실 화면 절반에 떠요.</p>
         <div class="pct-row"><span>몬스터 체력 기준% 기본값</span><input id="p-pct" type="number" min="10" max="100" step="5" value="${data.pct || L.defaultPct || 90}"><button class="btn" id="p-pct-save">저장</button><span class="muted small">수업 중에는 교사 폰에서 몬스터마다 바꿔요</span></div>
@@ -38,7 +39,7 @@ DS.Prep = (function () {
       ${pdfPanel()}
       ${slots.map(slotHtml).join('')}`;
     $('#r-text').value = keep.text; if (keep.cls != null) $('#r-cls').value = keep.cls;
-    bindRoster();
+    bindRoster(); bindSheet();
     $('#p-think').onchange = () => DS.Control.run(async () => { await DS.Act.setThink(L.id, Number($('#p-think').value)); DS.UI.toast('생각 시간을 저장했어요.'); });
     $('#p-pct-save').onclick = () => DS.Control.run(async () => { await DS.Act.setDefaultPct(L.id, Math.max(10, Math.min(100, Number($('#p-pct').value) || 90))); DS.UI.toast('기준% 기본값을 저장했어요. 새로 만드는 수업부터 적용돼요.'); });
     bindSlots();
@@ -185,6 +186,59 @@ DS.Prep = (function () {
         box.onpointerup = () => { box.onpointermove = null; box.onpointerup = null; };
       };
     });
+  }
+
+  // ── 📊 엑셀로 차시 만들기 (문제 은행) ─────────────────────────
+  let sheetDraft = null;
+  function sheetPanel() {
+    const mine = DS.Lessons.list.filter((l) => l.sheetLesson);
+    const d = sheetDraft;
+    return `<div class="panel framed"><h2>📊 엑셀로 차시 만들기</h2>
+      <p class="muted small">양식에 「차시 · 순서 · 문항」을 채워 올리면 레이드 수업 차시가 돼요. 문항마다 버전 0 = 학습지 원문(첫 시도), 버전 1·2 = 재도전용. <b>저장 전에 미리보기에서 정답을 꼭 확인</b>하세요.</p>
+      <div class="row"><a class="btn small" href="assets/templates/question-bank-v1.xlsx" download>⬇ 양식 내려받기 (.xlsx)</a><label class="btn small">📂 엑셀 올리기<input type="file" id="x-file" accept=".xlsx" hidden></label></div>
+      ${d ? `<div class="x-prev"><p class="gold">미리보기: ${esc(d.pack.unit)} · ${esc(d.pack.title)} <span class="muted small">(${esc(d.pack.id)})</span></p>
+        <table class="r-table"><tr><th>단계</th><th>종류</th><th>제목</th><th>문항</th></tr>${d.summary.map((s) => `<tr><td>${esc(s.id)}</td><td>${({ intro: '도입', concept: '개념', monster: '문제', boss: '형성평가' })[s.kind]}</td><td>${esc(s.title)}</td><td>${s.items || ''}</td></tr>`).join('')}</table>
+        ${d.errors.length ? `<div class="x-err"><b>❌ 고칠 것 ${d.errors.length}개</b><br>${d.errors.map(esc).join('<br>')}</div>` : ''}
+        ${d.warnings.length ? `<div class="x-warn"><b>⚠ 확인 ${d.warnings.length}개</b><br>${d.warnings.map(esc).join('<br>')}</div>` : ''}
+        ${d.errors.length ? '' : `<details><summary>문항 전체 보기 (정답 확인)</summary>${qList(d.pack)}</details>`}
+        <div class="row">${d.errors.length ? '' : '<button class="btn primary" id="x-save">✅ 이 차시 저장</button>'}<button class="btn small" id="x-drop">버리기</button></div></div>` : ''}
+      ${mine.length ? `<p class="shelf-title">저장된 엑셀 차시</p>${mine.map((l) => `<div class="wrow"><span>📊 ${esc(l.unit)} · ${esc(l.title)}</span><button class="btn small" data-xdel="${esc(l.id)}">지우기</button></div>`).join('')}` : ''}</div>`;
+  }
+  const ansText = (q) => (q.type === 'choice' ? `${q.answerIndex + 1}. ${q.choices[q.answerIndex]}` : q.type === 'ox' ? (q.answer ? 'O' : 'X') : q.type === 'multi' ? q.answer.map((i) => q.options[i]).join(', ') : q.type === 'blanks' ? q.items[0].answer : q.type === 'text' ? q.answers.join(' / ') : String(q.answer));
+  const qText0 = (q) => (q.type === 'blanks' ? `${q.question} ${q.items[0].left} □ ${q.items[0].right}` : q.question);
+  function qList(pack) {
+    const rows = [];
+    pack.steps.forEach((s) => {
+      const slots = s.kind === 'boss' ? (pack.boss ? pack.boss.sets[1].map((q, i) => [q, pack.boss.sets[2][i]]) : []) : pack.monsters[s.id] ? pack.monsters[s.id].slots : [];
+      slots.forEach((vs, k) => vs.forEach((q, v) => rows.push(`<tr><td>${esc(s.id)}-${k + 1}</td><td>${s.kind === 'boss' ? `세트${v + 1}` : `v${v}`}</td><td>${esc(qText0(q))}</td><td class="okc">${esc(ansText(q))}</td></tr>`)));
+    });
+    return `<table class="r-table"><tr><th>칸</th><th>버전</th><th>문제</th><th>정답</th></tr>${rows.join('')}</table>`;
+  }
+  function bindSheet() {
+    const f = $('#x-file');
+    if (f) f.onchange = () => DS.Control.run(async () => {
+      const file = f.files[0]; if (!file) return;
+      const tabs = await DS.Xlsx.read(await file.arrayBuffer());
+      if (!tabs['문항']) throw Object.assign(new Error('「차시 · 순서 · 문항」 탭이 있는 양식 파일인지 확인해 주세요.'), { user: true });
+      sheetDraft = DS.SheetLesson.build(tabs); render();
+      DS.UI.toast(sheetDraft.errors.length ? `고칠 것 ${sheetDraft.errors.length}개가 있어요` : '읽었어요! 미리보기를 확인하고 저장하세요', 3200);
+    });
+    const sv = $('#x-save');
+    if (sv) sv.onclick = () => DS.Control.run(async () => {
+      const p = sheetDraft.pack;
+      if (DS.Lessons.get(p.id) && !DS.Lessons.get(p.id).sheetLesson) throw Object.assign(new Error('기존 차시와 이름이 겹쳐요. 「차시」 탭의 제목이나 차시ID를 바꿔 주세요.'), { user: true });
+      if (DS.Lessons.get(p.id) && !confirm('같은 이름의 엑셀 차시가 있어요. 새 내용으로 바꿀까요?')) return;
+      await DS.Net.set(`sheets/${p.id}`, p);
+      DS.SheetLesson.attach(p); DS.App.fillLessons();
+      sheetDraft = null; render(); DS.UI.toast('저장했어요! 교사 메뉴의 차시 목록에 📊 로 나와요. 테스트 모드로 먼저 확인해 보세요.', 4200);
+    });
+    const dr = $('#x-drop'); if (dr) dr.onclick = () => { sheetDraft = null; render(); };
+    document.querySelectorAll('[data-xdel]').forEach((b) => (b.onclick = () => DS.Control.run(async () => {
+      if (!confirm('이 엑셀 차시를 지울까요? (진행한 수업 기록은 남아요)')) return;
+      await DS.Net.remove(`sheets/${b.dataset.xdel}`);
+      const i = DS.Lessons.list.findIndex((l) => l.id === b.dataset.xdel); if (i >= 0) DS.Lessons.list.splice(i, 1);
+      DS.App.fillLessons(); render();
+    })));
   }
 
   // ── 학생 명단 · 초기화 ────────────────────────────────────

@@ -3,15 +3,15 @@
 //  - 그림·글꼴·아이콘(assets/, icons/): 저장해 둔 것 먼저 → 처음 한 번만 받는다 (그림을 바꾸면 파일 이름을 바꾼다: heroes-v3 …)
 //  - Firebase(다른 주소)는 건드리지 않는다. 수업 진행에는 인터넷이 필요하다
 // 새 버전을 낼 때 CACHE 이름을 'ds-' + DS.VERSION 과 맞춘다 (tests/pwa.test.js 가 확인)
-const CACHE = 'ds-citadel-0.6.5';
+const CACHE = 'ds-citadel-0.7.0';
 const ASSETS = 'ds-assets';
 const CORE = [
   './', './index.html', './css/style.css', './manifest.webmanifest',
   './js/config.js', './assets/manifest.js',
-  './js/engine/ui.js', './js/engine/audio.js', './js/engine/setgen.js', './js/engine/quiz.js', './js/engine/lessons.js',
+  './js/engine/ui.js', './js/engine/audio.js', './js/engine/setgen.js', './js/engine/quiz.js', './js/engine/lessons.js', './js/engine/sheet-lesson.js',
   './lessons/set-02.js', './lessons/set-03.js', './js/engine/art.js', './js/engine/fx.js', './js/engine/qrcode.min.js', './js/engine/pwa.js',
   './js/raid/net.js', './js/raid/model.js', './js/raid/words.js', './js/raid/actions.js', './js/raid/account.js', './js/raid/control.js',
-  './lessons/unit-set.js', './js/raid/cards.js', './js/raid/forge.js', './js/raid/camp.js', './js/raid/student.js', './js/raid/bots.js', './js/raid/test.js', './js/raid/teacher.js', './js/raid/hall.js', './js/raid/prep.js', './js/raid/nav.js', './js/raid/app.js',
+  './lessons/unit-set.js', './js/raid/cards.js', './js/raid/forge.js', './js/raid/camp.js', './js/raid/student.js', './js/raid/bots.js', './js/raid/test.js', './js/raid/teacher.js', './js/raid/hall.js', './js/engine/xlsx-lite.js', './js/raid/prep.js', './js/raid/nav.js', './js/raid/app.js',
 ];
 const STATIC = [
   './assets/art/heroes-v2.webp', './assets/art/monsters-v2.webp', './assets/art/cards-v4.webp', './assets/art/frame-v2.webp', './assets/art/dungeon.webp', './assets/art/monsters-new-v1.webp', './assets/art/dg-02-deep-forest-v1.webp', './assets/art/dg-05-ruins-v1.webp', './assets/art/brand-m2-title-v2.webp', './assets/art/brand-m2-header-v2.webp', './assets/art/brand-bg-v1.webp', './assets/art/menu-icons-v1.webp', './assets/art/heroes-extra-v1.webp', './assets/art/card-frame-v1.webp', './assets/art/card-arts-v1.webp', './assets/art/forge-anvil-v1.webp', './assets/art/forge-hammer-v1.webp', './assets/art/camp-forest-v1.webp', './assets/art/campfire-v2.webp', './assets/art/portal-02-deep-forest-v1.webp', './assets/art/portal-05-ruins-v1.webp', './assets/art/camp-trees-v1.webp', './assets/art/anvil-v1.webp',

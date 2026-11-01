@@ -149,6 +149,12 @@
       "$c": {
         ".write": "auth != null && root.child('admins/'+auth.uid).val() === true"
       }
+    },
+    "sheets": {
+      ".read": "auth != null",
+      "$id": {
+        ".write": "auth != null && root.child('admins/'+auth.uid).val() === true"
+      }
     }
   }
 }
