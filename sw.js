@@ -10,7 +10,7 @@ const CORE = [
   './', './index.html', './css/style.css', './manifest.webmanifest',
   './js/config.js', './assets/manifest.js',
   './js/engine/ui.js', './js/engine/video.js', './js/engine/audio.js', './js/engine/setgen.js', './js/engine/quiz.js', './js/engine/lessons.js', './js/engine/sheet-lesson.js',
-  './lessons/set-02.js', './lessons/set-03.js', './lessons/set-04.js', './lessons/set-05.js', './js/engine/art.js', './js/engine/fx.js', './js/engine/qrcode.min.js', './js/engine/pwa.js',
+  './lessons/set-02.js', './lessons/set-03.js', './lessons/set-04.js', './lessons/set-05.js', './lessons/set-06.js', './js/engine/art.js', './js/engine/fx.js', './js/engine/qrcode.min.js', './js/engine/pwa.js',
   './js/raid/net.js', './js/raid/model.js', './js/raid/words.js', './js/raid/actions.js', './js/raid/account.js', './js/raid/control.js',
   './lessons/unit-set.js', './js/raid/cards.js', './js/raid/forge.js', './js/raid/grow.js', './js/raid/titles.js', './js/raid/result.js', './js/raid/sharecard.js', './js/raid/bonus.js', './js/raid/camp.js', './js/raid/tcamp.js', './js/raid/student.js', './js/raid/bots.js', './js/raid/test.js', './js/raid/teacher.js', './js/raid/hall.js', './js/engine/xlsx-lite.js', './js/raid/prep.js', './js/raid/students.js', './js/raid/nav.js', './js/raid/app.js',
 ];

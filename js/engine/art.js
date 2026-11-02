@@ -15,12 +15,16 @@ DS.Art = (function () {
   };
   // n = 숫자(기본 시트) 또는 'extra:3' · 'new:5' · 'crown:7' (추가 시트)
   const SHEETS = { extra: 'monstersExtra', new: 'monstersNew', crown: 'monstersCrown' };
+  // 몬스터 번호: 2 · 'extra:3' · 'crown:9' … 끝에 '@h150' 을 붙이면 색 변형 (hue-rotate 150°, v0.9.6 — 보강 · 돌려쓰기 보스용, 그림 0)
   function monster(n, pose = 'idle', cls = '') {
+    let hue = 0;
+    if (typeof n === 'string' && n.includes('@h')) { hue = Number(n.split('@h')[1]) || 0; n = n.split('@h')[0]; }
     const [k, i] = typeof n === 'string' && n.includes(':') ? n.split(':') : [null, n];
     const sheet = SHEETS[k] || 'monsters', s = A()[sheet];
     const row = Number(i) % s.rows;
     // 오른쪽을 보고 그려진 몬스터는 좌우를 뒤집어 왼쪽(용사 쪽)을 보게 한다 (배치표 flip)
-    return cell(sheet, s.poses[pose] || 0, row, `monster${(s.flip || []).includes(row) ? ' flip' : ''} ${cls}`);
+    const html = cell(sheet, s.poses[pose] || 0, row, `monster${(s.flip || []).includes(row) ? ' flip' : ''}${hue ? ' hue' : ''} ${cls}`);
+    return hue ? html.replace('style="', `style="--hue:${hue}deg;`) : html;
   }
   const card = (art, cls = '') => cell('cards', art % A().cards.cols, Math.floor(art / A().cards.cols) % A().cards.rows, `card-art ${cls}`);
   function css() { // 글꼴·프레임·배경을 배치표에서
@@ -40,7 +44,7 @@ ${(a.dungeons ? a.dungeons.ids : []).map((id) => `.bg-scene.th-${id}{background-
   // ── 차시별 다운로드 (v0.9.6): 처음엔 공통 그림만 받고(sw.js STATIC), 던전 그림은 그 차시에 들어갈 때 받는다 ──
   // lessonFiles(L) = 그 차시 던전 배경 · 포털 · 몬스터 시트 파일 이름 · prefetch = 미리 받기(서비스 워커가 저장)
   // trim(Ls) = 폰 저장소(ds-assets)에서 Ls 차시들(지금 + 바로 전)에 쓰지 않는 던전 그림을 지운다 (공통 그림은 그대로)
-  const sheetFile = (n) => { const [k] = typeof n === 'string' && n.includes(':') ? n.split(':') : [null]; return (A()[SHEETS[k] || 'monsters'] || {}).src; };
+  const sheetFile = (n) => { n = typeof n === 'string' ? n.split('@h')[0] : n; const [k] = typeof n === 'string' && n.includes(':') ? n.split(':') : [null]; return (A()[SHEETS[k] || 'monsters'] || {}).src; };
   function lessonFiles(L) {
     if (!L) return [];
     const a = A(), out = new Set();

@@ -1048,3 +1048,8 @@ body.forge-open .test-bar { display: none; } /* v0.9.3: 모루(한 화면)를 �
 .sh-l { margin: 6px 0; border: 1px solid var(--line); padding: 4px 8px; }
 .sh-l summary { cursor: pointer; padding: 4px 0; }
 .sh-row { display: flex; justify-content: space-between; align-items: center; gap: 6px; padding: 4px 0; border-top: 1px dashed #ffffff22; font-size: 14px; }
+/* v0.9.6 몬스터 색 변형 ('extra:3@h150' → --hue) — 보강던전 · 돌려쓰기 보스 */
+.art.monster.hue { filter: hue-rotate(var(--hue)) saturate(1.15); }
+.scene .art.monster.hue, .enc-mon .art.monster.hue { filter: drop-shadow(0 6px 8px #000c) hue-rotate(var(--hue)) saturate(1.15); }
+.raid-mon .art.monster.hue { filter: drop-shadow(0 10px 12px #000c) hue-rotate(var(--hue)) saturate(1.15); }
+.raid2-mon .art.monster.hue { filter: drop-shadow(0 12px 14px #000c) hue-rotate(var(--hue)) saturate(1.15); }
