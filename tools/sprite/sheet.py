@@ -15,6 +15,7 @@ os.makedirs(out, exist_ok=True)
 a = np.asarray(Image.open(src).convert('RGB')).astype(int)
 r, g, b = a[..., 0], a[..., 1], a[..., 2]
 bg = ((r > 170) & (b > 170) & (g < 110) & (abs(r - b) < 90)) | ((r > 150) & (b > 140) & (g < 130) & (abs(r - b) < 110))
+bg |= (r > 70) & (b > 120) & (g < 70) & (b > r * 0.8)  # 발밑 보라 그림자 · 분홍 번짐 (남색 외곽선은 r 이 작아 남는다)
 rgba = np.dstack([a, (~bg) * 255]).astype(np.uint8)
 fg = ~bg
 
