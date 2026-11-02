@@ -227,8 +227,13 @@
       boss: [{ p: 2, x: 0.5116, y: 0.103, w: 0.4458, h: 0.7156 }],
       b1: [{ p: 1, x: 0.0426, y: 0.6236, w: 0.4458, h: 0.1194 }], b2: [{ p: 1, x: 0.5116, y: 0.5174, w: 0.4458, h: 0.0869 }], b3: [{ p: 1, x: 0.5116, y: 0.7348, w: 0.4458, h: 0.1229 }], b4: [{ p: 2, x: 0.0426, y: 0.5903, w: 0.4458, h: 0.1681 }] },
     theme: '01-burrow', // 던전 테마: 땅굴 (배경 dg-01 · 포털 portal-01)
-    // 🎬 「공통수학2 > 05 모션그래픽」: (06차시) 09 드모르간 → c1 · m1 (나머지 개념은 새 영상 18번~ 예정)
-    videos: { c1: V('1o-r117sgFGMuX4oTKzkAdSBH60Mx-T2q'), m1: V('1o-r117sgFGMuX4oTKzkAdSBH60Mx-T2q') },
+    // 🎬 「공통수학2 > 05 모션그래픽」: (06차시) 09 드모르간 → c1 · m1 · 18 원소의 개수 → c2 · m2 · b1 · 19 생활 속 문제 → c3 · m3 · b2
+    //    · 20 명제 (정의 · 정리 포함) → c4 · m4 · b3 · b4 · 21 명제의 부정 → c5 · m5
+    videos: { c1: V('1o-r117sgFGMuX4oTKzkAdSBH60Mx-T2q'), m1: V('1o-r117sgFGMuX4oTKzkAdSBH60Mx-T2q'),
+      c2: V('1Vu-Bqa30xEe76gAI18hjaOWvr8X7plPZ'), m2: V('1Vu-Bqa30xEe76gAI18hjaOWvr8X7plPZ'), b1: V('1Vu-Bqa30xEe76gAI18hjaOWvr8X7plPZ'),
+      c3: V('17Y2f76lY5Rre8Sidf0ri382smhE6MEN1'), m3: V('17Y2f76lY5Rre8Sidf0ri382smhE6MEN1'), b2: V('17Y2f76lY5Rre8Sidf0ri382smhE6MEN1'),
+      c4: V('1P3IpuyM3TrewrodAd-O6djDFOmq9u5_J'), m4: V('1P3IpuyM3TrewrodAd-O6djDFOmq9u5_J'), b3: V('1P3IpuyM3TrewrodAd-O6djDFOmq9u5_J'), b4: V('1P3IpuyM3TrewrodAd-O6djDFOmq9u5_J'),
+      c5: V('1wB9NB74mB17CIr0bECaDDhQk45QPy5Gu'), m5: V('1wB9NB74mB17CIr0bECaDDhQk45QPy5Gu') },
     goal: '드모르간의 법칙을 이용한다 · 여집합 · 차집합의 원소의 개수를 구한다 · 명제와 그 부정의 참 · 거짓을 판별한다',
     defaultPct: 90,
     steps: STEPS,
