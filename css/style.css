@@ -1129,3 +1129,4 @@ body.forge-open .test-bar { display: none; } /* v0.9.3: 모루(한 화면)를 �
 /* 수업 중(차시 던전 열림): 보강던전 · 허수아비 비활성 (회색 · 반짝임 멈춤) */
 #screen-camp .camp-bonus.off .camp-bonus-img, #screen-camp .camp-prop.off .camp-prop-img { filter: grayscale(1) brightness(.55) !important; animation: none !important; }
 #screen-camp .camp-bonus.off::before, #screen-camp .camp-bonus.off::after { display: none; }
+#screen-camp .camp-anvil.off .camp-anvil-img { filter: grayscale(1) brightness(.55) !important; } /* 수업 중 모루 비활성 */

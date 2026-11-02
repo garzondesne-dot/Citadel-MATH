@@ -19,10 +19,11 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   // 2차시 수업 열기 (첫 수업과 같은 상황)
   await T.selectOption('#lesson', 'set-02'); await T.selectOption('#t-cls', '1-3'); await T.click('#t-new'); await T.waitForTimeout(2500);
   await S.bringToFront(); await S.waitForTimeout(1500);
-  const off = async () => S.evaluate(() => ['camp-bonus', 'camp-dummy'].map((id) => (document.getElementById(id) || {}).className || 'none').join(' | '));
+  const off = async () => S.evaluate(() => ['camp-bonus', 'camp-dummy', 'camp-anvil'].map((id) => (document.getElementById(id) || {}).className || 'none').join(' | '));
   console.log('수업 중 캠프:', await off());
   await S.click('#camp-dummy'); await S.waitForTimeout(500);
   console.log('허수아비 누름 → 안내:', (await S.textContent('#toast').catch(() => '')).trim().slice(0, 50), '· 화면:', await S.evaluate(() => document.querySelector('.screen.active') && document.querySelector('.screen.active').id));
+  await S.click('#camp-anvil'); await S.waitForTimeout(500); console.log('모루 누름 → 화면:', await S.evaluate(() => document.querySelector('.screen.active').id), '· 모루 창 열림:', await S.evaluate(() => document.body.classList.contains('forge-open')));
   await S.screenshot({ path: `${OUT}/1-class-locked.png` });
   // 다른 길로 들어가 보기 (예전 화면이 남아 있는 경우)
   const sneak = await S.evaluate(async () => { const m = JSON.parse(localStorage.getItem('citadel-me') || 'null'); return !!m; });

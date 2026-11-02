@@ -30,10 +30,10 @@ DS.Camp = (function () {
   const D = () => DS.ASSETS.dungeons;
   // 한 화면에 전체가 보이므로 차원문이 열리면 반짝 강조만
   function showGate() { const g = document.getElementById('camp-gate'); if (g) { g.classList.remove('flash'); void g.offsetWidth; g.classList.add('flash'); } }
-  // 수업 중(차시 던전 열림)에는 보강던전 · 허수아비를 회색으로 (누르면 안내만)
+  // 수업 중(차시 던전 열림)에는 보강던전 · 허수아비 · 모루를 회색으로 (누르면 안내만)
   const inClass = () => !!(live && live.open);
   function lockSide() {
-    ['camp-bonus', 'camp-dummy'].forEach((id) => { const b = document.getElementById(id); if (b) b.classList.toggle('off', inClass()); });
+    ['camp-bonus', 'camp-dummy', 'camp-anvil'].forEach((id) => { const b = document.getElementById(id); if (b) b.classList.toggle('off', inClass()); });
   }
   function drawGate() {
     lockSide();
@@ -66,8 +66,8 @@ DS.Camp = (function () {
       <div class="camp-bar"><span class="muted small">🎯 허수아비 · 📚 책장 · 📮 우편함을 눌러 보세요</span><button class="btn small" id="camp-code">코드로 입장</button></div>
       <div class="camp-forge panel framed" id="camp-forge"><p class="muted small">연성 정보를 불러오는 중…</p></div>`;
     forgeInfo();
-    $('#camp-anvil').onclick = () => pick('#camp-anvil', () => DS.Forge.open(me));
-    const classOnly = (sel) => { nope(sel); DS.UI.toast(`🌀 지금은 ${live.no ? `${live.no}차시 ` : ''}수업 중이에요! 차시 던전으로 들어가요. (보강던전 · 허수아비는 수업이 끝나면 열려요)`, 3400); };
+    $('#camp-anvil').onclick = () => (inClass() ? classOnly('#camp-anvil') : pick('#camp-anvil', () => DS.Forge.open(me)));
+    const classOnly = (sel) => { nope(sel); DS.UI.toast(`🌀 지금은 ${live.no ? `${live.no}차시 ` : ''}수업 중이에요! 차시 던전으로 들어가요. (보강던전 · 허수아비 · 모루는 수업이 끝나면 열려요)`, 3400); };
     $('#camp-bonus').onclick = () => (inClass() ? classOnly('#camp-bonus') : pick('#camp-bonus', () => DS.Control.run(() => DS.Bonus.enter(me))));
     $('#camp-gate').onclick = () => {
       if (live && live.open) return pick('#camp-gate', () => DS.Control.run(() => enterCode(live.code)), 'portal');
@@ -134,8 +134,9 @@ DS.Camp = (function () {
       <div class="cf-cards">${have.slice(-4).reverse().map((c) => DS.Card.html(c, { w: 62 })).join('') || '<span class="muted small">아직 만든 카드가 없어요 — 모루에서 첫 카드를 만들어 봐요!</span>'}</div>
       ${next ? `<p class="cf-hint">💡 다음 레시피 힌트: <b>${esc(next.hint)}</b></p>` : '<p class="cf-hint okc">🎉 열린 레시피를 모두 모았어요!</p>'}
       <p class="muted small">✨ 숨겨진 용사: 1~3차시 도감 <b>${got3} / ${need3.length}</b>장 모으면 열려요</p>`;
-    const b = document.getElementById('cf-open'); if (b) b.onclick = () => DS.Forge.open(me);
-    el.querySelectorAll('.mcard').forEach((c) => (c.onclick = () => DS.Forge.open(me)));
+    const forgeGo = () => (inClass() ? DS.UI.toast('🌀 수업 중에는 모루를 쓸 수 없어요. 수업이 끝나면 열려요!', 3000) : DS.Forge.open(me));
+    const b = document.getElementById('cf-open'); if (b) b.onclick = forgeGo;
+    el.querySelectorAll('.mcard').forEach((c) => (c.onclick = forgeGo));
   }
   function animateFire() {
     clearInterval(fireT);
