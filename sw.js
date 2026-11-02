@@ -3,13 +3,13 @@
 //  - 그림·글꼴·아이콘(assets/, icons/): 저장해 둔 것 먼저 → 처음 한 번만 받는다 (그림을 바꾸면 파일 이름을 바꾼다: heroes-v3 …)
 //  - Firebase(다른 주소)는 건드리지 않는다. 수업 진행에는 인터넷이 필요하다
 // 새 버전을 낼 때 CACHE 이름을 'ds-' + DS.VERSION 과 맞춘다 (tests/pwa.test.js 가 확인)
-const CACHE = 'ds-citadel-0.9.2';
+const CACHE = 'ds-citadel-0.9.3';
 const ASSETS = 'ds-assets';
 const CORE = [
   './', './index.html', './css/style.css', './manifest.webmanifest',
   './js/config.js', './assets/manifest.js',
   './js/engine/ui.js', './js/engine/video.js', './js/engine/audio.js', './js/engine/setgen.js', './js/engine/quiz.js', './js/engine/lessons.js', './js/engine/sheet-lesson.js',
-  './lessons/set-02.js', './lessons/set-03.js', './lessons/set-04.js', './js/engine/art.js', './js/engine/fx.js', './js/engine/qrcode.min.js', './js/engine/pwa.js',
+  './lessons/set-02.js', './lessons/set-03.js', './lessons/set-04.js', './lessons/set-05.js', './js/engine/art.js', './js/engine/fx.js', './js/engine/qrcode.min.js', './js/engine/pwa.js',
   './js/raid/net.js', './js/raid/model.js', './js/raid/words.js', './js/raid/actions.js', './js/raid/account.js', './js/raid/control.js',
   './lessons/unit-set.js', './js/raid/cards.js', './js/raid/forge.js', './js/raid/grow.js', './js/raid/titles.js', './js/raid/result.js', './js/raid/sharecard.js', './js/raid/bonus.js', './js/raid/camp.js', './js/raid/tcamp.js', './js/raid/student.js', './js/raid/bots.js', './js/raid/test.js', './js/raid/teacher.js', './js/raid/hall.js', './js/engine/xlsx-lite.js', './js/raid/prep.js', './js/raid/students.js', './js/raid/nav.js', './js/raid/app.js',
 ];

@@ -91,7 +91,7 @@ DS.Quiz = (function () {
         prob.choices.forEach((ch, i) => {
           const b = document.createElement('button');
           b.className = 'choice';
-          b.innerHTML = `<span class="no">${i + 1}</span><span class="math">${pretty(ch)}</span>`;
+          b.innerHTML = `<span class="no">${i + 1}</span>${DS.UI.opt ? DS.UI.opt(ch) : `<span class="math">${pretty(ch)}</span>`}`;
           b.addEventListener('click', () => {
             if (done) return;
             if (collect(i)) { b.classList.add('on'); return; }

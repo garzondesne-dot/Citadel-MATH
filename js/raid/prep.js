@@ -164,17 +164,64 @@ DS.Prep = (function () {
     render();
   }
   const guessRects = (id) => ((L.crops || {})[id] || [{ p: 1, x: 0.05, y: 0.1, w: 0.44, h: 0.3 }]).map((r) => ({ ...r }));
-  // 조각들을 위아래로 이어 붙이고 가로 1400px 이하 JPEG 로
+  // v0.9.3 (사용자 결정 ②A): 조각을 위아래로만 붙이면 세로로 길어 큰 화면에서 글자가 작아진다
+  //   → 세로로 길면 좌우 단(최대 3단)으로 나란히 놓고, 한 조각이 길면 가운데쯤 빈 줄에서 잘라 옆 단으로 보낸다. 넓으면 그대로
+  // plan(조각 크기들, 자르기 함수) → { cols: [[{ pi, y0, h }]], W, H } (조각 좌표 기준 · 순수 계산이라 tests/prep.test.js 가 확인)
+  // 고르는 기준 = 종합상황실 칸(가로:세로 ≈ 1.4)에 넣었을 때 글자가 가장 크게 보이는 배치 (단을 늘릴수록 조금 감점)
+  function plan(pieces, split, box = 1.4) {
+    const gap = 0.04 * Math.max(...pieces.map((q) => q.w));
+    let best = null;
+    for (let c = 1; c <= 3; c++) {
+      let segs = pieces.map((q, pi) => ({ pi, y0: 0, h: q.h, w: q.w }));
+      while (segs.length < c) {
+        const i = segs.reduce((m, sg, k) => (sg.h > segs[m].h ? k : m), 0), sg = segs[i];
+        const y = split(sg); if (!(y > sg.h * 0.2 && y < sg.h * 0.8)) break;
+        segs.splice(i, 1, { ...sg, h: y }, { ...sg, y0: sg.y0 + y, h: sg.h - y });
+      }
+      if (segs.length < c) continue;
+      // 순서를 지키며 c 단으로 나누기: 가장 높은 단이 가장 낮아지게 (조각 수가 적어 모든 경우를 본다)
+      let cut = null;
+      const tryCuts = (start, left, acc) => {
+        if (left === 1) { const cols = [...acc, segs.slice(start)]; const hh = Math.max(...cols.map((col) => col.reduce((a, sg) => a + sg.h, 0) + gap * (col.length - 1))); if (!cut || hh < cut.H) cut = { cols, H: hh }; return; }
+        for (let e = start + 1; e <= segs.length - left + 1; e++) tryCuts(e, left - 1, [...acc, segs.slice(start, e)]);
+      };
+      tryCuts(0, c, []);
+      const W = cut.cols.reduce((a, col) => a + Math.max(...col.map((sg) => sg.w)), 0) + gap * (c - 1), score = Math.min(box / W, 1 / cut.H) * (1 - 0.06 * (c - 1));
+      if (!best || score > best.score) best = { cols: cut.cols, W, H: cut.H, gap, score };
+    }
+    return best;
+  }
+  // 빈 줄 찾기: 조각 가운데 30~70% 높이에서 가장 하얀 줄들의 한가운데 (글자를 자르지 않게)
+  function whiteRow(part, sg) {
+    try {
+      const c = document.createElement('canvas'), sc = Math.min(1, 400 / part.sw), w = Math.max(1, Math.round(part.sw * sc)), h = Math.max(1, Math.round(sg.h * sc));
+      c.width = w; c.height = h; const g = c.getContext('2d'); g.drawImage(part.pg, part.sx, part.sy + sg.y0, part.sw, sg.h, 0, 0, w, h);
+      const d = g.getImageData(0, 0, w, h).data, lum = [];
+      for (let y = 0; y < h; y++) { let m = 255; for (let x = 0; x < w; x += 2) { const i = (y * w + x) * 4; m = Math.min(m, (d[i] + d[i + 1] + d[i + 2]) / 3); } lum.push(m); }
+      const a = Math.floor(h * 0.3), b = Math.ceil(h * 0.7); let bestRun = null, run = null;
+      for (let y = a; y <= b; y++) {
+        if (lum[y] >= 235) { run = run ? { s: run.s, e: y } : { s: y, e: y }; } else run = null;
+        if (run) { const len = run.e - run.s, mid = (run.s + run.e) / 2, cost = -len + Math.abs(mid - h / 2) * 0.05; if (!bestRun || cost < bestRun.cost) bestRun = { mid, cost }; }
+      }
+      return (bestRun ? bestRun.mid : h / 2) / sc;
+    } catch (e) { return sg.h / 2; }
+  }
   function cut(rects) {
     const parts = rects.map((r) => {
       const pg = pages[Math.min(pages.length, Math.max(1, r.p)) - 1];
       return { pg, sx: r.x * pg.width, sy: r.y * pg.height, sw: r.w * pg.width, sh: r.h * pg.height };
     });
-    const W = Math.max(...parts.map((q) => q.sw)), k = Math.min(1, 1280 / W);
-    const cv = document.createElement('canvas'); cv.width = Math.round(W * k); cv.height = Math.round(parts.reduce((a, q) => a + q.sh, 0) * k);
+    const P = plan(parts.map((q) => ({ w: q.sw, h: q.sh })), (sg) => whiteRow(parts[sg.pi], sg));
+    const k = Math.min(1, 1800 / P.W);
+    const cv = document.createElement('canvas'); cv.width = Math.round(P.W * k); cv.height = Math.round(P.H * k);
     const g = cv.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, cv.width, cv.height);
-    let y = 0;
-    parts.forEach((q) => { g.drawImage(q.pg, q.sx, q.sy, q.sw, q.sh, 0, y, q.sw * k, q.sh * k); y += q.sh * k; });
+    let x = 0;
+    P.cols.forEach((col, ci) => {
+      let y = 0; const cw = Math.max(...col.map((sg) => sg.w));
+      col.forEach((sg) => { const q = parts[sg.pi]; g.drawImage(q.pg, q.sx, q.sy + sg.y0, q.sw, sg.h, x * k, y * k, q.sw * k, sg.h * k); y += sg.h + P.gap; });
+      if (ci < P.cols.length - 1) { g.fillStyle = '#d0d4dc'; g.fillRect((x + cw + P.gap / 2) * k - 1, 0, 2, cv.height); g.fillStyle = '#fff'; }
+      x += cw + P.gap;
+    });
     return toUrl(cv);
   }
   // 서버 부하 줄이기: WebP 품질 0.85 (같은 화질에서 JPEG 보다 30% 안팎 작음). WebP 를 못 만드는 기기면 JPEG
@@ -293,5 +340,5 @@ DS.Prep = (function () {
       rd.readAsDataURL(file);
     });
   }
-  return { enter };
+  return { enter, plan };
 })();

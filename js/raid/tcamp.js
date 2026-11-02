@@ -20,7 +20,7 @@ DS.TCamp = (function () {
     hall = !!o.hall;
     if (!hall && !(await DS.Account.isAdmin())) throw Object.assign(new Error('교사 계정으로 로그인해야 해요.'), { user: true });
     code = o.code || ''; hallKey = o.hallKey || ''; R = null; L = null; wasLobby = null;
-    DS.UI.show('screen-tcamp');
+    DS.UI.show('screen-tcamp'); DS.UI.wake.on(); // 교사 캠프 · 종합상황실 캠프도 화면 켜 둠
     document.getElementById('screen-tcamp').classList.toggle('tc-hallmode', hall);
     if (!hall) DS.Scene.save({ role: 'tcamp', code, hallKey }); // 종합상황실 기기는 장면을 종합상황실로 둔다 (새로고침 → 종합상황실)
     render();
@@ -60,8 +60,8 @@ DS.TCamp = (function () {
     if (info && R) { const studs = Object.values(R.players || {}).filter((p) => !p.teacher).length; info.innerHTML = `${R.meta.cls ? `${esc(R.meta.cls)}반 · ` : ''}${L ? esc(L.title) : ''} · <b class="gold">입장 ${studs}명</b>${DS.Raid.isLobby(R) ? ' · 대기 중' : closed ? ' · 끝' : ' · 진행 중'}`; }
     const bar = $('#tc-bar');
     if (bar) {
-      bar.innerHTML = `${hall ? '<button class="btn small" id="tc-menu">🖥 종합상황실로</button>' : `<button class="btn small" id="tc-menu">≪ 교사 메뉴</button>${code ? `<button class="btn small" id="tc-hall">🖥 종합상황실 키 ${esc(hallKey || '—')}</button>` : ''}`}${DS.ShareCard.klassReady(L, R) ? '<button class="btn small sc-btn" id="tc-news">🏫 학급 결과</button>' : ''}`;
-      $('#tc-menu').onclick = leave;
+      bar.innerHTML = `${hall ? `<button class="btn small" id="tc-menu">🖥 종합상황실로</button>${DS.UI.fs.btn('tc-fs')}` : `<button class="btn small" id="tc-menu">≪ 교사 메뉴</button>${code ? `<button class="btn small" id="tc-hall">🖥 종합상황실 키 ${esc(hallKey || '—')}</button>` : ''}`}${DS.ShareCard.klassReady(L, R) ? '<button class="btn small sc-btn" id="tc-news">🏫 학급 결과</button>' : ''}`;
+      $('#tc-menu').onclick = leave; DS.UI.fs.bind('tc-fs');
       const hb = $('#tc-hall'); if (hb) hb.onclick = () => DS.UI.toast(`종합상황실(교실 PC)에서 수업 코드 ${code} · 키 ${hallKey} 를 넣어요`, 4000);
       const nb = $('#tc-news'); if (nb) nb.onclick = () => DS.Control.run(() => DS.ShareCard.klassOpen(L, R, { praise: !hall }));
     }

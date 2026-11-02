@@ -1,7 +1,7 @@
 // 성장 · 보강던전 · 개인 결과 검증: node tests/grow.test.js
 // (1) EXP 표 · 레벨 경계 · 칭호  (2) 보강 인장 · 화려한 이펙트 해금 (인장 1·2·4·6·8·10개)  (3) 개인 결과: 첫 시도 / 고침 / 못 맞힘 · 개념별 · 복습 추천
 const load = require('./load');
-const DS = load(['assets/manifest.js', 'js/engine/ui.js', 'js/engine/setgen.js', 'js/engine/quiz.js', 'js/engine/lessons.js', 'lessons/set-02.js', 'lessons/set-03.js', 'lessons/set-04.js', 'js/engine/fx.js', 'js/raid/model.js', 'js/raid/grow.js', 'js/raid/bonus.js', 'js/raid/result.js', 'lessons/unit-set.js', 'js/raid/titles.js']);
+const DS = load(['assets/manifest.js', 'js/engine/ui.js', 'js/engine/setgen.js', 'js/engine/quiz.js', 'js/engine/lessons.js', 'lessons/set-02.js', 'lessons/set-03.js', 'lessons/set-04.js', 'lessons/set-05.js', 'js/engine/fx.js', 'js/raid/model.js', 'js/raid/grow.js', 'js/raid/bonus.js', 'js/raid/result.js', 'lessons/unit-set.js', 'js/raid/titles.js']);
 let fail = 0;
 const check = (c, m) => { if (!c) { fail++; console.error('FAIL:', m); } };
 const G = DS.Grow, B = DS.Bonus, X = DS.Raid;

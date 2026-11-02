@@ -22,6 +22,7 @@ DS.Teacher = (function () {
     if (!R0 || !R0.meta) throw Object.assign(new Error('수업을 찾을 수 없어요.'), { user: true });
     if (R0.meta.teacher !== DS.Net.uid()) throw Object.assign(new Error('이 기기에서 만든 수업이 아니에요.'), { user: true });
     code = c; wasClosed = null; curKey = hallKey || '';
+    DS.UI.wake.on(); // v0.9.3 긴급: 교사 폰 화면이 저절로 꺼지지 않게
     DS.UI.show('screen-teacher');
     DS.Scene.save({ role: 'teacher', code: c, hallKey: hallKey || '' });
     $('#t-key').textContent = hallKey || '';
