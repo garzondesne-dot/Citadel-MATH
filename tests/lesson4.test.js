@@ -98,7 +98,7 @@ check(L.items('m2', 'x', 0)[1].check.words.join() === '정삼각형,직각삼각
 // ── 3. 재도전 (시드 300개 × 2번) ─────────────────────────────
 for (const id of Object.keys(L.monsters)) {
   const n0 = L.items(id, 'x', 0).length;
-  for (let s = 0; s < 300; s++) for (const a of [1, 2]) {
+  for (let s = 0; s < 300; s++) for (const a of [1, 2, 3]) {
     const items = L.items(id, `seed${s}`, a);
     check(items.length === n0, `${id} 재도전 칸 수`);
     items.forEach((q, i) => verify(q, `${id}#${s}/${a}-${i + 1}`));

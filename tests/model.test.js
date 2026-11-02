@@ -1,5 +1,5 @@
 // 레이드 규칙 검증: node tests/model.test.js
-// 체력 = ⌊대기실 인원 × 소문제 수 × 기준%⌋ · 데미지 = 가장 많이 맞힌 수(늘어난 만큼만) · 재도전 2번 · 전원 1회 이상 제출 뒤 격파
+// 체력 = ⌊대기실 인원 × 소문제 수 × 기준%⌋ · 데미지 = 가장 많이 맞힌 수(늘어난 만큼만) · 재도전 3번 · 체력 0 이 되면 즉시 격파 (v0.9.2)
 // 미제출 제외 · 기준% 실시간 조정 · 보스 체력(1~6번) + 7번 보너스 · 체력 0 즉시 승리 · 도움 필요 목록
 const load = require('./load');
 const DS = load(['js/engine/ui.js', 'js/engine/setgen.js', 'js/engine/quiz.js', 'js/engine/lessons.js', 'lessons/set-03.js', 'js/raid/model.js']);
@@ -41,11 +41,12 @@ R.subs.m1.s03 = { 0: answer(R, 'm1', 's03', 0, 0) };
 check(X.resultLabel(X.record(L, R, 'm1', 's03').last) === 'fail', '0개 = 공격 실패');
 check(X.monsterHp(L, R, 'm1').dmg === 8, '데미지 합 4 + 4 + 0');
 
-// 전원 제출 전에는 체력이 0 이어도 격파 아님
+// v0.9.2: 체력이 0 이 되면 전원 제출 전이라도 그 자리에서 격파 (안 낸 학생은 계속 풀고 공격할 수 있음)
 ids.slice(3).forEach((u) => { R.subs.m1[u] = { 0: answer(R, 'm1', u, 0, 4) }; }); // 15명 × 4 = 60, 합 68
 R.subs.m1.s18 = undefined; delete R.subs.m1.s18; // 1명 미제출
 hp = X.monsterHp(L, R, 'm1');
-check(hp.left === 0 && !X.cleared(L, R, 'm1') && X.waiting(L, R, 'm1').join() === 's18', `체력 0 이지만 s18 미제출 → 판정 대기 ${JSON.stringify(hp)}`);
+check(hp.left === 0 && X.cleared(L, R, 'm1') && X.waiting(L, R, 'm1').join() === 's18', `체력 0 → s18 미제출이어도 격파 ${JSON.stringify(hp)}`);
+check(X.record(L, R, 'm1', 's18').submitted === false && !X.cleared(L, X.newRoom('9', L.id, 'T', 0, 90), 'm1'), '격파 뒤에도 s18 은 아직 제출 전 · 인원 0 인 방은 격파 아님');
 R.state.skip = { m1: { s18: true } };
 check(X.cleared(L, R, 'm1'), '미제출 학생 제외 → 격파');
 delete R.state.skip;
@@ -77,7 +78,7 @@ check(bh.dmg === 97 && bh.left === 0 && bh.won, `체력 0 → 즉시 승리 (미
 // 도움 필요: 직접 요청 > 재도전까지 못 맞힘 > 2분째 미제출
 R.state.step = 2; R.state.stepAt = 0;
 R.help = { s07: true };
-R.subs.m1.s09 = { 0: answer(R, 'm1', 's09', 0, 1), 1: answer(R, 'm1', 's09', 1, 2), 2: answer(R, 'm1', 's09', 2, 2) };
+R.subs.m1.s09 = { 0: answer(R, 'm1', 's09', 0, 1), 1: answer(R, 'm1', 's09', 1, 2), 2: answer(R, 'm1', 's09', 2, 2), 3: answer(R, 'm1', 's09', 3, 2) }; // 기회 4번 (재도전 3번)
 delete R.subs.m1.s10;
 const hl = X.helpList(L, R, 200000);
 check(hl[0].uid === 's07' && hl[0].why === '직접 요청', `도움 1순위 직접 요청 ${JSON.stringify(hl)}`);
@@ -108,4 +109,4 @@ R2.online = { a: true };
 check(X.online(R2, 'a') && !X.online(R2, 'b'), '접속 표시');
 
 if (fail) { console.error(`\n${fail}건 실패`); process.exit(1); }
-console.log('OK: 레이드 — 체력·기준%·데미지(늘어난 만큼)·재도전 2번·전원 제출 뒤 격파·미제출 제외·보스 즉시 승리·7번 보너스·도움 목록·마무리·집중모드·만점 통과');
+console.log('OK: 레이드 — 체력·기준%·데미지(늘어난 만큼)·재도전 3번·체력 0 즉시 격파·미제출 제외·보스 즉시 승리·7번 보너스·도움 목록·마무리·집중모드·만점 통과');

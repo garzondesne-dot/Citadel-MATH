@@ -218,5 +218,8 @@ DS.ShareCard = (function () {
     el.querySelector('#sc-save').onclick = () => DS.Control.run(async () => { const a = document.createElement('a'); a.href = c.toDataURL('image/png'); a.download = `${name}.png`; document.body.appendChild(a); a.click(); a.remove(); });
     return el;
   }
-  return { battle, math, klass, classStats, share, preview, W, H };
+  // v0.9.2: 🏫 학급 결과 — 마무리(또는 보스 격파) 뒤 어디서든 같은 카드 (교사 폰 · 교사 캠프 · 종합상황실 · 학생 대기실)
+  const klassReady = (L, R) => !!(L && R && (DS.Raid.isEnd(L, R) || DS.Raid.isClosed(R) || DS.Raid.bossHp(L, R).won));
+  const klassOpen = (L, R, o = {}) => preview((praise) => klass({ L, R, cls: R.meta.cls, praise }), `우리 반 수업 소식 · ${L.no ? `${L.no}차시 ` : ''}${L.title}`, `🏫 ${R.meta.cls ? `${R.meta.cls}반 ` : ''}공통수학2 ${L.title} 수업 소식`, { praise: !!o.praise });
+  return { battle, math, klass, classStats, share, preview, klassReady, klassOpen, W, H };
 })();

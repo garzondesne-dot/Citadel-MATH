@@ -39,7 +39,7 @@
           "$mid": {
             "$uid": {
               "$attempt": {
-                ".write": "auth != null && auth.uid === $uid && !data.exists() && root.child('rooms/'+$code+'/active/'+$uid).val() === true && ($attempt === '0' || $attempt === '1' || $attempt === '2')",
+                ".write": "auth != null && auth.uid === $uid && !data.exists() && root.child('rooms/'+$code+'/active/'+$uid).val() === true && ($attempt === '0' || $attempt === '1' || $attempt === '2' || $attempt === '3')",
                 ".validate": "newData.isString() && newData.val().length < 20000"
               }
             }

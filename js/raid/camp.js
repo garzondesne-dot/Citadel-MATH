@@ -46,7 +46,7 @@ DS.Camp = (function () {
   }
   function render() {
     const c = C();
-    $('#camp').innerHTML = `<div class="camp-top"><b>🔥 ${esc(me.name)}의 모닥불</b><span class="muted small">${DS.Titles && (me.title || 'dawn') !== 'none' ? `${DS.Titles.nameHtml({ title: me.title || 'dawn', nick: '' }, { num: false, size: 16 })} · ` : ''}${esc(me.c)} · ${me.n}번${DS.Grow ? ` · <b class="gold" id="camp-lv">Lv.-</b>` : ''}</span><button class="btn small camp-set" id="camp-set">⚙ 설정</button></div>
+    $('#camp').innerHTML = `<div class="camp-top"><b>🔥 ${esc(me.name)}의 모닥불</b><span class="muted small">${DS.Titles && (me.title || 'none') !== 'none' ? `${DS.Titles.nameHtml({ title: me.title || 'none', nick: '' }, { num: false, size: 16 })} · ` : ''}${esc(me.c)} · ${me.n}번${DS.Grow ? ` · <b class="gold" id="camp-lv">Lv.-</b>` : ''}</span><button class="btn small camp-set" id="camp-set">⚙ 설정</button></div>
       ${stampToday() ? '<div class="stamp-bar">📮 반드시 학습지 확인도장 받아가세요.</div>' : ''}
       <div class="camp-stage" style="background-image:url('${base()}${c.bg}')">
         ${tree(0, 'back', 'left:2%;bottom:30%;height:46%')}${tree(2, 'back', 'left:60%;bottom:32%;height:40%')}
@@ -69,6 +69,7 @@ DS.Camp = (function () {
       else DS.UI.toast('아직 열린 던전이 없어요. 선생님이 수업을 열면 차원문이 나타나요.', 3200);
     };
     if (DS.Grow) DS.Grow.mine(me).then((g) => { const el = document.getElementById('camp-lv'); if (el && g) el.textContent = `Lv.${g.lv} ${g.title}`; }).catch(() => {});
+    newTitles();
     $('#camp-code').onclick = codeGate;
     $('#camp-note').onclick = () => DS.Control.run(note);
     $('#camp-set').onclick = settings;
@@ -128,7 +129,7 @@ DS.Camp = (function () {
   async function enterCode(code) {
     if (me.test && DS.Test.active()) return DS.Test.join(code); // 🧪 테스트 모닥불
     try { localStorage.setItem('citadel-student', JSON.stringify({ code })); } catch (e) { /* 무시 */ }
-    await DS.Student.enter(code, { num: me.n, nick: me.name, hero: me.hero, fx: me.fx || 'flame', cls: me.c, title: me.title || 'dawn' });
+    await DS.Student.enter(code, { num: me.n, nick: me.name, hero: me.hero, fx: me.fx || 'flame', cls: me.c, title: me.title || 'none' });
   }
   // 📜 복습 노트: 차시별 결과 · 개념별 첫 시도 · 복습 추천 (records/{반}/{번호})
   async function note() {
@@ -158,10 +159,20 @@ DS.Camp = (function () {
       el.remove(); code0 = '';
     });
   }
+  // v0.9.2: 호칭은 자동으로 달지 않는다 → 새로 얻은 호칭만 알려 주고 ⚙ 설정에서 스스로 고르게 (레벨 칭호는 알리지 않음)
+  async function newTitles() {
+    if (!DS.Titles || me.test) return;
+    const k = `citadel-ttl-seen-${me.c}-${me.n}`;
+    let seen = null; try { seen = JSON.parse(localStorage.getItem(k)); } catch (e) { /* 무시 */ }
+    const got = DS.Titles.earned(await DS.Titles.data(me).catch(() => ({}))).filter((t) => !/^lv\d/.test(t.id));
+    const fresh = got.filter((t) => !(seen || []).includes(t.id));
+    try { localStorage.setItem(k, JSON.stringify(got.map((t) => t.id))); } catch (e) { /* 무시 */ }
+    if (fresh.length) DS.UI.toast(`🏅 새 호칭 ${fresh.slice(0, 2).map((t) => `[${t.name}]`).join(' ')}${fresh.length > 2 ? ` 외 ${fresh.length - 2}개` : ''} 획득! ⚙ 설정에서 이름 앞에 달 수 있어요`, 4200);
+  }
   // ⚙ 설정: 용사 · 공격 이펙트 (잠긴 것은 🔒 + 조건)
   async function settings() {
     const L = await DS.Account.looks(me);
-    let hero = me.hero, fx = me.fx || 'flame', title = me.title || 'dawn';
+    let hero = me.hero, fx = me.fx || 'flame', title = me.title || 'none';
     const TD = DS.Titles ? await DS.Titles.data(me).catch(() => ({})) : {}, got = DS.Titles ? DS.Titles.earned(TD).map((t) => t.id) : [];
     const el = document.createElement('div'); el.className = 'modal camp-modal';
     const draw = () => {
@@ -177,7 +188,7 @@ DS.Camp = (function () {
       el.querySelectorAll('[data-fx]').forEach((b) => (b.onclick = () => { const f = L.fx.find((x) => x.id === b.dataset.fx); if (!f.open) { DS.UI.toast(`🔒 ${f.cond || '해금 조건은 추후 공개'} — 보강던전에서 인장을 모아요`, 3200); return; } fx = f.id; draw(); DS.FX.play(el.querySelector(`[data-fx="${fx}"]`), fx, { scale: 0.45 }); DS.Sound.hit(); }));
       el.querySelectorAll('[data-ttl]').forEach((b) => (b.onclick = () => { if (b.classList.contains('lock')) { DS.UI.toast(`🔒 ${b.title}`, 2600); return; } title = b.dataset.ttl; DS.Sound.clank(); draw(); }));
       el.querySelector('#set-x').onclick = () => el.remove();
-      el.querySelector('#set-ok').onclick = () => DS.Control.run(async () => { if (me.test) DS.Test.setLook(hero, fx); else { await DS.Account.setLook(hero, fx); if (title !== (me.title || 'dawn')) await DS.Account.setTitle(title); } me.title = title; me.hero = hero; me.fx = fx; el.remove(); DS.UI.toast('저장했어요! 다음 입장부터 적용돼요.'); render(); });
+      el.querySelector('#set-ok').onclick = () => DS.Control.run(async () => { if (me.test) DS.Test.setLook(hero, fx); else { await DS.Account.setLook(hero, fx); if (title !== (me.title || 'none')) await DS.Account.setTitle(title); } me.title = title; me.hero = hero; me.fx = fx; el.remove(); DS.UI.toast('저장했어요! 다음 입장부터 적용돼요.'); render(); });
     };
     draw(); document.body.appendChild(el);
   }

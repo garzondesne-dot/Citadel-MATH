@@ -59,7 +59,7 @@ DS.App = (function () {
       else if (sc.role === 'tcamp' && (await A().isAdmin())) await DS.TCamp.enter(sc);
     } catch (e) { DS.Scene.clear(); DS.UI.toast(e.message || String(e), 3200); }
   }
-  const info = (m) => ({ num: m.n, nick: m.name, hero: m.hero, fx: m.fx || 'flame', cls: m.c, title: m.title || 'dawn' });
+  const info = (m) => ({ num: m.n, nick: m.name, hero: m.hero, fx: m.fx || 'flame', cls: m.c, title: m.title || 'none' });
   // 시작 화면: 큰 제목 그림 → 화면을 터치하면 첫 화면 (주소로 바로 들어오거나 새로고침 복귀 · 체험판 안에서는 건너뜀)
   const inFrame = () => { try { return window.top !== window.self; } catch (e) { return true; } };
   function splash(on) {
@@ -255,7 +255,7 @@ DS.App = (function () {
     box.querySelectorAll('[data-lgo]').forEach((b) => (b.onclick = () => DS.Control.run(async () => { const sec = await DS.Net.get(`secrets/${b.dataset.lgo}`).catch(() => null); await DS.Teacher.open(b.dataset.lgo, sec && sec.hallKey); })));
     box.querySelectorAll('[data-lnews]').forEach((b) => (b.onclick = () => DS.Control.run(async () => {
       const R = DS.Act.unpackRoom(await DS.Net.get(`rooms/${b.dataset.lnews}`)); const L = DS.Lessons.get(R.meta.lesson);
-      await DS.ShareCard.preview((praise) => DS.ShareCard.klass({ L, R, cls: R.meta.cls, praise }), `우리 반 수업 소식 · ${L.no ? `${L.no}차시 ` : ''}${L.title}`, `🏫 ${R.meta.cls ? `${R.meta.cls}반 ` : ''}공통수학2 ${L.title} 수업 소식`, { praise: true });
+      await DS.ShareCard.klassOpen(L, R, { praise: true });
     })));
     box.querySelectorAll('[data-lx]').forEach((b) => (b.onclick = () => DS.Control.run(async () => {
       const code = b.dataset.lx, open = b.dataset.lopen === '1';

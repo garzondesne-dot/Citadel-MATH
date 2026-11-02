@@ -97,7 +97,7 @@ DS.Account = (function () {
     if (cache && cache.uid === uid) return cache;
     const all = (await N().get('accounts')) || {};
     for (const [c, byN] of Object.entries(all)) for (const [n, a] of Object.entries(byN || {})) {
-      if (a && a.uid === uid) { const name = await N().get(`roster/${c}/${n}`); cache = { uid, c, n: Number(n), name: name || '', title: a.title || 'dawn', hero: a.hero || 0, fx: DS.FX ? (DS.FX.KINDS.includes(a.fx) ? a.fx : 'flame') : a.fx || 'flame' }; return cache; }
+      if (a && a.uid === uid) { const name = await N().get(`roster/${c}/${n}`); cache = { uid, c, n: Number(n), name: name || '', title: a.title || 'none', hero: a.hero || 0, fx: DS.FX ? (DS.FX.KINDS.includes(a.fx) ? a.fx : 'flame') : a.fx || 'flame' }; return cache; }
     }
     return null;
   }
