@@ -53,13 +53,16 @@ DS.Raid = (function () {
     return { marks, correct: marks.filter(Boolean).length, total: items.length };
   }
   // 학생의 기록: 시도별 결과 · 가장 많이 맞힌 수(=데미지) · 남은 재도전
+  // v0.9.2 연습 공격: 다 맞힌 뒤에도 남은 기회만큼 숫자 바뀐 문제를 풀 수 있다 (데미지는 가장 많이 맞힌 수라 늘지 않음 = 0)
+  //   perfectAt = 처음 다 맞힌 시도 번호(-1 = 아직) · practice = 마지막 시도가 다 맞힌 뒤의 연습인지
   function record(L, R, mid, uid) {
     const tries = attemptsOf(R, mid, uid).map((t) => ({ ...t, ...gradeAttempt(L, R, mid, uid, t.attempt, t.given) }));
     const best = tries.reduce((m, t) => Math.max(m, t.correct), 0);
     const total = L.monsters[mid] ? itemsFor(L, R, mid, uid, 0).length : 0;
     const last = tries[tries.length - 1] || null;
     const allRight = !!last && last.correct === last.total;
-    return { tries, best, total, last, allRight, submitted: tries.length > 0, canRetry: tries.length > 0 && tries.length <= RETRIES && !tries.some((t) => t.correct === t.total), nextAttempt: tries.length };
+    const perfectAt = tries.findIndex((t) => t.total > 0 && t.correct === t.total), practice = perfectAt >= 0 && tries.length - 1 > perfectAt;
+    return { tries, best, total, last, allRight, perfectAt, perfect: perfectAt >= 0, practice, submitted: tries.length > 0, canRetry: tries.length > 0 && tries.length <= RETRIES, nextAttempt: tries.length };
   }
   const resultLabel = (t) => (!t ? '' : t.correct === t.total ? 'success' : t.correct === 0 ? 'fail' : 'partial');
 

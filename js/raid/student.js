@@ -162,8 +162,8 @@ DS.Student = (function () {
       const w = was[u] || { n: 0, best: 0 };
       if (r.tries.length <= w.n) return;
       const p = R.players[u] || {}, dmg = Math.max(0, r.best - w.best);
-      if (dmg) DS.FX.play(sc, p.fx || 'flame', { scale: 0.18, x: sc.clientWidth * (0.7 + Math.random() * 0.1), y: sc.clientHeight * 0.55 });
-      const t = document.createElement('span'); t.className = 'ally-hit'; t.textContent = dmg ? `${p.nick} −${dmg}` : `${p.nick} 💨`;
+      if (dmg || r.practice) DS.FX.play(sc, p.fx || 'flame', { scale: 0.18, x: sc.clientWidth * (0.7 + Math.random() * 0.1), y: sc.clientHeight * 0.55 });
+      const t = document.createElement('span'); t.className = 'ally-hit'; t.textContent = r.practice ? `${p.nick} ✔ 이미 성공` : dmg ? `${p.nick} −${dmg}` : `${p.nick} 💨`;
       t.style.left = `${55 + Math.random() * 25}%`; sc.appendChild(t); setTimeout(() => t.remove(), 1300);
     });
   }
@@ -196,27 +196,29 @@ DS.Student = (function () {
     if (!rec.submitted || wantRetry) return fightForm(body, step, rec, hp);
     const t = rec.last, label = Raid().resultLabel(t);
     const items = Raid().itemsFor(L, R, mid, me, t.attempt);
-    const fx = `${mid}|${t.attempt}` !== shown ? (label === 'fail' ? 'miss' : 'hit') : '';
+    const prac = rec.practice; // v0.9.2 연습 공격: 다 맞힌 뒤의 시도 → 이펙트는 그대로 · 데미지 0 · 「이미 성공」
+    const fx = `${mid}|${t.attempt}` !== shown ? (label === 'fail' && !prac ? 'miss' : 'hit') : '';
     if (fx && t.correct < t.total && thinkSec() > 0) thinkUntil[`${mid}|${t.attempt}`] = Date.now() + thinkSec() * 1000;
-    if (fx) { shown = `${mid}|${t.attempt}`; if (label === 'fail') DS.Sound.squish(); else { DS.Sound.slash(); setTimeout(() => DS.Sound.hit(), 160); setTimeout(() => { const sc = body.querySelector('.scene'); if (sc) DS.FX.play(sc, myP().fx || 'flame', { perfect: label === 'success', scale: label === 'success' ? 0.42 : 0.3 }); }, 60); } }
-    const head = { success: '⚔ 공격 성공!', partial: `⚔ 부분 성공 (${t.correct}/${t.total})`, fail: '💨 공격 실패…' }[label];
+    if (fx) { shown = `${mid}|${t.attempt}`; if (label === 'fail' && !prac) DS.Sound.squish(); else { DS.Sound.slash(); setTimeout(() => DS.Sound.hit(), 160); setTimeout(() => { const sc = body.querySelector('.scene'); if (sc) DS.FX.play(sc, myP().fx || 'flame', { perfect: label === 'success', scale: label === 'success' ? 0.42 : 0.3 }); }, 60); } }
+    const head = prac ? `✔ 이미 성공! 연습 공격 ${t.correct}/${t.total} <span class="small muted">(데미지 0)</span>` : { success: '⚔ 공격 성공!', partial: `⚔ 부분 성공 (${t.correct}/${t.total})`, fail: '💨 공격 실패…' }[label];
     const done = Raid().cleared(L, R, mid);
     const sig = `res|${mid}|${t.attempt}|${done}|${rec.canRetry}|${(R.help || {})[me] ? 1 : 0}`;
     if (sig === drawn && body.querySelector('.marks')) { hpText(body, hp); return; }
     drawn = sig;
     body.innerHTML = `<div class="panel framed">${scene(step, rec, hp, fx)}
-      <h2 class="res-${label}">${head}</h2>
+      <h2 class="res-${prac ? 'success' : label}">${head}</h2>
       <div class="marks">${items.map((q, i) => `<div class="mark ${t.marks[i] ? 'ok' : 'ng'}"><b>${i + 1}</b> ${t.marks[i] ? '✔' : '✘'} <span class="math">${pretty(itemText(q))}</span>${t.marks[i] ? '' : `<br><span class="sol-line math">${pretty(solOf(q))}</span>`}</div>`).join('')}</div>
-      ${done && rec.canRetry ? `<p class="okc big-msg">🎉 몬스터 격파!</p><p>틀린 소문제를 다시 풀어 볼까요? <span class="muted small">(남은 기회 ${Raid().RETRIES - rec.tries.length + 1}번 · 숫자가 모두 바뀌어요 · 고친 만큼 경험치가 더 쌓여요)</span></p><button class="btn primary big" id="st-retry">↻ 다시 도전</button>`
+      ${rec.perfect && rec.canRetry ? `<p class="okc">✔ 이미 성공한 몬스터예요!</p><p>숫자가 바뀐 문제로 연습 공격을 해 볼까요? <span class="muted small">(남은 기회 ${Raid().RETRIES - rec.tries.length + 1}번 · 이펙트는 그대로, 데미지는 0)</span></p><button class="btn primary big" id="st-retry">⚔ 연습 공격</button>`
+        : done && rec.canRetry ? `<p class="okc big-msg">🎉 몬스터 격파!</p><p>틀린 소문제를 다시 풀어 볼까요? <span class="muted small">(남은 기회 ${Raid().RETRIES - rec.tries.length + 1}번 · 숫자가 모두 바뀌어요 · 고친 만큼 경험치가 더 쌓여요)</span></p><button class="btn primary big" id="st-retry">↻ 다시 도전</button>`
         : done ? '<p class="okc big-msg">🎉 몬스터 격파! 다음 신호를 기다려요.</p>'
         : rec.canRetry ? `<p>다시 해 보겠습니까? <span class="muted small">(남은 기회 ${Raid().RETRIES - rec.tries.length + 1}번 · 숫자가 모두 바뀌어요)</span></p><button class="btn primary big" id="st-retry">↻ 다시 도전</button>`
-        : `<p class="muted">${rec.allRight ? '멋져요! 다른 용사들을 기다려요.' : '재도전 기회를 모두 썼어요. 해설을 보며 학습지에 정리해요.'} 데미지 <b>${rec.best}</b></p>`}
+        : `<p class="muted">${rec.perfect ? '멋져요! 기회를 모두 썼어요. 다른 용사들을 기다려요.' : '재도전 기회를 모두 썼어요. 해설을 보며 학습지에 정리해요.'} 데미지 <b>${rec.best}</b></p>`}
       ${test && (test.prep.img || {})[mid] ? '<button class="btn small" id="st-sheet">📄 학습지 보기 (문제 해설)</button>' : ''}
       ${test ? '' : helpBtn()}</div>`;
     bindHelp();
     const sb = $('#st-sheet'); if (sb) sb.onclick = () => sheetModal(step);
     const rb = $('#st-retry');
-    if (rb) { thinkTimer(rb, `${mid}|${t.attempt}`, '↻ 다시 도전'); rb.onclick = () => { retrying = `${mid}|${rec.nextAttempt}`; form = null; DS.Sound.clank(); render(); }; }
+    if (rb) { thinkTimer(rb, `${mid}|${t.attempt}`, rec.perfect ? '⚔ 연습 공격' : '↻ 다시 도전'); rb.onclick = () => { retrying = `${mid}|${rec.nextAttempt}`; form = null; DS.Sound.clank(); render(); }; }
   }
   // 보기 글자: 'venn:B|1 2 3 6' 은 벤 다이어그램 그림으로
   function optHtml(o) {
@@ -239,7 +241,7 @@ DS.Student = (function () {
     drawn = sig;
     body.innerHTML = `<div class="panel framed">${scene(step, rec, hp)}
       ${down ? '<p class="okc down-note">🎉 몬스터는 쓰러졌어요! 그래도 풀어서 공격하면 이펙트도 뜨고 경험치가 쌓여요.</p>' : ''}
-      ${attempt ? `<p class="retry-note">↻ 재도전 ${attempt} — 숫자가 모두 바뀌었어요. 지난번 틀린 칸은 <b class="ngc">✘</b> 표시</p>` : ''}
+      ${attempt && rec.perfect ? `<p class="retry-note">⚔ 연습 공격 — 이미 성공한 몬스터예요. 숫자가 모두 바뀌었어요 (데미지 0 · 이펙트는 그대로)</p>` : attempt ? `<p class="retry-note">↻ 재도전 ${attempt} — 숫자가 모두 바뀌었어요. 지난번 틀린 칸은 <b class="ngc">✘</b> 표시</p>` : ''}
       ${L.monsters[mid].note ? `<p class="muted small">💡 ${esc(L.monsters[mid].note)}</p>` : ''}
       <div class="items">${items.map((q, i) => itemHtml(q, i, prevWrong[i], attempt ? null : `${step.sheet || step.title} (${i + 1})`)).join('')}</div>
       <button class="btn primary big" id="st-go"${ready ? '' : ' disabled'}>⚔ 공격!</button>

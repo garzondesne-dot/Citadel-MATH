@@ -954,3 +954,5 @@ details.panel[open] > summary::before { content: '▾ '; }
 .h-concept.split[class*="zoom-"] .h-half { cursor: zoom-out; }
 .h-zoom-tip { grid-column: 1 / -1; margin: 0; text-align: center; }
 .h-concept.split .h-focus-badge { top: auto; bottom: 4px; right: 8px; }
+/* v0.9.2 연습 공격: 종합상황실 용사 머리 위 「✔ 이미 성공」 */
+.prac-tag { position: absolute; left: 50%; bottom: 100%; transform: translateX(-50%); white-space: nowrap; background: #0f5132; color: #b8ffd9; border: 1px solid #5be39a; font-weight: 700; font-size: 15px; padding: 2px 8px; border-radius: 10px; z-index: 12; animation: pop .25s; }

@@ -140,7 +140,7 @@ DS.Hall = (function () {
     const out = {};
     Raid().activeIds(R).forEach((u) => {
       if (step.kind === 'boss') { const m = Raid().mastery(L, R, u).filter(Boolean).length; const n = Object.values(((R.bossAns || {})[u]) || {}).reduce((a, s) => a + (s || []).filter((x) => x != null).length, 0); out[u] = { n, dmg: m }; }
-      else { const rec = Raid().record(L, R, step.id, u); out[u] = { n: rec.tries.length, dmg: rec.best, label: Raid().resultLabel(rec.last) }; }
+      else { const rec = Raid().record(L, R, step.id, u); out[u] = { n: rec.tries.length, dmg: rec.best, label: Raid().resultLabel(rec.last), prac: rec.practice }; }
     });
     return out;
   }
@@ -168,7 +168,7 @@ DS.Hall = (function () {
     const now = attacks(step);
     Object.entries(now).forEach(([u, a]) => {
       const was = seen[u] || { n: 0, dmg: 0 };
-      if (a.n > was.n) queue.push({ u, dmg: Math.max(0, a.dmg - was.dmg), label: step.kind === 'boss' ? (a.dmg > was.dmg ? 'partial' : 'fail') : a.label });
+      if (a.n > was.n) queue.push({ u, dmg: a.prac ? 0 : Math.max(0, a.dmg - was.dmg), label: step.kind === 'boss' ? (a.dmg > was.dmg ? 'partial' : 'fail') : a.prac ? 'practice' : a.label });
     });
     seen = now;
     const wait = step.kind === 'monster' ? Raid().waiting(L, R, step.id) : [];
@@ -188,7 +188,8 @@ DS.Hall = (function () {
     const a = queue.shift();
     const h = document.getElementById(`fh-${a.u}`), arena = $('#raid'), m0 = $('#rm');
     if (h && arena && m0) {
-      const ok = a.label !== 'fail', perfect = a.label === 'success';
+      // v0.9.2 연습 공격(이미 다 맞힌 학생): 돌진 + 이펙트 + 머리 위 「✔ 이미 성공」 · 데미지 숫자 · PERFECT 흔들림 없음
+      const prac = a.label === 'practice', ok = a.label !== 'fail', perfect = a.label === 'success';
       const hr = h.getBoundingClientRect(), mr = m0.getBoundingClientRect(), ar = arena.getBoundingClientRect();
       h.style.setProperty('--tx', `${(mr.left + mr.width / 2 - (hr.left + hr.width / 2)) * (ok ? 0.8 : 0.35)}px`);
       h.style.setProperty('--ty', `${(mr.top + mr.height * 0.7 - (hr.top + hr.height / 2)) * (ok ? 0.8 : 0.35)}px`);
@@ -199,6 +200,7 @@ DS.Hall = (function () {
           const p = (R.players[a.u] || {}).fx || 'flame';
           DS.FX.play(arena, p, { x: mr.left - ar.left + mr.width / 2, y: mr.top - ar.top + mr.height / 2, scale: Math.min(ar.width, ar.height) / (perfect ? 900 : 1150), perfect });
           m0.classList.remove('flash'); void m0.offsetWidth; m0.classList.add('flash');
+          if (prac) { const t = document.createElement('span'); t.className = 'prac-tag'; t.textContent = '✔ 이미 성공'; h.appendChild(t); setTimeout(() => t.remove(), 1600); }
           const fx = $('#rm-fx');
           if (fx && a.dmg) { const d = document.createElement('span'); d.className = `dmg${perfect ? ' big' : ''}`; d.textContent = `−${a.dmg}`; d.style.left = `${55 + Math.random() * 25}%`; fx.appendChild(d); setTimeout(() => d.remove(), 1300); }
           if (perfect) {

@@ -33,10 +33,14 @@ R.subs.m1.s01[1] = answer(R, 'm1', 's01', 1, 2);
 check(X.record(L, R, 'm1', 's01').best === 3, '재도전에서 덜 맞혀도 데미지는 줄지 않음');
 R.subs.m1.s01[2] = answer(R, 'm1', 's01', 2, 4);
 rec = X.record(L, R, 'm1', 's01');
-check(rec.best === 4 && !rec.canRetry && X.resultLabel(rec.last) === 'success', '두 번째 재도전 4/4 → 데미지 4 (늘어난 1만 더해짐), 기회 끝');
+check(rec.best === 4 && rec.canRetry && rec.perfectAt === 2 && !rec.practice && X.resultLabel(rec.last) === 'success', '두 번째 재도전 4/4 → 데미지 4 (늘어난 1만 더해짐), 남은 기회 1번은 연습 공격');
 check(JSON.stringify(X.itemsFor(L, R, 'm1', 's01', 1)) !== JSON.stringify(X.itemsFor(L, R, 'm1', 's01', 0)), '재도전은 숫자가 바뀐 문제');
 R.subs.m1.s02 = { 0: answer(R, 'm1', 's02', 0, 4) };
-check(!X.record(L, R, 'm1', 's02').canRetry, '다 맞히면 재도전 없음');
+// v0.9.2 연습 공격: 다 맞혀도 남은 기회만큼 숫자 바뀐 문제 · 데미지는 그대로(0 추가)
+check(X.record(L, R, 'm1', 's02').canRetry && X.record(L, R, 'm1', 's02').perfectAt === 0, '다 맞혀도 연습 공격 가능');
+R.subs.m1.s02[1] = answer(R, 'm1', 's02', 1, 1); R.subs.m1.s02[2] = answer(R, 'm1', 's02', 2, 4); R.subs.m1.s02[3] = answer(R, 'm1', 's02', 3, 0);
+rec = X.record(L, R, 'm1', 's02');
+check(rec.best === 4 && rec.practice && !rec.canRetry && rec.tries.length === 4, `연습 3번(1/4 · 4/4 · 0/4) 뒤에도 데미지 4 그대로 · 기회 4번 끝 ${JSON.stringify({ best: rec.best, practice: rec.practice })}`);
 R.subs.m1.s03 = { 0: answer(R, 'm1', 's03', 0, 0) };
 check(X.resultLabel(X.record(L, R, 'm1', 's03').last) === 'fail', '0개 = 공격 실패');
 check(X.monsterHp(L, R, 'm1').dmg === 8, '데미지 합 4 + 4 + 0');
