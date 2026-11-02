@@ -52,7 +52,7 @@ DS.Camp = (function () {
         ${tree(0, 'back', 'left:2%;bottom:30%;height:46%')}${tree(2, 'back', 'left:60%;bottom:32%;height:40%')}
         <button class="camp-anvil" id="camp-anvil" aria-label="모루">${sheet(c.anvil, c.anvil.states.idle, 0, 'camp-anvil-img')}<span class="camp-label">⚒ 모루</span></button>
         <div class="camp-fire">${sheet(c.fire, 0, 0, 'camp-fire-img', '')}</div>
-        <div class="camp-hero">${DS.Art.hero(me.hero, 'idle', 'huff')}<i class="shadow"></i></div>
+        <div class="camp-hero">${DS.Art.hero(me.hero, 'sit', 'huff')}<i class="shadow"></i></div>
         <button class="camp-bonus" id="camp-bonus" aria-label="보강던전"><i class="camp-bonus-img" style="background-image:url('${base()}${DS.ASSETS.dportals.bonus}')"></i><span class="camp-label">📘 보강던전</span></button>
         <button class="camp-gate empty" id="camp-gate" aria-label="차원문"></button>
         ${prop('dummy', '🎯', '허수아비', 'right:3%;top:5%')}${prop('shelf', '📚', '책장', 'left:3%;top:5%')}${prop('mail', '📮', '우편함', 'left:34%;top:5%')}
@@ -64,7 +64,7 @@ DS.Camp = (function () {
     $('#camp-anvil').onclick = () => pick('#camp-anvil', () => DS.Forge.open(me));
     $('#camp-bonus').onclick = () => pick('#camp-bonus', () => DS.Control.run(() => DS.Bonus.enter(me)));
     $('#camp-gate').onclick = () => {
-      if (live && live.open) return pick('#camp-gate', () => DS.Control.run(() => enterCode(live.code)));
+      if (live && live.open) return pick('#camp-gate', () => DS.Control.run(() => enterCode(live.code)), 'portal');
       nope('#camp-gate');
       if (live) DS.UI.toast('지난 던전은 닫혔어요. 선생님이 다음 수업을 열면 새 차원문이 나타나요.', 3200);
       else DS.UI.toast('아직 열린 던전이 없어요. 선생님이 수업을 열면 차원문이 나타나요.', 3200);
@@ -81,7 +81,9 @@ DS.Camp = (function () {
   }
   // 선택 연출 (한 번 탭 · 0.7초): 흰 테두리 번쩍 + 눌림 반동 + 소리·진동 → 금빛 외곽선 + ▼ → 내 용사가 그쪽으로 폴짝 → 열림
   let picking = false;
-  function pick(sel, then) {
+  // pose: 그쪽으로 가는 동안의 용사 동작 (기본 걷기 · 차원문 = 뒷모습으로 들어가기 → 작아지며 사라짐)
+  const heroArt = (pose, cls = '') => { const a = document.querySelector('.camp-hero .art'); if (a) a.outerHTML = DS.Art.hero(me.hero, pose, cls); };
+  function pick(sel, then, pose = 'walk') {
     const el = document.querySelector(sel); if (!el || picking) return;
     picking = true;
     el.classList.remove('picked'); void el.offsetWidth; el.classList.add('picked');
@@ -92,10 +94,12 @@ DS.Camp = (function () {
       const dx = (a.left + a.width / 2) - (b.left + b.width / 2);
       hero.style.setProperty('--dx', `${Math.max(-1, Math.min(1, dx / Math.abs(dx || 1))) * Math.min(Math.abs(dx) * 0.55, 160)}px`);
       hero.classList.remove('dash'); void hero.offsetWidth; hero.classList.add('dash');
-      hero.classList.toggle('face-left', dx < 0);
+      hero.classList.toggle('face-left', dx < 0 && pose !== 'portal');
+      heroArt(pose); if (pose === 'portal') hero.classList.add('into-portal');
     }
-    setTimeout(() => { picking = false; then(); }, 700);
-    setTimeout(() => { el.classList.remove('picked'); if (hero) hero.classList.remove('dash'); }, 1300);
+    const wait = pose === 'portal' && DS.Art.isV2(me.hero) ? 950 : 700; // 차원문: 뒷모습으로 걸어 들어가는 걸 다 보고
+    setTimeout(() => { picking = false; then(); }, wait);
+    setTimeout(() => { el.classList.remove('picked'); if (hero) { hero.classList.remove('dash', 'into-portal'); heroArt('sit', 'huff'); } }, 1300 + wait - 700);
   }
   // 못 들어가는 곳: 회색으로 살짝 흔들림
   function nope(sel) { const el = document.querySelector(sel); if (!el) return; el.classList.remove('nope'); void el.offsetWidth; el.classList.add('nope'); DS.Sound.squish(); }

@@ -4,6 +4,14 @@ window.DS = window.DS || {};
 DS.ASSETS = {
   base: 'assets/art/', // 압축본 (v0.6.0: 화면 크기에 맞춰 WebP 품질 90 — 원본 무손실은 저장소 기록에)
   heroes: { src: 'heroes-v2.webp', cols: 4, rows: 8, poses: { idle: 0, walk: 1, attack: 2, fall: 3 }, count: 8, teacher: 7 },
+  // v2 도트 용사 (2026-11-02 · docs/ASSET-SPEC.md): 칸 80×64 · 줄 = 동작 [줄, 프레임 수, 초] · 대기 줄 = 숨쉬기 구움(tools/sprite/breathe.py)
+  // 용사 시트에 없는 줄(7줄 시트 등)은 art.js 의 대신 쓰기 표로 보여 준다. 번호 16~ = v2 용사
+  heroesV2: {
+    cols: 4, rows: 11, w: 80, h: 64,
+    anims: { idle: [0, 4, 1.28], walk: [1, 4, 0.64], attack: [2, 4, 0.48], hit: [3, 1], win: [4, 2, 0.7], fall: [5, 2, 0.6, 'once'], heal: [6, 2, 0.7],
+      portal: [7, 4, 0.9, 'once'], sit: [8, 2, 1.6], healed: [9, 2, 0.8], think: [10, 2, 1.4] },
+    list: { 16: { src: 'hero-blond-v2.webp', name: '금발 검사', rows: 11 } },
+  },
   monsters: { src: 'monsters-v2.webp', cols: 3, rows: 3, poses: { idle: 0, attack: 1, down: 2 }, names: ['수정 슬라임', '바위 골렘', '성채 드래곤'], flip: [1] }, // flip: 오른쪽을 보고 그려진 줄 (용사는 왼쪽에 선다)
   cards: { src: 'cards-v4.webp', cols: 4, rows: 2 }, // 카드 그림 8칸: 0 소속 · 1 개수 · 2 공집합 · 3 포함 · 4 반례 · 5 같음 · 6 부분집합 목록 · 7 개수의 비밀
   frame: { src: 'frame-v2.webp', slice: 140 },

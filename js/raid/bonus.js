@@ -94,7 +94,7 @@ DS.Bonus = (function () {
       const segs = solved.map((s) => `<i class="${s ? 'gone' : ''}"></i>`).join('');
       const done = solved.every(Boolean);
       el.innerHTML = `<div class="scene enc bg-scene th-${L.theme || ''} ${cls}"><div class="scene-bar"><div><b>⚔ ${esc(mon.title)}</b><br><span class="muted small">${L.no}차시 ${train ? '🎯 허수아비 연습' : '보강던전'} · 소문제 ${n}개를 모두 맞히면 처치</span></div><button class="btn small" id="bf-x">✕</button></div>
-          <div class="enc-hero"><div class="enc-tries" title="남은 도전 기회">${pips}</div>${DS.Art.hero(me.hero || 0, done ? 'attack' : 'idle', done ? 'pairhop' : cls === 'miss' ? 'slump' : 'huff')}<i class="shadow"></i></div>
+          <div class="enc-hero"><div class="enc-tries" title="남은 도전 기회">${pips}</div>${DS.Art.hero(me.hero || 0, done || cls ? 'attack' : 'think', done ? 'pairhop' : cls === 'miss' ? 'slump' : 'huff')}<i class="shadow"></i></div>
           <div class="enc-mon">${DS.Art.monster(mon.sprite, done ? 'down' : 'idle', done ? '' : 'float')}<div class="segs">${segs}</div></div></div>
         <div class="bf-body">${msg}${mon.note ? `<p class="muted small">💡 ${esc(mon.note)}</p>` : ''}
           <div class="row">${img ? '<button class="btn small" id="bf-sheet">📄 학습지 보기</button>' : ''}${vid && DS.Video.ok(vid) ? '<button class="btn small" id="bf-vid">🎬 설명 보기</button>' : ''}</div>

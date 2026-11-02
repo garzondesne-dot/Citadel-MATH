@@ -82,6 +82,18 @@ input:focus, select:focus { outline: none; border-color: var(--gold); }
 .art.hero.me { width: 52px; height: 52px; }
 .art.hero.big { width: 120px; height: 120px; }
 .art.hero.huge { width: 200px; height: 200px; }
+/* v2 도트 용사: 칸 80×64 를 상자 아래에 꽉 차게(가로 기준) · 프레임은 steps 로 (4칸 시트: 프레임 k = k × 33.333%) */
+.art.hv2 { position: relative; }
+.art.hv2 > b { position: absolute; left: -12%; right: -12%; bottom: 0; aspect-ratio: 5 / 4; background-repeat: no-repeat; image-rendering: pixelated; }
+@keyframes hv2n4 { from { background-position-x: 0%; } to { background-position-x: 133.333%; } }
+@keyframes hv2n2 { from { background-position-x: 0%; } to { background-position-x: 66.667%; } }
+@keyframes hv2n3 { from { background-position-x: 0%; } to { background-position-x: 100%; } }
+/* 한 번만 (쓰러짐 · 차원문): 마지막 프레임에서 멈춤 */
+@keyframes hv2o4 { from { background-position-x: 0%; } to { background-position-x: 100%; } }
+@keyframes hv2o2 { from { background-position-x: 0%; } to { background-position-x: 33.333%; } }
+/* 캠프: 차원문으로 들어가기 (뒷모습으로 걸어 들어가며 작아지고 사라짐) */
+.camp-hero.into-portal .art { animation: into-portal 0.9s ease-in forwards; transform-origin: 50% 100%; }
+@keyframes into-portal { 0% { transform: none; opacity: 1; } 70% { transform: translateY(-28%) scale(0.72); opacity: 1; } 100% { transform: translateY(-40%) scale(0.5); opacity: 0; } }
 .art.monster { width: 64px; height: 64px; }
 .art.flip { scale: -1 1; } /* 좌우 뒤집기: transform 애니메이션(둥실·흔들림)과 따로 움직인다 */
 .art.monster.mid { width: 92px; height: 92px; }

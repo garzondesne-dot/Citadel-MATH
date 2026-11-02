@@ -1,0 +1,62 @@
+// v2 도트 용사 (금발 검사 16번): ① 설정에서 고르기 ② 캠프 모닥불 앞 앉기 ③ 차원문 = 뒷모습으로 들어가기 ④ 레이드 풀 때 생각 중 ⑤ 힐 받음
+// 사용: python3 -m http.server 8765 (저장소 폴더) 띄운 뒤 node tools/e2e/e2e21.js <출력 폴더>
+const { chromium } = require('playwright');
+const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
+(async () => {
+  const b = await chromium.launch(); const ctx = await b.newContext({ viewport: { width: 390, height: 844 } }); const errs = [];
+  const mk = async (t) => { const p = await ctx.newPage(); p.on('pageerror', (e) => errs.push(t + ': ' + e.message)); p.on('dialog', (d) => d.accept()); return p; };
+  const T = await mk('T');
+  await T.goto(U + '&role=teacher'); await T.waitForTimeout(1200);
+  await T.fill('#f-teacher .t-id', 'e2e-teacher'); await T.fill('#f-teacher .t-pw', '909090'); await T.click('#f-teacher .t-login'); await T.waitForTimeout(1000);
+  await T.click('#s-go'); await T.waitForTimeout(500); await T.fill('#r-cls', '1-3'); await T.fill('#r-text', '1 김민준\n2 이서연\n3 박지호'); await T.click('#r-up'); await T.waitForTimeout(800);
+  await T.click('#screen-students .nav-back'); await T.waitForTimeout(1500); if (await T.isVisible('#splash')) { await T.click('#splash'); await T.waitForTimeout(400); }
+  if (!(await T.isVisible('#lesson'))) { await T.click('.role[data-role=teacher]'); await T.waitForTimeout(600); }
+  const S1 = await mk('S1'); await S1.goto(U + '&role=student'); await S1.waitForTimeout(1500);
+  if (await S1.isVisible('#splash')) { await S1.click('#splash'); await S1.waitForTimeout(500); }
+  await S1.selectOption('#s-cls', '1-3'); await S1.waitForTimeout(200); await S1.selectOption('#s-num', '1'); await S1.waitForTimeout(300);
+  await S1.click('#s-new'); await S1.fill('#s-p1', '1234'); await S1.fill('#s-p2', '1234'); await S1.click('#s-make'); await S1.waitForTimeout(1200);
+  await S1.click('#s-go'); await S1.waitForTimeout(2000);
+  // ① 설정에서 금발 검사(16) 고르기
+  await S1.click('#camp-set'); await S1.waitForTimeout(800);
+  await S1.click('[data-h="16"]'); await S1.waitForTimeout(400);
+  await S1.screenshot({ path: `${OUT}/1-settings.png` });
+  await S1.click('#set-ok'); await S1.waitForTimeout(1500);
+  // ② 캠프: 앉아 쉬기
+  console.log('camp anim:', await S1.getAttribute('.camp-hero .art', 'data-anim'));
+  await S1.screenshot({ path: `${OUT}/2-camp-sit.png` });
+  // 수업 열기 → 차원문
+  await T.selectOption('#lesson', 'set-06'); await T.selectOption('#t-cls', '1-3'); await T.click('#t-new'); await T.waitForTimeout(2500);
+  const code = await T.evaluate(() => DS.Teacher.code());
+  await S1.waitForTimeout(1500);
+  await S1.click('#camp-gate');
+  for (const ms of [150, 450, 800]) { await S1.waitForTimeout(ms === 150 ? 150 : 300); await S1.screenshot({ path: `${OUT}/3-portal-${ms}.png` }); }
+  console.log('portal anim:', await S1.getAttribute('.camp-hero .art', 'data-anim').catch(() => 'gone'));
+  await S1.waitForTimeout(2500);
+  const go = () => T.evaluate(async () => { const code = DS.Teacher.code(); const R = DS.Act.unpackRoom(await DS.Net.get(`rooms/${code}`)); await DS.Act.go(code, R, DS.Lessons.get(R.meta.lesson), 1); });
+  for (let k = 0; k < 3; k++) { await go(); await T.waitForTimeout(800); } // 도입 → 개념1 → 문제1
+  await S1.waitForTimeout(1500);
+  console.log('fight anim:', await S1.getAttribute('.enc-hero .art', 'data-anim').catch(() => 'none'));
+  await S1.screenshot({ path: `${OUT}/4-raid-think.png` });
+  // ⑤ 힐 받음: 4번 다 틀리고 가상 친구가 힐
+  await T.evaluate(async (c) => { await DS.Net.set(`rooms/${c}/players/f2`, { num: 2, nick: '이서연', hero: 2, at: Date.now() }); await DS.Net.set(`rooms/${c}/active/f2`, true); }, code);
+  const subAs = (page, who, a, k) => page.evaluate(async ([who, a, k]) => {
+    const code = (DS.Teacher && DS.Teacher.code()) || JSON.parse(localStorage.getItem('citadel-student')).code;
+    const R = DS.Act.unpackRoom(await DS.Net.get(`rooms/${code}`)); const L = DS.Lessons.get(R.meta.lesson), st = DS.Raid.stepOf(L, R);
+    const u = who === 'me' ? DS.Net.uid() : who; const right = (q) => (q.type === 'choice' ? q.answerIndex : q.answer);
+    const ans = DS.Raid.itemsFor(L, R, st.id, u, a).map((q, i) => (k < 0 || i < k ? right(q) : (q.type === 'multi' ? [] : -1)));
+    if (who === 'me') await DS.Act.submit(code, R, st.id, a, ans); else await DS.Net.set(`rooms/${code}/subs/${st.id}/${u}/${a}`, DS.Net.pack(ans));
+    return st.id;
+  }, [who, a, k]);
+  for (let a = 0; a < 4; a++) { await subAs(S1, 'me', a, 0); await S1.waitForTimeout(400); }
+  await S1.waitForTimeout(1500);
+  const s1uid = await S1.evaluate(() => DS.Net.uid());
+  await subAs(T, 'f2', 0, -1);
+  await T.evaluate(async ([c, to]) => { await DS.Net.set(`rooms/${c}/heals/m1/f2/0`, to); }, [code, s1uid]);
+  await S1.waitForTimeout(500);
+  console.log('healed anim:', await S1.getAttribute('.enc-hero .art', 'data-anim').catch(() => 'none'));
+  await S1.screenshot({ path: `${OUT}/5-healed.png` });
+  await S1.waitForTimeout(2200);
+  console.log('after heal anim:', await S1.getAttribute('.enc-hero .art', 'data-anim').catch(() => 'none'));
+  console.log('errors:', errs.length ? errs : 'none');
+  await b.close();
+})();

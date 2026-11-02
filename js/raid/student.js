@@ -17,6 +17,7 @@ DS.Student = (function () {
   let drawn = '';           // 지금 그려 둔 화면의 서명 — 다른 학생의 제출로 방 값이 바뀌어도 내 화면은 다시 그리지 않는다 (터치가 씹히지 않게)
 
   let info0 = null, focusWas = false, cleared0 = false, locked = false;
+  let heroFx = null, heroFxT = null, heroBack = ['idle', 'huff']; // v2 용사 잠깐 동작 (힐 받음 · 힐 쓰기) · 끝나면 돌아갈 자세
   let test = null;          // 🧪 테스트 모드: { prep: 학습지 이미지, exit() } — 이 기기 안에서만, 집중모드 대신 학습지 이미지
   async function enter(c, info, opt = {}) {
     test = opt.test || null;
@@ -176,7 +177,7 @@ DS.Student = (function () {
     const pips = Array.from({ length: rec.slots }, (_, i) => `<i class="${i < left ? 'on' : ''}${i < Math.min(left, rec.healed) ? ' heal' : ''}"></i>`).join('');
     return `<div class="scene enc bg-scene th-${L.theme || ''} ${cls}${step.special ? ' special' : ''}"><div class="scene-bar"><div><b>${step.special ? '⭐ 난입! ' : step.review ? '📖 ' : ''}${esc(step.title)}</b><br><span class="muted small">레이드 체력 ${hp.left} / ${hp.max}</span></div></div>
       ${test ? `<div class="enc-friends">${Raid().activeIds(R).filter((u) => u !== me).slice(0, 4).map((u) => DS.Art.hero((R.players[u] || {}).hero || 0, 'idle', 'huff')).join('')}</div>` : ''}
-      <div class="enc-hero"><div class="enc-tries" title="남은 도전 기회">${pips}</div>${DS.Art.hero(myP().hero, done || cls ? 'attack' : 'idle', done ? 'pairhop' : cls === 'miss' ? 'slump' : 'huff')}<i class="shadow"></i></div>
+      <div class="enc-hero"><div class="enc-tries" title="남은 도전 기회">${pips}</div>${heroNow(pose2(done, cls), done ? 'pairhop' : cls === 'miss' ? 'slump' : 'huff')}<i class="shadow"></i></div>
       <div class="enc-mon">${DS.Art.monster(L.monsters[step.id].sprite, done ? 'down' : 'idle', done ? '' : 'float')}<div class="segs" title="내가 맞힌 만큼 칸이 깨져요">${segs}</div></div></div>`;
   }
   // 생각 시간: 틀린 칸이 있으면 해설은 읽을 수 있고 「다시 도전」만 잠깐 잠긴다 (수업 준비에서 0·5·10·15초, 기본 5초)
@@ -191,6 +192,19 @@ DS.Student = (function () {
     };
     tick();
   }
+  // 용사 자세: 잠깐 동작(heroFx)이 살아 있으면 그것 · 아니면 기본 (풀 때 = 생각 중)
+  // v2 용사: 격파 = 승리 · 틀림 = 피격 (v1 은 그대로 공격 자세)
+  const pose2 = (done, cls) => { const v2 = DS.Art.isV2(myP().hero); return done ? (v2 ? 'win' : 'attack') : cls === 'hit' ? 'attack' : cls === 'miss' ? (v2 ? 'hit' : 'attack') : 'think'; };
+  function heroNow(pose, cls) {
+    heroBack = [pose, cls];
+    return heroFx && Date.now() < heroFx.until ? DS.Art.hero(myP().hero, heroFx.pose, '') : DS.Art.hero(myP().hero, pose, cls);
+  }
+  function heroFlash(pose, ms) {
+    heroFx = { pose, until: Date.now() + ms };
+    const a = document.querySelector('.enc-hero .art'); if (a) a.outerHTML = DS.Art.hero(myP().hero, pose, '');
+    clearTimeout(heroFxT);
+    heroFxT = setTimeout(() => { heroFx = null; const b = document.querySelector('.enc-hero .art'); if (b) b.outerHTML = DS.Art.hero(myP().hero, heroBack[0], heroBack[1]); }, ms);
+  }
   // 💚 힐 알림 (v0.9.6): 받은 학생은 누가 줬는지 안다 (종합상황실엔 힐러만). 한 번 본 알림은 다시 안 띄움
   const healSeen = (k) => { try { const s = JSON.parse(sessionStorage.getItem('ds-heal-seen') || '{}'); if (s[k]) return true; s[k] = 1; sessionStorage.setItem('ds-heal-seen', JSON.stringify(s)); } catch (e) { /* 저장 못 하면 매번 확인 */ } return false; };
   const who = (u) => { const p = (R.players || {})[u] || {}; return `${p.num || ''}번 ${p.nick || '친구'}`; };
@@ -199,6 +213,7 @@ DS.Student = (function () {
     Raid().healsTo(R, mid, me).slice(0, Raid().HEAL_MAX).forEach((h) => {
       if (healSeen(`${code}|${mid}|${h.from}|${h.k}`)) return;
       DS.UI.toast(`💚 ${who(h.from)} 용사가 도전 기회를 한 칸 채워 줬어요!`, 3500); DS.Sound.correct(); drawn = '';
+      heroFx = { pose: 'healed', until: Date.now() + 1800 }; setTimeout(() => heroFlash('healed', 1600), 60);
     });
   }
   function monsterView(body, step) {
@@ -232,7 +247,7 @@ DS.Student = (function () {
     bindHelp();
     const sb = $('#st-sheet'); if (sb) sb.onclick = () => sheetModal(step);
     // v0.9.3 (⑤): 공격 자세는 잠깐만 → 다시 서 있는 자세 (격파됐으면 승리 자세 그대로)
-    if (fx && !done) setTimeout(() => { const a = body.querySelector('.enc-hero .art'); if (a) a.outerHTML = DS.Art.hero(myP().hero, 'idle', fx === 'miss' ? 'slump' : 'huff'); }, 650);
+    if (fx && !done) setTimeout(() => { const a = body.querySelector('.enc-hero .art'); if (a) a.outerHTML = heroNow('idle', fx === 'miss' ? 'slump' : 'huff'); }, 650);
     const rb = $('#st-retry');
     if (rb) { thinkTimer(rb, `${mid}|${t.attempt}`, rec.perfect ? '⚔ 연습 공격' : '↻ 다시 도전'); rb.onclick = () => { retrying = `${mid}|${rec.nextAttempt}`; form = null; DS.Sound.clank(); render(); }; }
     const hb = $('#st-heal');
@@ -240,6 +255,7 @@ DS.Student = (function () {
       hb.disabled = true;
       const k = Raid().healsGiven(R, mid, me), to = await DS.Act.heal(code, raw, mid);
       DS.Sound.correct(); drawn = '';
+      heroFx = { pose: 'heal', until: Date.now() + 1600 }; setTimeout(() => heroFlash('heal', 1400), 60);
       DS.UI.toast(to ? `💚 ${who(to)} 용사에게 도전 기회를 한 칸 채워 줬어요!` : '💚 응원을 보냈어요! (지금은 기회가 필요한 친구가 없어요)', 3500);
       if (DS.Grow && !test) DS.Grow.add(acc(), { heal: 1 }, `heal_${code}_${mid}_${k}`).catch(() => {});
     });
