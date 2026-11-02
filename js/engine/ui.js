@@ -14,6 +14,21 @@ DS.UI = {
     const e = DS.UI.esc;
     return `<svg class="venn" viewBox="0 0 160 70" aria-label="벤 다이어그램 ${e(name)}: ${e(elems)}"><ellipse cx="80" cy="38" rx="72" ry="28" fill="none" stroke="currentColor" stroke-width="2"/><text x="80" y="11" font-size="11" text-anchor="middle" fill="currentColor" font-style="italic">${e(name)}</text><text x="80" y="44" font-size="15" text-anchor="middle" fill="currentColor">${e(elems)}</text></svg>`;
   },
+  // v0.9.3 색칠한 벤 다이어그램 (보기 'vshade:영역') — 영역: A-B (A 만) · B-A (B 만) · AnB (겹친 곳) · AuB (합친 곳) · Ac (A 바깥)
+  vshade(reg) {
+    const id = `vs${(DS.UI._vs = (DS.UI._vs || 0) + 1)}`, A = '<circle cx="62" cy="50" r="30"/>', B = '<circle cx="98" cy="50" r="30"/>', U = '<rect x="6" y="8" width="148" height="84" rx="8"/>';
+    const fill = { 'A-B': `<mask id="${id}"><rect width="160" height="100" fill="#000"/><g fill="#fff">${A}</g><g fill="#000">${B}</g></mask><rect width="160" height="100" fill="#ff4fa3" fill-opacity="0.55" mask="url(#${id})"/>`,
+      'B-A': `<mask id="${id}"><rect width="160" height="100" fill="#000"/><g fill="#fff">${B}</g><g fill="#000">${A}</g></mask><rect width="160" height="100" fill="#ff4fa3" fill-opacity="0.55" mask="url(#${id})"/>`,
+      AnB: `<mask id="${id}"><rect width="160" height="100" fill="#000"/><g fill="#fff">${A}</g></mask><g fill="#ff4fa3" fill-opacity="0.55" mask="url(#${id})">${B}</g>`,
+      AuB: `<g fill="#ff4fa3" fill-opacity="0.55">${A}${B}</g>`,
+      Ac: `<mask id="${id}"><rect width="160" height="100" fill="#000"/><g fill="#fff">${U}</g><g fill="#000">${A}</g></mask><rect width="160" height="100" fill="#ff4fa3" fill-opacity="0.55" mask="url(#${id})"/>` }[reg] || '';
+    return `<svg class="venn vshade" viewBox="0 0 160 100" aria-label="벤 다이어그램 색칠 ${DS.UI.esc(reg)}">${fill}<g fill="none" stroke="currentColor" stroke-width="2">${U}${A}${B}</g><text x="44" y="24" font-size="13" font-style="italic" fill="currentColor">A</text><text x="110" y="24" font-size="13" font-style="italic" fill="currentColor">B</text><text x="140" y="24" font-size="11" font-style="italic" fill="currentColor">U</text></svg>`;
+  },
+  // 보기 한 칸: 'vshade:영역' 은 색칠한 그림, 'venn:이름|원소' 는 벤 다이어그램, 나머지는 글
+  opt(o) {
+    const s = String(o), v = /^vshade:(.+)$/.exec(s), m = /^venn:([^|]*)\|(.*)$/.exec(s);
+    return v ? DS.UI.vshade(v[1]) : m ? DS.UI.venn(m[1], m[2]) : `<span class="math">${DS.UI.pretty(s)}</span>`;
+  },
   // 문제 글: pretty + [[venn:이름|원소]] 를 그림으로 (학습지 그림 문항을 앱에서도 보이게)
   rich(s) {
     return String(s).split(/(\[\[venn:[^|\]]*\|[^\]]*\]\])/).map((part) => {
@@ -22,7 +37,7 @@ DS.UI = {
     }).join('');
   },
   // 글로만 보여 줄 때 (결과 목록 등): 그림 표시를 짧은 글로
-  plain(s) { return String(s).replace(/\[\[venn:([^|\]]*)\|([^\]]*)\]\]/g, '[벤 다이어그램 $1: $2] '); },
+  plain(s) { return String(s).replace(/^vshade:(.+)$/, (_, r) => `[그림: ${({ 'A-B': 'A 만', 'B-A': 'B 만', AnB: 'A ∩ B', AuB: 'A ∪ B', Ac: 'A 바깥' })[r] || r} 색칠]`).replace(/\[\[venn:([^|\]]*)\|([^\]]*)\]\]/g, '[벤 다이어그램 $1: $2] '); },
   toast(msg, ms = 2200) {
     if (typeof document === 'undefined') return;
     const t = document.querySelector('#toast');
