@@ -76,7 +76,7 @@ check(it('s2').map((q) => q.answer).join() === '4,0,2', `보강2: 4 / 0 / 2 (${i
 Object.keys(L.monsters).forEach((id) => it(id).forEach((q, i) => verify(q, `${id}-${i + 1}`)));
 
 // 3. 재도전
-for (const id of Object.keys(L.monsters)) for (let s = 0; s < 300; s++) for (const a of [1, 2]) {
+for (const id of Object.keys(L.monsters)) for (let s = 0; s < 300; s++) for (const a of [1, 2, 3]) {
   const items = L.items(id, `seed${s}`, a);
   check(items.length === it(id).length, `${id} 칸 수`);
   items.forEach((q, i) => verify(q, `${id}#${s}/${a}-${i + 1}`));

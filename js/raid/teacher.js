@@ -15,7 +15,7 @@ DS.Teacher = (function () {
     const r = await DS.Act.createRoom(lessonId, cls);
     try { localStorage.setItem('citadel-teacher', JSON.stringify({ code: r.code, hallKey: r.hallKey, uid: DS.Net.uid() })); } catch (e) { /* 무시 */ }
     try { const a = JSON.parse(localStorage.getItem('citadel-rooms')) || []; a.unshift({ code: r.code, cls: cls || '', lesson: lessonId, uid: DS.Net.uid(), at: Date.now() }); localStorage.setItem('citadel-rooms', JSON.stringify(a.slice(0, 30))); } catch (e) { /* 무시 */ } // 📋 만든 수업 목록
-    return DS.TCamp.enter({ code: r.code, hallKey: r.hallKey }); // v0.9.1: 새 수업은 교사 대기공간(QR)에서 시작
+    return open(r.code, r.hallKey); // v0.9.2: 교사 폰은 리모컨에서 바로 시작 (교사 캠프는 종합상황실 첫 화면 · 수업 끝 뒤 버튼)
   }
   async function open(c, hallKey) {
     const R0 = await DS.Net.get(`rooms/${c}`);
@@ -29,8 +29,8 @@ DS.Teacher = (function () {
     stop = DS.Net.watch(`rooms/${code}`, (v) => { if (!v) return; raw = v; R = DS.Act.unpackRoom(v); L = DS.Lessons.get(R.meta.lesson);
       if (vLesson !== L.id) { vLesson = L.id; if (vStop) vStop(); vStop = DS.Net.watch(`prep/${L.id}/video`, (x) => { videos = x || {}; if (R) render(); }); }
       render(); DS.Act.admitLate(code, R, L); DS.Act.markBossWin(code, R, L);
-      // 수업 끝 → 교사 대기공간 (꺼진 차원문 + 🏫 우리 반 수업 소식)
-      const cl = DS.Raid.isClosed(R); if (wasClosed === false && cl && document.getElementById('screen-teacher').classList.contains('active')) { if (stop) stop(); stop = null; DS.TCamp.enter({ code, hallKey: curKey }); } wasClosed = cl; });
+      // v0.9.2: 수업이 끝나도 이 화면에 남는다 → 「🏛 교사 캠프 가기」 버튼이 켜짐
+      wasClosed = DS.Raid.isClosed(R); });
     clearInterval(tick); tick = setInterval(() => { if (R) render(); }, 15000); // "2분째 미제출" 갱신
   }
   const studentUrl = () => `${location.origin}${location.pathname.replace(/[^/]*$/, '')}index.html?role=student&code=${code}${DS.Net.mode === 'local' ? '&local' : ''}`;
@@ -43,13 +43,14 @@ DS.Teacher = (function () {
     $('#t-tabs').innerHTML = '';
     const body = $('#t-body');
     const live = !Raid().isLobby(R) && !Raid().isClosed(R);
-    body.innerHTML = `<div class="panel framed t-now">${now()}${C().pctHtml(L, R)}${live ? C().videoBtn(L, R, videos) + C().sheetBtn(L, R) + C().focusBtn(R) : ''}${Raid().isEnd(L, R) || Raid().isClosed(R) ? '<button class="btn sc-btn" id="t-news">🏫 우리 반 수업 소식 만들기</button>' : ''}</div>
+    body.innerHTML = `<div class="panel framed t-now">${now()}${C().pctHtml(L, R)}${live ? C().videoBtn(L, R, videos) + C().sheetBtn(L, R) + C().focusBtn(R) : ''}${DS.ShareCard.klassReady(L, R) ? '<button class="btn sc-btn" id="t-news">🏫 학급 결과 · 우리 반 수업 소식</button>' : ''}${Raid().isClosed(R) ? '<button class="btn primary" id="t-tcamp">🏛 교사 캠프 가기</button>' : ''}</div>
       ${Raid().isLobby(R) ? lobby() : Raid().isEnd(L, R) ? `<div class="panel framed">${C().wordsHtml(R)}</div>` : helpPanel()}
       <p class="t-next muted small">다음 ▶ <b>${esc(C().nextName(L, R))}</b></p>
       <div class="t-pad"><button class="btn t-back" id="t-back"${i < 0 ? ' disabled' : ''}>◀<br>뒤로</button><button class="btn primary t-fwd" id="t-fwd"${Raid().isClosed(R) ? ' disabled' : ''}>▶<br>${Raid().isFinale(L, R) ? '수업 끝' : '앞으로'}</button></div>`;
     if (Raid().isLobby(R)) drawQR();
     C().bindPct(body, code, R, L); C().bindFocus(body, code, R); C().bindSheet(body, code, R); C().bindVideo(body, code, R); C().bindWords(body, code, R);
-    const nb = $('#t-news'); if (nb) nb.onclick = () => C().run(() => DS.ShareCard.preview((praise) => DS.ShareCard.klass({ L, R, cls: R.meta.cls, praise }), `우리 반 수업 소식 · ${L.no ? `${L.no}차시 ` : ''}${L.title}`, `🏫 ${R.meta.cls ? `${R.meta.cls}반 ` : ''}공통수학2 ${L.title} 수업 소식`, { praise: true }));
+    const nb = $('#t-news'); if (nb) nb.onclick = () => C().run(() => DS.ShareCard.klassOpen(L, R, { praise: true }));
+    const cb = $('#t-tcamp'); if (cb) cb.onclick = () => C().run(() => { if (stop) stop(); stop = null; clearInterval(tick); return DS.TCamp.enter({ code, hallKey: curKey }); });
     body.querySelectorAll('[data-help]').forEach((b) => (b.onclick = () => C().run(() => DS.Act.clearHelp(code, b.dataset.help))));
     $('#t-fwd').onclick = () => C().run(() => C().forward(code, R, L));
     $('#t-back').onclick = () => C().run(() => C().back(code, R, L));
@@ -68,7 +69,7 @@ DS.Teacher = (function () {
   function lobby() {
     const studs = Object.entries(R.players || {}).filter(([, p]) => !p.teacher).sort((a, b) => a[1].num - b[1].num);
     return `<div class="panel framed"><p class="stage-name">학생 입장</p><div class="qr-row"><div id="t-qr" class="qr"></div><div><p>수업 코드 <b class="big-code">${code}</b></p><p class="muted small break">${esc(studentUrl())}</p><p class="muted small">종합상황실(PC): 첫 화면 → 종합상황실 → 코드 ${code} · 키는 위쪽 [보기]</p></div></div>
-      <div class="chips">${studs.map(([, p]) => `<span class="chip">${DS.Titles.nameHtml(p, { beon: true, size: 14 })}</span>`).join('') || '<span class="muted">아직 아무도 없어요</span>'}</div></div>`;
+      <div class="chips">${studs.map(([, p]) => `<span class="chip">${DS.Titles.nameHtml(p, { beon: true, size: 14, short: true })}</span>`).join('') || '<span class="muted">아직 아무도 없어요</span>'}</div></div>`;
   }
   function drawQR() {
     const el = $('#t-qr');
@@ -81,5 +82,5 @@ DS.Teacher = (function () {
       ${list.map((h) => `<button class="t-help ${why[h.level]}" data-help="${h.uid}"><b>${esc(C().name(R, h.uid))}</b><span>${esc(h.why)}</span></button>`).join('') || '<p class="muted small">지금은 없어요 👍</p>'}</div>`;
   }
 
-  return { create, open, code: () => code };
+  return { create, open, code: () => code, live: () => !!(code && R && document.getElementById('screen-teacher').classList.contains('active') && !Raid().isClosed(R)) };
 })();

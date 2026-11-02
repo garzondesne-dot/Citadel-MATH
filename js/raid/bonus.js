@@ -1,6 +1,6 @@
 // ⚔ 보강던전 (4차시부터 · 학생 혼자 · 모닥불의 파랑 차원문): 차시마다 학습지 보강 문항이 몬스터로 나온다. 레이드(수업) 중에는 들어가지 않는다.
 // - 열린 범위 = 모루와 같음: 우리 반에 배포한 차시까지 (unlock/{반})
-// - 처치 조건 = 소문제 전부 맞히기 (혼자라 기준% 없음). 기회 3번(첫 시도 + 재도전 2번) — 틀린 소문제만 새 숫자·새 문장으로 다시. 실패해도 벌 없음
+// - 처치 조건 = 소문제 전부 맞히기 (혼자라 기준% 없음). 기회 4번(첫 시도 + 재도전 3번, v0.9.2) — 틀린 소문제만 새 숫자·새 문장으로 다시. 실패해도 벌 없음
 // - 처음 들어가면 학습지 원문(attempt 0), 다시 들어가면 새 시드의 다른 문제
 // - 그 차시 보강을 모두 처치하면 📘 보강 인장 1개 → 인장 1 · 2 · 4 · 6 · 8 · 10개에서 화려한 공격 이펙트가 하나씩 열린다
 // - 기록: bonus/{반}/{번호}/{차시}/{몬스터} = { clear, tries, at } (성적이 아니라 참여 기록). 🎬 설명 영상 · 📄 학습지 보기 = 수업 준비에서 올린 것
@@ -13,7 +13,7 @@ DS.Bonus = (function () {
   const N = () => DS.Net;
   const ck = (c) => String(c).replace(/[.#$/[\]]/g, '_');
   const UNLOCK = [1, 2, 4, 6, 8, 10];             // 인장 개수 → 화려한 이펙트 FANCY[i]
-  const TRIES = 3;
+  const TRIES = (DS.Raid ? DS.Raid.RETRIES : 3) + 1; // 레이드와 같은 기회 수
   let me = null, no = 0, mine = {}, prepCache = {};
 
   const lessons = () => DS.Lessons.list.filter((l) => (l.bonus || []).length);
@@ -45,7 +45,7 @@ DS.Bonus = (function () {
   }
   function render() {
     const open = lessons().filter((l) => l.no <= no), sl = seals(mine), nextFx = UNLOCK.findIndex((u) => sl.length < u);
-    $('#bonus').innerHTML = `<div class="bn-top"><button class="btn small" id="bn-back">≪ ${preview ? '교사 대기공간' : '모닥불로'}</button><b>📘 보강던전</b><span class="bn-seal">📘 인장 ${sl.length}개</span></div>
+    $('#bonus').innerHTML = `<div class="bn-top"><button class="btn small" id="bn-back">≪ ${preview ? '교사 캠프' : '모닥불로'}</button><b>📘 보강던전</b><span class="bn-seal">📘 인장 ${sl.length}개</span></div>
       <div class="bn-portals">
         <div class="bn-portal on"><i style="background-image:url('${DS.ASSETS.base}${DS.ASSETS.dportals.bonus}')"></i><b>보강던전</b><span class="muted small">차시 보강 · 혼자</span></div>
         <div class="bn-portal lock" data-lock="mid"><i style="background-image:url('${DS.ASSETS.base}${DS.ASSETS.dportals.mid}')"></i><b>🔒 중단원던전</b><span class="muted small">중단원을 마치면</span></div>

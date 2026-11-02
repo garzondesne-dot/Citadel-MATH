@@ -1,5 +1,5 @@
 // 🏅 호칭 · 메달 (v0.9.1): 이름표 = [메달][호칭] 번호 이름 — 이름 색이 호칭 등급을 따라간다
-// 등급: 일반(흰) → 파랑 → 보라 → 주황(메달). 첫 접속 때 모두 보라 [새벽의 개척자]. ⚙ 설정에서 얻은 호칭 중 하나를 달거나(또는 안 달거나) 고른다.
+// 등급: 일반(흰) → 파랑 → 보라 → 주황(메달). 첫 접속 때 모두 보라 [새벽의 개척자]를 얻는다. v0.9.2: 얻기만 하고 자동으로 달지 않는다 — ⚙ 설정에서 스스로 골라야 붙는다 (기본 = 이름만).
 // 얻은 호칭은 기록(records · cards · xp · bonus)에서 그때그때 계산한다 (따로 저장하지 않음). 고른 호칭만 accounts/{반}/{번호}/title 에 저장.
 // 메달 그림: 배치표 medals.rank · medals.dungeon (5열 × 2행, 사용자 제공)
 window.DS = window.DS || {};
@@ -47,10 +47,12 @@ DS.Titles = (function () {
     return `<i class="medal" style="width:${size}px;height:${size}px;background-image:url('${DS.ASSETS.base}${s.src}');background-size:${s.cols * 100}% ${s.rows * 100}%;background-position:${(col / (s.cols - 1)) * 100}% ${(row / (s.rows - 1)) * 100}%"></i>`;
   }
   // 이름표: [메달][호칭] 번호 이름 (호칭이 없거나 'none' 이면 이름만)
+  // opt.short (v0.9.2): 좁은 칸(종합상황실 · 교사 칩)은 호칭 글자 없이 메달 + 이름만 — 이름이 가려지지 않게
   function nameHtml(p, opt = {}) {
     const t = p && p.title && p.title !== 'none' ? get(p.title) : null, cls = t ? TIER[t.tier].cls : '';
     const num = p && p.num != null && opt.num !== false ? `${p.num}${opt.beon ? '번' : ''} ` : '';
-    return `${t ? `<span class="ttl ${cls}">${medal(t, opt.size || 18)}[${esc(t.name)}]</span> ` : ''}<span class="tname ${cls}">${num}${esc((p && (p.nick || p.name)) || '')}</span>`;
+    const tag = !t ? '' : opt.short ? (t.medal ? `${medal(t, opt.size || 18)} ` : '') : `<span class="ttl ${cls}">${medal(t, opt.size || 18)}[${esc(t.name)}]</span> `;
+    return `${tag}<span class="tname ${cls}">${num}${esc((p && (p.nick || p.name)) || '')}</span>`;
   }
   return { TIER, all, get, data, earned, medal, nameHtml, BASE };
 })();

@@ -6,14 +6,14 @@
 //            focus: 집중모드 (학생 폰 멈춤 · 개념 설명 단계에 들어가면 자동으로 켜짐, 교사가 언제든 켜고 끔)
 //   online:  { uid: true } (접속 중 — 연결이 끊기면 서버가 지움) · words: { uid: { t, bad, n } } 마지막 한마디 · hide: { uid: true }
 //   players: { uid: { num, nick, hero, teacher? } } · active: { uid: true } (수업 시작 때 대기실 인원)
-//   subs:    { 몬스터id: { uid: { 0: 답(JSON), 1: …, 2: … } } }   attempt 0 = 첫 시도, 1·2 = 재도전
+//   subs:    { 몬스터id: { uid: { 0: 답(JSON), 1: …, 2: …, 3: … } } }   attempt 0 = 첫 시도, 1·2·3 = 재도전
 //   bossAns: { uid: { 1: [답 7개](JSON), 2: [...] } } · help: { uid: true }
 // 필드 몬스터 = 공동 체력 레이드: 체력 = ⌊대기실 인원 × 소문제 수 × 기준%⌋, 데미지 = 학생마다 가장 많이 맞힌 소문제 수(늘어난 만큼만)
 //   전원이 한 번 이상 제출(제외된 학생 빼고)한 뒤 체력이 0 이하면 격파. 보스는 체력 0 이 되는 즉시 승리.
 window.DS = window.DS || {};
 
 DS.Raid = (function () {
-  const RETRIES = 2; // 재도전 2번 → 시도는 최대 3번
+  const RETRIES = 3; // v0.9.2: 재도전 3번 → 시도는 최대 4번 (사용자 결정)
   const keys = (o) => Object.keys(o || {});
   const num = (R, uid) => ((R.players || {})[uid] || {}).num || 0;
   const activeIds = (R) => keys(R.active).filter((u) => R.active[u]).sort((a, b) => num(R, a) - num(R, b));
@@ -53,13 +53,16 @@ DS.Raid = (function () {
     return { marks, correct: marks.filter(Boolean).length, total: items.length };
   }
   // 학생의 기록: 시도별 결과 · 가장 많이 맞힌 수(=데미지) · 남은 재도전
+  // v0.9.2 연습 공격: 다 맞힌 뒤에도 남은 기회만큼 숫자 바뀐 문제를 풀 수 있다 (데미지는 가장 많이 맞힌 수라 늘지 않음 = 0)
+  //   perfectAt = 처음 다 맞힌 시도 번호(-1 = 아직) · practice = 마지막 시도가 다 맞힌 뒤의 연습인지
   function record(L, R, mid, uid) {
     const tries = attemptsOf(R, mid, uid).map((t) => ({ ...t, ...gradeAttempt(L, R, mid, uid, t.attempt, t.given) }));
     const best = tries.reduce((m, t) => Math.max(m, t.correct), 0);
     const total = L.monsters[mid] ? itemsFor(L, R, mid, uid, 0).length : 0;
     const last = tries[tries.length - 1] || null;
     const allRight = !!last && last.correct === last.total;
-    return { tries, best, total, last, allRight, submitted: tries.length > 0, canRetry: tries.length > 0 && tries.length <= RETRIES && !tries.some((t) => t.correct === t.total), nextAttempt: tries.length };
+    const perfectAt = tries.findIndex((t) => t.total > 0 && t.correct === t.total), practice = perfectAt >= 0 && tries.length - 1 > perfectAt;
+    return { tries, best, total, last, allRight, perfectAt, perfect: perfectAt >= 0, practice, submitted: tries.length > 0, canRetry: tries.length > 0 && tries.length <= RETRIES, nextAttempt: tries.length };
   }
   const resultLabel = (t) => (!t ? '' : t.correct === t.total ? 'success' : t.correct === 0 ? 'fail' : 'partial');
 
@@ -76,7 +79,8 @@ DS.Raid = (function () {
   }
   const waiting = (L, R, mid) => activeIds(R).filter((u) => !skipped(R, mid)[u] && !record(L, R, mid, u).submitted);
   const allSubmitted = (L, R, mid) => waiting(L, R, mid).length === 0;
-  const cleared = (L, R, mid) => allSubmitted(L, R, mid) && monsterHp(L, R, mid).left <= 0;
+  // v0.9.2: 체력이 0 이 되면 그 자리에서 쓰러진다 (아직 안 낸 학생도 계속 풀고 공격 · 이펙트 · 경험치 그대로)
+  const cleared = (L, R, mid) => { const h = monsterHp(L, R, mid); return h.max > 0 && h.left <= 0; };
 
   // ── 보스 (형성평가) ───────────────────────────────────────
   // 문항별로 세트1·세트2 중 한 번이라도 맞히면 도달. 체력 = ⌊인원 × hpItems(6) × 기준%⌋, 7번(보너스)도 맞히면 1 데미지

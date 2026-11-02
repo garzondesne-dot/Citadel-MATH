@@ -9,11 +9,11 @@ DS.Hall = (function () {
   const { esc, pretty } = DS.UI;
   const C = () => DS.Control, Raid = () => DS.Raid;
   let code = null, L = null, R = null, raw = null, stop = null, stopPrep = null, prep = {};
-  let built = '', seen = {}, queue = [], playing = false, wonFx = '', bubbleT = 0, bubbleK = 0;
+  let built = '', seen = {}, queue = [], playing = false, wonFx = '', bubbleT = 0, bubbleK = 0, hallKey = '', camped = false, zoom = '', zoomStep = -9;
 
   async function enter(c, key) {
     await DS.Act.joinHall(c, key);
-    code = c;
+    code = c; hallKey = String(key); camped = false; L = null; R = null; built = '';
     try { localStorage.setItem('citadel-hall', JSON.stringify({ code: c, key: String(key) })); } catch (e) { /* 무시 */ }
     DS.UI.show('screen-hall');
     DS.Scene.save({ role: 'hall', code: c, key: String(key) });
@@ -26,7 +26,15 @@ DS.Hall = (function () {
       if (DS.Act.isHost(R)) { DS.Act.admitLate(code, R, L); DS.Act.markBossWin(code, R, L); }
       if (first) { if (stopPrep) stopPrep(); stopPrep = DS.Net.watch(`prep/${L.id}`, (p) => { prep = p || {}; built = ''; if (R) render(); }); }
       render();
+      // v0.9.2: 종합상황실은 교사 캠프(학생 입장 QR · 모루 · 보강던전)에서 시작 — 수업이 시작되면 저절로 이 화면으로
+      if (first && !camped && Raid().isLobby(R) && DS.TCamp) { camped = true; DS.TCamp.enter({ code, hallKey, hall: true }).catch(() => {}); }
     });
+  }
+  const toCamp = () => DS.Control.run(() => DS.TCamp.enter({ code, hallKey, hall: true }));
+  const klassBtn = () => (DS.ShareCard.klassReady(L, R) ? '<button class="btn sc-btn" id="h-klass">🏫 학급 결과</button>' : '');
+  function bindActs() {
+    const k = $('#h-klass'); if (k) k.onclick = () => DS.Control.run(() => DS.ShareCard.klassOpen(L, R));
+    const c = $('#h-tcamp'); if (c) c.onclick = toCamp;
   }
   const studentUrl = () => `${location.origin}${location.pathname.replace(/[^/]*$/, '')}index.html?role=student&code=${code}${DS.Net.mode === 'local' ? '&local' : ''}`;
   const studs = () => Object.entries(R.players || {}).filter(([, p]) => !p.teacher).sort((a, b) => a[1].num - b[1].num);
@@ -43,15 +51,26 @@ DS.Hall = (function () {
     el.classList.toggle('focus-on', Raid().focusOn(R) && !Raid().isLobby(R));
     if (step && (step.kind === 'monster' || step.kind === 'boss')) { const key = `f${i}`; if (built !== key) buildFight(step, key); else updateFight(step); sheetOverlay(step); return; }
     clearInterval(bubbleT);
-    if (Raid().isClosed(R)) { built = 'closed'; el.innerHTML = `<div class="h-victory"><div class="trophy"><i class="trophy-img" style="background-image:url('${DS.ASSETS.base}${DS.ASSETS.trophy}')"></i></div><h1>수업 끝!</h1><p class="muted">모두 모닥불로 돌아갔어요. 게임 기록은 수학 성적이 아니에요.</p><div class="stamp-bar big">📮 반드시 학습지 확인도장 받아가세요.</div></div>`; return; }
+    if (Raid().isClosed(R)) { built = 'closed'; el.innerHTML = `<div class="h-victory"><div class="trophy"><i class="trophy-img" style="background-image:url('${DS.ASSETS.base}${DS.ASSETS.trophy}')"></i></div><h1>수업 끝!</h1><p class="muted">모두 모닥불로 돌아갔어요. 게임 기록은 수학 성적이 아니에요.</p><div class="stamp-bar big">📮 반드시 학습지 확인도장 받아가세요.</div><div class="h-acts row">${klassBtn()}<button class="btn primary" id="h-tcamp">🏛 교사 캠프 가기</button></div></div>`; bindActs(); return; }
     if (Raid().isLobby(R) || Raid().isFinale(L, R)) return lobbyScene(Raid().isFinale(L, R));
-    const key = `c${i}|${(prep.img || {})[step.id] ? 1 : 0}`;
+    // v0.9.2: 개념 설명 = 왼쪽 개념 · 오른쪽 바로 이어지는 문제 (일반 문제 m 만 — ⭐ 스페셜 난입은 미리 보이지 않게). 문제 칸 이미지가 없으면 개념 하나만 크게
+    const nx = L.steps[i + 1], prob = nx && nx.kind === 'monster' && !nx.special && !nx.review ? nx : null;
+    const img = (prep.img || {})[step.id], pimg = prob ? (prep.img || {})[prob.id] : null, split = !!(img && pimg);
+    if (zoomStep !== i) { zoomStep = i; zoom = ''; }
+    const key = `c${i}|${img ? img.length : 0}|${pimg ? pimg.length : 0}|${zoom}`;
     if (built === key) return;
     built = key;
-    const img = (prep.img || {})[step.id];
-    el.innerHTML = `<div class="h-concept"><p class="h-ctitle">📣 ${esc(step.title)}</p>
-      <div class="h-sheet">${img ? `<img src="${img}" alt="${esc(step.title)} 학습지">` : `<div class="h-sheet-empty">📄 학습지 이미지 칸<br><span class="muted small">수업 준비 화면에서 '${esc(step.title)}' 이미지를 넣으면 여기에 크게 떠요</span><p class="h-intro">${pretty(step.say || '')}</p></div>`}</div>
+    const one = img ? `<img src="${img}" alt="${esc(step.title)} 학습지">` : `<div class="h-sheet-empty">📄 학습지 이미지 칸<br><span class="muted small">수업 준비 화면에서 '${esc(step.title)}' 이미지를 넣으면 여기에 크게 떠요</span><p class="h-intro">${pretty(step.say || '')}</p></div>`;
+    el.innerHTML = split
+      ? `<div class="h-concept split${zoom ? ` zoom-${zoom}` : ''}">
+        <div class="h-half" data-zoom="l"><p class="h-ctitle">📣 ${esc(step.title)}</p><div class="h-sheet"><img src="${img}" alt="${esc(step.title)} 학습지"></div></div>
+        <div class="h-half" data-zoom="r"><p class="h-ctitle prob">⚔ 이어지는 문제 · ${esc(prob.title)}</p><div class="h-sheet"><img src="${pimg}" alt="${esc(prob.title)} 학습지"></div></div>
+        <p class="h-zoom-tip muted small">${zoom ? '누르면 좌우로 다시 나눠 봐요' : '한쪽을 누르면 그쪽만 크게'}</p>
+        <div class="h-focus-badge">⚠ 집중모드 — 학생 폰 멈춤</div></div>`
+      : `<div class="h-concept"><p class="h-ctitle">📣 ${esc(step.title)}</p>
+      <div class="h-sheet">${one}</div>
       <div class="h-focus-badge">⚠ 집중모드 — 학생 폰 멈춤</div></div>`;
+    el.querySelectorAll('[data-zoom]').forEach((h) => (h.onclick = () => { zoom = zoom ? '' : h.dataset.zoom; render(); }));
   }
 
   // ── 왼쪽: 용사단 ─────────────────────────────────────────
@@ -69,14 +88,14 @@ DS.Hall = (function () {
     const on = list.filter(([u]) => Raid().online(R, u)).length;
     $('#h-heroes').innerHTML = `<p class="shelf-title">⚔ 용사단 <span class="muted">${Raid().isLobby(R) ? `입장 ${list.length}` : `접속 ${on} / ${list.length}`}</span></p>
       <div class="hrow teach">${DS.Art.hero(DS.ASSETS.heroes.teacher, 'idle', 'mini')}<b>선생님</b><i class="dot"></i></div>
-      ${list.map(([u, p]) => `<div class="hrow">${DS.Art.hero(p.hero, 'idle', 'mini')}<span>${DS.Titles.nameHtml(p, { size: 16 })}</span>${st(u, p)}<i class="dot${Raid().online(R, u) || Raid().isLobby(R) ? '' : ' off'}"></i></div>`).join('')}
+      ${list.map(([u, p]) => `<div class="hrow">${DS.Art.hero(p.hero, 'idle', 'mini')}<span>${DS.Titles.nameHtml(p, { size: 16, short: true })}</span>${st(u, p)}<i class="dot${Raid().online(R, u) || Raid().isLobby(R) ? '' : ' off'}"></i></div>`).join('')}
       <p class="muted small h-legend">● 접속 · ○ 끊김 — 정답·오답 글자는 띄우지 않아요</p>`;
   }
 
   // ── 가운데: 던전 단체 대기실 (수업 전 · 마무리) ─────────────
   function lobbyScene(finale) {
     const list = inClass().filter(([, p]) => !finale || true);
-    const sig = `lobby|${finale}|${list.map(([u, p]) => u + p.hero).join()}|${finale ? JSON.stringify([R.words, R.hide]) : ''}`;
+    const sig = `lobby|${finale}|${list.map(([u, p]) => u + p.hero + (p.title || '')).join()}|${finale ? JSON.stringify([R.words, R.hide]) : ''}|${DS.ShareCard.klassReady(L, R)}`;
     if (built === sig) return;
     built = sig;
     const n = list.length, size = n > 24 ? 62 : n > 16 ? 72 : 84, per = Math.max(1, Math.ceil(n / 3));
@@ -92,9 +111,11 @@ DS.Hall = (function () {
       ${finale ? `<div class="lb2-cnt">💬 ${words.length} / ${n}</div>` : `<div class="lb2-qr"><div id="h-qr" class="qr"></div><b>${code}</b><span>QR · 수업 코드</span></div>`}
       <div class="lb2-say teacher">${finale ? '모두 수고했네! 오늘 배운 것 한마디씩 남기게' : `${L.no ? `${L.no}차시 ` : ''}${esc(L.title.split('·')[0].trim())} 던전에 온 것을 환영하네!`}</div>
       <div class="lb2-h teacher" style="left:50%;top:60%">${DS.Art.hero(DS.ASSETS.heroes.teacher, finale ? 'attack' : 'idle', finale ? 'pairhop' : 'huff')}<i class="shadow"></i><span class="nm gold">선생님</span></div>
-      ${pos.map((o, i) => `<div class="lb2-h" style="left:${o.x}%;top:${o.y}%;--sz:${size}px;animation-delay:${(i * 0.13) % 0.9}s"><span class="nm">${DS.Titles.nameHtml(o.p, { size: 16 })}</span><div class="${(finale ? i % 2 === 1 : o.flip) ? 'face-l' : ''}">${DS.Art.hero(o.p.hero, 'idle', finale ? 'pairhop' : 'huff')}</div><i class="shadow"></i>${finale && words.includes(o.u) ? `<span class="lb2-bub" data-u="${o.u}">${esc(R.words[o.u].t)}</span>` : ''}</div>`).join('')}
+      ${pos.map((o, i) => `<div class="lb2-h" style="left:${o.x}%;top:${o.y}%;--sz:${size}px;animation-delay:${(i * 0.13) % 0.9}s"><span class="nm">${DS.Titles.nameHtml(o.p, { size: 16, short: true })}</span><div class="${(finale ? i % 2 === 1 : o.flip) ? 'face-l' : ''}">${DS.Art.hero(o.p.hero, 'idle', finale ? 'pairhop' : 'huff')}</div><i class="shadow"></i>${finale && words.includes(o.u) ? `<span class="lb2-bub" data-u="${o.u}">${esc(R.words[o.u].t)}</span>` : ''}</div>`).join('')}
       ${finale ? '<div class="stamp-bar wide">📮 반드시 학습지 확인도장 받아가세요.</div>' : ''}
-      ${Raid().focusOn(R) ? '<div class="h-focus-badge">⚠ 집중모드</div>' : ''}</div>`;
+      ${Raid().focusOn(R) ? '<div class="h-focus-badge">⚠ 집중모드</div>' : ''}
+      <div class="h-acts corner">${finale ? klassBtn() : '<button class="btn small" id="h-tcamp">🏛 교사 캠프</button>'}</div></div>`;
+    bindActs();
     if (!finale && window.QRCode) new QRCode($('#h-qr'), { text: studentUrl(), width: 150, height: 150 });
     if (finale) rotateBubbles();
   }
@@ -119,7 +140,7 @@ DS.Hall = (function () {
     const out = {};
     Raid().activeIds(R).forEach((u) => {
       if (step.kind === 'boss') { const m = Raid().mastery(L, R, u).filter(Boolean).length; const n = Object.values(((R.bossAns || {})[u]) || {}).reduce((a, s) => a + (s || []).filter((x) => x != null).length, 0); out[u] = { n, dmg: m }; }
-      else { const rec = Raid().record(L, R, step.id, u); out[u] = { n: rec.tries.length, dmg: rec.best, label: Raid().resultLabel(rec.last) }; }
+      else { const rec = Raid().record(L, R, step.id, u); out[u] = { n: rec.tries.length, dmg: rec.best, label: Raid().resultLabel(rec.last), prac: rec.practice }; }
     });
     return out;
   }
@@ -133,7 +154,7 @@ DS.Hall = (function () {
       <div class="raid-top"><b>${step.kind === 'boss' ? '👑 ' : step.special ? '⭐ ' : step.review ? '📖 ' : ''}${esc(f.title)}</b><div class="raid-hp"><i id="rh-bar"></i><span id="rh-txt"></span></div></div>
       ${step.special ? '<div class="raid-banner">⭐ 스페셜 몬스터 난입!</div>' : step.kind === 'boss' ? '<div class="raid-banner boss">👑 보스 출현!</div>' : ''}
       <div class="raid2-shadow"></div><div class="raid2-mon" id="rm">${DS.Art.monster(f.sprite, 'idle', 'float')}<div id="rm-fx"></div></div>
-      ${pos.map((o) => `<div class="fh2" id="fh-${o.u}" style="left:${o.x}%;top:${o.y}%"><span class="fh-name">${DS.Titles.nameHtml(o.p, { size: 16 })}</span><div class="${o.x > 50 ? 'face-l' : ''}">${DS.Art.hero(o.p.hero, 'idle')}</div><i class="shadow"></i></div>`).join('')}
+      ${pos.map((o) => `<div class="fh2" id="fh-${o.u}" style="left:${o.x}%;top:${o.y}%"><span class="fh-name">${DS.Titles.nameHtml(o.p, { size: 16, short: true })}</span><div class="${o.x > 50 ? 'face-l' : ''}">${DS.Art.hero(o.p.hero, 'idle')}</div><i class="shadow"></i></div>`).join('')}
       <div class="raid-clear" id="r-clear" hidden></div><div class="h-focus-badge">⚠ 집중모드</div>
     </div>`;
     seen = attacks(step);
@@ -147,7 +168,7 @@ DS.Hall = (function () {
     const now = attacks(step);
     Object.entries(now).forEach(([u, a]) => {
       const was = seen[u] || { n: 0, dmg: 0 };
-      if (a.n > was.n) queue.push({ u, dmg: Math.max(0, a.dmg - was.dmg), label: step.kind === 'boss' ? (a.dmg > was.dmg ? 'partial' : 'fail') : a.label });
+      if (a.n > was.n) queue.push({ u, dmg: a.prac ? 0 : Math.max(0, a.dmg - was.dmg), label: step.kind === 'boss' ? (a.dmg > was.dmg ? 'partial' : 'fail') : a.prac ? 'practice' : a.label });
     });
     seen = now;
     const wait = step.kind === 'monster' ? Raid().waiting(L, R, step.id) : [];
@@ -167,7 +188,8 @@ DS.Hall = (function () {
     const a = queue.shift();
     const h = document.getElementById(`fh-${a.u}`), arena = $('#raid'), m0 = $('#rm');
     if (h && arena && m0) {
-      const ok = a.label !== 'fail', perfect = a.label === 'success';
+      // v0.9.2 연습 공격(이미 다 맞힌 학생): 돌진 + 이펙트 + 머리 위 「✔ 이미 성공」 · 데미지 숫자 · PERFECT 흔들림 없음
+      const prac = a.label === 'practice', ok = a.label !== 'fail', perfect = a.label === 'success';
       const hr = h.getBoundingClientRect(), mr = m0.getBoundingClientRect(), ar = arena.getBoundingClientRect();
       h.style.setProperty('--tx', `${(mr.left + mr.width / 2 - (hr.left + hr.width / 2)) * (ok ? 0.8 : 0.35)}px`);
       h.style.setProperty('--ty', `${(mr.top + mr.height * 0.7 - (hr.top + hr.height / 2)) * (ok ? 0.8 : 0.35)}px`);
@@ -178,6 +200,7 @@ DS.Hall = (function () {
           const p = (R.players[a.u] || {}).fx || 'flame';
           DS.FX.play(arena, p, { x: mr.left - ar.left + mr.width / 2, y: mr.top - ar.top + mr.height / 2, scale: Math.min(ar.width, ar.height) / (perfect ? 900 : 1150), perfect });
           m0.classList.remove('flash'); void m0.offsetWidth; m0.classList.add('flash');
+          if (prac) { const t = document.createElement('span'); t.className = 'prac-tag'; t.textContent = '✔ 이미 성공'; h.appendChild(t); setTimeout(() => t.remove(), 1600); }
           const fx = $('#rm-fx');
           if (fx && a.dmg) { const d = document.createElement('span'); d.className = `dmg${perfect ? ' big' : ''}`; d.textContent = `−${a.dmg}`; d.style.left = `${55 + Math.random() * 25}%`; fx.appendChild(d); setTimeout(() => d.remove(), 1300); }
           if (perfect) {

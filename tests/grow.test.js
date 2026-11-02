@@ -53,6 +53,11 @@ check(r.parts.submit === 5 && r.parts.fixed === 2 + 1 + 1, `EXP 재료: 제출 5
 const sm = DS.Result.summary(r, code);
 check(sm.conc.c2.join() === '1,3' && sm.weak[0] === 'c2' && sm.xp === G.sum(r.parts), '저장 요약');
 check(/서로소/.test(DS.Result.history({ 'set-04': Object.assign({}, sm, { at: 1 }) })), '복습 노트에 추천 개념 이름');
+// v0.9.2 연습 공격: 복습을 처음에 다 맞힌 뒤 연습에서 1개만 맞혀도 기록은 「처음에 3개 다 맞힘」 그대로 · 제출 EXP 만 +1번
+give('r1', 1, [0]);
+const rp = DS.Result.compute(L, R, u), mp = rp.mons.find((x) => x.id === 'r1');
+check(mp.first === 3 && mp.fixed === 0 && mp.miss === 0 && rp.perfects === r.perfects && rp.parts.submit === r.parts.submit + 1 && rp.parts.correct === r.parts.correct && rp.parts.fixed === r.parts.fixed, `연습 공격은 기록 · PERFECT · 맞힌/고친 EXP 를 바꾸지 않음 ${JSON.stringify(mp)}`);
+delete R.subs.r1[u][1];
 // 2·3차시 형성평가 문항마다 개념 표시
 ['set-02', 'set-03', 'set-04'].forEach((id) => { const l = DS.Lessons.get(id); check((l.boss.tags || []).length === l.boss.items && l.boss.tags.every((t) => l.steps.some((s) => s.id === t)), `${id}: 형성평가 개념 표시`); });
 

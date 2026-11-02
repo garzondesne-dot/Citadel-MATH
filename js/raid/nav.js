@@ -12,7 +12,7 @@ DS.Nav = (function () {
   const ASK = {
     'screen-camp': null,
     'screen-student': '수업 화면에서 나갈까요?\n수업은 계속되고, 다시 들어오면 기록은 그대로예요.',
-    'screen-teacher': null, // v0.9.1: 교사 대기공간으로 (수업은 그대로)
+    'screen-teacher': null, // v0.9.2: 교사 메뉴로 (수업 중이면 끝낼지 한 번 묻는다)
     'screen-hall': '종합상황실을 닫고 첫 화면으로 갈까요?\n수업은 계속돼요.',
   };
   const homeUrl = () => `${location.pathname}${new URLSearchParams(location.search).has('local') ? '?local' : ''}`;
@@ -22,7 +22,7 @@ DS.Nav = (function () {
   const ask = (id) => !ASK[id] || window.confirm(ASK[id]);
   // v0.8.5: ≪ 뒤로 = 바로 전 화면 (화면을 새로 열어 실시간 연결은 깨끗이 끊되, 시작 화면부터가 아니라 한 단계 위로)
   //  수업 화면(학생) · 보강던전 → 모닥불 / 교사 화면 · 수업 준비 · 학생 관리 → 교사 메뉴 / 모닥불 → 학생 첫 화면 / 종합상황실 → 종합상황실 입력
-  const UP = { 'screen-student': 'camp', 'screen-bonus': 'camp', 'screen-teacher': 'tcamp', 'screen-tcamp': 'teacher', 'screen-prep': 'teacher', 'screen-students': 'teacher', 'screen-camp': 'student', 'screen-hall': 'hall' };
+  const UP = { 'screen-student': 'camp', 'screen-bonus': 'camp', 'screen-teacher': 'teacher', 'screen-tcamp': 'teacher', 'screen-prep': 'teacher', 'screen-students': 'teacher', 'screen-camp': 'student', 'screen-hall': 'hall' };
   const reopen = () => {
     leaving = true;
     let up = UP[current()]; const sc0 = DS.Scene.get() || {};
@@ -38,10 +38,23 @@ DS.Nav = (function () {
   };
   // v0.8.1: 교사 화면에서 나갈 때 한 번 더 — [확인] 수업 끝내기 / [취소] 잠깐 나가기 (수업은 계속 · 교사 메뉴에서 이어서)
   const END = '수업도 끝낼까요?\n\n[확인] 수업 끝내기 — 학생은 결과를 보고 모닥불로, 차원문은 꺼져요\n[취소] 잠깐 나가기 — 수업은 계속돼요 (교사 메뉴에서 이어서)';
-  const endHook = (id) => (id === 'screen-tcamp' && DS.TCamp && DS.TCamp.code() && DS.TCamp.open() && window.confirm(END) ? DS.Act.endClass(DS.TCamp.code()).catch(() => {}) : null);
+  const endHook = (id) => {
+    if (id === 'screen-tcamp' && DS.TCamp && !DS.TCamp.hallMode() && DS.TCamp.code() && DS.TCamp.open() && window.confirm(END)) return DS.Act.endClass(DS.TCamp.code()).catch(() => {});
+    if (id === 'screen-teacher' && DS.Teacher && DS.Teacher.live() && window.confirm(END)) return DS.Act.endClass(DS.Teacher.code()).catch(() => {});
+    return null;
+  };
+  // v0.9.2: 종합상황실 기기의 교사 캠프 · 미리 보기 보강던전 → 화면을 새로 열지 않고 제자리에서 종합상황실 / 교사 캠프로
+  const inPlace = (id) => {
+    if (!DS.TCamp || !DS.TCamp.hallMode()) return false;
+    if (id === 'screen-tcamp') { DS.TCamp.leave(); return true; }
+    if (id === 'screen-bonus' && document.querySelector('#bn-back') && /교사/.test(document.querySelector('#bn-back').textContent)) { DS.TCamp.back(); return true; }
+    return false;
+  };
   function leave() { // 화면 왼쪽 위 ≪ 뒤로 (지금 위치 = top)
     const id = current();
-    if (id === 'screen-home' || leaving || !ask(id)) return false;
+    if (id === 'screen-home' || leaving) return false;
+    if (inPlace(id)) return true;
+    if (!ask(id)) return false;
     const go = () => { if (embedded || !(history.state && history.state.cm === 'top')) reopen(); else { leaving = 'back'; history.back(); } }; // → popstate 에서 base 자리에 새로 연다
     const p = endHook(id); if (p) { leaving = true; p.then(() => { leaving = false; go(); }); } else go();
     return true;
@@ -50,6 +63,7 @@ DS.Nav = (function () {
     if (leaving === 'back') { reopen(); return; }
     if (leaving) return;
     const id = current();
+    if (id !== 'screen-home' && inPlace(id)) { history.pushState({ cm: 'top' }, ''); return; }
     if (id !== 'screen-home') { if (ask(id)) { const p = endHook(id); if (p) { leaving = true; p.then(reopen); } else reopen(); } else history.pushState({ cm: 'top' }, ''); return; }
     // 경고하는 동안은 막지 않으므로 그사이 한 번 더 누르면 앱이 꺼진다. 시간이 지나면 다시 막는다
     DS.UI.toast('한 번 더 누르면 앱이 꺼져요', EXIT_MS);
