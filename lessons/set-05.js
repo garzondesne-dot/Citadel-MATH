@@ -247,8 +247,10 @@
       boss: [{ p: 2, x: 0.5116, y: 0.103, w: 0.4458, h: 0.7343 }],
       b1: [{ p: 1, x: 0.5116, y: 0.1474, w: 0.4458, h: 0.1226 }], b2: [{ p: 2, x: 0.0426, y: 0.103, w: 0.4458, h: 0.1576 }], b3: [{ p: 2, x: 0.0426, y: 0.2588, w: 0.4458, h: 0.1631 }] },
     theme: '07-volcano', // 던전 테마: 화산 심연 (배경 dg-07 · 포털 portal-07)
-    // 🎬 「학습자료 > 모션그래픽」: (05차시) 07 여집합 · 08 차집합. 11~14(이 방에서 만든 연산 법칙 · 간단히 · 성질)는 드라이브에 올리면 c1 · c2 · b1 · b2 에 연결
-    videos: { c3: V('1D_oPTzjvuLv8RplCx3oClSqAGaRF-0m7'), m3: V('1D_oPTzjvuLv8RplCx3oClSqAGaRF-0m7'), c4: V('1JGsZ3HlDjdFJJw4JAyzjV8LE--r8ksVw'), m4: V('1JGsZ3HlDjdFJJw4JAyzjV8LE--r8ksVw'),
+    // 🎬 「학습자료 > 모션그래픽」 720p: 11 교환·결합 → c1·m1 · 12 분배 → c2·m2 · 13 간단히 → b1 · 14 여집합의 성질 → b2 · 07 여집합 → c3·m3 · 08 차집합 → c4·m4·c5·m5·b3
+    videos: { c1: V('1Fn3qzM6kxqLF3msS1AzS4AkPEwXf6e_c'), m1: V('1Fn3qzM6kxqLF3msS1AzS4AkPEwXf6e_c'), c2: V('1LvX21kXNdhD4Zb34-VwwpqksPVvGD_XT'), m2: V('1LvX21kXNdhD4Zb34-VwwpqksPVvGD_XT'),
+      b1: V('1zWvb_vphSN00gRaj5UnomFE74I67qf7V'), b2: V('1Hl7fUa-QItFCxPC1cqU1CvvOWgGj40IT'),
+      c3: V('1D_oPTzjvuLv8RplCx3oClSqAGaRF-0m7'), m3: V('1D_oPTzjvuLv8RplCx3oClSqAGaRF-0m7'), c4: V('1JGsZ3HlDjdFJJw4JAyzjV8LE--r8ksVw'), m4: V('1JGsZ3HlDjdFJJw4JAyzjV8LE--r8ksVw'),
       c5: V('1JGsZ3HlDjdFJJw4JAyzjV8LE--r8ksVw'), m5: V('1JGsZ3HlDjdFJJw4JAyzjV8LE--r8ksVw'), b3: V('1JGsZ3HlDjdFJJw4JAyzjV8LE--r8ksVw') },
     goal: '교환·결합·분배법칙을 안다 · 여집합과 차집합을 구한다 · A − B = A ∩ Bᶜ 임을 안다',
     defaultPct: 90,
