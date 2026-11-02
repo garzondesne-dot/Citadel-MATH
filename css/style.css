@@ -396,7 +396,7 @@ textarea { display: block; width: 100%; font: 15px var(--pixel); color: var(--te
 .nav-back { display: inline-block; margin: 0 0 8px; padding: 4px 12px; font-size: 14px; opacity: 0.9; }
 .hall { position: relative; }
 .hall > .nav-back { position: absolute; top: 16px; left: 18px; margin: 0; z-index: 5; }
-.hall > .h-top { padding-left: 112px; }
+.hall > .h-top { padding-left: 150px; }
 
 /* 수업 준비: 이미지 칸 고르기 · 붙여넣기 · PDF 자르기 조정 */
 .p-slot { cursor: pointer; outline: none; }
@@ -997,3 +997,39 @@ details.panel[open] > summary::before { content: '▾ '; }
   box-shadow: -34px 10px 0 0 #7fd0ff, 28px -6px 0 0 #bfe8ff, -16px -30px 0 -1px #e6f6ff, 22px 26px 0 -1px #7fd0ff, 0 -48px 0 -1px #bfe8ff, -40px -18px 0 -2px #e6f6ff; animation: blueSpark 2.4s ease-in-out infinite; }
 .camp-bonus::after, .bn-portal.on::after { animation-delay: 1.2s; transform: scale(-1, 1); }
 @keyframes blueSpark { 0% { opacity: 0; translate: 0 18px; } 30% { opacity: 1; } 70% { opacity: .8; } 100% { opacity: 0; translate: 0 -34px; } }
+.h-acts.corner.below-qr { top: 252px; right: 14px; } /* 대기실: QR 상자 아래 */
+/* v0.9.3 모루 연성창: 한 화면 (위 연산 줄 · 가운데 모루 · 아래 재료 칩) · 망치는 연성할 때만 · 힌트는 차시별 접기 창 */
+.fg-wrap.one { height: 100dvh; min-height: 0; display: flex; flex-direction: column; padding-bottom: 8px; overflow: hidden; }
+.fg-wrap.one .fg-body { flex: 1; min-height: 0; display: flex; }
+.fc-one { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 6px; }
+.fc-ops { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
+.fc-tile.mini { width: 44px; aspect-ratio: auto; height: 56px; padding: 6px 2px; font-size: 18px; flex: none; }
+.fc-tile.mini.long { font-size: 12px; }
+.fc-tile.mini .fc-cardname { font-size: 10px; }
+.fc-one .fc-stage { width: min(100%, calc((100dvh - 330px) * 1.48)); max-width: 100%; margin: 0 auto; flex: none; }
+.fc-hammer { opacity: 0; }
+.fc-one .fg-msg { margin: 0; text-align: center; font-size: 13px; }
+.fc-mats { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; align-content: flex-start; flex: 1; min-height: 60px; overflow-y: auto; padding: 2px; }
+.fc-foot { display: flex; justify-content: space-between; gap: 8px; }
+.fc-foot b { color: #ffe39a; }
+.fg-hintov { position: fixed; inset: 0; z-index: 50; background: #050a14cc; display: flex; align-items: flex-end; justify-content: center; }
+.fg-hintbox { width: min(520px, 100vw); max-height: 82dvh; overflow-y: auto; background: #0e1730; padding: 12px; }
+.fg-hintbox .fc-row .btn { margin-left: 6px; }
+.fc-hgroup { margin: 6px 0; border: 1px solid #3a5487; background: #0d1830e6; }
+.fc-hgroup > summary { cursor: pointer; padding: 8px 10px; display: flex; gap: 8px; align-items: center; list-style: none; }
+.fc-hgroup > summary::-webkit-details-marker { display: none; }
+.fc-hgroup > summary::before { content: '▸'; color: var(--gold); } .fc-hgroup[open] > summary::before { content: '▾'; }
+.fc-hgroup .fc-hint, .fc-hgroup > p, .fc-hgroup > .fg-grid { margin: 6px 8px; }
+.fc-unlock { margin-left: auto; font-size: 13px; color: #ffe39a; border: 1px solid #9f803e; padding: 1px 8px; background: #1a1408; white-space: nowrap; }
+.fc-unlock.done { color: #4dffb0; border-color: #4dffb0; }
+body.forge-open .test-bar { display: none; } /* v0.9.3: 모루(한 화면)를 열면 테스트 막대가 아래 버튼을 가리지 않게 */
+/* 망치가 평소 안 보이니 모루 위 빈자리를 줄인다 (무대 위쪽은 투명 — 누름은 칸 · 연성 버튼만) */
+.fc-one .fc-stage { margin-top: -19%; pointer-events: none; }
+.fc-one .fc-slots, .fc-one .fc-go { pointer-events: auto; }
+.fc-one .fc-ops { position: relative; z-index: 5; }
+@media (max-height: 720px) {
+  .fc-tile.mini { width: 38px; height: 46px; font-size: 16px; padding: 4px 1px; }
+  .fg-wrap.one .fg-tabs { margin: 4px 0; }
+  .fc-one { gap: 4px; }
+  .fc-one .fg-msg { font-size: 12px; }
+}
