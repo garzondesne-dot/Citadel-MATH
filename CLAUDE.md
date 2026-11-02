@@ -30,6 +30,12 @@
   ⑤ 테스트 통과 → 커밋 → 배포한다 (수업 직전이면 배포는 미룬다)
   ⑥ 어떤 영상을 어느 칸에 연결했는지 표로 알린다
 - **레이드용 학습지 PDF 를 만들면 사용자의 Google 드라이브 「내 드라이브 > 학습지 > 공통수학2 > 02 레이드학습지」 폴더(id `1gcvXDs8FQETGkNZJrI2WlHJ3x8Jdzs0W`)에 저장**한다 (사용자 지침). 이 작업 공간은 PDF · mp4 를 드라이브에 직접 못 올리므로 파일을 보내 드리고 사용자가 올린다. 이름은 「(0n차시) 레이드용_vN.pdf」. 드라이브 폴더 구조는 `docs/HANDOVER.md` 「드라이브 폴더」.
+- **「n차시 학습지 컨펌」 = 차시 자동화** (사용자 지침, 2026-11-02 · 도구 `tools/auto/` README): 사용자가 변경 제안 PDF 를 컨펌하면 →
+  ① 레이드용 학습지 생성(`tools/worksheet/gen_wsN.py`) · 칸 위치(`measure_crops.js`) · 차시 파일 · 독립 검산 테스트 · e2e 테스트 모드
+  ② PDF → 드라이브 「02 레이드학습지」(`gdrive.js up`, 이름 「(0n차시) 레이드용_vN.pdf」) · 칸 이미지 → Firebase(`fbprep.js`)
+  ③ 개념 모션그래픽(`tools/motion`, 720p) → 「05 모션그래픽」 · 공유 확인 · `videos` 연결
+  ④ 변경 제안 PDF · 확정본 → 드라이브 백업(99 지난판 / 02) ⑤ 테스트 통과 → 커밋 → **배포는 사용자 「배포」 뒤** (수업 직전 금지)
+  열쇠(`GDRIVE_RCLONE_TOKEN` · `FIREBASE_SA_JSON`)가 없으면 ②~④ 는 파일을 보내 드리고 사용자가 올린다.
 - 교과서 PDF·학습지 원본·**학생 명단**·**API 키**·시트 ID·교사 비밀번호는 저장소에 넣지 않는다. 개념 설명용 학습지 이미지는 저장소가 아니라 Firebase(서버)에 올려 게임에서 띄운다. (Firebase 웹 설정값은 공개값이라 커밋해도 된다. 데이터는 `firebase/database.rules.json` 이 지킨다)
 - 푸시 = 학생 화면 즉시 변경(GitHub Pages 배포 후). 수업 직전에는 푸시하지 않는다.
 - DIMENSION SLASHER 본편 v0.3.2 대기 안건(m′ 제한 등)은 이 저장소가 아니라 DIMENSION-SLASHER 저장소 일이다 (`docs/DECISIONS.md` 참고 메모).
