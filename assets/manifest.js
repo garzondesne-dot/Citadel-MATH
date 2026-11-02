@@ -52,7 +52,7 @@ DS.ASSETS = {
     trees: { src: 'camp-trees-v1.webp', cuts: [0, 630, 1020, 1550, 2048], base: 2048, names: ['활엽수', '침엽수', '고목', '전경 나무'] }, // 폭이 달라 cuts 비율로 자름
     anvil: { src: 'anvil-v1.webp', cols: 3, rows: 1, states: { idle: 0, forging: 1, done: 2 } }, // 모루: 대기 / 연성 중 / 완성
     layers: ['bg', 'trees-back', 'gate', 'heroes', 'fire', 'anvil', 'trees-front', 'ui'],
-    props: { dummy: { src: 'camp-dummy-v2.webp', cols: 2 }, shelf: '', mail: '' }, // dummy = v2 도트 2칸 (평소 | 맞음 — 누르면 기울어짐) // v0.9.6 캠프 기본 오브젝트 그림 (🎯 허수아비 · 📚 책장 · 📮 우편함). 비어 있으면 이모지 팻말 — v2 도트 그림이 오면 파일 이름만 넣는다
+    props: { dummy: { src: 'camp-dummy-v2.webp', cols: 2 }, shelf: { src: 'camp-shelf-v2.webp', cols: 2 }, mail: { src: 'camp-mail-v2.webp', cols: 2 } }, // dummy = v2 도트 2칸 (평소 | 맞음 — 누르면 기울어짐) // v0.9.6 캠프 기본 오브젝트 그림 (🎯 허수아비 · 📚 책장 · 📮 우편함). 비어 있으면 이모지 팻말 — v2 도트 그림이 오면 파일 이름만 넣는다
   },
   // 수학 카드 (모루 연성): 공통 금테 + 위쪽 무기·마법 그림 8칸. 좌표는 테두리(384×512) 기준. 그림은 한 색으로 차분하게, 등급은 아래 보석 색
   cardKit: { frame: 'card-frame-v1.webp', w: 384, h: 512, arts: { src: 'card-arts-v1.webp', cols: 8, names: ['검', '주판', '수정구', '반지', '돋보기', '쌍수정', '두루마리', '빛나무'] },
