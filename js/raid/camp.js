@@ -55,9 +55,10 @@ DS.Camp = (function () {
         <div class="camp-hero">${DS.Art.hero(me.hero, 'idle', 'huff')}<i class="shadow"></i></div>
         <button class="camp-bonus" id="camp-bonus" aria-label="보강던전"><i class="camp-bonus-img" style="background-image:url('${base()}${DS.ASSETS.dportals.bonus}')"></i><span class="camp-label">📘 보강던전</span></button>
         <button class="camp-gate empty" id="camp-gate" aria-label="차원문"></button>
+        ${prop('dummy', '🎯', '허수아비', 'right:3%;top:5%')}${prop('shelf', '📚', '책장', 'left:3%;top:5%')}${prop('mail', '📮', '우편함', 'left:34%;top:5%')}
         ${tree(3, 'front', 'left:-6%;bottom:-6%;height:44%')}${tree(1, 'front', 'right:-5%;bottom:-4%;height:48%')}
       </div>
-      <div class="camp-bar"><button class="btn small" id="camp-note">📜 복습 노트</button><button class="btn small" id="camp-code">코드로 입장</button></div>
+      <div class="camp-bar"><span class="muted small">🎯 허수아비 · 📚 책장 · 📮 우편함을 눌러 보세요</span><button class="btn small" id="camp-code">코드로 입장</button></div>
       <div class="camp-forge panel framed" id="camp-forge"><p class="muted small">연성 정보를 불러오는 중…</p></div>`;
     forgeInfo();
     $('#camp-anvil').onclick = () => pick('#camp-anvil', () => DS.Forge.open(me));
@@ -71,7 +72,9 @@ DS.Camp = (function () {
     if (DS.Grow) DS.Grow.mine(me).then((g) => { const el = document.getElementById('camp-lv'); if (el && g) el.textContent = `Lv.${g.lv} ${g.title}`; }).catch(() => {});
     newTitles();
     $('#camp-code').onclick = codeGate;
-    $('#camp-note').onclick = () => DS.Control.run(note);
+    $('#camp-mail').onclick = () => pick('#camp-mail', () => DS.Control.run(note));
+    $('#camp-shelf').onclick = () => pick('#camp-shelf', () => DS.Control.run(shelf));
+    $('#camp-dummy').onclick = () => pick('#camp-dummy', () => DS.Control.run(() => DS.Bonus.enter(me, { train: true })));
     $('#camp-set').onclick = settings;
     drawGate();
     animateFire();
@@ -131,12 +134,41 @@ DS.Camp = (function () {
     try { localStorage.setItem('citadel-student', JSON.stringify({ code })); } catch (e) { /* 무시 */ }
     await DS.Student.enter(code, { num: me.n, nick: me.name, hero: me.hero, fx: me.fx || 'flame', cls: me.c, title: me.title || 'none' });
   }
+  // 캠프 기본 오브젝트 (v0.9.6 · 특전 아님): 그림(DS.ASSETS.camp.props)이 오기 전에는 이모지 팻말
+  function prop(id, icon, label, pos) {
+    const src = ((C().props || {})[id]) || '';
+    return `<button class="camp-prop" id="camp-${id}" style="${pos}" aria-label="${label}">${src ? `<i class="camp-prop-img" style="background-image:url('${base()}${src}')"></i>` : `<i class="camp-prop-ic">${icon}</i>`}<span class="camp-label">${icon} ${label}</span></button>`;
+  }
+  // 📚 책장: 열린 차시의 개념별 🎬 설명 영상 · 📄 학습지 개념 (기말 대비 다시 보기)
+  async function shelf() {
+    const no = me.test ? 99 : Number(await DS.Net.get(`unlock/${ck(me.c)}`).catch(() => 0)) || 0;
+    const open = DS.Lessons.list.filter((l) => l.no && l.no <= no).sort((a, b) => b.no - a.no);
+    const preps = {};
+    for (const l of open) preps[l.id] = (await DS.Act.prepLite(l.id).catch(() => null)) || {};
+    const el = document.createElement('div'); el.className = 'modal camp-modal';
+    const rows = (l) => l.steps.filter((st) => st.kind === 'concept').map((st) => {
+      const p = preps[l.id], vid = DS.Video.pick(l, p.video, st.id), img = DS.Act.hasImg(p, st.id);
+      return `<div class="sh-row"><span>${esc(st.title)}</span><span class="row">${vid && DS.Video.ok(vid) ? `<button class="btn small" data-v="${l.id}|${st.id}">🎬 영상</button>` : ''}${img ? `<button class="btn small" data-i="${l.id}|${st.id}">📄 개념</button>` : ''}</span></div>`;
+    }).join('');
+    el.innerHTML = `<div class="quiz-box framed rs-box"><div class="quiz-head"><b>📚 책장 — 개념 다시 보기</b><button class="btn small" id="sh-x">✕ 닫기</button></div>
+      ${open.length ? open.map((l) => `<details class="sh-l"${l === open[0] ? ' open' : ''}><summary><b>${l.no}차시 · ${esc(l.title)}</b></summary>${rows(l)}</details>`).join('') : '<p class="muted">선생님이 우리 반 수업을 열면 그 차시 개념이 꽂혀요.</p>'}</div>`;
+    document.body.appendChild(el);
+    el.querySelector('#sh-x').onclick = () => el.remove();
+    const titleOf = (lid, sid) => (DS.Lessons.get(lid).steps.find((x) => x.id === sid) || {}).title || '';
+    el.querySelectorAll('[data-v]').forEach((b) => (b.onclick = () => { const [lid, sid] = b.dataset.v.split('|'); DS.Video.open(DS.Video.pick(DS.Lessons.get(lid), preps[lid].video, sid), titleOf(lid, sid), { lesson: lid, slot: sid }); }));
+    el.querySelectorAll('[data-i]').forEach((b) => (b.onclick = () => DS.Control.run(async () => {
+      const [lid, sid] = b.dataset.i.split('|'), src = await DS.Act.prepImg(lid, sid);
+      if (!src) { DS.UI.toast('아직 이 개념의 학습지 이미지가 없어요.'); return; }
+      const v = document.createElement('div'); v.className = 'modal sheet-modal'; v.innerHTML = `<div class="quiz-box framed"><div class="quiz-head"><b>📄 ${esc(titleOf(lid, sid))}</b><button class="btn small" data-x>✕ 닫기</button></div><img class="bn-sheet" src="${src}" alt="학습지"></div>`;
+      v.querySelector('[data-x]').onclick = () => v.remove(); document.body.appendChild(v);
+    })));
+  }
   // 📜 복습 노트: 차시별 결과 · 개념별 첫 시도 · 복습 추천 (records/{반}/{번호})
   async function note() {
     const rec = (await DS.Net.get(`records/${ck(me.c)}/${me.n}`).catch(() => null)) || {};
     const g = DS.Grow ? await DS.Grow.mine(me).catch(() => null) : null;
     const el = document.createElement('div'); el.className = 'modal camp-modal';
-    el.innerHTML = `<div class="quiz-box framed rs-box"><h2>📜 복습 노트</h2>${g ? `<div class="rs-lv"><b>Lv.${g.lv} ${esc(g.title)}</b> <span class="muted small">EXP ${g.total}</span><div class="rs-bar"><i style="width:${Math.round((100 * g.into) / g.next)}%"></i><span>${g.into} / ${g.next}</span></div></div>` : ''}
+    el.innerHTML = `<div class="quiz-box framed rs-box"><h2>📮 우편함 · 복습 노트</h2>${g ? `<div class="rs-lv"><b>Lv.${g.lv} ${esc(g.title)}</b> <span class="muted small">EXP ${g.total}</span><div class="rs-bar"><i style="width:${Math.round((100 * g.into) / g.next)}%"></i><span>${g.into} / ${g.next}</span></div></div>` : ''}
       <p class="muted small">성적이 아니라 다음에 볼 것을 모아 둔 노트예요. 📌 복습 추천 개념은 📘 보강던전에서 연습할 수 있어요.</p>${DS.Result.history(rec)}
       <div class="row"><button class="btn" id="nt-x">닫기</button><button class="btn primary" id="nt-bonus">📘 보강던전으로</button></div></div>`;
     document.body.appendChild(el);

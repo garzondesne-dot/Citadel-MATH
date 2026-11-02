@@ -15,12 +15,15 @@ DS.Bonus = (function () {
   const UNLOCK = [1, 2, 4, 6, 8, 10];             // 인장 개수 → 화려한 이펙트 FANCY[i]
   const TRIES = (DS.Raid ? DS.Raid.RETRIES : 3) + 1; // 레이드와 같은 기회 수
   let me = null, no = 0, mine = {}, prepCache = {};
-
-  const lessons = () => DS.Lessons.list.filter((l) => (l.bonus || []).length);
+  // 🎯 훈련 허수아비 (v0.9.6, 캠프 기본 오브젝트 · 특전 아님): 열린 차시의 수업 몬스터(문제 칸)를 숫자만 바꿔 혼자 연습 — 기말 대비.
+  //   기록은 저장하지 않고 EXP 만 조금 (같은 날 같은 몬스터는 한 번). 보강던전과 같은 1:1 전투 화면을 쓴다
+  let train = false;
+  const fieldIds = (l) => l.steps.filter((st) => st.kind === 'monster' && l.monsters[st.id]).map((st) => st.id);
+  const lessons = () => (train ? DS.Lessons.list.filter((l) => l.no && fieldIds(l).length) : DS.Lessons.list.filter((l) => (l.bonus || []).length));
   // 인장 = 보강을 모두 처치한 차시 목록 (data = bonus/{반}/{번호})
   function seals(data) {
     data = data || {};
-    return lessons().filter((l) => l.bonus.every((b) => ((data[l.id] || {})[b.id] || {}).clear)).map((l) => l.id);
+    return DS.Lessons.list.filter((l) => (l.bonus || []).length).filter((l) => l.bonus.every((b) => ((data[l.id] || {})[b.id] || {}).clear)).map((l) => l.id);
   }
   // 화려한 이펙트 열림 { fire: true, … }
   function fxOpen(data) {
@@ -32,7 +35,7 @@ DS.Bonus = (function () {
 
   let preview = false; // 교사 대기공간: 모든 차시 미리 보기 (기록 저장 안 함)
   async function enter(m, opt = {}) {
-    me = m; preview = !!opt.preview;
+    me = m; preview = !!opt.preview; train = !!opt.train;
     no = preview ? Number(opt.no) || 0 : Number(await N().get(`unlock/${ck(m.c)}`).catch(() => 0)) || 0;
     mine = preview ? {} : (await N().get(`bonus/${ck(m.c)}/${m.n}`).catch(() => null)) || {};
     DS.UI.show('screen-bonus');
@@ -44,6 +47,7 @@ DS.Bonus = (function () {
     return prepCache[id];
   }
   function render() {
+    if (train) return renderTrain();
     const open = lessons().filter((l) => l.no <= no), sl = seals(mine), nextFx = UNLOCK.findIndex((u) => sl.length < u);
     $('#bonus').innerHTML = `<div class="bn-top"><button class="btn small" id="bn-back">≪ ${preview ? '교사 캠프' : '모닥불로'}</button><b>📘 보강던전</b><span class="bn-seal">📘 인장 ${sl.length}개</span></div>
       <div class="bn-portals">
@@ -63,10 +67,21 @@ DS.Bonus = (function () {
       <div class="bn-list">${l.bonus.map((b) => { const r = rec[b.id] || {}; return `<div class="bn-row${r.clear ? ' clear' : ''}">${DS.Art.monster(l.monsters[b.id].sprite, r.clear ? 'down' : 'idle')}<span>${esc(b.title)}${r.tries && !r.clear ? ` <span class="muted small">· ${r.tries}번 도전</span>` : ''}</span><button class="btn small${r.clear ? '' : ' primary'}" data-fight="${l.id}|${b.id}">${r.clear ? '✔ 다시 하기' : r.tries ? '⚔ 다시 도전' : '⚔ 도전'}</button></div>`; }).join('')}</div></div>`;
   }
 
+  function renderTrain() {
+    const open = lessons().filter((l) => l.no <= no).sort((a, b) => b.no - a.no);
+    $('#bonus').innerHTML = `<div class="bn-top"><button class="btn small" id="bn-back">≪ ${preview ? '교사 캠프' : '모닥불로'}</button><b>🎯 훈련 허수아비</b><span class="bn-seal">기말 대비</span></div>
+      <p class="bn-fx">지난 차시 수업 문제를 <b>숫자만 바꿔</b> 혼자 연습해요. 기록은 남지 않고, 경험치가 조금 쌓여요 (같은 날 같은 몬스터는 한 번).</p>
+      ${open.length ? open.map((l) => `<div class="panel framed bn-card"><p class="bn-h"><b>${l.no}차시 · ${esc(l.title)}</b></p>
+        <div class="bn-list">${fieldIds(l).map((mid) => { const st = l.steps.find((x) => x.id === mid); return `<div class="bn-row">${DS.Art.monster(l.monsters[mid].sprite, 'idle')}<span>${esc(st.title || mid)}</span><button class="btn small primary" data-fight="${l.id}|${mid}">🎯 연습</button></div>`; }).join('')}</div></div>`).join('')
+        : '<div class="panel framed"><p class="muted">선생님이 우리 반 수업을 열면 그 차시 문제로 연습할 수 있어요.</p></div>'}`;
+    $('#bn-back').onclick = () => (preview ? DS.TCamp.back() : DS.Camp.enter(me));
+    document.querySelectorAll('[data-fight]').forEach((b) => (b.onclick = () => { const [lid, mid] = b.dataset.fight.split('|'); DS.Control.run(() => fight(DS.Lessons.get(lid), mid)); }));
+  }
+
   // ── 1:1 전투 ───────────────────────────────────────────
   async function fight(L, mid) {
-    const mon = L.monsters[mid], rec = (mine[L.id] || {})[mid] || {}, prep = await prepOf(L.id);
-    const first = !rec.tries && !rec.clear, clearedBefore = !!rec.clear, sealedBefore = seals(mine).includes(L.id);
+    const mon = L.monsters[mid], rec = train ? {} : (mine[L.id] || {})[mid] || {}, prep = await prepOf(L.id);
+    const first = !train && !rec.tries && !rec.clear, clearedBefore = !!rec.clear, sealedBefore = seals(mine).includes(L.id);
     const seed = `${N().uid()}|${Date.now()}`;
     let attempt = first ? 0 : 1, left = TRIES;
     const n = L.items(mid, seed, attempt).length;
@@ -78,7 +93,7 @@ DS.Bonus = (function () {
       const pips = Array.from({ length: TRIES }, (_, i) => `<i class="${i < left ? 'on' : ''}"></i>`).join('');
       const segs = solved.map((s) => `<i class="${s ? 'gone' : ''}"></i>`).join('');
       const done = solved.every(Boolean);
-      el.innerHTML = `<div class="scene enc bg-scene th-${L.theme || ''} ${cls}"><div class="scene-bar"><div><b>⚔ ${esc(mon.title)}</b><br><span class="muted small">${L.no}차시 보강던전 · 소문제 ${n}개를 모두 맞히면 처치</span></div><button class="btn small" id="bf-x">✕</button></div>
+      el.innerHTML = `<div class="scene enc bg-scene th-${L.theme || ''} ${cls}"><div class="scene-bar"><div><b>⚔ ${esc(mon.title)}</b><br><span class="muted small">${L.no}차시 ${train ? '🎯 허수아비 연습' : '보강던전'} · 소문제 ${n}개를 모두 맞히면 처치</span></div><button class="btn small" id="bf-x">✕</button></div>
           <div class="enc-hero"><div class="enc-tries" title="남은 도전 기회">${pips}</div>${DS.Art.hero(me.hero || 0, done ? 'attack' : 'idle', done ? 'pairhop' : cls === 'miss' ? 'slump' : 'huff')}<i class="shadow"></i></div>
           <div class="enc-mon">${DS.Art.monster(mon.sprite, done ? 'down' : 'idle', done ? '' : 'float')}<div class="segs">${segs}</div></div></div>
         <div class="bf-body">${msg}${mon.note ? `<p class="muted small">💡 ${esc(mon.note)}</p>` : ''}
@@ -103,12 +118,12 @@ DS.Bonus = (function () {
       rec.tries = tries;
       const patch = { tries, at: N().TS };
       if (cleared) patch.clear = true;
-      if (!preview) await N().update(`bonus/${ck(me.c)}/${me.n}/${L.id}/${mid}`, patch).catch(() => {});
-      mine[L.id] = mine[L.id] || {}; mine[L.id][mid] = Object.assign({}, mine[L.id][mid], { tries, clear: cleared || (mine[L.id][mid] || {}).clear });
+      if (!preview && !train) await N().update(`bonus/${ck(me.c)}/${me.n}/${L.id}/${mid}`, patch).catch(() => {});
+      if (!train) mine[L.id] = mine[L.id] || {}, mine[L.id][mid] = Object.assign({}, mine[L.id][mid], { tries, clear: cleared || (mine[L.id][mid] || {}).clear });
       if (cleared) return win();
       if (left <= 0) {
         const act = draw('miss', '<p class="gold">기회를 모두 썼어요. 해설을 다시 보고 다음에 새 문제로 도전해요! (벌은 없어요)</p>');
-        act.innerHTML = '<button class="btn primary" id="bf-out">보강던전으로</button>';
+        act.innerHTML = `<button class="btn primary" id="bf-out">${train ? '허수아비로' : '보강던전으로'}</button>`;
         act.querySelector('#bf-out').onclick = () => { el.remove(); render(); };
         return null;
       }
@@ -118,15 +133,22 @@ DS.Bonus = (function () {
       return null;
     };
     const win = async () => {
+      if (train) {
+        DS.Sound.correct();
+        if (DS.Grow && !preview) DS.Grow.add(me, { train: 1 }, `train_${new Date().toISOString().slice(0, 10)}_${L.id}_${mid}`).catch(() => {});
+        const a2 = draw('', '<p class="okc"><b>🎯 명중!</b> 다른 몬스터도 연습해 볼까요?</p>');
+        a2.innerHTML = '<button class="btn primary" id="bf-out">허수아비로</button>'; a2.querySelector('#bf-out').onclick = () => { el.remove(); render(); };
+        return;
+      }
       const sealed = !sealedBefore && seals(mine).includes(L.id);
       DS.Sound.correct();
       if (DS.Grow && !clearedBefore && !preview) DS.Grow.add(me, { bonusClear: 1, seal: sealed ? 1 : 0 }).catch(() => {});
       const fx = sealed ? DS.FX.FANCY.find((k, i) => seals(mine).length === UNLOCK[i]) : null;
       const act = draw('', `<p class="okc"><b>🎉 처치!</b>${sealed ? ` <b class="gold">📘 ${L.no}차시 보강 인장을 얻었어요!</b>` : ''}${fx ? `<br>✨ 화려한 이펙트 「${esc(DS.FX.NAMES[fx])}」이 열렸어요! ⚙ 설정에서 바꿀 수 있어요` : ''}</p>`);
-      act.innerHTML = '<button class="btn primary" id="bf-out">보강던전으로</button>';
+      act.innerHTML = `<button class="btn primary" id="bf-out">${train ? '허수아비로' : '보강던전으로'}</button>`;
       act.querySelector('#bf-out').onclick = () => { el.remove(); render(); };
     };
-    const act = draw('', `<p>${first ? '학습지 보강 문항이에요.' : '다시 들어오면 새 문제가 나와요.'} 기회 ${TRIES}번 — 틀린 소문제만 다시 풀어요.</p>`);
+    const act = draw('', `<p>${train ? '🎯 숫자가 바뀐 연습 문제예요.' : first ? '학습지 보강 문항이에요.' : '다시 들어오면 새 문제가 나와요.'} 기회 ${TRIES}번 — 틀린 소문제만 다시 풀어요.</p>`);
     act.innerHTML = '<button class="btn primary big" id="bf-go">⚔ 전투 시작</button>';
     act.querySelector('#bf-go').onclick = () => round();
   }

@@ -998,7 +998,7 @@ details.panel[open] > summary::before { content: '▾ '; }
 .set-head { display: flex; align-items: center; gap: 8px; position: sticky; top: -1px; z-index: 2; background: inherit; padding: 4px 0 6px; }
 .set-head h2 { margin: 0 auto 0 0; }
 /* 보강던전 차원문: 파란 반짝이 (작은 별빛이 떠오름) + 파란 빛 */
-.camp-bonus, .bn-portal.on { position: relative; }
+.bn-portal.on { position: relative; } /* v0.9.6: .camp-bonus 는 absolute 그대로 (relative 로 덮이면 모닥불에서 보강던전이 화면 밖으로 밀렸음) */
 .camp-bonus-img, .bn-portal.on i { filter: drop-shadow(0 0 14px #4fb8ffcc); }
 .camp-bonus::before, .camp-bonus::after, .bn-portal.on::before, .bn-portal.on::after { content: ''; position: absolute; left: 50%; top: 45%; width: 5px; height: 5px; border-radius: 50%; background: #bfe8ff; pointer-events: none; z-index: 3;
   box-shadow: -34px 10px 0 0 #7fd0ff, 28px -6px 0 0 #bfe8ff, -16px -30px 0 -1px #e6f6ff, 22px 26px 0 -1px #7fd0ff, 0 -48px 0 -1px #bfe8ff, -40px -18px 0 -2px #e6f6ff; animation: blueSpark 2.4s ease-in-out infinite; }
@@ -1040,3 +1040,11 @@ body.forge-open .test-bar { display: none; } /* v0.9.3: 모루(한 화면)를 �
   .fc-one { gap: 4px; }
   .fc-one .fg-msg { font-size: 12px; }
 }
+
+/* v0.9.6 캠프 기본 오브젝트 (허수아비 · 책장 · 우편함) — 그림 전에는 이모지 팻말 */
+.camp-prop { position: absolute; z-index: 6; width: 17%; background: none; border: 0; padding: 0; cursor: pointer; display: flex; flex-direction: column; align-items: center; --ol: #fff; }
+.camp-prop-ic { display: grid; place-items: center; width: clamp(40px, 11vw, 64px); aspect-ratio: 1; font-size: clamp(24px, 7vw, 40px); font-style: normal; background: radial-gradient(#5a3a1acc, #2a1608cc); border: 2px solid #c8954a; border-radius: 12px; box-shadow: 0 3px 0 #1a0d04, 0 0 10px #ffb04a55; }
+.camp-prop-img { display: block; width: 100%; aspect-ratio: 1; background-size: contain; background-repeat: no-repeat; background-position: center bottom; image-rendering: pixelated; }
+.sh-l { margin: 6px 0; border: 1px solid var(--line); padding: 4px 8px; }
+.sh-l summary { cursor: pointer; padding: 4px 0; }
+.sh-row { display: flex; justify-content: space-between; align-items: center; gap: 6px; padding: 4px 0; border-top: 1px dashed #ffffff22; font-size: 14px; }
