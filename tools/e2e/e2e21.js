@@ -74,8 +74,8 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   // 👑 보스 장면: 내 용사 · 머리 위 체력 · 공격 게이지
   for (let k = 0; k < 16; k++) { const kind = await T.evaluate(async () => { const code = DS.Teacher.code(); const R = DS.Act.unpackRoom(await DS.Net.get(`rooms/${code}`)); return DS.Raid.stepOf(DS.Lessons.get(R.meta.lesson), R).kind; }); if (kind === 'boss') break; await go(); await T.waitForTimeout(500); }
   await S1.bringToFront(); await S1.waitForTimeout(1500);
-  await S1.evaluate(() => { window.DS_ATK = { monster: [4, 1], boss: [3, 2] }; }); await S1.waitForTimeout(2200);
   await S1.screenshot({ path: `${OUT}/6-boss.png` });
+  await S1.evaluate(() => { window.DS_ATK = { monster: [4, 1], boss: [3, 2] }; }); await S1.waitForTimeout(2200);
   await S1.waitForSelector('.stun', { timeout: 4000 }).catch(() => null); await S1.waitForTimeout(300);
   console.log('boss stun:', !!(await S1.$('.stun')), 'hero:', await S1.getAttribute('.enc-hero .art', 'data-anim').catch(() => 'none'));
   await S1.screenshot({ path: `${OUT}/6b-boss-struck.png` });
