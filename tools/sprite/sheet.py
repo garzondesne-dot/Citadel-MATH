@@ -96,7 +96,7 @@ def shrink(c):
 
 small = [(ri, shrink(f)) for ri, f in frames]
 px = np.concatenate([f[f[..., 3] > 0][:, :3] for _, f in small])
-pal = Image.fromarray(px.reshape(1, -1, 3)).quantize(colors=32, method=Image.MEDIANCUT)
+pal = Image.fromarray(px.reshape(1, -1, 3)).quantize(colors=int(os.environ.get('COLORS', 48)), method=Image.FASTOCTREE)  # 이펙트 색(초록 십자 등)이 묻히지 않게
 def quant(f):
     rgb = Image.fromarray(f[..., :3]).quantize(palette=pal, dither=Image.Dither.NONE).convert('RGB')
     return np.dstack([np.asarray(rgb), f[..., 3]])
@@ -107,17 +107,19 @@ sheet = Image.new('RGBA', (CW * max(counts), CH * len(rows)), (0, 0, 0, 0))
 col = [0] * len(rows); clipped = 0
 for ri, f in small:
     al = f[..., 3] > 0; h, w = al.shape
-    xs = np.where(al[int(h * 0.6):])[1]; cx = xs.mean() if len(xs) else w / 2
-    ox, oy = int(round(CW * 0.375 - cx)), CH - 1 - h
+    feet = al[int(h * 0.88):]; xs = np.where(feet)[1]; cx = (xs.min() + xs.max()) / 2 if len(xs) else w / 2  # 발 가운데로 맞춤
+    ox, oy = int(round(CW * float(os.environ.get("ANCHOR", 0.36)) - cx)), CH - 1 - h
+    if w <= CW: ox = min(max(ox, 0), CW - w)  # 넓은 프레임(누운 자세 · 큰 이펙트)은 칸 안으로 밀어 넣는다
     if ox < 0 or ox + w > CW or oy < 0: clipped += 1
     cell = Image.new('RGBA', (CW, CH), (0, 0, 0, 0)); cell.alpha_composite(Image.fromarray(f, 'RGBA').crop((max(0, -ox), max(0, -oy), w, h)), (max(0, ox), max(0, oy)))
     sheet.paste(cell, (col[ri] * CW, ri * CH)); col[ri] += 1
 sheet.save(os.path.join(out, f'{name}.webp'), lossless=True)
 sheet.save(os.path.join(out, f'{name}.png'))
+bgc = Image.new('RGBA', sheet.size, (24, 30, 48, 255)); bgc.alpha_composite(sheet); gpal = bgc.convert('RGB').quantize(colors=255, method=Image.FASTOCTREE)
 seq = []
 for ri, n in enumerate(counts):
     for j in range(n):
         im = Image.new('RGBA', (CW, CH), (24, 30, 48, 255)); im.alpha_composite(sheet.crop((j * CW, ri * CH, (j + 1) * CW, (ri + 1) * CH)))
-        seq += [im.resize((CW * 4, CH * 4), Image.NEAREST).convert('P', palette=Image.ADAPTIVE)] * (2 if n == 1 else 1)
+        seq += [im.resize((CW * 4, CH * 4), Image.NEAREST).convert('RGB').quantize(palette=gpal, dither=Image.Dither.NONE)] * (2 if n == 1 else 1)
 seq[0].save(os.path.join(out, f'{name}-anim.gif'), save_all=True, append_images=seq[1:], duration=170, loop=0)
 print(f'{name}: 줄 {len(rows)} · 프레임 {counts} · 배율 {S:.3f} · 칸 {CW}×{CH} · 잘림 {clipped} · webp {os.path.getsize(os.path.join(out, name + ".webp"))} bytes')
