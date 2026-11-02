@@ -9,7 +9,7 @@ DS.Hall = (function () {
   const { esc, pretty } = DS.UI;
   const C = () => DS.Control, Raid = () => DS.Raid;
   let code = null, L = null, R = null, raw = null, stop = null, stopPrep = null, prep = {};
-  let built = '', seen = {}, queue = [], playing = false, wonFx = '', bubbleT = 0, bubbleK = 0, hallKey = '', camped = false;
+  let built = '', seen = {}, queue = [], playing = false, wonFx = '', bubbleT = 0, bubbleK = 0, hallKey = '', camped = false, zoom = '', zoomStep = -9;
 
   async function enter(c, key) {
     await DS.Act.joinHall(c, key);
@@ -53,13 +53,24 @@ DS.Hall = (function () {
     clearInterval(bubbleT);
     if (Raid().isClosed(R)) { built = 'closed'; el.innerHTML = `<div class="h-victory"><div class="trophy"><i class="trophy-img" style="background-image:url('${DS.ASSETS.base}${DS.ASSETS.trophy}')"></i></div><h1>수업 끝!</h1><p class="muted">모두 모닥불로 돌아갔어요. 게임 기록은 수학 성적이 아니에요.</p><div class="stamp-bar big">📮 반드시 학습지 확인도장 받아가세요.</div><div class="h-acts row">${klassBtn()}<button class="btn primary" id="h-tcamp">🏛 교사 캠프 가기</button></div></div>`; bindActs(); return; }
     if (Raid().isLobby(R) || Raid().isFinale(L, R)) return lobbyScene(Raid().isFinale(L, R));
-    const key = `c${i}|${(prep.img || {})[step.id] ? 1 : 0}`;
+    // v0.9.2: 개념 설명 = 왼쪽 개념 · 오른쪽 바로 이어지는 문제 (일반 문제 m 만 — ⭐ 스페셜 난입은 미리 보이지 않게). 문제 칸 이미지가 없으면 개념 하나만 크게
+    const nx = L.steps[i + 1], prob = nx && nx.kind === 'monster' && !nx.special && !nx.review ? nx : null;
+    const img = (prep.img || {})[step.id], pimg = prob ? (prep.img || {})[prob.id] : null, split = !!(img && pimg);
+    if (zoomStep !== i) { zoomStep = i; zoom = ''; }
+    const key = `c${i}|${img ? img.length : 0}|${pimg ? pimg.length : 0}|${zoom}`;
     if (built === key) return;
     built = key;
-    const img = (prep.img || {})[step.id];
-    el.innerHTML = `<div class="h-concept"><p class="h-ctitle">📣 ${esc(step.title)}</p>
-      <div class="h-sheet">${img ? `<img src="${img}" alt="${esc(step.title)} 학습지">` : `<div class="h-sheet-empty">📄 학습지 이미지 칸<br><span class="muted small">수업 준비 화면에서 '${esc(step.title)}' 이미지를 넣으면 여기에 크게 떠요</span><p class="h-intro">${pretty(step.say || '')}</p></div>`}</div>
+    const one = img ? `<img src="${img}" alt="${esc(step.title)} 학습지">` : `<div class="h-sheet-empty">📄 학습지 이미지 칸<br><span class="muted small">수업 준비 화면에서 '${esc(step.title)}' 이미지를 넣으면 여기에 크게 떠요</span><p class="h-intro">${pretty(step.say || '')}</p></div>`;
+    el.innerHTML = split
+      ? `<div class="h-concept split${zoom ? ` zoom-${zoom}` : ''}">
+        <div class="h-half" data-zoom="l"><p class="h-ctitle">📣 ${esc(step.title)}</p><div class="h-sheet"><img src="${img}" alt="${esc(step.title)} 학습지"></div></div>
+        <div class="h-half" data-zoom="r"><p class="h-ctitle prob">⚔ 이어지는 문제 · ${esc(prob.title)}</p><div class="h-sheet"><img src="${pimg}" alt="${esc(prob.title)} 학습지"></div></div>
+        <p class="h-zoom-tip muted small">${zoom ? '누르면 좌우로 다시 나눠 봐요' : '한쪽을 누르면 그쪽만 크게'}</p>
+        <div class="h-focus-badge">⚠ 집중모드 — 학생 폰 멈춤</div></div>`
+      : `<div class="h-concept"><p class="h-ctitle">📣 ${esc(step.title)}</p>
+      <div class="h-sheet">${one}</div>
       <div class="h-focus-badge">⚠ 집중모드 — 학생 폰 멈춤</div></div>`;
+    el.querySelectorAll('[data-zoom]').forEach((h) => (h.onclick = () => { zoom = zoom ? '' : h.dataset.zoom; render(); }));
   }
 
   // ── 왼쪽: 용사단 ─────────────────────────────────────────

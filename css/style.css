@@ -943,3 +943,14 @@ details.panel[open] > summary::before { content: '▾ '; }
 .h-acts { display: flex; gap: 8px; justify-content: center; margin-top: 14px; }
 .h-acts.corner { position: absolute; top: 10px; right: 10px; margin: 0; z-index: 20; }
 .down-note { margin: 6px 0; font-weight: 700; }
+/* v0.9.2 개념 설명 좌우: 왼쪽 개념 · 오른쪽 이어지는 문제 (한쪽 누르면 그쪽만 크게) */
+.h-concept.split { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr auto; gap: 12px; align-items: stretch; }
+.h-concept.split .h-half { display: flex; flex-direction: column; align-items: center; min-width: 0; min-height: 0; cursor: zoom-in; }
+.h-concept.split .h-sheet img { max-width: 100%; max-height: calc(100dvh - 190px); }
+.h-concept.split .h-ctitle { font-size: 22px; }
+.h-concept.split .h-ctitle.prob { color: #ff9a7a; }
+.h-concept.split.zoom-l, .h-concept.split.zoom-r { grid-template-columns: 1fr; }
+.h-concept.split.zoom-l .h-half[data-zoom="r"], .h-concept.split.zoom-r .h-half[data-zoom="l"] { display: none; }
+.h-concept.split[class*="zoom-"] .h-half { cursor: zoom-out; }
+.h-zoom-tip { grid-column: 1 / -1; margin: 0; text-align: center; }
+.h-concept.split .h-focus-badge { top: auto; bottom: 4px; right: 8px; }
