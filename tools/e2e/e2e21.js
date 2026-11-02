@@ -38,6 +38,19 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   await S1.waitForTimeout(1500);
   console.log('fight anim:', await S1.getAttribute('.enc-hero .art', 'data-anim').catch(() => 'none'));
   await S1.screenshot({ path: `${OUT}/4-raid-think.png` });
+  // 👾 몬스터 공격: 시험용으로 4초마다 1초 잠금
+  await S1.bringToFront();
+  console.log('hidden:', await S1.evaluate(() => document.hidden), 'focus hidden:', await S1.evaluate(() => document.querySelector('#focus').hidden));
+  await S1.evaluate(() => { window.DS_ATK = { monster: [4, 1], boss: [5, 2] }; });
+  const samples = []; for (let k = 0; k < 7; k++) { samples.push(await S1.$eval('.atk-gauge i', (e) => e.style.width).catch(() => '-')); await S1.waitForTimeout(500); }
+  console.log('gauge samples (0.5s):', samples.join(' '));
+  await S1.screenshot({ path: `${OUT}/4b-gauge-hot.png` });
+  console.log('gauge width before hit:', await S1.$eval('.atk-gauge i', (e) => e.style.width).catch(() => 'none'));
+  await S1.waitForSelector('.stun', { timeout: 3000 }).catch(() => null); await S1.waitForTimeout(250);
+  console.log('stun shown:', !!(await S1.$('.stun')), 'hero anim:', await S1.getAttribute('.enc-hero .art', 'data-anim').catch(() => 'none'));
+  await S1.screenshot({ path: `${OUT}/4c-struck.png` });
+  await S1.waitForTimeout(1200); console.log('stun after 1.2s:', !!(await S1.$('.stun')));
+  await S1.evaluate(() => { window.DS_ATK = null; });
   // ⑤ 힐 받음: 4번 다 틀리고 가상 친구가 힐
   await T.evaluate(async (c) => { await DS.Net.set(`rooms/${c}/players/f2`, { num: 2, nick: '이서연', hero: 2, at: Date.now() }); await DS.Net.set(`rooms/${c}/active/f2`, true); }, code);
   const subAs = (page, who, a, k) => page.evaluate(async ([who, a, k]) => {
@@ -58,6 +71,14 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   await S1.screenshot({ path: `${OUT}/5-healed.png` });
   await S1.waitForTimeout(2200);
   console.log('after heal anim:', await S1.getAttribute('.enc-hero .art', 'data-anim').catch(() => 'none'));
+  // 👑 보스 장면: 내 용사 · 머리 위 체력 · 공격 게이지
+  for (let k = 0; k < 16; k++) { const kind = await T.evaluate(async () => { const code = DS.Teacher.code(); const R = DS.Act.unpackRoom(await DS.Net.get(`rooms/${code}`)); return DS.Raid.stepOf(DS.Lessons.get(R.meta.lesson), R).kind; }); if (kind === 'boss') break; await go(); await T.waitForTimeout(500); }
+  await S1.bringToFront(); await S1.waitForTimeout(1500);
+  await S1.evaluate(() => { window.DS_ATK = { monster: [4, 1], boss: [3, 2] }; }); await S1.waitForTimeout(2200);
+  await S1.screenshot({ path: `${OUT}/6-boss.png` });
+  await S1.waitForSelector('.stun', { timeout: 4000 }).catch(() => null); await S1.waitForTimeout(300);
+  console.log('boss stun:', !!(await S1.$('.stun')), 'hero:', await S1.getAttribute('.enc-hero .art', 'data-anim').catch(() => 'none'));
+  await S1.screenshot({ path: `${OUT}/6b-boss-struck.png` });
   console.log('errors:', errs.length ? errs : 'none');
   await b.close();
 })();

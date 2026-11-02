@@ -26,7 +26,7 @@ DS.Student = (function () {
     code = c; info0 = info;
     me = DS.Net.uid();
     if (!test) { try { localStorage.setItem('citadel-student', JSON.stringify({ code: c, ...info })); } catch (e) { /* 무시 */ } }
-    DS.UI.show('screen-student');
+    DS.UI.show('screen-student'); atkStart();
     if (!test) DS.Scene.save({ role: 'student', code: c });
     DS.Act.presence(c).catch(() => {});
     locked = !!(info.cls && (await DS.Net.get(`wordLock/${String(info.cls).replace(/[.#$/[\]]/g, '_')}/${info.num}`).catch(() => null)));
@@ -42,13 +42,13 @@ DS.Student = (function () {
   // 수업이 끝나면 모닥불로
   // v0.8.0: 수업이 끝나면 ⚔ 오늘의 전투 결과(개인) → 모닥불 (「⚔ 보강던전」 추천을 누르면 보강던전으로)
   function toCamp() {
-    if (stop) stop(); stop = null; focus(false);
+    if (stop) stop(); stop = null; focus(false); atkStop();
     const t = test; test = null;
     const go = (bonus) => { if (t) { t.exit(); return; } if (bonus && DS.Bonus) DS.Bonus.enter(acc()); else DS.Camp.enter(acc()); };
     if (!resulted && DS.Result && L && R && me && Raid().activeIds(R).includes(me)) return DS.Result.show(L, R, me, t ? null : acc(), code, go).catch(() => go()); // 결과를 못 보고 끝났을 때만
     go();
   }
-  const stop0 = () => { if (stop) stop(); stop = null; focus(false); test = null; };
+  const stop0 = () => { if (stop) stop(); stop = null; focus(false); atkStop(); test = null; };
   // 집중모드 막
   function focus(on) {
     const el = $('#focus');
@@ -171,14 +171,14 @@ DS.Student = (function () {
   }
   // 1:1 대치: 왼쪽 내 용사(머리 위 = 남은 도전 기회 ●●●, 같이 움직임) vs 오른쪽 몬스터(아래 체력 칸)
   // cls: 'hit'(공격 성공 → 용사 돌진) · 'miss'(실패 → 축 처짐, 잠깐)
-  function scene(step, rec, hp, cls = '') {
+  function scene(step, rec, hp, cls = '', gauge = '') {
     const segs = Array.from({ length: rec.total }, (_, i) => `<i class="${i < rec.best ? 'gone' : ''}"></i>`).join('');
     const left = rec.left, done = Raid().cleared(L, R, step.id);
     const pips = Array.from({ length: rec.slots }, (_, i) => `<i class="${i < left ? 'on' : ''}${i < Math.min(left, rec.healed) ? ' heal' : ''}"></i>`).join('');
     return `<div class="scene enc bg-scene th-${L.theme || ''} ${cls}${step.special ? ' special' : ''}"><div class="scene-bar"><div><b>${step.special ? '⭐ 난입! ' : step.review ? '📖 ' : ''}${esc(step.title)}</b><br><span class="muted small">레이드 체력 ${hp.left} / ${hp.max}</span></div></div>
       ${test ? `<div class="enc-friends">${Raid().activeIds(R).filter((u) => u !== me).slice(0, 4).map((u) => DS.Art.hero((R.players[u] || {}).hero || 0, 'idle', 'huff')).join('')}</div>` : ''}
       <div class="enc-hero"><div class="enc-tries" title="남은 도전 기회">${pips}</div>${heroNow(pose2(done, cls), done ? 'pairhop' : cls === 'miss' ? 'slump' : 'huff')}<i class="shadow"></i></div>
-      <div class="enc-mon">${DS.Art.monster(L.monsters[step.id].sprite, done ? 'down' : 'idle', done ? '' : 'float')}<div class="segs" title="내가 맞힌 만큼 칸이 깨져요">${segs}</div></div></div>`;
+      <div class="enc-mon">${DS.Art.monster(L.monsters[step.id].sprite, done ? 'down' : 'idle', done ? '' : 'float')}<div class="segs" title="내가 맞힌 만큼 칸이 깨져요">${segs}</div>${gauge}</div></div>`;
   }
   // 생각 시간: 틀린 칸이 있으면 해설은 읽을 수 있고 「다시 도전」만 잠깐 잠긴다 (수업 준비에서 0·5·10·15초, 기본 5초)
   const thinkSec = () => { const t = (R.meta || {}).think; return t != null ? Number(t) : 5; };
@@ -192,6 +192,41 @@ DS.Student = (function () {
     };
     tick();
   }
+  // 👾 몬스터 공격 (사용자 확정 2026-11-03): 문제를 푸는 동안 몬스터 아래 게이지가 차고, 다 차면 용사를 공격 → 입력 잠깐 잠금
+  //   일반 45초마다 1초 · 보스 60초마다 2초. 도전 기회 · 데미지 · 경험치는 그대로 (실패해도 벌 없음 원칙 — 잠깐 멈출 뿐)
+  //   🔴 집중모드 · 📄 학습지 · 🎬 영상 · 화면 꺼짐 동안은 게이지가 멈춘다. 풀이 화면(문제 입력 · 보스 문항 목록)에서만 돈다
+  const ATK = { monster: [45, 1], boss: [60, 2] };
+  const GAUGE = '<div class="atk-gauge" title="몬스터 공격 게이지"><i></i></div>';
+  let atk = { key: '', t: 0, last: 0 }, atkTimer = null, stunUntil = 0;
+  const atkPaused = () => document.hidden || !$('#focus').hidden || !!document.querySelector('.t-sheet-modal, .video-modal');
+  function atkTick() {
+    const now = Date.now(), dt = Math.min(1, (now - (atk.last || now)) / 1000); atk.last = now;
+    const g = document.querySelector('#st-body .atk-gauge'); if (!g) return;
+    const kind = g.closest('.scene.boss') ? 'boss' : 'monster', key = kind === 'boss' ? `boss|${code}` : `${code}|${form ? form.key : ''}`;
+    if (key !== atk.key) atk = { key, t: 0, last: now };
+    if (atkPaused() || now < stunUntil) return;
+    const [per, lock] = (window.DS_ATK || ATK)[kind]; // DS_ATK = 브라우저 시험용 짧은 시간 (e2e21)
+    atk.t += dt;
+    const p = Math.min(1, atk.t / per), bar = g.querySelector('i'); if (bar) bar.style.width = `${(p * 100).toFixed(1)}%`;
+    g.classList.toggle('hot', p > 0.8);
+    if (atk.t >= per) { atk.t = 0; if (bar) bar.style.width = '0%'; g.classList.remove('hot'); monsterStrike(lock); }
+  }
+  function monsterStrike(lock) {
+    stunUntil = Date.now() + lock * 1000;
+    const sc = document.querySelector('#st-body .scene'), mon = sc && sc.querySelector('.art.monster'), hb = sc && sc.querySelector('.enc-hero');
+    if (mon) { mon.classList.remove('lunge'); void mon.offsetWidth; mon.classList.add('lunge'); setTimeout(() => mon.classList.remove('lunge'), 500); }
+    setTimeout(() => {
+      if (hb) { hb.classList.remove('struck'); void hb.offsetWidth; hb.classList.add('struck'); setTimeout(() => hb.classList.remove('struck'), 600); }
+      if (sc && DS.FX) DS.FX.play(sc, 'flame', { scale: 0.2 });
+      heroFlash('hit', 350); setTimeout(() => heroFlash('pant', lock * 1000 + 500), 350); // 맞고 → 헉헉
+      DS.Sound.squish(); if (navigator.vibrate) navigator.vibrate(60);
+      if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+      const st = document.createElement('div'); st.className = 'stun'; st.innerHTML = `<b>💥 몬스터의 공격! ${lock}초 멈춤</b>`;
+      document.body.appendChild(st); setTimeout(() => st.remove(), lock * 1000);
+    }, 200);
+  }
+  const atkStart = () => { if (!atkTimer) { atk.last = Date.now(); atkTimer = setInterval(atkTick, 200); } };
+  const atkStop = () => { clearInterval(atkTimer); atkTimer = null; atk = { key: '', t: 0, last: 0 }; const st = document.querySelector('.stun'); if (st) st.remove(); };
   // 용사 자세: 잠깐 동작(heroFx)이 살아 있으면 그것 · 아니면 기본 (풀 때 = 생각 중)
   // v2 용사: 격파 = 승리 · 틀림 = 피격 (v1 은 그대로 공격 자세)
   const pose2 = (done, cls) => { const v2 = DS.Art.isV2(myP().hero); return done ? (v2 ? 'win' : 'attack') : cls === 'hit' ? 'attack' : cls === 'miss' ? (v2 ? 'hit' : 'attack') : 'think'; };
@@ -276,7 +311,7 @@ DS.Student = (function () {
     const sig = `form|${key}|${JSON.stringify(form.given)}|${(R.help || {})[me] ? 1 : 0}|${down}`;
     if (sig === drawn && body.querySelector('.items')) { hpText(body, hp); return; }
     drawn = sig;
-    body.innerHTML = `<div class="panel framed">${scene(step, rec, hp)}
+    body.innerHTML = `<div class="panel framed">${scene(step, rec, hp, '', down ? '' : GAUGE)}
       ${down ? '<p class="okc down-note">🎉 몬스터는 쓰러졌어요! 그래도 풀어서 공격하면 이펙트도 뜨고 경험치가 쌓여요.</p>' : ''}
       ${attempt && rec.perfect ? `<p class="retry-note">⚔ 연습 공격 — 이미 성공한 몬스터예요. 숫자가 모두 바뀌었어요 (데미지 0 · 이펙트는 그대로)</p>` : attempt ? `<p class="retry-note">↻ 재도전 ${attempt} — 숫자가 모두 바뀌었어요. 지난번 틀린 칸은 <b class="ngc">✘</b> 표시</p>` : ''}
       ${L.monsters[mid].note ? `<p class="muted small">💡 ${esc(L.monsters[mid].note)}</p>` : ''}
@@ -351,7 +386,8 @@ DS.Student = (function () {
     const mine = (ans[bossSet] || []).slice();
     body.innerHTML = `<div class="panel framed">
       <div class="scene bg-scene th-${L.theme || ''} boss${hp.won ? '' : ' quake-once'}"><div class="scene-bar"><div><b>👑 ${esc(L.boss.title)}</b><br><span class="muted small">보스 체력 ${hp.left} / ${hp.max}</span></div></div>${DS.Art.monster(L.boss.sprite, hp.won ? 'down' : 'idle', hp.won ? '' : 'float')}
-        <div class="hpbar"><i style="width:${hp.max ? (100 * hp.left) / hp.max : 0}%"></i></div></div>
+        <div class="hpbar"><i style="width:${hp.max ? (100 * hp.left) / hp.max : 0}%"></i></div>
+        <div class="enc-hero">${heroNow(hp.won ? pose2(true, '') : 'think', hp.won ? 'pairhop' : 'huff')}<i class="shadow"></i></div>${hp.won ? '' : GAUGE}</div>
       ${hp.won ? '<h2 class="okc center">🎉 보스 격파! 모두 함께 이겼어요!</h2>' : ''}
       <div class="tabs"><button class="tab${bossSet === 1 ? ' on' : ''}" data-s="1">세트 1</button><button class="tab${bossSet === 2 ? ' on' : ''}" data-s="2">세트 2 (재도전)</button></div>
       <div class="boss-items">${items.map((p, i) => `<button class="bitem${m[i] ? ' ok' : mine[i] != null ? ' tried' : ''}${i >= L.boss.hpItems ? ' bonus' : ''}" data-i="${i}"><b>${i + 1}번${i >= L.boss.hpItems ? ' ⭐' : ''}</b> ${m[i] ? '✔ 도달' : mine[i] != null ? '✘ 다시' : '풀기'}</button>`).join('')}</div>

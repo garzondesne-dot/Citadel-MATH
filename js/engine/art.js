@@ -10,7 +10,7 @@ DS.Art = (function () {
   // 용사 번호: 0~7 기본 시트(7 = 선생님) · 8~15 추가 용사(heroesExtra, 잠금 해제 특전)
   // v2 도트 용사 (번호 16~): 줄 = 동작, 프레임을 CSS steps 로 넘긴다. 숨쉬기는 그림에 들어 있어 'huff'(눌림)는 뺀다
   // 시트에 없는 동작은 대신 쓰기: 차원문 → 걷기 · 앉기 · 생각 → 대기 · 힐 받음 → 승리
-  const V2_FALL = { portal: 'walk', sit: 'idle', think: 'idle', healed: 'win', heal: 'attack', win: 'attack', hit: 'idle', down: 'fall', walk: 'idle', fall: 'idle' };
+  const V2_FALL = { pant: 'hit', portal: 'walk', sit: 'idle', think: 'idle', healed: 'win', heal: 'attack', win: 'attack', hit: 'idle', down: 'fall', walk: 'idle', fall: 'idle' };
   const isV2 = (n) => !!(A().heroesV2 && A().heroesV2.list[Number(n)]);
   function heroV2(n, pose, cls) {
     const v = A().heroesV2, h = v.list[n], rows = h.rows || v.rows;
@@ -19,7 +19,8 @@ DS.Art = (function () {
     const [row, nf, dur = 1, mode] = v.anims[a];
     const delay = mode === 'once' ? 0 : -((n * 0.37 + Math.random()) % 1) * dur; // 여럿이 있어도 같은 박자로 안 움직이게
     const run = nf > 1 ? (mode === 'once' ? `animation:hv2o${nf} ${dur}s steps(${nf}, jump-none) 1 forwards;` : `animation:hv2n${nf} ${dur}s steps(${nf}) ${delay.toFixed(2)}s infinite;`) : '';
-    return `<i class="art hero hv2 ${String(cls).replace(/\bhuff\b/g, '')}" data-anim="${a}"><b style="background-image:url('${A().base}${h.src}');background-size:${v.cols * 100}% ${rows * 100}%;background-position:0% ${rows > 1 ? (100 * row) / (rows - 1) : 0}%;${run}"></b></i>`;
+    const W = 124, left = 50 - (h.cx || 0.4) * W; // 그림 칸(80×64)을 상자보다 넓게 두고, 머리 가운데가 상자 가운데에 오게
+    return `<i class="art hero hv2 ${String(cls).replace(/\bhuff\b/g, '')}" data-anim="${a}"><b style="left:${left.toFixed(1)}%;width:${W}%;background-image:url('${A().base}${h.src}');background-size:${v.cols * 100}% ${rows * 100}%;background-position:0% ${rows > 1 ? (100 * row) / (rows - 1) : 0}%;${run}"></b></i>`;
   }
   const hero = (n, pose = 'idle', cls = '') => {
     if (isV2(n)) return heroV2(Number(n), pose, cls);

@@ -26,7 +26,7 @@
 
 | 종류 | 원본 칸 | 화면 배율 | 프레임 (가로 한 줄씩) | 예상 용량 |
 |---|---|---|---|---|
-| 용사 | **64×64** (게임 칸 80×64) | ×1 ~ ×3 | **11줄 29프레임** (2026-11-02 확정 · 금발 검사 기준): 대기 4(숨쉬기 = `breathe.py` 가 구움) · 걷기 4 · 공격 4 · 피격 1 · 승리 2 · 쓰러짐 2 · 힐 쓰기 2 · 차원문 4(뒷모습으로 화면 안쪽) · 앉기 2 · 힐 받음 2 · 생각 중 2. 시트 2장(기본 7줄 + 추가 4줄)으로 뽑아 합친다. 추가 4줄이 없으면 게임이 대신 쓰기로 보여 줌 | 한 명 약 20KB |
+| 용사 | **64×64** (게임 칸 80×64) | ×1 ~ ×3 | **12줄 31프레임** (2026-11-02 확정 · 11-03 헉헉 추가 · 금발 검사 기준): 대기 4(숨쉬기 = `breathe.py` 가 구움) · 걷기 4 · 공격 4 · 피격 1 · 승리 2 · 쓰러짐 2 · 힐 쓰기 2 · 차원문 4(뒷모습으로 화면 안쪽) · 앉기 2 · 힐 받음 2 · 생각 중 2 · 헉헉 2(몬스터에게 맞은 뒤). 시트 2장(기본 7줄 + 추가 5줄)으로 뽑아 합친다. 추가 4줄이 없으면 게임이 대신 쓰기로 보여 줌 | 한 명 약 20KB |
 | 장신구 (모자 · 망토 · 무기) | 32×32 | 용사와 같이 | 1장 (프레임마다 위치는 Claude 가 기준점으로 붙임) | 1KB |
 | 일반 몬스터 | **96×96** | ×1 ~ ×3 | 대기 2 · 공격 3 · 피격 1 · 쓰러짐 2 = **8** | 한 마리 5KB |
 | 보스 | **192×192** | ×2 ~ ×3 | 대기 4 · 공격 4 · 피격 1 · 쓰러짐 3 = **12** (등장 · 분노는 코드) | 한 마리 30KB |
@@ -91,7 +91,8 @@ Magenta (#FF00FF) background. Native cell 64x64 px. 4 rows, left-aligned, same f
 row1 portal-enter 4 frames, walking AWAY from the viewer into the screen: (1) turning from facing right to a 3/4 back view, (2) back view walking, left foot forward, (3) back view walking, right foot forward, (4) back view, one arm reaching forward to touch a door.
 row2 sit-rest 2 frames, facing RIGHT (sitting on the ground, weapon laid beside, gentle breathing),
 row3 receive-heal 2 frames, facing RIGHT (surrounded by small green sparkles: surprised, then happy),
-row4 thinking 2 frames, facing RIGHT (hand on chin, then eyes looking up). No speech bubbles, no text, no portal or door drawn.
+row4 thinking 2 frames, facing RIGHT (hand on chin, then eyes looking up).
+row5 panting 2 frames, facing RIGHT (just got hit by a monster: bent forward, hands on knees, out of breath, small sweat drops, then shoulders rising). No speech bubbles, no text, no portal or door drawn.
 ```
 
 ### 6-2. 일반 몬스터 (96×96, 8 프레임)

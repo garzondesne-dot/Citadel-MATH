@@ -84,7 +84,7 @@ input:focus, select:focus { outline: none; border-color: var(--gold); }
 .art.hero.huge { width: 200px; height: 200px; }
 /* v2 도트 용사: 칸 80×64 를 상자 아래에 꽉 차게(가로 기준) · 프레임은 steps 로 (4칸 시트: 프레임 k = k × 33.333%) */
 .art.hv2 { position: relative; }
-.art.hv2 > b { position: absolute; left: -12%; right: -12%; bottom: 0; aspect-ratio: 5 / 4; background-repeat: no-repeat; image-rendering: pixelated; }
+.art.hv2 > b { position: absolute; left: -12%; width: 124%; bottom: 0; aspect-ratio: 5 / 4; background-repeat: no-repeat; image-rendering: pixelated; }
 @keyframes hv2n4 { from { background-position-x: 0%; } to { background-position-x: 133.333%; } }
 @keyframes hv2n2 { from { background-position-x: 0%; } to { background-position-x: 66.667%; } }
 @keyframes hv2n3 { from { background-position-x: 0%; } to { background-position-x: 100%; } }
@@ -489,7 +489,13 @@ i.shadow { display: block; position: absolute; left: 50%; bottom: -4px; width: 7
 .camp-label { font-size: 13px; color: #fff; background: #000b; padding: 2px 8px; border-radius: 8px; white-space: nowrap; margin-top: 2px; animation: blink2 1.6s ease-in-out infinite; }
 @keyframes blink2 { 50% { box-shadow: 0 0 10px var(--gold); } }
 .camp-fire { position: absolute; left: 50%; bottom: 18%; width: 11%; transform: translateX(-50%); z-index: 4; }
-.camp-fire-img { display: block; width: 100%; aspect-ratio: 240 / 230; background-repeat: no-repeat; filter: drop-shadow(0 0 24px #ff9a2a); }
+.camp-fire-img { display: block; width: 100%; aspect-ratio: 240 / 230; background-repeat: no-repeat; filter: drop-shadow(0 0 24px #ff9a2a); position: relative; }
+/* 모닥불 빛: 주변을 따뜻하게 비추며 불규칙하게 일렁임 (바닥 타원 + 둥근 빛) */
+.camp-glow { position: absolute; left: 50%; top: 55%; width: 520%; aspect-ratio: 1.5; transform: translate(-50%, -50%); border-radius: 50%; pointer-events: none; mix-blend-mode: screen;
+  background: radial-gradient(closest-side, #ffb04a99, #ff7a2a4d 45%, #ff5a1a1f 70%, transparent); animation: glowFlicker 2.3s ease-in-out infinite; }
+.camp-glow.g2 { width: 300%; animation-duration: 1.7s; animation-delay: -.6s; background: radial-gradient(closest-side, #ffd27a55, #ff9a3a22 55%, transparent); }
+@keyframes glowFlicker { 0%, 100% { opacity: .8; transform: translate(-50%, -50%) scale(1); } 13% { opacity: .62; transform: translate(-50%, -50%) scale(.95); } 27% { opacity: .9; transform: translate(-50%, -50%) scale(1.04); }
+  41% { opacity: .7; transform: translate(-50%, -50%) scale(.97); } 58% { opacity: .95; transform: translate(-50%, -50%) scale(1.06); } 74% { opacity: .66; transform: translate(-50%, -50%) scale(.96); } 87% { opacity: .88; transform: translate(-50%, -50%) scale(1.02); } }
 .camp-hero { position: absolute; left: 40%; bottom: 16%; z-index: 5; }
 .camp-hero .art { width: clamp(64px, 12dvh, 96px); height: clamp(64px, 12dvh, 96px); }
 .camp-modal input { width: 100%; font-size: 28px; text-align: center; letter-spacing: 6px; margin: 8px 0; }
@@ -654,10 +660,27 @@ body.forge-open { overflow: hidden; }
 .scene.enc { display: block; height: 240px; }
 .enc-hero { position: absolute; left: 10%; bottom: 14px; z-index: 2; display: flex; flex-direction: column; align-items: center; transition: transform .3s; }
 .enc-hero .art { width: 96px; height: 96px; }
-.enc-tries { display: flex; gap: 4px; margin-bottom: 2px; padding: 2px 6px; background: #000a; border: 1px solid #e8b85a; }
-.enc-tries i { width: 10px; height: 10px; border-radius: 50%; background: #333a4d; border: 1px solid #000; }
-.enc-tries i.on { background: #ffcf5a; box-shadow: 0 0 5px #ffb04a; }
-.enc-tries i.heal.on { background: #5dffa0; box-shadow: 0 0 6px #2fe07a; } /* v0.9.6 힐로 받은 칸 */
+.enc-tries { display: flex; gap: 2px; width: 88px; height: 14px; margin-bottom: 4px; padding: 2px; background: #05080fdd; border: 2px solid #0a1424; box-shadow: 0 0 0 1px #3c5a44; }
+.enc-tries i { flex: 1; background: #1c2a24; }
+.enc-tries i.on { background: linear-gradient(#8dffa8, #29b856 60%, #1d8a40); }
+.enc-tries i.heal.on { background: linear-gradient(#e6fff0, #6dffb0 60%, #2fe07a); box-shadow: 0 0 6px #2fe07a; } /* v0.9.6 힐로 받은 칸 (밝게) */
+/* 👾 몬스터 공격 게이지 (몬스터 아래) · 체력 칸 (머리 위) */
+.enc-mon .segs { order: -1; margin: 0 0 4px; }
+.enc-hero:has(.hv2) .enc-tries { margin-bottom: -16px; position: relative; z-index: 3; } /* v2 용사: 칸 위쪽 빈 곳만큼 내려 머리 바로 위에 */
+.atk-gauge { width: 120px; height: 9px; margin-top: 3px; background: #05080fdd; border: 2px solid #0a1424; box-shadow: 0 0 0 1px #6a4a1c; position: relative; z-index: 2; }
+.atk-gauge i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #ffd34a, #ff8a2a); }
+.atk-gauge.hot i { background: linear-gradient(90deg, #ff8a2a, #ff2a3a); animation: gaugeHot .3s steps(2) infinite; }
+@keyframes gaugeHot { 50% { filter: brightness(1.5); } }
+.scene.boss .enc-hero { left: 6%; }
+.scene.boss .hpbar { top: 54px; bottom: auto; left: 28%; right: 18%; }
+.scene.boss .atk-gauge { position: absolute; bottom: 6px; left: 38%; width: 34%; }
+.art.monster.lunge { animation: lunge .45s ease-in-out !important; }
+@keyframes lunge { 40% { transform: translateX(-38px) scale(1.08); } 100% { transform: none; } }
+.enc-hero.struck .art { animation: struck .5s steps(2) 1; }
+@keyframes struck { 0% { filter: brightness(2) sepia(1) hue-rotate(-40deg) saturate(5); transform: translateX(-6px); } 100% { filter: none; transform: none; } }
+.stun { position: fixed; inset: 0; z-index: 9000; display: flex; align-items: center; justify-content: center; background: #ff203012; animation: stunIn .25s; }
+.stun b { font: 700 24px var(--pixel); color: #ffe27a; background: #1a0508e6; border: 2px solid #ff5a3a; padding: 10px 16px; text-shadow: 2px 2px 0 #000; }
+@keyframes stunIn { 0% { background: #ff203055; } 100% { background: #ff203012; } }
 .heal-pick { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
 .heal-btn { background: linear-gradient(#2f8f5a, #1f6a40); border-color: #7dffb5; color: #eafff2; }
 .heal-tag { position: absolute; left: 50%; top: -6px; transform: translateX(-50%); white-space: nowrap; font-size: 15px; font-weight: 700; color: #7dffb5; text-shadow: 1px 1px 0 #000, 0 0 8px #2fe07a; animation: healUp 1.8s ease-out forwards; pointer-events: none; }
