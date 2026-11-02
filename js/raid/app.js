@@ -85,12 +85,12 @@ DS.App = (function () {
     try { await fn(); } catch (e) { DS.UI.toast(e.message || String(e), 3600); if (!e.user) console.error(e); } finally { b.disabled = false; }
   };
   let fx = 'flame';
-  const fxPicker = (title = '내 공격 이펙트') => `<p class="shelf-title">${title}</p><div class="fxs">${DS.FX.BASE.map((k) => `<button class="fxpick${k === fx ? ' on' : ''}" data-fx="${k}"><canvas width="150" height="90" data-still="${k}"></canvas><span>${DS.FX.NAMES[k]}</span></button>`).join('')}</div>`;
+  const fxPicker = (title = '내 공격 이펙트') => `<p class="shelf-title">${title}</p><div class="fxs">${DS.FX.BASE.map((k) => `<button type="button" class="fxpick${k === fx ? ' on' : ''}" data-fx="${k}"><canvas width="150" height="90" data-still="${k}"></canvas><span>${DS.FX.NAMES[k]}</span></button>`).join('')}</div>`;
   function bindFx(after) {
     document.querySelectorAll('#s-auth canvas[data-still]').forEach((c) => DS.FX.still(c, c.dataset.still));
     document.querySelectorAll('#s-auth .fxpick').forEach((b) => (b.onclick = () => { fx = b.dataset.fx; document.querySelectorAll('#s-auth .fxpick').forEach((x) => x.classList.toggle('on', x === b)); DS.FX.play(b, fx, { scale: 0.22 }); DS.Sound.hit(); if (after) after(); }));
   }
-  const heroPicker = () => `<p class="shelf-title">내 용사</p><div class="heroes">${Array.from({ length: DS.ASSETS.heroes.count - 1 }, (_, i) => `<button class="hpick${i === hero ? ' on' : ''}" data-h="${i}">${DS.Art.hero(i, i === hero ? 'attack' : 'idle')}</button>`).join('')}</div>`;
+  const heroPicker = () => `<p class="shelf-title">내 용사</p><div class="heroes">${Array.from({ length: DS.ASSETS.heroes.count - 1 }, (_, i) => `<button type="button" class="hpick${i === hero ? ' on' : ''}" data-h="${i}">${DS.Art.hero(i, i === hero ? 'attack' : 'idle')}</button>`).join('')}</div>`;
   const bindHeroes = (after) => document.querySelectorAll('#s-auth .hpick').forEach((b) => (b.onclick = () => { hero = Number(b.dataset.h); DS.Sound.clank(); after(); }));
 
   // ── 학생 로그인 · 가입 ─────────────────────────────────────
@@ -133,12 +133,16 @@ DS.App = (function () {
     $('#s-cls').onchange = nums; $('#s-num').onchange = showMask;
     nums();
   }
-  const pinInput = (id, ph) => `<input id="${id}" type="password" inputmode="numeric" maxlength="4" pattern="[0-9]*" placeholder="${ph}" autocomplete="off">`;
+  // 🔑 크롬 비밀번호 저장 정리 (2026-11-03): 저장되는 곳은 딱 두 군데 — 학생(아이디 「1-3반 1번」 + 4자리) · 교사(아이디 + 비밀번호)
+  //   학생 칸은 <form> 안에 숨은 아이디 칸(반·번호)과 짝지어 둔다. 로그인 = current-password · 가입/새 비번 = new-password
+  //   그 밖의 숫자 칸(수업 코드 · 종합상황실 키)은 password 칸이 아니라서 크롬이 저장하지 않는다
+  const pinInput = (id, ph, kind = 'current-password') => `<input id="${id}" name="${kind === 'new-password' ? 'new-password' : 'password'}" type="password" inputmode="numeric" maxlength="4" pattern="[0-9]*" placeholder="${ph}" autocomplete="${kind}">`;
+  const sForm = (c, n, inner) => `<form class="s-auth" autocomplete="on" onsubmit="return false"><input class="vh" type="text" name="username" autocomplete="username" tabindex="-1" aria-hidden="true" readonly value="${esc(`${c}반 ${n}번`)}">${inner}</form>`;
   function drawForm() {
     const f = $('#s-form'), c = () => $('#s-cls').value, n = () => Number($('#s-num').value);
     const remember = () => {}; // 반·번호는 기억하지 않는다 (v0.8.3)
     if (sMode === 'login') {
-      f.innerHTML = `<label>비밀번호 (숫자 4자리) ${pinInput('s-pin', '••••')}</label><button id="s-login" class="btn primary big">🔑 로그인</button><button id="s-new" class="btn">처음이에요 · 가입</button>`;
+      f.innerHTML = sForm(c(), n(), `<label>비밀번호 (숫자 4자리) ${pinInput('s-pin', '••••')}</label><button id="s-login" type="submit" class="btn primary big">🔑 로그인</button><button id="s-new" type="button" class="btn">처음이에요 · 가입</button>`);
       $('#s-login').onclick = go(async () => {
         const r = await A().login(c(), n(), $('#s-pin').value);
         if (r && r.needNewPin) { sMode = 'newpin'; drawForm(); return; }
@@ -146,10 +150,10 @@ DS.App = (function () {
       });
       $('#s-new').onclick = () => { sMode = 'signup'; drawForm(); };
     } else if (sMode === 'signup') {
-      f.innerHTML = `<p class="muted small">이름이 맞는지 꼭 확인하고 가입해요. 한 번호는 한 명만 가입할 수 있어요.</p>
-        <div class="row2"><label>비밀번호 4자리 ${pinInput('s-p1', '숫자 4자리')}</label><label>한 번 더 ${pinInput('s-p2', '다시')}</label></div>${heroPicker()}${fxPicker()}
+      f.innerHTML = sForm(c(), n(), `<p class="muted small">이름이 맞는지 꼭 확인하고 가입해요. 한 번호는 한 명만 가입할 수 있어요.</p>
+        <div class="row2"><label>비밀번호 4자리 ${pinInput('s-p1', '숫자 4자리', 'new-password')}</label><label>한 번 더 ${pinInput('s-p2', '다시', 'new-password')}</label></div>${heroPicker()}${fxPicker()}
         <p class="muted small">용사·이펙트는 나중에 모닥불 ⚙ 설정에서 언제든 바꿀 수 있어요.</p>
-        <button id="s-make" class="btn primary big">✨ 가입하기</button><button id="s-back" class="btn small">← 로그인으로</button>`;
+        <button id="s-make" type="submit" class="btn primary big">✨ 가입하기</button><button id="s-back" type="button" class="btn small">← 로그인으로</button>`);
       bindHeroes(() => { const a = $('#s-p1').value, b = $('#s-p2').value; drawForm(); $('#s-p1').value = a; $('#s-p2').value = b; });
       bindFx();
       $('#s-make').onclick = go(async () => {
@@ -160,9 +164,9 @@ DS.App = (function () {
       });
       $('#s-back').onclick = () => { sMode = 'login'; drawForm(); };
     } else {
-      f.innerHTML = `<p class="gold">선생님이 비밀번호를 초기화했어요. 새 비밀번호를 정해요.</p>
-        <div class="row2"><label>새 비밀번호 4자리 ${pinInput('s-p1', '숫자 4자리')}</label><label>한 번 더 ${pinInput('s-p2', '다시')}</label></div>
-        <button id="s-make" class="btn primary big">🔑 새 비밀번호로 시작</button>`;
+      f.innerHTML = sForm(c(), n(), `<p class="gold">선생님이 비밀번호를 초기화했어요. 새 비밀번호를 정해요.</p>
+        <div class="row2"><label>새 비밀번호 4자리 ${pinInput('s-p1', '숫자 4자리', 'new-password')}</label><label>한 번 더 ${pinInput('s-p2', '다시', 'new-password')}</label></div>
+        <button id="s-make" type="submit" class="btn primary big">🔑 새 비밀번호로 시작</button>`);
       $('#s-make').onclick = go(async () => {
         const a = $('#s-p1').value, b = $('#s-p2').value;
         if (a !== b) throw Object.assign(new Error('두 비밀번호가 달라요.'), { user: true });
@@ -189,8 +193,8 @@ DS.App = (function () {
     const first = !(await A().adminExists());
     document.querySelectorAll('.t-auth').forEach((e) => {
       e.innerHTML = `<p class="muted small">${first ? '처음 한 번: 교사 계정을 만들어요. (학생보다 먼저!)' : '교사 계정으로 로그인해요.'}</p>
-        <div class="row2"><label>교사 아이디 <input class="t-id" autocomplete="username" placeholder="영문·숫자"></label><label>비밀번호 <input class="t-pw" type="password" autocomplete="current-password" placeholder="6자 이상"></label></div>
-        <button class="btn primary t-login">${first ? '✨ 교사 계정 만들기' : '🔑 교사 로그인'}</button>`;
+        <form class="t-form" autocomplete="on" onsubmit="return false"><div class="row2"><label>교사 아이디 <input class="t-id" name="username" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="영문·숫자"></label><label>비밀번호 <input class="t-pw" name="${first ? 'new-password' : 'password'}" type="password" autocomplete="${first ? 'new-password' : 'current-password'}" placeholder="6자 이상"></label></div>
+        <button type="submit" class="btn primary t-login">${first ? '✨ 교사 계정 만들기' : '🔑 교사 로그인'}</button></form>`;
     });
     document.querySelectorAll('.t-login').forEach((b) => (b.onclick = go(async () => {
       const box = b.closest('.t-auth'), id = box.querySelector('.t-id').value.trim(), pwd = box.querySelector('.t-pw').value;

@@ -1145,3 +1145,8 @@ body.forge-open .test-bar { display: none; } /* v0.9.3: 모루(한 화면)를 �
 #screen-camp .camp-stage .tut-spot { z-index: 21 !important; animation: tutPulse 1.1s ease-in-out infinite !important; }
 #screen-camp .camp-stage .tut-spot .camp-label { opacity: 1 !important; }
 @keyframes tutPulse { 0%, 100% { filter: drop-shadow(0 0 6px #ffe27a); } 50% { filter: drop-shadow(0 0 18px #ffe27a) brightness(1.2); } }
+
+/* 🔑 크롬 비밀번호 저장 정리: 숨은 아이디 칸(학생 반·번호) · 가려 보이는 글자 칸(종합상황실 키 — password 칸이 아니라 저장 안 됨) */
+.vh { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+input.masked { -webkit-text-security: disc; text-security: disc; }
+.s-auth, .t-form { display: contents; }
