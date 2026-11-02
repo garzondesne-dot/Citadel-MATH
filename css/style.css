@@ -980,3 +980,20 @@ details.panel[open] > summary::before { content: '▾ '; }
 .shard { position: absolute; width: 14px; height: 30px; margin: -15px 0 0 -7px; background: linear-gradient(#fff, #ffcf5a); clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); z-index: 13; pointer-events: none; animation: shard 1s ease-out forwards; }
 @keyframes shard { 0% { transform: rotate(var(--a)) translateY(0) scale(1); opacity: 1; } 100% { transform: rotate(var(--a)) translateY(-260px) scale(.4); opacity: 0; } }
 .perfect.vanish-txt { color: #ffe7a8; } .perfect.demo-txt { color: #ffcf5a; font-size: 48px; }
+/* v0.9.3 확정안: 종합상황실 대기실 교사 말풍선 작게 (수업 코드 · QR 을 가리지 않게) */
+.lb2-say.teacher { font-size: 14px; max-width: 44%; top: 30%; padding: 6px 12px; }
+/* 교사 캠프 차원문: 제자리에서 빛만 숨쉬기 (위아래로 움직이지 않음) */
+#screen-tcamp .camp-gate.open .camp-portal { animation: portalPulse 2.6s ease-in-out infinite; }
+#screen-tcamp .camp-gate.appear .camp-portal { animation: portalIn 1.1s ease-out, portalPulse 2.6s 1.1s ease-in-out infinite; }
+/* 캠프 용사는 모루 · 차원문보다 위 겹 (이동할 때 그림 뒤로 들어가지 않게) */
+.camp-hero, .tc-hero { z-index: 9; }
+/* ⚙ 설정: 닫기 · 저장을 맨 위 제목 줄에 */
+.set-head { display: flex; align-items: center; gap: 8px; position: sticky; top: -1px; z-index: 2; background: inherit; padding: 4px 0 6px; }
+.set-head h2 { margin: 0 auto 0 0; }
+/* 보강던전 차원문: 파란 반짝이 (작은 별빛이 떠오름) + 파란 빛 */
+.camp-bonus, .bn-portal.on { position: relative; }
+.camp-bonus-img, .bn-portal.on i { filter: drop-shadow(0 0 14px #4fb8ffcc); }
+.camp-bonus::before, .camp-bonus::after, .bn-portal.on::before, .bn-portal.on::after { content: ''; position: absolute; left: 50%; top: 45%; width: 5px; height: 5px; border-radius: 50%; background: #bfe8ff; pointer-events: none; z-index: 3;
+  box-shadow: -34px 10px 0 0 #7fd0ff, 28px -6px 0 0 #bfe8ff, -16px -30px 0 -1px #e6f6ff, 22px 26px 0 -1px #7fd0ff, 0 -48px 0 -1px #bfe8ff, -40px -18px 0 -2px #e6f6ff; animation: blueSpark 2.4s ease-in-out infinite; }
+.camp-bonus::after, .bn-portal.on::after { animation-delay: 1.2s; transform: scale(-1, 1); }
+@keyframes blueSpark { 0% { opacity: 0; translate: 0 18px; } 30% { opacity: 1; } 70% { opacity: .8; } 100% { opacity: 0; translate: 0 -34px; } }
