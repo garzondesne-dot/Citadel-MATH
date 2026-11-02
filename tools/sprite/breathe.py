@@ -26,15 +26,17 @@ wide = width[neck:bot + 1]; wmax = wide.max()
 arm_rows = [neck + i for i, w in enumerate(wide) if w >= wmax * 0.85]
 waist = int(os.environ.get('WAIST') or min(max(arm_rows) + 2, bot - 5))
 
-def shift(a, y0, y1, d=1):  # [y0, y1) 줄을 d 픽셀 아래로 (아래 겹 위에 덮어 그림)
-    o = a.copy(); band = a[y0:y1].copy(); o[y0:y1][band[..., 3] > 0] = 0
+def shift(a, y0, y1, d=1, fill=False):  # [y0, y1) 줄을 d 픽셀 아래로 (아래 겹 위에 덮어 그림)
+    # fill=True: 원래 자리를 지우지 않는다 → 몸통 윗줄(깃)이 1줄 늘어나 턱 밑 틈이 생기지 않음
+    o = a.copy(); band = a[y0:y1].copy()
+    if not fill: o[y0:y1][band[..., 3] > 0] = 0
     dst = o[y0 + d:y1 + d]; m = band[: dst.shape[0], ..., 3] > 0; dst[m] = band[: dst.shape[0]][m]
     return o
 
 def frame(k):
     a = base
     body = k in (1, 2); head = k in (2, 3)
-    if body: a = shift(a, neck, waist)
+    if body: a = shift(a, neck, waist, fill=True)
     if head: a = shift(a, 0, neck)
     return a
 
