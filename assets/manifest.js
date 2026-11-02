@@ -7,10 +7,10 @@ DS.ASSETS = {
   // v2 도트 용사 (2026-11-02 · docs/ASSET-SPEC.md): 칸 80×64 · 줄 = 동작 [줄, 프레임 수, 초] · 대기 줄 = 숨쉬기 구움(tools/sprite/breathe.py)
   // 용사 시트에 없는 줄(7줄 시트 등)은 art.js 의 대신 쓰기 표로 보여 준다. 번호 16~ = v2 용사
   heroesV2: {
-    cols: 4, rows: 11, w: 80, h: 64,
+    cols: 4, rows: 12, w: 80, h: 64,
     anims: { idle: [0, 4, 1.28], walk: [1, 4, 0.64], attack: [2, 4, 0.48], hit: [3, 1], win: [4, 2, 0.7], fall: [5, 2, 0.6, 'once'], heal: [6, 2, 0.7],
       portal: [7, 4, 0.9, 'once'], sit: [8, 2, 1.6], healed: [9, 2, 0.8], think: [10, 2, 1.4], pant: [11, 2, 0.5] },
-    list: { 16: { src: 'hero-blond-v2.webp', name: '금발 검사', rows: 11, cx: 0.4 } }, // cx = 칸 안 머리 가운데 (가로 비율) → 상자 가운데로 맞춤
+    list: { 16: { src: 'hero-blond-v2-2.webp', name: '금발 검사', rows: 12, cx: 0.4 } }, // cx = 칸 안 머리 가운데 (가로 비율) → 상자 가운데로 맞춤
   },
   monsters: { src: 'monsters-v2.webp', cols: 3, rows: 3, poses: { idle: 0, attack: 1, down: 2 }, names: ['수정 슬라임', '바위 골렘', '성채 드래곤'], flip: [1] }, // flip: 오른쪽을 보고 그려진 줄 (용사는 왼쪽에 선다)
   cards: { src: 'cards-v4.webp', cols: 4, rows: 2 }, // 카드 그림 8칸: 0 소속 · 1 개수 · 2 공집합 · 3 포함 · 4 반례 · 5 같음 · 6 부분집합 목록 · 7 개수의 비밀
@@ -26,12 +26,16 @@ DS.ASSETS = {
   monstersNew: { src: 'monsters-new-v1.webp', cols: 3, rows: 10, poses: { idle: 0, attack: 1, down: 2 },
     names: ['수정 아홀로틀', '선인장 수호수', '등불 유령', '번개 독수리', '자수정 슬라임', '해바라기 정령', '흑요석 표범', '용암 게', '황금 스카라베', '별빛 해파리'] },
   // 왕관 몬스터 10종 (v0.8.0 · 사용자 제공 · 배경 제거 + 왼쪽(용사 쪽)을 보게 뒤집음 · 칸 340×340): 'crown:번호'
+  // v2 도트 몬스터 (2026-11-03 · 7차시 차원 균열 · 3자세 대기 | 공격 | 쓰러짐 · 왼쪽을 봄): 'rift:번호' · 보스 'riftboss:0' (칸 96 · 보스 192)
+  monstersRift: { src: 'monsters-rift-v2.webp', cols: 3, rows: 5, poses: { idle: 0, attack: 1, down: 2 }, names: ['균열 슬라임', '프리즘 골렘', '틈새 박쥐', '태엽 눈알 거미', '공허 가오리'] },
+  monstersRiftBoss: { src: 'monsters-riftboss-v2.webp', cols: 3, rows: 1, poses: { idle: 0, attack: 1, down: 2 }, names: ['균열의 감시자'] },
   monstersCrown: { src: 'monsters-crown-v1.webp', cols: 3, rows: 10, poses: { idle: 0, attack: 1, down: 2 },
     names: ['에메랄드 왕관 슬라임', '루비 박쥐', '사파이어 뿔벌레', '자수정 뼈뱀', '버섯 전사', '자수정 눈알 문어', '이끼 골렘', '서리 왕관 늑대', '덩굴 미믹', '청록 수정룡'] },
   // 던전 테마 10종: 던전 안 전투 배경(dg-) + 같은 번호의 포털(portal-, 2열: 활성 / 봉쇄). 차시 파일의 theme 으로 고른다
   dungeons: { ids: ['01-burrow', '02-deep-forest', '03-dimensional', '04-mine', '05-ruins', '06-frost', '07-volcano', '08-crypt', '09-underwater', '10-sky'],
     names: ['땅굴', '깊은 숲 성역', '차원 균열 지대', '폐광 갱도', '고대 유적 심장부', '빙결 동굴', '화산 심연', '망자의 지하 묘실', '수중 신전', '천공 성소'],
-    bg: (id) => `dg-${id}-v1.webp`, portal: (id) => `portal-${id}-v1.webp` },
+    bg: (id) => ({ '03-dimensional': 'dg-03-dimensional-v2.webp' })[id] || `dg-${id}-v1.webp`, portal:  // v2 도트 배경이 온 테마만 바꿔 씀 (2026-11-03: 03 차원 균열)
+       (id) => `portal-${id}-v1.webp` },
   // 특수 차원문 3종 (투명 배경 · 400×600): 보강던전(파랑) · 중단원던전(보라) · 대단원던전(빨강). 원본 무손실은 assets/img/dportal-*-v1.png
   // 메달 (v0.9.1 · 사용자 제공 · 5열 × 2행): rank = 업적 · 성장 10종, dungeon = 던전 테마 01~10 정복
   medals: { rank: { src: 'medals-rank-v1.webp', cols: 5, rows: 2 }, dungeon: { src: 'medals-dungeon-v1.webp', cols: 5, rows: 2 } },
@@ -47,7 +51,7 @@ DS.ASSETS = {
     trees: { src: 'camp-trees-v1.webp', cuts: [0, 630, 1020, 1550, 2048], base: 2048, names: ['활엽수', '침엽수', '고목', '전경 나무'] }, // 폭이 달라 cuts 비율로 자름
     anvil: { src: 'anvil-v1.webp', cols: 3, rows: 1, states: { idle: 0, forging: 1, done: 2 } }, // 모루: 대기 / 연성 중 / 완성
     layers: ['bg', 'trees-back', 'gate', 'heroes', 'fire', 'anvil', 'trees-front', 'ui'],
-    props: { dummy: '', shelf: '', mail: '' }, // v0.9.6 캠프 기본 오브젝트 그림 (🎯 허수아비 · 📚 책장 · 📮 우편함). 비어 있으면 이모지 팻말 — v2 도트 그림이 오면 파일 이름만 넣는다
+    props: { dummy: { src: 'camp-dummy-v2.webp', cols: 2 }, shelf: '', mail: '' }, // dummy = v2 도트 2칸 (평소 | 맞음 — 누르면 기울어짐) // v0.9.6 캠프 기본 오브젝트 그림 (🎯 허수아비 · 📚 책장 · 📮 우편함). 비어 있으면 이모지 팻말 — v2 도트 그림이 오면 파일 이름만 넣는다
   },
   // 수학 카드 (모루 연성): 공통 금테 + 위쪽 무기·마법 그림 8칸. 좌표는 테두리(384×512) 기준. 그림은 한 색으로 차분하게, 등급은 아래 보석 색
   cardKit: { frame: 'card-frame-v1.webp', w: 384, h: 512, arts: { src: 'card-arts-v1.webp', cols: 8, names: ['검', '주판', '수정구', '반지', '돋보기', '쌍수정', '두루마리', '빛나무'] },

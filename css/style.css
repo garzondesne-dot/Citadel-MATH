@@ -1081,6 +1081,8 @@ body.forge-open .test-bar { display: none; } /* v0.9.3: 모루(한 화면)를 �
 .camp-prop { position: absolute; z-index: 6; width: 17%; background: none; border: 0; padding: 0; cursor: pointer; display: flex; flex-direction: column; align-items: center; --ol: #fff; }
 .camp-prop-ic { display: grid; place-items: center; width: clamp(40px, 11vw, 64px); aspect-ratio: 1; font-size: clamp(24px, 7vw, 40px); font-style: normal; background: radial-gradient(#5a3a1acc, #2a1608cc); border: 2px solid #c8954a; border-radius: 12px; box-shadow: 0 3px 0 #1a0d04, 0 0 10px #ffb04a55; }
 .camp-prop-img { display: block; width: 100%; aspect-ratio: 1; background-size: contain; background-repeat: no-repeat; background-position: center bottom; image-rendering: pixelated; }
+.camp-prop-img.two { background-size: 200% 100%; background-position: 0% 100%; filter: drop-shadow(0 0 6px #ffb04a66); }
+.picked .camp-prop-img.two { background-position: 100% 100%; } /* 🎯 허수아비: 누르면 맞은 칸 (기울어짐) */
 .sh-l { margin: 6px 0; border: 1px solid var(--line); padding: 4px 8px; }
 .sh-l summary { cursor: pointer; padding: 4px 0; }
 .sh-row { display: flex; justify-content: space-between; align-items: center; gap: 6px; padding: 4px 0; border-top: 1px dashed #ffffff22; font-size: 14px; }

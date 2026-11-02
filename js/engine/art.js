@@ -29,7 +29,7 @@ DS.Art = (function () {
     return cell('heroes', A().heroes.poses[pose] || 0, ((n % A().heroes.count) + A().heroes.count) % A().heroes.count, `hero ${cls}`);
   };
   // n = 숫자(기본 시트) 또는 'extra:3' · 'new:5' · 'crown:7' (추가 시트)
-  const SHEETS = { extra: 'monstersExtra', new: 'monstersNew', crown: 'monstersCrown' };
+  const SHEETS = { extra: 'monstersExtra', new: 'monstersNew', crown: 'monstersCrown', rift: 'monstersRift', riftboss: 'monstersRiftBoss' };
   // 몬스터 번호: 2 · 'extra:3' · 'crown:9' … 끝에 '@h150' 을 붙이면 색 변형 (hue-rotate 150°, v0.9.6 — 보강 · 돌려쓰기 보스용, 그림 0)
   function monster(n, pose = 'idle', cls = '') {
     let hue = 0;

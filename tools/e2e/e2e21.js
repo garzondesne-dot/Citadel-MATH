@@ -24,6 +24,7 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   // ② 캠프: 앉아 쉬기
   console.log('camp anim:', await S1.getAttribute('.camp-hero .art', 'data-anim'));
   await S1.screenshot({ path: `${OUT}/2-camp-sit.png` });
+  await S1.evaluate(() => document.querySelector('#camp-dummy').classList.add('picked')); await S1.waitForTimeout(150); await S1.screenshot({ path: `${OUT}/2b-dummy-hit.png` }); await S1.evaluate(() => document.querySelector('#camp-dummy').classList.remove('picked'));
   // 수업 열기 → 차원문
   await T.selectOption('#lesson', 'set-06'); await T.selectOption('#t-cls', '1-3'); await T.click('#t-new'); await T.waitForTimeout(2500);
   const code = await T.evaluate(() => DS.Teacher.code());
@@ -34,6 +35,7 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   console.log('portal anim:', await S1.getAttribute('.camp-hero .art', 'data-anim').catch(() => 'gone'));
   await S1.waitForTimeout(2500);
   const go = () => T.evaluate(async () => { const code = DS.Teacher.code(); const R = DS.Act.unpackRoom(await DS.Net.get(`rooms/${code}`)); await DS.Act.go(code, R, DS.Lessons.get(R.meta.lesson), 1); });
+  if (process.env.V2MON) await S1.evaluate(() => { const L = DS.Lessons.get('set-06'); L.monsters.m1.sprite = 'rift:0'; L.boss.sprite = 'riftboss:0'; L.theme = '03-dimensional'; }); // V2MON=1: v2 몬스터 미리보기 (이 브라우저에서만)
   for (let k = 0; k < 3; k++) { await go(); await T.waitForTimeout(800); } // 도입 → 개념1 → 문제1
   await S1.waitForTimeout(1500);
   console.log('fight anim:', await S1.getAttribute('.enc-hero .art', 'data-anim').catch(() => 'none'));
