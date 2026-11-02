@@ -66,8 +66,9 @@ DS.Student = (function () {
       <div><b>${DS.Titles ? DS.Titles.nameHtml(p, { beon: true }) : `${p.num}번 ${esc(p.nick || '')}`}</b><br><span class="muted small">${esc(L.unit)} · ${esc(L.title)}</span></div>
       <div class="st-badge">${Raid().isLobby(R) || myP().lobby ? '대기실' : Raid().isEnd(L, R) ? '마무리' : step.kind === 'boss' ? '보스' : step.kind === 'monster' ? (step.special ? '스페셜' : '전투') : '설명'}</div>`;
   }
-  const helpBtn = () => `<button class="btn small help${(R.help || {})[me] ? ' on' : ''}" id="st-help">${(R.help || {})[me] ? '🙋 도움 요청 중 (누르면 취소)' : '🙋 도움 요청'}</button>`;
-  function bindHelp() { const b = $('#st-help'); if (b) b.onclick = () => DS.Act.help(code, !(R.help || {})[me]); }
+  // v0.9.3 긴급 (사용자 요청): 🙋 도움 요청 버튼 없앰 — 수업 중에는 학생이 직접 손을 든다. 교사 폰의 「재도전까지 못 맞힘 · 2분째 미제출」 알림은 그대로
+  const helpBtn = () => '';
+  function bindHelp() {}
 
   function render() {
     if (Raid().isClosed(R)) return toCamp();
@@ -175,7 +176,7 @@ DS.Student = (function () {
     const pips = Array.from({ length: Raid().RETRIES + 1 }, (_, i) => `<i class="${i < left ? 'on' : ''}"></i>`).join('');
     return `<div class="scene enc bg-scene th-${L.theme || ''} ${cls}${step.special ? ' special' : ''}"><div class="scene-bar"><div><b>${step.special ? '⭐ 난입! ' : step.review ? '📖 ' : ''}${esc(step.title)}</b><br><span class="muted small">레이드 체력 ${hp.left} / ${hp.max}</span></div></div>
       ${test ? `<div class="enc-friends">${Raid().activeIds(R).filter((u) => u !== me).slice(0, 4).map((u) => DS.Art.hero((R.players[u] || {}).hero || 0, 'idle', 'huff')).join('')}</div>` : ''}
-      <div class="enc-hero"><div class="enc-tries" title="남은 도전 기회">${pips}</div>${DS.Art.hero(myP().hero, done ? 'attack' : 'idle', done ? 'pairhop' : cls === 'miss' ? 'slump' : 'huff')}<i class="shadow"></i></div>
+      <div class="enc-hero"><div class="enc-tries" title="남은 도전 기회">${pips}</div>${DS.Art.hero(myP().hero, done || cls ? 'attack' : 'idle', done ? 'pairhop' : cls === 'miss' ? 'slump' : 'huff')}<i class="shadow"></i></div>
       <div class="enc-mon">${DS.Art.monster(L.monsters[step.id].sprite, done ? 'down' : 'idle', done ? '' : 'float')}<div class="segs" title="내가 맞힌 만큼 칸이 깨져요">${segs}</div></div></div>`;
   }
   // 생각 시간: 틀린 칸이 있으면 해설은 읽을 수 있고 「다시 도전」만 잠깐 잠긴다 (수업 준비에서 0·5·10·15초, 기본 5초)
@@ -217,6 +218,8 @@ DS.Student = (function () {
       ${test ? '' : helpBtn()}</div>`;
     bindHelp();
     const sb = $('#st-sheet'); if (sb) sb.onclick = () => sheetModal(step);
+    // v0.9.3 (⑤): 공격 자세는 잠깐만 → 다시 서 있는 자세 (격파됐으면 승리 자세 그대로)
+    if (fx && !done) setTimeout(() => { const a = body.querySelector('.enc-hero .art'); if (a) a.outerHTML = DS.Art.hero(myP().hero, 'idle', fx === 'miss' ? 'slump' : 'huff'); }, 650);
     const rb = $('#st-retry');
     if (rb) { thinkTimer(rb, `${mid}|${t.attempt}`, rec.perfect ? '⚔ 연습 공격' : '↻ 다시 도전'); rb.onclick = () => { retrying = `${mid}|${rec.nextAttempt}`; form = null; DS.Sound.clank(); render(); }; }
   }
@@ -271,34 +274,34 @@ DS.Student = (function () {
     };
   }
   // ref: 첫 시도면 '문제 1 (2)' 처럼 학습지 문항 이름 → 문제 위에 작은 꼬리표 (같은 문제를 학습지에서 바로 찾게)
-  function itemHtml(q, i, wasWrong, ref) {
+  function itemHtml(q, i, wasWrong, ref, G = form.given) { // G: 고른 답 (v0.9.3 종합상황실 시연도 같은 칸을 쓴다)
     const tag = `<span class="item-no">${i + 1}${wasWrong ? ' <b class="ngc">✘</b>' : ''}${ref ? ` <span class="sheet-tag">📄 ${esc(ref)}</span>` : ''}</span>`;
     const qText = (t) => `<div class="item-q">${DS.UI.rich(t)}</div>`;
     if (q.type === 'blanks') {
-      const it = q.items[0], v = (form.given[i] || [])[0];
+      const it = q.items[0], v = (G[i] || [])[0];
       // 문제 상황(예: A = {1, 3, 5} 일 때 …)을 먼저 보여 주고, 그 아래에 □ 식
       return `<div class="item">${tag}${q.question ? `<div class="item-q bl-q">${DS.UI.rich(q.question)}</div>` : ''}<div class="item-q math">${pretty(it.left)} <b class="bl-box">${v ? esc(v) : '□'}</b> ${pretty(it.right)}</div>
         <div class="item-opts">${q.options.map((o) => `<button class="choice sym${v === o ? ' on' : ''}" data-pick="${i}|${esc(o)}">${esc(o)}</button>`).join('')}</div></div>`;
     }
     if (q.type === 'multi') {
-      const on = new Set(form.given[i]);
+      const on = new Set(G[i]);
       return `<div class="item">${tag}${qText(q.question)}
         <div class="item-opts pickset">${q.options.map((o, k) => `<button class="choice chipset${on.has(k) ? ' on' : ''}" data-pick="${i}|${k}"><span class="math">${pretty(o)}</span></button>`).join('')}</div></div>`;
     }
     if (q.type === 'choice') {
       return `<div class="item">${tag}${qText(q.question)}
-        <div class="item-opts col">${q.choices.map((o, k) => `<button class="choice opt${form.given[i] === k ? ' on' : ''}" data-pick="${i}|${k}">${optHtml(o)}</button>`).join('')}</div></div>`;
+        <div class="item-opts col">${q.choices.map((o, k) => `<button class="choice opt${G[i] === k ? ' on' : ''}" data-pick="${i}|${k}">${optHtml(o)}</button>`).join('')}</div></div>`;
     }
     if (q.type === 'ox') {
-      const v = form.given[i];
+      const v = G[i];
       return `<div class="item">${tag}${qText(q.question)}
         <div class="item-opts">${['O', 'X'].map((o) => `<button class="choice sym${v === (o === 'O') ? ' on' : ''}" data-pick="${i}|${o}">${o}</button>`).join('')}</div></div>`;
     }
     if (q.type === 'text') { // 단답: 글자 입력
-      return `<div class="item">${tag}${qText(q.question)}<input class="item-text" data-text="${i}" maxlength="40" placeholder="답을 입력하세요" value="${esc(form.given[i] || '')}" autocomplete="off"></div>`;
+      return `<div class="item">${tag}${qText(q.question)}<input class="item-text" data-text="${i}" maxlength="40" placeholder="답을 입력하세요" value="${esc(G[i] || '')}" autocomplete="off"></div>`;
     }
     // number: 다이얼 (십의 자리 · 일의 자리)
-    const v = form.given[i], t = Math.floor(v / 10), o = v % 10;
+    const v = G[i], t = Math.floor(v / 10), o = v % 10;
     return `<div class="item">${tag}${qText(q.question)}
       <div class="dial"><div class="wheel"><button data-dial="${i}|10">▲</button><b>${t}</b><button data-dial="${i}|-10">▼</button></div><div class="wheel"><button data-dial="${i}|1">▲</button><b>${o}</b><button data-dial="${i}|-1">▼</button></div><span class="dial-val">= ${v}</span></div></div>`;
   }
@@ -342,5 +345,6 @@ DS.Student = (function () {
       <p class="muted small">게임 기록은 수학 성적이 아니에요. 오늘 배운 것을 학습지에 정리해요.</p></div>`;
     bindLobby();
   }
-  return { enter, stop: stop0 };
+  // v0.9.3 종합상황실 시연: 학생 폰과 같은 문항 칸 · 해설 줄
+  return { enter, stop: stop0, itemHtml: (q, i, G) => itemHtml(q, i, false, null, G), solOf, itemText };
 })();

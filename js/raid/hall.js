@@ -9,7 +9,7 @@ DS.Hall = (function () {
   const { esc, pretty } = DS.UI;
   const C = () => DS.Control, Raid = () => DS.Raid;
   let code = null, L = null, R = null, raw = null, stop = null, stopPrep = null, prep = {};
-  let built = '', seen = {}, queue = [], playing = false, wonFx = '', bubbleT = 0, bubbleK = 0, hallKey = '', camped = false, zoom = '', zoomStep = -9;
+  let built = '', seen = {}, queue = [], playing = false, wonFx = '', bubbleT = 0, bubbleK = 0, hallKey = '', camped = false, zoom = '', zoomStep = -9, vanished = '', demo = null;
 
   async function enter(c, key) {
     await DS.Act.joinHall(c, key);
@@ -43,7 +43,8 @@ DS.Hall = (function () {
 
   function render() {
     const i = R.state.step ?? -1;
-    $('#h-top').innerHTML = `<b>${esc(L.unit)} · ${esc(L.title)}</b><span>${esc(C().stepName(L, R))}</span><span class="muted">수업 코드 <b>${code}</b></span>`;
+    $('#h-top').innerHTML = `<b>${esc(L.unit)} · ${esc(L.title)}</b><span>${esc(C().stepName(L, R))}</span><span class="muted">수업 코드 <b>${code}</b></span>${DS.UI.fs.btn('h-fs')}`;
+    DS.UI.fs.bind('h-fs');
     heroes(); side(i);
     const step = Raid().stepOf(L, R);
     videoOverlay(step);
@@ -145,7 +146,7 @@ DS.Hall = (function () {
     return out;
   }
   function buildFight(step, key) {
-    built = key; queue = []; wonFx = '';
+    built = key; queue = []; wonFx = ''; vanished = ''; if (demo && demo.step !== step) demoClose();
     const f = fightOf(step);
     const hs = studs().filter(([u]) => (R.active || {})[u]);
     const n = hs.length, row0 = Math.ceil(n / 2);
@@ -175,11 +176,17 @@ DS.Hall = (function () {
     const clr = $('#r-clear');
     if (f.done) {
       clr.hidden = false; clr.className = 'raid-clear'; clr.innerHTML = step.kind === 'boss' ? '🎉 보스 격파! 모두 함께 이겼다!' : '⚔ 몬스터 격파!';
-      if (wonFx !== built) { wonFx = built; setTimeout(() => { const m = $('#rm'); if (m) m.innerHTML = DS.Art.monster(f.sprite, 'down'); DS.Sound.correct(); document.querySelectorAll('.fh2').forEach((h, k) => { const a = h.querySelector('.art'); if (!a) return; a.parentElement.classList.toggle('face-l', k % 2 === 1); a.classList.add('pairhop'); a.style.animationDelay = `${(k % 2) * 0.22}s`; }); }, 600); }
+      if (wonFx !== built) { wonFx = built; setTimeout(() => { const m = $('#rm'); if (m && vanished !== built) m.innerHTML = DS.Art.monster(f.sprite, 'down'); DS.Sound.correct(); document.querySelectorAll('.fh2').forEach((h, k) => { const a = h.querySelector('.art'); if (!a) return; a.parentElement.classList.toggle('face-l', k % 2 === 1); a.classList.add('pairhop'); a.style.animationDelay = `${(k % 2) * 0.22}s`; }); }, 600); }
     } else if (step.kind === 'monster' && !wait.length && f.hp.left > 0) {
       clr.hidden = false; clr.className = 'raid-clear note'; clr.innerHTML = `모두 공격했다! 남은 체력 ${f.hp.left} — 재도전으로 더 공격하자`;
     } else clr.hidden = true;
     play();
+  }
+  // 용사 자세 잠깐 바꾸기 (공격 → ms 뒤 서 있는 자세). 승리 점프(pairhop) 중이면 그대로 둔다
+  function pose(h, heroId, p, ms) {
+    const art = h.querySelector('.art'); if (!art || art.classList.contains('pairhop')) return;
+    const box = art.parentElement; box.innerHTML = DS.Art.hero(heroId, p);
+    clearTimeout(h._pt); h._pt = setTimeout(() => { const a2 = box.querySelector('.art'); if (a2 && !a2.classList.contains('pairhop')) box.innerHTML = DS.Art.hero(heroId, 'idle'); }, ms);
   }
   // 공격 연출: 0.35초 간격으로 차례차례. 성공 = 몬스터로 뛰어올라 내 이펙트 + 데미지 숫자 (전부 맞힘이면 크게 + PERFECT! + 흔들림)
   function play() {
@@ -194,6 +201,7 @@ DS.Hall = (function () {
       h.style.setProperty('--tx', `${(mr.left + mr.width / 2 - (hr.left + hr.width / 2)) * (ok ? 0.8 : 0.35)}px`);
       h.style.setProperty('--ty', `${(mr.top + mr.height * 0.7 - (hr.top + hr.height / 2)) * (ok ? 0.8 : 0.35)}px`);
       h.classList.remove('dash', 'swing'); void h.offsetWidth; h.classList.add(ok ? 'dash' : 'swing');
+      pose(h, (R.players[a.u] || {}).hero || 0, 'attack', 820); // v0.9.3 (사용자 지적 ⑤): 돌진하는 동안 공격 자세 → 돌아오면 서 있는 자세
       setTimeout(() => {
         if (ok) {
           DS.Sound.hit();
@@ -250,10 +258,72 @@ DS.Hall = (function () {
       ${Raid().isEnd(L, R) ? `<div class="h-words">${C().wordsHtml(R)}</div>` : ''}`;
     C().bindWords($('#h-side'), code, R);
     const el = $('#h-ctrl'), live = !Raid().isLobby(R) && !Raid().isClosed(R);
-    el.innerHTML = `${C().pctHtml(L, R)}<p class="muted small">다음 ▶ ${esc(C().nextName(L, R))}</p><div class="row"><button class="btn" id="h-back"${i < 0 ? ' disabled' : ''}>◀ 뒤로</button><button class="btn primary" id="h-fwd"${Raid().isClosed(R) ? ' disabled' : ''}>${Raid().isFinale(L, R) ? '수업 끝 ▶' : '앞으로 ▶'}</button></div>${live ? C().videoBtn(L, R, prep.video) + C().sheetBtn(L, R) + C().focusBtn(R) : ''}`;
+    el.innerHTML = `${C().pctHtml(L, R)}<p class="muted small">다음 ▶ ${esc(C().nextName(L, R))}</p><div class="row"><button class="btn" id="h-back"${i < 0 ? ' disabled' : ''}>◀ 뒤로</button><button class="btn primary" id="h-fwd"${Raid().isClosed(R) ? ' disabled' : ''}>${Raid().isFinale(L, R) ? '수업 끝 ▶' : '앞으로 ▶'}</button></div>${live ? C().videoBtn(L, R, prep.video) + C().sheetBtn(L, R) + C().focusBtn(R) : ''}${live && Raid().stepOf(L, R) && Raid().stepOf(L, R).kind === 'monster' ? '<button class="btn demo-btn" id="h-demo">🎮 시연: 문제 풀어 보기</button>' : ''}`;
+    const db = $('#h-demo'); if (db) db.onclick = () => demoOpen(Raid().stepOf(L, R));
     C().bindPct(el, code, R, L); C().bindFocus(el, code, R); C().bindSheet(el, code, R); C().bindVideo(el, code, R);
     $('#h-fwd').onclick = () => C().run(() => C().forward(code, R, L));
     $('#h-back').onclick = () => C().run(() => C().back(code, R, L));
+  }
+
+  // ── 🎮 시연 (v0.9.3 사용자 요청): 교사가 학생과 똑같은 문제 칸으로 풀어 본다 · 데미지 · 기록 없음 (이 PC 화면에서만) ─────────
+  //   다 맞히면 선생님 캐릭터가 돌진해 일격 → 이미 공략된(체력 0) 몬스터면 형체가 완전히 사라진다(소멸) · 아직이면 「시연 · 데미지 없음」
+  //   정답 · 오답 표시는 교사 본인의 시연 풀이에만 보인다 (학생 답은 여전히 띄우지 않음 — DECISIONS 예외)
+  function demoOpen(step, attempt = 0) {
+    if (!step || step.kind !== 'monster') return;
+    const items = L.items(step.id, `demo|${code}|${Date.now()}`, attempt);
+    demo = { step, attempt, items, given: items.map((q) => (q.type === 'multi' ? [] : q.type === 'number' ? 0 : q.type === 'text' ? '' : null)), marks: null };
+    demoDraw();
+  }
+  function demoClose() { const ov = document.getElementById('h-demo-ov'); if (ov) ov.remove(); demo = null; }
+  function demoDraw() {
+    let ov = document.getElementById('h-demo-ov');
+    if (!ov) { ov = document.createElement('div'); ov.id = 'h-demo-ov'; ov.className = 'h-demo-ov'; document.getElementById('screen-hall').appendChild(ov); }
+    const d = demo, S = DS.Student, ready = d.items.every((q, i) => (q.type === 'multi' ? d.given[i].length > 0 : q.type === 'text' ? String(d.given[i] || '').trim() !== '' : d.given[i] != null));
+    const res = d.marks ? `<div class="demo-res ${d.marks.every(Boolean) ? 'ok' : 'ng'}">${d.marks.every(Boolean) ? '⚔ 모두 맞혔다! 선생님의 일격!' : `✘ ${d.marks.filter((m) => !m).length}개 틀림 — 해설을 함께 봐요`}</div>
+      <div class="marks">${d.items.map((q, i) => `<div class="mark ${d.marks[i] ? 'ok' : 'ng'}"><b>${i + 1}</b> ${d.marks[i] ? '✔' : '✘'} <span class="math">${DS.UI.pretty(S.itemText(q))}</span>${d.marks[i] ? '' : `<br><span class="sol-line math">${DS.UI.pretty(S.solOf(q))}</span>`}</div>`).join('')}</div>` : '';
+    ov.innerHTML = `<div class="demo-box framed"><div class="demo-head"><b>🎮 시연 · ${esc(d.step.title)}</b><span class="demo-tag">데미지 · 기록 없음</span>
+        <button class="btn small${d.attempt ? '' : ' on'}" data-da="0">📄 학습지 문제</button><button class="btn small${d.attempt ? ' on' : ''}" data-da="1">🔄 숫자 바꾼 문제</button><button class="btn small" id="demo-x">✕ 닫기</button></div>
+      ${d.marks ? res : `${L.monsters[d.step.id].note ? `<p class="muted small">💡 ${esc(L.monsters[d.step.id].note)}</p>` : ''}<div class="items demo-items">${d.items.map((q, i) => S.itemHtml(q, i, d.given)).join('')}</div>
+        <button class="btn primary big" id="demo-go"${ready ? '' : ' disabled'}>⚔ 공격! (시연)</button>`}
+      ${d.marks ? '<div class="row demo-row"><button class="btn" data-da="1">↻ 숫자 바꿔 다시</button><button class="btn primary" id="demo-x2">✕ 닫고 레이드로</button></div>' : ''}</div>`;
+    ov.querySelector('#demo-x').onclick = demoClose; const x2 = ov.querySelector('#demo-x2'); if (x2) x2.onclick = demoClose;
+    ov.querySelectorAll('[data-da]').forEach((b) => (b.onclick = () => demoOpen(d.step, Number(b.dataset.da))));
+    ov.querySelectorAll('[data-pick]').forEach((b) => (b.onclick = () => {
+      const [i, v] = b.dataset.pick.split('|'), k = Number(i), t = d.items[k].type;
+      if (t === 'multi') { const s = new Set(d.given[k]); const n = Number(v); if (s.has(n)) s.delete(n); else s.add(n); d.given[k] = [...s].sort((a, b2) => a - b2); }
+      else if (t === 'choice') d.given[k] = Number(v); else if (t === 'ox') d.given[k] = v === 'O'; else d.given[k] = [v];
+      DS.Sound.clank(); demoDraw();
+    }));
+    ov.querySelectorAll('[data-dial]').forEach((b) => (b.onclick = () => { const [i, dd] = b.dataset.dial.split('|').map(Number); d.given[i] = Math.max(0, Math.min(99, d.given[i] + dd)); demoDraw(); }));
+    ov.querySelectorAll('[data-text]').forEach((inp) => inp.addEventListener('input', () => { d.given[Number(inp.dataset.text)] = inp.value; const go = ov.querySelector('#demo-go'); if (go) go.disabled = !d.items.every((q, j) => (q.type === 'multi' ? d.given[j].length > 0 : q.type === 'text' ? String(d.given[j] || '').trim() !== '' : d.given[j] != null)); }));
+    const go = ov.querySelector('#demo-go');
+    if (go) go.onclick = () => {
+      const given = d.items.map((q, i) => (q.type === 'number' ? Number(d.given[i]) : d.given[i]));
+      d.marks = d.items.map((q, i) => DS.Quiz.grade(q, given[i]));
+      demoDraw();
+      if (d.marks.every(Boolean)) { DS.Sound.slash(); setTimeout(() => { demoClose(); teacherStrike(d.step); }, 1100); } else DS.Sound.squish();
+    };
+  }
+  // 선생님 일격: 왼쪽에서 등장 → 몬스터로 돌진 → 팍! (이미 공략된 몬스터면 소멸)
+  function teacherStrike(step) {
+    const arena = $('#raid'), m0 = $('#rm'); if (!arena || !m0 || Raid().stepOf(L, R) !== step) return;
+    const kill = Raid().cleared(L, R, step.id), ar = arena.getBoundingClientRect(), mr = m0.getBoundingClientRect();
+    const t = document.createElement('div'); t.className = 'teach-strike'; t.innerHTML = DS.Art.hero(DS.ASSETS.heroes.teacher, 'attack');
+    arena.appendChild(t);
+    t.style.setProperty('--tx', `${mr.left - ar.left + mr.width * 0.2 - ar.width * 0.08}px`); t.style.setProperty('--ty', `${mr.top - ar.top + mr.height * 0.45 - ar.height * 0.62}px`);
+    requestAnimationFrame(() => t.classList.add('go'));
+    setTimeout(() => {
+      DS.Sound.hit(); setTimeout(() => DS.Sound.correct(), 140);
+      DS.FX.play(arena, 'twinkle', { x: mr.left - ar.left + mr.width / 2, y: mr.top - ar.top + mr.height / 2, scale: Math.min(ar.width, ar.height) / 700, perfect: true });
+      arena.classList.remove('shake'); void arena.offsetWidth; arena.classList.add('shake');
+      const tag = document.createElement('div'); tag.className = `perfect ${kill ? 'vanish-txt' : 'demo-txt'}`; tag.textContent = kill ? '💥 소멸!' : '시연 · 데미지 없음'; arena.appendChild(tag); setTimeout(() => tag.remove(), 1600);
+      if (kill) {
+        vanished = built; m0.classList.remove('flash'); void m0.offsetWidth; m0.classList.add('vanish');
+        for (let k = 0; k < 14; k++) { const sh = document.createElement('i'); sh.className = 'shard'; sh.style.setProperty('--a', `${(k / 14) * 360}deg`); sh.style.left = `${mr.left - ar.left + mr.width / 2}px`; sh.style.top = `${mr.top - ar.top + mr.height / 2}px`; arena.appendChild(sh); setTimeout(() => sh.remove(), 1100); }
+        setTimeout(() => { m0.classList.remove('vanish'); m0.classList.add('gone'); }, 900);
+      } else { m0.classList.remove('flash'); void m0.offsetWidth; m0.classList.add('flash'); }
+    }, 520);
+    setTimeout(() => t.remove(), 1500);
   }
 
   return { enter };
