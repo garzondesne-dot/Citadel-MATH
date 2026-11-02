@@ -37,7 +37,9 @@ DS.Prep = (function () {
       <div class="panel framed p-slots-top"><h2>🖼 단계별 이미지 <span class="muted small">${slots.filter((s) => (data.img || {})[s.id]).length} / ${slots.length}칸</span></h2>
         <div class="row"><button class="btn small" id="p-open-all">모두 펼치기</button><button class="btn small" id="p-close-all">모두 접기</button></div></div>
       ${slots.map(slotHtml).join('')}
-      ${sheetPanel()}`;
+      ${sheetPanel()}
+      ${tidyPanel()}`;
+    bindTidy();
     if (sheetOpen && $('#p-sheet')) $('#p-sheet').open = true;
     bindSheet();
     $('#p-open-all').onclick = () => { slots.forEach((s) => opened.add(s.id)); render(); };
@@ -265,6 +267,44 @@ DS.Prep = (function () {
         };
         box.onpointerup = () => { box.onpointermove = null; box.onpointerup = null; };
       };
+    });
+  }
+
+  // ── 📦 지난 차시 정리 (v0.9.6): ① 백업 파일 내려받기(이 차시의 수업 기록 · 학습지 이미지 · 올린 영상) → ② 서버에서 지우기 ──
+  //   학생 성장 기록(EXP · 호칭 · 도감 · 개인 결과 · 보강던전)은 지우지 않는다. 지우기는 백업을 받은 뒤에만 열린다
+  let tidy = null; // { rooms: [code], backedUp: bool }
+  function tidyPanel() {
+    return `<details class="panel framed" id="p-tidy"${tidy ? ' open' : ''}><summary><b>📦 지난 차시 정리</b> <span class="muted small">백업 받고 서버에서 지우기 (Firebase 사용량 줄이기)</span></summary>
+      <p class="muted small">이 차시의 <b>수업 방 기록 · 학습지 이미지 · 올린 영상</b>을 백업 파일(.json)로 받은 뒤 서버에서 지워요. 학생 EXP · 호칭 · 도감 · 개인 결과 · 보강던전 기록은 그대로 남아요. 지우면 그 수업의 🏫 학급 결과는 백업 파일로만 볼 수 있어요.</p>
+      <div class="row"><button class="btn" id="td-scan">🔍 이 차시 수업 찾기</button>${tidy ? `<span class="muted small">수업 방 ${tidy.rooms.length}개 · 이미지 ${Object.keys(data.img || data.has || {}).length}칸</span>` : ''}</div>
+      ${tidy ? `<div class="row"><button class="btn primary" id="td-backup">⬇ ① 백업 파일 받기</button><button class="btn danger" id="td-del"${tidy.backedUp ? '' : ' disabled'}>🗑 ② 서버에서 지우기</button></div>` : ''}</details>`;
+  }
+  function bindTidy() {
+    const sc = $('#td-scan'); if (!sc) return;
+    sc.onclick = () => DS.Control.run(async () => {
+      const all = (await DS.Net.get('rooms').catch(() => null)) || {};
+      tidy = { rooms: Object.keys(all).filter((c) => ((all[c] || {}).meta || {}).lesson === L.id && (all[c].state || {}).closed), all, backedUp: false };
+      render(); $('#p-tidy').open = true;
+      if (!Object.keys(all).length) DS.UI.toast('수업 목록을 읽지 못했어요 (Firebase 규칙을 새로 게시했는지 확인)', 3500);
+    });
+    const bk = $('#td-backup');
+    if (bk) bk.onclick = () => DS.Control.run(async () => {
+      const prep = (await DS.Net.get(`prep/${L.id}`).catch(() => null)) || {}, vid = (await DS.Net.get(`prepVideo/${L.id}`).catch(() => null)) || {};
+      const out = { kind: 'citadel-backup', version: DS.VERSION, lesson: L.id, at: new Date().toISOString(), rooms: Object.fromEntries(tidy.rooms.map((c) => [c, tidy.all[c]])), prep, prepVideo: vid };
+      const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(out)], { type: 'application/json' }));
+      a.download = `citadel-backup-${L.id}-${new Date().toISOString().slice(0, 10)}.json`; document.body.appendChild(a); a.click(); a.remove();
+      tidy.backedUp = true; render(); $('#p-tidy').open = true; DS.UI.toast('백업 파일을 받았어요. 드라이브에 올려 두면 안전해요.', 3500);
+    });
+    const dl = $('#td-del');
+    if (dl) dl.onclick = () => DS.Control.run(async () => {
+      if (!tidy.backedUp || !confirm(`${L.title}\n수업 방 ${tidy.rooms.length}개 · 학습지 이미지 · 올린 영상을 서버에서 지울까요?\n(백업 파일로만 되살릴 수 있어요)`)) return;
+      for (const c of tidy.rooms) { await DS.Net.remove(`rooms/${c}`).catch(() => {}); await DS.Net.remove(`secrets/${c}`).catch(() => {}); }
+      const keep = { pct: data.pct ?? null, think: data.think ?? null };
+      await DS.Net.remove(`prepVideo/${L.id}`).catch(() => {});
+      await DS.Net.remove(`prep/${L.id}`).catch(() => {});
+      for (const [k, v] of Object.entries(keep)) if (v != null) await DS.Net.set(`prep/${L.id}/${k}`, v).catch(() => {});
+      tidy = null; DS.UI.toast('정리했어요. (기준% · 생각 시간 설정은 남겨 두었어요)', 3500);
+      await enter(L.id);
     });
   }
 

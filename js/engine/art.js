@@ -37,5 +37,38 @@ ${Object.entries(a.brand.menu.kinds).map(([k, i]) => `.menu-ic[data-ic="${k}"]{b
 ${(a.dungeons ? a.dungeons.ids : []).map((id) => `.bg-scene.th-${id}{background-image:linear-gradient(#0a142455,#0a142400 40%,#0a1424cc),url('${a.base}${a.dungeons.bg(id)}')}`).join('\n')}`;
   }
   function install() { const s = document.createElement('style'); s.textContent = css(); document.head.appendChild(s); }
-  return { cell, hero, monster, card, install, pos };
+  // ── 차시별 다운로드 (v0.9.6): 처음엔 공통 그림만 받고(sw.js STATIC), 던전 그림은 그 차시에 들어갈 때 받는다 ──
+  // lessonFiles(L) = 그 차시 던전 배경 · 포털 · 몬스터 시트 파일 이름 · prefetch = 미리 받기(서비스 워커가 저장)
+  // trim(Ls) = 폰 저장소(ds-assets)에서 Ls 차시들(지금 + 바로 전)에 쓰지 않는 던전 그림을 지운다 (공통 그림은 그대로)
+  const sheetFile = (n) => { const [k] = typeof n === 'string' && n.includes(':') ? n.split(':') : [null]; return (A()[SHEETS[k] || 'monsters'] || {}).src; };
+  function lessonFiles(L) {
+    if (!L) return [];
+    const a = A(), out = new Set();
+    if (L.theme && a.dungeons) { out.add(a.dungeons.bg(L.theme)); out.add(a.dungeons.portal(L.theme)); }
+    Object.values(L.monsters || {}).forEach((m) => { const f = sheetFile(m.sprite); if (f) out.add(f); });
+    if (L.boss && L.boss.sprite != null) { const f = sheetFile(L.boss.sprite); if (f) out.add(f); }
+    return [...out];
+  }
+  const prefetched = {};
+  function prefetch(L) {
+    lessonFiles(L).forEach((f) => { if (prefetched[f]) return; prefetched[f] = new Image(); prefetched[f].src = A().base + f; });
+  }
+  const LESSON_ART = /\/(dg-|portal-|monsters)[^/]*$/;
+  async function trim(Ls) {
+    if (typeof caches === 'undefined') return 0;
+    try {
+      const keep = new Set(Ls.filter(Boolean).flatMap(lessonFiles)), c = await caches.open('ds-assets');
+      let n = 0;
+      for (const req of await c.keys()) { const f = new URL(req.url).pathname.split('/').pop(); if (LESSON_ART.test('/' + f) && !keep.has(f)) { await c.delete(req); n++; } }
+      return n;
+    } catch (e) { return 0; }
+  }
+  // 학생 폰 · 종합상황실이 수업에 들어갈 때: 이 차시 그림 미리 받기 + 지금 · 바로 전 차시 말고는 지우기
+  function lessonEnter(L) {
+    if (!L) return;
+    prefetch(L);
+    const prev = L.no ? DS.Lessons.list.find((l) => l.no === L.no - 1) : null;
+    setTimeout(() => trim([L, prev]), 5000);
+  }
+  return { cell, hero, monster, card, install, pos, lessonFiles, prefetch, trim, lessonEnter };
 })();

@@ -22,7 +22,7 @@ DS.Hall = (function () {
       if (!v) return;
       raw = v; R = DS.Act.unpackRoom(v);
       const first = !L;
-      L = DS.Lessons.get(R.meta.lesson);
+      L = DS.Lessons.get(R.meta.lesson); if (L && L.id !== DS.Art._entered) { DS.Art._entered = L.id; DS.Art.lessonEnter(L); } // v0.9.6 차시별 다운로드
       if (DS.Act.isHost(R)) { DS.Act.admitLate(code, R, L); DS.Act.markBossWin(code, R, L); }
       if (first) { if (stopPrep) stopPrep(); stopPrep = DS.Net.watch(`prep/${L.id}`, (p) => { prep = p || {}; built = ''; if (R) render(); }); }
       render();

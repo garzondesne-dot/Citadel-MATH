@@ -33,7 +33,7 @@ DS.Student = (function () {
     stop = DS.Net.watch(`rooms/${code}`, (v) => {
       if (!v) return;
       raw = v; R = DS.Act.unpackRoom(v);
-      L = DS.Lessons.get(R.meta.lesson);
+      L = DS.Lessons.get(R.meta.lesson); if (L && L.id !== DS.Art._entered) { DS.Art._entered = L.id; DS.Art.lessonEnter(L); } // v0.9.6 차시별 다운로드
       render();
     });
   }

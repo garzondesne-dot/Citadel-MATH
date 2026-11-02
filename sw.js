@@ -1,9 +1,10 @@
 // 서비스 워커: 앱 설치(PWA) + 빠른 로딩
 //  - 코드(html·js·css·json): 인터넷 먼저 → 끊기면 저장해 둔 것. 푸시하면 학생 화면에 바로 반영된다
 //  - 그림·글꼴·아이콘(assets/, icons/): 저장해 둔 것 먼저 → 처음 한 번만 받는다 (그림을 바꾸면 파일 이름을 바꾼다: heroes-v3 …)
+//  - v0.9.6 차시별 다운로드: STATIC = 공통 그림만. 던전 배경 · 포털 · 몬스터는 그 차시에 들어갈 때 받고(DS.Art.lessonEnter), 지금 · 바로 전 차시 것만 남긴다
 //  - Firebase(다른 주소)는 건드리지 않는다. 수업 진행에는 인터넷이 필요하다
 // 새 버전을 낼 때 CACHE 이름을 'ds-' + DS.VERSION 과 맞춘다 (tests/pwa.test.js 가 확인)
-const CACHE = 'ds-citadel-0.9.5';
+const CACHE = 'ds-citadel-0.9.6';
 const ASSETS = 'ds-assets';
 const CORE = [
   './', './index.html', './css/style.css', './manifest.webmanifest',
@@ -14,8 +15,7 @@ const CORE = [
   './lessons/unit-set.js', './js/raid/cards.js', './js/raid/forge.js', './js/raid/grow.js', './js/raid/titles.js', './js/raid/result.js', './js/raid/sharecard.js', './js/raid/bonus.js', './js/raid/camp.js', './js/raid/tcamp.js', './js/raid/student.js', './js/raid/bots.js', './js/raid/test.js', './js/raid/teacher.js', './js/raid/hall.js', './js/engine/xlsx-lite.js', './js/raid/prep.js', './js/raid/students.js', './js/raid/nav.js', './js/raid/app.js',
 ];
 const STATIC = [
-  './assets/art/heroes-v2.webp', './assets/art/monsters-v2.webp', './assets/art/cards-v4.webp', './assets/art/frame-v2.webp', './assets/art/dungeon.webp', './assets/art/monsters-new-v1.webp', './assets/art/dg-02-deep-forest-v1.webp', './assets/art/dg-05-ruins-v1.webp', './assets/art/brand-m2-title-v3.webp', './assets/art/brand-m2-header-v3.webp', './assets/art/brand-bg-v1.webp', './assets/art/menu-icons-v1.webp', './assets/art/heroes-extra-v1.webp', './assets/art/card-frame-v1.webp', './assets/art/card-arts-v1.webp', './assets/art/forge-anvil-v1.webp', './assets/art/forge-hammer-v1.webp', './assets/art/camp-forest-v1.webp', './assets/art/campfire-v2.webp', './assets/art/portal-02-deep-forest-v1.webp', './assets/art/portal-05-ruins-v1.webp', './assets/art/camp-trees-v1.webp', './assets/art/anvil-v1.webp', './assets/art/monsters-extra-v2.webp', './assets/art/monsters-crown-v1.webp', './assets/art/trophy-v1.webp', './assets/art/medals-rank-v1.webp', './assets/art/medals-dungeon-v1.webp', './assets/art/tcamp-sanctuary-v1.webp', './assets/art/forgec-anvil-v1.webp', './assets/art/forgec-hammer-v1.webp', './assets/art/forgec-material-v1.webp', './assets/art/forgec-operator-v1.webp', './assets/art/forgec-button-v1.webp', './assets/art/forgec-background-v1.webp', './assets/art/dg-06-frost-v1.webp', './assets/art/portal-06-frost-v1.webp', './assets/art/dportal-bonus-v1.webp', './assets/art/dportal-mid-v1.webp', './assets/art/dportal-big-v1.webp',
-  './assets/fonts/Galmuri11.woff2', './assets/fonts/Galmuri11-Bold.woff2',
+  './assets/art/heroes-v2.webp', './assets/art/cards-v4.webp', './assets/art/frame-v2.webp', './assets/art/brand-m2-title-v3.webp', './assets/art/brand-m2-header-v3.webp', './assets/art/brand-bg-v1.webp', './assets/art/menu-icons-v1.webp', './assets/art/heroes-extra-v1.webp', './assets/art/card-frame-v1.webp', './assets/art/card-arts-v1.webp', './assets/art/forge-anvil-v1.webp', './assets/art/forge-hammer-v1.webp', './assets/art/camp-forest-v1.webp', './assets/art/campfire-v2.webp', './assets/art/camp-trees-v1.webp', './assets/art/anvil-v1.webp', './assets/art/trophy-v1.webp', './assets/art/medals-rank-v1.webp', './assets/art/medals-dungeon-v1.webp', './assets/art/forgec-anvil-v1.webp', './assets/art/forgec-hammer-v1.webp', './assets/art/forgec-material-v1.webp', './assets/art/forgec-operator-v1.webp', './assets/art/forgec-button-v1.webp', './assets/art/forgec-background-v1.webp', './assets/art/dportal-bonus-v1.webp', './assets/fonts/Galmuri11.woff2', './assets/fonts/Galmuri11-Bold.woff2',
   './icons/icon-192-m2.png', './icons/icon-512-m2.png', './icons/icon-maskable-512-m2.png', './icons/apple-touch-icon-m2.png',
 ];
 const isStatic = (url) => /\/(assets\/(img|art|fonts)|icons)\//.test(url.pathname);
