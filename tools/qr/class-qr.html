@@ -1,0 +1,33 @@
+<!doctype html><html lang="ko"><meta charset="utf-8"><title>수학 수업 입장 QR</title>
+<style>
+@page{size:A4;margin:0}
+*{box-sizing:border-box}
+body{margin:0;font-family:'WenQuanYi Zen Hei',sans-serif;color:#1f2937}
+.p{width:210mm;height:296mm;overflow:hidden;padding:16mm 18mm 12mm;display:flex;flex-direction:column;align-items:center;background:#fff}
+.top{width:100%;display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1.2mm solid #1e3a8a;padding-bottom:3mm}
+.top .sj{font-size:13pt;color:#1e3a8a;font-weight:700;letter-spacing:0.5px}
+.top .tc{font-size:13pt;color:#374151}
+h1{font-size:36pt;margin:10mm 0 2mm;color:#111827;letter-spacing:1px}
+.sub{font-size:14pt;color:#4b5563;margin:0 0 9mm}
+.qr{padding:7mm;border:0.5mm solid #cbd5e1;border-radius:4mm}
+.qr img,.qr canvas{display:block;width:130mm!important;height:130mm!important;image-rendering:pixelated}
+.st{width:100%;margin-top:10mm;border-top:0.3mm solid #e5e7eb}
+.s{display:flex;align-items:center;gap:5mm;padding:3.4mm 2mm;border-bottom:0.3mm solid #e5e7eb;font-size:14pt}
+.n{flex:none;width:9mm;height:9mm;border-radius:50%;background:#1e3a8a;color:#fff;font-weight:700;font-size:13pt;display:flex;align-items:center;justify-content:center}
+.s small{color:#6b7280;font-size:11pt;margin-left:2mm}
+.ft{margin-top:auto;width:100%;display:flex;justify-content:space-between;font-size:10.5pt;color:#6b7280}
+</style>
+<div class="p">
+<div class="top"><span class="sj">공통수학2 · 수학 수업</span><span class="tc">김찬우 선생님</span></div>
+<h1>수업 입장 QR</h1>
+<p class="sub">휴대폰 카메라로 아래 QR 코드를 찍어 주세요</p>
+<div class="qr" id="q"></div>
+<div class="st">
+<div class="s"><span class="n">1</span>휴대폰 카메라로 QR 코드 찍기</div>
+<div class="s"><span class="n">2</span>반 · 번호 선택, 비밀번호 숫자 4자리 입력<small>(처음이면 가입)</small></div>
+<div class="s"><span class="n">3</span>선생님 안내에 따라 수업에 입장하기</div>
+</div>
+<div class="ft"><span>비밀번호를 잊어버리면 선생님께 말해 주세요.</span><span>garzondesne-dot.github.io/Citadel-MATH</span></div>
+</div>
+<script src="../../js/engine/qrcode.min.js"></script>
+<script>new QRCode(document.getElementById('q'),{text:'https://garzondesne-dot.github.io/Citadel-MATH/index.html?role=student',width:1024,height:1024,correctLevel:QRCode.CorrectLevel.H});</script>
