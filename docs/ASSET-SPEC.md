@@ -26,7 +26,7 @@
 
 | 종류 | 원본 칸 | 화면 배율 | 프레임 (가로 한 줄씩) | 예상 용량 |
 |---|---|---|---|---|
-| 용사 | **64×64** | ×1 ~ ×3 | 대기 4 · 걷기 4 · 공격 4 · 피격 1 · 승리 2 · 쓰러짐 2 · 힐 2 = **19** | 한 명 8KB |
+| 용사 | **64×64** (게임 칸 80×64) | ×1 ~ ×3 | **11줄 29프레임** (2026-11-02 확정 · 금발 검사 기준): 대기 4(숨쉬기 = `breathe.py` 가 구움) · 걷기 4 · 공격 4 · 피격 1 · 승리 2 · 쓰러짐 2 · 힐 쓰기 2 · 차원문 4(뒷모습으로 화면 안쪽) · 앉기 2 · 힐 받음 2 · 생각 중 2. 시트 2장(기본 7줄 + 추가 4줄)으로 뽑아 합친다. 추가 4줄이 없으면 게임이 대신 쓰기로 보여 줌 | 한 명 약 20KB |
 | 장신구 (모자 · 망토 · 무기) | 32×32 | 용사와 같이 | 1장 (프레임마다 위치는 Claude 가 기준점으로 붙임) | 1KB |
 | 일반 몬스터 | **96×96** | ×1 ~ ×3 | 대기 2 · 공격 3 · 피격 1 · 쓰러짐 2 = **8** | 한 마리 5KB |
 | 보스 | **192×192** | ×2 ~ ×3 | 대기 4 · 공격 4 · 피격 1 · 쓰러짐 3 = **12** (등장 · 분노는 코드) | 한 마리 30KB |
@@ -72,7 +72,9 @@ Deliver on a solid magenta #FF00FF background (except backgrounds), upscaled 8x 
 so every pixel is a crisp 8x8 block.
 ```
 
-### 6-1. 용사 (64×64, 19 프레임)
+### 6-1. 용사 (64×64, 11줄 29 프레임 — 2장으로 뽑음)
+처리: 2장을 같은 키로 맞춰 합침 → `tools/sprite/sheet.py <합본> <폴더> <이름> 50 80 64` → `tools/sprite/breathe.py <시트.png> <폴더> <이름>` (대기 숨쉬기) → `assets/art/hero-*-v2.webp` · 배치표 `heroesV2.list`.
+① 기본 7줄 (대기 줄은 1프레임만 써도 됨 — 숨쉬기는 도구가 만듦):
 ```
 [STYLE BIBLE above]
 Sprite sheet of ONE hero: "[이름 예: 성기사 / holy paladin]", chibi knight, facing RIGHT.
@@ -80,6 +82,16 @@ Native cell 64x64 px. 7 rows, left-aligned, same feet baseline in every cell:
 row1 idle 4 frames (breathing), row2 walk 4 frames, row3 attack 4 frames (wind-up, swing, impact, recover),
 row4 hit 1 frame, row5 victory 2 frames (jump, arm up), row6 fall 2 frames, row7 heal-cast 2 frames (arm raised, green glow).
 Keep the character exactly the same size, colors and proportions in every frame.
+```
+② 추가 4줄 (①을 참고 그림으로 첨부):
+```
+[STYLE BIBLE above]
+Use the attached sprite sheet as the exact reference: SAME hero, same size, colors, outline and proportions.
+Magenta (#FF00FF) background. Native cell 64x64 px. 4 rows, left-aligned, same feet baseline in every cell:
+row1 portal-enter 4 frames, walking AWAY from the viewer into the screen: (1) turning from facing right to a 3/4 back view, (2) back view walking, left foot forward, (3) back view walking, right foot forward, (4) back view, one arm reaching forward to touch a door.
+row2 sit-rest 2 frames, facing RIGHT (sitting on the ground, weapon laid beside, gentle breathing),
+row3 receive-heal 2 frames, facing RIGHT (surrounded by small green sparkles: surprised, then happy),
+row4 thinking 2 frames, facing RIGHT (hand on chin, then eyes looking up). No speech bubbles, no text, no portal or door drawn.
 ```
 
 ### 6-2. 일반 몬스터 (96×96, 8 프레임)
