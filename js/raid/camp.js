@@ -30,7 +30,13 @@ DS.Camp = (function () {
   const D = () => DS.ASSETS.dungeons;
   // 한 화면에 전체가 보이므로 차원문이 열리면 반짝 강조만
   function showGate() { const g = document.getElementById('camp-gate'); if (g) { g.classList.remove('flash'); void g.offsetWidth; g.classList.add('flash'); } }
+  // 수업 중(차시 던전 열림)에는 보강던전 · 허수아비를 회색으로 (누르면 안내만)
+  const inClass = () => !!(live && live.open);
+  function lockSide() {
+    ['camp-bonus', 'camp-dummy'].forEach((id) => { const b = document.getElementById(id); if (b) b.classList.toggle('off', inClass()); });
+  }
   function drawGate() {
+    lockSide();
     const el = document.getElementById('camp-gate'); if (!el) return;
     if (!live || !live.theme) { el.className = 'camp-gate empty'; el.innerHTML = '<span class="camp-label dim">🌀 차원문 자리 — 선생님이 수업을 열면 나타나요</span>'; return; }
     const i = D().ids.indexOf(live.theme), name = i >= 0 ? D().names[i] : '던전';
@@ -61,7 +67,8 @@ DS.Camp = (function () {
       <div class="camp-forge panel framed" id="camp-forge"><p class="muted small">연성 정보를 불러오는 중…</p></div>`;
     forgeInfo();
     $('#camp-anvil').onclick = () => pick('#camp-anvil', () => DS.Forge.open(me));
-    $('#camp-bonus').onclick = () => pick('#camp-bonus', () => DS.Control.run(() => DS.Bonus.enter(me)));
+    const classOnly = (sel) => { nope(sel); DS.UI.toast(`🌀 지금은 ${live.no ? `${live.no}차시 ` : ''}수업 중이에요! 차시 던전으로 들어가요. (보강던전 · 허수아비는 수업이 끝나면 열려요)`, 3400); };
+    $('#camp-bonus').onclick = () => (inClass() ? classOnly('#camp-bonus') : pick('#camp-bonus', () => DS.Control.run(() => DS.Bonus.enter(me))));
     $('#camp-gate').onclick = () => {
       if (live && live.open) return pick('#camp-gate', () => DS.Control.run(() => enterCode(live.code)), 'portal');
       nope('#camp-gate');
@@ -73,7 +80,7 @@ DS.Camp = (function () {
     $('#camp-code').onclick = codeGate;
     $('#camp-mail').onclick = () => pick('#camp-mail', () => DS.Control.run(note));
     $('#camp-shelf').onclick = () => pick('#camp-shelf', () => DS.Control.run(shelf));
-    $('#camp-dummy').onclick = () => pick('#camp-dummy', () => DS.Control.run(() => DS.Bonus.enter(me, { train: true })));
+    $('#camp-dummy').onclick = () => (inClass() ? classOnly('#camp-dummy') : pick('#camp-dummy', () => DS.Control.run(() => DS.Bonus.enter(me, { train: true }))));
     $('#camp-set').onclick = settings;
     drawGate();
     animateFire();

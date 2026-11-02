@@ -14,7 +14,7 @@ DS.Bonus = (function () {
   const ck = (c) => String(c).replace(/[.#$/[\]]/g, '_');
   const UNLOCK = [1, 2, 4, 6, 8, 10];             // 인장 개수 → 화려한 이펙트 FANCY[i]
   const TRIES = (DS.Raid ? DS.Raid.RETRIES : 3) + 1; // 레이드와 같은 기회 수
-  let me = null, no = 0, mine = {}, prepCache = {};
+  let me = null, no = 0, liveNo = 0, mine = {}, prepCache = {}; // liveNo = 지금 수업 중인 차시 (연습 목록에서 뺀다)
   // 🎯 훈련 허수아비 (v0.9.6, 캠프 기본 오브젝트 · 특전 아님): 열린 차시의 수업 몬스터(문제 칸)를 숫자만 바꿔 혼자 연습 — 기말 대비.
   //   기록은 저장하지 않고 EXP 만 조금 (같은 날 같은 몬스터는 한 번). 보강던전과 같은 1:1 전투 화면을 쓴다
   let train = false;
@@ -37,6 +37,11 @@ DS.Bonus = (function () {
   async function enter(m, opt = {}) {
     me = m; preview = !!opt.preview; train = !!opt.train;
     no = preview ? Number(opt.no) || 0 : Number(await N().get(`unlock/${ck(m.c)}`).catch(() => 0)) || 0;
+    // 🌀 우리 반 차시 던전이 열려 있는 동안(수업 중)은 보강던전 · 허수아비에 못 들어간다 (2026-11-03 사용자 확정)
+    //   unlock 은 수업 방을 만들 때 올라가므로, 수업 중인 차시는 수업이 끝나야(차원문이 닫혀야) 목록에 들어간다
+    const lv = preview ? null : await N().get(`live/${ck(m.c)}`).catch(() => null);
+    liveNo = DS.Raid.liveOpen(lv, Date.now()) ? Number(lv.no) || 0 : 0;
+    if (liveNo && !m.test && !(DS.Test && DS.Test.active && DS.Test.active())) { DS.UI.toast(`🌀 지금은 ${liveNo}차시 수업 중이에요! 차시 던전으로 들어가요. (${train ? '허수아비' : '보강던전'}는 수업이 끝나면 열려요)`, 3600); DS.Camp.enter(m); return; }
     mine = preview ? {} : (await N().get(`bonus/${ck(m.c)}/${m.n}`).catch(() => null)) || {};
     DS.UI.show('screen-bonus');
     render();
@@ -48,7 +53,7 @@ DS.Bonus = (function () {
   }
   function render() {
     if (train) return renderTrain();
-    const open = lessons().filter((l) => l.no <= no), sl = seals(mine), nextFx = UNLOCK.findIndex((u) => sl.length < u);
+    const open = lessons().filter((l) => l.no <= no && l.no !== liveNo), sl = seals(mine), nextFx = UNLOCK.findIndex((u) => sl.length < u);
     $('#bonus').innerHTML = `<div class="bn-top"><button class="btn small" id="bn-back">≪ ${preview ? '교사 캠프' : '모닥불로'}</button><b>📘 보강던전</b><span class="bn-seal">📘 인장 ${sl.length}개</span></div>
       <div class="bn-portals">
         <div class="bn-portal on"><i style="background-image:url('${DS.ASSETS.base}${DS.ASSETS.dportals.bonus}')"></i><b>보강던전</b><span class="muted small">차시 보강 · 혼자</span></div>
@@ -68,7 +73,7 @@ DS.Bonus = (function () {
   }
 
   function renderTrain() {
-    const open = lessons().filter((l) => l.no <= no).sort((a, b) => b.no - a.no);
+    const open = lessons().filter((l) => l.no <= no && l.no !== liveNo).sort((a, b) => b.no - a.no);
     $('#bonus').innerHTML = `<div class="bn-top"><button class="btn small" id="bn-back">≪ ${preview ? '교사 캠프' : '모닥불로'}</button><b>🎯 훈련 허수아비</b><span class="bn-seal">기말 대비</span></div>
       <p class="bn-fx">지난 차시 수업 문제를 <b>숫자만 바꿔</b> 혼자 연습해요. 기록은 남지 않고, 경험치가 조금 쌓여요 (같은 날 같은 몬스터는 한 번).</p>
       ${open.length ? open.map((l) => `<div class="panel framed bn-card"><p class="bn-h"><b>${l.no}차시 · ${esc(l.title)}</b></p>
