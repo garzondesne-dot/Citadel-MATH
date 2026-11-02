@@ -145,5 +145,23 @@ check(X.online(R2, 'a') && !X.online(R2, 'b'), '접속 표시');
   check(X.monsterHp(L, H, 'm1').dmg === 16, '힐로 고친 만큼 데미지에 들어감');
 }
 
+// 👾 몬스터 공격 시계 (2026-11-03): 반 전체 공통 · 집중모드 멈춤 · ⛓ 묶기 = 다 맞힌 뒤 재도전에서 맞힌 소문제 1개당 1초, 학생당 최대 4초
+{
+  const Q = X.newRoom('654321', 'set-03', 'T', 0);
+  ['a', 'b'].forEach((u, i) => { Q.players[u] = { num: i + 1, nick: u, hero: 0, at: 0 }; });
+  Q.active = { a: true, b: true }; Q.state.headcount = 10; Q.state.step = 2; Q.state.stepAt = 0; // 문제1 (4칸) · 인원 10 = 체력이 남아 있어야 공격한다
+  let c = X.atkClock(L, Q, 50000);
+  check(c && c.kind === 'monster' && c.per === 45 && c.lock === 1 && c.k === 1 && Math.abs(c.p - 5 / 45) < 1e-9, `일반 45초 주기 (50초 = 2바퀴째) ${JSON.stringify(c)}`);
+  Q.state.pauseMs = 10000; c = X.atkClock(L, Q, 50000); check(c.k === 0 && Math.abs(c.p - 40 / 45) < 1e-9, '집중모드로 멈춘 10초는 빼고 센다');
+  Q.state.focus = true; Q.state.focusAt = 45000; c = X.atkClock(L, Q, 50000); check(c.paused && Math.abs(c.p - 35 / 45) < 1e-9, '집중모드가 켜져 있으면 그 시각에서 멈춤');
+  delete Q.state.focus; delete Q.state.focusAt; delete Q.state.pauseMs;
+  Q.subs = { m1: { a: { 0: answer(Q, 'm1', 'a', 0, 4), 1: answer(Q, 'm1', 'a', 1, 3), 2: answer(Q, 'm1', 'a', 2, 4) }, b: { 0: answer(Q, 'm1', 'b', 0, 2), 1: answer(Q, 'm1', 'b', 1, 4) } } };
+  check(X.bindOf(L, Q, 'm1', 'a') === 4, `a: 다 맞힌 뒤 3 + 4 = 7 → 최대 4초 (${X.bindOf(L, Q, 'm1', 'a')})`);
+  check(X.bindOf(L, Q, 'm1', 'b') === 0, 'b: 처음 다 맞힌 시도는 묶기가 아님');
+  c = X.atkClock(L, Q, 50000); check(c.bind === 4 && Math.abs(c.p - 1 / 45) < 1e-9 && c.k === 1, `묶기 4초만큼 늦춰짐 ${JSON.stringify(c)}`);
+  Q.state.step = X.stepOf(L, Q) && L.steps.findIndex((st) => st.kind === 'boss'); c = X.atkClock(L, Q, 70000);
+  check(c && c.kind === 'boss' && c.per === 60 && c.lock === 2 && c.bind === 0, `보스 60초 주기 · 2초 잠금 ${JSON.stringify(c)}`);
+  Q.state.step = -1; check(X.atkClock(L, Q, 70000) === null, '대기실에서는 공격 없음');
+}
 if (fail) { console.error(`\n${fail}건 실패`); process.exit(1); }
 console.log('OK: 레이드 — 체력·기준%·데미지(늘어난 만큼)·재도전 3번·체력 0 즉시 격파·미제출 제외·보스 즉시 승리·7번 보너스·도움 목록·마무리·집중모드·만점 · 💚 힐 통과');

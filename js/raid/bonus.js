@@ -88,6 +88,32 @@ DS.Bonus = (function () {
     const solved = new Array(n).fill(false);
     const el = document.createElement('div'); el.className = 'bn-fight';
     document.body.appendChild(el);
+    // 👾 몬스터 공격 (보강던전 · 사용자 확정 2026-11-03): 혼자 하는 곳이라 이 폰에서만 45초마다 1초 잠금. 🎯 허수아비 연습은 공격 없음
+    //   학습지 · 영상을 보는 동안 · 화면 꺼짐 동안은 멈춤. 기회 · 경험치는 줄지 않음
+    let gT = 0, gLast = Date.now();
+    const gTimer = train ? null : setInterval(() => {
+      if (!document.body.contains(el)) { clearInterval(gTimer); return; }
+      const now = Date.now(), dt = Math.min(1, (now - gLast) / 1000); gLast = now;
+      const g = el.querySelector('.atk-gauge'); if (!g || document.hidden || document.querySelector('.sheet-modal, .video-modal')) return;
+      const [per, lock] = (window.DS_ATK || DS.Raid.ATK).monster;
+      gT += dt; const p = Math.min(1, gT / per), bar = g.querySelector('i');
+      bar.style.width = `${(p * 100).toFixed(1)}%`; g.classList.toggle('hot', p > 0.8);
+      if (gT < per) return;
+      gT = 0; bar.style.width = '0%'; g.classList.remove('hot');
+      const m = el.querySelector('.art.monster'), hb = el.querySelector('.enc-hero');
+      if (m) { m.classList.remove('lunge'); void m.offsetWidth; m.classList.add('lunge'); setTimeout(() => m.classList.remove('lunge'), 500); }
+      setTimeout(() => {
+        const art = () => el.querySelector('.enc-hero .art');
+        if (hb) { hb.classList.remove('struck'); void hb.offsetWidth; hb.classList.add('struck'); setTimeout(() => hb.classList.remove('struck'), 600); }
+        const a1 = art(); if (a1) a1.outerHTML = DS.Art.hero(me.hero || 0, 'hit', '');
+        setTimeout(() => { const a2 = art(); if (a2) a2.outerHTML = DS.Art.hero(me.hero || 0, 'pant', ''); }, 350);
+        setTimeout(() => { const a3 = art(); if (a3) a3.outerHTML = DS.Art.hero(me.hero || 0, 'think', 'huff'); }, 350 + lock * 1000 + 500);
+        DS.Sound.squish(); if (navigator.vibrate) navigator.vibrate(60);
+        if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+        const st = document.createElement('div'); st.className = 'stun'; st.innerHTML = `<b>💥 몬스터의 공격! ${lock}초 멈춤</b>`;
+        document.body.appendChild(st); setTimeout(() => st.remove(), lock * 1000);
+      }, 200);
+    }, 200);
     const img = DS.Act.hasImg(prep, mid), cslot = (L.bonus.find((b) => b.id === mid) || {}).concept, vslot = DS.Video.pick(L, prep.video, mid) ? mid : cslot, vid = DS.Video.pick(L, prep.video, vslot);
     const draw = (cls = '', msg = '') => {
       const pips = Array.from({ length: TRIES }, (_, i) => `<i class="${i < left ? 'on' : ''}"></i>`).join('');
@@ -95,7 +121,7 @@ DS.Bonus = (function () {
       const done = solved.every(Boolean);
       el.innerHTML = `<div class="scene enc bg-scene th-${L.theme || ''} ${cls}"><div class="scene-bar"><div><b>⚔ ${esc(mon.title)}</b><br><span class="muted small">${L.no}차시 ${train ? '🎯 허수아비 연습' : '보강던전'} · 소문제 ${n}개를 모두 맞히면 처치</span></div><button class="btn small" id="bf-x">✕</button></div>
           <div class="enc-hero"><div class="enc-tries" title="남은 도전 기회">${pips}</div>${DS.Art.hero(me.hero || 0, done || cls ? 'attack' : 'think', done ? 'pairhop' : cls === 'miss' ? 'slump' : 'huff')}<i class="shadow"></i></div>
-          <div class="enc-mon">${DS.Art.monster(mon.sprite, done ? 'down' : 'idle', done ? '' : 'float')}<div class="segs">${segs}</div></div></div>
+          <div class="enc-mon">${DS.Art.monster(mon.sprite, done ? 'down' : 'idle', done ? '' : 'float')}<div class="segs">${segs}</div>${done || train ? '' : '<div class="atk-gauge" title="몬스터 공격 게이지"><i></i></div>'}</div></div>
         <div class="bf-body">${msg}${mon.note ? `<p class="muted small">💡 ${esc(mon.note)}</p>` : ''}
           <div class="row">${img ? '<button class="btn small" id="bf-sheet">📄 학습지 보기</button>' : ''}${vid && DS.Video.ok(vid) ? '<button class="btn small" id="bf-vid">🎬 설명 보기</button>' : ''}</div>
           <div class="row" id="bf-act"></div></div>`;

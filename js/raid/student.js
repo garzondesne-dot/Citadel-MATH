@@ -195,24 +195,22 @@ DS.Student = (function () {
   // 👾 몬스터 공격 (사용자 확정 2026-11-03): 문제를 푸는 동안 몬스터 아래 게이지가 차고, 다 차면 용사를 공격 → 입력 잠깐 잠금
   //   일반 45초마다 1초 · 보스 60초마다 2초. 도전 기회 · 데미지 · 경험치는 그대로 (실패해도 벌 없음 원칙 — 잠깐 멈출 뿐)
   //   🔴 집중모드 · 📄 학습지 · 🎬 영상 · 화면 꺼짐 동안은 게이지가 멈춘다. 풀이 화면(문제 입력 · 보스 문항 목록)에서만 돈다
-  const ATK = { monster: [45, 1], boss: [60, 2] };
-  const GAUGE = '<div class="atk-gauge" title="몬스터 공격 게이지"><i></i></div>';
-  let atk = { key: '', t: 0, last: 0 }, atkTimer = null, stunUntil = 0;
-  const atkPaused = () => document.hidden || !$('#focus').hidden || !!document.querySelector('.t-sheet-modal, .video-modal');
+  // 게이지는 반 전체 공통 (DS.Raid.atkClock: 서버 시각 기준) → 종합상황실 · 모든 학생 폰이 같은 순간에 공격받는다
+  const GAUGE = '<div class="atk-gauge" title="몬스터 공격 게이지 (반 전체 공통)"><i></i></div>';
+  let atkTimer = null, stunUntil = 0, atkSeen = { key: '', k: -1 };
   function atkTick() {
-    const now = Date.now(), dt = Math.min(1, (now - (atk.last || now)) / 1000); atk.last = now;
-    const g = document.querySelector('#st-body .atk-gauge'); if (!g) return;
-    const kind = g.closest('.scene.boss') ? 'boss' : 'monster', key = kind === 'boss' ? `boss|${code}` : `${code}|${form ? form.key : ''}`;
-    if (key !== atk.key) atk = { key, t: 0, last: now };
-    if (atkPaused() || now < stunUntil) return;
-    const [per, lock] = (window.DS_ATK || ATK)[kind]; // DS_ATK = 브라우저 시험용 짧은 시간 (e2e21)
-    atk.t += dt;
-    const p = Math.min(1, atk.t / per), bar = g.querySelector('i'); if (bar) bar.style.width = `${(p * 100).toFixed(1)}%`;
-    g.classList.toggle('hot', p > 0.8);
-    if (atk.t >= per) { atk.t = 0; if (bar) bar.style.width = '0%'; g.classList.remove('hot'); monsterStrike(lock); }
+    if (!L || !R || !code) return;
+    const c = Raid().atkClock(L, R, DS.Net.now(), window.DS_ATK || null); // DS_ATK = 브라우저 시험용 짧은 시간 (e2e21)
+    const g = document.querySelector('#st-body .atk-gauge');
+    if (!c) { if (g) g.querySelector('i').style.width = '0%'; return; }
+    const key = `${code}|${(R.state || {}).step}|${c.kind}`;
+    if (key !== atkSeen.key) atkSeen = { key, k: c.k }; // 들어온 순간 이전 바퀴는 공격하지 않음
+    const behind = c.k < atkSeen.k; // ⛓ 묶기로 되감김 → 게이지 빈 채로 대기
+    if (g) { const p = behind ? 0 : c.p; g.querySelector('i').style.width = `${(p * 100).toFixed(1)}%`; g.classList.toggle('hot', p > 0.8); g.classList.toggle('bound', behind || c.paused); }
+    if (c.k > atkSeen.k) { atkSeen.k = c.k; monsterStrike(c.lock, !!g); }
   }
-  function monsterStrike(lock) {
-    stunUntil = Date.now() + lock * 1000;
+  function monsterStrike(lock, stun) { // stun: 문제 입력 화면이면 잠금, 아니면 맞는 모습만
+    if (stun) stunUntil = Date.now() + lock * 1000;
     const sc = document.querySelector('#st-body .scene'), mon = sc && sc.querySelector('.art.monster'), hb = sc && sc.querySelector('.enc-hero');
     if (mon) { mon.classList.remove('lunge'); void mon.offsetWidth; mon.classList.add('lunge'); setTimeout(() => mon.classList.remove('lunge'), 500); }
     setTimeout(() => {
@@ -220,13 +218,14 @@ DS.Student = (function () {
       if (sc && DS.FX) DS.FX.play(sc, 'flame', { scale: 0.2 });
       heroFlash('hit', 350); setTimeout(() => heroFlash('pant', lock * 1000 + 500), 350); // 맞고 → 헉헉
       DS.Sound.squish(); if (navigator.vibrate) navigator.vibrate(60);
+      if (!stun) return;
       if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
       const st = document.createElement('div'); st.className = 'stun'; st.innerHTML = `<b>💥 몬스터의 공격! ${lock}초 멈춤</b>`;
       document.body.appendChild(st); setTimeout(() => st.remove(), lock * 1000);
     }, 200);
   }
-  const atkStart = () => { if (!atkTimer) { atk.last = Date.now(); atkTimer = setInterval(atkTick, 200); } };
-  const atkStop = () => { clearInterval(atkTimer); atkTimer = null; atk = { key: '', t: 0, last: 0 }; const st = document.querySelector('.stun'); if (st) st.remove(); };
+  const atkStart = () => { if (!atkTimer) atkTimer = setInterval(atkTick, 200); };
+  const atkStop = () => { clearInterval(atkTimer); atkTimer = null; atkSeen = { key: '', k: -1 }; const st = document.querySelector('.stun'); if (st) st.remove(); };
   // 용사 자세: 잠깐 동작(heroFx)이 살아 있으면 그것 · 아니면 기본 (풀 때 = 생각 중)
   // v2 용사: 격파 = 승리 · 틀림 = 피격 (v1 은 그대로 공격 자세)
   const pose2 = (done, cls) => { const v2 = DS.Art.isV2(myP().hero); return done ? (v2 ? 'win' : 'attack') : cls === 'hit' ? 'attack' : cls === 'miss' ? (v2 ? 'hit' : 'attack') : 'think'; };
@@ -262,7 +261,7 @@ DS.Student = (function () {
     const fx = `${mid}|${t.attempt}` !== shown ? (label === 'fail' && !prac ? 'miss' : 'hit') : '';
     if (fx && t.correct < t.total && thinkSec() > 0) thinkUntil[`${mid}|${t.attempt}`] = Date.now() + thinkSec() * 1000;
     if (fx) { shown = `${mid}|${t.attempt}`; if (label === 'fail' && !prac) DS.Sound.squish(); else { DS.Sound.slash(); setTimeout(() => DS.Sound.hit(), 160); setTimeout(() => { const sc = body.querySelector('.scene'); if (sc) DS.FX.play(sc, myP().fx || 'flame', { perfect: label === 'success', scale: label === 'success' ? 0.42 : 0.3 }); }, 60); } }
-    const head = prac ? `✔ 이미 성공! 연습 공격 ${t.correct}/${t.total} <span class="small muted">(데미지 0)</span>` : { success: '⚔ 공격 성공!', partial: `⚔ 부분 성공 (${t.correct}/${t.total})`, fail: '💨 공격 실패…' }[label];
+    const head = prac ? `⛓ 몬스터 묶기 ${t.correct}/${t.total} — 지금까지 <b>${Raid().bindOf(L, R, mid, me)}초</b> 묶음 <span class="small muted">(최대 ${Raid().BIND_MAX}초)</span>` : { success: '⚔ 공격 성공!', partial: `⚔ 부분 성공 (${t.correct}/${t.total})`, fail: '💨 공격 실패…' }[label];
     const done = Raid().cleared(L, R, mid);
     const sig = `res|${mid}|${t.attempt}|${done}|${rec.canRetry}|${rec.left}|${(R.help || {})[me] ? 1 : 0}`;
     if (sig === drawn && body.querySelector('.marks')) { hpText(body, hp); return; }
@@ -271,8 +270,8 @@ DS.Student = (function () {
       <h2 class="res-${prac ? 'success' : label}">${head}</h2>
       <div class="marks">${items.map((q, i) => `<div class="mark ${t.marks[i] ? 'ok' : 'ng'}"><b>${i + 1}</b> ${t.marks[i] ? '✔' : '✘'} <span class="math">${pretty(itemText(q))}</span>${t.marks[i] ? '' : `<br><span class="sol-line math">${pretty(solOf(q))}</span>`}</div>`).join('')}</div>
       ${rec.perfect && rec.canRetry ? `<p class="okc">✔ 이미 성공한 몬스터예요!</p><p>남은 기회 <b>${rec.left}</b>번으로 무엇을 할까요?</p>
-        <div class="heal-pick"><button class="btn primary big" id="st-retry">⚔ 연습 공격</button><button class="btn big heal-btn" id="st-heal">💚 친구 힐</button></div>
-        <p class="muted small">연습 공격 = 숫자 바뀐 문제 (데미지 0) · 친구 힐 = 기회가 필요한 친구에게 도전 기회 한 칸</p>`
+        <div class="heal-pick"><button class="btn primary big" id="st-retry">⛓ 몬스터 묶기</button><button class="btn big heal-btn" id="st-heal">💚 친구 힐</button></div>
+        <p class="muted small">몬스터 묶기 = 숫자 바뀐 문제를 맞힌 만큼 몬스터 공격을 늦춤 (1개 1초 · 최대 ${Raid().BIND_MAX}초) · 친구 힐 = 기회가 필요한 친구에게 도전 기회 한 칸</p>`
         : done && rec.canRetry ? `<p class="okc big-msg">🎉 몬스터 격파!</p><p>틀린 소문제를 다시 풀어 볼까요? <span class="muted small">(남은 기회 ${rec.left}번 · 숫자가 모두 바뀌어요 · 고친 만큼 경험치가 더 쌓여요)</span></p><button class="btn primary big" id="st-retry">↻ 다시 도전</button>`
         : done ? '<p class="okc big-msg">🎉 몬스터 격파! 다음 신호를 기다려요.</p>'
         : rec.canRetry ? `<p>다시 해 보겠습니까? <span class="muted small">(남은 기회 ${rec.left}번 · 숫자가 모두 바뀌어요)</span></p><button class="btn primary big" id="st-retry">↻ 다시 도전</button>`
@@ -284,7 +283,7 @@ DS.Student = (function () {
     // v0.9.3 (⑤): 공격 자세는 잠깐만 → 다시 서 있는 자세 (격파됐으면 승리 자세 그대로)
     if (fx && !done) setTimeout(() => { const a = body.querySelector('.enc-hero .art'); if (a) a.outerHTML = heroNow('idle', fx === 'miss' ? 'slump' : 'huff'); }, 650);
     const rb = $('#st-retry');
-    if (rb) { thinkTimer(rb, `${mid}|${t.attempt}`, rec.perfect ? '⚔ 연습 공격' : '↻ 다시 도전'); rb.onclick = () => { retrying = `${mid}|${rec.nextAttempt}`; form = null; DS.Sound.clank(); render(); }; }
+    if (rb) { thinkTimer(rb, `${mid}|${t.attempt}`, rec.perfect ? '⛓ 몬스터 묶기' : '↻ 다시 도전'); rb.onclick = () => { retrying = `${mid}|${rec.nextAttempt}`; form = null; DS.Sound.clank(); render(); }; }
     const hb = $('#st-heal');
     if (hb) hb.onclick = () => DS.Control.run(async () => {
       hb.disabled = true;
@@ -313,7 +312,7 @@ DS.Student = (function () {
     drawn = sig;
     body.innerHTML = `<div class="panel framed">${scene(step, rec, hp, '', down ? '' : GAUGE)}
       ${down ? '<p class="okc down-note">🎉 몬스터는 쓰러졌어요! 그래도 풀어서 공격하면 이펙트도 뜨고 경험치가 쌓여요.</p>' : ''}
-      ${attempt && rec.perfect ? `<p class="retry-note">⚔ 연습 공격 — 이미 성공한 몬스터예요. 숫자가 모두 바뀌었어요 (데미지 0 · 이펙트는 그대로)</p>` : attempt ? `<p class="retry-note">↻ 재도전 ${attempt} — 숫자가 모두 바뀌었어요. 지난번 틀린 칸은 <b class="ngc">✘</b> 표시</p>` : ''}
+      ${attempt && rec.perfect ? `<p class="retry-note">⛓ 몬스터 묶기 — 이미 성공한 몬스터예요. 맞힌 소문제 1개마다 반 전체의 몬스터 공격이 1초 늦어져요 (최대 ${Raid().BIND_MAX}초)</p>` : attempt ? `<p class="retry-note">↻ 재도전 ${attempt} — 숫자가 모두 바뀌었어요. 지난번 틀린 칸은 <b class="ngc">✘</b> 표시</p>` : ''}
       ${L.monsters[mid].note ? `<p class="muted small">💡 ${esc(L.monsters[mid].note)}</p>` : ''}
       <div class="items">${items.map((q, i) => itemHtml(q, i, prevWrong[i], attempt ? null : `${step.sheet || step.title} (${i + 1})`)).join('')}</div>
       <button class="btn primary big" id="st-go"${ready ? '' : ' disabled'}>⚔ 공격!</button>

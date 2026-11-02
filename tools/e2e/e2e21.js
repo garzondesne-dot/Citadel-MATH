@@ -27,8 +27,9 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   await S1.evaluate(() => document.querySelector('#camp-dummy').classList.add('picked')); await S1.waitForTimeout(150); await S1.screenshot({ path: `${OUT}/2b-dummy-hit.png` }); await S1.evaluate(() => document.querySelector('#camp-dummy').classList.remove('picked'));
   // 수업 열기 → 차원문
   await T.selectOption('#lesson', 'set-06'); await T.selectOption('#t-cls', '1-3'); await T.click('#t-new'); await T.waitForTimeout(2500);
-  const code = await T.evaluate(() => DS.Teacher.code());
-  await S1.waitForTimeout(1500);
+  const code = await T.evaluate(() => DS.Teacher.code()), key = (await T.textContent('#t-key')).trim();
+  const H = await mk('H'); await H.setViewportSize({ width: 1600, height: 900 }); await H.goto(`${U}&role=hall&code=${code}&key=${key}`); await H.waitForTimeout(2500);
+  await S1.bringToFront(); await S1.waitForTimeout(1500);
   await S1.click('#camp-gate');
   for (const ms of [200, 500, 800, 1000]) { await S1.waitForTimeout(ms === 200 ? 200 : ms === 1000 ? 200 : 300); await S1.screenshot({ path: `${OUT}/3-portal-${ms}.png` });
     if (ms === 800) console.log('portal center gap (px):', await S1.evaluate(() => { const p = document.querySelector('.camp-portal').getBoundingClientRect(), h = document.querySelector('.camp-hero .art').getBoundingClientRect(); return [Math.round(p.left + p.width / 2 - h.left - h.width / 2), Math.round(p.top + p.height / 2 - h.top - h.height / 2)]; })); }
@@ -43,7 +44,12 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   // 👾 몬스터 공격: 시험용으로 4초마다 1초 잠금
   await S1.bringToFront();
   console.log('hidden:', await S1.evaluate(() => document.hidden), 'focus hidden:', await S1.evaluate(() => document.querySelector('#focus').hidden));
-  await S1.evaluate(() => { window.DS_ATK = { monster: [4, 1], boss: [5, 2] }; });
+  await S1.evaluate(() => { window.DS_ATK = { monster: [4, 1], boss: [5, 2] }; }); await H.evaluate(() => { window.DS_ATK = { monster: [4, 1], boss: [5, 2] }; });
+  // 🔗 동기화: 같은 순간 종합상황실 · 학생 폰 게이지 비교
+  for (let k = 0; k < 3; k++) { const [a, b] = await Promise.all([H.$eval('#rh-atk i', (e) => e.style.width), S1.$eval('.atk-gauge i', (e) => e.style.width).catch(() => '-')]); console.log('sync hall/phone:', a, b); await S1.waitForTimeout(700); }
+  await H.waitForSelector('.atk-banner', { timeout: 5000 }).catch(() => null); await H.waitForTimeout(500);
+  console.log('hall banner:', !!(await H.$('.atk-banner')), 'hall heroes pant:', await H.$$eval('.fh2 .art', (as) => as.map((a) => a.dataset.anim || 'v1').join(',')));
+  await H.screenshot({ path: `${OUT}/7-hall-strike.png` });
   const samples = []; for (let k = 0; k < 7; k++) { samples.push(await S1.$eval('.atk-gauge i', (e) => e.style.width).catch(() => '-')); await S1.waitForTimeout(500); }
   console.log('gauge samples (0.5s):', samples.join(' '));
   await S1.screenshot({ path: `${OUT}/4b-gauge-hot.png` });

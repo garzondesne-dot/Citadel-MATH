@@ -70,7 +70,7 @@ DS.Act = (function () {
     if (dir > 0 && i < 0) {
       const studs = Object.entries(R.players || {}).filter(([, p]) => !p.teacher).map(([u]) => u);
       if (!studs.length) fail('입장한 학생이 없어요.');
-      await N().update(P(code), { active: Object.fromEntries(studs.map((u) => [u, true])), 'state/headcount': studs.length, 'state/step': 0, 'state/stepAt': N().TS, 'state/focus': Raid.autoFocus(L.steps[0]) });
+      await N().update(P(code), { active: Object.fromEntries(studs.map((u) => [u, true])), 'state/headcount': studs.length, 'state/step': 0, 'state/stepAt': N().TS, 'state/focus': Raid.autoFocus(L.steps[0]), 'state/focusAt': Raid.autoFocus(L.steps[0]) ? N().now() : null, 'state/pauseMs': null });
       await unlockFor(L, studs.map((u) => (R.players[u] || {}).cls).filter(Boolean));
       return;
     }
@@ -82,7 +82,7 @@ DS.Act = (function () {
     }
     const next = Math.max(-1, Math.min(L.steps.length, i + dir));
     if (next === i) return;
-    await N().update(P(code, 'state'), { step: next, stepAt: N().TS, focus: Raid.autoFocus(L.steps[next]), closed: null, sheet: null, video: null }); // 단계가 바뀌면 문제 화면 · 영상은 닫힘
+    await N().update(P(code, 'state'), { step: next, stepAt: N().TS, focus: Raid.autoFocus(L.steps[next]), focusAt: Raid.autoFocus(L.steps[next]) ? N().now() : null, pauseMs: null, closed: null, sheet: null, video: null }); // 단계가 바뀌면 문제 화면 · 영상은 닫힘
   }
   // 모루 레시피는 반마다 "배포한 차시까지" 열린다: unlock/{반} = 가장 큰 차시 번호
   async function unlockFor(L, classes) {
@@ -96,7 +96,13 @@ DS.Act = (function () {
   // 📄 문제 화면: 종합상황실에 지금 문제의 학습지 이미지를 크게 (교사 해설용, 레이드는 뒤에서 계속)
   const setSheet = (code, on) => N().set(P(code, 'state/sheet'), on ? true : null);
   const setVideoOn = (code, stepId) => N().set(P(code, 'state/video'), stepId || null); // 🎬 큰 화면에 설명 영상 (null = 닫기)
-  const setFocus = (code, on) => N().set(P(code, 'state/focus'), !!on);
+  // 집중모드: 켜고 끈 시각을 남겨 👾 몬스터 공격 게이지가 모두 함께 멈춘다 (state.focusAt · pauseMs)
+  async function setFocus(code, on) {
+    const st = (await N().get(P(code, 'state'))) || {};
+    if (!!on === !!st.focus) return;
+    if (on) await N().update(P(code, 'state'), { focus: true, focusAt: N().now() });
+    else await N().update(P(code, 'state'), { focus: false, focusAt: null, pauseMs: (st.pauseMs || 0) + Math.max(0, N().now() - (st.focusAt || N().now())) });
+  }
   const setPct = (code, mid, pct) => N().set(P(code, `state/pct/${mid}`), Math.max(10, Math.min(100, Math.round(pct))));
   // 미제출 학생 빼고 판정 (결석·폰 고장)
   const skip = (code, mid, uids) => N().update(P(code, `state/skip/${mid}`), Object.fromEntries(uids.map((u) => [u, true])));

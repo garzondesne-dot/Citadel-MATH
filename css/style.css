@@ -358,7 +358,21 @@ input:focus, select:focus { outline: none; border-color: var(--gold); }
 .raid.quake { animation: quake 0.45s 4; }
 .raid-top { position: absolute; top: 0; left: 0; right: 0; z-index: 3; display: flex; align-items: center; gap: 16px; padding: 10px 16px 24px; background: linear-gradient(#0a1424ee, #0a142400); font-size: 22px; }
 .raid-top b { white-space: nowrap; color: var(--gold); }
+.raid-bars { flex: 1; display: flex; flex-direction: column; gap: 4px; }
 .raid-hp { position: relative; flex: 1; height: 30px; background: #08101e; border: 3px solid var(--gold); }
+/* 👾 몬스터 공격 게이지 (체력바 바로 밑 · 학생 폰과 같은 시계) */
+.raid-atk { position: relative; height: 16px; background: #08101e; border: 2px solid #6a4a1c; }
+.raid-atk i { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, #ffd34a, #ff8a2a); }
+.raid-atk span { position: relative; display: block; text-align: center; font-size: 13px; line-height: 12px; text-shadow: 1px 1px 0 #000; }
+.raid-atk.hot i { background: linear-gradient(90deg, #ff8a2a, #ff2a3a); animation: gaugeHot .3s steps(2) infinite; }
+.raid-atk.bound, .atk-gauge.bound { border-color: #5ab0ff; box-shadow: 0 0 6px #5ab0ff88; } /* ⛓ 묶기 · 집중모드: 파랗게 멈춤 */
+.raid2-mon.lunge-big .art.monster { animation: lungeBig .7s ease-in-out !important; }
+@keyframes lungeBig { 35% { transform: translateY(18%) scale(1.25); filter: brightness(1.6) drop-shadow(0 0 30px #ff3a3a); } 100% { transform: none; } }
+.raid2.atk-hit { animation: quake .4s 2; box-shadow: inset 0 0 120px #ff203099; }
+.atk-banner { position: absolute; left: 50%; top: 38%; transform: translate(-50%, -50%); z-index: 20; font: 700 64px var(--pixel); color: #ffe27a; text-shadow: 4px 4px 0 #6a0a00, 0 0 24px #ff3a1a; white-space: nowrap; animation: bannerPop 1.6s ease-out forwards; pointer-events: none; }
+.atk-banner small { display: block; text-align: center; font-size: 28px; color: #fff; }
+@keyframes bannerPop { 0% { transform: translate(-50%, -50%) scale(2.2); opacity: 0; } 15% { transform: translate(-50%, -50%) scale(1); opacity: 1; } 80% { opacity: 1; } 100% { opacity: 0; } }
+.fh2.struck .art { animation: struck .5s steps(2) 1; }
 .raid-hp i { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, #ff3355, #ff8a3d); transition: width 0.5s; }
 .raid-hp span { position: relative; display: block; text-align: center; line-height: 24px; font-size: 18px; text-shadow: 2px 2px 0 #000; }
 .raid-banner { position: absolute; top: 60px; left: 50%; z-index: 4; transform: translateX(-50%); font-size: 34px; color: #d9c8ff; text-shadow: 3px 3px 0 #000; animation: pop 0.5s, fadeOut 0.6s 2.6s forwards; pointer-events: none; }

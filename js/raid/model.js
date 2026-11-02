@@ -151,5 +151,25 @@ DS.Raid = (function () {
     return out.sort((a, b) => b.level - a.level || num(R, a.uid) - num(R, b.uid));
   }
 
-  return { RETRIES, HEAL_MAX, healsOf, healsGiven, healsTo, healsReceived, healTarget, LIVE_MS, lateIds, liveOpen, activeIds, teacherUid, num, newRoom, stepOf, isLobby, isEnd, isFinale, isClosed, focusOn, sheetOn, videoOn, autoFocus, fullMarks, canLobby, online, seedOf, itemsFor, attemptsOf, gradeAttempt, record, resultLabel, headcount, pctOf, monsterHp, waiting, allSubmitted, cleared, mastery, bossHp, helpList };
+  // ── 👾 몬스터 공격 시계 (2026-11-03 사용자 확정) ─────────────────
+  // 반 전체가 같은 게이지: 모든 기기가 서버 시각으로 같은 값을 계산한다 (종합상황실 · 학생 폰 동시 공격)
+  //   경과 = 서버 시각 − 단계 시작(state.stepAt) − 집중모드로 멈춘 시간(state.pauseMs · 지금 켜져 있으면 focusAt 부터) − ⛓ 몬스터 묶기 합계
+  //   일반 45초마다 1초 잠금 · 보스 60초마다 2초 잠금 · 쓰러진 몬스터 · 이긴 보스는 공격 안 함
+  //   ⛓ 몬스터 묶기 = 이미 다 맞힌 학생의 재도전에서 맞힌 소문제 1개당 1초, 학생 한 명 몬스터당 최대 4초 (성취감용, 늘어지지 않게)
+  const ATK = { monster: [45, 1], boss: [60, 2] }, BIND_PER = 1, BIND_MAX = 4;
+  function bindOf(L, R, mid, uid) {
+    const r = record(L, R, mid, uid); if (!r.perfect) return 0;
+    return Math.min(BIND_MAX, r.tries.slice(r.perfectAt + 1).reduce((a, t) => a + t.correct, 0) * BIND_PER);
+  }
+  const bindTotal = (L, R, mid) => activeIds(R).reduce((a, u) => a + bindOf(L, R, mid, u), 0);
+  function atkClock(L, R, now, cfg) {
+    const st = R.state || {}, step = stepOf(L, R); if (!step || st.closed) return null;
+    const kind = step.kind === 'monster' && L.monsters[step.id] && !cleared(L, R, step.id) ? 'monster' : step.kind === 'boss' && !bossHp(L, R).won ? 'boss' : null;
+    if (!kind) return null;
+    const [per, lock] = (cfg || ATK)[kind], bind = kind === 'monster' ? bindTotal(L, R, step.id) : 0;
+    const paused = !!st.focus, start = st.stepAt != null ? st.stepAt : now;
+    const t = Math.max(0, (now - start - (st.pauseMs || 0) - (paused ? now - (st.focusAt != null ? st.focusAt : now) : 0)) / 1000 - bind);
+    return { kind, mid: step.id || 'boss', per, lock, bind, paused, k: Math.floor(t / per), p: (t % per) / per };
+  }
+  return { ATK, BIND_PER, BIND_MAX, bindOf, bindTotal, atkClock, RETRIES, HEAL_MAX, healsOf, healsGiven, healsTo, healsReceived, healTarget, LIVE_MS, lateIds, liveOpen, activeIds, teacherUid, num, newRoom, stepOf, isLobby, isEnd, isFinale, isClosed, focusOn, sheetOn, videoOn, autoFocus, fullMarks, canLobby, online, seedOf, itemsFor, attemptsOf, gradeAttempt, record, resultLabel, headcount, pctOf, monsterHp, waiting, allSubmitted, cleared, mastery, bossHp, helpList };
 })();

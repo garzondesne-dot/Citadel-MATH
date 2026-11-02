@@ -14,6 +14,7 @@ DS.Hall = (function () {
   async function enter(c, key) {
     await DS.Act.joinHall(c, key);
     code = c; hallKey = String(key); camped = false; L = null; R = null; built = '';
+    if (!atkT) atkT = setInterval(hallAtk, 200);
     try { localStorage.setItem('citadel-hall', JSON.stringify({ code: c, key: String(key) })); } catch (e) { /* 무시 */ }
     DS.UI.show('screen-hall');
     DS.Scene.save({ role: 'hall', code: c, key: String(key) });
@@ -152,7 +153,7 @@ DS.Hall = (function () {
     const n = hs.length, row0 = Math.ceil(n / 2);
     const pos = hs.map(([u, p], i) => { const r = i < row0 ? 0 : 1, k = r ? i - row0 : i, cnt = r ? n - row0 : row0; const x = 7 + ((k + 0.5) / Math.max(1, cnt)) * 86 + (r ? 2 : 0); return { u, p, x, y: r ? 96 : 82 }; });
     $('#h-arena').innerHTML = `<div class="raid2 bg-scene th-${L.theme || ''} ${step.kind === 'boss' ? 'boss quake' : ''}${step.special ? ' special' : ''}" id="raid">
-      <div class="raid-top"><b>${step.kind === 'boss' ? '👑 ' : step.special ? '⭐ ' : step.review ? '📖 ' : ''}${esc(f.title)}</b><div class="raid-hp"><i id="rh-bar"></i><span id="rh-txt"></span></div></div>
+      <div class="raid-top"><b>${step.kind === 'boss' ? '👑 ' : step.special ? '⭐ ' : step.review ? '📖 ' : ''}${esc(f.title)}</b><div class="raid-bars"><div class="raid-hp"><i id="rh-bar"></i><span id="rh-txt"></span></div><div class="raid-atk" id="rh-atk" title="몬스터 공격 게이지 (학생 폰과 같은 시계)"><i></i><span></span></div></div></div>
       ${step.special ? '<div class="raid-banner">⭐ 스페셜 몬스터 난입!</div>' : step.kind === 'boss' ? '<div class="raid-banner boss">👑 보스 출현!</div>' : ''}
       <div class="raid2-shadow"></div><div class="raid2-mon" id="rm">${DS.Art.monster(f.sprite, 'idle', 'float')}<div id="rm-fx"></div></div>
       ${pos.map((o) => `<div class="fh2" id="fh-${o.u}" style="left:${o.x}%;top:${o.y}%"><span class="fh-name">${DS.Titles.nameHtml(o.p, { size: 16, short: true })}</span><div class="${o.x > 50 ? 'face-l' : ''}">${DS.Art.hero(o.p.hero, 'idle')}</div><i class="shadow"></i></div>`).join('')}
@@ -182,6 +183,35 @@ DS.Hall = (function () {
       clr.hidden = false; clr.className = 'raid-clear note'; clr.innerHTML = `모두 공격했다! 남은 체력 ${f.hp.left} — 재도전으로 더 공격하자`;
     } else clr.hidden = true;
     play();
+  }
+  // 👾 몬스터 공격 (학생 폰과 같은 시계 DS.Raid.atkClock): 체력바 바로 밑 게이지 → 다 차면 큰 공격 연출 + 용사 전원 피격 · 헉헉
+  let atkT = null, atkSeen = { key: '', k: -1 };
+  function hallAtk() {
+    const g = document.getElementById('rh-atk'); if (!g || !L || !R) return;
+    const c = Raid().atkClock(L, R, DS.Net.now(), window.DS_ATK || null);
+    const bar = g.querySelector('i'), txt = g.querySelector('span');
+    if (!c) { bar.style.width = '0%'; txt.textContent = ''; g.classList.remove('hot'); return; }
+    const key = `${(R.state || {}).step}|${c.kind}`;
+    if (key !== atkSeen.key) atkSeen = { key, k: c.k };
+    const behind = c.k < atkSeen.k, p = behind ? 0 : c.p;
+    bar.style.width = `${(p * 100).toFixed(1)}%`; g.classList.toggle('hot', p > 0.8); g.classList.toggle('bound', behind || c.paused);
+    txt.textContent = c.paused ? '⏸ 집중모드' : `👾 공격까지 ${Math.ceil((1 - p) * c.per)}초${c.bind ? `  ·  ⛓ 묶기 ${c.bind}초` : ''}`;
+    if (c.k > atkSeen.k) { atkSeen.k = c.k; hallStrike(c); }
+  }
+  function hallStrike(c) {
+    const arena = $('#raid'), m = $('#rm'); if (!arena) return;
+    if (m) { m.classList.remove('lunge-big'); void m.offsetWidth; m.classList.add('lunge-big'); setTimeout(() => m.classList.remove('lunge-big'), 700); }
+    setTimeout(() => {
+      arena.classList.remove('atk-hit'); void arena.offsetWidth; arena.classList.add('atk-hit'); setTimeout(() => arena.classList.remove('atk-hit'), 800);
+      const b = document.createElement('div'); b.className = 'atk-banner'; b.innerHTML = `💥 몬스터의 공격! <small>${c.lock}초 멈춤</small>`; arena.appendChild(b); setTimeout(() => b.remove(), 1600);
+      if (DS.FX) DS.FX.play(arena, 'flame', { scale: 0.7 });
+      DS.Sound.squish(); setTimeout(() => DS.Sound.hit(), 120);
+      document.querySelectorAll('.fh2').forEach((h) => {
+        const u = h.id.slice(3), hid = ((R.players || {})[u] || {}).hero || 0;
+        h.classList.remove('struck'); void h.offsetWidth; h.classList.add('struck'); setTimeout(() => h.classList.remove('struck'), 600);
+        pose(h, hid, 'hit', 400); setTimeout(() => pose(h, hid, 'pant', c.lock * 1000 + 900), 400);
+      });
+    }, 300);
   }
   // 용사 자세 잠깐 바꾸기 (공격 → ms 뒤 서 있는 자세). 승리 점프(pairhop) 중이면 그대로 둔다
   function pose(h, heroId, p, ms) {
@@ -213,7 +243,7 @@ DS.Hall = (function () {
           const p = (R.players[a.u] || {}).fx || 'flame';
           DS.FX.play(arena, p, { x: mr.left - ar.left + mr.width / 2, y: mr.top - ar.top + mr.height / 2, scale: Math.min(ar.width, ar.height) / (perfect ? 900 : 1150), perfect });
           m0.classList.remove('flash'); void m0.offsetWidth; m0.classList.add('flash');
-          if (prac) { const t = document.createElement('span'); t.className = 'prac-tag'; t.textContent = '✔ 이미 성공'; h.appendChild(t); setTimeout(() => t.remove(), 1600); }
+          if (prac) { const t = document.createElement('span'); t.className = 'prac-tag'; t.textContent = '⛓ 몬스터 묶기!'; h.appendChild(t); setTimeout(() => t.remove(), 1600); }
           const fx = $('#rm-fx');
           if (fx && a.dmg) { const d = document.createElement('span'); d.className = `dmg${perfect ? ' big' : ''}`; d.textContent = `−${a.dmg}`; d.style.left = `${55 + Math.random() * 25}%`; fx.appendChild(d); setTimeout(() => d.remove(), 1300); }
           if (perfect) {
