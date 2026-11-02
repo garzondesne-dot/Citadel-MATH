@@ -159,10 +159,20 @@ DS.Act = (function () {
   async function submit(code, R, mid, attempt, given) {
     const step = DS.Lessons.get(R.meta.lesson).steps[R.state.step];
     if (!step || step.id !== mid) fail('지금은 이 몬스터와 싸우는 시간이 아니에요.');
-    if (attempt > Raid.RETRIES) fail('재도전 기회를 모두 썼어요.');
     const me = N().uid();
+    if (attempt > 0 && !Raid.record(DS.Lessons.get(R.meta.lesson), unpackRoom(R), mid, me).left) fail('재도전 기회를 모두 썼어요.'); // v0.9.6: 기본 4번 + 받은 힐
     if ((((R.subs || {})[mid] || {})[me] || {})[attempt] != null) return;
     await N().set(P(code, `subs/${mid}/${me}/${attempt}`), N().pack(given));
+  }
+  // 💚 힐 (v0.9.6): 다 맞힌 학생이 남은 기회 한 칸을 친구에게. 받을 친구가 없으면 '_' (응원 — 경험치만). 반환 = 받은 uid | null
+  async function heal(code, packed, mid) {
+    const R = unpackRoom(packed), L = DS.Lessons.get(R.meta.lesson), step = L.steps[R.state.step], me = N().uid();
+    if (!step || step.id !== mid) fail('지금은 이 몬스터와 싸우는 시간이 아니에요.');
+    const rec = Raid.record(L, R, mid, me);
+    if (!rec.canHeal) fail('힐은 몬스터를 다 맞힌 뒤 남은 기회로 할 수 있어요.');
+    const to = Raid.healTarget(L, R, mid, me);
+    await N().set(P(code, `heals/${mid}/${me}/${Raid.healsGiven(R, mid, me)}`), to || '_');
+    return to;
   }
   const bossAnswer = (code, set, answers) => N().set(P(code, `bossAns/${N().uid()}/${set}`), N().pack(answers));
 
@@ -174,5 +184,5 @@ DS.Act = (function () {
     return out;
   }
 
-  return { markBossWin, prepLite, prepImg, hasImg, setVideoFile, setVideoOn, endClass, admitLate, getPrep, setImage, setVideo, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, bossAnswer, unpackRoom, P };
+  return { markBossWin, prepLite, prepImg, hasImg, setVideoFile, setVideoOn, endClass, admitLate, getPrep, setImage, setVideo, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, heal, bossAnswer, unpackRoom, P };
 })();

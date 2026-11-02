@@ -112,5 +112,38 @@ check(X.fullMarks(L, R2, 'b'), '세트2 에서 맞히면 만점');
 R2.online = { a: true };
 check(X.online(R2, 'a') && !X.online(R2, 'b'), '접속 표시');
 
+// ── 💚 힐 (v0.9.6) ── 다 맞힌 학생이 남은 기회 한 칸을 친구에게 · 받는 쪽 최대 +2 · 막힌 친구일수록 높은 확률
+{
+  const H = X.newRoom('777777', 'set-03', 'T', 1000);
+  ['h', 'x', 'y', 'z'].forEach((u, i) => { H.players[u] = { num: i + 1, nick: u, hero: 0 }; });
+  H.active = { h: true, x: true, y: true, z: true }; H.state.headcount = 4; H.state.step = 2;
+  const ans = (u, a, k) => X.itemsFor(L, H, 'm1', u, a).map((q, i) => (i < k ? right(q) : wrong(q)));
+  H.subs = { m1: { h: { 0: ans('h', 0, 4) }, x: { 0: ans('x', 0, 0), 1: ans('x', 1, 1), 2: ans('x', 2, 1), 3: ans('x', 3, 2) }, y: { 0: ans('y', 0, 1) } } };
+  let rh = X.record(L, H, 'm1', 'h'), rx = X.record(L, H, 'm1', 'x'), ry = X.record(L, H, 'm1', 'y');
+  check(rh.canHeal && rh.left === 3 && rh.slots === 4, `힐러: 다 맞힘 · 남은 기회 3 ${rh.left}`);
+  check(!rx.canRetry && rx.left === 0 && !rx.canHeal, '기회를 다 쓴 x 는 재도전 불가');
+  check(!X.record(L, H, 'm1', 'z').submitted, 'z 는 아직 안 냄 → 힐 후보 아님');
+  // 무게: x(남은 0) = 8, y(남은 3) = 1 → 난수 0~8/9 는 x, 그 뒤는 y
+  check(X.healTarget(L, H, 'm1', 'h', 0) === 'x' && X.healTarget(L, H, 'm1', 'h', 0.85) === 'x' && X.healTarget(L, H, 'm1', 'h', 0.95) === 'y', '막힌 친구일수록 높은 확률');
+  let cnt = 0; for (let i = 0; i < 900; i++) if (X.healTarget(L, H, 'm1', 'h', (i + 0.5) / 900) === 'x') cnt++;
+  check(cnt === 800, `x 확률 8/9 (${cnt}/900)`);
+  check(X.healTarget(L, H, 'm1', 'h', 0.5) !== 'h' && X.healTarget(L, H, 'm1', 'x', 0) === 'y', '자기 자신 · 다 맞힌 친구는 후보 아님');
+  H.heals = { m1: { h: { 0: 'x' } } };
+  rh = X.record(L, H, 'm1', 'h'); rx = X.record(L, H, 'm1', 'x');
+  check(rh.left === 2 && X.healsGiven(H, 'm1', 'h') === 1, '힐러는 기회 한 칸을 씀');
+  check(rx.canRetry && rx.left === 1 && rx.slots === 5 && rx.healed === 1, `x 가 기회 한 칸을 받음 ${JSON.stringify({ l: rx.left, s: rx.slots })}`);
+  check(X.healsTo(H, 'm1', 'x')[0].from === 'h', '받은 학생은 누가 줬는지 안다');
+  H.heals.m1.h[1] = 'x'; H.heals.m1.y = { 0: 'x' };
+  rx = X.record(L, H, 'm1', 'x');
+  check(rx.healed === 2 && rx.slots === 6 && rx.left === 2, '받는 쪽은 최대 +2 (세 번째 힐은 기회가 안 늘어남)');
+  check(X.healTarget(L, H, 'm1', 'h', 0) !== 'x', '+2 를 받은 친구는 더 이상 후보 아님');
+  H.subs.m1.y = { 0: ans('y', 0, 4) }; H.subs.m1.z = { 0: ans('z', 0, 4) };
+  check(X.healTarget(L, H, 'm1', 'h', 0) === null, '받을 친구가 없으면 null (응원)');
+  H.subs.m1.x[4] = ans('x', 4, 3); H.subs.m1.x[5] = ans('x', 5, 4);
+  rx = X.record(L, H, 'm1', 'x');
+  check(rx.perfect && rx.left === 0 && rx.best === 4 && rx.tries.length === 6, '힐로 받은 기회로 성공 (시도 6번)');
+  check(X.monsterHp(L, H, 'm1').dmg === 16, '힐로 고친 만큼 데미지에 들어감');
+}
+
 if (fail) { console.error(`\n${fail}건 실패`); process.exit(1); }
-console.log('OK: 레이드 — 체력·기준%·데미지(늘어난 만큼)·재도전 3번·체력 0 즉시 격파·미제출 제외·보스 즉시 승리·7번 보너스·도움 목록·마무리·집중모드·만점 통과');
+console.log('OK: 레이드 — 체력·기준%·데미지(늘어난 만큼)·재도전 3번·체력 0 즉시 격파·미제출 제외·보스 즉시 승리·7번 보너스·도움 목록·마무리·집중모드·만점 · 💚 힐 통과');

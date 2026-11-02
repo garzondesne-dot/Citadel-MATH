@@ -141,7 +141,7 @@ DS.Hall = (function () {
     const out = {};
     Raid().activeIds(R).forEach((u) => {
       if (step.kind === 'boss') { const m = Raid().mastery(L, R, u).filter(Boolean).length; const n = Object.values(((R.bossAns || {})[u]) || {}).reduce((a, s) => a + (s || []).filter((x) => x != null).length, 0); out[u] = { n, dmg: m }; }
-      else { const rec = Raid().record(L, R, step.id, u); out[u] = { n: rec.tries.length, dmg: rec.best, label: Raid().resultLabel(rec.last), prac: rec.practice }; }
+      else { const rec = Raid().record(L, R, step.id, u); out[u] = { n: rec.tries.length, dmg: rec.best, label: Raid().resultLabel(rec.last), prac: rec.practice, h: Raid().healsGiven(R, step.id, u) }; }
     });
     return out;
   }
@@ -170,6 +170,7 @@ DS.Hall = (function () {
     Object.entries(now).forEach(([u, a]) => {
       const was = seen[u] || { n: 0, dmg: 0 };
       if (a.n > was.n) queue.push({ u, dmg: a.prac ? 0 : Math.max(0, a.dmg - was.dmg), label: step.kind === 'boss' ? (a.dmg > was.dmg ? 'partial' : 'fail') : a.prac ? 'practice' : a.label });
+      if ((a.h || 0) > (was.h || 0)) queue.push({ u, label: 'heal' }); // v0.9.6 💚 힐: 힐러만 보인다 (받은 학생은 안 보임)
     });
     seen = now;
     const wait = step.kind === 'monster' ? Raid().waiting(L, R, step.id) : [];
@@ -194,7 +195,11 @@ DS.Hall = (function () {
     playing = true;
     const a = queue.shift();
     const h = document.getElementById(`fh-${a.u}`), arena = $('#raid'), m0 = $('#rm');
-    if (h && arena && m0) {
+    if (h && a.label === 'heal') {
+      const t = document.createElement('span'); t.className = 'heal-tag'; t.textContent = `💚 ${(R.players[a.u] || {}).nick || ''}의 응원!`; h.appendChild(t); setTimeout(() => t.remove(), 1900);
+      h.classList.remove('healing'); void h.offsetWidth; h.classList.add('healing'); setTimeout(() => h.classList.remove('healing'), 1300);
+      DS.Sound.correct();
+    } else if (h && arena && m0) {
       // v0.9.2 연습 공격(이미 다 맞힌 학생): 돌진 + 이펙트 + 머리 위 「✔ 이미 성공」 · 데미지 숫자 · PERFECT 흔들림 없음
       const prac = a.label === 'practice', ok = a.label !== 'fail', perfect = a.label === 'success';
       const hr = h.getBoundingClientRect(), mr = m0.getBoundingClientRect(), ar = arena.getBoundingClientRect();

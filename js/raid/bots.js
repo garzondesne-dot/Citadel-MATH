@@ -47,6 +47,8 @@ DS.Bots = (function () {
       if (st.kind === 'monster') {
         const rec = DS.Raid.record(L, R, st.id, u);
         const a = rec.nextAttempt;
+        // v0.9.6 💚 다 맞힌 가상 친구는 절반쯤 힐을 고른다
+        if (rec.canHeal && Math.random() < 0.5) { const k = DS.Raid.healsGiven(R, st.id, u); later(`heal|${st.id}|${u}|${k}`, rand(3000, 8000), () => N().set(P(`heals/${st.id}/${u}/${k}`), DS.Raid.healTarget(L, R, st.id, u) || '_')); return; }
         const go = !rec.submitted || (rec.canRetry && Math.random() < 0.85);
         if (go) later(`sub|${st.id}|${u}|${a}`, rand(a ? 4000 : 6000, a ? 9000 : 18000), () => {
           const items = DS.Raid.itemsFor(L, R, st.id, u, a);

@@ -8,12 +8,14 @@
 //   players: { uid: { num, nick, hero, teacher? } } · active: { uid: true } (수업 시작 때 대기실 인원)
 //   subs:    { 몬스터id: { uid: { 0: 답(JSON), 1: …, 2: …, 3: … } } }   attempt 0 = 첫 시도, 1·2·3 = 재도전
 //   bossAns: { uid: { 1: [답 7개](JSON), 2: [...] } } · help: { uid: true }
+//   heals:   { 몬스터id: { 힐러uid: { 0: 받은uid | '_'(받을 친구 없음 = 응원), 1: … } } }   v0.9.6 💚 힐: 다 맞힌 학생이 남은 기회 한 칸을 친구에게 (받는 쪽 몬스터당 최대 +2)
 // 필드 몬스터 = 공동 체력 레이드: 체력 = ⌊대기실 인원 × 소문제 수 × 기준%⌋, 데미지 = 학생마다 가장 많이 맞힌 소문제 수(늘어난 만큼만)
 //   전원이 한 번 이상 제출(제외된 학생 빼고)한 뒤 체력이 0 이하면 격파. 보스는 체력 0 이 되는 즉시 승리.
 window.DS = window.DS || {};
 
 DS.Raid = (function () {
   const RETRIES = 3; // v0.9.2: 재도전 3번 → 시도는 최대 4번 (사용자 결정)
+  const HEAL_MAX = 2; // v0.9.6: 힐로 받는 기회는 몬스터마다 최대 +2 → 시도는 최대 6번 (Firebase 규칙 $attempt 0~5)
   const keys = (o) => Object.keys(o || {});
   const num = (R, uid) => ((R.players || {})[uid] || {}).num || 0;
   const activeIds = (R) => keys(R.active).filter((u) => R.active[u]).sort((a, b) => num(R, a) - num(R, b));
@@ -46,6 +48,28 @@ DS.Raid = (function () {
     const a = (((R.subs || {})[mid]) || {})[uid] || {};
     return keys(a).map(Number).sort((x, y) => x - y).map((k) => ({ attempt: k, given: a[k] }));
   };
+  // ── 💚 힐 (v0.9.6) ───────────────────────────────────────
+  const healsOf = (R, mid) => ((R.heals || {})[mid]) || {};
+  const healsGiven = (R, mid, uid) => keys(healsOf(R, mid)[uid]).length;
+  // 받은 힐 목록 (시간 순서 없음 → 힐러 번호 · 칸 순서로 고정) · 앞의 HEAL_MAX 개만 기회가 된다
+  function healsTo(R, mid, uid) {
+    const out = [];
+    Object.entries(healsOf(R, mid)).forEach(([from, byK]) => Object.entries(byK || {}).forEach(([k, to]) => { if (to === uid) out.push({ from, k: Number(k) }); }));
+    return out.sort((a, b) => num(R, a.from) - num(R, b.from) || a.k - b.k);
+  }
+  const healsReceived = (R, mid, uid) => Math.min(HEAL_MAX, healsTo(R, mid, uid).length);
+  // 받을 친구 고르기: 아직 다 못 맞힌 친구 전원이 후보 · 남은 기회가 적을수록 무게가 크다 (0칸 8 · 1칸 4 · 2칸 2 · 그 밖 1)
+  // → 대부분 막힌 친구에게 가지만 가끔 다른 친구에게도 가서 티가 나지 않는다. rnd = 0~1 난수 (없으면 Math.random)
+  function healTarget(L, R, mid, healer, rnd) {
+    const cand = activeIds(R).filter((u) => u !== healer && u !== teacherUid(R)).map((u) => ({ u, rec: record(L, R, mid, u) }))
+      .filter(({ u, rec }) => rec.submitted && !rec.perfect && healsTo(R, mid, u).length < HEAL_MAX)
+      .map(({ u, rec }) => ({ u, w: rec.left <= 0 ? 8 : rec.left === 1 ? 4 : rec.left === 2 ? 2 : 1 }));
+    const sum = cand.reduce((a, c) => a + c.w, 0);
+    if (!sum) return null;
+    let r = (rnd == null ? Math.random() : rnd) * sum;
+    for (const c of cand) { r -= c.w; if (r < 0) return c.u; }
+    return cand[cand.length - 1].u;
+  }
   // 한 번의 시도 채점: 소문제마다 정답 여부
   function gradeAttempt(L, R, mid, uid, attempt, given) {
     const items = itemsFor(L, R, mid, uid, attempt);
@@ -62,7 +86,10 @@ DS.Raid = (function () {
     const last = tries[tries.length - 1] || null;
     const allRight = !!last && last.correct === last.total;
     const perfectAt = tries.findIndex((t) => t.total > 0 && t.correct === t.total), practice = perfectAt >= 0 && tries.length - 1 > perfectAt;
-    return { tries, best, total, last, allRight, perfectAt, perfect: perfectAt >= 0, practice, submitted: tries.length > 0, canRetry: tries.length > 0 && tries.length <= RETRIES, nextAttempt: tries.length };
+    // 기회 = 기본 4 + 받은 힐(최대 2) · 쓴 기회 = 시도 + 내가 준 힐
+    const slots = RETRIES + 1 + healsReceived(R, mid, uid), used = tries.length + healsGiven(R, mid, uid), left = Math.max(0, slots - used);
+    return { tries, best, total, last, allRight, perfectAt, perfect: perfectAt >= 0, practice, submitted: tries.length > 0, slots, left, healed: healsReceived(R, mid, uid),
+      canRetry: tries.length > 0 && left > 0, canHeal: perfectAt >= 0 && left > 0, nextAttempt: tries.length };
   }
   const resultLabel = (t) => (!t ? '' : t.correct === t.total ? 'success' : t.correct === 0 ? 'fail' : 'partial');
 
@@ -124,5 +151,5 @@ DS.Raid = (function () {
     return out.sort((a, b) => b.level - a.level || num(R, a.uid) - num(R, b.uid));
   }
 
-  return { RETRIES, LIVE_MS, lateIds, liveOpen, activeIds, teacherUid, num, newRoom, stepOf, isLobby, isEnd, isFinale, isClosed, focusOn, sheetOn, videoOn, autoFocus, fullMarks, canLobby, online, seedOf, itemsFor, attemptsOf, gradeAttempt, record, resultLabel, headcount, pctOf, monsterHp, waiting, allSubmitted, cleared, mastery, bossHp, helpList };
+  return { RETRIES, HEAL_MAX, healsOf, healsGiven, healsTo, healsReceived, healTarget, LIVE_MS, lateIds, liveOpen, activeIds, teacherUid, num, newRoom, stepOf, isLobby, isEnd, isFinale, isClosed, focusOn, sheetOn, videoOn, autoFocus, fullMarks, canLobby, online, seedOf, itemsFor, attemptsOf, gradeAttempt, record, resultLabel, headcount, pctOf, monsterHp, waiting, allSubmitted, cleared, mastery, bossHp, helpList };
 })();

@@ -172,8 +172,8 @@ DS.Student = (function () {
   // cls: 'hit'(공격 성공 → 용사 돌진) · 'miss'(실패 → 축 처짐, 잠깐)
   function scene(step, rec, hp, cls = '') {
     const segs = Array.from({ length: rec.total }, (_, i) => `<i class="${i < rec.best ? 'gone' : ''}"></i>`).join('');
-    const left = Math.max(0, Raid().RETRIES + 1 - rec.tries.length), done = Raid().cleared(L, R, step.id);
-    const pips = Array.from({ length: Raid().RETRIES + 1 }, (_, i) => `<i class="${i < left ? 'on' : ''}"></i>`).join('');
+    const left = rec.left, done = Raid().cleared(L, R, step.id);
+    const pips = Array.from({ length: rec.slots }, (_, i) => `<i class="${i < left ? 'on' : ''}${i < Math.min(left, rec.healed) ? ' heal' : ''}"></i>`).join('');
     return `<div class="scene enc bg-scene th-${L.theme || ''} ${cls}${step.special ? ' special' : ''}"><div class="scene-bar"><div><b>${step.special ? '⭐ 난입! ' : step.review ? '📖 ' : ''}${esc(step.title)}</b><br><span class="muted small">레이드 체력 ${hp.left} / ${hp.max}</span></div></div>
       ${test ? `<div class="enc-friends">${Raid().activeIds(R).filter((u) => u !== me).slice(0, 4).map((u) => DS.Art.hero((R.players[u] || {}).hero || 0, 'idle', 'huff')).join('')}</div>` : ''}
       <div class="enc-hero"><div class="enc-tries" title="남은 도전 기회">${pips}</div>${DS.Art.hero(myP().hero, done || cls ? 'attack' : 'idle', done ? 'pairhop' : cls === 'miss' ? 'slump' : 'huff')}<i class="shadow"></i></div>
@@ -191,8 +191,19 @@ DS.Student = (function () {
     };
     tick();
   }
+  // 💚 힐 알림 (v0.9.6): 받은 학생은 누가 줬는지 안다 (종합상황실엔 힐러만). 한 번 본 알림은 다시 안 띄움
+  const healSeen = (k) => { try { const s = JSON.parse(sessionStorage.getItem('ds-heal-seen') || '{}'); if (s[k]) return true; s[k] = 1; sessionStorage.setItem('ds-heal-seen', JSON.stringify(s)); } catch (e) { /* 저장 못 하면 매번 확인 */ } return false; };
+  const who = (u) => { const p = (R.players || {})[u] || {}; return `${p.num || ''}번 ${p.nick || '친구'}`; };
+  function healNotice(mid) {
+    if (test) return;
+    Raid().healsTo(R, mid, me).slice(0, Raid().HEAL_MAX).forEach((h) => {
+      if (healSeen(`${code}|${mid}|${h.from}|${h.k}`)) return;
+      DS.UI.toast(`💚 ${who(h.from)} 용사가 도전 기회를 한 칸 채워 줬어요!`, 3500); DS.Sound.correct(); drawn = '';
+    });
+  }
   function monsterView(body, step) {
     const mid = step.id, rec = Raid().record(L, R, mid, me), hp = Raid().monsterHp(L, R, mid);
+    healNotice(mid);
     const wantRetry = retrying === `${mid}|${rec.nextAttempt}` && rec.canRetry;
     if (!rec.submitted || wantRetry) return fightForm(body, step, rec, hp);
     const t = rec.last, label = Raid().resultLabel(t);
@@ -203,16 +214,18 @@ DS.Student = (function () {
     if (fx) { shown = `${mid}|${t.attempt}`; if (label === 'fail' && !prac) DS.Sound.squish(); else { DS.Sound.slash(); setTimeout(() => DS.Sound.hit(), 160); setTimeout(() => { const sc = body.querySelector('.scene'); if (sc) DS.FX.play(sc, myP().fx || 'flame', { perfect: label === 'success', scale: label === 'success' ? 0.42 : 0.3 }); }, 60); } }
     const head = prac ? `✔ 이미 성공! 연습 공격 ${t.correct}/${t.total} <span class="small muted">(데미지 0)</span>` : { success: '⚔ 공격 성공!', partial: `⚔ 부분 성공 (${t.correct}/${t.total})`, fail: '💨 공격 실패…' }[label];
     const done = Raid().cleared(L, R, mid);
-    const sig = `res|${mid}|${t.attempt}|${done}|${rec.canRetry}|${(R.help || {})[me] ? 1 : 0}`;
+    const sig = `res|${mid}|${t.attempt}|${done}|${rec.canRetry}|${rec.left}|${(R.help || {})[me] ? 1 : 0}`;
     if (sig === drawn && body.querySelector('.marks')) { hpText(body, hp); return; }
     drawn = sig;
     body.innerHTML = `<div class="panel framed">${scene(step, rec, hp, fx)}
       <h2 class="res-${prac ? 'success' : label}">${head}</h2>
       <div class="marks">${items.map((q, i) => `<div class="mark ${t.marks[i] ? 'ok' : 'ng'}"><b>${i + 1}</b> ${t.marks[i] ? '✔' : '✘'} <span class="math">${pretty(itemText(q))}</span>${t.marks[i] ? '' : `<br><span class="sol-line math">${pretty(solOf(q))}</span>`}</div>`).join('')}</div>
-      ${rec.perfect && rec.canRetry ? `<p class="okc">✔ 이미 성공한 몬스터예요!</p><p>숫자가 바뀐 문제로 연습 공격을 해 볼까요? <span class="muted small">(남은 기회 ${Raid().RETRIES - rec.tries.length + 1}번 · 이펙트는 그대로, 데미지는 0)</span></p><button class="btn primary big" id="st-retry">⚔ 연습 공격</button>`
-        : done && rec.canRetry ? `<p class="okc big-msg">🎉 몬스터 격파!</p><p>틀린 소문제를 다시 풀어 볼까요? <span class="muted small">(남은 기회 ${Raid().RETRIES - rec.tries.length + 1}번 · 숫자가 모두 바뀌어요 · 고친 만큼 경험치가 더 쌓여요)</span></p><button class="btn primary big" id="st-retry">↻ 다시 도전</button>`
+      ${rec.perfect && rec.canRetry ? `<p class="okc">✔ 이미 성공한 몬스터예요!</p><p>남은 기회 <b>${rec.left}</b>번으로 무엇을 할까요?</p>
+        <div class="heal-pick"><button class="btn primary big" id="st-retry">⚔ 연습 공격</button><button class="btn big heal-btn" id="st-heal">💚 친구 힐</button></div>
+        <p class="muted small">연습 공격 = 숫자 바뀐 문제 (데미지 0) · 친구 힐 = 기회가 필요한 친구에게 도전 기회 한 칸</p>`
+        : done && rec.canRetry ? `<p class="okc big-msg">🎉 몬스터 격파!</p><p>틀린 소문제를 다시 풀어 볼까요? <span class="muted small">(남은 기회 ${rec.left}번 · 숫자가 모두 바뀌어요 · 고친 만큼 경험치가 더 쌓여요)</span></p><button class="btn primary big" id="st-retry">↻ 다시 도전</button>`
         : done ? '<p class="okc big-msg">🎉 몬스터 격파! 다음 신호를 기다려요.</p>'
-        : rec.canRetry ? `<p>다시 해 보겠습니까? <span class="muted small">(남은 기회 ${Raid().RETRIES - rec.tries.length + 1}번 · 숫자가 모두 바뀌어요)</span></p><button class="btn primary big" id="st-retry">↻ 다시 도전</button>`
+        : rec.canRetry ? `<p>다시 해 보겠습니까? <span class="muted small">(남은 기회 ${rec.left}번 · 숫자가 모두 바뀌어요)</span></p><button class="btn primary big" id="st-retry">↻ 다시 도전</button>`
         : `<p class="muted">${rec.perfect ? '멋져요! 기회를 모두 썼어요. 다른 용사들을 기다려요.' : '재도전 기회를 모두 썼어요. 해설을 보며 학습지에 정리해요.'} 데미지 <b>${rec.best}</b></p>`}
       ${test && (test.prep.img || {})[mid] ? '<button class="btn small" id="st-sheet">📄 학습지 보기 (문제 해설)</button>' : ''}
       ${test ? '' : helpBtn()}</div>`;
@@ -222,6 +235,14 @@ DS.Student = (function () {
     if (fx && !done) setTimeout(() => { const a = body.querySelector('.enc-hero .art'); if (a) a.outerHTML = DS.Art.hero(myP().hero, 'idle', fx === 'miss' ? 'slump' : 'huff'); }, 650);
     const rb = $('#st-retry');
     if (rb) { thinkTimer(rb, `${mid}|${t.attempt}`, rec.perfect ? '⚔ 연습 공격' : '↻ 다시 도전'); rb.onclick = () => { retrying = `${mid}|${rec.nextAttempt}`; form = null; DS.Sound.clank(); render(); }; }
+    const hb = $('#st-heal');
+    if (hb) hb.onclick = () => DS.Control.run(async () => {
+      hb.disabled = true;
+      const k = Raid().healsGiven(R, mid, me), to = await DS.Act.heal(code, raw, mid);
+      DS.Sound.correct(); drawn = '';
+      DS.UI.toast(to ? `💚 ${who(to)} 용사에게 도전 기회를 한 칸 채워 줬어요!` : '💚 응원을 보냈어요! (지금은 기회가 필요한 친구가 없어요)', 3500);
+      if (DS.Grow && !test) DS.Grow.add(acc(), { heal: 1 }, `heal_${code}_${mid}_${k}`).catch(() => {});
+    });
   }
   // 보기 글자: 'venn:B|1 2 3 6' 은 벤 다이어그램 그림으로
   const optHtml = (o) => DS.UI.opt(o); // v0.9.3: 'vshade:영역' 색칠 그림도
