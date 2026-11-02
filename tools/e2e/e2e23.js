@@ -16,6 +16,7 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   await S.selectOption('#s-cls', '1-3'); await S.waitForTimeout(200); await S.selectOption('#s-num', '1'); await S.waitForTimeout(300);
   await S.click('#s-new'); await S.fill('#s-p1', '1234'); await S.fill('#s-p2', '1234'); await S.click('#s-make'); await S.waitForTimeout(1200);
   await S.click('#s-go'); await S.waitForTimeout(1500);
+  await S.evaluate(async () => { localStorage.setItem('citadel-tut-1-3-1', JSON.stringify({ a: true, b: true })); await DS.Net.update('xp/1-3/1/tut', { a: true, b: true }); }); await S.evaluate(() => DS.Camp.back()); await S.waitForTimeout(800); // 튜토리얼은 이미 본 학생
   // 2차시 수업 열기 (첫 수업과 같은 상황)
   await T.selectOption('#lesson', 'set-02'); await T.selectOption('#t-cls', '1-3'); await T.click('#t-new'); await T.waitForTimeout(2500);
   await S.bringToFront(); await S.waitForTimeout(1500);

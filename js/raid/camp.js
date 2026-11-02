@@ -18,11 +18,12 @@ DS.Camp = (function () {
     DS.UI.show('screen-camp');
     if (!m.test) DS.Scene.save({ role: 'camp' });
     render();
+    tut = null; tutLoad().then(tutApply);
     if (liveStop) liveStop();
     liveStop = DS.Net.watch(`live/${ck(m.c)}`, (v) => {
       const was = live; live = v && v.open && !DS.Raid.liveOpen(v, Date.now()) ? Object.assign({}, v, { open: false }) : v;
       if (!document.getElementById('screen-camp').classList.contains('active')) return;
-      drawGate();
+      drawGate(); tutApply();
       if (live && live.open && (!was || !was.open || was.code !== live.code) && liveSeen !== live.code) { liveSeen = live.code; showGate(); forgeInfo(); DS.Sound.correct(); DS.UI.toast(`🌀 ${live.no ? `${live.no}차시 ` : ''}던전이 열렸어요! 차원문을 눌러 들어가요`, 4200); }
     });
     if (code0) setTimeout(codeGate, 300); // QR 로 들어왔으면 코드 창을 바로
@@ -30,6 +31,68 @@ DS.Camp = (function () {
   const D = () => DS.ASSETS.dungeons;
   // 한 화면에 전체가 보이므로 차원문이 열리면 반짝 강조만
   function showGate() { const g = document.getElementById('camp-gate'); if (g) { g.classList.remove('flash'); void g.offsetWidth; g.classList.add('flash'); } }
+  // ── 🧭 첫 수업 튜토리얼 (2026-11-03 사용자 확정) ──────────────────────
+  //   A 입장: 튜토리얼을 본 적 없고 (수업 중이거나 수업 기록이 아직 없는) 학생 → 모루 · 보강던전 · 소품을 숨기고 차시 던전만, 들어가는 법 안내
+  //   B 캠프 안내: A 를 본 뒤 수업이 끝나고 캠프에 오면 → 보강던전 · 허수아비 · 책장 · 우편함 · 모루를 하나씩 보여 주며 역할 설명
+  //   반마다 첫 수업 날이 달라도, 가입만 하고 못 본 학생도 각자 한 번씩. 본 기록 = xp/{반}/{번호}/tut { a, b } (+ 이 기기 localStorage)
+  let tut = null, tutRecs = null, tutMode = '', tutStep = 0;
+  const tutPath = () => `xp/${ck(me.c)}/${me.n}/tut`, tutKey = () => `citadel-tut-${ck(me.c)}-${me.n}`;
+  async function tutLoad() {
+    if (me.test) { tut = { a: true, b: true }; return; }
+    let local = {}; try { local = JSON.parse(localStorage.getItem(tutKey()) || '{}'); } catch (e) { /* 무시 */ }
+    tut = Object.assign({}, local, (await DS.Net.get(tutPath()).catch(() => null)) || {});
+    if (!tut.a) tutRecs = await DS.Net.get(`records/${ck(me.c)}/${me.n}`).catch(() => null);
+  }
+  function tutMark(k) {
+    tut = Object.assign({}, tut, { [k]: true });
+    DS.Net.update(tutPath(), { [k]: true }).catch(() => {});
+    try { localStorage.setItem(tutKey(), JSON.stringify(tut)); } catch (e) { /* 무시 */ }
+  }
+  function tutDecide() {
+    if (!tut) return '';
+    if (!tut.a) { if (inClass() || !tutRecs || !Object.keys(tutRecs).length) return 'A'; tutMark('a'); } // 이미 수업을 해 본 학생은 입장 안내를 건너뛰고 캠프 안내로
+    return !tut.b && !inClass() ? 'B' : '';
+  }
+  const TUT_B = [
+    ['#camp-bonus', '📘 보강던전', '지난 수업에서 어려웠던 문제를 <b>혼자 다시</b> 연습하는 곳이에요. 다 깨면 📘 인장, 인장을 모으면 화려한 공격 이펙트가 열려요!'],
+    ['#camp-dummy', '🎯 훈련 허수아비', '지난 차시 문제를 <b>숫자만 바꿔</b> 연습해요. 기록은 남지 않고 경험치가 조금 쌓여요. 시험 전에 딱!'],
+    ['#camp-shelf', '📚 책장', '차시별 🎬 <b>개념 영상</b>과 📄 <b>학습지 개념</b>을 다시 볼 수 있어요.'],
+    ['#camp-mail', '📮 우편함', '내 <b>수업 결과</b>와 <b>복습 노트</b>가 도착해요. 틀린 문제를 다시 확인해요.'],
+    ['#camp-anvil', '⚒ 모루', '수업에서 배운 개념으로 <b>카드를 만드는 대장간</b>이에요. 수업이 없을 때 여기서만 열려요.'],
+  ];
+  function tutClear() {
+    tutMode = ''; const stg = document.querySelector('#camp .camp-stage'); const co = document.getElementById('tut-coach'); if (co) co.remove();
+    document.getElementById('camp').classList.remove('tut-a');
+    if (stg) { stg.classList.remove('tut-a', 'tut-b'); stg.querySelectorAll('.tut-spot, .tut-hide').forEach((e) => e.classList.remove('tut-spot', 'tut-hide')); }
+  }
+  function tutApply() {
+    const stg = document.querySelector('#camp .camp-stage'); if (!stg || !document.getElementById('screen-camp').classList.contains('active')) return;
+    const mode = tutDecide();
+    if (mode !== tutMode) { tutClear(); tutMode = mode; tutStep = 0; }
+    if (!mode) return;
+    let co = document.getElementById('tut-coach');
+    if (!co) { co = document.createElement('div'); co.id = 'tut-coach'; co.className = 'tut-coach'; stg.appendChild(co); }
+    const gate = document.getElementById('camp-gate');
+    if (mode === 'A') {
+      document.getElementById('camp').classList.add('tut-a'); stg.classList.add('tut-a'); co.classList.remove('block');
+      if (gate) gate.classList.toggle('tut-spot', inClass());
+      co.innerHTML = inClass()
+        ? `<div class="tut-box"><p>🌀 <b>${live.no ? `${live.no}차시 ` : ''}던전이 열렸어요!</b><br>오른쪽에 반짝이는 <b>문을 눌러</b> 입장해요. 친구들과 함께 몬스터를 물리쳐요! 👉</p></div>`
+        : '<div class="tut-box"><p>👋 <b>환영해요, 용사님!</b> 여기는 나만의 <b>모닥불(개인 캠프)</b>이에요.<br>선생님이 수업을 열면 오른쪽에 🌀 <b>차시 던전</b>이 나타나요. 잠깐 기다려요!</p></div>';
+      return;
+    }
+    // B: 하나씩 나타나며 설명 (아직 소개 안 한 것은 숨김)
+    stg.classList.add('tut-b'); co.classList.add('block');
+    TUT_B.forEach(([sel], i) => { const e = stg.querySelector(sel); if (e) { e.classList.toggle('tut-hide', i > tutStep); e.classList.toggle('tut-spot', i === tutStep); } });
+    const [, h, body] = TUT_B[tutStep], last = tutStep === TUT_B.length - 1;
+    co.innerHTML = `<div class="tut-box"><p><b>${h}</b> <span class="tut-n">${tutStep + 1} / ${TUT_B.length}</span><br>${body}</p><button class="btn primary small" id="tut-next">${last ? '시작하기!' : '다음 ▶'}</button></div>`;
+    co.querySelector('#tut-next').onclick = () => {
+      DS.Sound.clank();
+      if (!last) { tutStep++; tutApply(); return; }
+      tutMark('b'); tutClear(); DS.UI.toast('🔥 이제 자유롭게 둘러봐요! 다음 수업 때 🌀 차시 던전이 다시 열려요.', 3200);
+    };
+  }
+
   // 수업 중(차시 던전 열림)에는 보강던전 · 허수아비 · 모루를 회색으로 (누르면 안내만)
   const inClass = () => !!(live && live.open);
   function lockSide() {
@@ -70,7 +133,7 @@ DS.Camp = (function () {
     const classOnly = (sel) => { nope(sel); DS.UI.toast(`🌀 지금은 ${live.no ? `${live.no}차시 ` : ''}수업 중이에요! 차시 던전으로 들어가요. (보강던전 · 허수아비 · 모루는 수업이 끝나면 열려요)`, 3400); };
     $('#camp-bonus').onclick = () => (inClass() ? classOnly('#camp-bonus') : pick('#camp-bonus', () => DS.Control.run(() => DS.Bonus.enter(me))));
     $('#camp-gate').onclick = () => {
-      if (live && live.open) return pick('#camp-gate', () => DS.Control.run(() => enterCode(live.code)), 'portal');
+      if (live && live.open) { if (tutMode === 'A') { tutMark('a'); tutClear(); } return pick('#camp-gate', () => DS.Control.run(() => enterCode(live.code)), 'portal'); }
       nope('#camp-gate');
       if (live) DS.UI.toast('지난 던전은 닫혔어요. 선생님이 다음 수업을 열면 새 차원문이 나타나요.', 3200);
       else DS.UI.toast('아직 열린 던전이 없어요. 선생님이 수업을 열면 차원문이 나타나요.', 3200);
