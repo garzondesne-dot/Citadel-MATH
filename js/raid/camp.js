@@ -92,14 +92,22 @@ DS.Camp = (function () {
     if (hero) {
       const a = el.getBoundingClientRect(), b = hero.getBoundingClientRect();
       const dx = (a.left + a.width / 2) - (b.left + b.width / 2);
-      hero.style.setProperty('--dx', `${Math.max(-1, Math.min(1, dx / Math.abs(dx || 1))) * Math.min(Math.abs(dx) * 0.55, 160)}px`);
-      hero.classList.remove('dash'); void hero.offsetWidth; hero.classList.add('dash');
-      hero.classList.toggle('face-left', dx < 0 && pose !== 'portal');
-      heroArt(pose); if (pose === 'portal') hero.classList.add('into-portal');
+      heroArt(pose);
+      if (pose === 'portal') {
+        // 차원문: 용사 몸 가운데가 포털 그림 정중앙에 닿을 때까지 걸어가며 작아지고 사라짐
+        const pe = el.querySelector('.camp-portal') || el, p = pe.getBoundingClientRect(), h = hero.querySelector('.art').getBoundingClientRect();
+        hero.style.setProperty('--px', `${p.left + p.width / 2 - (h.left + h.width / 2)}px`);
+        hero.style.setProperty('--py', `${p.top + p.height / 2 - (h.top + h.height / 2)}px`);
+        hero.classList.remove('face-left'); hero.classList.add('to-portal');
+      } else {
+        hero.style.setProperty('--dx', `${Math.max(-1, Math.min(1, dx / Math.abs(dx || 1))) * Math.min(Math.abs(dx) * 0.55, 160)}px`);
+        hero.classList.remove('dash'); void hero.offsetWidth; hero.classList.add('dash');
+        hero.classList.toggle('face-left', dx < 0);
+      }
     }
-    const wait = pose === 'portal' && DS.Art.isV2(me.hero) ? 950 : 700; // 차원문: 뒷모습으로 걸어 들어가는 걸 다 보고
+    const wait = pose === 'portal' ? 1150 : 700; // 차원문: 정중앙까지 걸어 들어가 사라지는 걸 다 보고
     setTimeout(() => { picking = false; then(); }, wait);
-    setTimeout(() => { el.classList.remove('picked'); if (hero) { hero.classList.remove('dash', 'into-portal'); heroArt('sit', 'huff'); } }, 1300 + wait - 700);
+    setTimeout(() => { el.classList.remove('picked'); if (hero) { hero.classList.remove('dash', 'to-portal'); heroArt('sit', 'huff'); } }, 1300 + wait - 700);
   }
   // 못 들어가는 곳: 회색으로 살짝 흔들림
   function nope(sel) { const el = document.querySelector(sel); if (!el) return; el.classList.remove('nope'); void el.offsetWidth; el.classList.add('nope'); DS.Sound.squish(); }

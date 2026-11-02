@@ -29,7 +29,8 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   const code = await T.evaluate(() => DS.Teacher.code());
   await S1.waitForTimeout(1500);
   await S1.click('#camp-gate');
-  for (const ms of [150, 450, 800]) { await S1.waitForTimeout(ms === 150 ? 150 : 300); await S1.screenshot({ path: `${OUT}/3-portal-${ms}.png` }); }
+  for (const ms of [200, 500, 800, 1000]) { await S1.waitForTimeout(ms === 200 ? 200 : ms === 1000 ? 200 : 300); await S1.screenshot({ path: `${OUT}/3-portal-${ms}.png` });
+    if (ms === 800) console.log('portal center gap (px):', await S1.evaluate(() => { const p = document.querySelector('.camp-portal').getBoundingClientRect(), h = document.querySelector('.camp-hero .art').getBoundingClientRect(); return [Math.round(p.left + p.width / 2 - h.left - h.width / 2), Math.round(p.top + p.height / 2 - h.top - h.height / 2)]; })); }
   console.log('portal anim:', await S1.getAttribute('.camp-hero .art', 'data-anim').catch(() => 'gone'));
   await S1.waitForTimeout(2500);
   const go = () => T.evaluate(async () => { const code = DS.Teacher.code(); const R = DS.Act.unpackRoom(await DS.Net.get(`rooms/${code}`)); await DS.Act.go(code, R, DS.Lessons.get(R.meta.lesson), 1); });
