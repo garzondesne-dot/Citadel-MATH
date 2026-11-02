@@ -49,14 +49,13 @@ DS.Camp = (function () {
     $('#camp').innerHTML = `<div class="camp-top"><b>🔥 ${esc(me.name)}의 모닥불</b><span class="muted small">${DS.Titles && (me.title || 'none') !== 'none' ? `${DS.Titles.nameHtml({ title: me.title || 'none', nick: '' }, { num: false, size: 16 })} · ` : ''}${esc(me.c)} · ${me.n}번${DS.Grow ? ` · <b class="gold" id="camp-lv">Lv.-</b>` : ''}</span><button class="btn small camp-set" id="camp-set">⚙ 설정</button></div>
       ${stampToday() ? '<div class="stamp-bar">📮 반드시 학습지 확인도장 받아가세요.</div>' : ''}
       <div class="camp-stage" style="background-image:url('${base()}${c.bg}')">
-        ${tree(0, 'back', 'left:-9%;bottom:30%;height:46%')}${tree(2, 'back', 'right:-10%;bottom:34%;height:38%')}
         <button class="camp-anvil" id="camp-anvil" aria-label="모루">${sheet(c.anvil, c.anvil.states.idle, 0, 'camp-anvil-img')}<span class="camp-label">⚒ 모루</span></button>
         <div class="camp-fire"><i class="camp-glow"></i><i class="camp-glow g2"></i>${sheet(c.fire, 0, 0, 'camp-fire-img', '')}</div>
         <div class="camp-hero">${DS.Art.hero(me.hero, 'sit', 'huff')}<i class="shadow"></i></div>
         <button class="camp-bonus" id="camp-bonus" aria-label="보강던전"><i class="camp-bonus-img" style="background-image:url('${base()}${DS.ASSETS.dportals.bonus}')"></i><span class="camp-label">📘 보강던전</span></button>
         <button class="camp-gate empty" id="camp-gate" aria-label="차원문"></button>
-        ${prop('dummy', '🎯', '허수아비', 'right:3%;top:5%')}${prop('shelf', '📚', '책장', 'left:3%;top:5%')}${prop('mail', '📮', '우편함', 'left:34%;top:5%')}
-        ${tree(3, 'front', 'left:-6%;bottom:-6%;height:44%')}${tree(1, 'front', 'right:-5%;bottom:-4%;height:48%')}
+        ${prop('dummy', '🎯', '허수아비', '')}${prop('shelf', '📚', '책장', '')}${prop('mail', '📮', '우편함', '')}
+
       </div>
       <div class="camp-bar"><span class="muted small">🎯 허수아비 · 📚 책장 · 📮 우편함을 눌러 보세요</span><button class="btn small" id="camp-code">코드로 입장</button></div>
       <div class="camp-forge panel framed" id="camp-forge"><p class="muted small">연성 정보를 불러오는 중…</p></div>`;
@@ -78,6 +77,7 @@ DS.Camp = (function () {
     $('#camp-set').onclick = settings;
     drawGate();
     animateFire();
+    const stg = document.querySelector('#camp .camp-stage'); if (stg) { stg.classList.add('labels'); setTimeout(() => stg.classList.remove('labels'), 3000); } // 이름표: 들어올 때 3초 · 누를 때
   }
   // 선택 연출 (한 번 탭 · 0.7초): 흰 테두리 번쩍 + 눌림 반동 + 소리·진동 → 금빛 외곽선 + ▼ → 내 용사가 그쪽으로 폴짝 → 열림
   let picking = false;
