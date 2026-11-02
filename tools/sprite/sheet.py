@@ -17,13 +17,8 @@ r, g, b = a[..., 0], a[..., 1], a[..., 2]
 bg = ((r > 170) & (b > 170) & (g < 110) & (abs(r - b) < 90)) | ((r > 150) & (b > 140) & (g < 130) & (abs(r - b) < 110))
 bg |= (r > 70) & (b > 120) & (g < 70) & (b > r * 0.8)  # 발밑 보라 그림자 · 분홍 번짐 (남색 외곽선은 r 이 작아 남는다)
 if os.environ.get('BG') == 'edge':
-    # BG=edge (몬스터 · 보스, 보라색 몸이 많을 때): 위 규칙에 걸리더라도 그림 테두리에서 이어진 곳만 배경으로 지운다
-    #   + 아주 진한 마젠타(다리 사이 · 날개 안쪽에 갇힌 배경)는 어디든 지운다
-    from PIL import ImageDraw
-    m = Image.fromarray((bg * 255).astype(np.uint8), 'L'); W_, H_ = m.size
-    for x, y in [(x, 0) for x in range(0, W_, 3)] + [(x, H_ - 1) for x in range(0, W_, 3)] + [(0, y) for y in range(0, H_, 3)] + [(W_ - 1, y) for y in range(0, H_, 3)]:
-        if m.getpixel((x, y)) == 255: ImageDraw.floodfill(m, (x, y), 128)
-    bg = (np.asarray(m) == 128) | ((r > 200) & (b > 200) & (g < 90) & (abs(r - b) < 60))
+    # BG=edge (몬스터 · 보스 · 소품, 보라색 몸이 많을 때): 진한 마젠타(배경)만 지운다 — 보라 · 분홍 몸은 그대로 (2026-11-03 7차시 몬스터로 확인)
+    bg = (r > 200) & (b > 200) & (g < 90) & (abs(r - b) < 60)
 rgba = np.dstack([a, (~bg) * 255]).astype(np.uint8)
 fg = ~bg
 
