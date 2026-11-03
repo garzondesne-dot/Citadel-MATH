@@ -59,7 +59,7 @@ ${a.ui && a.ui.panel ? '' : `.framed{border:14px solid transparent;border-image:
 .bg-dungeon{background:#0a0d18}.bg-dungeon::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(#0a142400 55%,#0a142466),url('${a.base}${a.background.src}') center top/cover no-repeat}
 .bg-scene{background-image:linear-gradient(#0a142466,#0a142411 40%,#0a1424dd),url('${a.base}${(a.scene || a.background).src}');background-size:cover;background-position:center 65%}
 ${a.brand ? `.brand-head{background:url('${a.base}${a.brand.header}') center/contain no-repeat;aspect-ratio:960/461}
-.splash{background-image:url('${a.base}${a.brand.title}')}
+${a.brand.splash ? '' : `.splash{background-image:url('${a.base}${a.brand.title}')}`}
 .menu-ic{background-image:url('${a.base}${a.brand.menu.src}');background-size:${a.brand.menu.cols * 100}% 100%}
 ${Object.entries(a.brand.menu.kinds).map(([k, i]) => `.menu-ic[data-ic="${k}"]{background-position:${(i / (a.brand.menu.cols - 1)) * 100}% 0}`).join('')}` : ''}
 ${a.ui && a.ui.kit ? skin(a) : ''}

@@ -1399,3 +1399,21 @@ body:has(#test-bar) #ver-tag { bottom: calc(64px + env(safe-area-inset-bottom));
 .t-sec { border-bottom: 2px solid transparent; border-image: linear-gradient(90deg, #0000, #c99a3a, #0000) 1; padding-bottom: 4px; }
 .framed, .btn, .role, input, select, .tab { box-sizing: border-box; }
 .framed, input, select { max-width: 100%; }
+
+/* ── 시작 화면 연출 (v0.9.6.30): 배경 카메라 · 로고 떨어짐 · 테두리 없는 「터치」 글자 · 누르면 끝 장면(.done) ── */
+#screen-splash { background: #05080f; overflow: hidden; }
+.sp-cam { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.sp-bg { position: absolute; left: 50%; top: 50%; height: 100%; width: auto; min-width: 100%; aspect-ratio: 940 / 1673; object-fit: cover; transform: translate(-50%, -50%); image-rendering: pixelated; animation: spCam 3s cubic-bezier(.5, .05, .25, 1) both; }
+@keyframes spCam { from { transform: translate(-50%, -50%) translateY(30%) scale(1.6); } to { transform: translate(-50%, -50%); } }
+.sp-shade { position: absolute; inset: 0; background: linear-gradient(#05080f00 55%, #05080fcc); }
+.sp-logo { position: absolute; left: 50%; top: 9%; width: min(84vw, 520px); transform: translate(-50%, 0); pointer-events: none; filter: drop-shadow(0 8px 10px #000a); animation: spDrop 1.3s cubic-bezier(.2, .9, .3, 1.12) 1.5s both, spFloat 3.2s ease-in-out 2.8s infinite; }
+@keyframes spDrop { 0% { transform: translate(-50%, -140%); opacity: 0; } 35% { opacity: 1; } 100% { transform: translate(-50%, 0); opacity: 1; } }
+@keyframes spFloat { 50% { transform: translate(-50%, -6px); } }
+@media (min-aspect-ratio: 3/4) { .sp-bg { min-width: 0; } .sp-logo { top: 7%; width: min(44vh, 520px); } }
+.splash-tap { position: relative; z-index: 2; background: none; border: 0; padding: 0; letter-spacing: 1px; font-size: clamp(18px, 5vw, 26px); text-shadow: 0 2px 0 #000, 0 0 10px #000, 0 0 16px #5ae8ff; opacity: 0; animation: spIn .6s ease 3s forwards, tapBlink 1.4s ease-in-out 3.6s infinite; }
+.splash-ver, .splash-by { position: relative; z-index: 2; opacity: 0; animation: spIn .6s ease 3.2s forwards; }
+@keyframes spIn { to { opacity: 1; } }
+.splash.done .sp-bg { animation: none; }
+.splash.done .sp-logo { animation: spFloat 3.2s ease-in-out infinite; }
+.splash.done .splash-tap { opacity: 1; animation: tapBlink 1.4s ease-in-out infinite; }
+.splash.done .splash-ver, .splash.done .splash-by { opacity: 1; animation: none; }

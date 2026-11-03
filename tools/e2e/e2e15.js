@@ -1,5 +1,6 @@
 const { chromium } = require('playwright');
 const OUT = process.argv[2], PDF = process.argv[3], U = 'http://localhost:8765/index.html?local';
+if (!PDF) { console.log('건너뜀: 학습지 PDF 경로를 두 번째 인자로 (node tools/e2e/e2e15.js <출력> <학습지.pdf>) — PDF 는 저장소에 없음'); process.exit(0); }
 (async () => {
   const b = await chromium.launch(); const ctx = await b.newContext({ viewport: { width: 390, height: 844 } }); const errs = [];
   const mk = async (t) => { const p = await ctx.newPage(); p.on('pageerror', (e) => errs.push(t + ': ' + e.message)); p.on('dialog', (d) => d.accept()); return p; };

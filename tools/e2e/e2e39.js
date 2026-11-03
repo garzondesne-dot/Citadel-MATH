@@ -7,7 +7,7 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   const shot = async (n) => { await p.waitForTimeout(900); await p.screenshot({ path: `${OUT}/${n}.png`, clip: { x: 0, y: 0, width: 360, height: 300 } }); };
   const close = async () => p.evaluate(() => { document.querySelectorAll('.modal, .bn-fight').forEach((e) => { if (e.id !== 'quiz') e.remove(); }); document.getElementById('quiz').classList.add('hidden'); document.getElementById('forge').hidden = true; document.body.classList.remove('forge-open'); });
   const xCheck = async (name) => {
-    const r = await p.evaluate(() => { const m = [...document.querySelectorAll('.modal')].filter((e) => e.id !== 'quiz').pop(); if (!m) return 'no-modal'; const box = m.querySelector('.quiz-box, .framed'); box.scrollTop = box.scrollHeight; const x = m.querySelector('.ui-x'); if (!x) return 'no-x'; const a = x.getBoundingClientRect(), bb = box.getBoundingClientRect(); return a.top >= bb.top - 2 && a.bottom <= bb.bottom + 2 && a.top < 200 ? 'x 보임' : `x 사라짐 (${Math.round(a.top)})`; });
+    const r = await p.evaluate(() => { const m = [...document.querySelectorAll('.modal')].filter((e) => e.id !== 'quiz').pop(); if (!m) return 'no-modal'; const box = m.querySelector('.quiz-box, .framed'); box.scrollTop = box.scrollHeight; const x = m.querySelector('.ui-x'); if (!x) return 'no-x'; const a = x.getBoundingClientRect(), bb = box.getBoundingClientRect(); return a.top >= bb.top - 2 && a.bottom <= bb.bottom + 2 && a.top < bb.top + 80 /* 창 맨 위 (짧은 창은 화면 가운데라 200 넘을 수 있음) */ ? 'x 보임' : `x 사라짐 (${Math.round(a.top)})`; });
     log.push(`${name}: ${r}`);
   };
   await p.goto(U); await p.waitForTimeout(1200);

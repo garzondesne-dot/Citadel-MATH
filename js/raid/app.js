@@ -76,8 +76,14 @@ DS.App = (function () {
     if (!on) { DS.UI.show('screen-home'); return; }
     DS.UI.show('screen-splash');
     $('#splash-ver').textContent = DS.VERSION;
-    const go1 = () => { $('#splash').onclick = null; DS.Sound.clank(); DS.UI.show('screen-home'); };
-    $('#splash').onclick = go1;
+    // v0.9.6.30 연출: 배경 카메라가 아치 천장 → 영웅들로 내려오고(3초) · 로고가 떨어져 자리 잡음 · 「터치」 글자
+    //   연출 중에 누르면 바로 끝 장면(done) · 끝 장면에서 누르면 첫 화면 · 「동작 줄이기」 기기는 처음부터 끝 장면
+    const el = $('#splash'), sp = (DS.ASSETS.brand || {}).splash, base = DS.ASSETS.base;
+    if (sp && !el.querySelector('.sp-cam')) el.insertAdjacentHTML('afterbegin', `<div class="sp-cam" aria-hidden="true"><img class="sp-bg" src="${base}${sp.bg}" alt=""><div class="sp-shade"></div></div><img class="sp-logo" src="${base}${sp.logo}" alt="${esc((DS.ASSETS.brand || {}).full || '')}">`);
+    const t0 = Date.now(), still = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    el.classList.toggle('done', !sp || still);
+    const go1 = () => { el.onclick = null; DS.Sound.clank(); DS.UI.show('screen-home'); };
+    el.onclick = () => { if (!el.classList.contains('done') && Date.now() - t0 < 3400) { el.classList.add('done'); return; } go1(); };
   }
   // 차시 고르기 목록 (코드 차시 + 엑셀 차시)
   function fillLessons() {

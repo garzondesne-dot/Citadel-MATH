@@ -61,7 +61,7 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   await go(); await T.waitForTimeout(1500); // → 마무리
   console.log('8 hall finale klass btn:', !!(await H.$('#h-klass')), 'teacher news:', !!(await T.$('#t-news')));
   await H.screenshot({ path: `${OUT}/06-hall-finale.png` });
-  if (await H.$('#h-klass')) { await H.click('#h-klass'); await H.waitForTimeout(2500); await H.screenshot({ path: `${OUT}/07-hall-klass.png` }); await H.click('.sc-modal [data-x]'); }
+  if (await H.$('#h-klass')) { await H.click('#h-klass'); await H.waitForTimeout(2500); await H.screenshot({ path: `${OUT}/07-hall-klass.png` }); await H.click('.sc-modal .ui-x'); /* 0.9.6.27: 원래 닫기 버튼은 숨기고 ✕ 가 대신 */ }
   await T.evaluate(async () => DS.Act.endClass(DS.Teacher.code())); await T.waitForTimeout(2000);
   console.log('9 teacher after end:', await act(T), 'tcamp btn:', !!(await T.$('#t-tcamp')), '| hall:', await act(H), 'h-tcamp:', !!(await H.$('#h-tcamp')));
   await T.screenshot({ path: `${OUT}/08-teacher-end.png`, fullPage: true }); await H.screenshot({ path: `${OUT}/09-hall-end.png` });
