@@ -15,3 +15,12 @@
 | `fbprep.js` | `<차시 id> <레이드용 PDF> [--dry]` → 수업 준비 「PDF 한 번에 넣기」와 같은 코드로 칸을 잘라 Firebase `prep/{차시}/img · has` 에 씀 (먼저 `python3 -m http.server 8765`) |
 
 드라이브 폴더 id: 01 학습지 `1fFTvDkoQiyHOK5bzKAfzSPMWEVKVdkgp` · 02 레이드학습지 `1gcvXDs8FQETGkNZJrI2WlHJ3x8Jdzs0W` · 05 모션그래픽 `1wCaC9DlV8rofxd6uNYWdkIrRKrBAaBsT` · 07 에셋 원본 `1k3kOFsn8y1hmnTyBvGRZXt0HaV46kcXO` · 99 지난판 `1WZJ1FO-Kbql1jBjEWmrlvMM0j8KHdx0F`
+
+## 모션그래픽 방에서 쓰기 (2026-11-03)
+같은 클라우드 환경의 다른 방(저장소 없음)도 열쇠는 있으므로 두 파일만 받아 쓴다:
+
+```bash
+mkdir -p /home/user/dtools && cd /home/user/dtools && for f in google gdrive; do curl -fsSL -o $f.js https://raw.githubusercontent.com/garzondesne-dot/Citadel-MATH/main/tools/auto/$f.js; done
+node gdrive.js check && node gdrive.js swap 03 /path/"(03차시) 22_부분집합.mp4" … --dry
+```
+`google.js` · `gdrive.js` 는 Node 기본 모듈만 쓴다(설치 없음). 이 두 파일이 다른 파일을 require 하게 바꾸지 말 것.
