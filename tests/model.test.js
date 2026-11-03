@@ -22,7 +22,7 @@ check(X.stepOf(L, R).id === 'm1', '3번째 단계 = 문제1');
 // 체력: 18 × 4 × 90% = 64.8 → 64
 let hp = X.monsterHp(L, R, 'm1');
 check(hp.max === 64 && hp.left === 64 && hp.pct === 90 && hp.items === 4, `문제1 체력 ${JSON.stringify(hp)}`);
-check(X.monsterHp(L, R, 's1').max === 48 && X.monsterHp(L, R, 'm3').max === 97 && X.monsterHp(L, R, 's2').max === 64, '체력 예시 (보강1 48 · 문제3 97 · 보강2 64)');
+check(X.monsterHp(L, R, 's1').max === 48 && X.monsterHp(L, R, 'm3').max === 97 && X.monsterHp(L, R, 'm4').max === 64, '체력 예시 (보강1 48 · 문제3 97 · 보강2 64)');
 R.meta.pct = 80; check(X.monsterHp(L, R, 'm1').max === 57, '수업 준비 기본값 80% → 57'); delete R.meta.pct;
 
 // 데미지 = 맞힌 소문제 수, 재도전은 늘어난 만큼만 (= 가장 많이 맞힌 시도)

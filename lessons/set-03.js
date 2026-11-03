@@ -1,5 +1,6 @@
-// 공통수학2 Ⅱ-1 집합 · 3차시 「집합 사이의 포함 관계」 (학습과정 3차시 v4 기준, 2026-10-31 사용자 컨펌)
-// 수업 순서: 도입 → 개념1 → 문제1 → 보강 → 개념2 → 문제2 → 개념3 → 문제3 → 보강 → 형성평가(보스)
+// 공통수학2 Ⅱ-1 집합 · 3차시 「집합 사이의 포함 관계」 (레이드용 v5 기준, 2026-11-03 사용자 컨펌 — v4 를 갈아엎음)
+// 수업 순서: 도입 → 개념1 → 문제1 → ⭐ 한 걸음 더 → 개념2 → 문제2 → 개념3 → 문제3 → 개념4(부분집합의 개수 · 학습지 STEP 5) → 문제4 → 형성평가(보스)
+// v5 변경: 스페셜 「부분집합의 개수 규칙」 삭제 → 개념 4 + 문제 4(필드 몬스터) · 보강 예제는 학습지에만(문제 1 뒤)
 // 몬스터 = 학습지 문제 묶음. 소문제 하나 = 체력 한 칸. 첫 시도(attempt 0)는 학습지 그대로, 재도전은 소문제 전부 새 숫자.
 // 이 수업에서 ⊂ 는 서로 같은 집합도 포함하는 부분집합 기호다 (학습지와 같음).
 // 모든 정답은 tests/lesson.test.js 에서 원소를 직접 세거나 조건을 직접 계산해 검산한다 (check 정보 사용).
@@ -102,7 +103,7 @@
       S.number(`A = ${st(base)} 의 부분집합의 개수는?`, 8, '0개 1 + 1개 3 + 2개 3 + 3개 1 = 8개', { base }),
       S.number(`A = ${st(base)} 의 진부분집합의 개수는?`, 7, '부분집합 8개 − 자기 자신 1개 = 7개', { base, proper: true })];
   }
-  // 보강: 부분집합의 개수 규칙
+  // 문제 4 (v5 · 학습지 STEP 5 뒤): 부분집합의 개수 규칙
   const LET = ['a', 'b', 'c', 'd', 'e'];
   function countRule(m, n, letter) {
     const base = LET.slice(0, n), sb = `{${base.join(', ')}}`;
@@ -134,7 +135,7 @@
       sym(EQQ, '{2, 4, 6}', cond('even', 8), '≠', S.EQ, `${cond('even', 8)} = {2, 4, 6, 8}. 8 이 없다 → ≠`, { a: [2, 4, 6], cond: ['even', 8] }),
     ] : [genPerm(r), genDivEq(r), genParityEq(r)]) },
     m3: { title: '문제 3', sprite: 0, make: (a, r) => subsetTable(a === 0 ? [1, 2, 3] : sorted(r.shuffle(range(1, 9)).slice(0, 3)), r) },
-    s2: { title: '보강 · 부분집합의 개수 규칙', special: true, sprite: 0, make: (a, r) => (a === 0 ? countRule(4, 4, 'a') : (() => { const n = r.int(3, 5); return countRule(r.int(4, 6), n, r.pick(LET.slice(0, n))); })()) },
+    m4: { title: '문제 4', sprite: 'extra:4', make: (a, r) => (a === 0 ? countRule(4, 4, 'a') : (() => { const n = r.int(3, 5); return countRule(r.int(4, 6), n, r.pick(LET.slice(0, n))); })()) },
   };
 
   // ── 형성평가 (보스) — 세트1: 학습지 그대로(사진 채점은 4단계), 세트2: 숫자를 바꾼 재도전 ──
@@ -149,7 +150,7 @@
       S.subsets('4. 집합 {5, 7} 의 부분집합을 모두 쓰시오.', [5, 7], '∅, {5}, {7}, {5, 7}'),
       S.number('5. 집합 {5, 7} 의 진부분집합의 개수는?', 3, '부분집합 4개 − 자기 자신 1개 = 3개', { base: [5, 7], proper: true }),
       S.number('6. [도전] 두 집합 A = {1, a}, B = {1, 3} 에 대하여 A ⊂ B 이고 B ⊂ A 일 때, a 의 값은?', 3, 'A ⊂ B 이고 B ⊂ A → A = B → a = 3', { solveB: [1, 3] }),
-      S.number('7. [보강·도전] 집합 {1, 2, 3, 4, 5, 6, 7} 의 부분집합 중에서 2와 6을 반드시 포함하고 5는 포함하지 않는 부분집합의 개수는?', 16, '정해진 원소 3개(2, 6, 5)를 빼고 나머지 4개만 → 2⁷⁻³ = 16', { base: [1, 2, 3, 4, 5, 6, 7], must: [2, 6], not: [5] }),
+      S.number('7. [도전] 집합 {1, 2, 3, 4, 5, 6, 7} 의 부분집합 중에서 2와 6을 반드시 포함하고 5는 포함하지 않는 부분집합의 개수는?', 16, '정해진 원소 3개(2, 6, 5)를 빼고 나머지 4개만 → 2⁷⁻³ = 16', { base: [1, 2, 3, 4, 5, 6, 7], must: [2, 6], not: [5] }),
     ],
     2: [
       S.blanks('1. □ 안에 ⊂ 또는 ⊄ 를 쓰시오.', [{ left: '{2, 4}', right: '{2, 4, 6}', answer: '⊂' }, { left: '{2, 5}', right: '{2, 4, 6}', answer: '⊄' }], S.SUB, '{2, 4} 의 원소는 모두 있다 → ⊂, 5 는 없다 → ⊄', { pairs: [[[2, 4], [2, 4, 6]], [[2, 5], [2, 4, 6]]] }),
@@ -158,7 +159,7 @@
       S.subsets('4. 집합 {2, 8} 의 부분집합을 모두 쓰시오.', [2, 8], '∅, {2}, {8}, {2, 8}'),
       S.number('5. 집합 {2, 8} 의 진부분집합의 개수는?', 3, '부분집합 4개 − 자기 자신 1개 = 3개', { base: [2, 8], proper: true }),
       S.number('6. [도전] 두 집합 A = {1, a}, B = {1, 5} 에 대하여 A ⊂ B 이고 B ⊂ A 일 때, a 의 값은?', 5, 'A ⊂ B 이고 B ⊂ A → A = B → a = 5', { solveB: [1, 5] }),
-      S.number('7. [보강·도전] 집합 {1, 2, 3, 4, 5, 6} 의 부분집합 중에서 1과 4를 반드시 포함하고 6은 포함하지 않는 부분집합의 개수는?', 8, '정해진 원소 3개(1, 4, 6)를 빼고 나머지 3개만 → 2⁶⁻³ = 8', { base: [1, 2, 3, 4, 5, 6], must: [1, 4], not: [6] }),
+      S.number('7. [도전] 집합 {1, 2, 3, 4, 5, 6} 의 부분집합 중에서 1과 4를 반드시 포함하고 6은 포함하지 않는 부분집합의 개수는?', 8, '정해진 원소 3개(1, 4, 6)를 빼고 나머지 3개만 → 2⁶⁻³ = 8', { base: [1, 2, 3, 4, 5, 6], must: [1, 4], not: [6] }),
     ],
   };
 
@@ -171,7 +172,8 @@
     { kind: 'monster', id: 'm2' },
     { kind: 'concept', id: 'c3', title: '개념 3 · 부분집합 모두 구하기 · 진부분집합', say: '원소를 0개, 1개, 2개, … 고르는 순서로 빠짐없이. 진부분집합 = 부분집합 중에서 자기 자신을 뺀 것' },
     { kind: 'monster', id: 'm3' },
-    { kind: 'monster', id: 's2' },
+    { kind: 'concept', id: 'c4', title: '개념 4 · 부분집합의 개수', say: '원소가 하나 늘 때마다 2배 → 원소 n개면 2ⁿ개. 특정 원소 p개를 반드시 포함 2ⁿ⁻ᵖ개 · q개를 포함하지 않음 2ⁿ⁻ᑫ개' },
+    { kind: 'monster', id: 'm4' },
     { kind: 'boss', id: 'boss', title: '형성평가 · 포함의 성주' },
   ];
   STEPS.forEach((s) => { if (s.kind === 'monster') Object.assign(s, { title: MONSTERS[s.id].title, special: !!MONSTERS[s.id].special }); });
@@ -180,14 +182,16 @@
     id: 'set-03', no: 3,
     title: '집합 사이의 포함 관계',
     unit: '공통수학2 Ⅱ-1 집합 · 3차시',
-    sheet: '학습과정 3차시 v4',
+    sheet: '레이드용 v5',
     // 수업 준비에서 이 학습지 PDF 를 올리면 [개념] 칸마다 잘라 넣는 위치 (A4 쪽 비율 0~1, 여러 칸이면 위아래로 이어 붙임)
-    crops: { intro: [{ p: 1, x: 0.0426, y: 0.1245, w: 0.4458, h: 0.3329 }], c1: [{ p: 1, x: 0.0426, y: 0.4619, w: 0.4458, h: 0.3044 }], c2: [{ p: 1, x: 0.5116, y: 0.6489, w: 0.4458, h: 0.0979 }, { p: 2, x: 0.0426, y: 0.0984, w: 0.4458, h: 0.1488 }], c3: [{ p: 2, x: 0.0426, y: 0.3542, w: 0.4458, h: 0.1818 }],
-      // 문제 · 보강 · 형성평가 (교사 「📄 문제 화면」 해설용)
-      m1: [{ p: 1, x: 0.5116, y: 0.403, w: 0.4458, h: 0.1321 }], s1: [{ p: 1, x: 0.5116, y: 0.536, w: 0.4458, h: 0.1146 }], m2: [{ p: 2, x: 0.0426, y: 0.2454, w: 0.4458, h: 0.1043 }], m3: [{ p: 2, x: 0.0426, y: 0.5342, w: 0.4458, h: 0.2238 }], s2: [{ p: 2, x: 0.5116, y: 0.0984, w: 0.4458, h: 0.2266 }], boss: [{ p: 2, x: 0.5116, y: 0.3232, w: 0.4458, h: 0.4239 }] },
+    crops: { intro: [{ p: 1, x: 0.0426, y: 0.1447, w: 0.4458, h: 0.2897 }], c1: [{ p: 1, x: 0.0426, y: 0.4326, w: 0.4458, h: 0.3161 }, { p: 1, x: 0.5116, y: 0.1447, w: 0.4458, h: 0.0964 }],
+      c2: [{ p: 1, x: 0.5116, y: 0.8098, w: 0.4458, h: 0.0941 }, { p: 2, x: 0.0426, y: 0.103, w: 0.4458, h: 0.1251 }], c3: [{ p: 2, x: 0.0426, y: 0.4049, w: 0.4458, h: 0.1556 }], c4: [{ p: 2, x: 0.0426, y: 0.7857, w: 0.4458, h: 0.1523 }],
+      // 문제 · 보강 · 형성평가 (교사 「📄 문제 화면」 해설용) — v5 학습지에서 잰 위치 (tools/worksheet/measure_crops.js)
+      m1: [{ p: 1, x: 0.5116, y: 0.2375, w: 0.4458, h: 0.2284 }], s1: [{ p: 1, x: 0.5116, y: 0.4623, w: 0.4458, h: 0.172 }], m2: [{ p: 2, x: 0.0426, y: 0.2245, w: 0.4458, h: 0.1839 }], m3: [{ p: 2, x: 0.0426, y: 0.5569, w: 0.4458, h: 0.2297 }],
+      m4: [{ p: 2, x: 0.5116, y: 0.103, w: 0.4458, h: 0.2599 }], boss: [{ p: 2, x: 0.5116, y: 0.3593, w: 0.4458, h: 0.5005 }] },
     theme: '05-ruins', // 던전 테마: 고대 유적 (배경 dg-05 · 포털 portal-05)
     videos: { c1: 'https://drive.google.com/file/d/1IDjUrEbc8MQETDYN6xVvqar54iTNImqE/view', m1: 'https://drive.google.com/file/d/1IDjUrEbc8MQETDYN6xVvqar54iTNImqE/view', s1: 'https://drive.google.com/file/d/1IDjUrEbc8MQETDYN6xVvqar54iTNImqE/view', c2: 'https://drive.google.com/file/d/1esVCdmI-JcpCwDIQXY_9Eias913A4Akz/view', m2: 'https://drive.google.com/file/d/1esVCdmI-JcpCwDIQXY_9Eias913A4Akz/view', c3: 'https://drive.google.com/file/d/1SZYWHNaEDKIPLPWLfxRsjnbLn_nOKJ2n/view',
-      m3: 'https://drive.google.com/file/d/18_NnrD-wotD13Y3SocRjk7O2Rc6C96FC/view', s2: 'https://drive.google.com/file/d/1fY1nAbkFrQNf7CcHfEpDIIr7grCJulEp/view' }, // 🎬 기본 설명 영상 (드라이브 「학습자료 > 모션그래픽」 720p: 15 부분집합 · 16 서로 같은 집합 · 17 부분집합 모두 구하기 · 06 부분집합의 개수 2ⁿ · 10 부분집합의 개수 규칙)
+      m3: 'https://drive.google.com/file/d/18_NnrD-wotD13Y3SocRjk7O2Rc6C96FC/view', c4: 'https://drive.google.com/file/d/1fY1nAbkFrQNf7CcHfEpDIIr7grCJulEp/view', m4: 'https://drive.google.com/file/d/1fY1nAbkFrQNf7CcHfEpDIIr7grCJulEp/view' }, // 🎬 기본 설명 영상 (드라이브 「학습자료 > 모션그래픽」 720p: 15 부분집합 · 16 서로 같은 집합 · 17 부분집합 모두 구하기 · 06 부분집합의 개수 2ⁿ · 10 부분집합의 개수 규칙)
     goal: '부분집합의 뜻을 알고 ⊂, ⊄ 로 나타낸다 · 서로 같은 집합을 찾는다 · 부분집합을 모두 구한다',
     defaultPct: 90,
     steps: STEPS,
@@ -196,6 +200,6 @@
     items(id, seed, attempt) { return MONSTERS[id].make(attempt, DS.Rng(`${seed}|${id}|${attempt}`)); },
     COND,
     next: { title: '4차시 · 교집합과 합집합', ask: '선생님 폰과 내 폰에 둘 다 있는 앱은? 둘 중 하나라도 있는 앱은 모두 몇 개?', link: '오늘 배운 부분집합(⊂)을 이용해 두 집합의 공통 부분(∩)과 합친 집합(∪)을 만들어요.' }, // 다음 수업 (초안)
-    boss: { title: '3차시 형성평가 · 포함의 성주', sprite: 2, items: 7, hpItems: 6, sets: BOSS, tags: ['c1', 'c2', 'c2', 'c3', 'c3', 'c2', 'c3'] }, // tags: 문항별 개념 (개인 결과 · 복습 추천)
+    boss: { title: '3차시 형성평가 · 포함의 성주', sprite: 2, items: 7, hpItems: 6, sets: BOSS, tags: ['c1', 'c2', 'c2', 'c3', 'c3', 'c2', 'c4'] }, // tags: 문항별 개념 (개인 결과 · 복습 추천)
   });
 })();

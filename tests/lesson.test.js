@@ -61,11 +61,11 @@ function verify(q, label) {
 }
 
 // ── 1. 수업 순서 ─────────────────────────────────────────
-check(L.steps.map((s) => s.kind).join() === 'intro,concept,monster,monster,concept,monster,concept,monster,monster,boss', `순서 ${L.steps.map((s) => s.kind)}`);
-check(L.steps.filter((s) => s.kind === 'monster').map((s) => s.id).join() === 'm1,s1,m2,m3,s2', '몬스터 순서');
+check(L.steps.map((s) => s.kind).join() === 'intro,concept,monster,monster,concept,monster,concept,monster,concept,monster,boss', `순서 ${L.steps.map((s) => s.kind)}`);
+check(L.steps.filter((s) => s.kind === 'monster').map((s) => s.id).join() === 'm1,s1,m2,m3,m4', '몬스터 순서 (v5: 개수 규칙 = 문제 4)');
 // PDF 자르기 위치: 개념 설명 칸마다 있고, A4 쪽 안에 들어간다
 L.steps.filter((s) => s.kind === 'intro' || s.kind === 'concept').forEach((s) => { const rs = (L.crops || {})[s.id]; check(rs && rs.length && rs.every((r) => r.p >= 1 && r.p <= 2 && r.x >= 0 && r.y >= 0 && r.w > 0.1 && r.h > 0.05 && r.x + r.w <= 1 && r.y + r.h <= 1), `${s.id}: PDF 자르기 위치`); });
-check(L.steps.filter((s) => s.special).map((s) => s.id).join() === 's1,s2', '보강 = 스페셜 몬스터');
+check(L.steps.filter((s) => s.special).map((s) => s.id).join() === 's1', '보강 = 스페셜 몬스터 (v5: 한 걸음 더만)');
 check(L.defaultPct === 90, '기준% 기본값 90');
 
 // ── 2. 첫 시도 = 학습지 정답 ─────────────────────────────────
@@ -84,9 +84,9 @@ check(m3.length === 6 && m3[4].answer === 8 && m3[5].answer === 7, '문제3: 6�
 m3.forEach((q, i) => verify(q, `m3-${i + 1}`));
 check(m3[0].answer.map((k) => m3[0].options[k]).join('|') === '∅', '문제3 0개 줄 = ∅');
 check(m3[2].answer.map((k) => m3[2].options[k]).sort().join('|') === '{1, 2}|{1, 3}|{2, 3}', '문제3 2개 줄');
-const s2 = L.items('s2', 'x', 0);
-check(s2.map((q) => q.answer).join() === '16,16,8,8', `보강 개수 규칙 학습지 정답 ${s2.map((q) => q.answer)}`);
-s2.forEach((q, i) => verify(q, `s2-${i + 1}`));
+const m4 = L.items('m4', 'x', 0);
+check(m4.map((q) => q.answer).join() === '16,16,8,8', `문제 4 개수 규칙 학습지 정답 ${m4.map((q) => q.answer)}`);
+m4.forEach((q, i) => verify(q, `m4-${i + 1}`));
 
 // ── 3. 재도전 문제 (숫자가 바뀜) ───────────────────────────────
 for (const id of Object.keys(L.monsters)) {
