@@ -45,10 +45,11 @@ DS.Bonus = (function () {
   let preview = false, evalOpen = {}; // preview = 교사 대기공간: 모든 층 미리 보기 (기록 저장 안 함) · evalOpen = 꼭대기 층 열림 { 'eval-1': true }
   async function enter(m, opt = {}) {
     me = m; preview = !!opt.preview; train = !!opt.train;
-    no = preview ? Number(opt.no) || 0 : Number(await N().get(`unlock/${ck(m.c)}`).catch(() => 0)) || 0;
+    if (m && m.test && !opt.train) opt = Object.assign({}, opt, { no: 99 }); // 🧪 테스트 · 🎮 체험판: 모든 층 · 꼭대기 층 열림
+    no = preview || (m && m.test) ? Number(opt.no) || 99 : Number(await N().get(`unlock/${ck(m.c)}`).catch(() => 0)) || 0;
     liveNo = 0; // 2026-11-03 사용자 결정: 수업 중 잠금 · 수업 중인 차시를 목록에서 빼기 없앰
     mine = preview ? {} : (await N().get(`bonus/${ck(m.c)}/${m.n}`).catch(() => null)) || {};
-    evalOpen = preview ? null : (await N().get(`evalOpen/${ck(m.c)}`).catch(() => null)) || {};
+    evalOpen = m && m.test ? Object.fromEntries(DS.Lessons.list.filter((l) => l.eval).map((l) => [l.id, true])) : preview ? null : (await N().get(`evalOpen/${ck(m.c)}`).catch(() => null)) || {};
     DS.UI.show('screen-bonus');
     render();
   }

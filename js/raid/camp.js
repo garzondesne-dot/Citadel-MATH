@@ -139,7 +139,7 @@ DS.Camp = (function () {
       <div class="camp-bar"><button class="btn small" id="camp-code">코드로 입장</button></div>
       <div class="camp-forge panel framed st-panel" id="camp-forge"><p class="muted small">용사 상태를 불러오는 중…</p></div>`;
     status();
-    $('#camp-anvil').onclick = () => pick('#camp-anvil', () => DS.Forge.open(me));
+    $('#camp-anvil').onclick = () => pick('#camp-anvil', () => (me.test ? DS.Forge.open(me, { preview: true, no: 99 }) : DS.Forge.open(me))); // 🧪 체험판: 모든 레시피
     $('#camp-castle').onclick = () => pick('#camp-castle', () => DS.Control.run(() => DS.Bonus.enter(me)));
     $('#camp-gate').onclick = () => {
       if (live && live.open) { if (tutMode === 'A') { tutMark('a'); tutClear(); } return pick('#camp-gate', () => DS.Control.run(() => enterCode(live.code)), 'portal'); }
@@ -225,7 +225,7 @@ DS.Camp = (function () {
     const el = document.getElementById('camp-forge'); if (!el) return;
     const k = ck(me.c), get = (p) => DS.Net.get(`${p}/${k}/${me.n}`).catch(() => null);
     const [rec, bonus, cards, no, evo] = await Promise.all([get('records'), get('bonus'), get('cards'), DS.Net.get(`unlock/${k}`).catch(() => 0), DS.Net.get(`evalOpen/${k}`).catch(() => null)]);
-    const L = DS.Account && !me.test ? await DS.Account.looks(me).catch(() => ({ heroes: [], seals: 0 })) : { heroes: [], seals: 0 };
+    const L = DS.Account ? await DS.Account.looks(me).catch(() => ({ heroes: [], seals: 0 })) : { heroes: [], seals: 0 };
     const g = DS.Grow ? await DS.Grow.mine(me).catch(() => null) : null;
     const TD = DS.Titles ? await DS.Titles.data(me).catch(() => ({})) : {}, earned = DS.Titles ? DS.Titles.earned(TD).filter((t) => !/^lv\d/.test(t.id)) : [];
     if (!document.getElementById('camp-forge')) return;
@@ -240,7 +240,7 @@ DS.Camp = (function () {
       <div class="st-next">🎁 <b>다음 보상</b> — ${nextReward(L, owned, seals)}</div>`;
     el.querySelectorAll('[data-gear]').forEach((b) => (b.onclick = settings));
     // 장면: 등불 · 깃발 · 상태 표시 (글씨 없이)
-    const stage = document.querySelector('#camp .camp-stage'), states = DS.CampScene.floorStates(Number(no) || 0, sealed);
+    const stage = document.querySelector('#camp .camp-stage'), states = DS.CampScene.floorStates(me.test ? 99 : Number(no) || 0, sealed);
     DS.CampScene.lamps(stage, states, me.test ? [] : DS.CampScene.freshLamps(`citadel-lamps-${k}-${me.n}`, states));
     DS.CampScene.flag(stage, TD.bonus && ((TD.bonus['eval-1'] || {}).eb || {}).clear ? 'gold' : (evo || {})['eval-1'] ? 'open' : '');
     cues(rec, owned, Number(no) || 0);
@@ -342,7 +342,7 @@ DS.Camp = (function () {
   async function settings() {
     const L = await DS.Account.looks(me);
     let hero = me.hero, fx = me.fx || 'flame', title = me.title || 'none';
-    const TD = DS.Titles ? await DS.Titles.data(me).catch(() => ({})) : {}, got = DS.Titles ? DS.Titles.earned(TD).map((t) => t.id) : [];
+    const TD = DS.Titles ? await DS.Titles.data(me).catch(() => ({})) : {}, got = DS.Titles ? (me.test ? DS.Titles.all().map((t) => t.id) : DS.Titles.earned(TD).map((t) => t.id)) : []; // 🧪 체험판: 호칭 모두
     const el = document.createElement('div'); el.className = 'modal camp-modal';
     const draw = () => {
       el.innerHTML = `<div class="quiz-box framed set-box"><div class="set-head"><h2>⚙ 설정</h2><button class="btn" id="set-x">닫기</button><button class="btn primary" id="set-ok">저장</button></div>

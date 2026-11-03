@@ -176,9 +176,9 @@ DS.Hall = (function () {
     const n = hs.length, row0 = Math.ceil(n / 2);
     const pos = hs.map(([u, p], i) => { const r = i < row0 ? 0 : 1, k = r ? i - row0 : i, cnt = r ? n - row0 : row0; const x = 7 + ((k + 0.5) / Math.max(1, cnt)) * 86 + (r ? 2 : 0); return { u, p, x, y: r ? 87 : 72 }; }); // 2026-11-04: 공격대를 위로 (몬스터와 간격 줄이고 아래 잘림 없게 · 예전 82 · 96)
     $('#h-arena').innerHTML = `<div class="raid2 bg-scene th-${L.theme || ''} ${step.kind === 'boss' ? 'boss quake' : ''}${step.special ? ' special' : ''}" id="raid">
-      <div class="raid-top"><b>${step.kind === 'boss' ? '👑 ' : step.special ? '⭐ ' : step.review ? '📖 ' : ''}${esc(f.title)}</b><div class="raid-bars"><div class="raid-hp"><i id="rh-bar"></i><span id="rh-txt"></span></div><div class="raid-atk" id="rh-atk" title="몬스터 공격 게이지 (학생 폰과 같은 시계)"><i></i><span></span></div></div></div>
+      <div class="raid-top"><b>${step.kind === 'boss' ? '👑 ' : step.special ? '⭐ ' : step.review ? '📖 ' : ''}${esc(f.title)}</b></div>
       ${step.special ? '<div class="raid-banner">⭐ 스페셜 몬스터 난입!</div>' : step.kind === 'boss' ? '<div class="raid-banner boss">👑 보스 출현!</div>' : ''}
-      <div class="raid2-shadow"></div><div class="raid2-mon" id="rm">${DS.Art.monster(f.sprite, 'idle', 'float')}<div id="rm-fx"></div></div>
+      <div class="raid2-shadow"></div><div class="raid2-mon" id="rm"><div class="raid-bars over-head"><div class="raid-hp"><i id="rh-bar"></i><span id="rh-txt"></span></div><div class="raid-atk" id="rh-atk" title="몬스터 공격 게이지 (학생 폰과 같은 시계)"><i></i><span></span></div></div>${DS.Art.monster(f.sprite, 'idle', 'float')}<div id="rm-fx"></div></div>
       ${pos.map((o) => `<div class="fh2" id="fh-${o.u}" style="left:${o.x}%;top:${o.y}%;z-index:${5 + Math.round(o.y / 10)}"><span class="fh-name">${DS.Titles.nameHtml(o.p, { size: 16, short: true })}</span><div class="${o.x > 50 ? 'face-l' : ''}">${DS.Art.hero(o.p.hero, 'idle')}</div><i class="shadow"></i></div>`).join('')}
       <div class="raid-clear" id="r-clear" hidden></div><div class="h-focus-badge">⚠ 집중모드</div>
     </div>`;

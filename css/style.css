@@ -1363,3 +1363,7 @@ body:has(#test-bar) #ver-tag { bottom: calc(64px + env(safe-area-inset-bottom));
 .ic-bar .icb.wide small { font-size: 14px; color: #ffe7b0; }
 .ic-bar .icb:hover { border-color: #8fb6ff; }
 .ic-bar .icb-t { font-size: 20px; color: #ffe7b0; padding: 0 4px; }
+/* 2026-11-04: 종합상황실 몬스터 체력 · 공격 게이지 = 몬스터 머리 위 (사용자 요청) */
+.raid2-mon .raid-bars.over-head { position: absolute; left: 8%; right: 8%; top: 12%; z-index: 4; font-size: 18px; }
+.raid2-mon .raid-bars.over-head .raid-hp { height: 26px; }
+.raid2 .raid-top { padding-bottom: 14px; }
