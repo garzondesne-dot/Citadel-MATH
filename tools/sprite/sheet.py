@@ -41,7 +41,7 @@ if os.environ.get('ROWS'):
     rows = [(ys_[i], ys_[i + 1]) for i in range(len(ys_) - 1)]
 frames = []  # (줄 번호, 배열)
 for ri, (y0, y1) in enumerate(rows):
-    for (x0, x1) in spans(fg[y0:y1].sum(0) > 1, 14):
+    for (x0, x1) in spans(fg[y0:y1].sum(0) > 1, int(os.environ.get('COLGAP', 14))):  # COLGAP: 프레임 사이 틈이 좁을 때(창 · 이펙트가 옆 칸에 닿음) 작게
         c = rgba[y0:y1, x0:x1]; ys, xs = np.where(c[..., 3] > 0)
         if len(ys) < 50: continue
         frames.append((ri, c[ys.min():ys.max() + 1, xs.min():xs.max() + 1]))
