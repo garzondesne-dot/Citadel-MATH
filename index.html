@@ -56,6 +56,8 @@
         <p class="muted small">학습지 PDF · 단계별 이미지 · 설명 영상 링크 · 몬스터 체력 기준% · 생각 시간 · 엑셀 차시</p>
         <p class="t-sec"><span class="t-ic">👥</span><b>학생 관리</b> <span class="muted small">명단 · 비밀번호 · 개인 기록</span></p>
         <button id="s-go" class="btn big">👥 학생 관리 열기</button>
+        <p class="t-sec"><span class="t-ic">📊</span><b>학급 대시보드</b> <span class="muted small">교사만 · 표 · 랭킹 · 세특 메모</span></p>
+        <button id="d-go" class="btn big">📊 학급 대시보드 열기</button>
         <p class="t-sec"><span class="t-ic">🧙</span><b>선생님 모습</b> <span class="muted small">종합상황실 · 캠프</span></p>
         <div id="t-skin" class="heroes t-skin"></div>
         <p class="t-sec"><span class="t-ic">🧪</span><b>테스트 모드</b> <span class="muted small">학생 화면으로 혼자 확인</span></p>
@@ -127,6 +129,11 @@
   <div class="wrap wide"><button class="nav-back btn small">≪ 메뉴화면</button><div id="sm-body"></div></div>
 </section>
 
+<!-- 📊 학급 대시보드 (교사만) -->
+<section id="screen-dash" class="screen">
+  <div class="wrap wide"><button class="nav-back btn small">≪ 메뉴화면</button><div id="dash-body"></div></div>
+</section>
+
 <!-- 보강던전 (학생 혼자 · 모닥불에서) -->
 <section id="screen-bonus" class="screen">
   <div class="wrap"><div id="bonus"></div></div>
@@ -192,6 +199,7 @@
 <script src="js/engine/xlsx-lite.js"></script>
 <script src="js/raid/prep.js"></script>
 <script src="js/raid/students.js"></script>
+<script src="js/raid/dash.js"></script>
 <script src="js/raid/nav.js"></script>
 <script src="js/raid/app.js"></script>
 </body>

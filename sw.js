@@ -4,7 +4,7 @@
 //  - v0.9.6 차시별 다운로드: STATIC = 공통 그림만. 던전 배경 · 포털 · 몬스터는 그 차시에 들어갈 때 받고(DS.Art.lessonEnter), 지금 · 바로 전 차시 것만 남긴다
 //  - Firebase(다른 주소)는 건드리지 않는다. 수업 진행에는 인터넷이 필요하다
 // 새 버전을 낼 때 CACHE 이름을 'ds-' + DS.VERSION 과 맞춘다 (tests/pwa.test.js 가 확인)
-const CACHE = 'ds-citadel-0.9.6.9';
+const CACHE = 'ds-citadel-0.9.6.10';
 const ASSETS = 'ds-assets';
 const CORE = [
   './', './index.html', './css/style.css', './manifest.webmanifest',
@@ -12,7 +12,7 @@ const CORE = [
   './js/engine/ui.js', './js/engine/video.js', './js/engine/audio.js', './js/engine/setgen.js', './js/engine/quiz.js', './js/engine/lessons.js', './js/engine/sheet-lesson.js',
   './lessons/set-02.js', './lessons/set-03.js', './lessons/set-04.js', './lessons/set-05.js', './lessons/set-06.js', './js/engine/art.js', './js/engine/fx.js', './js/engine/qrcode.min.js', './js/engine/pwa.js',
   './js/raid/net.js', './js/raid/model.js', './js/raid/words.js', './js/raid/actions.js', './js/raid/account.js', './js/raid/control.js',
-  './lessons/unit-set.js', './js/raid/cards.js', './js/raid/forge.js', './js/raid/grow.js', './js/raid/titles.js', './js/raid/result.js', './js/raid/sharecard.js', './js/raid/bonus.js', './js/raid/camp.js', './js/raid/tcamp.js', './js/raid/student.js', './js/raid/bots.js', './js/raid/test.js', './js/raid/teacher.js', './js/raid/hall.js', './js/engine/xlsx-lite.js', './js/raid/prep.js', './js/raid/students.js', './js/raid/nav.js', './js/raid/app.js',
+  './lessons/unit-set.js', './js/raid/cards.js', './js/raid/forge.js', './js/raid/grow.js', './js/raid/titles.js', './js/raid/result.js', './js/raid/sharecard.js', './js/raid/bonus.js', './js/raid/camp.js', './js/raid/tcamp.js', './js/raid/student.js', './js/raid/bots.js', './js/raid/test.js', './js/raid/teacher.js', './js/raid/hall.js', './js/engine/xlsx-lite.js', './js/raid/prep.js', './js/raid/students.js', './js/raid/dash.js', './js/raid/nav.js', './js/raid/app.js',
 ];
 const STATIC = [
   './assets/art/heroes-v2.webp', './assets/art/hero-blond-v2-2.webp', './assets/art/hero-witch-v2.webp', './assets/art/hero-elf-v2.webp', './assets/art/hero-ninja-v2.webp', './assets/art/hero-priest-v2.webp', './assets/art/hero-lancer-v2.webp', './assets/art/hero-dwarf-v2.webp', './assets/art/hero-sage-v2.webp', './assets/art/hero-paladin-v2.webp', './assets/art/hero-monk-v2.webp', './assets/art/hero-dancer-v2.webp', './assets/art/hero-bard-v2.webp', './assets/art/hero-alchemist-v2.webp', './assets/art/hero-pirate-v2.webp', './assets/art/hero-frost-v2.webp', './assets/art/hero-tamer-v2.webp', './assets/art/hero-math-v2.webp', './assets/art/cards-v4.webp', './assets/art/frame-v2.webp', './assets/art/brand-m2-title-v3.webp', './assets/art/brand-m2-header-v3.webp', './assets/art/brand-bg-v1.webp', './assets/art/menu-icons-v1.webp', './assets/art/heroes-extra-v1.webp', './assets/art/card-frame-v1.webp', './assets/art/card-arts-v1.webp', './assets/art/forge-anvil-v1.webp', './assets/art/forge-hammer-v1.webp', './assets/art/camp-forest-v1.webp', './assets/art/campfire-v2.webp', './assets/art/camp-trees-v1.webp', './assets/art/anvil-v1.webp', './assets/art/trophy-v1.webp', './assets/art/medals-rank-v1.webp', './assets/art/medals-dungeon-v1.webp', './assets/art/forgec-anvil-v1.webp', './assets/art/forgec-hammer-v1.webp', './assets/art/forgec-material-v1.webp', './assets/art/forgec-operator-v1.webp', './assets/art/forgec-button-v1.webp', './assets/art/forgec-background-v1.webp', './assets/art/dportal-bonus-v1.webp', './assets/fonts/Galmuri11.woff2', './assets/fonts/Galmuri11-Bold.woff2',

@@ -65,6 +65,7 @@ DS.App = (function () {
       else if (sc.role === 'hall' && sc.code) await DS.Hall.enter(sc.code, sc.key);
       else if (sc.role === 'prep' && sc.lesson && (await A().isAdmin())) await DS.Prep.enter(sc.lesson);
       else if (sc.role === 'students' && (await A().isAdmin())) await DS.Students.enter();
+      else if (sc.role === 'dash' && (await A().isAdmin())) await DS.Dash.enter();
       else if (sc.role === 'tcamp' && (await A().isAdmin())) await DS.TCamp.enter(sc);
     } catch (e) { DS.Scene.clear(); DS.UI.toast(e.message || String(e), 3200); }
   }
@@ -250,6 +251,7 @@ DS.App = (function () {
     $('#h-go').onclick = go(() => DS.Hall.enter($('#h-code').value.trim(), $('#h-key').value.trim()));
     $('#p-go').onclick = go(async () => DS.Prep.enter($('#p-lesson').value));
     $('#s-go').onclick = go(async () => DS.Students.enter());
+    $('#d-go').onclick = go(async () => DS.Dash.enter());
     $('#x-go').onclick = go(async () => { if (!(await A().isAdmin())) throw Object.assign(new Error('교사 계정으로 로그인해야 해요.'), { user: true }); await DS.Test.start($('#x-lesson').value); });
   }
   // v0.8.4: 교사 메뉴 「📋 만든 수업」 — 반 · 차시 · 코드 · 진행 중/끝남 → [↩ 들어가기] [✕ 없애기]

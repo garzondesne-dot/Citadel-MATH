@@ -22,7 +22,7 @@ DS.Nav = (function () {
   const ask = (id) => !ASK[id] || window.confirm(ASK[id]);
   // v0.8.5: ≪ 뒤로 = 바로 전 화면 (화면을 새로 열어 실시간 연결은 깨끗이 끊되, 시작 화면부터가 아니라 한 단계 위로)
   //  수업 화면(학생) · 보강던전 → 모닥불 / 교사 화면 · 수업 준비 · 학생 관리 → 교사 메뉴 / 모닥불 → 학생 첫 화면 / 종합상황실 → 종합상황실 입력
-  const UP = { 'screen-student': 'camp', 'screen-bonus': 'camp', 'screen-teacher': 'teacher', 'screen-tcamp': 'teacher', 'screen-prep': 'teacher', 'screen-students': 'teacher', 'screen-camp': 'student', 'screen-hall': 'hall' };
+  const UP = { 'screen-student': 'camp', 'screen-bonus': 'camp', 'screen-teacher': 'teacher', 'screen-tcamp': 'teacher', 'screen-prep': 'teacher', 'screen-students': 'teacher', 'screen-dash': 'teacher', 'screen-camp': 'student', 'screen-hall': 'hall' };
   const reopen = () => {
     leaving = true;
     let up = UP[current()]; const sc0 = DS.Scene.get() || {};
