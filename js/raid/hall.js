@@ -186,16 +186,27 @@ DS.Hall = (function () {
     } else clr.hidden = true;
     play();
   }
-  // ⚔ 마무리 일격 (2026-11-03): 몬스터 · 보스의 체력을 0 으로 만든 학생을 크게 — 오래 걸려 끝까지 푼 친구가 「모두의 과제를 마무리」한 느낌
+  // ⚔ 마무리 일격 (2026-11-03 · 0.9.6.9 고침: 이름 배너 없앰): 체력을 0 으로 만든 학생의 용사가 슬로모션으로 돌진 → 하얀 섬광 · 큰 이펙트 두 번 · 강한 흔들림
   function finisher(u, step) {
-    const arena = $('#raid'), h = u && document.getElementById(`fh-${u}`), p = (R.players || {})[u]; if (!arena || !p) return;
-    arena.classList.remove('fin-flash'); void arena.offsetWidth; arena.classList.add('fin-flash'); setTimeout(() => arena.classList.remove('fin-flash'), 1600);
-    const b = document.createElement('div'); b.className = 'fin-banner';
-    b.innerHTML = `<small>⚔ 마무리 일격!</small><b>${p.num ? `${p.num}번 ` : ''}${DS.UI.esc(p.nick || '')}</b><span>${step.kind === 'boss' ? '보스를' : '몬스터를'} 쓰러뜨려 모두의 과제를 마무리했어요!</span>`;
-    arena.appendChild(b); setTimeout(() => b.remove(), 4200);
-    if (h) { h.classList.add('finisher'); setTimeout(() => h.classList.remove('finisher'), 4200); }
-    if (DS.FX) { DS.FX.play(arena, p.fx || 'flame', { perfect: true, scale: 1 }); setTimeout(() => DS.FX.play(arena, p.fx || 'flame', { perfect: true, scale: 0.8 }), 450); }
-    DS.Sound.hit(); setTimeout(() => DS.Sound.correct(), 300);
+    const arena = $('#raid'), h = u && document.getElementById(`fh-${u}`), m0 = $('#rm'), p = (R.players || {})[u]; if (!arena || !p) return;
+    arena.classList.remove('slowmo', 'fin-flash', 'quake-big'); void arena.offsetWidth; arena.classList.add('slowmo'); // 1) 장면이 느려지며 살짝 어두워지고 다가감
+    if (h && m0) {
+      const hr = h.getBoundingClientRect(), mr = m0.getBoundingClientRect();
+      h.style.setProperty('--tx', `${(mr.left + mr.width / 2 - (hr.left + hr.width / 2)) * 0.82}px`);
+      h.style.setProperty('--ty', `${(mr.top + mr.height * 0.7 - (hr.top + hr.height / 2)) * 0.82}px`);
+      h.classList.remove('dash', 'swing', 'dash-slow'); void h.offsetWidth; h.classList.add('finisher', 'dash-slow');
+      pose(h, p.hero || 0, 'attack', 2400);
+    }
+    setTimeout(() => { // 2) 임팩트
+      arena.classList.remove('slowmo'); arena.classList.add('fin-flash', 'quake-big');
+      setTimeout(() => arena.classList.remove('fin-flash', 'quake-big'), 1500);
+      const ar = arena.getBoundingClientRect(), mr = m0 ? m0.getBoundingClientRect() : ar;
+      const at = { x: mr.left - ar.left + mr.width / 2, y: mr.top - ar.top + mr.height / 2 }, sc = Math.min(ar.width, ar.height) / 520;
+      if (DS.FX) { DS.FX.play(arena, p.fx || 'flame', { ...at, scale: sc, perfect: true }); setTimeout(() => DS.FX.play(arena, p.fx || 'flame', { ...at, scale: sc * 0.75, perfect: true }), 220); }
+      if (m0) { m0.classList.remove('flash'); void m0.offsetWidth; m0.classList.add('flash'); }
+      DS.Sound.hit(); setTimeout(() => DS.Sound.hit(), 140); setTimeout(() => DS.Sound.correct(), 380);
+    }, 1450);
+    if (h) setTimeout(() => h.classList.remove('finisher', 'dash-slow'), 2600);
   }
   // 👾 몬스터 공격 (학생 폰과 같은 시계 DS.Raid.atkClock): 체력바 바로 밑 게이지 → 다 차면 큰 공격 연출 + 용사 전원 피격 · 헉헉
   let atkT = null, atkMemo = {};
