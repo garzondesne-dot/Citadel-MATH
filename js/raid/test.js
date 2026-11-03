@@ -14,18 +14,22 @@ DS.Test = (function () {
   const CLS = '테스트', ME = () => ({ c: CLS, n: 1, name: '선생님(테스트)', hero: look.hero, fx: look.fx, test: true });
   let prep = {}, look = { hero: 0, fx: 'flame' }, where = 'camp';
   // v0.8.0: 학생이 실제로 겪는 흐름 그대로 — 🧪 테스트 모닥불 → (1초 뒤) 차원문이 나타남 → 탭해서 입장 → 수업 → 모닥불로 돌아옴
-  async function start(lessonId) {
+  let demo = null; // 🎮 체험판(DS.DEMO): 한 파일 HTML · 인터넷 없음 · 모닥불 없이 바로 던전 → 끝나면 「다시 하기」
+  async function start(lessonId, opt = {}) {
     if (real) return;
     L = DS.Lessons.get(lessonId);
-    // 1) 학습지 이미지 · 영상 링크는 실제 서버에서 읽기만
-    try { prep = (await DS.Net.get(`prep/${lessonId}`)) || {}; } catch (e) { prep = {}; }
+    demo = opt.demo ? opt : null;
+    // 1) 학습지 이미지 · 영상 링크는 실제 서버에서 읽기만 (체험판은 파일 안에 든 개념 카드)
+    if (opt.prep) prep = opt.prep;
+    else { try { prep = (await DS.Net.get(`prep/${lessonId}`)) || {}; } catch (e) { prep = {}; } }
     // 2) 이 기기 안의 테스트 저장소로 바꿔 끼움 (실제 수업 · 계정에는 손대지 않음)
     real = DS.Net.impl;
     local = DS.Net.LocalNet('citadel-test-db');
     DS.Net.use(local);
     local.wipe();
     await local.init(); local.setUid('test-teacher');
-    look = { hero: 0, fx: 'flame' };
+    look = demo ? { hero: demo.hero ?? 16, fx: demo.fx || 'flame' } : { hero: 0, fx: 'flame' };
+    if (demo) { where = 'raid'; bar(true); await openGate(); await join(code); return; }
     where = 'camp'; bar(true);
     await DS.Camp.enter(ME());
     DS.UI.toast(`🧪 테스트 모드 · ${L.title} — 학생 모닥불이에요. 곧 차원문이 열려요`, 3200);
@@ -35,24 +39,34 @@ DS.Test = (function () {
   async function openGate() {
     const r = await DS.Act.createRoom(L.id, CLS);
     code = r.code; R = null; armed = '';
+    if (demo) return;
     draw(true);
   }
   // 모닥불에서 차원문을 누르면 (camp.js 가 부름)
   async function join(c) {
     code = c; where = 'raid';
-    DS.Bots.start(code, FRIENDS, { speed: 2, acc: { item: 0.75, boss: 0.8 } });
+    DS.Bots.start(code, demo ? demo.friends || FRIENDS : FRIENDS, { speed: 2, acc: { item: 0.75, boss: 0.8 } });
     draw(true);
-    await DS.Student.enter(code, { num: 1, nick: '선생님(테스트)', hero: look.hero, fx: look.fx, cls: CLS }, {
+    await DS.Student.enter(code, { num: 1, nick: demo ? demo.nick || '나' : '선생님(테스트)', hero: look.hero, fx: look.fx, cls: CLS }, {
       test: { prep, exit: () => backToCamp(), onRender: (l, room) => { R = room; draw(); } },
     });
-    DS.UI.toast(`가상 친구 ${FRIENDS}명이 들어오면 아래 「수업 시작 ▶」`, 3000);
+    DS.UI.toast(demo ? '친구들이 들어오면 아래 「수업 시작 ▶」을 눌러요' : `가상 친구 ${FRIENDS}명이 들어오면 아래 「수업 시작 ▶」`, 3000);
   }
   function backToCamp() {
     let score = '';
     try { if (R && L) { const m = DS.Raid.mastery(L, R, 'test-teacher'); score = ` · 형성평가 ${m.slice(0, L.boss.hpItems).filter(Boolean).length} / ${L.boss.hpItems}`; } } catch (e) { /* 무시 */ }
+    if (demo) { DS.Bots.stop(); R = null; return demoEnd(score); }
     DS.Bots.stop(); where = 'camp'; R = null; draw(true);
     DS.Camp.enter(ME());
     DS.UI.toast(`🏆 테스트 수업 끝!${score} — 모닥불로 돌아왔어요 (기록은 저장하지 않아요)`, 4000);
+  }
+  // 🎮 체험판 끝 화면: 점수 · 다시 하기 (기록 없음)
+  function demoEnd(score) {
+    bar(false); DS.Student.stop();
+    const el = document.getElementById('st-body'); DS.UI.show('screen-student');
+    if (el) el.innerHTML = `<div class="panel framed center win"><h2>🏆 체험 수업 끝!</h2><p>${esc(L.title)}${esc(score)}</p>${DS.Art.hero(look.hero, 'win', 'big')}
+      <p class="muted small">「모두의 던전」 체험판 · 기록은 저장하지 않아요</p><button class="btn primary" id="demo-again">↻ 처음부터 다시 하기</button></div>`;
+    const b = document.getElementById('demo-again'); if (b) b.onclick = () => location.reload();
   }
   const setLook = (hero, fx) => { look = { hero, fx }; };
   // 아래 막대: ◀ · 지금 단계 · 다음 ▶ · 끝내기
@@ -79,15 +93,15 @@ DS.Test = (function () {
     const sig = `${i}|${studs}|${R.state.closed ? 1 : 0}`;
     if (el.dataset.sig === sig) return;
     el.dataset.sig = sig;
-    el.innerHTML = `<b>🧪 테스트</b><span class="tb-step">${esc(DS.Control.stepName(L, R))}</span>
+    el.innerHTML = `<b>${demo ? '🎮 체험판' : '🧪 테스트'}</b><span class="tb-step">${esc(DS.Control.stepName(L, R))}</span>
       <button class="btn small" id="tb-back"${i < 0 ? ' disabled' : ''}>◀</button><button class="btn primary" id="tb-next">${next}</button><button class="btn small" id="tb-x">끝내기</button>`;
     $('#tb-back').onclick = () => DS.Control.run(() => DS.Act.go(code, R, L, -1));
     $('#tb-next').onclick = () => DS.Control.run(async () => {
       if (DS.Raid.isLobby(R) && studs < 2) { DS.UI.toast('가상 친구가 들어오는 중이에요…'); return; }
-      if (DS.Raid.isFinale(L, R) && armed !== 'end') { armed = 'end'; DS.UI.toast('한 번 더 누르면 테스트 수업을 끝내요'); return; }
+      if (DS.Raid.isFinale(L, R) && armed !== 'end') { armed = 'end'; DS.UI.toast(demo ? '한 번 더 누르면 체험 수업을 끝내요' : '한 번 더 누르면 테스트 수업을 끝내요'); return; }
       armed = ''; await DS.Act.go(code, R, L, 1);
     });
-    $('#tb-x').onclick = () => { if (confirm('테스트를 끝내고 교사 메뉴로 돌아갈까요?')) finish(false); };
+    $('#tb-x').onclick = () => { if (demo) { if (confirm('처음부터 다시 할까요?')) location.reload(); return; } if (confirm('테스트를 끝내고 교사 메뉴로 돌아갈까요?')) finish(false); };
   }
   function finish() {
     if (!real) return;

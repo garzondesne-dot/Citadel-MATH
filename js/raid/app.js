@@ -13,6 +13,7 @@ DS.App = (function () {
   let hero = 0, sMode = 'login', masks = {}, pending = null, pendingTest = null;
 
   async function boot() {
+    if (DS.DEMO) return demoBoot();
     DS.Art.install();
     DS.PWA.init();
     try { await DS.Net.init(); } catch (e) { DS.UI.show('screen-home'); $('#home-msg').textContent = e.message; return; }
@@ -43,6 +44,14 @@ DS.App = (function () {
       pendingTest = q.get('test'); DS.UI.toast('교사 로그인하면 테스트가 바로 시작돼요.', 3200);
     }
     await resume();
+  }
+  // 🎮 체험판 (tools/demo/pack.js 가 만든 한 파일 HTML): 서버 · 로그인 없이 학생 폰 화면으로 곧바로 한 차시
+  async function demoBoot() {
+    DS.Art.install();
+    DS.Net.use(DS.Net.LocalNet('citadel-demo-db'));
+    await DS.Net.init();
+    DS.Nav.init();
+    await DS.Test.start(DS.DEMO.lesson, { demo: true, prep: DS.DEMO.prep || {}, hero: DS.DEMO.hero, nick: DS.DEMO.nick, friends: DS.DEMO.friends });
   }
   // 새로고침(아래로 당기기 등) 뒤 보던 장면으로 바로 돌아간다 (같은 탭의 sessionStorage)
   async function resume() {
