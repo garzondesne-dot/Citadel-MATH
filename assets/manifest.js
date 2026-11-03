@@ -33,7 +33,7 @@ DS.ASSETS = {
   monsters: { src: 'monsters-v2.webp', cols: 3, rows: 3, poses: { idle: 0, attack: 1, down: 2 }, names: ['수정 슬라임', '바위 골렘', '성채 드래곤'], flip: [1] }, // flip: 오른쪽을 보고 그려진 줄 (용사는 왼쪽에 선다)
   cards: { src: 'cards-v4.webp', cols: 4, rows: 2 }, // 카드 그림 8칸: 0 소속 · 1 개수 · 2 공집합 · 3 포함 · 4 반례 · 5 같음 · 6 부분집합 목록 · 7 개수의 비밀
   frame: { src: 'frame-v2.webp', slice: 140 },
-  background: { src: 'dungeon.webp' },
+  background: { src: 'menu-bg-v1.webp' }, // 2026-11-04 돌 아치 던전 (옛 dungeon.webp)
   scene: { src: 'dungeon.webp' }, // 학생 폰 전투 장면: 몬스터 등 뒤 배경 (던전마다 바꿀 수 있게 따로 둠)
   // ── 2026-10-31 사용자 제공 추가 에셋 (아직 화면에 안 씀 — 쓰기 시작할 때 sw.js STATIC 에 넣는다). 자세한 설명: docs/ASSETS.md
   heroesExtra: { src: 'heroes-extra-v1.webp', cols: 4, rows: 8, poses: { idle: 0, walk: 1, attack: 2, fall: 3 }, count: 8,
@@ -78,7 +78,16 @@ DS.ASSETS = {
     props: { dummy: { src: 'camp-dummy-v2.webp', cols: 2 }, shelf: { src: 'camp-shelf-v2.webp', cols: 2 }, mail: { src: 'camp-mail-v2.webp', cols: 2 } }, // dummy = v2 도트 2칸 (평소 | 맞음 — 누르면 기울어짐) // v0.9.6 캠프 기본 오브젝트 그림 (🎯 허수아비 · 📚 책장 · 📮 우편함). 비어 있으면 이모지 팻말 — v2 도트 그림이 오면 파일 이름만 넣는다
   },
   // 🎨 UI 키트 v1 (2026-11-04 사용자 제공 · 이름은 tools/sprite/ui_cut.py 가 붙임): 도트 아이콘 40칸(64×64) + 버튼 · 틀 조각 — 화면에는 아직 안 씀 (다음 단계에서 이모지 · 버튼을 바꿈)
-  ui: {"icons": {"src": "ui-icons-v1.webp", "cell": 64, "cols": 8, "rows": 5, "names": ["sword", "close", "back", "gear", "lock", "unlock", "ok", "ng", "sheet", "video", "hint", "mis", "pin", "dash", "students", "prep", "castle", "tent", "mail", "dummy", "anvil", "fire", "rest", "gate", "boss", "seal", "fx", "medal", "gift", "star", "heal", "timer", "shield", "compass", "demo", "focus", "talk", "class", "full", "retry"]}, "kit": {"btn": {"src": "ui-btn-v1.webp", "w": 97, "h": 34}, "btn-press": {"src": "ui-btn-press-v1.webp", "w": 96, "h": 32}, "btn-off": {"src": "ui-btn-off-v1.webp", "w": 97, "h": 34}, "btn-gold": {"src": "ui-btn-gold-v1.webp", "w": 98, "h": 36}, "btn-gold-press": {"src": "ui-btn-gold-press-v1.webp", "w": 98, "h": 35}, "x": {"src": "ui-x-v1.webp", "w": 34, "h": 34}, "panel": {"src": "ui-panel-v1.webp", "w": 111, "h": 110}, "back": {"src": "ui-back-v1.webp", "w": 93, "h": 27}, "tab": {"src": "ui-tab-v1.webp", "w": 67, "h": 27}, "tab-on": {"src": "ui-tab-on-v1.webp", "w": 67, "h": 27}, "bar": {"src": "ui-bar-v1.webp", "w": 199, "h": 22}}},
+  // UI 키트 (2026-11-04 · 2판): 돌 무늬 없는 정사각 9칸 조각 — 높은 카드 · 긴 버튼 모두 늘려 씀. 창도 같은 키트
+  ui: {"icons": {"src": "ui-icons-v2.webp", "cell": 64, "cols": 8, "rows": 5, "names": ["sword", "close", "back", "gear", "lock", "unlock", "ok", "ng", "sheet", "video", "hint", "mis", "pin", "dash", "students", "prep", "castle", "tent", "mail", "dummy", "anvil", "fire", "rest", "gate", "boss", "seal", "fx", "medal", "gift", "star", "heal", "timer", "shield", "compass", "demo", "focus", "talk", "class", "full", "retry"]},
+    // 글 속 이모지 → 도트 아이콘 (DS.Art 가 화면에 그릴 때 저절로 바꿈 · ✕ ★ 🧪 등 표에 없는 것은 그대로)
+    emoji: {"⚔": "sword", "⚙": "gear", "🔒": "lock", "🔓": "unlock", "✔": "ok", "✅": "ok", "❌": "ng", "📄": "sheet", "🎬": "video", "💡": "hint", "🔎": "mis", "📌": "pin", "📊": "dash", "👥": "students", "📋": "prep", "🏰": "castle", "⛺": "tent", "📮": "mail", "🎯": "dummy", "⚒": "anvil", "🔥": "fire", "🏕": "rest", "🚪": "gate", "👑": "boss", "🟪": "seal", "✨": "fx", "🏅": "medal", "🎁": "gift", "⭐": "star", "💚": "heal", "⏱": "timer", "🛡": "shield", "🧭": "compass", "🎮": "demo", "🔴": "focus", "💬": "talk", "🏫": "class", "⛶": "full", "↩": "retry"},
+    kit: { btn: 'ui-btn-v2.webp', press: 'ui-btn-press-v2.webp', off: 'ui-btn-off-v2.webp', gold: 'ui-btn-gold-v2.webp', goldPress: 'ui-btn-gold-press-v2.webp', tab: 'ui-tab-v2.webp', tabOn: 'ui-tab-on-v2.webp', input: 'ui-input-v2.webp', icbtn: 'ui-icbtn-v2.webp', slice: 12 },
+    panel: { src: 'ui-panel-v3.webp', slice: 13, w: 10 }, // 창 = 버튼과 같은 키트(아이콘 버튼 틀 · 안쪽만 더 어둡게) — 금장 테두리는 통일감 없어 안 씀 (사용자 2026-11-04)
+    // 첫 화면: 엠블럼 + 소품 (폰 = 바닥 · 엠블럼 양옆 깃발 / PC = 양옆 깃발 · 바닥 — 횃불은 배경에 이미 있어 안 씀). 자리는 화면 % · 너비 px(폰은 390 기준 비율)
+    home: { emblem: 'ui-emblem-v1.webp',
+      phone: [['menu-prop-banner-v1.webp', 'left:4%;bottom:170px', 62], ['menu-prop-banner-v1.webp', 'right:4%;bottom:170px', 62], ['menu-prop-chest-v1.webp', 'left:2%;bottom:14px', 92], ['menu-prop-crystal-v1.webp', 'left:26%;bottom:10px', 64], ['menu-prop-lantern-v1.webp', 'right:30%;bottom:16px', 36], ['menu-prop-books-v1.webp', 'right:12%;bottom:8px', 74], ['menu-prop-shield-v1.webp', 'right:0;bottom:16px', 60]],
+      wide: [['menu-prop-banner-v1.webp', 'left:4%;top:0', 90], ['menu-prop-banner-v1.webp', 'right:4%;top:0', 90], ['menu-prop-chest-v1.webp', 'left:6%;bottom:4%', 150], ['menu-prop-crystal-v1.webp', 'left:18%;bottom:3%', 110], ['menu-prop-lantern-v1.webp', 'right:21%;bottom:5%', 64], ['menu-prop-books-v1.webp', 'right:9%;bottom:3%', 130], ['menu-prop-shield-v1.webp', 'right:2%;bottom:5%', 110]] } },
   // 수학 카드 (모루 연성): 공통 금테 + 위쪽 무기·마법 그림 8칸. 좌표는 테두리(384×512) 기준. 그림은 한 색으로 차분하게, 등급은 아래 보석 색
   cardKit: { frame: 'card-frame-v1.webp', w: 384, h: 512, arts: { src: 'card-arts-v1.webp', cols: 8, names: ['검', '주판', '수정구', '반지', '돋보기', '쌍수정', '두루마리', '빛나무'] },
     box: { art: [62, 24, 292, 186], body: [72, 214, 270, 172], plate: [92, 398, 230, 48], gem: [166, 418, 52, 74] } },
@@ -89,7 +98,7 @@ DS.ASSETS = {
   // 브랜드: 공통 = 배경 · 메뉴 아이콘(학생 · 교사 · 종합상황실 · 수업 준비 · 로그인), 에디션 = 제목 화면 · 머리 배너 · 로고 (과목이 늘면 에디션만 바꿈)
   brand: { name: '모두의 던전', edition: '공통수학2', full: '모두의 던전 : 공통수학2', tagline: '함께 풀고, 모두 함께 돌파하라',
     bg: 'brand-bg-v1.webp', menu: { src: 'menu-icons-v1.webp', cols: 5, kinds: { student: 0, teacher: 1, hall: 2, prep: 3, login: 4 } },
-    title: 'brand-m2-title-v3.webp', header: 'brand-m2-header-v3.webp', logo: 'brand-m2-logo-v3.webp' },
+    title: 'brand-m2-title-v3.webp', header: 'menu-logo-v1.webp', logo: 'brand-m2-logo-v3.webp' },
   panels: { src: 'ui-panels-v1.webp', cols: 2, rows: 2, kinds: { inventory: 0, paper: 1, dialog: 2, reward: 3 } }, // 남색 인벤토리 · 양피지 문제지 · 청록 대화창 · 보라 보상창
   fonts: { pixel: 'assets/fonts/Galmuri11.woff2', pixelBold: 'assets/fonts/Galmuri11-Bold.woff2' },
 };

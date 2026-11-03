@@ -1390,3 +1390,12 @@ body:has(#test-bar) #ver-tag { bottom: calc(64px + env(safe-area-inset-bottom));
 .tabs { overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none; }
 .tabs .tab { flex: 0 0 auto; white-space: nowrap; padding: 8px 10px; }
 .phase-pill { white-space: nowrap; writing-mode: horizontal-tb; }
+
+/* ── 메인 화면 · UI 키트 (2026-11-04 · v0.9.6.29) — 그림은 배치표 → DS.Art.css() 가 입힘 ── */
+#screen-home .wrap { box-sizing: border-box; width: 100%; max-width: 560px; margin: 0 auto; padding: 0 14px 40px; }
+.brand-head.home-title { display: block; box-sizing: border-box; width: 88%; height: auto; padding: 0; margin: 12px auto 18px; }
+.brand-head .brand-ver { right: 0; bottom: -16px; opacity: .75; }
+#mode { text-align: center; font-size: 11px; opacity: .8; }
+.t-sec { border-bottom: 2px solid transparent; border-image: linear-gradient(90deg, #0000, #c99a3a, #0000) 1; padding-bottom: 4px; }
+.framed, .btn, .role, input, select, .tab { box-sizing: border-box; }
+.framed, input, select { max-width: 100%; }

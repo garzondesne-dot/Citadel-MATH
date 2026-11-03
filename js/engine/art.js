@@ -55,16 +55,80 @@ DS.Art = (function () {
     const a = A();
     return `@font-face{font-family:'Galmuri11';src:url('${a.fonts.pixel}') format('woff2');font-display:swap}
 @font-face{font-family:'Galmuri11';font-weight:700;src:url('${a.fonts.pixelBold}') format('woff2');font-display:swap}
-.framed{border:14px solid transparent;border-image:url('${a.base}${a.frame.src}') ${a.frame.slice} / 14px stretch}
-.bg-dungeon{background-image:linear-gradient(#0a1424aa,#0a1424ee),url('${a.base}${a.background.src}');background-size:cover;background-position:center}
+${a.ui && a.ui.panel ? '' : `.framed{border:14px solid transparent;border-image:url('${a.base}${a.frame.src}') ${a.frame.slice} / 14px stretch}`}
+.bg-dungeon{background:#0a0d18}.bg-dungeon::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(#0a142400 55%,#0a142466),url('${a.base}${a.background.src}') center top/cover no-repeat}
 .bg-scene{background-image:linear-gradient(#0a142466,#0a142411 40%,#0a1424dd),url('${a.base}${(a.scene || a.background).src}');background-size:cover;background-position:center 65%}
-${a.brand ? `.brand-head{background:url('${a.base}${a.brand.header}') center/contain no-repeat;aspect-ratio:3/1}
+${a.brand ? `.brand-head{background:url('${a.base}${a.brand.header}') center/contain no-repeat;aspect-ratio:960/461}
 .splash{background-image:url('${a.base}${a.brand.title}')}
 .menu-ic{background-image:url('${a.base}${a.brand.menu.src}');background-size:${a.brand.menu.cols * 100}% 100%}
 ${Object.entries(a.brand.menu.kinds).map(([k, i]) => `.menu-ic[data-ic="${k}"]{background-position:${(i / (a.brand.menu.cols - 1)) * 100}% 0}`).join('')}` : ''}
+${a.ui && a.ui.kit ? skin(a) : ''}
 ${(a.dungeons ? a.dungeons.ids : []).map((id) => `.bg-scene.th-${id}{background-image:linear-gradient(#0a142455,#0a142400 40%,#0a1424cc),url('${a.base}${a.dungeons.bg(id)}')}`).join('\n')}`;
   }
-  function install() { const s = document.createElement('style'); s.textContent = css(); document.head.appendChild(s); }
+  // UI 키트 입히기 (2026-11-04): 창 · 버튼 · 탭 · 입력칸 · ✕ · 뒤로 · 아이콘 버튼. 다른 규칙의 border 묶음 지정이 border-image 를 지우므로 그림 · 두께는 !important
+  function skin(a) {
+    const k = a.ui.kit, p = a.ui.panel, u = (f) => `url('${a.base}${f}')`, n = k.slice;
+    const img = (f, w) => `border-style:solid!important;border-color:transparent!important;border-width:${w}!important;border-image:${u(f)} ${n} fill / ${w} stretch!important;background:none!important;border-radius:0!important;image-rendering:pixelated`;
+    return `.framed{border:${p.w}px solid transparent!important;border-image:${u(p.src)} ${p.slice} fill / ${p.w}px stretch!important;background:none!important;image-rendering:pixelated}
+.btn{${img(k.btn, '9px')};color:#eef2ff;text-shadow:1px 1px 0 #000;padding:1px 6px;box-shadow:0 3px 8px #0007}
+.btn.big{padding:5px}.btn.small{border-width:6px!important;border-image-width:6px!important;padding:0 4px}
+.btn:active:not(:disabled){border-image-source:${u(k.press)}!important;transform:translateY(1px)}
+.btn.primary,.btn.on,.btn.help.on{border-image-source:${u(k.gold)}!important;color:#3a2204!important;text-shadow:0 1px 0 #ffefb0!important;font-weight:700}
+.btn.primary:active:not(:disabled),.btn.on:active{border-image-source:${u(k.goldPress)}!important}
+.btn:disabled{border-image-source:${u(k.off)}!important;color:#9aa0ad!important;opacity:.75}
+.btn.boss{color:#e3d2ff}
+.role{${img(k.btn, '11px')};color:#eef2ff;padding:1px 0;min-height:92px;justify-content:center;box-shadow:0 3px 8px #0008}
+.role.on{border-image-source:${u(k.gold)}!important;color:#3a2204!important}
+.role b{white-space:nowrap;font-size:clamp(12px,3.7vw,16px);text-shadow:1px 1px 0 #000}.role.on b{text-shadow:0 1px 0 #ffefb0}
+input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea{${img(k.input, '7px')};padding:3px 4px;color:#eef2ff}
+.tab{${img(k.tab, '8px 8px 0')};border-image-slice:${n} ${n} 0 fill!important;color:#b9c4e6!important;padding:2px 4px 6px}
+.tabs .tab{padding:2px 8px 6px}.tab.on{border-image-source:${u(k.tabOn)}!important;color:#ffd35a!important}
+.ic-bar .icb{${img(k.icbtn, '7px')};box-shadow:0 2px 6px #0007}.ic-bar .icb.on{border-image-source:${u(k.gold)}!important;box-shadow:0 0 10px #ffd35a88}
+.ui-ic{display:inline-block;width:1.2em;height:1.2em;vertical-align:-.25em;margin:0 .08em;background:${u(a.ui.icons.src)} 0 0/${a.ui.icons.cols * 100}% ${a.ui.icons.rows * 100}% no-repeat;image-rendering:pixelated;flex:none}
+.ui-x{border:7px solid transparent!important;border-image:${u(k.icbtn)} ${n} fill / 7px stretch!important;background:none!important;color:#ffd35a!important;text-shadow:1px 1px 0 #000;image-rendering:pixelated;border-radius:0!important;font-size:18px!important}
+.nav-back,#bn-back,.ui-back{${img(k.btn, '7px')};color:#e9eefc!important;padding:0 8px!important}
+${a.ui.home ? `.home-props{display:contents}.home-props img{position:fixed;z-index:1;pointer-events:none;image-rendering:pixelated;filter:drop-shadow(0 4px 4px #000a)}.home-props .wide{display:none}
+@media (min-width:701px){.home-props .phone{display:none}.home-props .wide{display:block}}
+#screen-home .wrap{position:relative;z-index:2}.home-emblem{display:block;width:110px;margin:22px auto 0;image-rendering:pixelated}` : ''}`;
+  }
+  // 이모지 → 도트 아이콘 (2026-11-04): 화면에 글이 그려질 때마다(MutationObserver) 표 ui.emoji 에 있는 이모지를 <i class="ui-ic"> 로 바꿈
+  //   입력칸 · 고르기(option) · 그림판 · 공유 카드(canvas) 는 건드리지 않음 · 글자(textContent)는 이모지만 빠짐
+  const SKIP = /^(INPUT|TEXTAREA|SELECT|OPTION|SCRIPT|STYLE|CANVAS|SVG|TITLE|CODE|PRE)$/;
+  let EMO = null;
+  function emoRe() {
+    if (EMO !== null) return EMO;
+    const m = ((A().ui || {}).emoji) || {}, keys = Object.keys(m).sort((x, y) => y.length - x.length).map((k) => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    return (EMO = keys.length ? new RegExp(`(?<!\u200D)(${keys.join('|')})\uFE0F?(?!\u200D)`, 'gu') : false);
+  }
+  const icHtml = (name) => { const ic = A().ui.icons, i = ic.names.indexOf(name); return i < 0 ? '' : `<i class="ui-ic" data-ic="${name}" aria-hidden="true" style="background-position:${((i % ic.cols) / (ic.cols - 1)) * 100}% ${(Math.floor(i / ic.cols) / (ic.rows - 1)) * 100}%"></i>`; };
+  function emojify(root) {
+    const re = emoRe(); if (!re || !root) return;
+    const map = A().ui.emoji, list = [];
+    const w = document.createTreeWalker(root.nodeType === 3 ? root.parentNode : root, NodeFilter.SHOW_TEXT, { acceptNode: (n) => { for (let p = n.parentNode; p && p !== document.body; p = p.parentNode) { if (SKIP.test(p.nodeName.toUpperCase()) || (p.classList && p.classList.contains('no-ic')) || p.isContentEditable) return NodeFilter.FILTER_REJECT; } re.lastIndex = 0; return re.test(n.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP; } });
+    for (let n = w.nextNode(); n; n = w.nextNode()) list.push(n);
+    list.forEach((n) => { const span = document.createElement('span'); span.className = 'ui-ics'; re.lastIndex = 0; const esc = n.nodeValue.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c]); span.innerHTML = esc.replace(re, (m, k) => icHtml(map[k]) || m); n.replaceWith(...span.childNodes); });
+  }
+  function watchEmoji() {
+    if (!emoRe() || typeof MutationObserver === 'undefined') return;
+    emojify(document.body);
+    let q = new Set(), t = 0;
+    const flush = () => { t = 0; const s = q; q = new Set(); s.forEach((n) => n.isConnected && emojify(n)); };
+    new MutationObserver((ms) => { ms.forEach((m) => { if (m.type === 'characterData') q.add(m.target.parentNode); else m.addedNodes.forEach((n) => { if (!(n.classList && n.classList.contains('ui-ic'))) q.add(n.nodeType === 3 ? n.parentNode : n); }); }); if (!t) t = requestAnimationFrame(flush); }).observe(document.body, { childList: true, subtree: true, characterData: true });
+  }
+  // 첫 화면 소품 · 엠블럼 (배치표 ui.home) — 첫 화면이 보일 때만 보임 (#screen-home 안에 넣음)
+  function homeProps() {
+    const a = A(), h = a.ui && a.ui.home, sc = document.getElementById('screen-home');
+    if (!h || !sc || sc.querySelector('.home-props')) return;
+    const box = document.createElement('div'); box.className = 'home-props'; box.setAttribute('aria-hidden', 'true');
+    // 폰 = 390px 기준으로 줄어듦 (min(원래 px, vw 비율)) · PC = 그대로
+    const fit = (v, wide) => (wide ? `${v}px` : `min(${v}px, ${(v / 3.9).toFixed(2)}vw)`);
+    const put = (list, cls) => list.forEach(([f, at, w]) => { const im = document.createElement('img'); im.className = cls; im.alt = ''; im.src = a.base + f; im.style.cssText = at.replace(/(bottom|top):(\d+)px/g, (m, k, v) => `${k}:${fit(+v, cls === 'wide')}`) + `;width:${fit(w, cls === 'wide')}`; box.appendChild(im); });
+    put(h.phone, 'phone'); put(h.wide, 'wide');
+    sc.appendChild(box);
+    const wrap = sc.querySelector('.wrap'), em = document.createElement('img');
+    em.className = 'home-emblem'; em.alt = ''; em.src = a.base + h.emblem; wrap.appendChild(em);
+  }
+  function install() { const s = document.createElement('style'); s.textContent = css(); document.head.appendChild(s); if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => { homeProps(); watchEmoji(); }); else { homeProps(); watchEmoji(); } }
   // ── 차시별 다운로드 (v0.9.6): 처음엔 공통 그림만 받고(sw.js STATIC), 던전 그림은 그 차시에 들어갈 때 받는다 ──
   // lessonFiles(L) = 그 차시 던전 배경 · 포털 · 몬스터 시트 파일 이름 · prefetch = 미리 받기(서비스 워커가 저장)
   // trim(Ls) = 폰 저장소(ds-assets)에서 Ls 차시들(지금 + 바로 전)에 쓰지 않는 던전 그림을 지운다 (공통 그림은 그대로)
@@ -98,5 +162,5 @@ ${(a.dungeons ? a.dungeons.ids : []).map((id) => `.bg-scene.th-${id}{background-
     const prev = L.no ? DS.Lessons.list.find((l) => l.no === L.no - 1) : null;
     setTimeout(() => trim([L, prev]), 5000);
   }
-  return { cell, hero, isV2, monster, card, install, pos, lessonFiles, prefetch, trim, lessonEnter, teacherHero, setTeacherHero };
+  return { emojify, cell, hero, isV2, monster, card, install, pos, lessonFiles, prefetch, trim, lessonEnter, teacherHero, setTeacherHero };
 })();
