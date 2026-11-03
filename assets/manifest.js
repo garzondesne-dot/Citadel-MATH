@@ -63,7 +63,13 @@ DS.ASSETS = {
   dportals: { bonus: 'dportal-bonus-v1.webp', mid: 'dportal-mid-v1.webp', big: 'dportal-big-v1.webp' },
   fields: { forest: 'field-forest-v1.webp', lava: 'field-lava-v1.webp', ice: 'field-ice-v1.webp' }, // 전투 배경 (달빛 숲 유적 · 화산 대장간 · 빙결 신전)
   camp: {
-    bg: 'camp-forest-v1.webp',                                   // 어두운 숲 야영지 (텐트 포함, 모닥불·입구는 따로)
+    bg: 'camp-citadel-v1.webp', size: [1182, 1330],              // 2026-11-03 v2: 달빛 숲 야영지 + 먼 성채 (텐트 · 오른쪽 아치 문은 그림에 있음 · 사용자 제공, 비활성 판)
+    // 그림 위 자리 (원본 픽셀 [x0, y0, x1, y1]): 성채 = 중단원던전 · 텐트 = 책장 · 아치 문 = 차시 던전 (2026-11-03 사용자 확정)
+    zones: { castle: [480, 160, 970, 470], tent: [148, 692, 396, 878], gate: [915, 575, 1095, 885] },
+    gateOn: { src: 'camp-gate-on-v1.webp', x: 820, y: 520, w: 362, h: 490 }, // 활성 판에서 문 · 계단 · 바닥 빛만 잘라 낸 겹 (수업이 열리면 켬)
+    lamps: { y: 418, xs: [540, 640, 740, 840, 940] },              // 성벽 등불 5개 (2~6차시 · 같은 높이 — 순서 없음)
+    flag: [718, 168],                                              // 가장 높은 첨탑 깃발 = 집합 관문 (꼭대기 층)
+    bgOld: 'camp-forest-v1.webp',                                  // 예전 숲 야영지 (지금은 안 씀)
     fire: { src: 'campfire-v2.webp', cols: 4, rows: 2, frames: 8, ms: 120 }, // 모닥불 8프레임: v2 = 돌·장작은 모든 프레임에 같게 고정하고 불꽃만 바뀜 (예전 v1 은 프레임마다 자리가 달라 통째로 흔들렸음)
     gate: { src: 'gates-v1.webp', cols: 2, rows: 1, states: { on: 0, off: 1 } }, // 던전 차원문: 활성 / 꺼짐
     trees: { src: 'camp-trees-v1.webp', cuts: [0, 630, 1020, 1550, 2048], base: 2048, names: ['활엽수', '침엽수', '고목', '전경 나무'] }, // 폭이 달라 cuts 비율로 자름

@@ -43,7 +43,7 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   await T.evaluate(async () => { const code = DS.Teacher.code(); const R = DS.Act.unpackRoom(await DS.Net.get(`rooms/${code}`)); const L = DS.Lessons.get(R.meta.lesson); await DS.Net.update(`rooms/${code}/state`, { step: L.steps.length }); });
   const C2 = await mk('C2'); await C2.goto(U + '&role=student'); await C2.waitForTimeout(1500);
   await C2.evaluate(() => DS.Camp.enter({ c: '1-3', n: 1, name: '김민준', hero: 0, fx: 'flame' })); await C2.waitForTimeout(1800);
-  console.log('③ 마무리 단계 캠프:', await C2.evaluate(() => ['camp-bonus', 'camp-dummy', 'camp-anvil'].map((id) => (document.getElementById(id) || {}).className).join(' | ')), '· live.open:', await C2.evaluate(() => DS.Net.get('live/1-3/open')));
+  console.log('③ 마무리 단계 캠프:', await C2.evaluate(() => ['camp-castle', 'camp-dummy', 'camp-anvil'].map((id) => (document.getElementById(id) || {}).className).join(' | ')), '· live.open:', await C2.evaluate(() => DS.Net.get('live/1-3/open')));
   // 수업 끝 → 개인 결과
   await S.bringToFront(); await T.evaluate(async () => { await DS.Act.endClass(DS.Teacher.code()); }); await S.waitForTimeout(2500);
   console.log('④ 수업 끝 폰:', await S.evaluate(() => { const m = document.querySelector('.rs-modal h2'); return m ? m.textContent : 'none'; }));

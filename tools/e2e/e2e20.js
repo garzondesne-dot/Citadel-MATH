@@ -37,7 +37,7 @@ const OUT = process.argv[2];
   await next(); await next(); await p.waitForTimeout(2500);
   const ok = await p.$('#rs-ok'); if (ok) await ok.click(); await p.waitForTimeout(1200);
   console.log('screen:', await p.evaluate(() => document.querySelector('.screen.active').id));
-  await p.click('#camp-bonus'); await p.waitForTimeout(1500); await shot('06-bonus', true);
+  await p.click('#camp-castle'); await p.waitForTimeout(1500); await shot('06-bonus', true);
   const has = await p.$('[data-fight="set-06|b4"]'); console.log('bonus b3 button:', !!has);
   if (has) { await p.click('[data-fight="set-06|b4"]'); await p.waitForTimeout(600); await p.click('#bf-go'); await p.waitForTimeout(800); await shot('07-b3-q1', true);
     console.log('vshade choices:', await p.evaluate(() => document.querySelectorAll('#quiz-choices .vshade').length)); }

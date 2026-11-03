@@ -1,6 +1,7 @@
 // 🏛 교사 대기공간 (v0.9.1): 새 수업을 만들면 공동 던전 대기실이 아니라 여기서 시작한다 (배경 = 푸른 숲 성소, 사용자 제공)
 // - 맨 위 가운데: 학생 입장용 QR 코드 크게 + 수업 코드 + 입장 인원(실시간)
-// - ⚒ 모루 · 🟪 중단원던전: 모든 층 미리 보기 (교사는 기록을 저장하지 않음)
+// - ⚒ 모루 · 🏰 성채(중단원던전): 모든 층 미리 보기 (교사는 기록을 저장하지 않음) · ⛺ 텐트 = 책장
+// - v2 (2026-11-03): 학생 캠프와 같은 달빛 숲 + 성채 (DS.CampScene) · 성벽 등불 = 우리 반 진행도 (열린 층 · 반 절반 이상 인장이면 금빛)
 // - 🌀 오른쪽 차원문: 이 수업 던전으로 → 교사 화면(◀ ▶ 리모컨). 수업이 끝나면 꺼진 차원문 + 🏫 우리 반 수업 소식
 // - 수업이 없으면 차원문 자리 → 「새 수업 열기」(교사 메뉴)
 // v0.9.2 (사용자 결정): 교사 폰은 리모컨에서 바로 시작하고, **종합상황실(PC)이 교사 캠프에서 시작**한다 (아이들에게 모루 · 보강던전을 자연스럽게 소개)
@@ -33,20 +34,21 @@ DS.TCamp = (function () {
   function render() {
     const base = DS.ASSETS.base, c = DS.ASSETS.camp;
     $('#tcamp').innerHTML = `<div class="tc-top" style="background-image:linear-gradient(#050b1cdd,#050b1cdd),url('${base}${DS.ASSETS.tcamp.bg}')">${code ? `<div class="tc-qr" id="tc-qr"></div><div class="tc-code"><span class="muted small">${hall ? '📱 휴대폰 카메라로 QR 을 찍고 입장해요' : '학생 입장 · QR 찍기 또는 모닥불 차원문'}</span><b>수업 코드 ${esc(code)}</b><span id="tc-info" class="small"></span></div>` : '<div class="tc-code"><b>🏛 교사 캠프</b><span class="muted small">수업을 열면 여기에 학생 입장 QR 이 크게 떠요</span></div>'}</div>
-      <div class="tc-stage camp-like" style="background-image:url('${base}${c.bg}')">
+      <div class="tc-stage camp-like cs-v2" style="background-image:url('${base}${c.bg}');aspect-ratio:${c.size[0]} / ${c.size[1]}">
+        ${DS.CampScene.layers()}
+        ${DS.CampScene.zone('tc-castle', 'castle', '🏰 집합 중단원던전')}${DS.CampScene.zone('tc-tent', 'tent', '⛺ 텐트 · 책장')}
         <div class="camp-fire"><i class="camp-glow"></i><i class="camp-glow g2"></i><i class="camp-fire-img" style="background-image:url('${base}${c.fire.src}');background-size:${c.fire.cols * 100}% ${(c.fire.rows || 1) * 100}%;background-position:0 0"></i></div>
-        ${prop('dummy', '🎯', '허수아비')}${prop('shelf', '📚', '책장')}${prop('mail', '📮', hall ? '우리 반 소식' : '대시보드')}
+        ${prop('dummy', '🎯', '허수아비')}${prop('mail', '📮', hall ? '우리 반 소식' : '대시보드')}
         <button class="camp-anvil tc-anvil" id="tc-anvil" aria-label="모루"><i class="camp-anvil-img" style="background-image:url('${base}${c.anvil.src}');background-size:${c.anvil.cols * 100}% 100%;background-position:0 0"></i><span class="camp-label">⚒ 모루</span></button>
-        <button class="camp-bonus tc-bonus mid" id="tc-bonus" aria-label="중단원던전"><i class="camp-bonus-img" style="background-image:url('${base}${DS.ASSETS.dportals.mid}')"></i><span class="camp-label">🟪 중단원던전</span></button>
         <div class="tc-hero">${DS.Art.hero(DS.Art.teacherHero(R), 'idle', 'huff')}<i class="shadow"></i></div>
-        <button class="camp-gate tc-gate" id="tc-gate" aria-label="차원문"></button>
+        <button class="cs-zone camp-gate-z tc-gate" id="tc-gate" style="${DS.CampScene.box(c.zones.gate)}" aria-label="차시 던전"><span class="camp-label"></span></button>
       </div>
       <div class="tc-bar" id="tc-bar"></div>`;
     if (code && window.QRCode) { const q = $('#tc-qr'); q.innerHTML = ''; new QRCode(q, { text: studentUrl(), width: hall ? 380 : 320, height: hall ? 380 : 320, correctLevel: QRCode.CorrectLevel ? QRCode.CorrectLevel.M : undefined }); }
     $('#tc-anvil').onclick = () => pick('#tc-anvil', () => DS.Forge.open(ME(), { preview: true, no: maxNo() }));
-    $('#tc-bonus').onclick = () => pick('#tc-bonus', () => DS.Control.run(() => DS.Bonus.enter(ME(), { preview: true, no: maxNo() })));
+    $('#tc-castle').onclick = () => pick('#tc-castle', () => DS.Control.run(() => DS.Bonus.enter(ME(), { preview: true, no: maxNo() })));
     $('#tc-dummy').onclick = () => pick('#tc-dummy', () => DS.Control.run(() => DS.Bonus.enter(ME(), { preview: true, train: true, no: maxNo() })));
-    $('#tc-shelf').onclick = () => pick('#tc-shelf', () => DS.Control.run(() => DS.Camp.shelf(maxNo())));
+    $('#tc-tent').onclick = () => pick('#tc-tent', () => DS.Control.run(() => DS.Camp.shelf(maxNo())));
     // 📮 우편함: 교사 폰 = 학급 대시보드(교사만) · 종합상황실(TV) = 우리 반 수업 소식(이름 · 순위 없음)만
     $('#tc-mail').onclick = () => pick('#tc-mail', () => DS.Control.run(async () => {
       if (!hall) return DS.Dash.enter();
@@ -59,17 +61,33 @@ DS.TCamp = (function () {
       if (hall) return pick('#tc-gate', toHall);
       pick('#tc-gate', () => DS.Control.run(() => DS.Teacher.open(code, hallKey)));
     };
+    document.querySelectorAll('#tcamp .camp-prop, #tcamp .camp-anvil').forEach((e) => e.classList.add('cs-int'));
     drawLive();
+    DS.CampScene.intro(document.querySelector('#tcamp .tc-stage'));
+  }
+  // 성벽 등불 = 우리 반 진행도: 열린 층(unlock) 켜짐 · 학생 절반 이상이 인장을 얻은 층은 금빛 (교사 폰만 · 종합상황실은 켜짐까지)
+  let lampCls = '';
+  async function drawLamps() {
+    const cls = R && R.meta && R.meta.cls; if (!cls || cls === lampCls) return; lampCls = cls;
+    const k = String(cls).replace(/[.#$/[\]]/g, '_'), no = Number(await DS.Net.get(`unlock/${k}`).catch(() => 0)) || 0;
+    let sealed = [];
+    if (!hall) {
+      const all = (await DS.Net.get(`bonus/${k}`).catch(() => null)) || {}, studs = Object.values(all), cnt = {};
+      studs.forEach((b) => DS.Bonus.seals(b || {}).forEach((id) => { cnt[id] = (cnt[id] || 0) + 1; }));
+      const n = Object.keys((await DS.Net.get(`roster/${k}`).catch(() => null)) || {}).length || studs.length;
+      sealed = Object.keys(cnt).filter((id) => n && cnt[id] * 2 >= n);
+    }
+    const stage = document.querySelector('#tcamp .tc-stage');
+    DS.CampScene.lamps(stage, DS.CampScene.floorStates(no, sealed));
+    const ev = (await DS.Net.get(`evalOpen/${k}`).catch(() => null)) || {}; DS.CampScene.flag(stage, ev['eval-1'] ? 'open' : '');
   }
   function drawLive() {
     const g = $('#tc-gate'); if (!g) return;
     const closed = R && DS.Raid.isClosed(R), theme = L ? L.theme : '';
-    if (!code) { g.className = 'camp-gate tc-gate empty'; g.innerHTML = '<span class="camp-label">🌀 새 수업 열기 (교사 메뉴)</span>'; }
-    else {
-      const D = DS.ASSETS.dungeons, i = D.ids.indexOf(theme);
-      g.className = `camp-gate tc-gate ${closed ? 'closed' : 'open'}`;
-      g.innerHTML = theme ? `<i class="camp-portal" style="background-image:url('${DS.ASSETS.base}${D.portal(theme)}');background-position:${closed ? '100%' : '0%'} 0"></i><span class="camp-label">${closed ? `🔒 수업 끝 · ${hall ? '종합상황실로' : '교사 화면 보기'}` : `⚔ ${L && L.no ? `${L.no}차시 ` : ''}${hall ? (R && DS.Raid.isLobby(R) ? '던전 입장' : '수업 중 · 종합상황실로') : '수업 진행'}`}</span>` : '<span class="camp-label">🌀 던전 불러오는 중…</span>';
-    }
+    const lb = g.querySelector('.camp-label'), on = !!(code && !closed && theme);
+    DS.CampScene.gate(document.querySelector('#tcamp .tc-stage'), on); g.classList.toggle('open', on);
+    if (lb) lb.innerHTML = !code ? '⚔ 새 수업 열기 (교사 메뉴)' : !theme ? '⚔ 던전 불러오는 중…' : closed ? `🔒 수업 끝 · ${hall ? '종합상황실로' : '교사 화면 보기'}` : `⚔ ${L && L.no ? `${L.no}차시 ` : ''}${hall ? (R && DS.Raid.isLobby(R) ? '던전 입장' : '수업 중 · 종합상황실로') : '수업 진행'}`;
+    drawLamps();
     const info = $('#tc-info');
     if (info && R) { const studs = Object.values(R.players || {}).filter((p) => !p.teacher).length; info.innerHTML = `${R.meta.cls ? `${esc(R.meta.cls)}반 · ` : ''}${L ? esc(L.title) : ''} · <b class="gold">입장 ${studs}명</b>${DS.Raid.isLobby(R) ? ' · 대기 중' : closed ? ' · 끝' : ' · 진행 중'}`; }
     const bar = $('#tc-bar');

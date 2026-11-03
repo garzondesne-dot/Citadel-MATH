@@ -1,4 +1,4 @@
-// 🏛 교사 캠프 = 학생 캠프 배치 + 모닥불 · 허수아비 · 책장 · 우편함 (교사 폰 · 종합상황실) — node tools/e2e/e2e32.js <출력 폴더>
+// 🏛 교사 캠프 = 학생 캠프 배치 (v2: 성채 · 텐트=책장 · 아치 문) + 모닥불 · 허수아비 · 우편함 (교사 폰 · 종합상황실) — node tools/e2e/e2e32.js <출력 폴더>
 const { chromium } = require('playwright');
 const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
 (async () => {
@@ -9,9 +9,9 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   await T.fill('#f-teacher .t-id', 'e2e-teacher'); await T.fill('#f-teacher .t-pw', '909090'); await T.click('#f-teacher .t-login'); await T.waitForTimeout(1000);
   const { code, hallKey } = await T.evaluate(() => DS.Act.createRoom('set-03', '1-1'));
   await T.evaluate(([c, k]) => DS.TCamp.enter({ code: c, hallKey: k }), [code, hallKey]); await T.waitForTimeout(1500);
-  log.push('교사 폰 오브젝트: ' + (await T.evaluate(() => ['tc-anvil', 'tc-bonus', 'tc-gate', 'tc-dummy', 'tc-shelf', 'tc-mail'].map((i) => (document.getElementById(i) ? i.slice(3) : `없음:${i}`)).join(' ') + (document.querySelector('#tcamp .camp-fire-img') ? ' fire' : ''))));
+  log.push('교사 폰 오브젝트: ' + (await T.evaluate(() => ['tc-anvil', 'tc-castle', 'tc-gate', 'tc-dummy', 'tc-tent', 'tc-mail'].map((i) => (document.getElementById(i) ? i.slice(3) : `없음:${i}`)).join(' ') + (document.querySelector('#tcamp .camp-fire-img') ? ' fire' : ''))));
   await T.locator('.tc-stage').scrollIntoViewIfNeeded(); await T.screenshot({ path: `${OUT}/t-camp.png` });
-  await T.click('#tc-shelf'); await T.waitForTimeout(1500); log.push('책장: ' + (await T.locator('.sh-l').count()) + '개 차시'); await T.screenshot({ path: `${OUT}/t-shelf.png` }); await T.click('#sh-x');
+  await T.click('#tc-tent'); await T.waitForTimeout(1500); log.push('책장: ' + (await T.locator('.sh-l').count()) + '개 차시'); await T.screenshot({ path: `${OUT}/t-shelf.png` }); await T.click('#sh-x');
   await T.click('#tc-dummy'); await T.waitForTimeout(1500); log.push('허수아비 화면: ' + (await T.evaluate(() => document.getElementById('screen-bonus').classList.contains('active'))));
   await T.evaluate(([c, k]) => DS.TCamp.enter({ code: c, hallKey: k }), [code, hallKey]); await T.waitForTimeout(1000);
   await T.click('#tc-mail'); await T.waitForTimeout(1500); log.push('우편함(교사 폰) → 대시보드: ' + (await T.evaluate(() => document.getElementById('screen-dash').classList.contains('active'))));

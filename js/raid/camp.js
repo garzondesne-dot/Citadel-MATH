@@ -1,4 +1,6 @@
-// 모닥불 (학생 개인 대기실 · 혼자만의 공간): 로그인하면 여기로 온다. 가로로 넘겨 보는 숲 야영지.
+// 모닥불 (학생 개인 대기실 · 혼자만의 공간): 로그인하면 여기로 온다.
+// v2 (2026-11-03 사용자 확정): 달빛 숲 야영지 + 먼 성채 (DS.CampScene) · 🏰 성채 = 중단원던전 · ⛺ 텐트 = 책장 · ⚔ 아치 문 = 차시 던전
+//   이름표(Lv · 호칭 · 이름)는 용사 밑 · 아래 칸 = 📊 용사 상태창 (능력치 6 · 장착 · 수집 · 다음 보상) · 글씨 없는 오브젝트(누르면 이름표)
 // 왼쪽 ⚒ 모루 → 연성창 (수업 코드 없이 언제나) · 가운데 🔥 모닥불 + 내 용사(씩씩) · 오른쪽 🌀 차원문
 // 차원문: 선생님이 우리 반 수업을 열면 그 차시 던전 테마의 포털이 실시간으로 나타난다(live/{반}) → 누르면 코드 없이 입장.
 //         수업이 끝나면 마지막 포털이 꺼진(봉쇄) 채로 남는다. ⚙ 설정: 용사 · 공격 이펙트 바꾸기 (잠긴 것은 조건 표시)
@@ -24,7 +26,7 @@ DS.Camp = (function () {
       const was = live; live = v && v.open && !DS.Raid.liveOpen(v, Date.now()) ? Object.assign({}, v, { open: false }) : v;
       if (!document.getElementById('screen-camp').classList.contains('active')) return;
       watchRoom(); drawGate(); tutApply();
-      if (live && live.open && (!was || !was.open || was.code !== live.code) && liveSeen !== live.code) { liveSeen = live.code; showGate(); forgeInfo(); DS.Sound.correct(); DS.UI.toast(`🌀 ${live.no ? `${live.no}차시 ` : ''}던전이 열렸어요! 차원문을 눌러 들어가요`, 4200); }
+      if (live && live.open && (!was || !was.open || was.code !== live.code) && liveSeen !== live.code) { liveSeen = live.code; showGate(); status(); DS.Sound.correct(); DS.UI.toast(`⚔ ${live.no ? `${live.no}차시 ` : ''}던전이 열렸어요! 오른쪽 빛나는 문을 눌러 들어가요`, 4200); }
     });
     if (code0) setTimeout(codeGate, 300); // QR 로 들어왔으면 코드 창을 바로
   }
@@ -54,9 +56,9 @@ DS.Camp = (function () {
     return !tut.b && !inClass() ? 'B' : '';
   }
   const TUT_B = [
-    ['#camp-bonus', '🟪 중단원던전', '배운 차시마다 <b>한 층씩 열리는</b> 혼자 도전 던전이에요. 보강 몬스터 · 형성평가 재대결 · 꼭대기 층 중단원 마무리! 한 층을 다 깨면 🟪 인장, 인장을 모으면 화려한 공격 이펙트가 열려요!'],
+    ['#camp-castle', '🏰 성채 · 중단원던전', '배운 차시마다 <b>성벽 등불이 하나씩 켜지는</b> 혼자 도전 던전이에요. 보강 몬스터 · 형성평가 재대결 · 꼭대기 집합 관문! 한 층을 다 깨면 등불이 금빛(🟪 인장), 인장을 모으면 화려한 공격 이펙트가 열려요!'],
     ['#camp-dummy', '🎯 훈련 허수아비', '지난 차시 문제를 <b>숫자만 바꿔</b> 연습해요. 기록은 남지 않고 경험치가 조금 쌓여요. 시험 전에 딱!'],
-    ['#camp-shelf', '📚 책장', '차시별 🎬 <b>개념 영상</b>과 📄 <b>학습지 개념</b>을 다시 볼 수 있어요.'],
+    ['#camp-tent', '⛺ 텐트 · 책장', '텐트 안 책장에서 차시별 🎬 <b>개념 영상</b>과 📄 <b>학습지 개념</b>을 다시 볼 수 있어요.'],
     ['#camp-mail', '📮 우편함', '내 <b>수업 결과</b>와 <b>복습 노트</b>가 도착해요. 틀린 문제를 다시 확인해요.'],
     ['#camp-anvil', '⚒ 모루', '수업에서 배운 개념으로 <b>카드를 만드는 대장간</b>이에요. 수업이 없을 때 여기서만 열려요.'],
   ];
@@ -77,8 +79,8 @@ DS.Camp = (function () {
       document.getElementById('camp').classList.add('tut-a'); stg.classList.add('tut-a'); co.classList.remove('block');
       if (gate) gate.classList.toggle('tut-spot', inClass());
       co.innerHTML = inClass()
-        ? `<div class="tut-box"><p>🌀 <b>${live.no ? `${live.no}차시 ` : ''}던전이 열렸어요!</b><br>오른쪽에 반짝이는 <b>문을 눌러</b> 입장해요. 친구들과 함께 몬스터를 물리쳐요! 👉</p></div>`
-        : '<div class="tut-box"><p>👋 <b>환영해요, 용사님!</b> 여기는 나만의 <b>모닥불(개인 캠프)</b>이에요.<br>선생님이 수업을 열면 오른쪽에 🌀 <b>차시 던전</b>이 나타나요. 잠깐 기다려요!</p></div>';
+        ? `<div class="tut-box"><p>⚔ <b>${live.no ? `${live.no}차시 ` : ''}던전이 열렸어요!</b><br>오른쪽에 빛나는 <b>아치 문을 눌러</b> 입장해요. 친구들과 함께 몬스터를 물리쳐요! 👉</p></div>`
+        : '<div class="tut-box"><p>👋 <b>환영해요, 용사님!</b> 여기는 나만의 <b>모닥불(개인 캠프)</b>이에요.<br>선생님이 수업을 열면 오른쪽 <b>아치 문</b>에 빛이 들어와요. 잠깐 기다려요!</p></div>';
       return;
     }
     // B: 하나씩 나타나며 설명 (아직 소개 안 한 것은 숨김)
@@ -105,14 +107,15 @@ DS.Camp = (function () {
   function lockSide() {
     // 2026-11-03 사용자 결정: 수업 중 잠금 없앰 — 보강던전 · 허수아비 · 모루는 언제나 열림 (차시 던전 차원문은 따로 빛남)
   }
+  // ⚔ 차시 던전 = 오른쪽 아치 문 하나 (2026-11-03 사용자 확정): 수업이 열리면 문 빛 겹이 켜지고, 닫히면 꺼짐 · 이름표는 늘 보임
   function drawGate() {
     lockSide();
     const el = document.getElementById('camp-gate'); if (!el) return;
-    if (!live || !live.theme) { el.className = 'camp-gate empty'; el.innerHTML = '<span class="camp-label dim">🌀 차원문 자리 — 선생님이 수업을 열면 나타나요</span>'; return; }
-    const i = D().ids.indexOf(live.theme), name = i >= 0 ? D().names[i] : '던전';
-    el.className = `camp-gate ${live.open ? 'open appear' : 'closed'}`;
-    el.innerHTML = `<i class="camp-portal" style="background-image:url('${base()}${D().portal(live.theme)}');background-position:${live.open ? '0%' : '100%'} 0"></i>
-      <span class="camp-label">${live.open ? `🌀 ${live.no ? `${live.no}차시 ` : ''}${esc(name)} · 입장!` : `🔒 지난 던전 · ${esc(name)}`}</span>`;
+    const on = !!(live && live.open), i = live && live.theme ? D().ids.indexOf(live.theme) : -1, name = i >= 0 ? D().names[i] : '던전';
+    DS.CampScene.gate(document.querySelector('#camp .camp-stage'), on);
+    el.classList.toggle('open', on);
+    const lb = el.querySelector('.camp-label');
+    if (lb) lb.innerHTML = on ? `⚔ ${live.no ? `${live.no}차시 ` : ''}입장!` : '🔒 차시 던전'; el.setAttribute('aria-label', on ? `${live.no ? `${live.no}차시 ` : ''}${name} 입장` : '차시 던전 (닫힘)');
   }
   // 그림 칸 하나 (배치표 시트에서 열·행)
   const sheet = (s, col, row, cls, style = '') => `<i class="${cls}" style="background-image:url('${base()}${s.src}');background-size:${s.cols * 100}% ${(s.rows || 1) * 100}%;background-position:${s.cols > 1 ? (col / (s.cols - 1)) * 100 : 0}% ${(s.rows || 1) > 1 ? (row / (s.rows - 1)) * 100 : 0}%;${style}"></i>`;
@@ -121,39 +124,40 @@ DS.Camp = (function () {
     return `<i class="camp-tree ${cls}" style="background-image:url('${base()}${t.src}');background-size:${100 / w}% 100%;background-position:${(x0 / (1 - w)) * 100}% 0;aspect-ratio:${(w * 1038) / 378};${style}"></i>`;
   }
   function render() {
-    const c = C();
-    $('#camp').innerHTML = `<div class="camp-top"><b>🔥 ${esc(me.name)}의 모닥불</b><span class="muted small">${DS.Titles && (me.title || 'none') !== 'none' ? `${DS.Titles.nameHtml({ title: me.title || 'none', nick: '' }, { num: false, size: 16 })} · ` : ''}${esc(me.c)} · ${me.n}번${DS.Grow ? ` · <b class="gold" id="camp-lv">Lv.-</b>` : ''}</span><button class="btn small camp-set" id="camp-set">⚙ 설정</button></div>
+    const c = C(), S = DS.CampScene;
+    $('#camp').innerHTML = `<div class="camp-top"><button class="btn small camp-set" id="camp-set">⚙ 설정</button></div>
       ${stampToday() ? '<div class="stamp-bar">📮 반드시 학습지 확인도장 받아가세요.</div>' : ''}
-      <div class="camp-stage" style="background-image:url('${base()}${c.bg}')">
-        <button class="camp-anvil" id="camp-anvil" aria-label="모루">${sheet(c.anvil, c.anvil.states.idle, 0, 'camp-anvil-img')}<span class="camp-label">⚒ 모루</span></button>
+      <div class="camp-stage cs-v2" style="background-image:url('${base()}${c.bg}');aspect-ratio:${c.size[0]} / ${c.size[1]}">
+        ${S.layers()}
+        ${S.zone('camp-castle', 'castle', '🏰 집합 중단원던전')}${S.zone('camp-tent', 'tent', '⛺ 텐트 · 책장')}
+        <button class="cs-zone camp-gate-z" id="camp-gate" style="${S.box(c.zones.gate)}" aria-label="차시 던전"><span class="camp-label">🔒 차시 던전</span></button>
+        <button class="camp-anvil cs-int" id="camp-anvil" aria-label="모루">${sheet(c.anvil, c.anvil.states.idle, 0, 'camp-anvil-img')}<span class="camp-label">⚒ 모루</span></button>
         <div class="camp-fire"><i class="camp-glow"></i><i class="camp-glow g2"></i>${sheet(c.fire, 0, 0, 'camp-fire-img', '')}</div>
-        <div class="camp-hero">${DS.Art.hero(me.hero, 'sit', 'huff')}<i class="shadow"></i></div>
-        <button class="camp-bonus mid" id="camp-bonus" aria-label="중단원던전"><i class="camp-bonus-img" style="background-image:url('${base()}${DS.ASSETS.dportals.mid}')"></i><span class="camp-label">🟪 중단원던전</span></button>
-        <button class="camp-gate empty" id="camp-gate" aria-label="차원문"></button>
-        ${prop('dummy', '🎯', '허수아비', '')}${prop('shelf', '📚', '책장', '')}${prop('mail', '📮', '우편함', '')}
-
+        <div class="camp-hero">${DS.Art.hero(me.hero, 'sit', 'huff')}<i class="shadow"></i><div class="camp-plate"><span class="lv" id="camp-lv">Lv.-</span><span class="nm">${DS.Titles ? DS.Titles.nameHtml({ title: me.title || 'none', nick: me.name }, { num: false, size: 14 }) : esc(me.name)}</span></div></div>
+        ${prop('dummy', '🎯', '허수아비', '')}${prop('mail', '📮', '우편함', '')}
       </div>
-      <div class="camp-bar"><span class="muted small">🎯 허수아비 · 📚 책장 · 📮 우편함을 눌러 보세요</span><button class="btn small" id="camp-code">코드로 입장</button></div>
-      <div class="camp-forge panel framed" id="camp-forge"><p class="muted small">연성 정보를 불러오는 중…</p></div>`;
-    forgeInfo();
+      <div class="camp-bar"><button class="btn small" id="camp-code">코드로 입장</button></div>
+      <div class="camp-forge panel framed st-panel" id="camp-forge"><p class="muted small">용사 상태를 불러오는 중…</p></div>`;
+    status();
     $('#camp-anvil').onclick = () => pick('#camp-anvil', () => DS.Forge.open(me));
-    $('#camp-bonus').onclick = () => pick('#camp-bonus', () => DS.Control.run(() => DS.Bonus.enter(me)));
+    $('#camp-castle').onclick = () => pick('#camp-castle', () => DS.Control.run(() => DS.Bonus.enter(me)));
     $('#camp-gate').onclick = () => {
       if (live && live.open) { if (tutMode === 'A') { tutMark('a'); tutClear(); } return pick('#camp-gate', () => DS.Control.run(() => enterCode(live.code)), 'portal'); }
       nope('#camp-gate');
-      if (live) DS.UI.toast('지난 던전은 닫혔어요. 선생님이 다음 수업을 열면 새 차원문이 나타나요.', 3200);
-      else DS.UI.toast('아직 열린 던전이 없어요. 선생님이 수업을 열면 차원문이 나타나요.', 3200);
+      if (live) DS.UI.toast('지난 던전은 닫혔어요. 선생님이 다음 수업을 열면 문에 다시 빛이 들어와요.', 3200);
+      else DS.UI.toast('아직 열린 던전이 없어요. 선생님이 수업을 열면 오른쪽 문에 빛이 들어와요.', 3200);
     };
-    if (DS.Grow) DS.Grow.mine(me).then((g) => { const el = document.getElementById('camp-lv'); if (el && g) el.textContent = `Lv.${g.lv} ${g.title}`; }).catch(() => {});
+    if (DS.Grow) DS.Grow.mine(me).then((g) => { const el = document.getElementById('camp-lv'); if (el && g) el.textContent = `Lv.${g.lv}`; }).catch(() => {});
     newTitles();
     $('#camp-code').onclick = codeGate;
-    $('#camp-mail').onclick = () => pick('#camp-mail', () => DS.Control.run(note));
-    $('#camp-shelf').onclick = () => pick('#camp-shelf', () => DS.Control.run(shelf));
+    $('#camp-mail').onclick = () => pick('#camp-mail', () => { if (cues.mark) cues.mark('mail'); DS.Control.run(note); });
+    $('#camp-tent').onclick = () => pick('#camp-tent', () => { if (cues.mark) cues.mark('tent'); DS.Control.run(shelf); });
     $('#camp-dummy').onclick = () => pick('#camp-dummy', () => DS.Control.run(() => DS.Bonus.enter(me, { train: true })));
     $('#camp-set').onclick = settings;
     drawGate();
     animateFire();
-    const stg = document.querySelector('#camp .camp-stage'); if (stg) { stg.classList.add('labels'); setTimeout(() => stg.classList.remove('labels'), 3000); } // 이름표: 들어올 때 3초 · 누를 때
+    document.querySelectorAll('#camp .camp-prop').forEach((e) => e.classList.add('cs-int'));
+    DS.CampScene.intro(document.querySelector('#camp .camp-stage')); // 글씨 대신: 들어올 때 차례로 한 번 반짝
   }
   // 선택 연출 (한 번 탭 · 0.7초): 흰 테두리 번쩍 + 눌림 반동 + 소리·진동 → 금빛 외곽선 + ▼ → 내 용사가 그쪽으로 폴짝 → 열림
   let picking = false;
@@ -187,26 +191,69 @@ DS.Camp = (function () {
   }
   // 못 들어가는 곳: 회색으로 살짝 흔들림
   function nope(sel) { const el = document.querySelector(sel); if (!el) return; el.classList.remove('nope'); void el.offsetWidth; el.classList.add('nope'); DS.Sound.squish(); }
-  // 하단: 연성 정보 (열린 차시 · 도감 진행 · 최근 카드 · 다음 힌트 · 숨겨진 용사까지)
-  async function forgeInfo() {
-    const el = document.getElementById('camp-forge'); if (!el || !DS.Unit) return;
-    const no = Number(await DS.Net.get(`unlock/${ck(me.c)}`).catch(() => 0)) || 0;
-    const owned = (await DS.Net.get(`cards/${ck(me.c)}/${me.n}`).catch(() => null)) || {};
-    const open = DS.Unit.opens(no), have = open.filter((c) => owned[c.id]);
-    const need3 = DS.Unit.CARDS.filter((c) => c.no <= 3 && c.id !== 'subcount'), got3 = need3.filter((c) => owned[c.id]).length;
-    const need46 = DS.Unit.CARDS.filter((c) => c.no >= 4 && c.no <= 6), got46 = need46.filter((c) => owned[c.id]).length;
-    const next = open.find((c) => !owned[c.id]);
-    const pct = open.length ? Math.round((100 * have.length) / open.length) : 0;
+  // 📊 용사 상태창 (2026-11-03 사용자 확정): 정답률 · 점수 · 순위 없음 — 쌓이기만 하는 누적 횟수 (본인 폰만)
+  //   ⚔ 힘 = 레이드 첫 시도 + 형성평가에서 맞힌 소문제 · 🛡 끈기 = 재도전으로 고친 수 · 🎯 집중 = PERFECT · 👑 용기 = 보스 격파 함께
+  //   🧭 탐험 = 중단원던전 도전 · ⚒ 연성 = 도감 카드 · ★ 5단계는 능력치마다 학기 안에 닿을 만한 기준
+  const STATS = [
+    ['str', '⚔', '힘', [10, 30, 60, 120, 200]], ['grit', '🛡', '끈기', [3, 8, 15, 30, 50]], ['focus', '🎯', '집중', [1, 3, 6, 10, 15]],
+    ['brave', '👑', '용기', [1, 3, 6, 10, 15]], ['explore', '🧭', '탐험', [3, 10, 20, 40, 70]], ['craft', '⚒', '연성', [3, 10, 20, 35, 54]],
+  ];
+  function statsOf(rec, bonus, cards) {
+    const R = Object.values(rec || {}), n = (v) => Number(v) || 0;
+    const tries = Object.values(bonus || {}).reduce((a, l) => a + Object.values(l || {}).reduce((b, m) => b + n((m || {}).tries), 0), 0);
+    return {
+      str: R.reduce((a, r) => a + Object.values(r.conc || {}).reduce((b, v) => b + n((v || [])[0]), 0) + n(r.boss), 0),
+      grit: R.reduce((a, r) => a + n(r.fixed), 0), focus: R.reduce((a, r) => a + n(r.perfects), 0), brave: R.filter((r) => r.won).length,
+      explore: tries, craft: Object.keys(cards || {}).length,
+    };
+  }
+  const stars = (v, t) => { const k = t.filter((x) => v >= x).length; return `${'★'.repeat(k)}<s>${'★'.repeat(5 - k)}</s>`; };
+  // 🎁 다음 보상: 가장 가까운 하나 (용사 해금 · 화려한 이펙트)
+  function nextReward(L, owned, seals) {
+    const cand = [], U = DS.Unit ? DS.Unit.CARDS : [], range = (a, b) => U.filter((c) => c.no >= a && c.no <= b), hasN = (arr) => arr.filter((c) => owned[c.id]).length;
+    const hn = (id) => ((DS.ASSETS.heroesV2.list[id] || {}).name || '용사');
+    const lock = (id) => !((L.heroes || []).find((h) => h.id === id) || {}).open;
+    if (lock(16)) cand.push([3 - seals, `인장 ${3 - seals}개 더 모으면 <b class="gold">${hn(16)}</b> 해금!`]);
+    const need3 = U.filter((c) => c.no <= 3 && c.id !== 'subcount'); if (lock(8) && need3.length) cand.push([need3.length - hasN(need3), `1~3차시 도감 ${need3.length - hasN(need3)}장 더 → <b class="gold">${hn(8)}</b> 해금!`]);
+    const r46 = range(4, 6); if (lock(10) && r46.length) cand.push([r46.length - hasN(r46), `4~6차시 도감 ${r46.length - hasN(r46)}장 더 → <b class="gold">${hn(10)}</b> 해금!`]);
+    const ui = DS.Bonus ? DS.Bonus.UNLOCK.findIndex((u) => seals < u) : -1;
+    if (ui >= 0) cand.push([DS.Bonus.UNLOCK[ui] - seals, `인장 ${DS.Bonus.UNLOCK[ui] - seals}개 더 → ✨ <b class="gold">${esc(DS.FX.NAMES[DS.FX.FANCY[ui]])}</b> 이펙트!`]);
+    const c = cand.filter((x) => x[0] > 0).sort((a, b) => a[0] - b[0])[0];
+    return c ? c[1] : '모든 보상을 모았어요! 🎉';
+  }
+  async function status() {
+    const el = document.getElementById('camp-forge'); if (!el) return;
+    const k = ck(me.c), get = (p) => DS.Net.get(`${p}/${k}/${me.n}`).catch(() => null);
+    const [rec, bonus, cards, no, evo] = await Promise.all([get('records'), get('bonus'), get('cards'), DS.Net.get(`unlock/${k}`).catch(() => 0), DS.Net.get(`evalOpen/${k}`).catch(() => null)]);
+    const L = DS.Account && !me.test ? await DS.Account.looks(me).catch(() => ({ heroes: [], seals: 0 })) : { heroes: [], seals: 0 };
+    const g = DS.Grow ? await DS.Grow.mine(me).catch(() => null) : null;
+    const TD = DS.Titles ? await DS.Titles.data(me).catch(() => ({})) : {}, earned = DS.Titles ? DS.Titles.earned(TD).filter((t) => !/^lv\d/.test(t.id)) : [];
     if (!document.getElementById('camp-forge')) return;
-    el.innerHTML = !no ? `<p class="cf-h">⚒ 연성 도감</p><p class="muted small">선생님이 우리 반 수업(2차시부터)을 열면 레시피가 열려요.</p>`
-      : `<div class="cf-row"><p class="cf-h">⚒ 연성 도감 <span class="muted small">${no}차시까지 열림</span></p><button class="btn small primary" id="cf-open">모루 열기</button></div>
-      <div class="cf-bar"><i style="width:${pct}%"></i><span>${have.length} / ${open.length}장</span></div>
-      <div class="cf-cards">${have.slice(-4).reverse().map((c) => DS.Card.html(c, { w: 62 })).join('') || '<span class="muted small">아직 만든 카드가 없어요 — 모루에서 첫 카드를 만들어 봐요!</span>'}</div>
-      ${next ? `<p class="cf-hint">💡 다음 레시피 힌트: <b>${esc(next.hint)}</b></p>` : '<p class="cf-hint okc">🎉 열린 레시피를 모두 모았어요!</p>'}
-      <p class="muted small">✨ 숨겨진 용사: 1~3차시 도감 <b>${got3} / ${need3.length}</b>장 → 성기사${no >= 4 ? ` · 4~6차시 도감 <b>${got46} / ${need46.length}</b>장 → 무희` : ''}</p>`;
-    const forgeGo = () => DS.Forge.open(me);
-    const b = document.getElementById('cf-open'); if (b) b.onclick = forgeGo;
-    el.querySelectorAll('.mcard').forEach((c) => (c.onclick = forgeGo));
+    const st = statsOf(rec, bonus, cards), owned = cards || {}, sealed = DS.Bonus ? DS.Bonus.seals(bonus || {}) : [], seals = sealed.length;
+    const sealMax = DS.Lessons.list.filter((l) => (l.no && l.boss && !l.eval) || l.eval).length, U = DS.Unit ? DS.Unit.CARDS.length : 0;
+    const heroOpen = (L.heroes || []).filter((h) => h.open).length, heroAll = (L.heroes || []).length;
+    const t = me.title && me.title !== 'none' && DS.Titles ? DS.Titles.get(me.title) : null;
+    el.innerHTML = `<div class="st-head"><span class="lvb">Lv.${g ? g.lv : '-'}</span><span class="ttl">${g ? esc(g.title) : ''}</span><div class="st-exp"><i style="width:${g ? Math.round((100 * g.into) / g.next) : 0}%"></i><b>EXP ${g ? `${g.into} / ${g.next}` : '-'}</b></div></div>
+      <div class="st-grid">${STATS.map(([id, ic, nm, th]) => `<div class="st-row" title="${nm}"><span class="nm">${ic} ${nm}</span><span class="stars">${stars(st[id], th)}</span><span class="v">${st[id]}</span></div>`).join('')}</div>
+      <div class="st-gear"><button data-gear="hero"><span class="gi">${DS.Art.hero(me.hero, 'idle')}</span>${esc(((DS.ASSETS.heroesV2.list[me.hero] || {}).name) || '용사')}</button><button data-gear="fx"><span class="gi">✨</span>${esc((DS.FX.NAMES || {})[me.fx || 'flame'] || '이펙트')}</button><button data-gear="title"><span class="gi">${t ? DS.Titles.medal(t, 24) : '🏅'}</span>${t ? esc(t.name) : '호칭'}</button></div>
+      <div class="st-col"><span>🟪 인장 ${seals}/${sealMax}</span><span>📚 도감 ${Object.keys(owned).length}/${U}</span><span>🏅 호칭 ${earned.length}</span>${heroAll ? `<span>🧑 ${heroOpen}/${heroAll}</span>` : ''}</div>
+      <div class="st-next">🎁 <b>다음 보상</b> — ${nextReward(L, owned, seals)}</div>`;
+    el.querySelectorAll('[data-gear]').forEach((b) => (b.onclick = settings));
+    // 장면: 등불 · 깃발 · 상태 표시 (글씨 없이)
+    const stage = document.querySelector('#camp .camp-stage'), states = DS.CampScene.floorStates(Number(no) || 0, sealed);
+    DS.CampScene.lamps(stage, states, me.test ? [] : DS.CampScene.freshLamps(`citadel-lamps-${k}-${me.n}`, states));
+    DS.CampScene.flag(stage, TD.bonus && ((TD.bonus['eval-1'] || {}).eb || {}).clear ? 'gold' : (evo || {})['eval-1'] ? 'open' : '');
+    cues(rec, owned, Number(no) || 0);
+  }
+  // 상태가 있을 때만 살아 움직임: 📮 새 결과 · ⚒ 만들 수 있는 카드 · ⛺ 새로 열린 차시 영상
+  function cues(rec, owned, no) {
+    const k = `citadel-cue-${ck(me.c)}-${me.n}`; let seen = {}; try { seen = JSON.parse(localStorage.getItem(k)) || {}; } catch (e) { /* 무시 */ }
+    const lastRec = Math.max(0, ...Object.values(rec || {}).map((r) => Number((r || {}).at) || 0));
+    const set = (id, on) => { const e = document.getElementById(id); if (e) e.classList.toggle('cs-new', !!on); };
+    set('camp-mail', lastRec > (seen.mail || 0));
+    set('camp-anvil', DS.Unit ? DS.Unit.opens(no).some((c) => !owned[c.id]) : false);
+    set('camp-tent', no > (seen.tent || 0));
+    cues.mark = (what) => { seen[what] = what === 'mail' ? lastRec : no; try { localStorage.setItem(k, JSON.stringify(seen)); } catch (e) { /* 무시 */ } set(`camp-${what}`, false); };
   }
   function animateFire() {
     clearInterval(fireT);
@@ -263,7 +310,7 @@ DS.Camp = (function () {
       <div class="row"><button class="btn" id="nt-x">닫기</button><button class="btn primary" id="nt-bonus">🟪 중단원던전으로</button></div></div>`;
     document.body.appendChild(el);
     el.querySelector('#nt-x').onclick = () => el.remove();
-    el.querySelector('#nt-bonus').onclick = () => { el.remove(); pick('#camp-bonus', () => DS.Control.run(() => DS.Bonus.enter(me))); };
+    el.querySelector('#nt-bonus').onclick = () => { el.remove(); pick('#camp-castle', () => DS.Control.run(() => DS.Bonus.enter(me))); };
   }
   // 코드로 입장 (QR · 만약을 위해)
   function codeGate() {
@@ -315,5 +362,5 @@ DS.Camp = (function () {
     draw(); document.body.appendChild(el);
   }
   const back = () => (me ? enter(me) : null);
-  return { enter, back, settings, shelf: (all) => shelf(all), refresh: () => { if (document.getElementById('camp-forge')) forgeInfo(); }, stampToday, markStamp: () => { try { localStorage.setItem('citadel-stamp', today()); } catch (e) { /* 무시 */ } } };
+  return { enter, back, settings, shelf: (all) => shelf(all), refresh: () => { if (document.getElementById('camp-forge')) status(); }, stampToday, markStamp: () => { try { localStorage.setItem('citadel-stamp', today()); } catch (e) { /* 무시 */ } } };
 })();

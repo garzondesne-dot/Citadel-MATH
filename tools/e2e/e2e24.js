@@ -19,7 +19,7 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
     await p.click('#s-go'); await p.waitForTimeout(2000);
   };
   const state = (p) => p.evaluate(() => { const st = document.querySelector('#camp .camp-stage'); const vis = (s) => { const e = document.querySelector(s); return e ? getComputedStyle(e).display !== 'none' && getComputedStyle(e).visibility !== 'hidden' : false; };
-    return { a: st.classList.contains('tut-a'), b: st.classList.contains('tut-b'), coach: ((document.querySelector('.tut-box p') || {}).textContent || '').slice(0, 40), anvil: vis('#camp-anvil'), bonus: vis('#camp-bonus'), dummy: vis('#camp-dummy'), gateSpot: (document.getElementById('camp-gate') || {}).className }; });
+    return { a: st.classList.contains('tut-a'), b: st.classList.contains('tut-b'), coach: ((document.querySelector('.tut-box p') || {}).textContent || '').slice(0, 40), anvil: vis('#camp-anvil'), castle: vis('#camp-castle'), dummy: vis('#camp-dummy'), gateSpot: (document.getElementById('camp-gate') || {}).className }; });
   const S = await mk('S'); await join(S, 1);
   console.log('① 새 학생 캠프:', JSON.stringify(await state(S)));
   await S.screenshot({ path: `${OUT}/1-wait.png` });
