@@ -23,11 +23,13 @@ const b64 = (f) => 'data:image/png;base64,' + fs.readFileSync(`${OUT}/${f}.png`)
     await H.setViewportSize({ width: w, height: h }); await H.goto(`${U}&role=hall&code=${code}&key=${key}`); await H.waitForTimeout(1500);
     for (let k = 0; k < 6 && (await stepId()) !== 'c1'; k++) { await go(); await T.waitForTimeout(400); }
     await H.waitForTimeout(1200); await H.screenshot({ path: `${OUT}/c1-${w}.png` });
+    await H.click('.h-half[data-zoom="l"], .h-concept[data-zoom]'); await H.waitForTimeout(500); await H.screenshot({ path: `${OUT}/c1z-${w}.png` }); console.log(w, 'concept zoom:', await H.evaluate(() => { const c = document.querySelector('.h-concept'); return c.className + ' bg=' + getComputedStyle(c).backgroundColor; })); await H.click('.h-concept'); await H.waitForTimeout(400);
     for (let k = 0; k < 6 && (await stepId()) !== 'm1'; k++) { await go(); await T.waitForTimeout(400); }
     await T.evaluate(async () => { await DS.Act.setSheet(DS.Teacher.code(), true); }); await H.waitForTimeout(1500);
     const r = await H.evaluate(() => { const i = document.querySelector('#h-sheet-ov img'), a = document.querySelector('#h-arena'); if (!i) return 'no img'; const ir = i.getBoundingClientRect(), ar = a.getBoundingClientRect(); return { imgTop: Math.round(ir.top - ar.top), imgBottomGap: Math.round(ar.bottom - ir.bottom), heroAbove: [...document.querySelectorAll('.fh2')].some((h) => +getComputedStyle(h).zIndex >= 30) }; });
     console.log(w, h, 'sheet:', JSON.stringify(r));
     await H.screenshot({ path: `${OUT}/m1-${w}.png` });
+    await H.click('#h-sheet-ov img'); await H.waitForTimeout(400); await H.screenshot({ path: `${OUT}/m1z-${w}.png` }); console.log(w, 'sheet zoom:', await H.evaluate(() => document.querySelector('#h-sheet-ov').className)); await H.click('#h-sheet-ov'); await H.waitForTimeout(300);
     await T.evaluate(async () => { await DS.Act.setSheet(DS.Teacher.code(), false); });
     // 처음으로 되돌려 다음 크기
     await T.evaluate(async () => { const code = DS.Teacher.code(); await DS.Net.update(`rooms/${code}/state`, { step: 0 }); });

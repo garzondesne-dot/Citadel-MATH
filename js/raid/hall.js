@@ -64,15 +64,15 @@ DS.Hall = (function () {
     built = key;
     const one = img ? `<img src="${img}" alt="${esc(step.title)} 학습지">` : `<div class="h-sheet-empty">📄 학습지 이미지 칸<br><span class="muted small">수업 준비 화면에서 '${esc(step.title)}' 이미지를 넣으면 여기에 크게 떠요</span><p class="h-intro">${pretty(step.say || '')}</p></div>`;
     el.innerHTML = split
-      ? `<div class="h-concept split${zoom ? ` zoom-${zoom}` : ''}">
+      ? `<div class="h-concept split${zoom ? ` zoom-${zoom} wfull` : ''}">
         <div class="h-half" data-zoom="l"><p class="h-ctitle">📣 ${esc(step.title)}</p><div class="h-sheet"><img src="${img}" alt="${esc(step.title)} 학습지"></div></div>
         <div class="h-half" data-zoom="r"><p class="h-ctitle prob">⚔ 이어지는 문제 · ${esc(prob.title)}</p><div class="h-sheet"><img src="${pimg}" alt="${esc(prob.title)} 학습지"></div></div>
         <p class="h-zoom-tip muted small">${zoom ? '누르면 좌우로 다시 나눠 봐요' : '한쪽을 누르면 그쪽만 크게'}</p>
         <div class="h-focus-badge">⚠ 집중모드 — 학생 폰 멈춤</div></div>`
-      : `<div class="h-concept"><p class="h-ctitle">📣 ${esc(step.title)}</p>
-      <div class="h-sheet">${one}</div>
+      : `<div class="h-concept${zoom && img ? ' wfull' : ''}"${img ? ' data-zoom="one"' : ''}><p class="h-ctitle">📣 ${esc(step.title)}</p>
+      <div class="h-sheet">${one}</div>${img ? `<p class="h-zoom-tip muted small">${zoom ? '누르면 원래 크기로' : '그림을 누르면 화면 가득 크게'}</p>` : ''}
       <div class="h-focus-badge">⚠ 집중모드 — 학생 폰 멈춤</div></div>`;
-    el.querySelectorAll('[data-zoom]').forEach((h) => (h.onclick = () => { zoom = zoom ? '' : h.dataset.zoom; render(); }));
+    el.querySelectorAll('[data-zoom]').forEach((h) => (h.onclick = (e) => { e.stopPropagation(); zoom = zoom ? '' : h.dataset.zoom; render(); }));
   }
 
   // ── 왼쪽: 용사단 ─────────────────────────────────────────
@@ -294,6 +294,7 @@ DS.Hall = (function () {
     const k = `${step.id}|${img ? img.length : 0}`;
     if (k === sheetKey) return;
     sheetKey = k;
+    ov.onclick = () => { if (ov.querySelector('img')) ov.classList.toggle('wfull'); }; // 그림을 누르면 칸 가득 흰 바탕으로 크게 · 다시 누르면 원래대로
     ov.innerHTML = `<p class="h-ctitle">📄 ${esc(step.kind === 'boss' ? L.boss.title : step.title)} · 문제 해설</p>
       <div class="h-sheet">${img ? `<img src="${img}" alt="${esc(step.title || '')} 학습지">` : `<div class="h-sheet-empty">📄 이 문제의 학습지 이미지가 아직 없어요<br><span class="muted small">교사 → 수업 준비 → '${esc(step.title || '형성평가')}' 칸에 넣으면 여기에 떠요</span></div>`}</div>`;
   }
