@@ -1231,3 +1231,4 @@ body:has(#test-bar) #ver-tag { bottom: calc(64px + env(safe-area-inset-bottom));
 .tc-stage .camp-label { font-size: 11px; padding: 1px 6px; }
 .tc-hallmode .tc-stage .camp-label { font-size: 15px; padding: 2px 8px; }
 .dash-vs { margin-bottom: 10px; } .dash-vs tr.top1 td { background: #3a2a0c; } .dash-vs td, .dash-vs th { text-align: center; }
+.splash-by { margin: 4px 0 0; font-size: 13px; color: #c8d4ee; letter-spacing: 1px; text-shadow: 1px 1px 0 #000; }
