@@ -53,6 +53,19 @@ DS.Control = (function () {
     if (armed !== 'end') { armed = 'end'; DS.UI.toast('▶ 를 한 번 더 누르면 수업을 끝내고 학생들은 모닥불로 돌아가요', 4200); return true; }
     armed = ''; await Act().go(code, R, L, 1); return true;
   }
+  // 🏕 쉼터 버튼 (아무 단계에서나): 켜면 종합상황실 · 학생 폰이 쉼터 장면 · 끄면 하던 단계로 · 타이머는 교사가 −1 / +1 분 (기본 5분)
+  const restLeft = (R) => { const r = (R.state || {}).rest; return r ? Math.max(0, Math.round(((r.at || 0) + (r.min || 5) * 60000 - DS.Net.now()) / 1000)) : 0; };
+  const restEnd = (R) => { const r = (R.state || {}).rest; return r ? (r.at || 0) + (r.min || 5) * 60000 : 0; };
+  // 쉼터 타이머: 화면에 있는 [data-rest-end] 를 1초마다 고침 (끝나도 자동으로 넘어가지 않음 · 0:00 이 되면 깜빡)
+  if (typeof document !== 'undefined') setInterval(() => document.querySelectorAll('[data-rest-end]').forEach((e) => { const s = Math.max(0, Math.round((Number(e.dataset.restEnd) - DS.Net.now()) / 1000)); e.textContent = mmss(s); e.classList.toggle('over', s === 0); }), 1000);
+  const mmss = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+  const restBtn = (R) => Raid().restOn(R)
+    ? `<div class="rest-ctl"><button class="btn primary rest-btn on" data-rest>▶ 쉼터 끝 · 수업으로</button><span class="rest-t">⏱ <b data-rest-end="${restEnd(R)}">${mmss(restLeft(R))}</b></span><button class="btn small" data-rest-min="-1">−1분</button><button class="btn small" data-rest-min="1">+1분</button></div>`
+    : '<button class="btn rest-btn" data-rest>🏕 쉼터 (잠깐 쉬기 · 5분)</button>';
+  const bindRest = (el, code, R) => {
+    el.querySelectorAll('[data-rest]').forEach((b) => (b.onclick = () => run(() => Act().setRest(code, !Raid().restOn(R), 5))));
+    el.querySelectorAll('[data-rest-min]').forEach((b) => (b.onclick = () => run(() => Act().setRestMin(code, (((R.state || {}).rest || {}).min || 5) + Number(b.dataset.restMin)))));
+  };
   const focusBtn = (R) => `<button class="btn focus-btn${Raid().focusOn(R) ? ' on' : ''}" data-focus>${Raid().focusOn(R) ? '🔴 집중모드 끄기' : '🔴 집중모드 켜기'}</button>`;
   // 📄 문제 화면 버튼 (문제 · 보강 · 형성평가 단계에서만)
   const sheetBtn = (L, R) => { const st = Raid().stepOf(L, R); return st && (st.kind === 'monster' || st.kind === 'boss') ? `<button class="btn sheet-btn${Raid().sheetOn(R) ? ' on' : ''}" data-sheet>${Raid().sheetOn(R) ? '⚔ 레이드 화면으로' : '📄 문제 화면 (학습지 해설)'}</button>` : ''; };
@@ -91,5 +104,5 @@ DS.Control = (function () {
     })));
   }
 
-  return { name, run, wordsHtml, bindWords, stepName, nextName, stepTitles, FINALE, forward, back, pctHtml, bindPct, focusBtn, bindFocus, sheetBtn, bindSheet, videoBtn, bindVideo, esc };
+  return { restBtn, bindRest, restLeft, restEnd, mmss, name, run, wordsHtml, bindWords, stepName, nextName, stepTitles, FINALE, forward, back, pctHtml, bindPct, focusBtn, bindFocus, sheetBtn, bindSheet, videoBtn, bindVideo, esc };
 })();

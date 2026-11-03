@@ -51,6 +51,7 @@ DS.Hall = (function () {
     videoOverlay(step);
     const el = $('#h-arena');
     el.classList.toggle('focus-on', Raid().focusOn(R) && !Raid().isLobby(R));
+    if (Raid().restOn(R) && !Raid().isLobby(R) && !Raid().isClosed(R)) return restScene();
     if (step && (step.kind === 'monster' || step.kind === 'boss')) { const key = `f${i}`; if (built !== key) buildFight(step, key); else updateFight(step); sheetOverlay(step); return; }
     clearInterval(bubbleT);
     if (Raid().isClosed(R)) { built = 'closed'; el.innerHTML = `<div class="h-victory"><div class="trophy"><i class="trophy-img" style="background-image:url('${DS.ASSETS.base}${DS.ASSETS.trophy}')"></i></div><h1>수업 끝!</h1><p class="muted">모두 모닥불로 돌아갔어요. 게임 기록은 수학 성적이 아니에요.</p><div class="stamp-bar big">📮 반드시 학습지 확인도장 받아가세요.</div><div class="h-acts row">${klassBtn()}<button class="btn primary" id="h-tcamp">🏛 교사 캠프 가기</button></div></div>`; bindActs(); return; }
@@ -122,6 +123,27 @@ DS.Hall = (function () {
     if (!finale && window.QRCode) new QRCode($('#h-qr'), { text: studentUrl(), width: 150, height: 150 });
     if (finale) rotateBubbles();
   }
+  // 🏕 쉼터 (2026-11-04): 대기실 장면을 편안하게 — 따뜻한 불빛 · 가운데 모닥불 · 모두 둘러앉음 · 타이머 (선생님이 PC 로 퀴즈를 해도 뒤에 깔려 있음)
+  function restScene() {
+    const list = inClass(), r = (R.state || {}).rest || {}, sig = `rest|${r.at}|${r.min}|${list.map(([u, p]) => u + p.hero).join()}`;
+    if (built === sig) return;
+    built = sig; clearInterval(bubbleT);
+    const n = list.length, size = n > 24 ? 62 : n > 16 ? 72 : 84, per = Math.max(1, Math.ceil(n / 3)), c = DS.ASSETS.camp;
+    const pos = list.map(([u, p], i) => {
+      const ring = i % 3, k = Math.floor(i / 3), a = Math.PI * (0.04 + 0.92 * ((k + ring * 0.33) / per));
+      return { u, p, x: 50 - Math.cos(a) * (23 + ring * 12.5), y: 64 + Math.sin(a) * (7 + ring * 8.5), flip: Math.cos(a) > 0 };
+    });
+    $('#h-arena').innerHTML = `<div class="h-lobby2 rest bg-scene th-${L.theme || ''}">
+      <p class="lb2-title">🏕 쉼터</p><p class="lb2-sub">잠깐 쉬어 가요 — 물 한 모금 · 기지개 쭉!</p>
+      <div class="rest-timer">⏱ <b data-rest-end="${C().restEnd(R)}">${C().mmss(C().restLeft(R))}</b></div>
+      <div class="rest-fire"><i class="camp-glow"></i><i class="camp-glow g2"></i><i class="camp-fire-img" style="background-image:url('${DS.ASSETS.base}${c.fire.src}');background-size:${c.fire.cols * 100}% ${(c.fire.rows || 1) * 100}%;background-position:0 0"></i></div>
+      <div class="lb2-say teacher">잠깐 쉬었다 가세! 🔥</div>
+      <div class="lb2-h teacher" style="left:50%;top:44%">${DS.Art.hero(DS.Art.teacherHero(R), 'sit', 'huff')}<i class="shadow"></i><span class="nm gold">선생님</span></div>
+      ${pos.map((o, i) => `<div class="lb2-h" style="left:${o.x}%;top:${o.y}%;z-index:${5 + Math.round(o.y / 10)};--sz:${size}px;animation-delay:${(i * 0.13) % 0.9}s"><span class="nm">${DS.Titles.nameHtml(o.p, { size: 16, short: true })}</span><div class="${o.flip ? 'face-l' : ''}">${DS.Art.hero(o.p.hero, 'sit', 'huff')}</div><i class="shadow"></i></div>`).join('')}</div>`;
+    const f = c.fire; let k = 0; clearInterval(restFireT);
+    restFireT = setInterval(() => { const e = document.querySelector('#h-arena .rest-fire .camp-fire-img'); if (!e) { clearInterval(restFireT); return; } k = (k + 1) % f.frames; e.style.backgroundPosition = `${((k % f.cols) / Math.max(1, f.cols - 1)) * 100}% ${(Math.floor(k / f.cols) / Math.max(1, (f.rows || 1) - 1)) * 100}%`; }, f.ms);
+  }
+  let restFireT = null;
   // 말풍선은 한 번에 6개까지, 4초마다 돌아가며
   function rotateBubbles() {
     clearInterval(bubbleT);
@@ -318,9 +340,9 @@ DS.Hall = (function () {
       ${Raid().isEnd(L, R) ? `<div class="h-words">${C().wordsHtml(R)}</div>` : ''}`;
     C().bindWords($('#h-side'), code, R);
     const el = $('#h-ctrl'), live = !Raid().isLobby(R) && !Raid().isClosed(R);
-    el.innerHTML = `${C().pctHtml(L, R)}<p class="muted small">다음 ▶ ${esc(C().nextName(L, R))}</p><div class="row"><button class="btn" id="h-back"${i < 0 ? ' disabled' : ''}>◀ 뒤로</button><button class="btn primary" id="h-fwd"${Raid().isClosed(R) ? ' disabled' : ''}>${Raid().isFinale(L, R) ? '수업 끝 ▶' : '앞으로 ▶'}</button></div>${live ? C().videoBtn(L, R, prep.video) + C().sheetBtn(L, R) + C().focusBtn(R) : ''}${live && Raid().stepOf(L, R) && ['monster', 'boss'].includes(Raid().stepOf(L, R).kind) ? `<button class="btn demo-btn" id="h-demo">🎮 시연: ${Raid().stepOf(L, R).kind === 'boss' ? '형성평가 풀어 보기' : '문제 풀어 보기'}</button>` : ''}`;
+    el.innerHTML = `${C().pctHtml(L, R)}<p class="muted small">다음 ▶ ${esc(C().nextName(L, R))}</p><div class="row"><button class="btn" id="h-back"${i < 0 ? ' disabled' : ''}>◀ 뒤로</button><button class="btn primary" id="h-fwd"${Raid().isClosed(R) ? ' disabled' : ''}>${Raid().isFinale(L, R) ? '수업 끝 ▶' : '앞으로 ▶'}</button></div>${live ? C().restBtn(R) + (Raid().restOn(R) ? '' : C().videoBtn(L, R, prep.video) + C().sheetBtn(L, R) + C().focusBtn(R)) : ''}${live && Raid().stepOf(L, R) && ['monster', 'boss'].includes(Raid().stepOf(L, R).kind) ? `<button class="btn demo-btn" id="h-demo">🎮 시연: ${Raid().stepOf(L, R).kind === 'boss' ? '형성평가 풀어 보기' : '문제 풀어 보기'}</button>` : ''}`;
     const db = $('#h-demo'); if (db) db.onclick = () => demoOpen(Raid().stepOf(L, R));
-    C().bindPct(el, code, R, L); C().bindFocus(el, code, R); C().bindSheet(el, code, R); C().bindVideo(el, code, R);
+    C().bindRest(el, code, R); C().bindPct(el, code, R, L); C().bindFocus(el, code, R); C().bindSheet(el, code, R); C().bindVideo(el, code, R);
     $('#h-fwd').onclick = () => C().run(() => C().forward(code, R, L));
     $('#h-back').onclick = () => C().run(() => C().back(code, R, L));
   }

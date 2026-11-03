@@ -37,6 +37,8 @@ DS.Raid = (function () {
   const isFinale = (L, R) => isEnd(L, R) && !(R.state || {}).closed;
   const isClosed = (R) => !!(R.state || {}).closed;
   const focusOn = (R) => !!(R.state || {}).focus;
+  // 🏕 쉼터 (2026-11-04): 교사가 아무 단계에서나 켜고 끔 · state.rest = { at, min } · 쉬는 동안 몬스터 공격 게이지 멈춤 (pauseMs 에 더함)
+  const restOn = (R) => !!((R.state || {}).rest);
   const sheetOn = (R) => !!(R.state || {}).sheet; // 📄 문제 화면 (교사 해설)
   const videoOn = (R, stepId) => !!stepId && ((R.state || {}).video === stepId); // 🎬 설명 영상 (교사가 켠 단계에서만, v0.8.6)
   const autoFocus = (step) => !!step && (step.kind === 'intro' || step.kind === 'concept'); // 이 단계로 들어가면 집중모드 자동
@@ -174,8 +176,9 @@ DS.Raid = (function () {
     const a = (cfg || ATK)[kind], bind = kind === 'monster' ? bindTotal(L, R, step.id) : 0;
     const hp = kind === 'monster' ? monsterHp(L, R, step.id) : bossHp(L, R), ratio = hp.max ? Math.max(0, Math.min(1, hp.left / hp.max)) : 1;
     const per = a.length >= 3 ? a[0] + (a[1] - a[0]) * (1 - ratio) : a[0], lock = a[a.length - 1];
-    const paused = !!st.focus, start = st.stepAt != null ? st.stepAt : now;
-    const t = Math.max(0, (now - start - (st.pauseMs || 0) - (paused ? now - (st.focusAt != null ? st.focusAt : now) : 0)) / 1000 - bind);
+    const rest = st.rest && st.rest.at != null ? st.rest : null, paused = !!st.focus || !!rest, start = st.stepAt != null ? st.stepAt : now;
+    const held = (st.focus ? now - (st.focusAt != null ? st.focusAt : now) : 0) + (rest ? Math.max(0, now - rest.at) : 0);
+    const t = Math.max(0, (now - start - (st.pauseMs || 0) - held) / 1000 - bind);
     return { kind, mid: step.id || 'boss', per, lock, bind, paused, ratio, t, k: Math.floor(t / per), p: (t % per) / per };
   }
   // 게이지 진행 (기기마다 같은 규칙): 주기가 체력에 따라 바뀌어도 게이지가 거꾸로 튀지 않게 「이번 바퀴 시작 시각」을 기억한다
@@ -187,5 +190,5 @@ DS.Raid = (function () {
     if (p >= 1) { memo.start += c.per; return { p: 0, strike: true }; }
     return { p, strike: false };
   }
-  return { ATK, BIND_PER, BIND_MAX, bindOf, bindTotal, atkClock, atkTrack, RETRIES, HEAL_MAX, healsOf, healsGiven, healsTo, healsReceived, healTarget, LIVE_MS, lateIds, liveOpen, roomDone, inClass, activeIds, teacherUid, num, newRoom, stepOf, isLobby, isEnd, isFinale, isClosed, focusOn, sheetOn, videoOn, autoFocus, fullMarks, canLobby, online, seedOf, itemsFor, attemptsOf, gradeAttempt, record, resultLabel, headcount, pctOf, monsterHp, waiting, allSubmitted, cleared, mastery, bossHp, helpList };
+  return { ATK, BIND_PER, BIND_MAX, bindOf, bindTotal, atkClock, atkTrack, RETRIES, HEAL_MAX, healsOf, healsGiven, healsTo, healsReceived, healTarget, LIVE_MS, lateIds, liveOpen, roomDone, inClass, activeIds, teacherUid, num, newRoom, stepOf, isLobby, isEnd, isFinale, isClosed, focusOn, restOn, sheetOn, videoOn, autoFocus, fullMarks, canLobby, online, seedOf, itemsFor, attemptsOf, gradeAttempt, record, resultLabel, headcount, pctOf, monsterHp, waiting, allSubmitted, cleared, mastery, bossHp, helpList };
 })();

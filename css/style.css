@@ -1341,3 +1341,16 @@ body:has(#test-bar) #ver-tag { bottom: calc(64px + env(safe-area-inset-bottom));
 .tc-stage.cs-v2 #tc-mail { left: 37%; bottom: 33%; width: 10%; }
 .tc-stage.cs-v2 .camp-gate-z { left: auto; right: auto; bottom: auto; }
 .cs-v2 .camp-gate-z .camp-label { background: #0b1e3ae6; border: 1px solid #6fb8ff; color: #dff1ff; padding: 1px 6px; border-radius: 3px; text-shadow: 1px 1px 0 #000; }
+
+/* 🏕 쉼터 (2026-11-04): 대기실을 편안하게 — 따뜻한 불빛 톤 · 가운데 모닥불 · 타이머 */
+.lobby-scene.rest { position: relative; }
+.h-lobby2.rest::before, .lobby-scene.rest::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 62%, #ffb45a33, #2a120600 55%), linear-gradient(#1a0e0688, #0a050299); pointer-events: none; z-index: 1; }
+.h-lobby2.rest > *, .lobby-scene.rest > * { z-index: 2; }
+.rest-fire { position: absolute; left: 50%; top: 56%; width: 9%; transform: translateX(-50%); z-index: 3; }
+.rest-fire .camp-fire-img { display: block; width: 100%; aspect-ratio: 1; background-repeat: no-repeat; }
+.rest-timer { position: absolute; top: 18px; right: 24px; z-index: 4; font: 700 34px var(--pixel); color: #ffe7b0; background: #2a1606cc; border: 2px solid #ffb45a; padding: 2px 14px; text-shadow: 2px 2px 0 #000; }
+.rest-timer.sm { top: 8px; right: 8px; font-size: 18px; padding: 1px 8px; }
+.rest-timer b.over, .rest-t b.over { color: #ff8a7a; animation: csPing 1s ease-in-out infinite; }
+.rest-ctl { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 6px 0; }
+.rest-ctl .rest-t { font-size: 18px; color: #ffe7b0; }
+.rest-btn { border-color: #ffb45a !important; }

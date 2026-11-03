@@ -168,7 +168,14 @@ check(X.online(R2, 'a') && !X.online(R2, 'b'), '접속 표시');
   Q.state.step = L.steps.findIndex((st) => st.kind === 'boss'); c = X.atkClock(L, Q, 70000);
   check(c && c.kind === 'boss' && c.per === 30 && c.lock === 2 && c.bind === 0, `보스 가득 = 30초 주기 · 2초 잠금 ${JSON.stringify(c)}`);
   check(X.atkClock(L, Q, 70000, { monster: [4, 1], boss: [5, 2] }).per === 5, '시험용 [주기, 잠금] 두 칸도 그대로');
+  // 🏕 쉼터: 쉬는 동안 게이지 멈춤 · 끝나면 쉰 시간만큼 빼고 이어짐
+  { const st0 = JSON.parse(JSON.stringify(Q.state)), c0 = X.atkClock(L, Q, 70000);
+    Q.state.rest = { at: 70000, min: 5 }; const c1 = X.atkClock(L, Q, 130000);
+    check(X.restOn(Q) && c1.paused && Math.abs(c1.t - c0.t) < 1e-6, `쉼터 동안 공격 게이지 멈춤 (${c0.t} → ${c1.t})`);
+    Q.state.rest = null; Q.state.pauseMs = (Q.state.pauseMs || 0) + 60000; const c2 = X.atkClock(L, Q, 131000);
+    check(!X.restOn(Q) && Math.abs(c2.t - (c0.t + 1)) < 1e-6, '쉼터가 끝나면 쉰 시간을 빼고 이어짐');
+    Q.state = st0; }
   Q.state.step = -1; check(X.atkClock(L, Q, 70000) === null, '대기실에서는 공격 없음');
 }
 if (fail) { console.error(`\n${fail}건 실패`); process.exit(1); }
-console.log('OK: 레이드 — 체력·기준%·데미지(늘어난 만큼)·재도전 3번·체력 0 즉시 격파·미제출 제외·보스 즉시 승리·7번 보너스·도움 목록·마무리·집중모드·만점 · 💚 힐 통과');
+console.log('OK: 레이드 — 체력·기준%·데미지(늘어난 만큼)·재도전 3번·체력 0 즉시 격파·미제출 제외·보스 즉시 승리·7번 보너스·도움 목록·마무리·집중모드·🏕 쉼터·만점 · 💚 힐 통과');

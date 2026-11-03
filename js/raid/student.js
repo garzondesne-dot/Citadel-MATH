@@ -75,12 +75,13 @@ DS.Student = (function () {
     if (Raid().isClosed(R)) return toCamp();
     if (!R.players || !R.players[me]) { $('#st-body').innerHTML = '<div class="panel"><p>입장 정보가 없어요. 처음 화면에서 다시 입장해 주세요.</p></div>'; return; }
     header();
-    focus(!test && Raid().focusOn(R) && !Raid().isLobby(R));
+    focus(!test && Raid().focusOn(R) && !Raid().isLobby(R) && !Raid().restOn(R));
     if (test && test.onRender) test.onRender(L, R);
     const body = $('#st-body');
     const st0 = Raid().stepOf(L, R);
     if (!st0 || st0.kind !== 'monster') drawn = '';
     if (Raid().isLobby(R)) return lobbyView(body, false);
+    if (Raid().restOn(R)) return restView(body); // 🏕 쉼터: 쓰던 답(form)은 그대로 두고 장면만
     if (!(R.active || {})[me]) { body.innerHTML = '<div class="panel framed center"><p>⏳ 늦게 들어왔어요 — <b>다음 몬스터부터</b> 함께해요!</p><p class="muted small">잠시 뒤에도 그대로면 선생님께 말씀드려요 (선생님 폰이나 큰 화면이 켜져 있어야 들어가져요)</p></div>'; return; }
     if (Raid().canLobby(L, R, me) && !cleared0) { cleared0 = true; DS.Camp.markStamp(); }
     if (Raid().isEnd(L, R) && !resulted) showResult(); // 마무리 단계가 되면 아직 못 본 학생도 결과를 본다
@@ -100,6 +101,18 @@ DS.Student = (function () {
     }
     body.innerHTML = `<div class="panel framed center attend"><p class="attend-tag">📣 알림</p><h2>선생님에게 주목하세요</h2><p>${step.kind === 'intro' ? '수업을 시작합니다.' : '개념 설명을 시작합니다.'}</p>
       <p class="stage-name">${esc(step.title)}</p><p class="intro">${pretty(step.say || '')}</p>${DS.Art.hero(myP().hero, 'idle', 'big huff')}<p class="muted small">학습지를 펴고 선생님 설명을 들어요.</p></div>`;
+  }
+  // 🏕 쉼터 (2026-11-04): 대기실을 편안하게 — 내 용사와 친구들이 앉아 쉼 · 타이머 · 선생님이 「쉼터 끝」을 누르면 하던 단계로
+  function restView(body) {
+    const r = (R.state || {}).rest || {}, others = Object.entries(R.players || {}).filter(([u, p]) => !p.teacher && u !== me).slice(0, 10);
+    const sig = `rest|${r.at}|${r.min}|${others.length}`;
+    if (sig === drawn && body.querySelector('.lobby-scene.rest')) return;
+    drawn = sig;
+    const crowd = others.map(([, p], k) => `<div class="lb-h${k % 2 ? ' face-l' : ''}" style="left:${12 + ((k * 37) % 76)}%;bottom:${8 + (k % 3) * 9}%;z-index:${30 - (8 + (k % 3) * 9)}">${DS.Art.hero(p.hero, 'sit', 'small huff')}</div>`).join('');
+    body.innerHTML = `<div class="panel framed"><div class="lobby-scene rest bg-scene th-${L.theme || ''}"><p class="lb-title">🏕 쉼터</p>
+        <div class="rest-timer sm">⏱ <b data-rest-end="${DS.Control.restEnd(R)}">${DS.Control.mmss(DS.Control.restLeft(R))}</b></div>${crowd}
+        <div class="lb-h me" style="left:50%;bottom:22%">${DS.Art.hero(myP().hero, 'sit', 'huff')}<i class="shadow"></i></div></div>
+      <p class="center">잠깐 쉬어 가요 — 물 한 모금 · 기지개 쭉! 🔥</p><p class="muted small center">선생님이 다시 시작하면 하던 문제로 돌아가요 (쓰던 답은 그대로)</p></div>`;
   }
   // 던전 단체 대기실: 수업 전(입장) · 클리어 뒤(마지막 한마디 · 모루)
   const dungeonName = () => { const D = DS.ASSETS.dungeons, i = D.ids.indexOf(L.theme); return i >= 0 ? D.names[i] : '던전'; };
