@@ -380,7 +380,7 @@ DS.Hall = (function () {
       else if (t === 'choice') d.given[k] = Number(v); else if (t === 'ox') d.given[k] = v === 'O'; else d.given[k] = [v];
       DS.Sound.clank(); demoDraw();
     }));
-    ov.querySelectorAll('[data-dial]').forEach((b) => (b.onclick = () => { const [i, dd] = b.dataset.dial.split('|').map(Number); d.given[i] = Math.max(0, Math.min(99, d.given[i] + dd)); demoDraw(); }));
+    DS.UI.dial(ov, (i) => d.given[i], (i, v) => { d.given[i] = v; });
     ov.querySelectorAll('[data-text]').forEach((inp) => inp.addEventListener('input', () => { d.given[Number(inp.dataset.text)] = inp.value; const go = ov.querySelector('#demo-go'); if (go) go.disabled = !d.items.every((q, j) => (q.type === 'multi' ? d.given[j].length > 0 : q.type === 'text' ? String(d.given[j] || '').trim() !== '' : d.given[j] != null)); }));
     const go = ov.querySelector('#demo-go');
     if (go) go.onclick = () => {

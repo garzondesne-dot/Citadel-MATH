@@ -337,11 +337,7 @@ DS.Student = (function () {
       const go = $('#st-go'); if (go) go.disabled = !ok;
       drawn = `form|${key}|${JSON.stringify(form.given)}|${(R.help || {})[me] ? 1 : 0}`;
     }));
-    body.querySelectorAll('[data-dial]').forEach((b) => b.addEventListener('click', () => {
-      const [i, d] = b.dataset.dial.split('|').map(Number);
-      form.given[i] = Math.max(0, Math.min(99, form.given[i] + d));
-      DS.Sound.clank(); render();
-    }));
+    DS.UI.dial(body, (i) => form.given[i], (i, v) => { form.given[i] = v; drawn = `form|${key}|${JSON.stringify(form.given)}|${(R.help || {})[me] ? 1 : 0}|${down}`; }); // 꾹 누르면 계속 · 숫자만 바꿈 (v0.9.6.16)
     $('#st-go').onclick = async () => {
       const given = items.map((q, i) => (q.type === 'blanks' ? form.given[i] : q.type === 'number' ? Number(form.given[i]) : form.given[i]));
       try { await DS.Act.submit(code, raw, mid, attempt, given); retrying = ''; form = null; } catch (e) { DS.UI.toast(e.message); }

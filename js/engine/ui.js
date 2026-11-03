@@ -95,3 +95,30 @@ DS.MathGen = DS.MathGen || { shuffle: (a) => DS.Rng(Math.floor(Math.random() * 1
 if (typeof document !== 'undefined') ['fullscreenchange', 'webkitfullscreenchange'].forEach((ev) => document.addEventListener(ev, () => document.querySelectorAll('.fs-btn').forEach((b) => { b.textContent = DS.UI.fs.on() ? '⛶ 전체 화면 끄기' : '⛶ 전체 화면'; })));
 // 화면 꺼짐 방지: 다른 앱 · 탭에서 돌아오면 다시 켠다
 if (typeof document !== 'undefined') document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && DS.UI.wake.want) DS.UI.wake.on(); });
+// 🔢 숫자 다이얼 (v0.9.6.16): ▲▼ 를 누르면 바로 한 칸 · 꾹 누르고 있으면 계속 올라감/내려감
+//   화면 전체를 다시 그리지 않고 다이얼 숫자만 바꾼다 (꾹 누르는 동안 버튼이 바뀌지 않게) · 두 번 탭 확대는 CSS touch-action 으로 막음
+//   root 안의 [data-dial="문항|증감"] 버튼 · get(i) → 지금 값 · set(i, v) 값 저장 (0~99)
+DS.UI.dial = function (root, get, set) {
+  const step = (b) => {
+    if (!b.isConnected) return false; // 화면이 다시 그려져 버튼이 사라졌으면 멈춤
+    const [i, d] = b.dataset.dial.split('|').map(Number), v = Math.max(0, Math.min(99, Number(get(i)) + d));
+    if (v === Number(get(i))) return false;
+    set(i, v);
+    const box = b.closest('.dial'); if (box) { const bs = box.querySelectorAll('.wheel b'); if (bs[0]) bs[0].textContent = Math.floor(v / 10); if (bs[1]) bs[1].textContent = v % 10; const t = box.querySelector('.dial-val'); if (t) t.textContent = `= ${v}`; }
+    if (DS.Sound) DS.Sound.clank();
+    return true;
+  };
+  root.querySelectorAll('[data-dial]').forEach((b) => {
+    let t1 = 0, n = 0;
+    const stop = () => { clearTimeout(t1); t1 = 0; };
+    const rep = () => { n++; if (step(b)) t1 = setTimeout(rep, n > 8 ? 60 : 120); else stop(); }; // 오래 누를수록 빨라짐
+    b.addEventListener('pointerdown', (e) => {
+      if (e.button) return; e.preventDefault(); stop(); n = 0; step(b);
+      try { b.setPointerCapture(e.pointerId); } catch (x) { /* 없음 */ }
+      t1 = setTimeout(rep, 380);
+    });
+    ['pointerup', 'pointercancel', 'lostpointercapture'].forEach((ev) => b.addEventListener(ev, stop));
+    b.addEventListener('click', (e) => { if (e.detail === 0) step(b); }); // 키보드(Enter · Space)
+    b.addEventListener('contextmenu', (e) => e.preventDefault()); // 꾹 누를 때 메뉴 안 뜨게
+  });
+};

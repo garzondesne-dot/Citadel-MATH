@@ -317,8 +317,9 @@ input:focus, select:focus { outline: none; border-color: var(--gold); }
 .pickset .chipset { font-size: 15px; padding: 6px 10px; }
 .dial { display: flex; align-items: center; gap: 10px; }
 .wheel { display: flex; flex-direction: column; align-items: center; border: 2px solid var(--line); background: #12203a; }
-.wheel button { font: 16px var(--pixel); color: var(--cyan); background: none; border: 0; padding: 4px 16px; cursor: pointer; }
-.wheel b { font-size: 30px; color: #ffe7a8; }
+.wheel button { font: 22px var(--pixel); color: var(--cyan); background: none; border: 0; padding: 10px 24px; min-height: 46px; cursor: pointer; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+.wheel button:active { background: #1d3358; color: #fff; }
+.wheel b { font-size: 34px; color: #ffe7a8; }
 .dial-val { font-size: 18px; color: var(--muted); }
 .bitem.bonus { border-color: var(--violet); }
 .quake-once { animation: quake 0.5s 2; }
@@ -1236,3 +1237,7 @@ body:has(#test-bar) #ver-tag { bottom: calc(64px + env(safe-area-inset-bottom));
 .dash-sum td { background: #10203a; font-weight: 700; }
 .dash-tag.mis { background: #2a1a3a; border-color: #a06cd5; } .dash-tag.mis.ok { background: #13402a; border-color: #11a36d; }
 .rs-mis { margin: 4px 0; padding: 6px 8px; background: #1a1430; border-left: 3px solid #a06cd5; }
+
+/* 📱 두 번 탭 확대 막기 (v0.9.6.16): 다이얼 ▲▼ · 숫자 패드를 빠르게 두 번 누르면 아이폰 · 안드로이드가 화면을 확대하던 것
+   manipulation = 두 손가락 확대 · 스크롤은 그대로, 두 번 탭 확대만 끔 · 클래스에 따로 정한 touch-action(그림 자르기 · 학습지 확대)이 우선 */
+* { touch-action: manipulation; }
