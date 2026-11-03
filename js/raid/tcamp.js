@@ -16,7 +16,8 @@ DS.TCamp = (function () {
   // 선생님 모습이 수업 방에서 바뀌면(교사 메뉴 · 처음 불러올 때) 교사 캠프 용사도 바꾼다
   let shownHero = null;
   function tHero() { const h = DS.Art.teacherHero(R), el = document.querySelector('.tc-hero'); if (!el || h === shownHero) return; shownHero = h; const a = el.querySelector('.art'); if (a) a.outerHTML = DS.Art.hero(h, 'idle', 'huff'); }
-  const ME = () => ({ c: '교사', n: 0, name: '선생님', hero: DS.Art.teacherHero(R), fx: 'twinkle', preview: true });
+  const ME = () => ({ c: '교사', n: 0, name: '선생님', hero: DS.Art.teacherHero(R), fx: DS.Art.teacherLook().fx, preview: true });
+  const plate = () => `<div class="camp-plate"><span class="nm">${DS.Titles ? DS.Titles.nameHtml({ title: DS.Art.teacherLook().title, nick: '선생님' }, { num: false, size: 14 }) : '선생님'}</span></div>`;
   const maxNo = () => Math.max(0, ...DS.Lessons.list.map((l) => l.no || 0));
   const studentUrl = () => `${location.origin}${location.pathname.replace(/[^/]*$/, '')}index.html?role=student&code=${code}${DS.Net.mode === 'local' ? '&local' : ''}`;
 
@@ -40,11 +41,17 @@ DS.TCamp = (function () {
         <div class="camp-fire"><i class="camp-glow"></i><i class="camp-glow g2"></i><i class="camp-fire-img" style="background-image:url('${base}${c.fire.src}');background-size:${c.fire.cols * 100}% ${(c.fire.rows || 1) * 100}%;background-position:0 0"></i></div>
         ${prop('dummy', '🎯', '허수아비')}${prop('mail', '📮', hall ? '우리 반 소식' : '대시보드')}
         <button class="camp-anvil tc-anvil" id="tc-anvil" aria-label="모루"><i class="camp-anvil-img" style="background-image:url('${base}${c.anvil.src}');background-size:${c.anvil.cols * 100}% 100%;background-position:0 0"></i><span class="camp-label">⚒ 모루</span></button>
-        <div class="tc-hero">${DS.Art.hero(DS.Art.teacherHero(R), 'idle', 'huff')}<i class="shadow"></i></div>
+        <div class="tc-hero">${DS.Art.hero(DS.Art.teacherHero(R), 'idle', 'huff')}<i class="shadow"></i>${plate()}</div>
+        <button class="btn small tc-set" id="tc-set">⚙ 설정</button>
         <button class="cs-zone camp-gate-z tc-gate" id="tc-gate" style="${DS.CampScene.box(c.zones.gate)}" aria-label="차시 던전"><span class="camp-label"></span></button>
       </div>
       <div class="tc-bar" id="tc-bar"></div>`;
     if (code && window.QRCode) { const q = $('#tc-qr'); q.innerHTML = ''; new QRCode(q, { text: studentUrl(), width: hall ? 380 : 320, height: hall ? 380 : 320, correctLevel: QRCode.CorrectLevel ? QRCode.CorrectLevel.M : undefined }); }
+    // ⚙ 설정 (2026-11-04): 선생님 모습 · 이펙트 · 호칭 — 모두 열림. 수업 방이 있으면 그 방 선생님 용사 · 이펙트도 바로 바꿈
+    $('#tc-set').onclick = () => DS.Control.run(() => DS.Camp.settings({ teacher: true, onSave: async (v) => {
+      if (code && R && R.meta && R.meta.teacher === DS.Net.uid()) { try { await DS.Net.update(`rooms/${code}/players/${R.meta.teacher}`, { hero: v.hero, fx: v.fx }); } catch (e) { /* 권한 없음 → 다음 수업부터 */ } } else if (code) DS.UI.toast('저장했어요 — 지금 수업 방에는 교사 폰 교사 캠프에서 바꾸면 바로 보여요 (다음 수업부터는 이 기기 모습)', 3600);
+      shownHero = null; tHero(); const p = document.querySelector('.tc-hero .camp-plate'); if (p) p.outerHTML = plate();
+    } }));
     $('#tc-anvil').onclick = () => pick('#tc-anvil', () => DS.Forge.open(ME(), { preview: true, no: maxNo() }));
     $('#tc-castle').onclick = () => pick('#tc-castle', () => DS.Control.run(() => DS.Bonus.enter(ME(), { preview: true, no: maxNo() })));
     $('#tc-dummy').onclick = () => pick('#tc-dummy', () => DS.Control.run(() => DS.Bonus.enter(ME(), { preview: true, train: true, no: maxNo() })));

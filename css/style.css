@@ -1417,3 +1417,11 @@ body:has(#test-bar) #ver-tag { bottom: calc(64px + env(safe-area-inset-bottom));
 .splash.done .sp-logo { animation: spFloat 3.2s ease-in-out infinite; }
 .splash.done .splash-tap { opacity: 1; animation: tapBlink 1.4s ease-in-out infinite; }
 .splash.done .splash-ver, .splash.done .splash-by { opacity: 1; animation: none; }
+/* 교사 캠프 ⚙ 설정 (2026-11-04) */
+.tc-stage .tc-set { position: absolute; right: 6px; top: 6px; z-index: 30; white-space: nowrap; }
+/* 교사 메뉴 (2026-11-04): 수업 준비 차시 + 🧪 테스트 한 줄 · 학생 관리 두 버튼 같은 크기 */
+.t-prep-row { display: flex; gap: 8px; align-items: flex-end; }
+.t-prep-row label { flex: 1; min-width: 0; }
+.t-prep-row #x-go { flex: none; height: 48px; padding: 0 12px; white-space: nowrap; margin-bottom: 0; }
+.t-stu-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.t-stu-row .btn.big { margin: 6px 0 4px; white-space: nowrap; }

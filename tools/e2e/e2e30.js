@@ -7,10 +7,8 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   const T = await mk('T');
   await T.goto(U + '&role=teacher'); await T.waitForTimeout(1200);
   await T.fill('#f-teacher .t-id', 'e2e-teacher'); await T.fill('#f-teacher .t-pw', '909090'); await T.click('#f-teacher .t-login'); await T.waitForTimeout(1000);
-  log.push('선생님 모습 버튼: ' + (await T.locator('#t-skin .hpick').count()));
-  await T.locator('#t-skin .hpick[data-h="17"]').click(); await T.waitForTimeout(600);
-  log.push('저장된 모습: ' + (await T.evaluate(() => localStorage.getItem('citadel-thero'))));
-  await T.locator('#t-skin').scrollIntoViewIfNeeded(); await T.screenshot({ path: `${OUT}/t-skin.png` });
+  // 2026-11-04: 선생님 모습 고르기는 교사 캠프 ⚙ 설정으로 옮김 (e2e42) — 여기서는 저장만
+  await T.evaluate(() => DS.Art.setTeacherLook({ hero: 17 })); log.push('저장된 모습: ' + (await T.evaluate(() => localStorage.getItem('citadel-thero'))));
   await T.click('#s-go'); await T.waitForTimeout(500); await T.fill('#r-cls', '1-1'); await T.fill('#r-text', '1 김민준'); await T.click('#r-up'); await T.waitForTimeout(800);
   await T.click('#screen-students .nav-back'); await T.waitForTimeout(1000);
   // 금발 검사(16)를 고른 학생 → 로그인하면 0번으로

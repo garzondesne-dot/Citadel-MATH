@@ -33,10 +33,14 @@ DS.Art = (function () {
   function teacherHero(R) {
     const t = R && R.meta && R.players && R.players[R.meta.teacher];
     if (t && t.hero != null) return Number(t.hero);
-    try { const v = Number(localStorage.getItem(TKEY)); if ((A().heroes.teacherSkins || []).includes(v)) return v; } catch (e) { /* 무시 */ }
+    try { const raw = localStorage.getItem(TKEY), v = Number(raw); if (raw !== null && raw !== '' && A().heroesV2 && A().heroesV2.list[v]) return v; } catch (e) { /* 무시 */ } // 2026-11-04: 교사는 모든 용사
     return A().heroes.teacher;
   }
   const setTeacherHero = (n) => { try { localStorage.setItem(TKEY, String(n)); } catch (e) { /* 무시 */ } };
+  // 선생님 이펙트 · 호칭 (2026-11-04 · 교사 캠프 ⚙ 설정 · 모두 열림 · 이 기기에 저장)
+  const TLOOK = 'citadel-tlook';
+  const teacherLook = () => { let v = {}; try { v = JSON.parse(localStorage.getItem(TLOOK) || '{}') || {}; } catch (e) { /* 무시 */ } return { hero: teacherHero(), fx: v.fx || 'twinkle', title: v.title || 'none' }; };
+  const setTeacherLook = (o) => { try { const v = JSON.parse(localStorage.getItem(TLOOK) || '{}') || {}; localStorage.setItem(TLOOK, JSON.stringify({ ...v, fx: o.fx || v.fx, title: o.title || v.title })); } catch (e) { /* 무시 */ } if (o.hero != null) setTeacherHero(o.hero); };
   // n = 숫자(기본 시트) 또는 'extra:3' · 'new:5' · 'crown:7' (추가 시트)
   const SHEETS = { extra: 'monstersExtra', new: 'monstersNew', crown: 'monstersCrown', rift: 'monstersRift', riftboss: 'monstersRiftBoss' };
   // 몬스터 번호: 2 · 'extra:3' · 'crown:9' … 끝에 '@h150' 을 붙이면 색 변형 (hue-rotate 150°, v0.9.6 — 보강 · 돌려쓰기 보스용, 그림 0)
@@ -162,5 +166,5 @@ ${a.ui.home ? `.home-props{display:contents}.home-props img{position:fixed;z-ind
     const prev = L.no ? DS.Lessons.list.find((l) => l.no === L.no - 1) : null;
     setTimeout(() => trim([L, prev]), 5000);
   }
-  return { emojify, cell, hero, isV2, monster, card, install, pos, lessonFiles, prefetch, trim, lessonEnter, teacherHero, setTeacherHero };
+  return { emojify, cell, hero, isV2, monster, card, install, pos, lessonFiles, prefetch, trim, lessonEnter, teacherHero, setTeacherHero, teacherLook, setTeacherLook };
 })();

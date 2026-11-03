@@ -6,8 +6,8 @@ const OUT = process.argv[2];
   const shot = (n, full) => p.screenshot({ path: `${OUT}/${n}.png`, fullPage: !!full });
   await p.goto('http://localhost:8765/index.html?local&role=teacher'); await p.waitForTimeout(1200);
   await p.fill('#f-teacher .t-id', process.env.E2E_ID || 'e2e-teacher'); await p.fill('#f-teacher .t-pw', process.env.E2E_PW || '909090'); await p.click('#f-teacher .t-login'); await p.waitForTimeout(1000);
-  console.log('lesson options:', await p.evaluate(() => [...document.querySelectorAll('#x-lesson option')].map((o) => o.value).join(',')));
-  await p.selectOption('#x-lesson', 'set-05'); await p.click('#x-go'); await p.waitForTimeout(2500);
+  console.log('lesson options:', await p.evaluate(() => [...document.querySelectorAll('#p-lesson option')].map((o) => o.value).join(',')));
+  await p.selectOption('#p-lesson', 'set-05'); await p.click('#x-go'); await p.waitForTimeout(2500);
   await p.click('#camp-gate'); await p.waitForTimeout(3500);
   const next = async () => { await p.click('#tb-next'); await p.waitForTimeout(900); };
   const answer = (mode) => p.evaluate(async (mode) => {

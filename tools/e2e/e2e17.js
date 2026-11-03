@@ -6,7 +6,7 @@ const OUT = process.argv[2];
     const p = await b.newPage({ viewport: { width: w, height: h } }); p.on('pageerror', (e) => errs.push(e.message)); p.on('dialog', (d) => d.accept());
     await p.goto('http://localhost:8765/index.html?local&role=teacher'); await p.waitForTimeout(1200);
     await p.fill('#f-teacher .t-id', process.env.E2E_ID || 'e2e-teacher'); await p.fill('#f-teacher .t-pw', process.env.E2E_PW || '909090'); await p.click('#f-teacher .t-login'); await p.waitForTimeout(1000);
-    await p.selectOption('#x-lesson', 'set-05'); await p.click('#x-go'); await p.waitForTimeout(2500);
+    await p.selectOption('#p-lesson', 'set-05'); await p.click('#x-go'); await p.waitForTimeout(2500);
     await p.screenshot({ path: `${OUT}/camp-${w}.png` });
     await p.click('#camp-anvil'); await p.waitForTimeout(1500);
     const m = await p.evaluate(() => { const ov = document.getElementById('forge'); return { scroll: ov.scrollHeight - ov.clientHeight, hammerOp: getComputedStyle(document.getElementById('fg-hammer')).opacity, ops: document.querySelectorAll('.fc-ops .fc-tile').length, mats: document.querySelectorAll('.fc-mats .fc-tile').length, hitVisible: (() => { const r = document.getElementById('fg-hit').getBoundingClientRect(); return r.bottom <= innerHeight && r.top >= 0; })() }; });

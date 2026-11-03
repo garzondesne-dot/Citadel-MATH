@@ -7,7 +7,7 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   await T.goto(U + '&role=teacher'); await T.waitForTimeout(1200);
   await T.fill('#f-teacher .t-id', process.env.E2E_ID || 'e2e-teacher'); await T.fill('#f-teacher .t-pw', process.env.E2E_PW || '909090'); await T.click('#f-teacher .t-login'); await T.waitForTimeout(1000);
   // 테스트 모드 → 학생 캠프 (용사 겹 · 보강던전 반짝이 · 설정)
-  await T.selectOption('#x-lesson', 'set-05'); await T.click('#x-go'); await T.waitForTimeout(2500);
+  await T.selectOption('#p-lesson', 'set-05'); await T.click('#x-go'); await T.waitForTimeout(2500);
   console.log('camp hero z:', await T.evaluate(() => getComputedStyle(document.querySelector('#screen-camp .camp-hero')).zIndex), 'anvil z:', await T.evaluate(() => (document.querySelector('#screen-camp .camp-anvil, #camp-anvil') ? getComputedStyle(document.querySelector('#screen-camp .camp-anvil, #camp-anvil')).zIndex : 'none')),
     'bonus sparkle:', await T.evaluate(() => (document.querySelector('.camp-bonus') ? getComputedStyle(document.querySelector('.camp-bonus'), '::before').animationName : 'none (캠프 v2: 성채)')));
   await T.click('#camp-anvil'); await T.waitForTimeout(350); await T.screenshot({ path: `${OUT}/1-hero-to-anvil.png` });
