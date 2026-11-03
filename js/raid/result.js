@@ -89,7 +89,7 @@ DS.Result = (function () {
       if (DS.Grow) g = await DS.Grow.add(me, r.parts, `raid_${code}`).catch(() => null);
       if (!g) first = false;
     }
-    if (seen && !g) return then();
+    if (seen && !g && !opt.force) return then(); // force: 수업이 끝날 때는 이미 본 학생도 개인 결과를 다시 (2026-11-03)
     try { localStorage.setItem(seenKey, '1'); } catch (e) { /* 무시 */ }
     const prep = (DS.Test && DS.Test.active() && DS.Test.prep(L.id)) || (await DS.Act.prepLite(L.id)); // 이미지는 누를 때 한 장만 (v0.8.8)
     const lv = g ? g.after : DS.Grow && me ? await DS.Grow.mine(me).catch(() => null) : null;

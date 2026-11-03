@@ -8,7 +8,7 @@ DS.Camp = (function () {
   const $ = (s) => document.querySelector(s);
   const { esc } = DS.UI;
   const C = () => DS.ASSETS.camp, base = () => DS.ASSETS.base;
-  let me = null, fireT = 0, code0 = '', live = null, liveStop = null, liveSeen = '';
+  let me = null, fireT = 0, code0 = '', live = null, liveStop = null, liveSeen = '', roomSt = null, roomStop = null, roomCode = '';
   const ck = (c) => String(c).replace(/[.#$/[\]]/g, '_');
   const today = () => new Date().toISOString().slice(0, 10);
   const stampToday = () => { try { return localStorage.getItem('citadel-stamp') === today(); } catch (e) { return false; } };
@@ -23,7 +23,7 @@ DS.Camp = (function () {
     liveStop = DS.Net.watch(`live/${ck(m.c)}`, (v) => {
       const was = live; live = v && v.open && !DS.Raid.liveOpen(v, Date.now()) ? Object.assign({}, v, { open: false }) : v;
       if (!document.getElementById('screen-camp').classList.contains('active')) return;
-      drawGate(); tutApply();
+      watchRoom(); drawGate(); tutApply();
       if (live && live.open && (!was || !was.open || was.code !== live.code) && liveSeen !== live.code) { liveSeen = live.code; showGate(); forgeInfo(); DS.Sound.correct(); DS.UI.toast(`🌀 ${live.no ? `${live.no}차시 ` : ''}던전이 열렸어요! 차원문을 눌러 들어가요`, 4200); }
     });
     if (code0) setTimeout(codeGate, 300); // QR 로 들어왔으면 코드 창을 바로
@@ -94,7 +94,14 @@ DS.Camp = (function () {
   }
 
   // 수업 중(차시 던전 열림)에는 보강던전 · 허수아비 · 모루를 회색으로 (누르면 안내만)
-  const inClass = () => !!(live && live.open);
+  const inClass = () => DS.Raid.inClass(live, roomSt, Date.now());
+  // 그 수업 방의 진행 상태를 지켜본다: 마무리 · 끝 단계가 되면 바로 보강던전 · 허수아비 · 모루가 풀린다
+  function watchRoom() {
+    const c = live && live.open ? live.code : '';
+    if (c === roomCode) return;
+    if (roomStop) roomStop(); roomStop = null; roomSt = null; roomCode = c;
+    if (c) roomStop = DS.Net.watch(`rooms/${c}/state`, (st) => { roomSt = st || null; if (document.getElementById('screen-camp').classList.contains('active')) { drawGate(); tutApply(); } });
+  }
   function lockSide() {
     ['camp-bonus', 'camp-dummy', 'camp-anvil'].forEach((id) => { const b = document.getElementById(id); if (b) b.classList.toggle('off', inClass()); });
   }

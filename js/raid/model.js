@@ -135,6 +135,9 @@ DS.Raid = (function () {
   // 차원문이 열린 지 오래되면(기본 2시간) 꺼진 것으로 본다 — 선생님이 수업 끝을 안 누르고 나간 경우
   const LIVE_MS = 2 * 60 * 60 * 1000;
   const liveOpen = (live, now) => !!(live && live.open && !(typeof live.at === 'number' && now - live.at > LIVE_MS));
+  // 수업 중 = 차원문이 열려 있고, 그 수업이 아직 마무리(마지막 한마디) · 끝 단계가 아님 (2026-11-03: 선생님이 목록에서 끝내기 전에도 풀리게)
+  const roomDone = (st, live) => { const L = live && DS.Lessons && DS.Lessons.get(live.lesson); return !!(st && (st.closed || (L && (st.step ?? -1) >= L.steps.length))); };
+  const inClass = (live, st, now) => liveOpen(live, now) && !roomDone(st, live);
 
   // ── 도움 필요 (교사 폰) ───────────────────────────────────
   // 직접 요청 · 재도전까지 다 썼는데 다 맞히지 못함 · 몬스터가 나온 지 2분이 지나도 미제출
@@ -156,7 +159,9 @@ DS.Raid = (function () {
   //   경과 = 서버 시각 − 단계 시작(state.stepAt) − 집중모드로 멈춘 시간(state.pauseMs · 지금 켜져 있으면 focusAt 부터) − ⛓ 몬스터 묶기 합계
   //   일반 45초마다 1초 잠금 · 보스 60초마다 2초 잠금 · 쓰러진 몬스터 · 이긴 보스는 공격 안 함
   //   ⛓ 몬스터 묶기 = 이미 다 맞힌 학생의 재도전에서 맞힌 소문제 1개당 1초, 학생 한 명 몬스터당 최대 4초 (성취감용, 늘어지지 않게)
-  const ATK = { monster: [45, 1], boss: [60, 2] }, BIND_PER = 1, BIND_MAX = 4;
+  // 2026-11-03 수업 뒤 변경: 체력이 많을 때 빠르게 → 닳을수록 느리게 (폰만 보고 서두르는 학생이 펜을 들게, 끝까지 푸는 학생은 여유 있게)
+  //   [가득일 때 주기, 거의 0 일 때 주기, 잠금 초] · 주기 = 빠름 + (느림 − 빠름) × (1 − 남은 체력 비율)
+  const ATK = { monster: [20, 45, 1], boss: [30, 60, 2] }, BIND_PER = 1, BIND_MAX = 4;
   function bindOf(L, R, mid, uid) {
     const r = record(L, R, mid, uid); if (!r.perfect) return 0;
     return Math.min(BIND_MAX, r.tries.slice(r.perfectAt + 1).reduce((a, t) => a + t.correct, 0) * BIND_PER);
@@ -166,10 +171,21 @@ DS.Raid = (function () {
     const st = R.state || {}, step = stepOf(L, R); if (!step || st.closed) return null;
     const kind = step.kind === 'monster' && L.monsters[step.id] && !cleared(L, R, step.id) ? 'monster' : step.kind === 'boss' && !bossHp(L, R).won ? 'boss' : null;
     if (!kind) return null;
-    const [per, lock] = (cfg || ATK)[kind], bind = kind === 'monster' ? bindTotal(L, R, step.id) : 0;
+    const a = (cfg || ATK)[kind], bind = kind === 'monster' ? bindTotal(L, R, step.id) : 0;
+    const hp = kind === 'monster' ? monsterHp(L, R, step.id) : bossHp(L, R), ratio = hp.max ? Math.max(0, Math.min(1, hp.left / hp.max)) : 1;
+    const per = a.length >= 3 ? a[0] + (a[1] - a[0]) * (1 - ratio) : a[0], lock = a[a.length - 1];
     const paused = !!st.focus, start = st.stepAt != null ? st.stepAt : now;
     const t = Math.max(0, (now - start - (st.pauseMs || 0) - (paused ? now - (st.focusAt != null ? st.focusAt : now) : 0)) / 1000 - bind);
-    return { kind, mid: step.id || 'boss', per, lock, bind, paused, k: Math.floor(t / per), p: (t % per) / per };
+    return { kind, mid: step.id || 'boss', per, lock, bind, paused, ratio, t, k: Math.floor(t / per), p: (t % per) / per };
   }
-  return { ATK, BIND_PER, BIND_MAX, bindOf, bindTotal, atkClock, RETRIES, HEAL_MAX, healsOf, healsGiven, healsTo, healsReceived, healTarget, LIVE_MS, lateIds, liveOpen, activeIds, teacherUid, num, newRoom, stepOf, isLobby, isEnd, isFinale, isClosed, focusOn, sheetOn, videoOn, autoFocus, fullMarks, canLobby, online, seedOf, itemsFor, attemptsOf, gradeAttempt, record, resultLabel, headcount, pctOf, monsterHp, waiting, allSubmitted, cleared, mastery, bossHp, helpList };
+  // 게이지 진행 (기기마다 같은 규칙): 주기가 체력에 따라 바뀌어도 게이지가 거꾸로 튀지 않게 「이번 바퀴 시작 시각」을 기억한다
+  //   memo = { key, start } (기기에서 들고 있음) · 모든 기기가 같은 서버 시각 t 와 같은 체력으로 계산 → 거의 같은 순간 공격
+  function atkTrack(memo, c, key) {
+    if (memo.key !== key) { memo.key = key; memo.start = c.t - (c.t % c.per); }
+    if (c.t < memo.start) memo.start = Math.max(0, c.t - (c.t % c.per)); // ⛓ 묶기로 시계가 뒤로 → 이번 바퀴 다시
+    const p = (c.t - memo.start) / c.per;
+    if (p >= 1) { memo.start += c.per; return { p: 0, strike: true }; }
+    return { p, strike: false };
+  }
+  return { ATK, BIND_PER, BIND_MAX, bindOf, bindTotal, atkClock, atkTrack, RETRIES, HEAL_MAX, healsOf, healsGiven, healsTo, healsReceived, healTarget, LIVE_MS, lateIds, liveOpen, roomDone, inClass, activeIds, teacherUid, num, newRoom, stepOf, isLobby, isEnd, isFinale, isClosed, focusOn, sheetOn, videoOn, autoFocus, fullMarks, canLobby, online, seedOf, itemsFor, attemptsOf, gradeAttempt, record, resultLabel, headcount, pctOf, monsterHp, waiting, allSubmitted, cleared, mastery, bossHp, helpList };
 })();

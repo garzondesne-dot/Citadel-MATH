@@ -145,22 +145,29 @@ check(X.online(R2, 'a') && !X.online(R2, 'b'), '접속 표시');
   check(X.monsterHp(L, H, 'm1').dmg === 16, '힐로 고친 만큼 데미지에 들어감');
 }
 
-// 👾 몬스터 공격 시계 (2026-11-03): 반 전체 공통 · 집중모드 멈춤 · ⛓ 묶기 = 다 맞힌 뒤 재도전에서 맞힌 소문제 1개당 1초, 학생당 최대 4초
+// 👾 몬스터 공격 시계 (2026-11-03): 반 전체 공통 · 체력이 많을수록 빠름(일반 20초 → 45초 · 보스 30초 → 60초) · 집중모드 멈춤 · ⛓ 묶기 최대 4초
 {
   const Q = X.newRoom('654321', 'set-03', 'T', 0);
   ['a', 'b'].forEach((u, i) => { Q.players[u] = { num: i + 1, nick: u, hero: 0, at: 0 }; });
-  Q.active = { a: true, b: true }; Q.state.headcount = 10; Q.state.step = 2; Q.state.stepAt = 0; // 문제1 (4칸) · 인원 10 = 체력이 남아 있어야 공격한다
+  Q.active = { a: true, b: true }; Q.state.headcount = 10; Q.state.step = 2; Q.state.stepAt = 0; // 문제1 (4칸) · 인원 10
   let c = X.atkClock(L, Q, 50000);
-  check(c && c.kind === 'monster' && c.per === 45 && c.lock === 1 && c.k === 1 && Math.abs(c.p - 5 / 45) < 1e-9, `일반 45초 주기 (50초 = 2바퀴째) ${JSON.stringify(c)}`);
-  Q.state.pauseMs = 10000; c = X.atkClock(L, Q, 50000); check(c.k === 0 && Math.abs(c.p - 40 / 45) < 1e-9, '집중모드로 멈춘 10초는 빼고 센다');
-  Q.state.focus = true; Q.state.focusAt = 45000; c = X.atkClock(L, Q, 50000); check(c.paused && Math.abs(c.p - 35 / 45) < 1e-9, '집중모드가 켜져 있으면 그 시각에서 멈춤');
+  check(c && c.kind === 'monster' && c.per === 20 && c.lock === 1 && c.t === 50 && c.ratio === 1, `체력 가득 = 20초 주기 ${JSON.stringify(c)}`);
+  Q.state.pauseMs = 10000; c = X.atkClock(L, Q, 50000); check(c.t === 40, '집중모드로 멈춘 10초는 빼고 센다');
+  Q.state.focus = true; Q.state.focusAt = 45000; c = X.atkClock(L, Q, 50000); check(c.paused && c.t === 35, '집중모드가 켜져 있으면 그 시각에서 멈춤');
   delete Q.state.focus; delete Q.state.focusAt; delete Q.state.pauseMs;
   Q.subs = { m1: { a: { 0: answer(Q, 'm1', 'a', 0, 4), 1: answer(Q, 'm1', 'a', 1, 3), 2: answer(Q, 'm1', 'a', 2, 4) }, b: { 0: answer(Q, 'm1', 'b', 0, 2), 1: answer(Q, 'm1', 'b', 1, 4) } } };
   check(X.bindOf(L, Q, 'm1', 'a') === 4, `a: 다 맞힌 뒤 3 + 4 = 7 → 최대 4초 (${X.bindOf(L, Q, 'm1', 'a')})`);
   check(X.bindOf(L, Q, 'm1', 'b') === 0, 'b: 처음 다 맞힌 시도는 묶기가 아님');
-  c = X.atkClock(L, Q, 50000); check(c.bind === 4 && Math.abs(c.p - 1 / 45) < 1e-9 && c.k === 1, `묶기 4초만큼 늦춰짐 ${JSON.stringify(c)}`);
-  Q.state.step = X.stepOf(L, Q) && L.steps.findIndex((st) => st.kind === 'boss'); c = X.atkClock(L, Q, 70000);
-  check(c && c.kind === 'boss' && c.per === 60 && c.lock === 2 && c.bind === 0, `보스 60초 주기 · 2초 잠금 ${JSON.stringify(c)}`);
+  c = X.atkClock(L, Q, 50000); const hp = X.monsterHp(L, Q, 'm1');
+  check(c.bind === 4 && c.t === 46 && Math.abs(c.per - (20 + 25 * (1 - hp.left / hp.max))) < 1e-9 && c.per > 20, `묶기 4초 · 체력이 닳아 주기가 길어짐 ${JSON.stringify(c)}`);
+  // atkTrack: 바퀴가 차면 공격 · 주기가 바뀌어도 거꾸로 튀지 않음
+  const memo = {}; let tr = X.atkTrack(memo, { t: 5, per: 20 }, 'k'); check(Math.abs(tr.p - 0.25) < 1e-9 && !tr.strike, 'atkTrack 시작');
+  tr = X.atkTrack(memo, { t: 20, per: 20 }, 'k'); check(tr.strike && memo.start === 20, '20초에 공격');
+  tr = X.atkTrack(memo, { t: 30, per: 40 }, 'k'); check(!tr.strike && Math.abs(tr.p - 0.25) < 1e-9, '느려진 주기는 이번 바퀴부터 (게이지 그대로 이어짐)');
+  tr = X.atkTrack(memo, { t: 18, per: 40 }, 'k'); check(!tr.strike && tr.p >= 0, '묶기로 시계가 뒤로 가도 게이지가 음수가 되지 않음');
+  Q.state.step = L.steps.findIndex((st) => st.kind === 'boss'); c = X.atkClock(L, Q, 70000);
+  check(c && c.kind === 'boss' && c.per === 30 && c.lock === 2 && c.bind === 0, `보스 가득 = 30초 주기 · 2초 잠금 ${JSON.stringify(c)}`);
+  check(X.atkClock(L, Q, 70000, { monster: [4, 1], boss: [5, 2] }).per === 5, '시험용 [주기, 잠금] 두 칸도 그대로');
   Q.state.step = -1; check(X.atkClock(L, Q, 70000) === null, '대기실에서는 공격 없음');
 }
 if (fail) { console.error(`\n${fail}건 실패`); process.exit(1); }
