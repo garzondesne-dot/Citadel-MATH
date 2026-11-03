@@ -143,12 +143,11 @@ DS.App = (function () {
     $('#s-cls').onchange = nums; $('#s-num').onchange = showMask;
     nums();
   }
-  // 🔑 비밀번호 칸 (2026-11-03 v0.9.6.16 사용자 요청): 크롬 「비밀번호 유출 확인」 경고가 뜨지 않게 type=password 를 쓰지 않는다
-  //   ●●●● 가림은 CSS(input.masked) · 크롬 · 사파리 비밀번호 저장 · 자동 입력도 함께 꺼짐 (0.9.6.5 의 저장 정리를 대신함)
-  //   4자리 학생 비밀번호는 거의 다 유출 목록에 있어서 password 칸이면 학생 폰마다 경고가 뜬다
-  const NOSAVE = 'autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-1p-ignore data-lpignore="true" data-form-type="other"';
-  const pinInput = (id, ph) => `<input id="${id}" name="pin-${id}" class="masked" type="text" inputmode="numeric" maxlength="4" pattern="[0-9]*" placeholder="${ph}" ${NOSAVE}>`;
-  const sForm = (c, n, inner) => `<form class="s-auth" autocomplete="off" onsubmit="return false">${inner}</form>`;
+  // 🔑 크롬 비밀번호 저장 정리 (2026-11-03): 저장되는 곳은 딱 두 군데 — 학생(아이디 「1-3반 1번」 + 4자리) · 교사(아이디 + 비밀번호)
+  //   학생 칸은 <form> 안에 숨은 아이디 칸(반·번호)과 짝지어 둔다. 로그인 = current-password · 가입/새 비번 = new-password
+  //   그 밖의 숫자 칸(수업 코드 · 종합상황실 키)은 password 칸이 아니라서 크롬이 저장하지 않는다
+  const pinInput = (id, ph, kind = 'current-password') => `<input id="${id}" name="${kind === 'new-password' ? 'new-password' : 'password'}" type="password" inputmode="numeric" maxlength="4" pattern="[0-9]*" placeholder="${ph}" autocomplete="${kind}">`;
+  const sForm = (c, n, inner) => `<form class="s-auth" autocomplete="on" onsubmit="return false"><input class="vh" type="text" name="username" autocomplete="username" tabindex="-1" aria-hidden="true" readonly value="${esc(`${c}반 ${n}번`)}">${inner}</form>`;
   function drawForm() {
     const f = $('#s-form'), c = () => $('#s-cls').value, n = () => Number($('#s-num').value);
     const remember = () => {}; // 반·번호는 기억하지 않는다 (v0.8.3)
@@ -162,7 +161,7 @@ DS.App = (function () {
       $('#s-new').onclick = () => { sMode = 'signup'; drawForm(); };
     } else if (sMode === 'signup') {
       f.innerHTML = sForm(c(), n(), `<p class="muted small">이름이 맞는지 꼭 확인하고 가입해요. 한 번호는 한 명만 가입할 수 있어요.</p>
-        <div class="row2"><label>비밀번호 4자리 ${pinInput('s-p1', '숫자 4자리')}</label><label>한 번 더 ${pinInput('s-p2', '다시')}</label></div>${heroPicker()}${fxPicker()}
+        <div class="row2"><label>비밀번호 4자리 ${pinInput('s-p1', '숫자 4자리', 'new-password')}</label><label>한 번 더 ${pinInput('s-p2', '다시', 'new-password')}</label></div>${heroPicker()}${fxPicker()}
         <p class="muted small">용사·이펙트는 나중에 모닥불 ⚙ 설정에서 언제든 바꿀 수 있어요.</p>
         <button id="s-make" type="submit" class="btn primary big">✨ 가입하기</button><button id="s-back" type="button" class="btn small">← 로그인으로</button>`);
       bindHeroes(() => { const a = $('#s-p1').value, b = $('#s-p2').value; drawForm(); $('#s-p1').value = a; $('#s-p2').value = b; });
@@ -176,7 +175,7 @@ DS.App = (function () {
       $('#s-back').onclick = () => { sMode = 'login'; drawForm(); };
     } else {
       f.innerHTML = sForm(c(), n(), `<p class="gold">선생님이 비밀번호를 초기화했어요. 새 비밀번호를 정해요.</p>
-        <div class="row2"><label>새 비밀번호 4자리 ${pinInput('s-p1', '숫자 4자리')}</label><label>한 번 더 ${pinInput('s-p2', '다시')}</label></div>
+        <div class="row2"><label>새 비밀번호 4자리 ${pinInput('s-p1', '숫자 4자리', 'new-password')}</label><label>한 번 더 ${pinInput('s-p2', '다시', 'new-password')}</label></div>
         <button id="s-make" type="submit" class="btn primary big">🔑 새 비밀번호로 시작</button>`);
       $('#s-make').onclick = go(async () => {
         const a = $('#s-p1').value, b = $('#s-p2').value;
@@ -219,7 +218,7 @@ DS.App = (function () {
     const first = !(await A().adminExists());
     document.querySelectorAll('.t-auth').forEach((e) => {
       e.innerHTML = `<p class="muted small">${first ? '처음 한 번: 교사 계정을 만들어요. (학생보다 먼저!)' : '교사 계정으로 로그인해요.'}</p>
-        <form class="t-form" autocomplete="off" onsubmit="return false"><div class="row2"><label>교사 아이디 <input class="t-id" name="teacher-id" type="text" ${NOSAVE} placeholder="영문·숫자"></label><label>비밀번호 <input class="t-pw masked" name="teacher-key" type="text" ${NOSAVE} placeholder="6자 이상"></label></div>
+        <form class="t-form" autocomplete="on" onsubmit="return false"><div class="row2"><label>교사 아이디 <input class="t-id" name="username" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="영문·숫자"></label><label>비밀번호 <input class="t-pw" name="${first ? 'new-password' : 'password'}" type="password" autocomplete="${first ? 'new-password' : 'current-password'}" placeholder="6자 이상"></label></div>
         <button type="submit" class="btn primary t-login">${first ? '✨ 교사 계정 만들기' : '🔑 교사 로그인'}</button></form>`;
     });
     document.querySelectorAll('.t-login').forEach((b) => (b.onclick = go(async () => {
