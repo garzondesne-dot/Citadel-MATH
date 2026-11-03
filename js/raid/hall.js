@@ -306,7 +306,7 @@ DS.Hall = (function () {
       ${Raid().isEnd(L, R) ? `<div class="h-words">${C().wordsHtml(R)}</div>` : ''}`;
     C().bindWords($('#h-side'), code, R);
     const el = $('#h-ctrl'), live = !Raid().isLobby(R) && !Raid().isClosed(R);
-    el.innerHTML = `${C().pctHtml(L, R)}<p class="muted small">다음 ▶ ${esc(C().nextName(L, R))}</p><div class="row"><button class="btn" id="h-back"${i < 0 ? ' disabled' : ''}>◀ 뒤로</button><button class="btn primary" id="h-fwd"${Raid().isClosed(R) ? ' disabled' : ''}>${Raid().isFinale(L, R) ? '수업 끝 ▶' : '앞으로 ▶'}</button></div>${live ? C().videoBtn(L, R, prep.video) + C().sheetBtn(L, R) + C().focusBtn(R) : ''}${live && Raid().stepOf(L, R) && Raid().stepOf(L, R).kind === 'monster' ? '<button class="btn demo-btn" id="h-demo">🎮 시연: 문제 풀어 보기</button>' : ''}`;
+    el.innerHTML = `${C().pctHtml(L, R)}<p class="muted small">다음 ▶ ${esc(C().nextName(L, R))}</p><div class="row"><button class="btn" id="h-back"${i < 0 ? ' disabled' : ''}>◀ 뒤로</button><button class="btn primary" id="h-fwd"${Raid().isClosed(R) ? ' disabled' : ''}>${Raid().isFinale(L, R) ? '수업 끝 ▶' : '앞으로 ▶'}</button></div>${live ? C().videoBtn(L, R, prep.video) + C().sheetBtn(L, R) + C().focusBtn(R) : ''}${live && Raid().stepOf(L, R) && ['monster', 'boss'].includes(Raid().stepOf(L, R).kind) ? `<button class="btn demo-btn" id="h-demo">🎮 시연: ${Raid().stepOf(L, R).kind === 'boss' ? '형성평가 풀어 보기' : '문제 풀어 보기'}</button>` : ''}`;
     const db = $('#h-demo'); if (db) db.onclick = () => demoOpen(Raid().stepOf(L, R));
     C().bindPct(el, code, R, L); C().bindFocus(el, code, R); C().bindSheet(el, code, R); C().bindVideo(el, code, R);
     $('#h-fwd').onclick = () => C().run(() => C().forward(code, R, L));
@@ -317,10 +317,37 @@ DS.Hall = (function () {
   //   다 맞히면 선생님 캐릭터가 돌진해 일격 → 이미 공략된(체력 0) 몬스터면 형체가 완전히 사라진다(소멸) · 아직이면 「시연 · 데미지 없음」
   //   정답 · 오답 표시는 교사 본인의 시연 풀이에만 보인다 (학생 답은 여전히 띄우지 않음 — DECISIONS 예외)
   function demoOpen(step, attempt = 0) {
-    if (!step || step.kind !== 'monster') return;
+    if (!step || !['monster', 'boss'].includes(step.kind)) return;
+    if (step.kind === 'boss') return bossDemo(step, attempt ? 2 : 1);
     const items = L.items(step.id, `demo|${code}|${Date.now()}`, attempt);
     demo = { step, attempt, items, given: items.map((q) => (q.type === 'multi' ? [] : q.type === 'number' ? 0 : q.type === 'text' ? '' : null)), marks: null };
     demoDraw();
+  }
+  // 👑 보스(형성평가) 시연 (2026-11-03 사용자 요청): 학생 폰과 같은 방식 — 문항 번호를 누르면 학생과 같은 입력 창(DS.Quiz.ask)
+  //   세트 1 = 학습지 형성평가 그대로 · 세트 2 = 숫자 바꾼 문제 · 데미지 · 기록 없음 · 체력 문항(1~hpItems)을 다 맞히면 선생님의 일격
+  function bossDemo(step, set, ok) {
+    demo = { step, boss: true, set, ok: ok || [] };
+    const items = L.boss.sets[set], hp = L.boss.hpItems;
+    let ov = document.getElementById('h-demo-ov');
+    if (!ov) { ov = document.createElement('div'); ov.id = 'h-demo-ov'; ov.className = 'h-demo-ov'; document.getElementById('screen-hall').appendChild(ov); }
+    const done = items.slice(0, hp).every((_, i) => demo.ok[i]);
+    ov.innerHTML = `<div class="demo-box framed"><div class="demo-head"><b>🎮 시연 · ${esc(L.boss.title)}</b><span class="demo-tag">데미지 · 기록 없음</span>
+        <button class="btn small${set === 1 ? ' on' : ''}" data-ds="1">📄 세트 1 (학습지)</button><button class="btn small${set === 2 ? ' on' : ''}" data-ds="2">🔄 세트 2 (숫자 바꿈)</button><button class="btn small" id="demo-x">✕ 닫기</button></div>
+      <p class="muted small">문항을 눌러 풀어요 — 학생 폰과 같은 입력 창이에요. 1~${hp}번을 모두 맞히면 선생님의 일격!</p>
+      <div class="boss-items">${items.map((p, i) => `<button class="bitem${demo.ok[i] === true ? ' ok' : demo.ok[i] === false ? ' tried' : ''}${i >= hp ? ' bonus' : ''}" data-di="${i}"><b>${i + 1}번${i >= hp ? ' 보너스' : ''}</b>${demo.ok[i] === true ? ' ✔' : demo.ok[i] === false ? ' ✘' : ''}</button>`).join('')}</div>
+      ${done ? '<div class="demo-res ok">⚔ 형성평가 완료! 선생님의 일격!</div>' : ''}</div>`;
+    ov.querySelector('#demo-x').onclick = demoClose;
+    ov.querySelectorAll('[data-ds]').forEach((b) => (b.onclick = () => bossDemo(step, Number(b.dataset.ds))));
+    ov.querySelectorAll('[data-di]').forEach((b) => (b.onclick = async () => {
+      const i = Number(b.dataset.di);
+      const r = await DS.Quiz.ask({ name: `형성평가 ${i + 1}번 (시연)`, formula: set === 1 ? '세트 1' : '세트 2 · 🔄 숫자가 바뀌었어요' }, items[i], { collect: true, tag: '🎮 시연' });
+      if (!r || !demo || !demo.boss) return;
+      const okNow = DS.Quiz.grade(items[i], r.given), next = demo.ok.slice(); next[i] = okNow;
+      if (okNow) DS.Sound.slash(); else DS.Sound.squish();
+      const was = items.slice(0, hp).every((_, k) => demo.ok[k]);
+      bossDemo(step, set, next);
+      if (!was && items.slice(0, hp).every((_, k) => next[k])) setTimeout(() => { demoClose(); teacherStrike(step); }, 1200);
+    }));
   }
   function demoClose() { const ov = document.getElementById('h-demo-ov'); if (ov) ov.remove(); demo = null; }
   function demoDraw() {
@@ -329,9 +356,9 @@ DS.Hall = (function () {
     const d = demo, S = DS.Student, ready = d.items.every((q, i) => (q.type === 'multi' ? d.given[i].length > 0 : q.type === 'text' ? String(d.given[i] || '').trim() !== '' : d.given[i] != null));
     const res = d.marks ? `<div class="demo-res ${d.marks.every(Boolean) ? 'ok' : 'ng'}">${d.marks.every(Boolean) ? '⚔ 모두 맞혔다! 선생님의 일격!' : `✘ ${d.marks.filter((m) => !m).length}개 틀림 — 해설을 함께 봐요`}</div>
       <div class="marks">${d.items.map((q, i) => `<div class="mark ${d.marks[i] ? 'ok' : 'ng'}"><b>${i + 1}</b> ${d.marks[i] ? '✔' : '✘'} <span class="math">${DS.UI.pretty(S.itemText(q))}</span>${d.marks[i] ? '' : `<br><span class="sol-line math">${DS.UI.pretty(S.solOf(q))}</span>`}</div>`).join('')}</div>` : '';
-    ov.innerHTML = `<div class="demo-box framed"><div class="demo-head"><b>🎮 시연 · ${esc(d.step.title)}</b><span class="demo-tag">데미지 · 기록 없음</span>
-        <button class="btn small${d.attempt ? '' : ' on'}" data-da="0">📄 학습지 문제</button><button class="btn small${d.attempt ? ' on' : ''}" data-da="1">🔄 숫자 바꾼 문제</button><button class="btn small" id="demo-x">✕ 닫기</button></div>
-      ${d.marks ? res : `${L.monsters[d.step.id].note ? `<p class="muted small">💡 ${esc(L.monsters[d.step.id].note)}</p>` : ''}<div class="items demo-items">${d.items.map((q, i) => S.itemHtml(q, i, d.given)).join('')}</div>
+    ov.innerHTML = `<div class="demo-box framed"><div class="demo-head"><b>🎮 시연 · ${esc(d.step.kind === 'boss' ? L.boss.title : d.step.title)}</b><span class="demo-tag">데미지 · 기록 없음</span>
+        <button class="btn small${d.attempt ? '' : ' on'}" data-da="0">📄 ${d.step.kind === 'boss' ? '세트 1 (학습지)' : '학습지 문제'}</button><button class="btn small${d.attempt ? ' on' : ''}" data-da="1">🔄 ${d.step.kind === 'boss' ? '세트 2 (숫자 바꿈)' : '숫자 바꾼 문제'}</button><button class="btn small" id="demo-x">✕ 닫기</button></div>
+      ${d.marks ? res : `${(L.monsters[d.step.id] || {}).note ? `<p class="muted small">💡 ${esc(L.monsters[d.step.id].note)}</p>` : ''}<div class="items demo-items">${d.items.map((q, i) => S.itemHtml(q, i, d.given)).join('')}</div>
         <button class="btn primary big" id="demo-go"${ready ? '' : ' disabled'}>⚔ 공격! (시연)</button>`}
       ${d.marks ? '<div class="row demo-row"><button class="btn" data-da="1">↻ 숫자 바꿔 다시</button><button class="btn primary" id="demo-x2">✕ 닫고 레이드로</button></div>' : ''}</div>`;
     ov.querySelector('#demo-x').onclick = demoClose; const x2 = ov.querySelector('#demo-x2'); if (x2) x2.onclick = demoClose;
@@ -355,7 +382,7 @@ DS.Hall = (function () {
   // 선생님 일격: 왼쪽에서 등장 → 몬스터로 돌진 → 팍! (이미 공략된 몬스터면 소멸)
   function teacherStrike(step) {
     const arena = $('#raid'), m0 = $('#rm'); if (!arena || !m0 || Raid().stepOf(L, R) !== step) return;
-    const kill = Raid().cleared(L, R, step.id), ar = arena.getBoundingClientRect(), mr = m0.getBoundingClientRect();
+    const kill = step.kind === 'boss' ? Raid().bossHp(L, R).won : Raid().cleared(L, R, step.id), ar = arena.getBoundingClientRect(), mr = m0.getBoundingClientRect();
     const t = document.createElement('div'); t.className = 'teach-strike'; t.innerHTML = DS.Art.hero(DS.ASSETS.heroes.teacher, 'attack');
     arena.appendChild(t);
     t.style.setProperty('--tx', `${mr.left - ar.left + mr.width * 0.2 - ar.width * 0.08}px`); t.style.setProperty('--ty', `${mr.top - ar.top + mr.height * 0.45 - ar.height * 0.62}px`);

@@ -1190,3 +1190,4 @@ input.masked { -webkit-text-security: disc; text-security: disc; }
 .h-concept.wfull .h-sheet img, .h-sheet-ov.wfull .h-sheet img { max-width: 100%; filter: none; }
 .h-concept.wfull .h-zoom-tip { color: #8a8f9c; margin: 2px 0 0; }
 .h-concept:not(.split)[data-zoom] .h-sheet img, .h-sheet-ov .h-sheet img { cursor: zoom-in; }
+body:has(#h-demo-ov) > .modal { z-index: 70; } /* 보스 시연: 학생과 같은 입력 창이 시연 창 위에 */
