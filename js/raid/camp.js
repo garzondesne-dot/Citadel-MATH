@@ -194,7 +194,8 @@ DS.Camp = (function () {
     const no = Number(await DS.Net.get(`unlock/${ck(me.c)}`).catch(() => 0)) || 0;
     const owned = (await DS.Net.get(`cards/${ck(me.c)}/${me.n}`).catch(() => null)) || {};
     const open = DS.Unit.opens(no), have = open.filter((c) => owned[c.id]);
-    const need3 = DS.Unit.CARDS.filter((c) => c.no <= 3), got3 = need3.filter((c) => owned[c.id]).length;
+    const need3 = DS.Unit.CARDS.filter((c) => c.no <= 3 && c.id !== 'subcount'), got3 = need3.filter((c) => owned[c.id]).length;
+    const need46 = DS.Unit.CARDS.filter((c) => c.no >= 4 && c.no <= 6), got46 = need46.filter((c) => owned[c.id]).length;
     const next = open.find((c) => !owned[c.id]);
     const pct = open.length ? Math.round((100 * have.length) / open.length) : 0;
     if (!document.getElementById('camp-forge')) return;
@@ -203,7 +204,7 @@ DS.Camp = (function () {
       <div class="cf-bar"><i style="width:${pct}%"></i><span>${have.length} / ${open.length}장</span></div>
       <div class="cf-cards">${have.slice(-4).reverse().map((c) => DS.Card.html(c, { w: 62 })).join('') || '<span class="muted small">아직 만든 카드가 없어요 — 모루에서 첫 카드를 만들어 봐요!</span>'}</div>
       ${next ? `<p class="cf-hint">💡 다음 레시피 힌트: <b>${esc(next.hint)}</b></p>` : '<p class="cf-hint okc">🎉 열린 레시피를 모두 모았어요!</p>'}
-      <p class="muted small">✨ 숨겨진 용사: 1~3차시 도감 <b>${got3} / ${need3.length}</b>장 모으면 열려요</p>`;
+      <p class="muted small">✨ 숨겨진 용사: 1~3차시 도감 <b>${got3} / ${need3.length}</b>장 → 성기사${no >= 4 ? ` · 4~6차시 도감 <b>${got46} / ${need46.length}</b>장 → 무희` : ''}</p>`;
     const forgeGo = () => (inClass() ? DS.UI.toast('🌀 수업 중에는 모루를 쓸 수 없어요. 수업이 끝나면 열려요!', 3000) : DS.Forge.open(me));
     const b = document.getElementById('cf-open'); if (b) b.onclick = forgeGo;
     el.querySelectorAll('.mcard').forEach((c) => (c.onclick = forgeGo));
@@ -300,7 +301,7 @@ DS.Camp = (function () {
     const draw = () => {
       el.innerHTML = `<div class="quiz-box framed set-box"><div class="set-head"><h2>⚙ 설정</h2><button class="btn" id="set-x">닫기</button><button class="btn primary" id="set-ok">저장</button></div>
         <p class="shelf-title">내 용사</p><div class="heroes set-grid">${L.heroes.map((h) => `<button class="hpick${h.id === hero ? ' on' : ''}${h.open ? '' : ' lock'}" data-h="${h.id}" title="${esc(h.cond || '')}">${DS.Art.hero(h.id, h.id === hero ? 'attack' : 'idle')}${h.open ? '' : '<b class="lk">🔒</b>'}</button>`).join('')}</div>
-        <p class="muted small">✨ 추가 용사: ① 1~3차시 도감 <b>${L.got} / ${L.need}</b>장 · ② 🎁 첫 레이드 클리어 · 나머지는 추후 공개</p>
+        <p class="muted small">✨ 추가 용사: ① 1~3차시 도감 <b>${L.got} / ${L.need}</b>장 · ② 🎁 첫 레이드 클리어 · ③ 4~6차시 도감 · ④ 7~10차시 도감 · 나머지는 추후 공개</p>
         <p class="shelf-title">🏅 호칭 <span class="muted small">얻은 ${got.length}개 · 고른 호칭이 이름 앞에 붙어요</span></p>
         <div class="ttl-grid">${[{ id: 'none', name: '달지 않기', tier: 'w', cond: '' }, ...DS.Titles.all()].map((t) => { const has = t.id === 'none' || got.includes(t.id); return `<button class="ttl-pick ${DS.Titles.TIER[t.tier].cls}${t.id === title ? ' on' : ''}${has ? '' : ' lock'}" data-ttl="${t.id}" title="${esc(t.cond || '')}">${has ? DS.Titles.medal(t, 22) : '🔒'}<span>${esc(t.name)}</span>${has ? '' : `<small>${esc(t.cond)}</small>`}</button>`; }).join('')}</div>
         <p class="shelf-title">공격 이펙트 <span class="muted small">화려한 이펙트 = 📘 보강 인장 ${L.seals || 0}개 모음</span></p><div class="fxs">${L.fx.map((f) => `<button class="fxpick${f.id === fx ? ' on' : ''}${f.open ? '' : ' lock'}" data-fx="${f.id}"><canvas width="150" height="90" data-still="${f.id}"></canvas><span>${f.open ? DS.FX.NAMES[f.id] : `🔒 ${esc(f.cond || '추후 공개')}`}</span></button>`).join('')}</div>

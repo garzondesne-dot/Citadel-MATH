@@ -10,7 +10,7 @@ DS.FIREBASE = {
   messagingSenderId: '434932944226',
   appId: '1:434932944226:web:0763464faf9dde9639b03b',
 };
-DS.VERSION = 'citadel-0.9.6.11';
+DS.VERSION = 'citadel-0.9.6.12';
 // 버전 꼬리표 (2026-11-03): 어느 화면에서든 왼쪽 아래 구석에 작게 — 학생 · 교사 · 전광판 화면에서 업데이트 됐는지 바로 확인
 if (typeof document !== 'undefined') {
   const tag = () => { if (document.getElementById('ver-tag') || /demo\.html$/.test(location.pathname)) return; /* 체험판 겉틀은 빼고 안쪽 화면마다 */ const d = document.createElement('div'); d.id = 'ver-tag'; d.setAttribute('aria-hidden', 'true'); d.textContent = 'v' + DS.VERSION.replace(/^citadel-/, ''); document.body.appendChild(d); };
