@@ -37,12 +37,7 @@ DS.Bonus = (function () {
   async function enter(m, opt = {}) {
     me = m; preview = !!opt.preview; train = !!opt.train;
     no = preview ? Number(opt.no) || 0 : Number(await N().get(`unlock/${ck(m.c)}`).catch(() => 0)) || 0;
-    // 🌀 우리 반 차시 던전이 열려 있는 동안(수업 중)은 보강던전 · 허수아비에 못 들어간다 (2026-11-03 사용자 확정)
-    //   unlock 은 수업 방을 만들 때 올라가므로, 수업 중인 차시는 수업이 끝나야(차원문이 닫혀야) 목록에 들어간다
-    const lv = preview ? null : await N().get(`live/${ck(m.c)}`).catch(() => null);
-    const lst = lv && lv.open && lv.code ? await N().get(`rooms/${lv.code}/state`).catch(() => null) : null;
-    liveNo = DS.Raid.inClass(lv, lst, Date.now()) ? Number(lv.no) || 0 : 0;
-    if (liveNo && !m.test && !(DS.Test && DS.Test.active && DS.Test.active())) { DS.UI.toast(`🌀 지금은 ${liveNo}차시 수업 중이에요! 차시 던전으로 들어가요. (${train ? '허수아비' : '보강던전'}는 수업이 끝나면 열려요)`, 3600); DS.Camp.enter(m); return; }
+    liveNo = 0; // 2026-11-03 사용자 결정: 수업 중 잠금 · 수업 중인 차시를 목록에서 빼기 없앰
     mine = preview ? {} : (await N().get(`bonus/${ck(m.c)}/${m.n}`).catch(() => null)) || {};
     DS.UI.show('screen-bonus');
     render();

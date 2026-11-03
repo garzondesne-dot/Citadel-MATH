@@ -103,7 +103,7 @@ DS.Camp = (function () {
     if (c) roomStop = DS.Net.watch(`rooms/${c}/state`, (st) => { roomSt = st || null; if (document.getElementById('screen-camp').classList.contains('active')) { drawGate(); tutApply(); } });
   }
   function lockSide() {
-    ['camp-bonus', 'camp-dummy', 'camp-anvil'].forEach((id) => { const b = document.getElementById(id); if (b) b.classList.toggle('off', inClass()); });
+    // 2026-11-03 사용자 결정: 수업 중 잠금 없앰 — 보강던전 · 허수아비 · 모루는 언제나 열림 (차시 던전 차원문은 따로 빛남)
   }
   function drawGate() {
     lockSide();
@@ -136,9 +136,8 @@ DS.Camp = (function () {
       <div class="camp-bar"><span class="muted small">🎯 허수아비 · 📚 책장 · 📮 우편함을 눌러 보세요</span><button class="btn small" id="camp-code">코드로 입장</button></div>
       <div class="camp-forge panel framed" id="camp-forge"><p class="muted small">연성 정보를 불러오는 중…</p></div>`;
     forgeInfo();
-    $('#camp-anvil').onclick = () => (inClass() ? classOnly('#camp-anvil') : pick('#camp-anvil', () => DS.Forge.open(me)));
-    const classOnly = (sel) => { nope(sel); DS.UI.toast(`🌀 지금은 ${live.no ? `${live.no}차시 ` : ''}수업 중이에요! 차시 던전으로 들어가요. (보강던전 · 허수아비 · 모루는 수업이 끝나면 열려요)`, 3400); };
-    $('#camp-bonus').onclick = () => (inClass() ? classOnly('#camp-bonus') : pick('#camp-bonus', () => DS.Control.run(() => DS.Bonus.enter(me))));
+    $('#camp-anvil').onclick = () => pick('#camp-anvil', () => DS.Forge.open(me));
+    $('#camp-bonus').onclick = () => pick('#camp-bonus', () => DS.Control.run(() => DS.Bonus.enter(me)));
     $('#camp-gate').onclick = () => {
       if (live && live.open) { if (tutMode === 'A') { tutMark('a'); tutClear(); } return pick('#camp-gate', () => DS.Control.run(() => enterCode(live.code)), 'portal'); }
       nope('#camp-gate');
@@ -150,7 +149,7 @@ DS.Camp = (function () {
     $('#camp-code').onclick = codeGate;
     $('#camp-mail').onclick = () => pick('#camp-mail', () => DS.Control.run(note));
     $('#camp-shelf').onclick = () => pick('#camp-shelf', () => DS.Control.run(shelf));
-    $('#camp-dummy').onclick = () => (inClass() ? classOnly('#camp-dummy') : pick('#camp-dummy', () => DS.Control.run(() => DS.Bonus.enter(me, { train: true }))));
+    $('#camp-dummy').onclick = () => pick('#camp-dummy', () => DS.Control.run(() => DS.Bonus.enter(me, { train: true })));
     $('#camp-set').onclick = settings;
     drawGate();
     animateFire();
@@ -205,7 +204,7 @@ DS.Camp = (function () {
       <div class="cf-cards">${have.slice(-4).reverse().map((c) => DS.Card.html(c, { w: 62 })).join('') || '<span class="muted small">아직 만든 카드가 없어요 — 모루에서 첫 카드를 만들어 봐요!</span>'}</div>
       ${next ? `<p class="cf-hint">💡 다음 레시피 힌트: <b>${esc(next.hint)}</b></p>` : '<p class="cf-hint okc">🎉 열린 레시피를 모두 모았어요!</p>'}
       <p class="muted small">✨ 숨겨진 용사: 1~3차시 도감 <b>${got3} / ${need3.length}</b>장 → 성기사${no >= 4 ? ` · 4~6차시 도감 <b>${got46} / ${need46.length}</b>장 → 무희` : ''}</p>`;
-    const forgeGo = () => (inClass() ? DS.UI.toast('🌀 수업 중에는 모루를 쓸 수 없어요. 수업이 끝나면 열려요!', 3000) : DS.Forge.open(me));
+    const forgeGo = () => DS.Forge.open(me);
     const b = document.getElementById('cf-open'); if (b) b.onclick = forgeGo;
     el.querySelectorAll('.mcard').forEach((c) => (c.onclick = forgeGo));
   }
