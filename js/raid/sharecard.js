@@ -22,7 +22,7 @@ DS.ShareCard = (function () {
     if (flip) { g.translate(x + w, y); g.scale(-1, 1); g.drawImage(im, col * cw, row * ch, cw, ch, 0, 0, w, h); } else g.drawImage(im, col * cw, row * ch, cw, ch, x, y, w, h);
     g.restore();
   }
-  const hero = (g, n, pose, x, y, s) => { n = Number(n) || 0; if (n >= 8 && A().heroesExtra) return cell(g, 'heroesExtra', A().heroesExtra.poses[pose] || 0, n - 8, x, y, s, s); return cell(g, 'heroes', A().heroes.poses[pose] || 0, n % A().heroes.count, x, y, s, s); };
+  const hero = (g, n, pose, x, y, s) => { n = Number(n) || 0; if (n >= 16) n = 0; if (n >= 8 && A().heroesExtra) return cell(g, 'heroesExtra', A().heroesExtra.poses[pose] || 0, n - 8, x, y, s, s); return cell(g, 'heroes', A().heroes.poses[pose] || 0, n % A().heroes.count, x, y, s, s); };
   const SHEETS = { extra: 'monstersExtra', new: 'monstersNew', crown: 'monstersCrown' };
   function monster(g, n, pose, x, y, s) {
     const [k, i] = typeof n === 'string' && n.includes(':') ? n.split(':') : [null, n];
