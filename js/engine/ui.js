@@ -122,3 +122,31 @@ DS.UI.dial = function (root, get, set) {
     b.addEventListener('contextmenu', (e) => e.preventDefault()); // 꾹 누를 때 메뉴 안 뜨게
   });
 };
+// 🪟 창 공통 틀 (2026-11-04 사용자 확정 「경험 통일」): 위에 뜨는 창은 모두 같은 모양으로 고친다
+//   ① 제목 줄(.ui-head)은 창 위에 붙어 있고(스크롤해도 ✕ 가 사라지지 않음) 오른쪽에 같은 크기의 ✕ 하나
+//   ② 해야 할 일 버튼 줄(주 버튼이 있는 마지막 .row)은 창 아래에 고정(.ui-foot) · 가운데 내용만 스크롤
+//   ③ 창 바깥을 누르면 닫힘 (원래 닫기 버튼을 눌러 준 것과 같음 · 문제 창 #quiz 는 제외)
+DS.UI.frame = function (modal) {
+  if (!modal || modal.id === 'quiz') return;
+  const box = modal.querySelector(':scope > .quiz-box, :scope > .framed'); if (!box || box.querySelector(':scope > .ui-head .ui-x')) return; // 창 안이 다시 그려지면 다시 씌움
+  const isClose = (b) => /^(✕\s*)?닫기$|^✕$/.test((b.textContent || '').trim()) || b.hasAttribute('data-x') || /-x$/.test(b.id || '');
+  const closeBtn = [...box.querySelectorAll('button')].find(isClose);
+  let head = box.querySelector(':scope > .quiz-head, :scope > .set-head');
+  if (!head) { const h = box.querySelector(':scope > h2'); if (h) { head = document.createElement('div'); head.className = 'quiz-head'; h.replaceWith(head); head.appendChild(h); } }
+  if (!head) return;
+  head.classList.add('ui-head');
+  const x = document.createElement('button'); x.type = 'button'; x.className = 'ui-x'; x.setAttribute('aria-label', '닫기'); x.textContent = '✕';
+  x.onclick = () => (closeBtn ? closeBtn.click() : modal.remove());
+  head.appendChild(x);
+  if (closeBtn) closeBtn.classList.add('ui-x-src'); // 원래 닫기 버튼은 숨김 (✕ 가 대신 누름)
+  const rows = [...box.querySelectorAll(':scope > .row')], foot = rows.reverse().find((r) => r.querySelector('.primary'));
+  if (foot) foot.classList.add('ui-foot');
+  const prim = head.querySelector('.btn.primary'); // 제목 줄의 「저장」 같은 할 일 버튼 → 아래 고정 줄로
+  if (prim && !foot) { const f = document.createElement('div'); f.className = 'row ui-foot'; box.appendChild(f); f.appendChild(prim); }
+  if (!modal.dataset.uiFrame) { modal.dataset.uiFrame = '1'; modal.addEventListener('click', (e) => { if (e.target === modal) { const xx = modal.querySelector('.ui-x'); if (xx) xx.click(); } }); }
+};
+if (typeof document !== 'undefined' && typeof MutationObserver !== 'undefined') {
+  const scan = (n) => { if (n.nodeType !== 1) return; const m = n.classList.contains('modal') ? n : n.closest && n.closest('.modal'); if (m) DS.UI.frame(m); n.querySelectorAll && n.querySelectorAll('.modal').forEach((mm) => DS.UI.frame(mm)); };
+  const start = () => new MutationObserver((ms) => ms.forEach((m) => m.addedNodes.forEach(scan))).observe(document.body, { childList: true, subtree: true });
+  if (document.body) start(); else document.addEventListener('DOMContentLoaded', start);
+}

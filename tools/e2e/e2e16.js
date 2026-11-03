@@ -15,7 +15,7 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   await T.screenshot({ path: `${OUT}/2-camp.png` });
   await T.click('#camp-set'); await T.waitForTimeout(1200); await T.screenshot({ path: `${OUT}/3-settings.png` });
   console.log('settings head buttons:', await T.evaluate(() => [...document.querySelectorAll('.set-head .btn')].map((x) => x.textContent).join(',')));
-  await T.click('#set-x'); await T.waitForTimeout(400);
+  await T.click('.modal .ui-x'); await T.waitForTimeout(400);
   // 교사 캠프 (차원문 애니메이션 이름)
   await T.goto(U + '&role=teacher'); await T.waitForTimeout(1200); if (await T.isVisible('#splash')) { await T.click('#splash'); await T.waitForTimeout(400); }
   if (!(await T.isVisible('#lesson'))) { await T.click('.role[data-role=teacher]'); await T.waitForTimeout(600); }

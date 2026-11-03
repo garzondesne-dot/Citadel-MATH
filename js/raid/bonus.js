@@ -69,7 +69,7 @@ DS.Bonus = (function () {
       return `<p class="bn-dtitle">🟪 ${esc(D.title)} <span class="muted small">${D.from}~${D.to}차시 · 열린 층 ${open.length} / ${floors.length}</span></p>${topCard}
         ${open.length ? open.slice().reverse().map((l) => card(l, sl.includes(l.id), `${l.no}층 · ${l.no}차시 ${l.title}`)).join('') : `<div class="panel framed"><p class="muted">선생님이 우리 반 수업을 열면 그 차시 층이 열려요.</p></div>`}`;
     }).join('');
-    $('#bonus').innerHTML = `<div class="bn-top"><button class="btn small" id="bn-back">≪ ${preview ? '교사 캠프' : '모닥불로'}</button><b>🟪 중단원던전</b><span class="bn-seal">🟪 인장 ${sl.length}개</span></div>
+    $('#bonus').innerHTML = `<div class="bn-top"><button class="btn small" id="bn-back">≪ ${preview ? '교사 캠프' : '모닥불'}</button><b>🟪 중단원던전</b><span class="bn-seal">🟪 인장 ${sl.length}개</span></div>
       <div class="bn-portals">
         <div class="bn-portal on mid"><i style="background-image:url('${A.base}${A.dportals.mid}')"></i><b>중단원던전</b><span class="muted small">차시마다 한 층 · 혼자</span></div>
         <div class="bn-portal lock" data-lock="big"><i style="background-image:url('${A.base}${A.dportals.big}')"></i><b>🔒 대단원던전</b><span class="muted small">명제까지 마치면</span></div>
@@ -88,7 +88,7 @@ DS.Bonus = (function () {
 
   function renderTrain() {
     const open = lessons().filter((l) => l.no <= no && l.no !== liveNo).sort((a, b) => b.no - a.no);
-    $('#bonus').innerHTML = `<div class="bn-top"><button class="btn small" id="bn-back">≪ ${preview ? '교사 캠프' : '모닥불로'}</button><b>🎯 훈련 허수아비</b><span class="bn-seal">기말 대비</span></div>
+    $('#bonus').innerHTML = `<div class="bn-top"><button class="btn small" id="bn-back">≪ ${preview ? '교사 캠프' : '모닥불'}</button><b>🎯 훈련 허수아비</b><span class="bn-seal">기말 대비</span></div>
       <p class="bn-fx">지난 차시 수업 문제를 <b>숫자만 바꿔</b> 혼자 연습해요. 기록은 남지 않고, 경험치가 조금 쌓여요 (같은 날 같은 몬스터는 한 번).</p>
       ${open.length ? open.map((l) => `<div class="panel framed bn-card"><p class="bn-h"><b>${l.no}차시 · ${esc(l.title)}</b></p>
         <div class="bn-list">${fieldIds(l).map((mid) => { const st = l.steps.find((x) => x.id === mid); return `<div class="bn-row">${DS.Art.monster(l.monsters[mid].sprite, 'idle')}<span>${esc(st.title || mid)}</span><button class="btn small primary" data-fight="${l.id}|${mid}">🎯 연습</button></div>`; }).join('')}</div></div>`).join('')

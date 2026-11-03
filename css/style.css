@@ -1367,3 +1367,26 @@ body:has(#test-bar) #ver-tag { bottom: calc(64px + env(safe-area-inset-bottom));
 .raid2-mon .raid-bars.over-head { position: absolute; left: 8%; right: 8%; top: 12%; z-index: 4; font-size: 18px; }
 .raid2-mon .raid-bars.over-head .raid-hp { height: 26px; }
 .raid2 .raid-top { padding-bottom: 14px; }
+
+/* ── 🪟 경험 통일 (2026-11-04 사용자 확정): 화면 = 왼쪽 위 「≪ 돌아갈 곳」 · 창 = 오른쪽 위 ✕ (제목 줄 · 할 일 버튼 고정, 가운데만 스크롤) ── */
+.modal > .quiz-box, .modal > .framed { max-height: calc(100dvh - 24px); overflow-y: auto; overscroll-behavior: contain; position: relative; }
+.ui-head { position: sticky; top: -12px; z-index: 6; margin: -12px -12px 8px; padding: 10px 12px 8px; background: linear-gradient(#0d1a33f5, #0d1a33e8); border-bottom: 1px solid #2c4370; display: flex; align-items: center; gap: 8px; }
+.ui-head > h2, .ui-head > b { flex: 1; margin: 0; }
+.ui-x-src { display: none !important; }
+.ui-x { flex: none; margin-left: auto; width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center; font: 700 20px var(--pixel); color: #e9eefc; background: linear-gradient(#22345e, #111d38); border: 2px solid #4a6aa8; border-radius: 6px; cursor: pointer; line-height: 1; }
+.ui-x:hover { border-color: #ffd35a; color: #ffd35a; }
+.ui-foot { position: sticky; bottom: -12px; z-index: 6; margin: 10px -12px -12px !important; padding: 10px 12px; background: linear-gradient(#0d1a33e8, #0d1a33f8); border-top: 1px solid #2c4370; justify-content: flex-end; }
+/* 화면 맨 윗줄: 「≪ 돌아갈 곳」 같은 모양 · 스크롤해도 위에 붙음 */
+.nav-back, #bn-back, .ui-back { position: sticky; top: 6px; z-index: 40; display: inline-flex; align-items: center; margin: 6px 0 8px 6px; padding: 4px 12px; height: 32px; font: 14px var(--pixel); opacity: 1; background: #0a1424e6; border: 2px solid #4a6aa8; }
+#screen-camp .camp-back { position: absolute; top: 6px; left: 6px; margin: 0; }
+.bn-top { position: sticky; top: 0; z-index: 30; background: linear-gradient(#050a18f2, #050a18d0); padding: 4px 0; }
+.bn-top #bn-back { position: static; margin: 0; }
+/* 전투 창 ✕ 도 같은 크기 */
+.bn-fight #bf-x { width: 38px; height: 38px; font-size: 20px; padding: 0; }
+/* 모루 창 닫기 = 같은 ✕ 모양 */
+#forge #fg-x, #forge .fg-x { width: 38px; height: 38px; padding: 0; font-size: 0; }
+#forge #fg-x::before, #forge .fg-x::before { content: '✕'; font: 700 20px var(--pixel); }
+/* 깨짐 고침: 대시보드 탭 · 리모컨 단계 표시가 폰에서 세로로 꺾이던 것 */
+.tabs { overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none; }
+.tabs .tab { flex: 0 0 auto; white-space: nowrap; padding: 8px 10px; }
+.phase-pill { white-space: nowrap; writing-mode: horizontal-tb; }

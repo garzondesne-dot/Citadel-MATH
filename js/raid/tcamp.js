@@ -33,7 +33,7 @@ DS.TCamp = (function () {
   }
   function render() {
     const base = DS.ASSETS.base, c = DS.ASSETS.camp;
-    $('#tcamp').innerHTML = `<div class="tc-top" style="background-image:linear-gradient(#050b1cdd,#050b1cdd),url('${base}${DS.ASSETS.tcamp.bg}')">${code ? `<div class="tc-qr" id="tc-qr"></div><div class="tc-code"><span class="muted small">${hall ? '📱 휴대폰 카메라로 QR 을 찍고 입장해요' : '학생 입장 · QR 찍기 또는 모닥불 차원문'}</span><b>수업 코드 ${esc(code)}</b><span id="tc-info" class="small"></span></div>` : '<div class="tc-code"><b>🏛 교사 캠프</b><span class="muted small">수업을 열면 여기에 학생 입장 QR 이 크게 떠요</span></div>'}</div>
+    $('#tcamp').innerHTML = `${hall ? '' : '<button class="btn small ui-back" id="tc-back">≪ 교사 메뉴</button>'}<div class="tc-top" style="background-image:linear-gradient(#050b1cdd,#050b1cdd),url('${base}${DS.ASSETS.tcamp.bg}')">${code ? `<div class="tc-qr" id="tc-qr"></div><div class="tc-code"><span class="muted small">${hall ? '📱 휴대폰 카메라로 QR 을 찍고 입장해요' : '학생 입장 · QR 찍기 또는 모닥불 차원문'}</span><b>수업 코드 ${esc(code)}</b><span id="tc-info" class="small"></span></div>` : '<div class="tc-code"><b>🏛 교사 캠프</b><span class="muted small">수업을 열면 여기에 학생 입장 QR 이 크게 떠요</span></div>'}</div>
       <div class="tc-stage camp-like cs-v2" style="background-image:url('${base}${c.bg}');aspect-ratio:${c.size[0]} / ${c.size[1]}">
         ${DS.CampScene.layers()}
         ${DS.CampScene.zone('tc-castle', 'castle', '🏰 집합 중단원던전')}${DS.CampScene.zone('tc-tent', 'tent', '⛺ 텐트 · 책장')}
@@ -92,8 +92,8 @@ DS.TCamp = (function () {
     if (info && R) { const studs = Object.values(R.players || {}).filter((p) => !p.teacher).length; info.innerHTML = `${R.meta.cls ? `${esc(R.meta.cls)}반 · ` : ''}${L ? esc(L.title) : ''} · <b class="gold">입장 ${studs}명</b>${DS.Raid.isLobby(R) ? ' · 대기 중' : closed ? ' · 끝' : ' · 진행 중'}`; }
     const bar = $('#tc-bar');
     if (bar) {
-      bar.innerHTML = `${hall ? `<button class="btn small" id="tc-menu">🖥 종합상황실로</button>${DS.UI.fs.btn('tc-fs')}` : `<button class="btn small" id="tc-menu">≪ 교사 메뉴</button>${code ? `<button class="btn small" id="tc-hall">🖥 종합상황실 키 ${esc(hallKey || '—')}</button>` : ''}`}${DS.ShareCard.klassReady(L, R) ? '<button class="btn small sc-btn" id="tc-news">🏫 학급 결과</button>' : ''}`;
-      $('#tc-menu').onclick = leave; DS.UI.fs.bind('tc-fs');
+      bar.innerHTML = `${hall ? `<button class="btn small" id="tc-menu">🖥 종합상황실로</button>${DS.UI.fs.btn('tc-fs')}` : `${code ? `<button class="btn small" id="tc-hall">🖥 종합상황실 키 ${esc(hallKey || '—')}</button>` : ''}`}${DS.ShareCard.klassReady(L, R) ? '<button class="btn small sc-btn" id="tc-news">🏫 학급 결과</button>' : ''}`;
+      const tm = $('#tc-menu'); if (tm) tm.onclick = leave; DS.UI.fs.bind('tc-fs'); const tb = $('#tc-back'); if (tb) tb.onclick = leave; // 2026-11-04: 「≪ 교사 메뉴」는 다른 화면처럼 왼쪽 위
       const hb = $('#tc-hall'); if (hb) hb.onclick = () => DS.UI.toast(`종합상황실(교실 PC)에서 수업 코드 ${code} · 키 ${hallKey} 를 넣어요`, 4000);
       const nb = $('#tc-news'); if (nb) nb.onclick = () => DS.Control.run(() => DS.ShareCard.klassOpen(L, R, { praise: !hall }));
     }

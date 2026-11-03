@@ -11,7 +11,7 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   await T.evaluate(([c, k]) => DS.TCamp.enter({ code: c, hallKey: k }), [code, hallKey]); await T.waitForTimeout(1500);
   log.push('교사 폰 오브젝트: ' + (await T.evaluate(() => ['tc-anvil', 'tc-castle', 'tc-gate', 'tc-dummy', 'tc-tent', 'tc-mail'].map((i) => (document.getElementById(i) ? i.slice(3) : `없음:${i}`)).join(' ') + (document.querySelector('#tcamp .camp-fire-img') ? ' fire' : ''))));
   await T.locator('.tc-stage').scrollIntoViewIfNeeded(); await T.screenshot({ path: `${OUT}/t-camp.png` });
-  await T.click('#tc-tent'); await T.waitForTimeout(1500); log.push('책장: ' + (await T.locator('.sh-l').count()) + '개 차시'); await T.screenshot({ path: `${OUT}/t-shelf.png` }); await T.click('#sh-x');
+  await T.click('#tc-tent'); await T.waitForTimeout(1500); log.push('책장: ' + (await T.locator('.sh-l').count()) + '개 차시'); await T.screenshot({ path: `${OUT}/t-shelf.png` }); await T.click('.modal .ui-x');
   await T.click('#tc-dummy'); await T.waitForTimeout(1500); log.push('허수아비 화면: ' + (await T.evaluate(() => document.getElementById('screen-bonus').classList.contains('active'))));
   await T.evaluate(([c, k]) => DS.TCamp.enter({ code: c, hallKey: k }), [code, hallKey]); await T.waitForTimeout(1000);
   await T.click('#tc-mail'); await T.waitForTimeout(1500); log.push('우편함(교사 폰) → 대시보드: ' + (await T.evaluate(() => document.getElementById('screen-dash').classList.contains('active'))));
