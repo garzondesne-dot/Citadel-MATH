@@ -1,6 +1,6 @@
 // 공통수학2 Ⅱ-1 집합 · 3차시 「집합 사이의 포함 관계」 (레이드용 v5 기준, 2026-11-03 사용자 컨펌 — v4 를 갈아엎음)
-// 수업 순서: 도입 → 개념1 → 문제1 → ⭐ 한 걸음 더 → 개념2 → 문제2 → 개념3 → 문제3 → 개념4(부분집합의 개수 · 학습지 STEP 5) → 문제4 → 형성평가(보스)
-// v5 변경: 스페셜 「부분집합의 개수 규칙」 삭제 → 개념 4 + 문제 4(필드 몬스터) · 보강 예제는 학습지에만(문제 1 뒤)
+// 수업 순서: 도입 → 개념1 → 문제1(5문항) → 개념2 → 문제2 → 개념3 → 문제3 → 개념4(부분집합의 개수 · 학습지 STEP 5) → 문제4 → 형성평가(보스)
+// v5 변경: 보강 2개(⭐ 한 걸음 더 · 보강 예제) 삭제 → 한 걸음 더 (6) 을 앞뒤 바꿔 문제 1 (5) · 스페셜 「부분집합의 개수 규칙」 → 개념 4 + 문제 4(필드 몬스터)
 // 몬스터 = 학습지 문제 묶음. 소문제 하나 = 체력 한 칸. 첫 시도(attempt 0)는 학습지 그대로, 재도전은 소문제 전부 새 숫자.
 // 이 수업에서 ⊂ 는 서로 같은 집합도 포함하는 부분집합 기호다 (학습지와 같음).
 // 모든 정답은 tests/lesson.test.js 에서 원소를 직접 세거나 조건을 직접 계산해 검산한다 (check 정보 사용).
@@ -66,6 +66,11 @@
     if (r() < 0.5) A = sorted([...A.slice(1), r.pick([0, n + 1])]);
     return sym(SUBQ, st(A), cond('nat', n), subAns(A, B), S.SUB, subSol(A, B, `${cond('nat', n)} = ${st(B)} → `), { a: A, cond: ['nat', n] });
   }
+  // 문제1 (5) (v5): 조건제시법이 왼쪽 → 먼저 원소나열법 {0, k} 로 바꿔 오른쪽과 비교
+  function genQuadL(r) {
+    const k = r.int(1, 5), A = [0, k], B = r.pick([[-k, 0, k], [0, k], [0, k, 2 * k], [0], [k, 2 * k], [-k, k]]);
+    return sym(SUBQ, cond('quad', k), st(B), subAns(A, B), S.SUB, subSol(A, B, `x(x − ${k}) = 0 → ${st(A)} → `), { leftCond: ['quad', k], b: B });
+  }
   // 문제2: = / ≠
   const eqSol = (A, B, pre = '') => pre + (S.sameSet(A, B) ? '원소가 모두 같다 → =' : '원소가 다르다 → ≠');
   function genPerm(r) {
@@ -123,12 +128,8 @@
       sym(SUBQ, '{2, 5}', '{1, 2, 3, 4}', '⊄', S.SUB, '5 가 {1, 2, 3, 4} 에 없다 → ⊄ (하나라도 빠지면 부분집합이 아니다)', { a: [2, 5], b: [1, 2, 3, 4] }),
       sym(SUBQ, '{3, 6}', cond('mul', 3), '⊂', S.SUB, '3, 6 모두 3의 배수 → ⊂', { a: [3, 6], cond: ['mul', 3] }),
       sym(SUBQ, '{2, 3, 5}', cond('prime', 10), '⊂', S.SUB, `${cond('prime', 10)} = {2, 3, 5, 7} → 모두 있다 → ⊂`, { a: [2, 3, 5], cond: ['prime', 10] }),
-    ] : [genExplicit(r), genExplicit(r), genMul(r), genFinite(r, [['prime', 10], ['div', 12], ['odd', 9], ['even', 10], ['div', 18]])]) },
-    s1: { title: '보강 · 한 걸음 더', special: true, sprite: 1, note: '먼저 원소나열법으로 바꿔 보자', make: (a, r) => (a === 0 ? [
-      sym(SUBQ, '{1, 5, 25}', cond('div', 25), '⊂', S.SUB, `${cond('div', 25)} = {1, 5, 25} → ⊂`, { a: [1, 5, 25], cond: ['div', 25] }),
-      sym(SUBQ, '{−2, 0, 2}', cond('quad', 2), '⊄', S.SUB, 'x(x − 2) = 0 → {0, 2}. −2 가 없다 → ⊄', { a: [-2, 0, 2], cond: ['quad', 2] }),
-      sym(SUBQ, '{2, 3, 5, 7}', cond('nat', 7), '⊂', S.SUB, `${cond('nat', 7)} = {1, 2, …, 7} → ⊂`, { a: [2, 3, 5, 7], cond: ['nat', 7] }),
-    ] : [genFinite(r, [['div', 8], ['div', 12], ['div', 16], ['div', 18], ['div', 20], ['div', 25], ['div', 27]]), genQuad(r), genNat(r)]) },
+      sym(SUBQ, cond('quad', 2), '{−2, 0, 2}', '⊂', S.SUB, 'x(x − 2) = 0 → {0, 2}. 0, 2 모두 {−2, 0, 2} 에 있다 → ⊂', { leftCond: ['quad', 2], b: [-2, 0, 2] }),
+    ] : [genExplicit(r), genExplicit(r), genMul(r), genFinite(r, [['prime', 10], ['div', 12], ['odd', 9], ['even', 10], ['div', 18]]), genQuadL(r)]) },
     m2: { title: '문제 2', sprite: 1, make: (a, r) => (a === 0 ? [
       sym(EQQ, '{2, 4, 6}', '{6, 4, 2}', '=', S.EQ, '순서만 다르다 → 원소가 모두 같다 → =', { a: [2, 4, 6], b: [6, 4, 2] }),
       sym(EQQ, '{1, 2, 4}', cond('div', 4), '=', S.EQ, `${cond('div', 4)} = {1, 2, 4} → =`, { a: [1, 2, 4], cond: ['div', 4] }),
@@ -167,7 +168,6 @@
     { kind: 'intro', id: 'intro', title: '도입 · 생각 열기', say: '선생님 세대 vs 너희 세대 — 유닛 멤버는 원래 그룹에 모두 있을까?' },
     { kind: 'concept', id: 'c1', title: '개념 1 · 부분집합', say: 'A의 모든 원소가 B에 속하면 A ⊂ B (A는 B에 포함된다). 하나라도 빠지면 A ⊄ B' },
     { kind: 'monster', id: 'm1' },
-    { kind: 'monster', id: 's1' },
     { kind: 'concept', id: 'c2', title: '개념 2 · 꼭 기억할 두 가지 · 서로 같은 집합', say: 'A ⊂ A, ∅ ⊂ A. A ⊂ B 이고 B ⊂ A 이면 A = B' },
     { kind: 'monster', id: 'm2' },
     { kind: 'concept', id: 'c3', title: '개념 3 · 부분집합 모두 구하기 · 진부분집합', say: '원소를 0개, 1개, 2개, … 고르는 순서로 빠짐없이. 진부분집합 = 부분집합 중에서 자기 자신을 뺀 것' },
@@ -185,12 +185,12 @@
     sheet: '레이드용 v5',
     // 수업 준비에서 이 학습지 PDF 를 올리면 [개념] 칸마다 잘라 넣는 위치 (A4 쪽 비율 0~1, 여러 칸이면 위아래로 이어 붙임)
     crops: { intro: [{ p: 1, x: 0.0426, y: 0.1447, w: 0.4458, h: 0.2897 }], c1: [{ p: 1, x: 0.0426, y: 0.4326, w: 0.4458, h: 0.3161 }, { p: 1, x: 0.5116, y: 0.1447, w: 0.4458, h: 0.0964 }],
-      c2: [{ p: 1, x: 0.5116, y: 0.8098, w: 0.4458, h: 0.0941 }, { p: 2, x: 0.0426, y: 0.103, w: 0.4458, h: 0.1251 }], c3: [{ p: 2, x: 0.0426, y: 0.4049, w: 0.4458, h: 0.1556 }], c4: [{ p: 2, x: 0.0426, y: 0.7857, w: 0.4458, h: 0.1523 }],
-      // 문제 · 보강 · 형성평가 (교사 「📄 문제 화면」 해설용) — v5 학습지에서 잰 위치 (tools/worksheet/measure_crops.js)
-      m1: [{ p: 1, x: 0.5116, y: 0.2375, w: 0.4458, h: 0.2284 }], s1: [{ p: 1, x: 0.5116, y: 0.4623, w: 0.4458, h: 0.172 }], m2: [{ p: 2, x: 0.0426, y: 0.2245, w: 0.4458, h: 0.1839 }], m3: [{ p: 2, x: 0.0426, y: 0.5569, w: 0.4458, h: 0.2297 }],
+      c2: [{ p: 1, x: 0.5116, y: 0.5711, w: 0.4458, h: 0.2157 }], c3: [{ p: 2, x: 0.0426, y: 0.3238, w: 0.4458, h: 0.1556 }], c4: [{ p: 2, x: 0.0426, y: 0.7046, w: 0.4458, h: 0.1523 }],
+      // 문제 · 형성평가 (교사 「📄 문제 화면」 해설용) — v5 학습지에서 잰 위치 (tools/worksheet/measure_crops.js)
+      m1: [{ p: 1, x: 0.5116, y: 0.2375, w: 0.4458, h: 0.3372 }], m2: [{ p: 2, x: 0.0426, y: 0.103, w: 0.4458, h: 0.2243 }], m3: [{ p: 2, x: 0.0426, y: 0.4758, w: 0.4458, h: 0.2297 }],
       m4: [{ p: 2, x: 0.5116, y: 0.103, w: 0.4458, h: 0.2599 }], boss: [{ p: 2, x: 0.5116, y: 0.3593, w: 0.4458, h: 0.5005 }] },
     theme: '05-ruins', // 던전 테마: 고대 유적 (배경 dg-05 · 포털 portal-05)
-    videos: { c1: 'https://drive.google.com/file/d/1IDjUrEbc8MQETDYN6xVvqar54iTNImqE/view', m1: 'https://drive.google.com/file/d/1IDjUrEbc8MQETDYN6xVvqar54iTNImqE/view', s1: 'https://drive.google.com/file/d/1IDjUrEbc8MQETDYN6xVvqar54iTNImqE/view', c2: 'https://drive.google.com/file/d/1esVCdmI-JcpCwDIQXY_9Eias913A4Akz/view', m2: 'https://drive.google.com/file/d/1esVCdmI-JcpCwDIQXY_9Eias913A4Akz/view', c3: 'https://drive.google.com/file/d/1SZYWHNaEDKIPLPWLfxRsjnbLn_nOKJ2n/view',
+    videos: { c1: 'https://drive.google.com/file/d/1IDjUrEbc8MQETDYN6xVvqar54iTNImqE/view', m1: 'https://drive.google.com/file/d/1IDjUrEbc8MQETDYN6xVvqar54iTNImqE/view', c2: 'https://drive.google.com/file/d/1esVCdmI-JcpCwDIQXY_9Eias913A4Akz/view', m2: 'https://drive.google.com/file/d/1esVCdmI-JcpCwDIQXY_9Eias913A4Akz/view', c3: 'https://drive.google.com/file/d/1SZYWHNaEDKIPLPWLfxRsjnbLn_nOKJ2n/view',
       m3: 'https://drive.google.com/file/d/18_NnrD-wotD13Y3SocRjk7O2Rc6C96FC/view', c4: 'https://drive.google.com/file/d/1fY1nAbkFrQNf7CcHfEpDIIr7grCJulEp/view', m4: 'https://drive.google.com/file/d/1fY1nAbkFrQNf7CcHfEpDIIr7grCJulEp/view' }, // 🎬 기본 설명 영상 (드라이브 「학습자료 > 모션그래픽」 720p: 15 부분집합 · 16 서로 같은 집합 · 17 부분집합 모두 구하기 · 06 부분집합의 개수 2ⁿ · 10 부분집합의 개수 규칙)
     goal: '부분집합의 뜻을 알고 ⊂, ⊄ 로 나타낸다 · 서로 같은 집합을 찾는다 · 부분집합을 모두 구한다',
     defaultPct: 90,

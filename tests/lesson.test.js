@@ -1,5 +1,5 @@
-// 차시 묶음 검증: node tests/lesson.test.js  (3차시 · 학습과정 v4)
-// (1) 수업 순서: 도입 → 개념1 → 문제1 → 보강 → 개념2 → 문제2 → 개념3 → 문제3 → 보강 → 형성평가
+// 차시 묶음 검증: node tests/lesson.test.js  (3차시 · 레이드용 v5)
+// (1) 수업 순서: 도입 → 개념1 → 문제1 → 개념2 → 문제2 → 개념3 → 문제3 → 개념4 → 문제4 → 형성평가
 // (2) 몬스터: 첫 시도(attempt 0)는 학습지 정답과 같다 · 재도전 문제는 시드 300개 × 재도전 3번 — 원소를 직접 세고 조건을 직접 계산해 검산
 // (3) 채점기: 정답 인정 · 오답 거부 · 같은 시드 → 같은 문제
 // (4) 형성평가 세트1(학습지)·세트2 정답 직접 검산 (7번 보너스 포함)
@@ -37,8 +37,10 @@ function verify(q, label) {
   const c = q.check || {};
   if (q.type === 'blanks') {
     const it = q.items[0];
-    const A = c.a, inB = c.cond ? (x) => member(c.cond, x) : (x) => c.b.includes(x);
-    check(JSON.stringify(parseSet(it.left)) === JSON.stringify(A), `${label}: 왼쪽 집합 표시 ${it.left}`);
+    // leftCond: 왼쪽이 조건제시법 (v5 문제 1 (5)) → 왼쪽 원소를 직접 풀어 구한다
+    const A = c.leftCond ? listOf(c.leftCond) : c.a, inB = c.cond ? (x) => member(c.cond, x) : (x) => c.b.includes(x);
+    if (c.leftCond) check(it.left === `{x | ${c.leftCond[1] === 1 ? 'x² − x = 0' : `x² − ${c.leftCond[1]}x = 0`}}`, `${label}: 왼쪽 조건 표시 ${it.left}`);
+    else check(JSON.stringify(parseSet(it.left)) === JSON.stringify(A), `${label}: 왼쪽 집합 표시 ${it.left}`);
     if (c.b) check(JSON.stringify(parseSet(it.right).slice().sort((x, y) => x - y)) === JSON.stringify(c.b.slice().sort((x, y) => x - y)), `${label}: 오른쪽 집합 표시 ${it.right}`);
     let want;
     if (q.options.includes('⊂')) want = subOk(A, inB) ? '⊂' : '⊄';
@@ -61,17 +63,16 @@ function verify(q, label) {
 }
 
 // ── 1. 수업 순서 ─────────────────────────────────────────
-check(L.steps.map((s) => s.kind).join() === 'intro,concept,monster,monster,concept,monster,concept,monster,concept,monster,boss', `순서 ${L.steps.map((s) => s.kind)}`);
-check(L.steps.filter((s) => s.kind === 'monster').map((s) => s.id).join() === 'm1,s1,m2,m3,m4', '몬스터 순서 (v5: 개수 규칙 = 문제 4)');
+check(L.steps.map((s) => s.kind).join() === 'intro,concept,monster,concept,monster,concept,monster,concept,monster,boss', `순서 ${L.steps.map((s) => s.kind)}`);
+check(L.steps.filter((s) => s.kind === 'monster').map((s) => s.id).join() === 'm1,m2,m3,m4', '몬스터 순서 (v5: 보강 삭제 · 개수 규칙 = 문제 4)');
 // PDF 자르기 위치: 개념 설명 칸마다 있고, A4 쪽 안에 들어간다
 L.steps.filter((s) => s.kind === 'intro' || s.kind === 'concept').forEach((s) => { const rs = (L.crops || {})[s.id]; check(rs && rs.length && rs.every((r) => r.p >= 1 && r.p <= 2 && r.x >= 0 && r.y >= 0 && r.w > 0.1 && r.h > 0.05 && r.x + r.w <= 1 && r.y + r.h <= 1), `${s.id}: PDF 자르기 위치`); });
-check(L.steps.filter((s) => s.special).map((s) => s.id).join() === 's1', '보강 = 스페셜 몬스터 (v5: 한 걸음 더만)');
+check(!L.steps.some((s) => s.special), 'v5: 스페셜(보강) 몬스터 없음');
 check(L.defaultPct === 90, '기준% 기본값 90');
 
 // ── 2. 첫 시도 = 학습지 정답 ─────────────────────────────────
 const sheet = {
-  m1: [['{1, 2}', '⊂'], ['{2, 5}', '⊄'], ['{3, 6}', '⊂'], ['{2, 3, 5}', '⊂']],
-  s1: [['{1, 5, 25}', '⊂'], ['{−2, 0, 2}', '⊄'], ['{2, 3, 5, 7}', '⊂']],
+  m1: [['{1, 2}', '⊂'], ['{2, 5}', '⊄'], ['{3, 6}', '⊂'], ['{2, 3, 5}', '⊂'], ['{x | x² − 2x = 0}', '⊂']],
   m2: [['{2, 4, 6}', '='], ['{1, 2, 4}', '='], ['{2, 4, 6}', '≠']],
 };
 Object.entries(sheet).forEach(([id, rows]) => {
@@ -98,10 +99,10 @@ for (const id of Object.keys(L.monsters)) {
   }
 }
 // 재도전은 정말 숫자가 바뀌는지 (학습지와 다른 문제가 나와야)
-['m1', 's1', 'm2', 'm3'].forEach((id) => { const a0 = JSON.stringify(L.items(id, 'q', 0)); check(upto(20).some((s) => JSON.stringify(L.items(id, `q${s}`, 1)) !== a0), `${id}: 재도전 숫자가 바뀜`); });
+['m1', 'm2', 'm3', 'm4'].forEach((id) => { const a0 = JSON.stringify(L.items(id, 'q', 0)); check(upto(20).some((s) => JSON.stringify(L.items(id, `q${s}`, 1)) !== a0), `${id}: 재도전 숫자가 바뀜`); });
 // ⊂·⊄ / =·≠ 정답이 한쪽으로 쏠리지 않는지
 const tally = {};
-for (let s = 0; s < 300; s++) for (const id of ['m1', 's1', 'm2']) L.items(id, `t${s}`, 1).forEach((q) => { const k = q.items[0].answer; tally[k] = (tally[k] || 0) + 1; });
+for (let s = 0; s < 300; s++) for (const id of ['m1', 'm2']) L.items(id, `t${s}`, 1).forEach((q) => { const k = q.items[0].answer; tally[k] = (tally[k] || 0) + 1; });
 ['⊂', '⊄', '=', '≠'].forEach((k) => check((tally[k] || 0) > 100, `재도전 정답 분포 ${JSON.stringify(tally)}`));
 
 // ── 4. 형성평가 ─────────────────────────────────────────

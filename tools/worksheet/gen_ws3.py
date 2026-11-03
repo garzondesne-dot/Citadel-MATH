@@ -1,5 +1,5 @@
 # 3차시 레이드용 학습지 v5 생성기 (v4 원본을 사용자 변경 사항대로 고침 · 2026-11-03 컨펌)
-#   ① 보강 1 예제 → 문제 1 · 「한 걸음 더」 뒤로  ② 스페셜 「부분집합의 개수 규칙」 삭제 → STEP 5 개념 + 문제 4 (몬스터)
+#   ① 보강 2개(한 걸음 더 · 예제) 삭제 → 한 걸음 더 (6) 을 앞뒤 바꿔 문제 1 (5) 로  ② 스페셜 「부분집합의 개수 규칙」 삭제 → STEP 5 개념 + 문제 4 (몬스터)
 #   ③ 답을 따로 적는 칸 · 형성평가 답 칸 표 삭제 (문제 안의 □ 는 문제의 일부라 남김)  ④ 문항마다 풀이 공간 넉넉히
 # 사용: python3 tools/worksheet/gen_ws3.py → tools/worksheet/ws3-raid-v5.html → node tools/worksheet/pdf.js <html> <pdf>
 import os
@@ -65,32 +65,23 @@ p1_right = f'''
         <div class="q">집합과 집합 사이 → ⊂, ⊄ &nbsp;예) {{1}} ⊂ {{1, 4}}</div>
         <div class="q redc">{{1}} ∈ {{1, 4}} (×) &nbsp;&nbsp; 1 ⊂ {{1, 4}} (×)</div></div>
       <div><b class="blue">문제 1)</b> □ 안에 ⊂ 또는 ⊄ 를 쓰시오. {G('몬스터 1')}</div>
-      <div class="q">(1) {{1, 2}} {SQ} {{1, 2, 3}}</div>{W(5)}
-      <div class="q">(2) {{2, 5}} {SQ} {{1, 2, 3, 4}}</div>{W(5)}
-      <div class="q">(3) {{3, 6}} {SQ} {{x | x는 3의 배수}}</div>{W(5)}
-      <div class="q">(4) {{2, 3, 5}} {SQ} {{x | x는 10 이하의 소수}}</div>{W(5)}
-      <div class="pur"><span class="tag t-pur">보강</span><b>한 걸음 더</b> <span class="mini">(먼저 원소나열법으로 바꿔 보자)</span> {G('스페셜 몬스터')}
-        <div class="q">(5) {{1, 5, 25}} {SQ} {{x | x는 25의 약수}}</div>{W(4)}
-        <div class="q">(6) {{−2, 0, 2}} {SQ} {{x | x{sup('2')} − 2x = 0}}</div>{W(4)}
-        <div class="q">(7) {{2, 3, 5, 7}} {SQ} {{x | x는 7 이하의 자연수}}</div>{W(3)}</div>
-      <div class="pur"><span class="tag t-pur">보강</span><b>예제</b> {m('A')} = {{1, 3, 4}}, {m('B')} = {{2, 3, 4}}, {m('C')} = {{1, 2, 3, 4, 7}}
-        <div class="q">(1) {m('A')}에 속하면서 {m('B')}에 없는 원소는? {ln(18)}</div>
-        <div class="q">(2) {m('A')}에 속하면서 {m('C')}에 없는 원소는? {ln(18)}</div>
-        <div class="q">(3) {m('B')}에 속하면서 {m('C')}에 없는 원소는? {ln(18)}</div>
-        <div class="mini purc">→ 없는 원소가 하나도 없으면 부분집합! &nbsp;{m('A')} ⊂ {m('C')}, {m('B')} ⊂ {m('C')}, {m('A')} ⊄ {m('B')}</div>
-        <div style="display:flex;gap:6px;align-items:center"><div class="mini" style="flex:1">벤 다이어그램으로 보면 {m('A')}가 {m('B')} 안에 쏙 들어 있다.<br>{m('A')} = {{1, 4}}, {m('B')} = {{1, 4, 7}}</div><div style="width:34mm">{venn}</div></div></div>
+      <div class="q">(1) {{1, 2}} {SQ} {{1, 2, 3}}</div>{W(7)}
+      <div class="q">(2) {{2, 5}} {SQ} {{1, 2, 3, 4}}</div>{W(7)}
+      <div class="q">(3) {{3, 6}} {SQ} {{x | x는 3의 배수}}</div>{W(7)}
+      <div class="q">(4) {{2, 3, 5}} {SQ} {{x | x는 10 이하의 소수}}</div>{W(7)}
+      <div class="q">(5) {{x | x{sup('2')} − 2x = 0}} {SQ} {{−2, 0, 2}} <span class="mini">(먼저 원소나열법으로 바꿔 보자)</span></div>{W(9)}
       <div><span class="pill p-blue">STEP 2 꼭 기억할 두 가지</span></div>
       <div class="box">① 모든 집합은 자기 자신의 부분집합이다. → {m('A')} ⊂ {m('A')}<br>② 공집합 ∅은 모든 집합의 부분집합이다. → ∅ ⊂ {m('A')}<div class="mini">예) {{1, 2}} ⊂ {{1, 2}}, ∅ ⊂ {{1, 2}}</div></div>
-'''
-
-p2_left = f'''
       <div><span class="pill p-blue">STEP 3 서로 같은 집합</span></div>
       <div class="box">{m('A')} ⊂ {m('B')} 이고 {m('B')} ⊂ {m('A')} 일 때 → {m('A')} = {m('B')} (서로 같다)<br>= 두 집합의 원소가 모두 같다. &nbsp;서로 같지 않을 때 → {m('A')} ≠ {m('B')}
         <div class="mini">보기 {{1, 2, 3}} = {{3, 1, 2}} (순서만 다르다) · {{1, 2}} ≠ {{1, 2, 3}} (3이 없다)</div></div>
+'''
+
+p2_left = f'''
       <div><b class="blue">문제 2)</b> □ 안에 = 또는 ≠ 를 쓰시오. {G('몬스터 2')}</div>
-      <div class="q">(1) {{2, 4, 6}} {SQ} {{6, 4, 2}}</div>{W(5)}
-      <div class="q">(2) {{1, 2, 4}} {SQ} {{x | x는 4의 약수}}</div>{W(6)}
-      <div class="q">(3) {{2, 4, 6}} {SQ} {{x | x는 8 이하의 짝수}}</div>{W(6)}
+      <div class="q">(1) {{2, 4, 6}} {SQ} {{6, 4, 2}}</div>{W(9)}
+      <div class="q">(2) {{1, 2, 4}} {SQ} {{x | x는 4의 약수}}</div>{W(10)}
+      <div class="q">(3) {{2, 4, 6}} {SQ} {{x | x는 8 이하의 짝수}}</div>{W(10)}
       <div><span class="pill p-blue">STEP 4 부분집합 모두 구하기</span></div>
       <div class="yel"><b>방법</b> 원소를 0개, 1개, 2개, … 고르는 순서로 빠짐없이 쓴다.
         <div class="mini">보기 {m('A')} = {{a, b}}의 부분집합 → 0개 : ∅ &nbsp;1개 : {{a}}, {{b}} &nbsp;2개 : {{a, b}} → 모두 4개</div></div>
