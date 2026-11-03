@@ -829,7 +829,7 @@ body:has(#test-bar) #screen-student .wrap { padding-bottom: 90px; max-width: 460
 .bn-top { display: flex; align-items: center; gap: 8px; margin: 6px 0 8px; }
 .bn-top b { font-size: 18px; color: #8fd0ff; flex: 1; }
 .bn-seal { color: #ffd35a; font-size: 14px; }
-.bn-portals { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 6px; }
+.bn-portals { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-bottom: 6px; }
 .bn-portal { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 4px; border: 1px solid #2a3c66; background: #08112688; cursor: pointer; }
 .bn-portal i { width: 70%; aspect-ratio: 2 / 3; background-size: contain; background-repeat: no-repeat; background-position: center; }
 .bn-portal.on { border-color: #6fb8ff; box-shadow: 0 0 12px #3d8cff66 inset; }
@@ -1241,3 +1241,16 @@ body:has(#test-bar) #ver-tag { bottom: calc(64px + env(safe-area-inset-bottom));
 /* 📱 두 번 탭 확대 막기 (v0.9.6.16): 다이얼 ▲▼ · 숫자 패드를 빠르게 두 번 누르면 아이폰 · 안드로이드가 화면을 확대하던 것
    manipulation = 두 손가락 확대 · 스크롤은 그대로, 두 번 탭 확대만 끔 · 클래스에 따로 정한 touch-action(그림 자르기 · 학습지 확대)이 우선 */
 * { touch-action: manipulation; }
+
+/* 🟪 중단원던전 (2026-11-03 · 보강던전을 대신함): 보라 차원문 · 층 카드 · 꼭대기 층 · 마무리 소개 */
+
+.bn-portal.on.mid { border-color: #b98bff; box-shadow: 0 0 12px #8b5cff66 inset; }
+.camp-bonus.mid .camp-bonus-img, .bn-portal.on.mid i { filter: drop-shadow(0 0 14px #b07cffcc); }
+.camp-bonus.mid::before, .camp-bonus.mid::after, .bn-portal.on.mid::before, .bn-portal.on.mid::after { background: #e3ccff; }
+.bn-dtitle { margin: 14px 0 6px; font-size: 17px; color: #d9c2ff; text-shadow: 2px 2px 0 #000; }
+.bn-card.bn-topfloor { border-color: #b98bff; box-shadow: 0 0 16px #8b5cff55; }
+.bn-card.bn-locked { opacity: .8; }
+.bn-row.boss span { color: #ffd98a; }
+.rs-floor { margin: 4px 0; padding: 6px 8px; border: 1px solid #8b5cff; background: #1c1236; }
+.lb2-floor { position: absolute; top: 92px; left: 22px; margin: 0; padding: 6px 12px; font-size: 18px; background: #1c1236dd; border: 2px solid #b98bff; text-shadow: 2px 2px 0 #000; }
+.t-eval { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }

@@ -49,7 +49,7 @@ const CSS = `@media (min-width: 560px) { html { background: #05080f; } body { ma
 function html({ lesson, prep, assets, title, record }) {
   const idx = read('index.html');
   const body = idx.slice(idx.indexOf('<body'), idx.indexOf('<script src="js/config.js"'));
-  const srcs = [...idx.matchAll(/<script src="([^"]+)"><\/script>/g)].map((m) => m[1]).filter((s) => !/^lessons\/set-/.test(s));
+  const srcs = [...idx.matchAll(/<script src="([^"]+)"><\/script>/g)].map((m) => m[1]).filter((s) => !/^lessons\/(set|eval)-/.test(s));
   const id = lessonId(lesson);
   const demo = { lesson: id, prep: { img: prep }, hero: 16, nick: '나', friends: 6 };
   const out = [`<!doctype html>\n<html lang="ko">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n<meta name="theme-color" content="#0a1424">\n<title>${title}</title>`,

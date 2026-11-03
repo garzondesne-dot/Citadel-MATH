@@ -87,7 +87,7 @@ DS.Dash = (function () {
     el.querySelectorAll('[data-copy]').forEach((b) => (b.onclick = () => copy(b.dataset.copy === 'all' ? data.studs.map((s) => `${who(s)}: ${memo(s)}`).join('\n\n') : memo(data.studs.find((s) => s.key === b.dataset.copy)))));
   }
   const who = (s) => `${isAll() ? `${s.cls}반 ` : ''}${s.n}번 ${s.name}`;
-  const COLS = [['n', '번호'], ['name', '이름'], ['part', '참여'], ['boss', '형성평가'], ['first', '첫 시도'], ['fixed', '고친 수'], ['seals', '인장'], ['tries', '보강 도전'], ['cards', '카드'], ['xp', 'Lv']];
+  const COLS = [['n', '번호'], ['name', '이름'], ['part', '참여'], ['boss', '형성평가'], ['first', '첫 시도'], ['fixed', '고친 수'], ['seals', '인장'], ['tries', '던전 도전'], ['cards', '카드'], ['xp', 'Lv']];
   function sorted() {
     const v = (s) => (s[sortKey] == null ? -1 : s[sortKey]);
     const base = (a, b) => String(a.cls).localeCompare(String(b.cls)) || a.n - b.n;
@@ -123,7 +123,7 @@ DS.Dash = (function () {
         </div>
         <div class="dash-boards small3">
           ${board('🔁 끈기 TOP 5', '재도전으로 고친 문제', 'fixed', (s) => `${s.fixed}개`, 5)}
-          ${board('📘 자기주도 TOP 5', '보강던전 도전 횟수', 'tries', (s) => `${s.tries}회 · 인장 ${s.seals}`, 5)}
+          ${board('🟪 자기주도 TOP 5', '중단원던전 도전 횟수', 'tries', (s) => `${s.tries}회 · 인장 ${s.seals}`, 5)}
           ${board('⭐ 성장 TOP 5', 'EXP', 'xp', (s) => `Lv.${s.lv} · ${s.xp}`, 5)}
         </div>`;
     },
@@ -135,10 +135,10 @@ DS.Dash = (function () {
         if (miss.length) why.push(`최근 불참: ${miss.map((l) => `${l.no}차시`).join(', ')}`);
         if (s.boss != null && s.boss < 50) why.push(`형성평가 평균 ${s.boss}%`);
         if (s.first != null && s.first < 50) why.push(`첫 시도 정답률 ${s.first}%`);
-        if (s.went && !s.tries) why.push('보강던전 0회');
+        if (s.went && !s.tries) why.push('중단원던전 0회');
         return { s, why };
       }).filter((r) => r.why.length);
-      return `<p class="muted small">최근 2차시(${isAll() ? '반마다' : last2.map((l) => `${l.no}차시`).join(' · ')}) 불참 · 형성평가 50% 미만 · 첫 시도 50% 미만 · 보강던전 0회</p>
+      return `<p class="muted small">최근 2차시(${isAll() ? '반마다' : last2.map((l) => `${l.no}차시`).join(' · ')}) 불참 · 형성평가 50% 미만 · 첫 시도 50% 미만 · 중단원던전 0회</p>
         ${rows.length ? `<table class="r-table">${rows.map(({ s, why }) => `<tr><td>${isAll() ? `${esc(s.cls)} ` : ''}${s.n}번</td><td><button class="linkish" data-who="${s.key}">${esc(s.name)}</button></td><td>${why.map((w) => `<span class="dash-tag">${esc(w)}</span>`).join(' ')}</td></tr>`).join('')}</table>` : '<p class="okc">👍 지금 눈에 띄는 학생이 없어요.</p>'}`;
     },
     weak() {
@@ -164,7 +164,7 @@ DS.Dash = (function () {
       const agg = {};
       data.studs.forEach((st) => Object.entries(st.mis).forEach(([c, v]) => { const a = (agg[c] = agg[c] || { w: 0, f: 0, who: 0 }); a.w += v[0]; a.f += v[1]; a.who++; }));
       const list = Object.entries(agg).filter(([c]) => M.CODES[c]).sort((x, y) => y[1].w - x[1].w);
-      if (!list.length) return '<p class="muted">아직 쌓인 오개념 기록이 없어요. (2026-11-03 이후 수업 · 보강던전부터 기록돼요)</p>';
+      if (!list.length) return '<p class="muted">아직 쌓인 오개념 기록이 없어요. (2026-11-03 이후 수업 · 중단원던전부터 기록돼요)</p>';
       return `<p class="muted small">틀린 답의 종류를 모은 것 · 「바로잡음」 = 그 뒤 재도전 · 형성평가 세트 2 · 보강에서 맞힘 · 점수가 아니라 다음 수업에서 짚을 것</p>
         <table class="r-table"><tr><th>코드</th><th>오개념</th><th>틀린 횟수</th><th>학생</th><th>바로잡음</th></tr>
         ${list.map(([c, a]) => `<tr><td>${c}</td><td>${esc(M.CODES[c].name)}</td><td>${a.w}</td><td>${a.who}명</td><td class="dash-c ${heat(pct(a.f, a.w))}">${pct(a.f, a.w)}%</td></tr>`).join('')}</table>
@@ -187,7 +187,7 @@ DS.Dash = (function () {
     if (best) parts.push(`특히 '${best.name}' 개념에서 첫 시도 정답률 ${best.p}%로 정확한 이해를 보임`);
     if (s.boss != null) parts.push(`형성평가 평균 ${s.boss}%를 기록함`);
     if (s.fixed) parts.push(`틀린 문제를 숫자를 바꾼 재도전 문제로 ${s.fixed}개 스스로 바로잡으며 끝까지 해결하려는 태도를 보임`);
-    if (s.tries) parts.push(`수업 뒤 보강던전에 ${s.tries}회 도전${s.seals ? `하여 보강 인장 ${s.seals}개를 모으는` : '하는'} 등 자기주도적으로 복습함`);
+    if (s.tries) parts.push(`수업 뒤 중단원던전에 ${s.tries}회 도전${s.seals ? `하여 ${s.seals}개 층을 모두 해결하는` : '하는'} 등 자기주도적으로 복습함`);
     if (s.cards) parts.push(`모루(개념 카드 만들기)에서 기호와 개념을 연결한 카드 ${s.cards}장을 완성함`);
     if (DS.Standards) { const good = Object.entries(s.std || {}).filter(([, v]) => v[1] >= 4 && pct(v[0], v[1]) >= 80).map(([id, v]) => ({ sd: DS.Standards.get(id), p: pct(v[0], v[1]) })).filter((x) => x.sd).sort((a, b) => b.p - a.p);
       if (good.length) parts.push(`${good.slice(0, 2).map((g) => `'${g.sd.name}'`).join('과 ')} 성취기준에 안정적으로 도달함(첫 시도 정답률 ${good[0].p}%)`); }
@@ -213,7 +213,7 @@ DS.Dash = (function () {
     const s = data.studs.find((x) => x.key === k); if (!s) return;
     const el = document.createElement('div'); el.className = 'modal camp-modal';
     el.innerHTML = `<div class="quiz-box framed st-detail"><h2>${esc(s.cls)} ${s.n}번 ${esc(s.name)}</h2>
-      <p>Lv.${s.lv} ${esc(s.lvTitle || '')} · EXP ${s.xp} · 카드 ${s.cards} · 보강 인장 ${s.seals} · 보강 도전 ${s.tries}회</p>
+      <p>Lv.${s.lv} ${esc(s.lvTitle || '')} · EXP ${s.xp} · 카드 ${s.cards} · 던전 인장 ${s.seals} · 던전 도전 ${s.tries}회</p>
       <p>형성평가 ${show(s.boss)} · 첫 시도 ${show(s.first)} · 참여 ${s.went}/${s.heldN} · 고친 수 ${s.fixed}</p>
       ${DS.Result ? DS.Result.history(s.rec || {}) : ''}
       <div class="dash-memo"><b>세특 메모 초안</b><p>${esc(memo(s))}</p></div>

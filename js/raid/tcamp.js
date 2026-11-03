@@ -1,6 +1,6 @@
 // 🏛 교사 대기공간 (v0.9.1): 새 수업을 만들면 공동 던전 대기실이 아니라 여기서 시작한다 (배경 = 푸른 숲 성소, 사용자 제공)
 // - 맨 위 가운데: 학생 입장용 QR 코드 크게 + 수업 코드 + 입장 인원(실시간)
-// - ⚒ 모루 · 📘 보강던전: 모든 차시 미리 보기 (교사는 기록을 저장하지 않음)
+// - ⚒ 모루 · 🟪 중단원던전: 모든 층 미리 보기 (교사는 기록을 저장하지 않음)
 // - 🌀 오른쪽 차원문: 이 수업 던전으로 → 교사 화면(◀ ▶ 리모컨). 수업이 끝나면 꺼진 차원문 + 🏫 우리 반 수업 소식
 // - 수업이 없으면 차원문 자리 → 「새 수업 열기」(교사 메뉴)
 // v0.9.2 (사용자 결정): 교사 폰은 리모컨에서 바로 시작하고, **종합상황실(PC)이 교사 캠프에서 시작**한다 (아이들에게 모루 · 보강던전을 자연스럽게 소개)
@@ -37,7 +37,7 @@ DS.TCamp = (function () {
         <div class="camp-fire"><i class="camp-glow"></i><i class="camp-glow g2"></i><i class="camp-fire-img" style="background-image:url('${base}${c.fire.src}');background-size:${c.fire.cols * 100}% ${(c.fire.rows || 1) * 100}%;background-position:0 0"></i></div>
         ${prop('dummy', '🎯', '허수아비')}${prop('shelf', '📚', '책장')}${prop('mail', '📮', hall ? '우리 반 소식' : '대시보드')}
         <button class="camp-anvil tc-anvil" id="tc-anvil" aria-label="모루"><i class="camp-anvil-img" style="background-image:url('${base}${c.anvil.src}');background-size:${c.anvil.cols * 100}% 100%;background-position:0 0"></i><span class="camp-label">⚒ 모루</span></button>
-        <button class="camp-bonus tc-bonus" id="tc-bonus" aria-label="보강던전"><i class="camp-bonus-img" style="background-image:url('${base}${DS.ASSETS.dportals.bonus}')"></i><span class="camp-label">📘 보강던전</span></button>
+        <button class="camp-bonus tc-bonus mid" id="tc-bonus" aria-label="중단원던전"><i class="camp-bonus-img" style="background-image:url('${base}${DS.ASSETS.dportals.mid}')"></i><span class="camp-label">🟪 중단원던전</span></button>
         <div class="tc-hero">${DS.Art.hero(DS.Art.teacherHero(R), 'idle', 'huff')}<i class="shadow"></i></div>
         <button class="camp-gate tc-gate" id="tc-gate" aria-label="차원문"></button>
       </div>

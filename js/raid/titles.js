@@ -21,12 +21,12 @@ DS.Titles = (function () {
     { id: 'rare', name: '레어 연성사', tier: 'p', medal: ['rank', 5], cond: '레어(보라) 카드 만들기', test: (d) => cardsOf(d, 3).length > 0 },
     { id: 'grit', name: '끈기의 용사', tier: 'p', medal: ['rank', 6], cond: '재도전으로 고친 문제 모두 10개', test: (d) => recs(d).reduce((a, r) => a + (Number(r.fixed) || 0), 0) >= 10 },
     { id: 'sage', name: '도감 수집가', tier: 'o', medal: ['rank', 8], cond: '1~3차시 연성 도감 15장 완성', test: (d) => { const need = DS.Unit ? DS.Unit.CARDS.filter((c) => c.no <= 3) : []; return need.length > 0 && need.every((c) => (d.cards || {})[c.id]); } },
-    { id: 'king', name: '집합의 지배자', tier: 'o', medal: ['rank', 9], cond: '집합 중단원평가 클리어 (추후 공개)', test: () => false },
+    { id: 'king', name: '집합의 지배자', tier: 'o', medal: ['rank', 9], cond: '🟪 중단원던전 꼭대기 층 👑 발전 보스 처치', test: (d) => !!(((d.bonus || {})['eval-1'] || {}).eb || {}).clear }, // 2026-11-03 변경 제안 v1
   ];
   // 던전 정복: 차시마다 그 던전 테마의 메달 (보스 격파 또는 형성평가 만점)
   function dungeonTitles() {
     const D = DS.ASSETS.dungeons;
-    return DS.Lessons.list.filter((l) => l.theme && D.ids.includes(l.theme)).map((l) => ({ id: `dg-${l.id}`, name: `${D.names[D.ids.indexOf(l.theme)]} 정복`, tier: 'b', medal: ['dungeon', D.ids.indexOf(l.theme)],
+    return DS.Lessons.list.filter((l) => !l.eval && l.theme && D.ids.includes(l.theme)).map((l) => ({ id: `dg-${l.id}`, name: `${D.names[D.ids.indexOf(l.theme)]} 정복`, tier: 'b', medal: ['dungeon', D.ids.indexOf(l.theme)],
       cond: `${l.no ? `${l.no}차시 ` : ''}${l.title} — 보스 격파 또는 형성평가 만점`, test: (d) => { const r = (d.records || {})[l.id]; return !!r && (r.won || (r.bossN && r.boss >= r.bossN)); } }));
   }
   // 레벨 칭호 (일반): 지금 레벨까지의 칭호

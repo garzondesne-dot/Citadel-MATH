@@ -12,7 +12,7 @@ DS.Prep = (function () {
   let sel = null, pages = [], thumbs = [], draft = {}, editing = null, piece = 0;
   // 이미지 칸: 도입·개념(설명 때 크게) + 문제·보강·형성평가(교사가 「📄 문제 화면」을 누르면 해설용으로 크게)
   const slotSteps = () => L.steps.map((s) => (s.kind === 'boss' ? { ...s, title: s.title || L.boss.title } : s))
-    .concat((L.bonus || []).map((b) => ({ kind: 'bonus', id: b.id, title: `⚔ 보강던전 · ${b.title}` }))); // 4차시부터: 보강던전 칸 (학생 「📄 학습지 보기」 · 🎬)
+    .concat((L.bonus || []).map((b) => ({ kind: 'bonus', id: b.id, title: `🟪 중단원던전 ${L.no}층 · ${b.title}` }))); // 4차시부터: 중단원던전 층의 보강 칸 (학생 「📄 학습지 보기」 · 🎬)
 
   async function enter(lessonId) {
     if (!(await A().isAdmin())) throw Object.assign(new Error('교사 계정으로 로그인해야 해요.'), { user: true });
@@ -78,7 +78,7 @@ DS.Prep = (function () {
     const video = `<div class="p-video"><span>🎬 설명 영상</span><input data-vid="${s.id}" placeholder="유튜브 · 구글 드라이브 주소 (없으면 비워 두기)" value="${esc(isFile ? '' : vid || '')}"><button class="btn small" data-vsave="${s.id}">링크 저장</button>
       <label class="btn small">🎞 파일 올리기<input type="file" accept="video/mp4,video/webm,video/*" data-vfile="${s.id}" hidden></label>
       ${isFile ? `<span class="okc small">🎞 올린 영상 파일</span><button class="btn small" data-vplay="${s.id}">▶ 미리보기</button><button class="btn small" data-vdel="${s.id}">지우기</button>`
-        : vid ? `<span class="muted small">${DS.Video && DS.Video.kind(vid) ? DS.Video.kind(vid) : '⚠ 알 수 없는 주소'}</span>` : (L.videos || {})[s.id] ? `<span class="okc small">🎬 기본 영상 연결됨 (모션그래픽)</span><button class="btn small" data-vdef="${s.id}">▶ 미리보기</button>` : '<span class="muted small">링크 또는 mp4 파일 (3MB 이하) · 큰 화면 「🎬 설명 영상 틀기」 · 보강던전에서 재생</span>'}</div>`;
+        : vid ? `<span class="muted small">${DS.Video && DS.Video.kind(vid) ? DS.Video.kind(vid) : '⚠ 알 수 없는 주소'}</span>` : (L.videos || {})[s.id] ? `<span class="okc small">🎬 기본 영상 연결됨 (모션그래픽)</span><button class="btn small" data-vdef="${s.id}">▶ 미리보기</button>` : '<span class="muted small">링크 또는 mp4 파일 (3MB 이하) · 큰 화면 「🎬 설명 영상 틀기」 · 중단원던전에서 재생</span>'}</div>`;
     return `<div class="panel framed p-slot${sel === s.id ? ' sel' : ''}" data-box="${s.id}" tabindex="0">${head.replace('</div>', `<button class="btn small" data-fold="${s.id}">접기 ▴</button></div>`)}${body}${video}${sel === s.id && editing !== s.id ? '<p class="p-paste small">📋 지금 Ctrl+V 하면 이 칸에 들어가요</p>' : ''}</div>`;
   }
   const up = (slot, url, msg = '올렸어요!') => DS.Control.run(async () => { await DS.Act.setImage(L.id, slot, url); delete draft[slot]; DS.UI.toast(msg); render(); });
@@ -275,7 +275,7 @@ DS.Prep = (function () {
   let tidy = null; // { rooms: [code], backedUp: bool }
   function tidyPanel() {
     return `<details class="panel framed" id="p-tidy"${tidy ? ' open' : ''}><summary><b>📦 지난 차시 정리</b> <span class="muted small">백업 받고 서버에서 지우기 (Firebase 사용량 줄이기)</span></summary>
-      <p class="muted small">이 차시의 <b>수업 방 기록 · 학습지 이미지 · 올린 영상</b>을 백업 파일(.json)로 받은 뒤 서버에서 지워요. 학생 EXP · 호칭 · 도감 · 개인 결과 · 보강던전 기록은 그대로 남아요. 지우면 그 수업의 🏫 학급 결과는 백업 파일로만 볼 수 있어요.</p>
+      <p class="muted small">이 차시의 <b>수업 방 기록 · 학습지 이미지 · 올린 영상</b>을 백업 파일(.json)로 받은 뒤 서버에서 지워요. 학생 EXP · 호칭 · 도감 · 개인 결과 · 중단원던전 기록은 그대로 남아요. 지우면 그 수업의 🏫 학급 결과는 백업 파일로만 볼 수 있어요.</p>
       <div class="row"><button class="btn" id="td-scan">🔍 이 차시 수업 찾기</button>${tidy ? `<span class="muted small">수업 방 ${tidy.rooms.length}개 · 이미지 ${Object.keys(data.img || data.has || {}).length}칸</span>` : ''}</div>
       ${tidy ? `<div class="row"><button class="btn primary" id="td-backup">⬇ ① 백업 파일 받기</button><button class="btn danger" id="td-del"${tidy.backedUp ? '' : ' disabled'}>🗑 ② 서버에서 지우기</button></div>` : ''}</details>`;
   }

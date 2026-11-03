@@ -82,7 +82,8 @@ const e1 = ids(d1);
 check(['first', 'slayer', 'smith', 'dg-set-04', 'lv2', 'lv3'].every((k) => e1.includes(k)) && !e1.includes('grit') && !e1.includes('sage'), `첫 출정 · 보스 토벌 · 첫 연성 · 빙결 동굴 정복 · Lv 칭호 (${e1})`);
 check(T.get('dg-set-04').name === '빙결 동굴 정복' && T.get('dg-set-04').medal[0] === 'dungeon', '던전 정복 = 그 던전 테마 메달');
 check(ids({ ...d1, records: { a: { fixed: 6 }, b: { fixed: 4 } } }).includes('grit'), '끈기의 용사 = 고친 문제 누적 10');
-check(!T.earned({ ...d1, xp: 1e6 }).some((t) => t.id === 'king'), '집합의 지배자는 추후 공개 (잠김)');
+check(!T.earned({ ...d1, xp: 1e6 }).some((t) => t.id === 'king'), '집합의 지배자: 레벨로는 안 열림');
+check(T.earned({ ...d1, bonus: { 'eval-1': { eb: { clear: true, tries: 1 } } } }).some((t) => t.id === 'king') && !T.earned({ ...d1, bonus: { 'eval-1': { e1: { clear: true, tries: 1 } } } }).some((t) => t.id === 'king'), '집합의 지배자 = 꼭대기 층 발전 보스 처치');
 check(T.all().every((t) => T.TIER[t.tier]), '모든 호칭에 등급');
 
 if (fail) { console.error(`\n${fail}건 실패`); process.exit(1); }

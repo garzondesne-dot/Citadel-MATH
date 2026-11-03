@@ -155,6 +155,15 @@
         ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 30"
       }
     },
+    "evalOpen": {
+      ".read": "auth != null",
+      "$c": {
+        "$e": {
+          ".write": "auth != null && root.child('admins/'+auth.uid).val() === true",
+          ".validate": "newData.isBoolean() && newData.val() === true && $e.matches(/^eval-[0-9]+$/)"
+        }
+      }
+    },
     "wordLock": {
       ".read": "auth != null",
       ".write": "auth != null && root.child('admins/'+auth.uid).val() === true"

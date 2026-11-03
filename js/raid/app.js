@@ -83,7 +83,7 @@ DS.App = (function () {
   function fillLessons() {
     // v0.8.4: 차시 번호 · 제목을 앞에 (칸이 좁아도 무엇인지 보이게), 차시 순서대로
     const unitShort = (u) => String(u || '').replace(/^공통수학2\s*/, '').replace(/\s*·\s*\d+차시$/, '');
-    const opts = DS.Lessons.list.slice().sort((a, b) => (a.no || 99) - (b.no || 99)).map((l) => `<option value="${l.id}">${l.sheetLesson ? '📊 ' : ''}${l.no ? `${l.no}차시 · ` : ''}${esc(l.title)}${l.unit ? ` (${esc(unitShort(l.unit))})` : ''}</option>`).join('');
+    const opts = DS.Lessons.list.filter((l) => !l.eval).sort((a, b) => (a.no || 99) - (b.no || 99)).map((l) => `<option value="${l.id}">${l.sheetLesson ? '📊 ' : ''}${l.no ? `${l.no}차시 · ` : ''}${esc(l.title)}${l.unit ? ` (${esc(unitShort(l.unit))})` : ''}</option>`).join('');
     ['#lesson', '#p-lesson', '#x-lesson'].forEach((k) => { const el = $(k); if (el) { const v = el.value; el.innerHTML = opts; if (v) el.value = v; } });
   }
   function form(which) {
@@ -210,6 +210,7 @@ DS.App = (function () {
       document.querySelectorAll('.t-out').forEach((b) => (b.onclick = go(async () => { await A().logout(); await teacherAuth(); await studentAuth(); })));
       const cs = Object.keys((await A().masks()) || {}).sort();
       $('#t-cls').innerHTML = cs.length ? cs.map((c) => `<option>${esc(c)}</option>`).join('') : '<option value="">(명단 없음 — 수업 준비에서 올려요)</option>';
+      evalPanel(cs);
       const t = read('citadel-teacher');
       $('#t-resume').hidden = true; // 「📋 만든 수업」 목록으로 합침 (v0.8.4)
       liveList(cs);
@@ -254,6 +255,23 @@ DS.App = (function () {
     $('#s-go').onclick = go(async () => DS.Students.enter());
     $('#d-go').onclick = go(async () => DS.Dash.enter());
     $('#x-go').onclick = go(async () => { if (!(await A().isAdmin())) throw Object.assign(new Error('교사 계정으로 로그인해야 해요.'), { user: true }); await DS.Test.start($('#x-lesson').value); });
+  }
+  // 🟪 중단원던전 꼭대기 층 열기 · 닫기 (2026-11-03): evalOpen/{반}/{평가 id} = true · 차시 층은 unlock 으로 저절로
+  function evalPanel(cs) {
+    const ck = (c) => String(c).replace(/[.#$/[\]]/g, '_'), evals = DS.Lessons.list.filter((l) => l.eval);
+    const cSel = $('#e-cls'), iSel = $('#e-id'), btn = $('#e-go'), stEl = $('#e-st'); if (!cSel) return;
+    cSel.innerHTML = cs.map((c) => `<option>${esc(c)}</option>`).join('') || '<option value="">(명단 없음)</option>';
+    iSel.innerHTML = evals.map((l) => `<option value="${l.id}">${esc(l.title)}</option>`).join('');
+    let on = false;
+    const refresh = async () => {
+      if (!cSel.value || !iSel.value) { btn.disabled = true; return; }
+      on = !!(await DS.Net.get(`evalOpen/${ck(cSel.value)}/${iSel.value}`).catch(() => null));
+      btn.disabled = false; btn.textContent = on ? '🔒 닫기' : '🔓 열기'; btn.classList.toggle('primary', !on);
+      stEl.innerHTML = `${esc(cSel.value)} · ${esc((DS.Lessons.get(iSel.value) || {}).title || '')}: ${on ? '<b class="okc">열림</b> — 학생 중단원던전 맨 위에 꼭대기 층이 보여요' : '<b>닫힘</b> — 차시 층(2~6층)은 수업을 열면 저절로 열려요'}`;
+    };
+    cSel.onchange = refresh; iSel.onchange = refresh;
+    btn.onclick = go(async () => { await DS.Net.set(`evalOpen/${ck(cSel.value)}/${iSel.value}`, on ? null : true); DS.UI.toast(on ? '꼭대기 층을 닫았어요.' : '🔓 꼭대기 층을 열었어요!'); await refresh(); });
+    refresh();
   }
   // v0.8.4: 교사 메뉴 「📋 만든 수업」 — 반 · 차시 · 코드 · 진행 중/끝남 → [↩ 들어가기] [✕ 없애기]
   // 목록 = 반마다 마지막 차원문(live/{반}, 다른 기기에서 만든 것도) + 이 기기에서 만든 수업 기록(citadel-rooms)

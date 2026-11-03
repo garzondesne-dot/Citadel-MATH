@@ -101,7 +101,7 @@ DS.Students = (function () {
     const seals = DS.Bonus ? DS.Bonus.seals((extra.bonus || {})[n]) : [];
     const el = document.createElement('div'); el.className = 'modal camp-modal';
     el.innerHTML = `<div class="quiz-box framed st-detail"><h2>${esc(cls)} ${n}번 ${esc(name)}</h2>
-      <p>${lv ? `<b class="gold">Lv.${lv.lv} ${esc(lv.title)}</b> · EXP ${total}` : `EXP ${total}`} · 도감 ${Object.keys((extra.cards || {})[n] || {}).length}장 · 보강 인장 ${seals.length}개</p>
+      <p>${lv ? `<b class="gold">Lv.${lv.lv} ${esc(lv.title)}</b> · EXP ${total}` : `EXP ${total}`} · 도감 ${Object.keys((extra.cards || {})[n] || {}).length}장 · 던전 인장 ${seals.length}개</p>
       ${DS.Result ? DS.Result.history(rec || {}) : '<p class="muted">아직 기록이 없어요.</p>'}
       <div class="row"><button class="btn" id="sd-x">닫기</button></div></div>`;
     document.body.appendChild(el);

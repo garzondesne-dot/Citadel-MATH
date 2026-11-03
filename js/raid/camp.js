@@ -54,7 +54,7 @@ DS.Camp = (function () {
     return !tut.b && !inClass() ? 'B' : '';
   }
   const TUT_B = [
-    ['#camp-bonus', '📘 보강던전', '지난 수업에서 어려웠던 문제를 <b>혼자 다시</b> 연습하는 곳이에요. 다 깨면 📘 인장, 인장을 모으면 화려한 공격 이펙트가 열려요!'],
+    ['#camp-bonus', '🟪 중단원던전', '배운 차시마다 <b>한 층씩 열리는</b> 혼자 도전 던전이에요. 보강 몬스터 · 형성평가 재대결 · 꼭대기 층 중단원 마무리! 한 층을 다 깨면 🟪 인장, 인장을 모으면 화려한 공격 이펙트가 열려요!'],
     ['#camp-dummy', '🎯 훈련 허수아비', '지난 차시 문제를 <b>숫자만 바꿔</b> 연습해요. 기록은 남지 않고 경험치가 조금 쌓여요. 시험 전에 딱!'],
     ['#camp-shelf', '📚 책장', '차시별 🎬 <b>개념 영상</b>과 📄 <b>학습지 개념</b>을 다시 볼 수 있어요.'],
     ['#camp-mail', '📮 우편함', '내 <b>수업 결과</b>와 <b>복습 노트</b>가 도착해요. 틀린 문제를 다시 확인해요.'],
@@ -128,7 +128,7 @@ DS.Camp = (function () {
         <button class="camp-anvil" id="camp-anvil" aria-label="모루">${sheet(c.anvil, c.anvil.states.idle, 0, 'camp-anvil-img')}<span class="camp-label">⚒ 모루</span></button>
         <div class="camp-fire"><i class="camp-glow"></i><i class="camp-glow g2"></i>${sheet(c.fire, 0, 0, 'camp-fire-img', '')}</div>
         <div class="camp-hero">${DS.Art.hero(me.hero, 'sit', 'huff')}<i class="shadow"></i></div>
-        <button class="camp-bonus" id="camp-bonus" aria-label="보강던전"><i class="camp-bonus-img" style="background-image:url('${base()}${DS.ASSETS.dportals.bonus}')"></i><span class="camp-label">📘 보강던전</span></button>
+        <button class="camp-bonus mid" id="camp-bonus" aria-label="중단원던전"><i class="camp-bonus-img" style="background-image:url('${base()}${DS.ASSETS.dportals.mid}')"></i><span class="camp-label">🟪 중단원던전</span></button>
         <button class="camp-gate empty" id="camp-gate" aria-label="차원문"></button>
         ${prop('dummy', '🎯', '허수아비', '')}${prop('shelf', '📚', '책장', '')}${prop('mail', '📮', '우편함', '')}
 
@@ -259,8 +259,8 @@ DS.Camp = (function () {
     const g = DS.Grow ? await DS.Grow.mine(me).catch(() => null) : null;
     const el = document.createElement('div'); el.className = 'modal camp-modal';
     el.innerHTML = `<div class="quiz-box framed rs-box"><h2>📮 우편함 · 복습 노트</h2>${g ? `<div class="rs-lv"><b>Lv.${g.lv} ${esc(g.title)}</b> <span class="muted small">EXP ${g.total}</span><div class="rs-bar"><i style="width:${Math.round((100 * g.into) / g.next)}%"></i><span>${g.into} / ${g.next}</span></div></div>` : ''}
-      <p class="muted small">성적이 아니라 다음에 볼 것을 모아 둔 노트예요. 📌 복습 추천 개념은 📘 보강던전에서 연습할 수 있어요.</p>${DS.Result.history(rec)}
-      <div class="row"><button class="btn" id="nt-x">닫기</button><button class="btn primary" id="nt-bonus">📘 보강던전으로</button></div></div>`;
+      <p class="muted small">성적이 아니라 다음에 볼 것을 모아 둔 노트예요. 📌 복습 추천 개념은 🟪 중단원던전(그 차시 층)에서 연습할 수 있어요.</p>${DS.Result.history(rec)}
+      <div class="row"><button class="btn" id="nt-x">닫기</button><button class="btn primary" id="nt-bonus">🟪 중단원던전으로</button></div></div>`;
     document.body.appendChild(el);
     el.querySelector('#nt-x').onclick = () => el.remove();
     el.querySelector('#nt-bonus').onclick = () => { el.remove(); pick('#camp-bonus', () => DS.Control.run(() => DS.Bonus.enter(me))); };
@@ -303,11 +303,11 @@ DS.Camp = (function () {
         <p class="muted small">✨ 추가 용사: ① 1~3차시 도감 <b>${L.got} / ${L.need}</b>장 · ② 🎁 첫 레이드 클리어 · ③ 4~6차시 도감 · ④ 7~10차시 도감 · 나머지는 추후 공개</p>
         <p class="shelf-title">🏅 호칭 <span class="muted small">얻은 ${got.length}개 · 고른 호칭이 이름 앞에 붙어요</span></p>
         <div class="ttl-grid">${[{ id: 'none', name: '달지 않기', tier: 'w', cond: '' }, ...DS.Titles.all()].map((t) => { const has = t.id === 'none' || got.includes(t.id); return `<button class="ttl-pick ${DS.Titles.TIER[t.tier].cls}${t.id === title ? ' on' : ''}${has ? '' : ' lock'}" data-ttl="${t.id}" title="${esc(t.cond || '')}">${has ? DS.Titles.medal(t, 22) : '🔒'}<span>${esc(t.name)}</span>${has ? '' : `<small>${esc(t.cond)}</small>`}</button>`; }).join('')}</div>
-        <p class="shelf-title">공격 이펙트 <span class="muted small">화려한 이펙트 = 📘 보강 인장 ${L.seals || 0}개 모음</span></p><div class="fxs">${L.fx.map((f) => `<button class="fxpick${f.id === fx ? ' on' : ''}${f.open ? '' : ' lock'}" data-fx="${f.id}"><canvas width="150" height="90" data-still="${f.id}"></canvas><span>${f.open ? DS.FX.NAMES[f.id] : `🔒 ${esc(f.cond || '추후 공개')}`}</span></button>`).join('')}</div>
+        <p class="shelf-title">공격 이펙트 <span class="muted small">화려한 이펙트 = 🟪 던전 인장 ${L.seals || 0}개 모음</span></p><div class="fxs">${L.fx.map((f) => `<button class="fxpick${f.id === fx ? ' on' : ''}${f.open ? '' : ' lock'}" data-fx="${f.id}"><canvas width="150" height="90" data-still="${f.id}"></canvas><span>${f.open ? DS.FX.NAMES[f.id] : `🔒 ${esc(f.cond || '추후 공개')}`}</span></button>`).join('')}</div>
       </div>`; // v0.9.3: 닫기 · 저장은 맨 위 (사용자 요청)
       el.querySelectorAll('canvas[data-still]').forEach((c) => DS.FX.still(c, c.dataset.still));
       el.querySelectorAll('[data-h]').forEach((b) => (b.onclick = () => { const h = L.heroes.find((x) => x.id === Number(b.dataset.h)); if (!h.open) { DS.UI.toast(`🔒 ${h.cond}`); return; } hero = h.id; DS.Sound.clank(); draw(); }));
-      el.querySelectorAll('[data-fx]').forEach((b) => (b.onclick = () => { const f = L.fx.find((x) => x.id === b.dataset.fx); if (!f.open) { DS.UI.toast(`🔒 ${f.cond || '해금 조건은 추후 공개'} — 보강던전에서 인장을 모아요`, 3200); return; } fx = f.id; draw(); DS.FX.play(el.querySelector(`[data-fx="${fx}"]`), fx, { scale: 0.45 }); DS.Sound.hit(); }));
+      el.querySelectorAll('[data-fx]').forEach((b) => (b.onclick = () => { const f = L.fx.find((x) => x.id === b.dataset.fx); if (!f.open) { DS.UI.toast(`🔒 ${f.cond || '해금 조건은 추후 공개'} — 중단원던전에서 인장을 모아요`, 3200); return; } fx = f.id; draw(); DS.FX.play(el.querySelector(`[data-fx="${fx}"]`), fx, { scale: 0.45 }); DS.Sound.hit(); }));
       el.querySelectorAll('[data-ttl]').forEach((b) => (b.onclick = () => { if (b.classList.contains('lock')) { DS.UI.toast(`🔒 ${b.title}`, 2600); return; } title = b.dataset.ttl; DS.Sound.clank(); draw(); }));
       el.querySelector('#set-x').onclick = () => el.remove();
       el.querySelector('#set-ok').onclick = () => DS.Control.run(async () => { if (me.test) DS.Test.setLook(hero, fx); else { await DS.Account.setLook(hero, fx); if (title !== (me.title || 'none')) await DS.Account.setTitle(title); } me.title = title; me.hero = hero; me.fx = fx; el.remove(); DS.UI.toast('저장했어요! 다음 입장부터 적용돼요.'); render(); });

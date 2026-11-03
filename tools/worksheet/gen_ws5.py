@@ -1,4 +1,4 @@
-# 5차시 레이드용 학습지 생성기 (4차시 v2 양식) · v4 (2026-11-03 사용자 확정: 수업 분량 줄이기 — 보강 칸 · 형성평가 도전 7·8번 뺌, 보강은 캠프 보강던전에서)
+# 5차시 레이드용 학습지 생성기 (4차시 v2 양식) · v4 (2026-11-03 사용자 확정: 수업 분량 줄이기 — 보강 칸 · 형성평가 도전 7·8번 뺌, 보강은 캠프 중단원던전 5층에서)
 import os
 D = os.path.dirname(os.path.abspath(__file__))
 css = open(os.path.join(D, 'style.css.txt'), encoding='utf-8').read()
@@ -87,7 +87,7 @@ p2_left = f'''
       <div class="q">(1) B{C} = {ln(18)} → {S}A ∩ B{C} = {ln(16)}</div>
       <div class="q">(2) {S}A − B = {ln(16)} → (1)과 ( 같다 / 다르다 )</div>
       <div class="box" style="flex:1;border-style:dashed;color:#777;font-size:8.5pt">✏ 풀이 · 메모</div>
-      <div class="pur mini">⚔ <b>더 해 보고 싶다면</b> — 수업 뒤 캠프의 <b>보강던전</b>에서: ① 법칙으로 간단히 하기 ② 여집합의 성질 ③ 색칠해서 확인하기</div>
+      <div class="pur mini">🟪 <b>더 해 보고 싶다면</b> — 수업 뒤 캠프의 <b>중단원던전 5층</b>: 보강 ① 법칙으로 간단히 하기 ② 여집합의 성질 ③ 색칠해서 확인하기 · 👑 형성평가 재대결</div>
 '''
 
 W = lambda h=15: f'<div style="height:{h}mm"></div>'
