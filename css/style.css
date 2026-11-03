@@ -1191,3 +1191,7 @@ input.masked { -webkit-text-security: disc; text-security: disc; }
 .h-concept.wfull .h-zoom-tip { color: #8a8f9c; margin: 2px 0 0; }
 .h-concept:not(.split)[data-zoom] .h-sheet img, .h-sheet-ov .h-sheet img { cursor: zoom-in; }
 body:has(#h-demo-ov) > .modal { z-index: 70; } /* 보스 시연: 학생과 같은 입력 창이 시연 창 위에 */
+/* 버전 꼬리표: 모든 화면 · 모든 창 위 왼쪽 아래 구석, 누름 막지 않음 */
+#ver-tag { position: fixed; left: calc(4px + env(safe-area-inset-left)); bottom: calc(2px + env(safe-area-inset-bottom)); z-index: 9999; font: 11px/1.2 monospace; color: #fff; opacity: .7; text-shadow: 1px 1px 0 #000; pointer-events: none; user-select: none; }
+body:has(#test-bar) #ver-tag { bottom: calc(64px + env(safe-area-inset-bottom)); }
+@media (min-width: 1000px) { #ver-tag { font-size: 14px; left: 8px; bottom: 6px; } } /* 종합상황실 · PC: 교실 뒤에서도 읽히게 */
