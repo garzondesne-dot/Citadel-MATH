@@ -66,6 +66,7 @@ DS.App = (function () {
       else if (sc.role === 'prep' && sc.lesson && (await A().isAdmin())) await DS.Prep.enter(sc.lesson);
       else if (sc.role === 'students' && (await A().isAdmin())) await DS.Students.enter();
       else if (sc.role === 'dash' && (await A().isAdmin())) await DS.Dash.enter();
+      else if (sc.role === 'att' && (await A().isAdmin())) await DS.Att.enter();
       else if (sc.role === 'tcamp' && (await A().isAdmin())) await DS.TCamp.enter(sc);
     } catch (e) { DS.Scene.clear(); DS.UI.toast(e.message || String(e), 3200); }
   }
@@ -210,6 +211,7 @@ DS.App = (function () {
     const ok = await A().isAdmin();
     document.querySelectorAll('.t-only').forEach((e) => (e.hidden = !ok));
     if (ok) teacherSkin();
+    if (ok && DS.Att) DS.Att.today($('#t-today')).catch((e) => console.warn('오늘 수업', e)); // 📅 v0.9.7.0: 예약 수업 7일 치 채우기 + 오늘 목록
     if (ok) {
       document.querySelectorAll('.t-auth').forEach((e) => { e.innerHTML = '<div class="acc-card"><b>👩‍🏫 교사 계정</b><span class="muted small">로그인됨</span><button class="btn small t-out">로그아웃</button></div>'; });
       document.querySelectorAll('.t-out').forEach((b) => (b.onclick = go(async () => { await A().logout(); await teacherAuth(); await studentAuth(); })));
@@ -259,6 +261,7 @@ DS.App = (function () {
     $('#p-go').onclick = go(async () => DS.Prep.enter($('#p-lesson').value));
     $('#s-go').onclick = go(async () => DS.Students.enter());
     $('#d-go').onclick = go(async () => DS.Dash.enter());
+    $('#a-go').onclick = go(async () => DS.Att.enter());
     $('#x-go').onclick = go(async () => { if (!(await A().isAdmin())) throw Object.assign(new Error('교사 계정으로 로그인해야 해요.'), { user: true }); await DS.Test.start($('#p-lesson').value); });
   }
   // 🟪 중단원던전 꼭대기 층 열기 · 닫기 (2026-11-03): evalOpen/{반}/{평가 id} = true · 차시 층은 unlock 으로 저절로

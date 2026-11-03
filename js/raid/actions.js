@@ -30,13 +30,15 @@ DS.Act = (function () {
   // ── 교사 ────────────────────────────────────────────────
   const ck = (c) => String(c).replace(/[.#$/[\]]/g, '_');
   // cls: 이 수업을 여는 반 → 그 반 학생들의 모닥불에 이 차시 차원문이 실시간으로 나타난다 (live/{반})
-  async function createRoom(lessonId, cls) {
+  // opt.slot (v0.9.7.0 시간표 예약 수업): { key, p, from, to } → 차원문(live) · 해금은 지금 안 함 (학생 캠프는 slots 로 시각에 맞춰 켬 · 해금은 수업 시작 때)
+  async function createRoom(lessonId, cls, opt = {}) {
     let code;
     for (let i = 0; i < 20; i++) { code = String(100000 + Math.floor(Math.random() * 900000)); if (!(await N().get(P(code, 'meta')))) break; }
     let pct = null;
     try { pct = await N().get(prepPath(lessonId, 'pct')); } catch (e) { /* 준비 안 했으면 차시 기본값 */ }
     const room = Raid.newRoom(code, lessonId, N().uid(), N().now(), pct, DS.Art ? DS.Art.teacherHero() : 7, DS.Art && DS.Art.teacherLook ? DS.Art.teacherLook().fx : undefined);
     if (cls) room.meta.cls = String(cls);
+    if (opt.slot) room.meta.slot = { key: String(opt.slot.key), p: Number(opt.slot.p), from: Number(opt.slot.from), to: Number(opt.slot.to) };
     let think = null;
     try { think = await N().get(prepPath(lessonId, 'think')); } catch (e) { /* 기본 5초 */ }
     const Lp = DS.Lessons.get(lessonId);
@@ -46,7 +48,9 @@ DS.Act = (function () {
     const hallKey = String(1000 + Math.floor(Math.random() * 9000));
     await N().set(P(code), room);
     await N().set(`secrets/${code}`, { hallKey }); // 학생은 읽을 수 없는 곳 (Firebase 규칙)
-    if (cls) {
+    // 📖 수업 일지 한 줄 (교사만 · 예약 · 바로 연 수업 모두)
+    if (cls) { const L = DS.Lessons.get(lessonId); await N().set(`classlog/${ck(cls)}/${code}`, { lesson: lessonId, no: (L && L.no) || 0, at: N().TS, ...(opt.slot ? { sched: true, p: Number(opt.slot.p), from: Number(opt.slot.from), to: Number(opt.slot.to) } : {}) }).catch(() => {}); }
+    if (cls && !opt.slot) {
       const L = DS.Lessons.get(lessonId);
       await N().set(`live/${ck(cls)}`, { code, lesson: lessonId, no: (L && L.no) || 0, theme: (L && L.theme) || '', open: true, at: N().TS });
       await unlockFor(L, [cls]);
@@ -152,7 +156,7 @@ DS.Act = (function () {
     const dup = Object.entries(R.players || {}).find(([u, p]) => u !== me && !p.teacher && Number(p.num) === Number(info.num));
     if (dup) fail(`${info.num}번은 이미 입장했어요. 번호를 확인해 주세요.`);
     const was = (R.players || {})[me] || {};
-    await N().set(P(code, `players/${me}`), { num: Number(info.num), nick: String(info.nick).slice(0, 8), hero: Number(info.hero) || 0, fx: info.fx || 'flame', ...(info.cls ? { cls: String(info.cls) } : {}), ...(info.title ? { title: String(info.title).slice(0, 24) } : {}), ...(was.lobby ? { lobby: true } : {}), at: N().TS });
+    await N().set(P(code, `players/${me}`), { num: Number(info.num), nick: String(info.nick).slice(0, 8), hero: Number(info.hero) || 0, fx: info.fx || 'flame', ...(info.cls ? { cls: String(info.cls) } : {}), ...(info.title ? { title: String(info.title).slice(0, 24) } : {}), ...(was.lobby ? { lobby: true } : {}), at: N().TS, first: was.first || N().TS }); // first = 처음 들어온 시각 (출석부)
     return R.meta;
   }
   // 접속 표시: 연결이 끊기면 서버가 지운다 (Firebase onDisconnect)

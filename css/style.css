@@ -1425,3 +1425,32 @@ body:has(#test-bar) #ver-tag { bottom: calc(64px + env(safe-area-inset-bottom));
 .t-prep-row #x-go { flex: none; height: 48px; padding: 0 12px; white-space: nowrap; margin-bottom: 0; }
 .t-stu-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .t-stu-row .btn.big { margin: 6px 0 4px; white-space: nowrap; }
+
+/* ── 📅 오늘 수업 · 시간표 · 🗓 출석부 (v0.9.7.0) ── */
+.t-today { margin: 6px 0 10px; }
+.td-head, .td-empty { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+.td-head .btn, .td-empty .btn { margin-left: auto; }
+.td-empty span { font-size: 13px; color: var(--muted); flex: 1; min-width: 180px; }
+.td-row { display: flex; align-items: center; gap: 8px; padding: 6px 4px; border-top: 1px solid #ffffff1a; }
+.td-row.now { background: #1f5a3a55; } .td-row.done { opacity: .55; }
+.td-p { display: flex; flex-direction: column; align-items: center; min-width: 46px; } .td-p small { font-size: 11px; color: var(--muted); }
+.td-c { flex: 1; min-width: 0; line-height: 1.35; }
+.td-b { display: flex; flex-direction: column; gap: 4px; }
+.t-stu-row { grid-template-columns: 1fr 1fr 1fr !important; }
+.t-stu-row .btn.big { font-size: 16px; }
+.sc-wrap, .att-wrap { overflow-x: auto; max-width: 100%; }
+.sc-tbl { border-collapse: collapse; width: 100%; table-layout: fixed; }
+.sc-tbl th:first-child { width: 46px; }
+.sc-tbl th, .sc-tbl td { border: 1px solid #ffffff22; padding: 2px 1px; text-align: center; font-size: 12px; }
+.sc-tbl th small { display: block; font-size: 10px; color: var(--muted); }
+.sc-tbl select { font-size: 12px !important; padding: 0 1px !important; width: 100%; min-width: 0; border-width: 4px !important; border-image-width: 4px !important; -webkit-appearance: none; appearance: none; text-align: center; }
+.sc-tbl .sc-no { font-size: 10px; line-height: 1.1; }
+.sc-tbl .sc-no { color: #7d86a3; font-size: 11px; background: #00000033; }
+.att-tbl { border-collapse: collapse; font-size: 13px; min-width: 100%; }
+.att-tbl th, .att-tbl td { border: 1px solid #ffffff22; padding: 4px 6px; text-align: center; white-space: nowrap; }
+.att-tbl th small { display: block; font-size: 10px; color: var(--muted); font-weight: 400; }
+.att-tbl .nm { text-align: left; position: sticky; left: 0; background: #0d1530; }
+.att-c { cursor: pointer; position: relative; } .att-c i { position: absolute; right: 1px; top: 0; font-size: 9px; font-style: normal; color: #ffd35a; }
+.att-c.s-o { color: #7dffb0; } .att-c.s-l { color: #ffd35a; } .att-c.s-x { color: #ff8a8a; } .att-c.s-a { color: #ff5a5a; font-size: 11px; } .att-c.s-e { color: #8fc8ff; font-size: 11px; }
+.log-tbl td { white-space: normal; } .log-tbl td:nth-child(2), .log-tbl td:nth-child(4) { white-space: nowrap; } .log-tbl tr.hid { opacity: .45; }
+.att-pick { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 8px 0; }

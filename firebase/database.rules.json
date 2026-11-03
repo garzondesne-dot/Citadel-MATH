@@ -234,6 +234,24 @@
           }
         }
       }
+    },
+    "slots": {
+      ".read": "auth != null",
+      "$c": {
+        ".write": "auth != null && root.child('admins/'+auth.uid).val() === true"
+      }
+    },
+    "sched": {
+      ".read": "auth != null && root.child('admins/'+auth.uid).val() === true",
+      ".write": "auth != null && root.child('admins/'+auth.uid).val() === true"
+    },
+    "classlog": {
+      ".read": "auth != null && root.child('admins/'+auth.uid).val() === true",
+      ".write": "auth != null && root.child('admins/'+auth.uid).val() === true"
+    },
+    "att": {
+      ".read": "auth != null && root.child('admins/'+auth.uid).val() === true",
+      ".write": "auth != null && root.child('admins/'+auth.uid).val() === true"
     }
   }
 }

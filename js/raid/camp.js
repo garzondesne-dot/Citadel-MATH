@@ -10,6 +10,7 @@ DS.Camp = (function () {
   const $ = (s) => document.querySelector(s);
   const { esc } = DS.UI;
   const C = () => DS.ASSETS.camp, base = () => DS.ASSETS.base;
+  let slotTick = 0;
   let me = null, fireT = 0, code0 = '', live = null, liveStop = null, liveSeen = '', roomSt = null, roomStop = null, roomCode = '';
   const ck = (c) => String(c).replace(/[.#$/[\]]/g, '_');
   const today = () => new Date().toISOString().slice(0, 10);
@@ -22,12 +23,20 @@ DS.Camp = (function () {
     render();
     tut = null; tutLoad().then(tutApply);
     if (liveStop) liveStop();
-    liveStop = DS.Net.watch(`live/${ck(m.c)}`, (v) => {
-      const was = live; live = v && v.open && !DS.Raid.liveOpen(v, Date.now()) ? Object.assign({}, v, { open: false }) : v;
+    // 📅 v0.9.7.0: 교사가 바로 연 수업(live/{반}) + 시간표 예약 수업(slots/{반}, 시각 안이면 열림) → 바로 연 것이 먼저
+    let manual = null, slotsV = null;
+    const pick = () => { const now = DS.Net.now(), mv = manual && manual.open && DS.Raid.liveOpen(manual, Date.now()) ? manual : null; return mv || (DS.Sched && DS.Sched.active(slotsV, now)) || (manual ? Object.assign({}, manual, { open: false }) : null); };
+    const stopLive = DS.Net.watch(`live/${ck(m.c)}`, (v) => { manual = v; onLive(); });
+    const stopSlots = DS.Net.watch(`slots/${ck(m.c)}`, (v) => { slotsV = v; onLive(); });
+    clearInterval(slotTick); slotTick = setInterval(() => { const a = pick(), b = live; if (!!(a && a.open) !== !!(b && b.open) || (a && b && a.code !== b.code)) onLive(); }, 15000);
+    liveStop = () => { stopLive(); stopSlots(); clearInterval(slotTick); };
+    function onLive() {
+      const v = pick();
+      const was = live; live = v;
       if (!document.getElementById('screen-camp').classList.contains('active')) return;
       watchRoom(); drawGate(); tutApply();
       if (live && live.open && (!was || !was.open || was.code !== live.code) && liveSeen !== live.code) { liveSeen = live.code; showGate(); status(); DS.Sound.correct(); DS.UI.toast(`⚔ ${live.no ? `${live.no}차시 ` : ''}던전이 열렸어요! 오른쪽 빛나는 문을 눌러 들어가요`, 4200); }
-    });
+    }
     if (code0) setTimeout(codeGate, 300); // QR 로 들어왔으면 코드 창을 바로
   }
   const D = () => DS.ASSETS.dungeons;
@@ -133,7 +142,7 @@ DS.Camp = (function () {
         <button class="cs-zone camp-gate-z" id="camp-gate" style="${S.box(c.zones.gate)}" aria-label="차시 던전"><span class="camp-label">🔒 차시 던전</span></button>
         <button class="camp-anvil cs-int" id="camp-anvil" aria-label="모루">${sheet(c.anvil, c.anvil.states.idle, 0, 'camp-anvil-img')}<span class="camp-label">⚒ 모루</span></button>
         <div class="camp-fire"><i class="camp-glow"></i><i class="camp-glow g2"></i>${sheet(c.fire, 0, 0, 'camp-fire-img', '')}</div>
-        <div class="camp-hero">${DS.Art.hero(me.hero, 'sit', 'huff')}<i class="shadow"></i><div class="camp-plate"><span class="lv" id="camp-lv">Lv.-</span><span class="nm">${DS.Titles ? DS.Titles.nameHtml({ title: me.title || 'none', nick: me.name }, { num: false, size: 14 }) : esc(me.name)}</span></div></div>
+        <div class="camp-hero">${DS.Art.hero(me.hero, 'sit', 'huff')}<i class="shadow"></i><div class="camp-plate"><span class="nm">${DS.Titles ? DS.Titles.nameHtml({ title: me.title || 'none', nick: me.name }, { num: false, size: 14 }) : esc(me.name)}</span></div></div>
         ${prop('dummy', '🎯', '허수아비', '')}${prop('mail', '📮', '우편함', '')}
       </div>
       <div class="camp-bar"><button class="btn small" id="camp-code">코드로 입장</button></div>
@@ -147,7 +156,7 @@ DS.Camp = (function () {
       if (live) DS.UI.toast('지난 던전은 닫혔어요. 선생님이 다음 수업을 열면 문에 다시 빛이 들어와요.', 3200);
       else DS.UI.toast('아직 열린 던전이 없어요. 선생님이 수업을 열면 오른쪽 문에 빛이 들어와요.', 3200);
     };
-    if (DS.Grow) DS.Grow.mine(me).then((g) => { const el = document.getElementById('camp-lv'); if (el && g) el.textContent = `Lv.${g.lv}`; }).catch(() => {});
+    // v0.9.7.0: 이름표의 Lv 는 뺌 (사용자 — 캠프에서 이질적). 레벨은 아래 상태창에만
     newTitles();
     $('#camp-code').onclick = codeGate;
     $('#camp-mail').onclick = () => pick('#camp-mail', () => { if (cues.mark) cues.mark('mail'); DS.Control.run(note); });
