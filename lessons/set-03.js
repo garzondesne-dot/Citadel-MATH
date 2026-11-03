@@ -190,8 +190,8 @@
       m1: [{ p: 1, x: 0.5116, y: 0.2375, w: 0.4458, h: 0.3372 }], m2: [{ p: 2, x: 0.0426, y: 0.103, w: 0.4458, h: 0.2243 }], m3: [{ p: 2, x: 0.0426, y: 0.4758, w: 0.4458, h: 0.2297 }],
       m4: [{ p: 2, x: 0.5116, y: 0.103, w: 0.4458, h: 0.2599 }], boss: [{ p: 2, x: 0.5116, y: 0.3593, w: 0.4458, h: 0.5005 }] },
     theme: '05-ruins', // 던전 테마: 고대 유적 (배경 dg-05 · 포털 portal-05)
-    videos: { c1: 'https://drive.google.com/file/d/1IDjUrEbc8MQETDYN6xVvqar54iTNImqE/view', m1: 'https://drive.google.com/file/d/1IDjUrEbc8MQETDYN6xVvqar54iTNImqE/view', c2: 'https://drive.google.com/file/d/1esVCdmI-JcpCwDIQXY_9Eias913A4Akz/view', m2: 'https://drive.google.com/file/d/1esVCdmI-JcpCwDIQXY_9Eias913A4Akz/view', c3: 'https://drive.google.com/file/d/1SZYWHNaEDKIPLPWLfxRsjnbLn_nOKJ2n/view',
-      m3: 'https://drive.google.com/file/d/18_NnrD-wotD13Y3SocRjk7O2Rc6C96FC/view', c4: 'https://drive.google.com/file/d/1fY1nAbkFrQNf7CcHfEpDIIr7grCJulEp/view', m4: 'https://drive.google.com/file/d/1fY1nAbkFrQNf7CcHfEpDIIr7grCJulEp/view' }, // 🎬 기본 설명 영상 (드라이브 「학습자료 > 모션그래픽」 720p: 15 부분집합 · 16 서로 같은 집합 · 17 부분집합 모두 구하기 · 06 부분집합의 개수 2ⁿ · 10 부분집합의 개수 규칙)
+    videos: { c1: 'https://drive.google.com/file/d/1mUd7G5ZqWPfHHLMTPaT2bQe9X7v6qWC1/view', m1: 'https://drive.google.com/file/d/1mUd7G5ZqWPfHHLMTPaT2bQe9X7v6qWC1/view', c2: 'https://drive.google.com/file/d/108vx25YAjTngh0DgHx853CNlf1Dkvy9k/view', m2: 'https://drive.google.com/file/d/108vx25YAjTngh0DgHx853CNlf1Dkvy9k/view',
+      c3: 'https://drive.google.com/file/d/1yRLf4QA82ZIt7ujgcV0I_35BIvl7GxXO/view', m3: 'https://drive.google.com/file/d/1yRLf4QA82ZIt7ujgcV0I_35BIvl7GxXO/view', c4: 'https://drive.google.com/file/d/1ubAX2bxwg52EE1to6kwyUf0OHBIHJRIn/view', m4: 'https://drive.google.com/file/d/1ubAX2bxwg52EE1to6kwyUf0OHBIHJRIn/view' }, // 🎬 기본 설명 영상 v5 (드라이브 05 모션그래픽 720p · 배경음: 22 부분집합 · 23 서로같은집합 · 24 부분집합모두구하기 · 25 부분집합의개수 / 옛 06·10·15·16·17 은 99 지난판)
     goal: '부분집합의 뜻을 알고 ⊂, ⊄ 로 나타낸다 · 서로 같은 집합을 찾는다 · 부분집합을 모두 구한다',
     defaultPct: 90,
     steps: STEPS,

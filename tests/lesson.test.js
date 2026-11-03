@@ -125,4 +125,4 @@ check(B[1].map((q) => rightGiven(q)).slice(4).join() === '3,3,16', '세트1 학�
 check(B[2][6].answer === 8, '세트2 7번 새 문항 = 2⁶⁻³ = 8');
 
 if (fail) { console.error(`\n${fail}건 실패`); process.exit(1); }
-console.log(`OK: 3차시 v4 — 수업 순서 · 학습지 첫 시도 · 재도전 소문제 ${count}개 독립 검산 · 형성평가 세트1·2 (7번 보너스) 통과`);
+console.log(`OK: 3차시 v5 — 수업 순서 · 학습지 첫 시도 · 재도전 소문제 ${count}개 독립 검산 · 형성평가 세트1·2 (7번 보너스) 통과`);
