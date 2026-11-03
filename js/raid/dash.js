@@ -1,7 +1,7 @@
 // 📊 학급 대시보드 (2026-11-03 · 교사 계정만 · 교사 메뉴): 서버에 쌓인 기록을 반 단위로 한눈에 — 학생 화면 · 종합상황실에는 나오지 않는다
 //   읽는 곳 (교사만 읽을 수 있는 경로 · 규칙 변경 없음): roster/{반} · records/{반}/{번호}/{차시} · xp/{반} · cards/{반} · bonus/{반}
 //   반 탭 맨 앞 「🏫 전체」 = 전 학년 모든 반을 한 표 · 한 랭킹으로 (2026-11-03 · 교사만. 학생 공개는 캐릭터 꾸미기가 생긴 뒤 이름을 가리고 — DECISIONS)
-//   탭: ① 한눈에 표(칸 누르면 정렬 · CSV) ② 랭킹(형성평가 · 첫 시도 정답률 · 참여 각각 + 끈기 · 자기주도 · 성장) ③ 주의 학생 ④ 개념별 약점 ⑤ 세특 메모 초안
+//   탭: ① 한눈에 표(칸 누르면 정렬 · CSV) ② 랭킹(형성평가 · 첫 시도 정답률 · 참여 각각 + 끈기 · 자기주도 · 성장) ③ 주의 학생 ④ 개념별 약점 ⑤ 성취기준(초안 코드) ⑥ 오개념 ⑦ 세특 메모 초안
 //   records 는 학생이 수업 끝 결과를 본 뒤 저장되는 요약: { no, conc: { 개념: [맞힘, 문항] }, names, boss, bossN, won, fixed, perfects, miss, weak }
 window.DS = window.DS || {};
 
@@ -50,17 +50,20 @@ DS.Dash = (function () {
     const studs = ns.map((n) => {
       const rec = records[n] || {}, went = held.filter((l) => rec[l.id]);
       let ok = 0, tot = 0, bo = 0, bt = 0, fixed = 0, perf = 0;
-      const conc = {};
+      const conc = {}, std = {}, mis = {}; // 📚 성취기준별 첫 시도 · 🔎 오개념 (2026-11-03)
       went.forEach((l) => {
         const r = rec[l.id];
-        Object.entries(r.conc || {}).forEach(([c, v]) => { ok += v[0]; tot += v[1]; const key = `${l.id}|${c}`; conc[key] = { name: (r.names || {})[c] || c, lesson: l, ok: v[0], total: v[1] }; });
+        Object.entries(r.conc || {}).forEach(([c, v]) => { ok += v[0]; tot += v[1]; const key = `${l.id}|${c}`; conc[key] = { name: (r.names || {})[c] || c, lesson: l, ok: v[0], total: v[1] };
+          const sd = DS.Standards ? DS.Standards.of(l.id, c, l.no) : null; if (sd) { std[sd] = std[sd] || [0, 0]; std[sd][0] += v[0]; std[sd][1] += v[1]; } });
+        if (DS.Mis && r.mis) DS.Mis.merge(mis, r.mis);
         bo += Number(r.boss) || 0; bt += Number(r.bossN) || 0; fixed += Number(r.fixed) || 0; perf += Number(r.perfects) || 0;
       });
       const total = Number((xp[n] || {}).total || 0), lv = DS.Grow ? DS.Grow.level(total) : { lv: 1, title: '' };
       const seals = DS.Bonus ? DS.Bonus.seals(bonus[n]).length : 0;
+      if (DS.Mis) Object.values(bonus[n] || {}).forEach((l) => Object.values(l || {}).forEach((m) => { if (m && m.mis) DS.Mis.merge(mis, m.mis); }));
       const tries = Object.values(bonus[n] || {}).reduce((a, l) => a + Object.values(l || {}).reduce((b, m) => b + (Number((m || {}).tries) || 0), 0), 0);
       return { n, name: byN[n], rec, went: went.length, heldN: held.length, part: pct(went.length, held.length), boss: pct(bo, bt), bossRaw: [bo, bt], first: pct(ok, tot), firstRaw: [ok, tot],
-        fixed, perf, seals, tries, cards: Object.keys(cards[n] || {}).length, xp: total, lv: lv.lv, lvTitle: lv.title, conc };
+        fixed, perf, seals, tries, cards: Object.keys(cards[n] || {}).length, xp: total, lv: lv.lv, lvTitle: lv.title, conc, std, mis };
     });
     return { held, studs };
   }
@@ -71,7 +74,7 @@ DS.Dash = (function () {
   function render() {
     const el = $('#dash-body'); if (!el) return;
     const classes = Object.keys(roster).sort();
-    const TABS = [['table', '① 한눈에 표'], ['rank', '② 랭킹'], ['watch', '③ 주의 학생'], ['weak', '④ 개념별 약점'], ['memo', '⑤ 세특 메모']];
+    const TABS = [['table', '① 한눈에 표'], ['rank', '② 랭킹'], ['watch', '③ 주의 학생'], ['weak', '④ 개념별 약점'], ['std', '⑤ 성취기준'], ['mis', '⑥ 오개념'], ['memo', '⑦ 세특 메모']];
     el.innerHTML = `<div class="panel framed"><h2>📊 학급 대시보드 <span class="muted small">교사만 · 학생 화면과 종합상황실에는 나오지 않아요</span></h2>
         <div class="tabs st-cls">${classes.length > 1 ? `<button class="tab${isAll() ? ' on' : ''}" data-cls="${ALL}">🏫 전체</button>` : ''}${classes.map((c) => `<button class="tab${c === cls ? ' on' : ''}" data-cls="${esc(c)}">${esc(c)}</button>`).join('') || '<span class="muted">명단이 없어요 — 학생 관리에서 먼저 올려 주세요</span>'}</div>
         <div class="tabs dash-tabs">${TABS.map(([k, t]) => `<button class="tab${k === tab ? ' on' : ''}" data-tab="${k}">${t}</button>`).join('')}</div></div>
@@ -145,6 +148,28 @@ DS.Dash = (function () {
       return `<p class="muted small">반 전체 첫 시도 정답률이 낮은 개념부터 — 다음 수업 복습 1순위</p>
         <table class="r-table">${list.map((a, i) => `<tr><td>${i + 1}</td><td>${a.lesson.no}차시</td><td>${esc(a.name)}</td><td class="dash-c ${heat(a.p)}">${a.p}%</td><td class="muted small">${a.ok}/${a.total} · ${a.who}명</td></tr>`).join('')}</table>`;
     },
+    std() {
+      const S = DS.Standards; if (!S) return '';
+      const used = S.LIST.filter((sd) => data.studs.some((st) => st.std[sd.id]));
+      if (!used.length) return '<p class="muted">아직 성취기준에 묶을 기록이 없어요.</p>';
+      const cell = (v) => { if (!v || !v[1]) return '<td class="dash-c off">-</td>'; const p = pct(v[0], v[1]); return `<td class="dash-c ${heat(p)}" title="${v[0]}/${v[1]}">${S.level(p)} <small>${p}%</small></td>`; };
+      const reach = (sd) => { const xs = data.studs.filter((st) => st.std[sd.id] && st.std[sd.id][1]); return xs.length ? Math.round((100 * xs.filter((st) => pct(st.std[sd.id][0], st.std[sd.id][1]) >= 80).length) / xs.length) : null; };
+      return `<p class="muted small">개념별 첫 시도(몬스터 · 형성평가)를 성취기준으로 묶은 참고 지표 · 도달 80% 이상 · 근접 50~79% · 미도달 50% 미만 · 칸에 손을 대면 맞힘/문항 <b class="gold">⚠ 성취기준 코드 · 문구는 초안 (확인 뒤 lessons/curriculum.js 에서 고침)</b></p>
+        <div class="st-scroll"><table class="r-table dash-t"><tr>${isAll() ? '<th>반</th>' : ''}<th>번호</th><th>이름</th>${used.map((sd) => `<th title="${esc(sd.name)}">${esc(sd.code)}<br><small>${esc(sd.name)}</small></th>`).join('')}</tr>
+        <tr class="dash-sum"><td colspan="${isAll() ? 3 : 2}">도달한 학생 비율</td>${used.map((sd) => { const r = reach(sd); return `<td class="dash-c ${heat(r)}">${show(r)}</td>`; }).join('')}</tr>
+        ${sorted().map((st) => `<tr>${isAll() ? `<td>${esc(st.cls)}</td>` : ''}<td>${st.n}</td><td><button class="linkish" data-who="${st.key}">${esc(st.name)}</button></td>${used.map((sd) => cell(st.std[sd.id])).join('')}</tr>`).join('')}</table></div>`;
+    },
+    mis() {
+      const M = DS.Mis; if (!M) return '';
+      const agg = {};
+      data.studs.forEach((st) => Object.entries(st.mis).forEach(([c, v]) => { const a = (agg[c] = agg[c] || { w: 0, f: 0, who: 0 }); a.w += v[0]; a.f += v[1]; a.who++; }));
+      const list = Object.entries(agg).filter(([c]) => M.CODES[c]).sort((x, y) => y[1].w - x[1].w);
+      if (!list.length) return '<p class="muted">아직 쌓인 오개념 기록이 없어요. (2026-11-03 이후 수업 · 보강던전부터 기록돼요)</p>';
+      return `<p class="muted small">틀린 답의 종류를 모은 것 · 「바로잡음」 = 그 뒤 재도전 · 형성평가 세트 2 · 보강에서 맞힘 · 점수가 아니라 다음 수업에서 짚을 것</p>
+        <table class="r-table"><tr><th>코드</th><th>오개념</th><th>틀린 횟수</th><th>학생</th><th>바로잡음</th></tr>
+        ${list.map(([c, a]) => `<tr><td>${c}</td><td>${esc(M.CODES[c].name)}</td><td>${a.w}</td><td>${a.who}명</td><td class="dash-c ${heat(pct(a.f, a.w))}">${pct(a.f, a.w)}%</td></tr>`).join('')}</table>
+        <h3>학생별</h3><table class="r-table">${data.studs.filter((st) => Object.keys(st.mis).length).map((st) => `<tr><td>${esc(who(st))}</td><td>${M.top(st.mis, 4).map((t) => `<span class="dash-tag mis${t.fixed >= t.wrong ? ' ok' : ''}" title="${esc(t.name)}">${t.code} ${t.wrong}${t.fixed ? ` · ✔${t.fixed}` : ''}</span>`).join(' ')}</td></tr>`).join('')}</table>`;
+    },
     memo() {
       return `<p class="muted small">기록에 있는 사실만으로 만든 초안이에요. 그대로 쓰지 말고 관찰 내용을 더해 다듬어 주세요.</p>
         <button class="btn" data-copy="all">📋 전체 복사</button>
@@ -164,6 +189,9 @@ DS.Dash = (function () {
     if (s.fixed) parts.push(`틀린 문제를 숫자를 바꾼 재도전 문제로 ${s.fixed}개 스스로 바로잡으며 끝까지 해결하려는 태도를 보임`);
     if (s.tries) parts.push(`수업 뒤 보강던전에 ${s.tries}회 도전${s.seals ? `하여 보강 인장 ${s.seals}개를 모으는` : '하는'} 등 자기주도적으로 복습함`);
     if (s.cards) parts.push(`모루(개념 카드 만들기)에서 기호와 개념을 연결한 카드 ${s.cards}장을 완성함`);
+    if (DS.Standards) { const good = Object.entries(s.std || {}).filter(([, v]) => v[1] >= 4 && pct(v[0], v[1]) >= 80).map(([id, v]) => ({ sd: DS.Standards.get(id), p: pct(v[0], v[1]) })).filter((x) => x.sd).sort((a, b) => b.p - a.p);
+      if (good.length) parts.push(`${good.slice(0, 2).map((g) => `'${g.sd.name}'`).join('과 ')} 성취기준에 안정적으로 도달함(첫 시도 정답률 ${good[0].p}%)`); }
+    if (DS.Mis) { const t = DS.Mis.top(s.mis, 3).find((x) => x.fixed > 0); if (t) parts.push(`초기에 ${t.seteuk}을(를) 혼동하였으나 재도전 과제와 보충 과제를 통해 스스로 바로잡음`); }
     const weak = cs.filter((c) => c.p < 50).sort((a, b) => a.p - b.p)[0];
     if (weak && s.fixed) parts.push(`'${weak.name}' 개념은 처음에 어려워했으나 재도전을 통해 보완해 나감`);
     return parts.join('. ') + '.';

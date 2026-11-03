@@ -131,11 +131,13 @@ DS.Bonus = (function () {
       const vb = el.querySelector('#bf-vid'); if (vb) vb.onclick = () => DS.Video.open(vid, mon.title, { lesson: L.id, slot: vslot });
       return el.querySelector('#bf-act');
     };
+    const wrongs = [], misBase = (DS.Mis && rec.mis) ? DS.Mis.merge({}, rec.mis) : {}; // 🔎 이 판에서 틀린 소문제 (판이 끝날 때마다 다시 계산 · 겹쳐 세지 않음)
     const round = async () => {
       const items = L.items(mid, seed, attempt);
       for (let i = 0; i < n; i++) {
         if (solved[i]) continue;
         const ok = await DS.Quiz.ask({ name: mon.title, formula: `${i + 1} / ${n}` }, items[i], { tag: attempt ? '🔄 숫자가 바뀌었어요' : '⚔ 보강던전' });
+        if (!ok && DS.Mis && DS.Quiz.lastGiven !== undefined) wrongs.push({ i, codes: DS.Mis.classify(items[i], DS.Quiz.lastGiven) }); // 🔎 오개념 (보강던전만 저장)
         if (ok) { solved[i] = true; DS.FX.play(el.querySelector('.scene'), me.fx || 'flame', { scale: 0.3 }); }
         draw(ok ? 'hit' : 'miss');
       }
@@ -145,8 +147,11 @@ DS.Bonus = (function () {
       rec.tries = tries;
       const patch = { tries, at: N().TS };
       if (cleared) patch.clear = true;
+      if (DS.Mis && wrongs.length) { // 오개념: 이번 판에서 틀린 소문제 → 그 소문제를 결국 맞혔으면 「바로잡음」
+        const acc = DS.Mis.merge({}, misBase); wrongs.forEach((w) => DS.Mis.add(acc, w.codes, !!solved[w.i])); if (Object.keys(acc).length) patch.mis = acc;
+      }
       if (!preview && !train) await N().update(`bonus/${ck(me.c)}/${me.n}/${L.id}/${mid}`, patch).catch(() => {});
-      if (!train) mine[L.id] = mine[L.id] || {}, mine[L.id][mid] = Object.assign({}, mine[L.id][mid], { tries, clear: cleared || (mine[L.id][mid] || {}).clear });
+      if (!train) mine[L.id] = mine[L.id] || {}, mine[L.id][mid] = Object.assign({}, mine[L.id][mid], { tries, clear: cleared || (mine[L.id][mid] || {}).clear }, patch.mis ? { mis: patch.mis } : {});
       if (cleared) return win();
       if (left <= 0) {
         const act = draw('miss', '<p class="gold">기회를 모두 썼어요. 해설을 다시 보고 다음에 새 문제로 도전해요! (벌은 없어요)</p>');

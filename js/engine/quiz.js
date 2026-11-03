@@ -70,6 +70,7 @@ DS.Quiz = (function () {
       };
       // 협동 전투: 채점·정답 공개 없이 학생 답만 모은다 (정답은 공동 공격 연출 뒤에 공개)
       const collect = (given) => {
+        DS.Quiz.lastGiven = given; // 🔎 오개념 기록용 (보강던전): 마지막으로 낸 답
         if (!opt.collect) return false;
         done = true;
         box.querySelectorAll('button').forEach((b) => { b.disabled = true; });

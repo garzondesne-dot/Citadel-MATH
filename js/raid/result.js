@@ -24,6 +24,7 @@ DS.Result = (function () {
     const X = DS.Raid, { map, titles } = conceptMap(L), conc = {};
     const bump = (c, ok) => { conc[c] = conc[c] || { ok: 0, total: 0 }; conc[c].total++; if (ok) conc[c].ok++; };
     let submits = 0, best = 0, fixed = 0, perfects = 0, fixEx = null;
+    const mis = {}, M = DS.Mis; // 🔎 오개념 (2026-11-03): 틀린 답의 종류 · 나중에 바로잡았는지
     const mons = L.steps.filter((s) => s.kind === 'monster').map((s) => {
       const rec = X.record(L, R, s.id, uid);
       const n = rec.total, first = rec.tries[0];
@@ -32,6 +33,7 @@ DS.Result = (function () {
       if (rec.submitted) firstOk.forEach((ok) => bump(map[s.id], ok)); // 안 한 몬스터는 개념 이해도에 넣지 않는다 (늦게 들어온 학생)
       submits += rec.tries.length; best += rec.best;
       const fx = everOk.filter((ok, i) => ok && !firstOk[i]).length; fixed += fx;
+      if (M) rec.tries.forEach((t) => { const items = X.itemsFor(L, R, s.id, uid, t.attempt); items.forEach((q, i) => { if (t.marks[i]) return; const later = rec.tries.some((u) => u.attempt > t.attempt && u.marks[i]); M.add(mis, M.classify(q, (t.given || [])[i]), later); }); });
       if (rec.submitted && n && firstOk.every(Boolean)) perfects++; // ⚡ PERFECT = 첫 시도에 모두 맞힘
       if (!fixEx && fx) { // 📘 내가 고친 문제 하나 (처음엔 틀렸다가 고친 것 — 마지막으로 맞힌 시도의 문제와 풀이)
         const i = everOk.findIndex((ok, k) => ok && !firstOk[k]), t = rec.tries.find((x) => x.marks[i]);
@@ -45,21 +47,24 @@ DS.Result = (function () {
     const mast = X.mastery(L, R, uid), bossTried = !!ans[1];
     if (bossTried) set1.forEach((ok, i) => bump(tags[i] || 'boss', ok));
     const bossFixed = mast.filter((ok, i) => ok && !set1[i]).length;
+    if (M) [1, 2].forEach((k) => (ans[k] || []).forEach((g, i) => { const q = L.boss.sets[k] && L.boss.sets[k][i]; if (!q || g == null || g === '' || DS.Quiz.grade(q, g)) return; M.add(mis, M.classify(q, g, M.bossTag(L.id, k, i)), !!mast[i]); }));
     const perfect = X.fullMarks(L, R, uid), bossWin = X.bossHp(L, R).won && bossTried;
     const words = !!((R.words || {})[uid] || {}).t;
     const order = Object.keys(conc).filter((c) => conc[c].total);
     const weak = order.map((c) => ({ c, r: conc[c].ok / conc[c].total })).filter((x) => x.r < 0.8).sort((a, b) => a.r - b.r).slice(0, 2).map((x) => x.c);
     const parts = { join: 1, submit: submits, correct: best + mast.filter(Boolean).length, fixed: fixed + bossFixed, bossWin: bossWin ? 1 : 0, perfect: perfect ? 1 : 0 }; // 마지막 한마디 EXP 는 한마디를 남길 때 따로 (v0.8.1)
     const hp = X.bossHp(L, R), bossShare = hp.max ? Math.min(100, Math.round((100 * mast.filter(Boolean).length) / hp.max)) : 0;
-    return { lesson: L.id, no: L.no || 0, title: L.title, mons, boss: { set1, mast, tried: bossTried, hp: L.boss.hpItems, won: hp.won, share: bossShare }, conc, titles, weak, parts, perfects, fixed: fixed + bossFixed, fixEx,
+    return { mis, lesson: L.id, no: L.no || 0, title: L.title, mons, boss: { set1, mast, tried: bossTried, hp: L.boss.hpItems, won: hp.won, share: bossShare }, conc, titles, weak, parts, perfects, fixed: fixed + bossFixed, fixEx,
       words: words ? String(((R.words || {})[uid] || {}).t) : '' };
   }
   // 저장용 요약 (records/{반}/{번호}/{차시})
   const summary = (r, code) => ({ at: (DS.Net || {}).TS || Date.now(), code: String(code || ''), no: r.no,
     conc: Object.fromEntries(Object.entries(r.conc).map(([c, v]) => [c, [v.ok, v.total]])), names: r.titles,
-    miss: r.mons.filter((m) => m.miss).map((m) => m.id), weak: r.weak, boss: r.boss.mast.filter(Boolean).length, bossN: r.boss.hp, won: !!r.boss.won, fixed: r.fixed || 0, perfects: r.perfects || 0, xp: DS.Grow ? DS.Grow.sum(r.parts) : 0 });
+    miss: r.mons.filter((m) => m.miss).map((m) => m.id), weak: r.weak, ...(Object.keys(r.mis || {}).length ? { mis: r.mis } : {}), boss: r.boss.mast.filter(Boolean).length, bossN: r.boss.hp, won: !!r.boss.won, fixed: r.fixed || 0, perfects: r.perfects || 0, xp: DS.Grow ? DS.Grow.sum(r.parts) : 0 });
 
   const dots = (ok, total) => Array.from({ length: Math.min(total, 10) }, (_, i) => `<i class="${i < Math.round((ok / total) * Math.min(total, 10)) ? 'on' : ''}"></i>`).join('');
+  // 🔎 자주 하는 실수 한 줄 (오개념 기록 · 점수 아님)
+  const misLine = (mis) => { const t = DS.Mis ? DS.Mis.top(mis, 1)[0] : null; return t ? `<p class="rs-mis small">🔎 자주 하는 실수: ${esc(t.kid)} <span class="muted">(${t.wrong}번${t.fixed ? ` · ${t.fixed}번은 스스로 고침 ✔` : ''})</span></p>` : ''; };
   // 복습 추천 버튼: 학습지 개념 · 보강던전(그 개념의 보강) · 영상
   function recs(L, r, prep, inClass) {
     if (!r.weak.length) return '<p class="okc">👍 오늘 개념을 고르게 잘 해냈어요! 보강던전에서 인장을 모아 보세요.</p>';
@@ -104,7 +109,7 @@ DS.Result = (function () {
         <tr><td>👑 형성평가</td><td>${r.boss.tried ? `${r.boss.mast.slice(0, r.boss.hp).filter(Boolean).length} / ${r.boss.hp}${r.boss.mast.length > r.boss.hp && r.boss.mast[r.boss.hp] ? ' + 보너스 ✔' : ''}` : '<span class="muted">— 안 함</span>'}</td></tr></table>
       <p class="muted small">✔ 처음에 맞힘 · 🔁 재도전으로 고침 · ✖ 끝까지 못 맞힘</p>
       <p class="shelf-title">개념별 (첫 시도)</p>${Object.entries(r.conc).map(([c, v]) => `<div class="rs-c"><span>${esc(r.titles[c] || c)}</span><span class="rs-dots">${dots(v.ok, v.total)}</span><span class="muted small">${v.ok} / ${v.total}</span></div>`).join('')}
-      <p class="shelf-title">복습 추천</p>${recs(L, r, prep, opt.inClass)}
+      <p class="shelf-title">복습 추천</p>${misLine(r.mis)}${recs(L, r, prep, opt.inClass)}
       <p class="shelf-title">📤 카톡으로 보내기</p><div class="row rs-share"><button class="btn" id="rs-card1">⚔ 전투 기록 보내기</button><button class="btn" id="rs-card2">📘 수학 노트 보내기</button></div>
       <div class="row"><button class="btn primary big" id="rs-ok">${opt.inClass ? '🏕 대기실로' : '🔥 모닥불로'}</button></div></div>`;
     document.body.appendChild(el);
@@ -132,7 +137,7 @@ DS.Result = (function () {
       const x = rec[id], L = DS.Lessons.get(id), names = x.names || {};
       return `<div class="rs-hist"><b>${x.no ? `${x.no}차시` : ''} ${esc(L ? L.title : id)}</b> <span class="muted small">형성평가 ${x.boss || 0} / ${x.bossN || '-'} · +${x.xp || 0} EXP</span>
         ${Object.entries(x.conc || {}).map(([c, v]) => `<div class="rs-c"><span>${esc(names[c] || c)}</span><span class="rs-dots">${dots(v[0], v[1] || 1)}</span><span class="muted small">${v[0]} / ${v[1]}</span></div>`).join('')}
-        ${(x.weak || []).length ? `<p class="small">📌 복습 추천: <b>${x.weak.map((c) => esc(names[c] || c)).join(', ')}</b></p>` : '<p class="small okc">👍 고르게 잘함</p>'}</div>`;
+        ${misLine(x.mis)}${(x.weak || []).length ? `<p class="small">📌 복습 추천: <b>${x.weak.map((c) => esc(names[c] || c)).join(', ')}</b></p>` : '<p class="small okc">👍 고르게 잘함</p>'}</div>`;
     }).join('');
   }
   return { compute, summary, show, history, conceptMap };
