@@ -4,3 +4,4 @@ tools/worksheet/*.html
 tools/worksheet/*.pdf
 tools/qr/*.pdf
 _demo-record.html
+__pycache__/
