@@ -30,7 +30,8 @@ DS.Result = (function () {
       const n = rec.total, first = rec.tries[0];
       const firstOk = Array.from({ length: n }, (_, i) => !!(first && first.attempt === 0 && first.marks[i]));
       const everOk = Array.from({ length: n }, (_, i) => rec.tries.some((t) => t.marks[i]));
-      if (rec.submitted) firstOk.forEach((ok) => bump(map[s.id], ok)); // 안 한 몬스터는 개념 이해도에 넣지 않는다 (늦게 들어온 학생)
+      const sp = (L.split || {})[s.id]; // v0.9.6.18: 한 몬스터에 두 개념이면 소문제마다 (5차시 문제 3 · 4)
+      if (rec.submitted) firstOk.forEach((ok, i) => bump((sp && sp[i]) || map[s.id], ok)); // 안 한 몬스터는 개념 이해도에 넣지 않는다 (늦게 들어온 학생)
       submits += rec.tries.length; best += rec.best;
       const fx = everOk.filter((ok, i) => ok && !firstOk[i]).length; fixed += fx;
       if (M) rec.tries.forEach((t) => { const items = X.itemsFor(L, R, s.id, uid, t.attempt); items.forEach((q, i) => { if (t.marks[i]) return; const later = rec.tries.some((u) => u.attempt > t.attempt && u.marks[i]); M.add(mis, M.classify(q, (t.given || [])[i]), later); }); });

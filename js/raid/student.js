@@ -317,7 +317,7 @@ DS.Student = (function () {
       ${down ? '<p class="okc down-note">🎉 몬스터는 쓰러졌어요! 그래도 풀어서 공격하면 이펙트도 뜨고 경험치가 쌓여요.</p>' : ''}
       ${attempt && rec.perfect ? `<p class="retry-note">⛓ 몬스터 묶기 — 이미 성공한 몬스터예요. 맞힌 소문제 1개마다 반 전체의 몬스터 공격이 1초 늦어져요 (최대 ${Raid().BIND_MAX}초)</p>` : attempt ? `<p class="retry-note">↻ 재도전 ${attempt} — 숫자가 모두 바뀌었어요. 지난번 틀린 칸은 <b class="ngc">✘</b> 표시</p>` : ''}
       ${L.monsters[mid].note ? `<p class="muted small">💡 ${esc(L.monsters[mid].note)}</p>` : ''}
-      <div class="items">${items.map((q, i) => itemHtml(q, i, prevWrong[i], attempt ? null : `${step.sheet || step.title} (${i + 1})`)).join('')}</div>
+      <div class="items">${items.map((q, i) => itemHtml(q, i, prevWrong[i], attempt ? null : (q.ref || `${step.sheet || step.title} (${i + 1})`))).join('')}</div>
       <button class="btn primary big" id="st-go"${ready ? '' : ' disabled'}>⚔ 공격!</button>
       ${helpBtn()}</div>`;
     bindHelp();

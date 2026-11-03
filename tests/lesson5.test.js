@@ -1,10 +1,10 @@
-// 5차시 검증: node tests/lesson5.test.js  (학습과정 5차시 레이드용 v3 · 2026-11-02 확정)
-// (1) 레이드 순서: 개념1 → 문제1 → … → 개념5 → 문제5 → 형성평가 (도입 · 복습 몬스터 없음) · 보강 3마리는 보강던전(bonus)
+// 5차시 검증: node tests/lesson5.test.js  (학습과정 5차시 레이드용 v3 · 2026-11-02 확정 → v4 2026-11-03: 보강 칸 · 도전 7·8 뺌 · ★ 칸만 · 문제 3·4 한 몬스터)
+// (1) 레이드 순서: 개념1 → 문제1 → 개념2 → 문제2 → 개념3 → 개념4 → 문제 3·4 → 개념5 → 문제5 → 형성평가 (도입 · 복습 몬스터 없음) · 보강 3마리는 보강던전(bonus)
 // (2) 첫 시도 = 학습지 · 교사용 정답 (아래에 따로 적음)
 // (3) 재도전 시드 300개 × 3번: 문제 글에서 집합 · 전체집합 · 조건을 직접 읽어 내고, 따로 만든 식 계산기(∪ ∩ − ᶜ 괄호)로 다시 계산 (차시 파일의 계산 결과 · check 를 쓰지 않는다)
 // (4) 보강 ①·② · 형성평가 3번: A, B, C 에 {1,2,3} 의 모든 부분집합을 대입해 항등식인지 확인 (정답 보기만 항등식)
 // (5) 보강 ③ 그림: 네 칸(A만 · B만 · 겹침 · 바깥)으로 식을 계산해 색칠 영역과 맞춘다
-// (6) 형성평가 세트1·2 (7·8번 도전 포함)
+// (6) 형성평가 세트1·2 (6문항 · v4 에서 도전 7·8 뺌)
 const load = require('./load');
 const DS = load(['assets/manifest.js', 'js/engine/ui.js', 'js/engine/setgen.js', 'js/engine/quiz.js', 'js/engine/lessons.js', 'lessons/set-05.js']);
 const L = DS.Lessons.get('set-05'), Q = DS.Quiz;
@@ -84,26 +84,27 @@ function checkItem(q, tag) {
 }
 
 // ── 1. 레이드 순서 · 구성 ─────────────────────────────────
-check(L.steps.map((s) => s.id).join() === 'c1,m1,c2,m2,c3,m3,c4,m4,c5,m5,boss', `순서 ${L.steps.map((s) => s.id)}`);
+check(L.steps.map((s) => s.id).join() === 'c1,m1,c2,m2,c3,c4,m3,c5,m5,boss', `순서 ${L.steps.map((s) => s.id)}`);
 check(!L.steps.some((s) => s.kind === 'intro' || s.id === 'r1'), '도입 · 복습 몬스터 없음 (사용자 결정)');
 check(L.bonus.map((b) => b.id).join() === 'b1,b2,b3' && L.bonus.every((b) => L.steps.some((s) => s.id === b.concept)), '보강던전 3마리 · 개념 연결');
-check(L.boss.items === 8 && L.boss.hpItems === 6 && L.boss.tags.length === 8 && L.boss.tags.every((t) => L.steps.some((s) => s.id === t)), '형성평가 8문항 (체력 6 + 도전 2) · 개념 표시');
+check(L.boss.items === 6 && L.boss.hpItems === 6 && L.boss.tags.length === 6 && L.boss.tags.every((t) => L.steps.some((s) => s.id === t)), '형성평가 6문항 (v4) · 개념 표시');
+check(JSON.stringify(L.split) === JSON.stringify({ m3: ['c3', 'c3', 'c4', 'c4'] }) && L.items('m3', 'x', 0).map((q) => q.ref).join('|') === '문제 3 (1)|문제 3 (2)|문제 4 (1)|문제 4 (2)', '문제 3 · 4 한 몬스터: 소문제마다 개념 · 학습지 꼬리표');
+check(['m1', 'm2', 'm3', 'm5'].reduce((a, id) => a + L.items(id, 'x', 0).length, 0) === 12, '레이드 소문제 12개 (19 → 12)');
 check(L.no === 5 && L.theme === '07-volcano' && DS.ASSETS.dungeons.ids.includes(L.theme), '5차시 · 화산 심연');
 const sprites = [...Object.values(L.monsters).map((m) => m.sprite), L.boss.sprite];
 check(new Set(sprites).size === sprites.length, '몬스터 그림 겹치지 않음');
 const sheetOf = { extra: 'monstersExtra', new: 'monstersNew', crown: 'monstersCrown' };
 check(sprites.every((s) => { const [k, n] = String(s).split(':'); const sh = DS.ASSETS[sheetOf[k]]; return sh && Number(n) < sh.rows; }), '몬스터 그림이 시트에 있음');
 check(Object.keys(L.videos).every((k) => L.steps.some((s) => s.id === k) || L.bonus.some((b) => b.id === k)) && Object.values(L.videos).every((u) => /^assets\/video\/v05-\d+\.mp4$/.test(u) && require('fs').existsSync(require('path').join(__dirname, '..', u))), '영상 칸 · 게임 서버 영상 파일 (assets/video)');
-check([...L.steps.filter((s) => s.kind !== 'intro').map((s) => s.id), ...L.bonus.map((b) => b.id)].every((k) => (L.crops[k] || []).length && L.crops[k].every((c) => c.x >= 0 && c.y >= 0 && c.x + c.w <= 1 && c.y + c.h <= 1)), '학습지 칸 위치(crops) 모두 있음');
+check([...L.steps.filter((s) => s.kind !== 'intro').map((s) => s.id), 'b2'].every((k) => (L.crops[k] || []).length && L.crops[k].every((c) => c.x >= 0 && c.y >= 0 && c.x + c.w <= 1 && c.y + c.h <= 1)), '학습지 칸 위치(crops) 모두 있음');
 
 // ── 2. 첫 시도 = 학습지 · 교사용 정답 ─────────────────────
 const first = (id) => L.items(id, 'x', 0);
 const ws = {
-  m1: [[1, 2, 3, 4], [1, 2, 3, 4, 5], [2, 3, 4, 5], [1, 2, 3, 4, 5], [3]],
-  m2: [[2, 3, 4, 5, 6], [2, 3, 4], [2, 4], [3, 4], [2, 3, 4], '같다'],
-  m3: [[4, 5, 6, 7, 8], [1, 3, 5, 7]],
-  m4: [[1, 5, 7], [6]],
-  m5: [[1, 3, 5], [1, 3], [1, 3], '같다'],
+  m1: [[1, 2, 3, 4, 5], [1, 2, 3, 4, 5], [3]], // ★ 칸: (A ∪ B) ∪ C · A ∪ (B ∪ C) · A ∩ B ∩ C
+  m2: [[2, 3, 4], [2, 3, 4], '같다'], // ★ 칸: A ∩ (B ∪ C) · (A ∩ B) ∪ (A ∩ C) · 같다
+  m3: [[4, 5, 6, 7, 8], [1, 3, 5, 7], [1, 5, 7], [6]], // 문제 3 (1)(2) + 문제 4 (1)(2)
+  m5: [[1, 3], [1, 3]], // ★ 칸: A ∩ Bᶜ · A − B
 };
 Object.entries(ws).forEach(([id, ans]) => first(id).forEach((q, i) => {
   const a = ans[i];
@@ -117,7 +118,7 @@ check(first('b3').map((q) => q.answer).join('|') === 'vshade:A-B|vshade:A-B|같�
 Object.keys(L.monsters).forEach((id) => { const q0 = first(id); if (q0[0].type === 'choice' && q0[0].choices.join() !== '같다,다르다') check(q0.some((q) => q.answerIndex !== 0), `${id}: 정답이 모두 첫 번째 보기는 아님`); });
 
 // ── 3. 레이드 몬스터 · 재도전 (시드 300 × 0~3번) ─────────────
-for (const id of ['m1', 'm2', 'm3', 'm4', 'm5']) {
+for (const id of ['m1', 'm2', 'm3', 'm5']) {
   const n0 = first(id).length;
   for (let s = 0; s < 300; s++) for (const a of [0, 1, 2, 3]) {
     const items = L.items(id, `seed${s}`, a);
@@ -167,7 +168,7 @@ const LAW = (q) => { // 법칙 이름: 식 모양으로 따로 판정
 };
 [1, 2].forEach((k) => {
   const S = L.boss.sets[k];
-  check(S.length === 8, `세트${k} 8문항`);
+  check(S.length === 6, `세트${k} 6문항`);
   S.forEach((q, i) => {
     const tag = `형성평가 세트${k} ${i + 1}번`;
     check(Q.grade(q, q.answerIndex) && !Q.grade(q, (q.answerIndex + 1) % q.choices.length), `${tag}: 채점`);
@@ -185,7 +186,7 @@ const LAW = (q) => { // 법칙 이름: 식 모양으로 따로 판정
   });
 });
 // 세트1 = 학습지 형성평가 · 교사용 정답 (6번은 「위 5번에서」 v3 기준)
-const want1 = ['교환법칙', '{1, 2, 3, 4}', 'A ∩ C', '{1, 3, 5}', '{1, 3}', '{6}', 'B ∩ C, {1, 2, 3, 4, 5, 6}', '{1, 5, 7}'];
+const want1 = ['교환법칙', '{1, 2, 3, 4}', 'A ∩ C', '{1, 3, 5}', '{1, 3}', '{6}'];
 check(L.boss.sets[1].map((q) => q.answer).join('|') === want1.join('|'), `세트1 학습지 정답 ${L.boss.sets[1].map((q) => q.answer)}`);
 check(/A = \{1, 2, 3, 4\}, B = \{2, 4, 6\}/.test(L.boss.sets[1][5].question), '6번은 5번의 A, B 를 그대로 보여 준다 (원본 「위 2번」 오타 고침)');
 check(L.boss.sets[1].filter((q) => q.answerIndex === 0).length <= 2, '세트1 정답이 첫 보기에 몰리지 않음');
