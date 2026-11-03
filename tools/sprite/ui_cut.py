@@ -92,3 +92,21 @@ if __name__ == '__main__':
     m = {'icons': icons(ic, out), 'kit': kit(kt, out)}
     json.dump(m, open(os.path.join(out, 'ui-meta.json'), 'w'), ensure_ascii=False, indent=1)
     print(json.dumps(m['kit'], ensure_ascii=False))
+
+
+# UI 키트 2판 (2026-11-04): 돌 무늬 없는 정사각 9칸 조각 3×3 (높은 카드 · 긴 버튼 모두 늘려 씀)
+KIT2 = ['btn', 'btn-press', 'btn-off', 'btn-gold', 'btn-gold-press', 'tab', 'tab-on', 'input', 'icbtn']
+
+
+def kit2(src, out, s=0.25):
+    rgba, _ = clean(Image.open(src))
+    bs = merge(boxes(rgba), gap=6)
+    bs = sorted(bs, key=lambda b: (round(b[1] / 200), b[0]))
+    meta = {}
+    for name, (x0, y0, x1, y1) in zip(KIT2, bs):
+        im = Image.fromarray(rgba[y0:y1, x0:x1], 'RGBA')
+        im = im.resize((max(1, round(im.size[0] * s)), max(1, round(im.size[1] * s))), Image.BOX)
+        a = np.asarray(im).copy(); a[..., 3] = np.where(a[..., 3] > 110, 255, 0)
+        fn = f'ui-{name}-v2.webp'; Image.fromarray(a, 'RGBA').save(os.path.join(out, fn), lossless=True)
+        meta[name] = {'src': fn, 'w': im.size[0], 'h': im.size[1]}
+    return meta
