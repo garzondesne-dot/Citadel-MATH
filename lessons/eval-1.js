@@ -138,7 +138,9 @@
       `「아니거나 아닌」 = (${p}의 배수 그리고 나머지 ${rem})의 여집합 (드모르간) → 빼는 수 ${st(bad)} ${bad.length}개 → ${N - 1} − ${bad.length} = ${n}`, { N, p, q, rem })];
   }
 
-  const tagRefs = (arr, refs) => arr.map((q, i) => Object.assign(q, { ref: refs[i] }));
+  // 소문제마다 학습지 번호(ref) · 풀이 영상(video = 교과서 숫자로 푼 예제, 한 번 틀린 뒤 열림). 영상이 없는 문항(01 · 02 · 06 · 08 · 09 · 12)은 주문서 37~40 대기
+  const V = { '03': 'assets/video/v03-22.mp4', '04': 'assets/video/e1-32.mp4', '05': 'assets/video/e1-33.mp4', '07': 'assets/video/e1-34.mp4', '10': 'assets/video/e1-35.mp4', '11': 'assets/video/e1-36.mp4' };
+  const tagRefs = (arr, refs) => arr.map((q, i) => Object.assign(q, { ref: refs[i] }, V[refs[i].slice(0, 2)] ? { video: V[refs[i].slice(0, 2)] } : {}));
   const MONSTERS = {
     e1: { title: '① 기본 · 집합의 뜻', sprite: 'extra:1@h270', make: (a, r) => tagRefs([...m01(a ? r : null), ...m02(a ? r : null)], ['01 ⑴', '01 ⑵', '01 ⑶', '02 ⑴', '02 ⑵']) },
     e2: { title: '② 기본 · 포함과 개수', sprite: 'new:7@h90', make: (a, r) => tagRefs([...m03(a ? r : null), ...m04(a ? r : null)], ['03 ⑴', '03 ⑵', '04']) },

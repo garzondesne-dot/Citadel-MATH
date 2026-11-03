@@ -96,6 +96,8 @@ Object.entries(WANT).forEach(([id, w]) => first[id].forEach((q, i) => { const go
 const all0 = Object.values(first).flat().map((q) => q.question).join('\n');
 ['21의 약수', 'x² − 7x + 6', '{1, 3, 7, 15}', 'n(A) = 18', '{1, 5, 9, 10}', '20 이하의 4의 배수', '{x² + 2x, 4, 6}', 'A₁₀ ∩ (A₃ ∪ A₈)', '24의 약수', '40명 중', '7의 배수가 아니거나'].forEach((s) => check(!all0.includes(s), `교과서 숫자 그대로: ${s}`));
 check(Object.values(first).flat().every((q) => q.ref), '학습지(평가지) 꼬리표 ref');
+const V0 = Object.values(first).flat();
+check(V0.filter((q) => q.video).map((q) => q.ref.slice(0, 2)).join() === '03,03,04,05,05,05,05,07,10,11,11' && V0.every((q) => !q.video || require('fs').existsSync(require('path').join(__dirname, '..', q.video))), '소문제 풀이 영상 (03 · 04 · 05 · 07 · 10 · 11) · 파일 있음');
 check(Object.values(L.videos).every((u) => require('fs').existsSync(require('path').join(__dirname, '..', u))) && Object.keys(L.videos).every((k) => L.monsters[k]), '영상 32~36 파일 · 칸');
 
 // (2) 첫 시도 + 재도전 독립 검산
