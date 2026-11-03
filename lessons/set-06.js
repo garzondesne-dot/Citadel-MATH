@@ -212,7 +212,6 @@
   ];
   STEPS.forEach((s) => { if (s.kind === 'monster') Object.assign(s, { title: MONSTERS[s.id].title, special: !!MONSTERS[s.id].special }); });
 
-  const V = (id) => `https://drive.google.com/file/d/${id}/view`;
   DS.Lessons.register({
     id: 'set-06', no: 6,
     title: '드모르간의 법칙 · 명제',
@@ -229,11 +228,11 @@
     theme: '01-burrow', // 던전 테마: 땅굴 (배경 dg-01 · 포털 portal-01)
     // 🎬 「공통수학2 > 05 모션그래픽」: (06차시) 09 드모르간 → c1 · m1 · 18 원소의 개수 → c2 · m2 · b1 · 19 생활 속 문제 → c3 · m3 · b2
     //    · 20 명제 (정의 · 정리 포함) → c4 · m4 · b3 · b4 · 21 명제의 부정 → c5 · m5
-    videos: { c1: V('1o-r117sgFGMuX4oTKzkAdSBH60Mx-T2q'), m1: V('1o-r117sgFGMuX4oTKzkAdSBH60Mx-T2q'),
-      c2: V('1Vu-Bqa30xEe76gAI18hjaOWvr8X7plPZ'), m2: V('1Vu-Bqa30xEe76gAI18hjaOWvr8X7plPZ'), b1: V('1Vu-Bqa30xEe76gAI18hjaOWvr8X7plPZ'),
-      c3: V('17Y2f76lY5Rre8Sidf0ri382smhE6MEN1'), m3: V('17Y2f76lY5Rre8Sidf0ri382smhE6MEN1'), b2: V('17Y2f76lY5Rre8Sidf0ri382smhE6MEN1'),
-      c4: V('1P3IpuyM3TrewrodAd-O6djDFOmq9u5_J'), m4: V('1P3IpuyM3TrewrodAd-O6djDFOmq9u5_J'), b3: V('1P3IpuyM3TrewrodAd-O6djDFOmq9u5_J'), b4: V('1P3IpuyM3TrewrodAd-O6djDFOmq9u5_J'),
-      c5: V('1wB9NB74mB17CIr0bECaDDhQk45QPy5Gu'), m5: V('1wB9NB74mB17CIr0bECaDDhQk45QPy5Gu') },
+    videos: { c1: 'assets/video/v06-09.mp4', m1: 'assets/video/v06-09.mp4',
+      c2: 'assets/video/v06-18.mp4', m2: 'assets/video/v06-18.mp4', b1: 'assets/video/v06-18.mp4',
+      c3: 'assets/video/v06-19.mp4', m3: 'assets/video/v06-19.mp4', b2: 'assets/video/v06-19.mp4',
+      c4: 'assets/video/v06-20.mp4', m4: 'assets/video/v06-20.mp4', b3: 'assets/video/v06-20.mp4', b4: 'assets/video/v06-20.mp4',
+      c5: 'assets/video/v06-21.mp4', m5: 'assets/video/v06-21.mp4' },
     goal: '드모르간의 법칙을 이용한다 · 여집합 · 차집합의 원소의 개수를 구한다 · 명제와 그 부정의 참 · 거짓을 판별한다',
     defaultPct: 90,
     steps: STEPS,

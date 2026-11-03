@@ -7,6 +7,8 @@ DS.Video = (function () {
     const u = String(url || '').trim();
     let m = /(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|shorts\/|embed\/|live\/))([\w-]{11})/.exec(u);
     if (m) return { kind: '유튜브', src: `https://www.youtube-nocookie.com/embed/${m[1]}?rel=0&playsinline=1&modestbranding=1` };
+    // 2026-11-03: 게임 서버에 올린 영상 파일(assets/video/*.mp4) → 브라우저 기본 플레이어 (드라이브 미리 보기는 아이폰 · 학교 PC 에서 자주 막힘)
+    if (/^(?:\.\/)?assets\/video\/[\w.-]+\.mp4$/.test(u)) return { kind: '영상 파일', src: u, local: true };
     m = /drive\.google\.com\/(?:file\/d\/|open\?(?:.*&)?id=|uc\?(?:.*&)?id=)([\w-]{10,})/.exec(u);
     if (m) return { kind: '구글 드라이브', src: `https://drive.google.com/file/d/${m[1]}/preview` };
     return null;
@@ -31,6 +33,7 @@ DS.Video = (function () {
   }
   // 재생 칸 HTML (iframe 또는 video). 파일이면 그린 뒤 attach(el, …) 로 주소를 넣는다
   const frameHtml = (url, autoplay) => (url === 'file' ? `<video class="vf" controls playsinline${autoplay ? ' autoplay' : ''}></video>`
+    : (parse(url) || {}).local ? `<video class="vf" src="${parse(url).src}" controls playsinline preload="metadata"${autoplay ? ' autoplay' : ''}></video>`
     : `<iframe src="${embed(url)}${autoplay && /youtube/.test(embed(url)) ? '&autoplay=1' : ''}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>`);
   async function attach(root, url, ref) { if (url !== 'file' || !ref) return; const v = root.querySelector('video.vf'); if (!v) return; v.src = await fileUrl(ref.lesson, ref.slot); v.play().catch(() => {}); }
   function open(url, title, ref) {

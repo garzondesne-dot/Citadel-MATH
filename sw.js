@@ -4,7 +4,7 @@
 //  - v0.9.6 차시별 다운로드: STATIC = 공통 그림만. 던전 배경 · 포털 · 몬스터는 그 차시에 들어갈 때 받고(DS.Art.lessonEnter), 지금 · 바로 전 차시 것만 남긴다
 //  - Firebase(다른 주소)는 건드리지 않는다. 수업 진행에는 인터넷이 필요하다
 // 새 버전을 낼 때 CACHE 이름을 'ds-' + DS.VERSION 과 맞춘다 (tests/pwa.test.js 가 확인)
-const CACHE = 'ds-citadel-0.9.6.12';
+const CACHE = 'ds-citadel-0.9.6.13';
 const ASSETS = 'ds-assets';
 const CORE = [
   './', './index.html', './css/style.css', './manifest.webmanifest',
@@ -36,6 +36,7 @@ self.addEventListener('fetch', (e) => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return;
+  if (url.pathname.endsWith('.mp4')) return; // 영상(assets/video): 브라우저가 직접 받음 (부분 요청 · 저장 안 함)
   if (isStatic(url)) {
     e.respondWith(caches.open(ASSETS).then((c) => c.match(req).then((hit) => hit || fetch(req).then((res) => {
       if (res.ok) c.put(req, res.clone());

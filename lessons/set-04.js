@@ -193,8 +193,8 @@
       b1: [{ p: 1, x: 0.5095, y: 0.526, w: 0.45, h: 0.0967 }], b2: [{ p: 2, x: 0.0405, y: 0.1897, w: 0.45, h: 0.0967 }], b3: [{ p: 2, x: 0.0405, y: 0.5685, w: 0.45, h: 0.1067 }] },
     theme: '06-frost', // 던전 테마: 빙결 동굴 (배경 dg-06 · 포털 portal-06)
     // 🎬 기본 설명 영상 (모션그래픽, 사용자 드라이브 「학습지 > 결과물」 · 링크 공유). 수업 준비에서 다른 영상을 넣으면 그것이 우선
-    videos: { c1: 'https://drive.google.com/file/d/1oqVgi3UamV1X1S6kX_YzoEn-x3D8_tEx/view', m1: 'https://drive.google.com/file/d/1fgTuunUHHc0ojicyPnr9cB8TwJxwg5En/view', b1: 'https://drive.google.com/file/d/1fgTuunUHHc0ojicyPnr9cB8TwJxwg5En/view', c2: 'https://drive.google.com/file/d/1oEdTYAIuprMeDEbnpI3TSOJ0BALJiOtM/view', m2: 'https://drive.google.com/file/d/1oEdTYAIuprMeDEbnpI3TSOJ0BALJiOtM/view', b2: 'https://drive.google.com/file/d/1oEdTYAIuprMeDEbnpI3TSOJ0BALJiOtM/view',
-      c3: 'https://drive.google.com/file/d/1MxULK12DicIXPgZOL9A2TF5rBYp04BZo/view', m3: 'https://drive.google.com/file/d/1MxULK12DicIXPgZOL9A2TF5rBYp04BZo/view', b3: 'https://drive.google.com/file/d/1DJg8zMF-Vkh336JndUqSnGEslLbX72Q4/view' }, // 🎬 「학습자료 > 모션그래픽」 최신본: 01 c1 · 02 m1 b1 · 03 c2 m2 b2 · 05 c3 m3 · 포함관계와 교집합·합집합(A⊂B) b3
+    videos: { c1: 'assets/video/v04-01.mp4', m1: 'assets/video/v04-02.mp4', b1: 'assets/video/v04-02.mp4', c2: 'assets/video/v04-03.mp4', m2: 'assets/video/v04-03.mp4', b2: 'assets/video/v04-03.mp4',
+      c3: 'assets/video/v04-05.mp4', m3: 'assets/video/v04-05.mp4', b3: 'assets/video/v-1DJg8zMF.mp4' }, // 🎬 「학습자료 > 모션그래픽」 최신본: 01 c1 · 02 m1 b1 · 03 c2 m2 b2 · 05 c3 m3 · 포함관계와 교집합·합집합(A⊂B) b3
     goal: '교집합과 합집합을 구한다 · 서로소인 두 집합을 찾는다 · 합집합의 원소의 개수를 구한다',
     defaultPct: 90,
     steps: STEPS,

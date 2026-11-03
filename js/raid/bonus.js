@@ -120,7 +120,7 @@ DS.Bonus = (function () {
         document.body.appendChild(st); setTimeout(() => st.remove(), lock * 1000);
       }, 200);
     }, 200);
-    const img = DS.Act.hasImg(prep, mid), cslot = (L.bonus.find((b) => b.id === mid) || {}).concept, vslot = DS.Video.pick(L, prep.video, mid) ? mid : cslot, vid = DS.Video.pick(L, prep.video, vslot);
+    const img = DS.Act.hasImg(prep, mid), cslot = ((L.bonus || []).find((b) => b.id === mid) || {}).concept, vslot = DS.Video.pick(L, prep.video, mid) ? mid : cslot, vid = DS.Video.pick(L, prep.video, vslot);
     const draw = (cls = '', msg = '') => {
       const pips = Array.from({ length: TRIES }, (_, i) => `<i class="${i < left ? 'on' : ''}"></i>`).join('');
       const segs = solved.map((s) => `<i class="${s ? 'gone' : ''}"></i>`).join('');
