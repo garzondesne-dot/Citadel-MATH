@@ -33,9 +33,11 @@ DS.TCamp = (function () {
   function render() {
     const base = DS.ASSETS.base, c = DS.ASSETS.camp;
     $('#tcamp').innerHTML = `<div class="tc-top" style="background-image:linear-gradient(#050b1cdd,#050b1cdd),url('${base}${DS.ASSETS.tcamp.bg}')">${code ? `<div class="tc-qr" id="tc-qr"></div><div class="tc-code"><span class="muted small">${hall ? '📱 휴대폰 카메라로 QR 을 찍고 입장해요' : '학생 입장 · QR 찍기 또는 모닥불 차원문'}</span><b>수업 코드 ${esc(code)}</b><span id="tc-info" class="small"></span></div>` : '<div class="tc-code"><b>🏛 교사 캠프</b><span class="muted small">수업을 열면 여기에 학생 입장 QR 이 크게 떠요</span></div>'}</div>
-      <div class="tc-stage" style="background-image:url('${base}${DS.ASSETS.tcamp.bg}')">
-        <button class="camp-anvil tc-anvil" id="tc-anvil" aria-label="모루"><i class="camp-anvil-img" style="background-image:url('${base}${c.anvil.src}');background-size:${c.anvil.cols * 100}% 100%;background-position:0 0"></i><span class="camp-label">⚒ 모루 (미리 보기)</span></button>
-        <button class="camp-bonus tc-bonus" id="tc-bonus" aria-label="보강던전"><i class="camp-bonus-img" style="background-image:url('${base}${DS.ASSETS.dportals.bonus}')"></i><span class="camp-label">📘 보강던전 (미리 보기)</span></button>
+      <div class="tc-stage camp-like" style="background-image:url('${base}${c.bg}')">
+        <div class="camp-fire"><i class="camp-glow"></i><i class="camp-glow g2"></i><i class="camp-fire-img" style="background-image:url('${base}${c.fire.src}');background-size:${c.fire.cols * 100}% ${(c.fire.rows || 1) * 100}%;background-position:0 0"></i></div>
+        ${prop('dummy', '🎯', '허수아비')}${prop('shelf', '📚', '책장')}${prop('mail', '📮', hall ? '우리 반 소식' : '대시보드')}
+        <button class="camp-anvil tc-anvil" id="tc-anvil" aria-label="모루"><i class="camp-anvil-img" style="background-image:url('${base}${c.anvil.src}');background-size:${c.anvil.cols * 100}% 100%;background-position:0 0"></i><span class="camp-label">⚒ 모루</span></button>
+        <button class="camp-bonus tc-bonus" id="tc-bonus" aria-label="보강던전"><i class="camp-bonus-img" style="background-image:url('${base}${DS.ASSETS.dportals.bonus}')"></i><span class="camp-label">📘 보강던전</span></button>
         <div class="tc-hero">${DS.Art.hero(DS.Art.teacherHero(R), 'idle', 'huff')}<i class="shadow"></i></div>
         <button class="camp-gate tc-gate" id="tc-gate" aria-label="차원문"></button>
       </div>
@@ -43,6 +45,15 @@ DS.TCamp = (function () {
     if (code && window.QRCode) { const q = $('#tc-qr'); q.innerHTML = ''; new QRCode(q, { text: studentUrl(), width: hall ? 380 : 320, height: hall ? 380 : 320, correctLevel: QRCode.CorrectLevel ? QRCode.CorrectLevel.M : undefined }); }
     $('#tc-anvil').onclick = () => pick('#tc-anvil', () => DS.Forge.open(ME(), { preview: true, no: maxNo() }));
     $('#tc-bonus').onclick = () => pick('#tc-bonus', () => DS.Control.run(() => DS.Bonus.enter(ME(), { preview: true, no: maxNo() })));
+    $('#tc-dummy').onclick = () => pick('#tc-dummy', () => DS.Control.run(() => DS.Bonus.enter(ME(), { preview: true, train: true, no: maxNo() })));
+    $('#tc-shelf').onclick = () => pick('#tc-shelf', () => DS.Control.run(() => DS.Camp.shelf(maxNo())));
+    // 📮 우편함: 교사 폰 = 학급 대시보드(교사만) · 종합상황실(TV) = 우리 반 수업 소식(이름 · 순위 없음)만
+    $('#tc-mail').onclick = () => pick('#tc-mail', () => DS.Control.run(async () => {
+      if (!hall) return DS.Dash.enter();
+      if (R && L && DS.ShareCard) return DS.ShareCard.klassOpen(L, R, { praise: false });
+      DS.UI.toast('수업이 끝나면 우리 반 수업 소식이 도착해요.', 2600);
+    }));
+    fire();
     $('#tc-gate').onclick = () => {
       if (!code) return pick('#tc-gate', () => leave());
       if (hall) return pick('#tc-gate', toHall);
@@ -81,6 +92,23 @@ DS.TCamp = (function () {
     if (hall) return toHall();
     if (code && R && !DS.Raid.isClosed(R) && window.confirm('수업도 끝낼까요?\n\n[확인] 수업 끝내기 — 학생은 결과를 보고 모닥불로, 차원문은 꺼져요\n[취소] 잠깐 나가기 — 수업은 계속돼요 (교사 메뉴 「📋 만든 수업」에서 다시 들어오기)')) await DS.Act.endClass(code).catch(() => {});
     if (stop) stop(); stop = null; DS.Scene.clear(); location.replace(`${location.pathname}?${DS.Net.mode === 'local' ? 'local&' : ''}role=teacher`);
+  }
+  // 캠프 소품 (학생 캠프와 같은 그림 · 이모지 팻말 대신)
+  function prop(id, icon, label) {
+    const p = ((DS.ASSETS.camp.props || {})[id]) || '', src = typeof p === 'string' ? p : p.src, two = typeof p === 'object' && p.cols === 2;
+    return `<button class="camp-prop" id="tc-${id}" aria-label="${label}">${src ? `<i class="camp-prop-img${two ? ' two' : ''}" style="background-image:url('${DS.ASSETS.base}${src}')"></i>` : `<i class="camp-prop-ic">${icon}</i>`}<span class="camp-label">${icon} ${label}</span></button>`;
+  }
+  // 🔥 모닥불 불꽃 (학생 캠프와 같은 프레임)
+  let fireT = null;
+  function fire() {
+    clearInterval(fireT);
+    const f = DS.ASSETS.camp.fire; let i = 0;
+    fireT = setInterval(() => {
+      const el = document.querySelector('#tcamp .camp-fire-img');
+      if (!el || !document.getElementById('screen-tcamp').classList.contains('active')) { clearInterval(fireT); return; }
+      i = (i + 1) % f.frames;
+      el.style.backgroundPosition = `${((i % f.cols) / Math.max(1, f.cols - 1)) * 100}% ${((Math.floor(i / f.cols)) / Math.max(1, (f.rows || 1) - 1)) * 100}%`;
+    }, f.ms);
   }
   // 모닥불과 같은 선택 연출
   function pick(sel, then) {

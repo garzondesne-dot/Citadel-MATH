@@ -230,8 +230,8 @@ DS.Camp = (function () {
     return `<button class="camp-prop" id="camp-${id}" style="${pos}" aria-label="${label}">${src ? `<i class="camp-prop-img${two ? ' two' : ''}" style="background-image:url('${base()}${src}')"></i>` : `<i class="camp-prop-ic">${icon}</i>`}<span class="camp-label">${icon} ${label}</span></button>`;
   }
   // 📚 책장: 열린 차시의 개념별 🎬 설명 영상 · 📄 학습지 개념 (기말 대비 다시 보기)
-  async function shelf() {
-    const no = me.test ? 99 : Number(await DS.Net.get(`unlock/${ck(me.c)}`).catch(() => 0)) || 0;
+  async function shelf(all) { // all: 교사 캠프 — 모든 차시
+    const no = all != null ? all : me.test ? 99 : Number(await DS.Net.get(`unlock/${ck(me.c)}`).catch(() => 0)) || 0;
     const open = DS.Lessons.list.filter((l) => l.no && l.no <= no).sort((a, b) => b.no - a.no);
     const preps = {};
     for (const l of open) preps[l.id] = (await DS.Act.prepLite(l.id).catch(() => null)) || {};
@@ -315,5 +315,5 @@ DS.Camp = (function () {
     draw(); document.body.appendChild(el);
   }
   const back = () => (me ? enter(me) : null);
-  return { enter, back, settings, refresh: () => { if (document.getElementById('camp-forge')) forgeInfo(); }, stampToday, markStamp: () => { try { localStorage.setItem('citadel-stamp', today()); } catch (e) { /* 무시 */ } } };
+  return { enter, back, settings, shelf: (all) => shelf(all), refresh: () => { if (document.getElementById('camp-forge')) forgeInfo(); }, stampToday, markStamp: () => { try { localStorage.setItem('citadel-stamp', today()); } catch (e) { /* 무시 */ } } };
 })();
