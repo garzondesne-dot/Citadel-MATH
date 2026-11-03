@@ -62,6 +62,15 @@ DS.Control = (function () {
   const restBtn = (R) => Raid().restOn(R)
     ? `<div class="rest-ctl"><button class="btn primary rest-btn on" data-rest>▶ 쉼터 끝 · 수업으로</button><span class="rest-t">⏱ <b data-rest-end="${restEnd(R)}">${mmss(restLeft(R))}</b></span><button class="btn small" data-rest-min="-1">−1분</button><button class="btn small" data-rest-min="1">+1분</button></div>`
     : '<button class="btn rest-btn" data-rest>🏕 쉼터 (잠깐 쉬기 · 5분)</button>';
+  // 🖥 종합상황실 아이콘 막대 (2026-11-04 사용자 요청 「버튼이 많아져 복잡」): 같은 기능을 아이콘 + 짧은 글자 (마우스를 올리면 설명)
+  //   쉼터 중에는 [▶ 수업으로 · ⏱ · −1 · +1] 만
+  function iconBar(L, R, videos, demo) {
+    if (Raid().restOn(R)) return `<div class="ic-bar rest"><button class="icb wide on" data-rest title="쉼터를 끝내고 하던 단계로">▶<small>수업으로</small></button><span class="icb-t">⏱ <b data-rest-end="${restEnd(R)}">${mmss(restLeft(R))}</b></span><button class="icb" data-rest-min="-1" title="쉼터 1분 줄이기">−1<small>분</small></button><button class="icb" data-rest-min="1" title="쉼터 1분 늘리기">+1<small>분</small></button></div>`;
+    const st = Raid().stepOf(L, R), fight = st && (st.kind === 'monster' || st.kind === 'boss');
+    const vid = st && DS.Video.ok(DS.Video.pick(L, videos, st.id)), von = vid && Raid().videoOn(R, st.id);
+    const b = (attr, ic, cap, tip, on) => `<button class="icb${on ? ' on' : ''}" ${attr} title="${tip}">${ic}<small>${cap}</small></button>`;
+    return `<div class="ic-bar">${b('data-rest', '🏕', '쉼터', '쉼터 — 잠깐 쉬기 (기본 5분)')}${vid ? b(`data-video="${st.id}"`, '🎬', von ? '닫기' : '영상', von ? '설명 영상 닫기' : '설명 영상 틀기 (큰 화면)', von) : ''}${fight ? b('data-sheet', '📄', Raid().sheetOn(R) ? '레이드' : '문제', Raid().sheetOn(R) ? '레이드 화면으로' : '문제 화면 (학습지 해설)', Raid().sheetOn(R)) : ''}${b('data-focus', '🔴', '집중', Raid().focusOn(R) ? '집중모드 끄기' : '집중모드 켜기 (학생 폰 잠깐 멈춤)', Raid().focusOn(R))}${fight && demo ? b('id="h-demo"', '🎮', '시연', st.kind === 'boss' ? '시연: 형성평가 풀어 보기' : '시연: 문제 풀어 보기') : ''}</div>`;
+  }
   const bindRest = (el, code, R) => {
     el.querySelectorAll('[data-rest]').forEach((b) => (b.onclick = () => run(() => Act().setRest(code, !Raid().restOn(R), 5))));
     el.querySelectorAll('[data-rest-min]').forEach((b) => (b.onclick = () => run(() => Act().setRestMin(code, (((R.state || {}).rest || {}).min || 5) + Number(b.dataset.restMin)))));
@@ -104,5 +113,5 @@ DS.Control = (function () {
     })));
   }
 
-  return { restBtn, bindRest, restLeft, restEnd, mmss, name, run, wordsHtml, bindWords, stepName, nextName, stepTitles, FINALE, forward, back, pctHtml, bindPct, focusBtn, bindFocus, sheetBtn, bindSheet, videoBtn, bindVideo, esc };
+  return { iconBar, restBtn, bindRest, restLeft, restEnd, mmss, name, run, wordsHtml, bindWords, stepName, nextName, stepTitles, FINALE, forward, back, pctHtml, bindPct, focusBtn, bindFocus, sheetBtn, bindSheet, videoBtn, bindVideo, esc };
 })();

@@ -174,7 +174,7 @@ DS.Hall = (function () {
     const f = fightOf(step);
     const hs = studs().filter(([u]) => (R.active || {})[u]);
     const n = hs.length, row0 = Math.ceil(n / 2);
-    const pos = hs.map(([u, p], i) => { const r = i < row0 ? 0 : 1, k = r ? i - row0 : i, cnt = r ? n - row0 : row0; const x = 7 + ((k + 0.5) / Math.max(1, cnt)) * 86 + (r ? 2 : 0); return { u, p, x, y: r ? 96 : 82 }; });
+    const pos = hs.map(([u, p], i) => { const r = i < row0 ? 0 : 1, k = r ? i - row0 : i, cnt = r ? n - row0 : row0; const x = 7 + ((k + 0.5) / Math.max(1, cnt)) * 86 + (r ? 2 : 0); return { u, p, x, y: r ? 87 : 72 }; }); // 2026-11-04: 공격대를 위로 (몬스터와 간격 줄이고 아래 잘림 없게 · 예전 82 · 96)
     $('#h-arena').innerHTML = `<div class="raid2 bg-scene th-${L.theme || ''} ${step.kind === 'boss' ? 'boss quake' : ''}${step.special ? ' special' : ''}" id="raid">
       <div class="raid-top"><b>${step.kind === 'boss' ? '👑 ' : step.special ? '⭐ ' : step.review ? '📖 ' : ''}${esc(f.title)}</b><div class="raid-bars"><div class="raid-hp"><i id="rh-bar"></i><span id="rh-txt"></span></div><div class="raid-atk" id="rh-atk" title="몬스터 공격 게이지 (학생 폰과 같은 시계)"><i></i><span></span></div></div></div>
       ${step.special ? '<div class="raid-banner">⭐ 스페셜 몬스터 난입!</div>' : step.kind === 'boss' ? '<div class="raid-banner boss">👑 보스 출현!</div>' : ''}
@@ -340,7 +340,7 @@ DS.Hall = (function () {
       ${Raid().isEnd(L, R) ? `<div class="h-words">${C().wordsHtml(R)}</div>` : ''}`;
     C().bindWords($('#h-side'), code, R);
     const el = $('#h-ctrl'), live = !Raid().isLobby(R) && !Raid().isClosed(R);
-    el.innerHTML = `${C().pctHtml(L, R)}<p class="muted small">다음 ▶ ${esc(C().nextName(L, R))}</p><div class="row"><button class="btn" id="h-back"${i < 0 ? ' disabled' : ''}>◀ 뒤로</button><button class="btn primary" id="h-fwd"${Raid().isClosed(R) ? ' disabled' : ''}>${Raid().isFinale(L, R) ? '수업 끝 ▶' : '앞으로 ▶'}</button></div>${live ? C().restBtn(R) + (Raid().restOn(R) ? '' : C().videoBtn(L, R, prep.video) + C().sheetBtn(L, R) + C().focusBtn(R)) : ''}${live && Raid().stepOf(L, R) && ['monster', 'boss'].includes(Raid().stepOf(L, R).kind) ? `<button class="btn demo-btn" id="h-demo">🎮 시연: ${Raid().stepOf(L, R).kind === 'boss' ? '형성평가 풀어 보기' : '문제 풀어 보기'}</button>` : ''}`;
+    el.innerHTML = `${C().pctHtml(L, R)}<p class="muted small">다음 ▶ ${esc(C().nextName(L, R))}</p><div class="row"><button class="btn" id="h-back"${i < 0 ? ' disabled' : ''}>◀ 뒤로</button><button class="btn primary" id="h-fwd"${Raid().isClosed(R) ? ' disabled' : ''}>${Raid().isFinale(L, R) ? '수업 끝 ▶' : '앞으로 ▶'}</button></div>${live ? C().iconBar(L, R, prep.video, true) : ''}`;
     const db = $('#h-demo'); if (db) db.onclick = () => demoOpen(Raid().stepOf(L, R));
     C().bindRest(el, code, R); C().bindPct(el, code, R, L); C().bindFocus(el, code, R); C().bindSheet(el, code, R); C().bindVideo(el, code, R);
     $('#h-fwd').onclick = () => C().run(() => C().forward(code, R, L));

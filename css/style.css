@@ -1354,3 +1354,12 @@ body:has(#test-bar) #ver-tag { bottom: calc(64px + env(safe-area-inset-bottom));
 .rest-ctl { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 6px 0; }
 .rest-ctl .rest-t { font-size: 18px; color: #ffe7b0; }
 .rest-btn { border-color: #ffb45a !important; }
+/* 🖥 종합상황실 아이콘 막대 (2026-11-04) */
+.ic-bar { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; align-items: center; }
+.ic-bar .icb { width: 54px; height: 54px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; font-size: 22px; line-height: 1; background: linear-gradient(#1c2c52, #0d1630); border: 2px solid #4a6aa8; color: #fff; cursor: pointer; border-radius: 6px; padding: 0; }
+.ic-bar .icb small { font: 11px var(--pixel); color: #b9c7e6; }
+.ic-bar .icb.on { border-color: #ffd35a; box-shadow: 0 0 10px #ffd35a88; background: linear-gradient(#4a3a10, #2a1f06); }
+.ic-bar .icb.wide { width: auto; padding: 0 12px; flex-direction: row; gap: 6px; font-size: 18px; }
+.ic-bar .icb.wide small { font-size: 14px; color: #ffe7b0; }
+.ic-bar .icb:hover { border-color: #8fb6ff; }
+.ic-bar .icb-t { font-size: 20px; color: #ffe7b0; padding: 0 4px; }

@@ -90,11 +90,17 @@ DS.Test = (function () {
     if (!R) return;
     const i = R.state.step ?? -1, studs = Object.values(R.players || {}).filter((p) => !p.teacher).length;
     const next = DS.Raid.isLobby(R) ? `수업 시작 ▶ (${studs}명)` : DS.Raid.isFinale(L, R) ? '수업 끝 ▶' : '다음 ▶';
-    const sig = `${i}|${studs}|${R.state.closed ? 1 : 0}`;
+    const stp = DS.Raid.stepOf(L, R), media = { id: stp && stp.id, title: stp ? stp.title || '' : '', vid: null, img: null };
+    if (stp) { const v = DS.Video.pick(L, (prep || {}).video, stp.id); if (v && DS.Video.ok(v)) media.vid = v; media.img = ((prep || {}).img || {})[stp.id] || null; }
+    const sig = `${i}|${studs}|${R.state.closed ? 1 : 0}|${media.vid ? 1 : 0}${media.img ? 1 : 0}`;
     if (el.dataset.sig === sig) return;
     el.dataset.sig = sig;
     el.innerHTML = `<b>${demo ? '🎮 체험판' : '🧪 테스트'}</b><span class="tb-step">${esc(DS.Control.stepName(L, R))}</span>
+      ${media.vid ? '<button class="btn small tb-ic" id="tb-vid" title="이 단계 설명 영상">🎬</button>' : ''}${media.img ? `<button class="btn small tb-ic" id="tb-img" title="이 단계 학습지 · 문제 이미지">📄</button>` : ''}
       <button class="btn small" id="tb-back"${i < 0 ? ' disabled' : ''}>◀</button><button class="btn primary" id="tb-next">${next}</button><button class="btn small" id="tb-x">끝내기</button>`;
+    // 🎬 · 📄 (2026-11-04 사용자 요청): 테스트 · 체험판에서도 그 단계에 붙은 설명 영상 · 문제(학습지) 이미지를 바로 확인
+    const vb = $('#tb-vid'); if (vb) vb.onclick = () => DS.Video.open(media.vid, media.title, { lesson: L.id, slot: media.id });
+    const ib = $('#tb-img'); if (ib) ib.onclick = () => { const v = document.createElement('div'); v.className = 'modal sheet-modal'; v.innerHTML = `<div class="quiz-box framed"><div class="quiz-head"><b>📄 ${esc(media.title)}</b><button class="btn small" data-x>✕ 닫기</button></div><img class="bn-sheet" src="${media.img}" alt="학습지"></div>`; v.querySelector('[data-x]').onclick = () => v.remove(); document.body.appendChild(v); };
     $('#tb-back').onclick = () => DS.Control.run(() => DS.Act.go(code, R, L, -1));
     $('#tb-next').onclick = () => DS.Control.run(async () => {
       if (DS.Raid.isLobby(R) && studs < 2) { DS.UI.toast('가상 친구가 들어오는 중이에요…'); return; }
