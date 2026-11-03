@@ -7,7 +7,7 @@ DS.Art = (function () {
     const s = A()[sheet];
     return `<i class="art ${sheet} ${cls}" style="background-image:url('${A().base}${s.src}');background-size:${s.cols * 100}% ${s.rows * 100}%;background-position:${pos(col, s.cols, row, s.rows)}"></i>`;
   }
-  // 용사 번호: 0~7 기본 시트(7 = 선생님) · 8~15 추가 용사(heroesExtra, 잠금 해제 특전)
+  // 용사 번호: 0~7 기본 시트(7 = 선생님 현자) · 8~15 추가 용사(heroesExtra, 잠금 해제 특전) · 17 = 선생님 수학자 — 배치표 heroesV2.list 에 있으면 v2 도트로 그린다
   // v2 도트 용사 (번호 16~): 줄 = 동작, 프레임을 CSS steps 로 넘긴다. 숨쉬기는 그림에 들어 있어 'huff'(눌림)는 뺀다
   // 시트에 없는 동작은 대신 쓰기: 차원문 → 걷기 · 앉기 · 생각 → 대기 · 힐 받음 → 승리
   const V2_FALL = { pant: 'hit', portal: 'walk', sit: 'idle', think: 'idle', healed: 'win', heal: 'attack', win: 'attack', hit: 'idle', down: 'fall', walk: 'idle', fall: 'idle' };
@@ -28,6 +28,15 @@ DS.Art = (function () {
     if (n >= 8 && n < 16 && A().heroesExtra) return cell('heroesExtra', A().heroesExtra.poses[pose] || 0, n - 8, `hero ${cls}`);
     return cell('heroes', A().heroes.poses[pose] || 0, ((n % A().heroes.count) + A().heroes.count) % A().heroes.count, `hero ${cls}`);
   };
+  // 선생님 모습 (2026-11-03): 수업 방의 선생님 용사 → 없으면 이 기기에서 고른 모습(교사 메뉴) → 기본 7 현자
+  const TKEY = 'citadel-thero';
+  function teacherHero(R) {
+    const t = R && R.meta && R.players && R.players[R.meta.teacher];
+    if (t && t.hero != null) return Number(t.hero);
+    try { const v = Number(localStorage.getItem(TKEY)); if ((A().heroes.teacherSkins || []).includes(v)) return v; } catch (e) { /* 무시 */ }
+    return A().heroes.teacher;
+  }
+  const setTeacherHero = (n) => { try { localStorage.setItem(TKEY, String(n)); } catch (e) { /* 무시 */ } };
   // n = 숫자(기본 시트) 또는 'extra:3' · 'new:5' · 'crown:7' (추가 시트)
   const SHEETS = { extra: 'monstersExtra', new: 'monstersNew', crown: 'monstersCrown', rift: 'monstersRift', riftboss: 'monstersRiftBoss' };
   // 몬스터 번호: 2 · 'extra:3' · 'crown:9' … 끝에 '@h150' 을 붙이면 색 변형 (hue-rotate 150°, v0.9.6 — 보강 · 돌려쓰기 보스용, 그림 0)
@@ -89,5 +98,5 @@ ${(a.dungeons ? a.dungeons.ids : []).map((id) => `.bg-scene.th-${id}{background-
     const prev = L.no ? DS.Lessons.list.find((l) => l.no === L.no - 1) : null;
     setTimeout(() => trim([L, prev]), 5000);
   }
-  return { cell, hero, isV2, monster, card, install, pos, lessonFiles, prefetch, trim, lessonEnter };
+  return { cell, hero, isV2, monster, card, install, pos, lessonFiles, prefetch, trim, lessonEnter, teacherHero, setTeacherHero };
 })();

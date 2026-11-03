@@ -12,20 +12,23 @@ DS.TCamp = (function () {
   const $ = (s) => document.querySelector(s);
   const { esc } = DS.UI;
   let code = '', hallKey = '', stop = null, R = null, L = null, picking = false, hall = false, wasLobby = null;
-  const ME = () => ({ c: '교사', n: 0, name: '선생님', hero: DS.ASSETS.heroes.teacher, fx: 'twinkle', preview: true });
+  // 선생님 모습이 수업 방에서 바뀌면(교사 메뉴 · 처음 불러올 때) 교사 캠프 용사도 바꾼다
+  let shownHero = null;
+  function tHero() { const h = DS.Art.teacherHero(R), el = document.querySelector('.tc-hero'); if (!el || h === shownHero) return; shownHero = h; const a = el.querySelector('.art'); if (a) a.outerHTML = DS.Art.hero(h, 'idle', 'huff'); }
+  const ME = () => ({ c: '교사', n: 0, name: '선생님', hero: DS.Art.teacherHero(R), fx: 'twinkle', preview: true });
   const maxNo = () => Math.max(0, ...DS.Lessons.list.map((l) => l.no || 0));
   const studentUrl = () => `${location.origin}${location.pathname.replace(/[^/]*$/, '')}index.html?role=student&code=${code}${DS.Net.mode === 'local' ? '&local' : ''}`;
 
   async function enter(o = {}) {
     hall = !!o.hall;
     if (!hall && !(await DS.Account.isAdmin())) throw Object.assign(new Error('교사 계정으로 로그인해야 해요.'), { user: true });
-    code = o.code || ''; hallKey = o.hallKey || ''; R = null; L = null; wasLobby = null;
+    code = o.code || ''; hallKey = o.hallKey || ''; R = null; L = null; wasLobby = null; shownHero = null;
     DS.UI.show('screen-tcamp'); DS.UI.wake.on(); // 교사 캠프 · 종합상황실 캠프도 화면 켜 둠
     document.getElementById('screen-tcamp').classList.toggle('tc-hallmode', hall);
     if (!hall) DS.Scene.save({ role: 'tcamp', code, hallKey }); // 종합상황실 기기는 장면을 종합상황실로 둔다 (새로고침 → 종합상황실)
     render();
     if (stop) stop(); stop = null;
-    if (code) stop = DS.Net.watch(`rooms/${code}`, (v) => { if (!v) return; R = DS.Act.unpackRoom(v); L = DS.Lessons.get(R.meta.lesson); drawLive(); autoHall(); });
+    if (code) stop = DS.Net.watch(`rooms/${code}`, (v) => { if (!v) return; R = DS.Act.unpackRoom(v); L = DS.Lessons.get(R.meta.lesson); drawLive(); autoHall(); tHero(); });
   }
   function render() {
     const base = DS.ASSETS.base, c = DS.ASSETS.camp;
@@ -33,7 +36,7 @@ DS.TCamp = (function () {
       <div class="tc-stage" style="background-image:url('${base}${DS.ASSETS.tcamp.bg}')">
         <button class="camp-anvil tc-anvil" id="tc-anvil" aria-label="모루"><i class="camp-anvil-img" style="background-image:url('${base}${c.anvil.src}');background-size:${c.anvil.cols * 100}% 100%;background-position:0 0"></i><span class="camp-label">⚒ 모루 (미리 보기)</span></button>
         <button class="camp-bonus tc-bonus" id="tc-bonus" aria-label="보강던전"><i class="camp-bonus-img" style="background-image:url('${base}${DS.ASSETS.dportals.bonus}')"></i><span class="camp-label">📘 보강던전 (미리 보기)</span></button>
-        <div class="tc-hero">${DS.Art.hero(DS.ASSETS.heroes.teacher, 'idle', 'huff')}<i class="shadow"></i></div>
+        <div class="tc-hero">${DS.Art.hero(DS.Art.teacherHero(R), 'idle', 'huff')}<i class="shadow"></i></div>
         <button class="camp-gate tc-gate" id="tc-gate" aria-label="차원문"></button>
       </div>
       <div class="tc-bar" id="tc-bar"></div>`;

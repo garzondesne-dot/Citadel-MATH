@@ -1195,3 +1195,7 @@ body:has(#h-demo-ov) > .modal { z-index: 70; } /* 보스 시연: 학생과 같�
 #ver-tag { position: fixed; left: calc(4px + env(safe-area-inset-left)); bottom: calc(2px + env(safe-area-inset-bottom)); z-index: 9999; font: 11px/1.2 monospace; color: #fff; opacity: .7; text-shadow: 1px 1px 0 #000; pointer-events: none; user-select: none; }
 body:has(#test-bar) #ver-tag { bottom: calc(64px + env(safe-area-inset-bottom)); }
 @media (min-width: 1000px) { #ver-tag { font-size: 14px; left: 8px; bottom: 6px; } } /* 종합상황실 · PC: 교실 뒤에서도 읽히게 */
+/* 🧙 선생님 모습 (교사 메뉴): 현자 · 수학자 */
+.t-skin { grid-template-columns: repeat(2, 1fr); max-width: 260px; margin: 4px 0 8px; }
+.t-skin .hpick { aspect-ratio: auto; display: flex; flex-direction: column; align-items: center; padding: 4px; color: var(--ink, #eef2ff); }
+.t-skin .hpick .art.hero { width: 96px; height: 96px; }

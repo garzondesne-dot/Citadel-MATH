@@ -21,12 +21,12 @@ DS.Raid = (function () {
   const activeIds = (R) => keys(R.active).filter((u) => R.active[u]).sort((a, b) => num(R, a) - num(R, b));
   const teacherUid = (R) => (R.meta || {}).teacher;
 
-  function newRoom(code, lessonId, teacher, now, pct) {
+  function newRoom(code, lessonId, teacher, now, pct, thero = 7) { // thero: 선생님 모습 (7 현자 · 17 수학자)
     return {
       meta: { lesson: lessonId, created: now, teacher, version: 2, code, ...(pct ? { pct } : {}) },
       hosts: { [teacher]: true },
       state: { step: -1, stepAt: now, headcount: 0 },
-      players: { [teacher]: { num: 0, nick: '선생님', hero: 7, at: now, teacher: true } },
+      players: { [teacher]: { num: 0, nick: '선생님', hero: Number(thero) || 7, at: now, teacher: true } },
     };
   }
 

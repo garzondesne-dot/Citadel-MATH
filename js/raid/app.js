@@ -186,9 +186,23 @@ DS.App = (function () {
   }
 
   // ── 교사 로그인 (교사 폰 · 수업 준비 공통) ─────────────────────
+  // 🧙 선생님 모습 (2026-11-03): 현자 · 수학자 — 이 기기에 저장 · 다음에 만드는 수업부터, 진행 중인 수업이면 그 방의 선생님 용사도 바로 바꿈
+  function teacherSkin() {
+    const el = $('#t-skin'); if (!el) return;
+    const cur = DS.Art.teacherHero(), list = DS.ASSETS.heroes.teacherSkins || [DS.ASSETS.heroes.teacher];
+    const name = (n) => ((DS.ASSETS.heroesV2.list[n] || {}).name || '선생님');
+    el.innerHTML = list.map((n) => `<button type="button" class="hpick${n === cur ? ' on' : ''}" data-h="${n}">${DS.Art.hero(n, n === cur ? 'attack' : 'idle')}<span class="small">${esc(name(n))}</span></button>`).join('');
+    el.querySelectorAll('.hpick').forEach((b) => (b.onclick = async () => {
+      const n = Number(b.dataset.h); DS.Art.setTeacherHero(n); DS.Sound.clank(); teacherSkin();
+      const t = read('citadel-teacher');
+      if (t && t.code && t.uid === DS.Net.uid()) { try { await DS.Net.update(`rooms/${t.code}/players/${t.uid}`, { hero: n }); } catch (e) { /* 끝난 수업 · 권한 없음 → 다음 수업부터 */ } }
+      DS.UI.toast(`선생님 모습: ${name(n)}`);
+    }));
+  }
   async function teacherAuth() {
     const ok = await A().isAdmin();
     document.querySelectorAll('.t-only').forEach((e) => (e.hidden = !ok));
+    if (ok) teacherSkin();
     if (ok) {
       document.querySelectorAll('.t-auth').forEach((e) => { e.innerHTML = '<div class="acc-card"><b>👩‍🏫 교사 계정</b><span class="muted small">로그인됨</span><button class="btn small t-out">로그아웃</button></div>'; });
       document.querySelectorAll('.t-out').forEach((b) => (b.onclick = go(async () => { await A().logout(); await teacherAuth(); await studentAuth(); })));
