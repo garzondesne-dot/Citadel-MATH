@@ -21,6 +21,6 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   const after = await T.evaluate(async (c) => ({ room: await DS.Net.get(`rooms/${c}/players/${DS.Net.uid()}`), look: DS.Art.teacherLook(), hero: document.querySelector('.tc-hero .art') && document.querySelector('.tc-hero .art').outerHTML.slice(0, 120), plate: (document.querySelector('.tc-hero .camp-plate') || {}).textContent }), code);
   log.push(`저장 뒤: 방 선생님 용사 ${after.room.hero} · 이펙트 ${after.room.fx} · 이 기기 ${JSON.stringify(after.look)} · 이름표 「${(after.plate || '').trim()}」`);
   await T.screenshot({ path: `${OUT}/3-tcamp.png` });
-  const ok = !menu.skin && !menu.xl && menu.test && menu.stu.length === 2 && st.h === 18 && !st.hl && !st.fl && !st.tl && after.room.hero === 3 && after.look.hero === 3 && after.room.fx === after.look.fx;
+  const ok = !menu.skin && !menu.xl && menu.test && menu.stu.length === 3 /* 0.9.7.0: 명단 · 출석부 · 대시보드 */ && st.h === 18 && !st.hl && !st.fl && !st.tl && after.room.hero === 3 && after.look.hero === 3 && after.room.fx === after.look.fx;
   console.log(log.join('\n')); console.log(ok ? '✅ 통과' : '❌ 기대와 다름'); console.log('errors', errs.length ? errs : 'none'); await b.close(); if (!ok || errs.length) process.exit(1);
 })();
