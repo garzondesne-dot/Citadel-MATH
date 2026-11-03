@@ -3,6 +3,12 @@
 // node tools/auto/gdrive.js down <파일 id> <저장 경로>
 // node tools/auto/gdrive.js ls <폴더 id>
 // node tools/auto/gdrive.js check                       → 열쇠 확인 (내 드라이브 이름)
+// ── 모션그래픽 교체 (2026-11-03) ── 폴더 기본값: 05 모션그래픽 → 99 지난판
+// node tools/auto/gdrive.js swap <차시 2자리> <새 mp4 …> [--trash] [--dry]
+//     ① 새 mp4 를 05 모션그래픽에 올리고 ② 같은 「(0n차시)」 옛 영상 중 이번에 올린 이름이 아닌 것을 99 지난판으로 옮김
+//     옮길 때 「링크가 있는 모든 사용자」 보기 권한을 붙여 두어, 게임에 연결된 옛 링크가 새 영상으로 바뀔 때까지 끊기지 않음
+//     --trash = 옮기지 않고 휴지통 (30일 안에 되살릴 수 있음) · --dry = 무엇을 할지 보여 주기만
+// node tools/auto/gdrive.js retire <차시 2자리> [--trash] [--dry]   → 올리기 없이 그 차시 옛 영상만 정리
 const fs = require('fs'), path = require('path');
 const { driveToken } = require('./google');
 const API = 'https://www.googleapis.com/drive/v3', UP = 'https://www.googleapis.com/upload/drive/v3';
@@ -32,14 +38,45 @@ async function down(id, out) {
   fs.mkdirSync(path.dirname(out), { recursive: true }); fs.writeFileSync(out, Buffer.from(await r.arrayBuffer()));
   return out;
 }
-module.exports = { ls, up, down };
+const MOTION = '1wCaC9DlV8rofxd6uNYWdkIrRKrBAaBsT', OLD = '1WZJ1FO-Kbql1jBjEWmrlvMM0j8KHdx0F'; // 05 모션그래픽 · 99 지난판
+const tag = (n) => `(${String(n).padStart(2, '0')}차시)`;
+async function keepLink(id) { // 옮겨도 옛 링크가 열리게: 「링크가 있는 모든 사용자 · 보기」
+  await call(`${API}/files/${id}/permissions`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ role: 'reader', type: 'anyone' }) }).catch(() => {});
+}
+async function retire(no, keepNames = [], opt = {}) {
+  const day = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+  const old = (await ls(MOTION)).filter((f) => f.name.startsWith(tag(no)) && !keepNames.includes(f.name));
+  for (const f of old) {
+    if (opt.dry) { console.log(`(미리보기) ${opt.trash ? '휴지통' : '99 지난판'} ← ${f.name}`); continue; }
+    if (opt.trash) await call(`${API}/files/${f.id}`, { method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ trashed: true }) });
+    else { await keepLink(f.id); await call(`${API}/files/${f.id}?addParents=${OLD}&removeParents=${MOTION}`, { method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ name: f.name.replace(/\.mp4$/, `_지난판${day}.mp4`) }) }); }
+    console.log(`${opt.trash ? '🗑 휴지통' : '📦 99 지난판'} ← ${f.name}  (${f.id})`);
+  }
+  return old.length;
+}
+async function swap(no, files, opt = {}) {
+  const names = [];
+  for (const f of files) {
+    const name = path.basename(f);
+    if (!name.startsWith(tag(no))) throw new Error(`파일 이름이 「${tag(no)}」로 시작해야 해요: ${name}`);
+    names.push(name);
+    if (opt.dry) { console.log(`(미리보기) 05 모션그래픽 ← ${name}`); continue; }
+    console.log('⬆', JSON.stringify(await up(f, MOTION, name)));
+  }
+  const n = await retire(no, names, opt);
+  console.log(`✅ ${tag(no)} 새 영상 ${names.length}개 · 옛 영상 ${n}개 ${opt.trash ? '휴지통' : '99 지난판'}${opt.dry ? ' (미리보기)' : ''}`);
+}
+module.exports = { ls, up, down, retire, swap };
 if (require.main === module) {
-  const [cmd, a, b, c] = process.argv.slice(2);
+  const args = process.argv.slice(2), flags = { trash: args.includes('--trash'), dry: args.includes('--dry') };
+  const [cmd, a, b, c] = args.filter((x) => !x.startsWith('--'));
   (async () => {
     if (cmd === 'up') console.log(JSON.stringify(await up(a, b, c)));
     else if (cmd === 'down') console.log(await down(a, b));
     else if (cmd === 'ls') (await ls(a)).forEach((f) => console.log(`${f.id}  ${f.size || '-'}  ${f.name}`));
+    else if (cmd === 'swap') await swap(a, args.filter((x) => !x.startsWith('--')).slice(2), flags);
+    else if (cmd === 'retire') await retire(a, [], flags);
     else if (cmd === 'check') { const j = await (await call(`${API}/about?fields=user(emailAddress)`)).json(); console.log('드라이브 연결 OK:', j.user.emailAddress); }
-    else console.log('사용: up <파일> <폴더id> [이름] · down <id> <경로> · ls <폴더id> · check');
+    else console.log('사용: up <파일> <폴더id> [이름] · down <id> <경로> · ls <폴더id> · check · swap <차시> <mp4…> [--trash] [--dry] · retire <차시> [--trash] [--dry]');
   })().catch((e) => { console.error('❌', e.message); process.exit(1); });
 }
