@@ -1,10 +1,18 @@
 // 종합상황실 학습지 크기 · 용사 겹침 확인: 1600×900 · 1366×768 · 1920×1080 에서 개념 · 문제 해설 그림이 칸 안에 다 들어가는지, 용사가 해설 위로 올라오지 않는지
-// 사용: 출력 폴더에 wide.png · tall.png (위 · 아래 표시 그림)를 두고, python3 -m http.server 8765 띄운 뒤 node tools/e2e/e2e26.js <출력 폴더>
+// 사용: 출력 폴더에 wide.png · tall.png (위 · 아래 표시 그림)를 두면 그것을, 없으면 시험용 그림을 저절로 만들어 씀(2026-11-04) — python3 -m http.server 8765 띄운 뒤 node tools/e2e/e2e26.js <출력 폴더>
 const { chromium } = require('playwright'); const fs = require('fs');
 const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
 const b64 = (f) => 'data:image/png;base64,' + fs.readFileSync(`${OUT}/${f}.png`).toString('base64');
+// 시험용 학습지 그림: 가로로 긴 칸(1200×420) · 세로로 긴 칸(700×1100), 테두리와 글줄이 있어 잘림이 보이게
+async function fake(b, name, w, h) {
+  if (fs.existsSync(`${OUT}/${name}.png`)) return;
+  const p = await b.newPage({ viewport: { width: w, height: h } });
+  await p.setContent(`<body style="margin:0;background:#fff;font:28px sans-serif"><div style="box-sizing:border-box;width:${w}px;height:${h}px;border:8px solid #d22;padding:24px">${Array.from({ length: Math.floor(h / 60) }, (_, i) => `<p style="margin:0 0 22px">${name} ${i + 1}줄 — 집합 A = {1, 2, 3}, B = {2, 4}</p>`).join('')}</div></body>`);
+  await p.screenshot({ path: `${OUT}/${name}.png` }); await p.close();
+}
 (async () => {
-  const b = await chromium.launch(); const ctx = await b.newContext({ viewport: { width: 390, height: 844 } });
+  const b = await chromium.launch(); await fake(b, 'wide', 1200, 420); await fake(b, 'tall', 700, 1100);
+  const ctx = await b.newContext({ viewport: { width: 390, height: 844 } });
   const T = await ctx.newPage(); T.on('dialog', (d) => d.accept());
   await T.goto(U + '&role=teacher'); await T.waitForTimeout(1200);
   await T.fill('#f-teacher .t-id', 'e2e-teacher'); await T.fill('#f-teacher .t-pw', '909090'); await T.click('#f-teacher .t-login'); await T.waitForTimeout(1000);

@@ -1,4 +1,4 @@
-// 수업 중 잠금: 차시 던전이 열려 있으면 캠프의 보강던전 · 허수아비 = 회색 · 못 들어감, 허수아비 목록에 수업 중인 차시 없음 → 수업 끝나면 열림
+// 수업 중에도 열림 (0.9.6.13 사용자 결정 · 2026-11-04 시험 고침): 차시 던전이 열려 있어도 허수아비 · 모루 · 성채(중단원던전)가 열리고, 허수아비 목록에 수업 중인 차시도 있음 → 수업 끝나도 그대로
 // 사용: python3 -m http.server 8765 (저장소 폴더) 띄운 뒤 node tools/e2e/e2e23.js <출력 폴더>
 const { chromium } = require('playwright');
 const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
@@ -21,24 +21,26 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   await T.selectOption('#lesson', 'set-02'); await T.selectOption('#t-cls', '1-3'); await T.click('#t-new'); await T.waitForTimeout(2500);
   await S.bringToFront(); await S.waitForTimeout(1500);
   const off = async () => S.evaluate(() => ['camp-castle', 'camp-dummy', 'camp-anvil'].map((id) => (document.getElementById(id) || {}).className || 'none').join(' | '));
+  const scr = () => S.evaluate(() => document.querySelector('.screen.active') && document.querySelector('.screen.active').id);
+  const back = async () => { if ((await scr()) !== 'screen-camp') { await S.evaluate(() => DS.Camp.back()); await S.waitForTimeout(900); } };
+  const list = () => S.$$eval('.bn-card .bn-h b', (bs) => bs.map((x) => x.textContent).join(' / ')).catch(() => 'none');
   console.log('수업 중 캠프:', await off());
-  await S.click('#camp-dummy'); await S.waitForTimeout(500);
-  console.log('허수아비 누름 → 안내:', (await S.textContent('#toast').catch(() => '')).trim().slice(0, 50), '· 화면:', await S.evaluate(() => document.querySelector('.screen.active') && document.querySelector('.screen.active').id));
-  await S.click('#camp-anvil'); await S.waitForTimeout(500); console.log('모루 누름 → 화면:', await S.evaluate(() => document.querySelector('.screen.active').id), '· 모루 창 열림:', await S.evaluate(() => document.body.classList.contains('forge-open')));
-  await S.screenshot({ path: `${OUT}/1-class-locked.png` });
-  // 다른 길로 들어가 보기 (예전 화면이 남아 있는 경우)
-  const sneak = await S.evaluate(async () => { const m = JSON.parse(localStorage.getItem('citadel-me') || 'null'); return !!m; });
-  await S.evaluate(() => DS.Bonus.enter(DS.Camp._me || window.__me || { c: '1-3', n: 1, name: '김민준', hero: 0 }, { train: true })); await S.waitForTimeout(800);
-  console.log('직접 들어가기 시도 → 화면:', await S.evaluate(() => document.querySelector('.screen.active').id), '(sneak me', sneak, ')');
+  await S.click('#camp-dummy'); await S.waitForTimeout(1800);
+  const s1 = await scr(), l1 = await list(); console.log('수업 중 허수아비 → 화면:', s1, '· 목록:', l1);
+  await S.screenshot({ path: `${OUT}/1-class-dummy.png` }); await back();
+  await S.click('#camp-anvil'); await S.waitForTimeout(1500);
+  const f1 = await S.evaluate(() => document.body.classList.contains('forge-open')); console.log('수업 중 모루 → 모루 창 열림:', f1);
+  await S.evaluate(() => { const f = document.getElementById('forge'); if (f) f.hidden = true; document.body.classList.remove('forge-open'); }); await back();
   // 수업 끝
   await T.evaluate(async () => { const code = DS.Teacher.code(); await DS.Act.endClass(code, '1-3').catch(async () => { await DS.Net.set('live/1-3/open', false); }); });
   await T.evaluate(async () => { await DS.Net.set('live/1-3/open', false); });
-  await S.bringToFront(); await S.waitForTimeout(1500);
-  if (!(await S.$('#camp-dummy'))) { await S.evaluate(() => DS.Camp.back()); await S.waitForTimeout(800); }
+  await S.bringToFront(); await S.waitForTimeout(1500); await back();
   console.log('수업 끝 캠프:', await off());
-  await S.click('#camp-dummy'); await S.waitForTimeout(1600);
-  console.log('허수아비 목록:', await S.$$eval('.bn-card .bn-h b', (bs) => bs.map((x) => x.textContent).join(' / ')).catch(() => 'none'));
+  await S.click('#camp-dummy'); await S.waitForTimeout(1800);
+  const s2 = await scr(), l2 = await list(); console.log('수업 끝 허수아비 → 화면:', s2, '· 목록:', l2);
   await S.screenshot({ path: `${OUT}/2-after-class.png` });
+  const ok = s1 === 'screen-bonus' && /2차시/.test(l1) && f1 && s2 === 'screen-bonus';
+  console.log(ok ? '✅ 수업 중에도 허수아비 · 모루 열림 (수업 중인 2차시도 목록에)' : '❌ 기대와 다름');
   console.log('errors:', errs.length ? errs : 'none');
-  await b.close();
+  await b.close(); if (!ok || errs.length) process.exit(1);
 })();

@@ -112,8 +112,8 @@ ${a.ui.home ? `.home-props{display:contents}.home-props img{position:fixed;z-ind
     if (!emoRe() || typeof MutationObserver === 'undefined') return;
     emojify(document.body);
     let q = new Set(), t = 0;
-    const flush = () => { t = 0; const s = q; q = new Set(); s.forEach((n) => n.isConnected && emojify(n)); };
-    new MutationObserver((ms) => { ms.forEach((m) => { if (m.type === 'characterData') q.add(m.target.parentNode); else m.addedNodes.forEach((n) => { if (!(n.classList && n.classList.contains('ui-ic'))) q.add(n.nodeType === 3 ? n.parentNode : n); }); }); if (!t) t = requestAnimationFrame(flush); }).observe(document.body, { childList: true, subtree: true, characterData: true });
+    const flush = () => { t = 0; const s = q; q = new Set(); s.forEach((n) => n && n.isConnected && emojify(n)); };
+    new MutationObserver((ms) => { ms.forEach((m) => { if (m.type === 'characterData') { if (m.target.parentNode) q.add(m.target.parentNode); } else m.addedNodes.forEach((n) => { const t = n.nodeType === 3 ? n.parentNode : n; if (t && !(n.classList && n.classList.contains('ui-ic'))) q.add(t); }); }); if (!t) t = requestAnimationFrame(flush); }).observe(document.body, { childList: true, subtree: true, characterData: true });
   }
   // 첫 화면 소품 · 엠블럼 (배치표 ui.home) — 첫 화면이 보일 때만 보임 (#screen-home 안에 넣음)
   function homeProps() {
