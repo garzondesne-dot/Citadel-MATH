@@ -89,7 +89,7 @@ DS.Student = (function () {
     const st0 = Raid().stepOf(L, R);
     if (!st0 || st0.kind !== 'monster') drawn = '';
     if (Raid().isLobby(R)) return lobbyView(body, false);
-    if (Raid().restOn(R)) return restView(body); // 🏕 쉼터: 쓰던 답(form)은 그대로 두고 장면만
+    if (Raid().restOn(R)) return DS.Fun && DS.Fun.on(R) ? DS.Fun.phone(body, R, me, code) : restView(body); // 🏕 쉼터: 쓰던 답(form)은 그대로 두고 장면만
     if (!(R.active || {})[me]) { body.innerHTML = '<div class="panel framed center"><p>⏳ 늦게 들어왔어요 — <b>다음 몬스터부터</b> 함께해요!</p><p class="muted small">잠시 뒤에도 그대로면 선생님께 말씀드려요 (선생님 폰이나 큰 화면이 켜져 있어야 들어가져요)</p></div>'; return; }
     if (Raid().canLobby(L, R, me) && !cleared0) { cleared0 = true; DS.Camp.markStamp(); }
     if (Raid().isEnd(L, R) && !resulted) showResult(); // 마무리 단계가 되면 아직 못 본 학생도 결과를 본다
@@ -262,11 +262,22 @@ DS.Student = (function () {
   // 💚 힐 알림 (v0.9.6): 받은 학생은 누가 줬는지 안다 (종합상황실엔 힐러만). 한 번 본 알림은 다시 안 띄움
   const healSeen = (k) => { try { const s = JSON.parse(sessionStorage.getItem('ds-heal-seen') || '{}'); if (s[k]) return true; s[k] = 1; sessionStorage.setItem('ds-heal-seen', JSON.stringify(s)); } catch (e) { /* 저장 못 하면 매번 확인 */ } return false; };
   const who = (u) => { const p = (R.players || {})[u] || {}; return `${p.num || ''}번 ${p.nick || '친구'}`; };
+  // 💚 힐 표시 (v0.9.7.7 · 사용자 요청): 아래 배너 대신 게임 화면 용사 머리 위에 「+1 💚 김민수 응원」이 떠오름
+  function healPop(text, delay = 0) {
+    setTimeout(() => {
+      const h = document.querySelector('#st-body .scene .enc-hero') || document.querySelector('#st-body .scene');
+      if (!h) { DS.UI.toast(text, 3000); return; }
+      const e = document.createElement('i'); e.className = 'heal-pop'; e.textContent = text; h.appendChild(e);
+      setTimeout(() => e.remove(), 2600);
+    }, 120 + delay);
+  }
+  const nickOf = (u) => ((R.players || {})[u] || {}).nick || '친구';
   function healNotice(mid) {
     if (test) return;
+    let k = 0;
     Raid().healsTo(R, mid, me).slice(0, Raid().HEAL_MAX).forEach((h) => {
       if (healSeen(`${code}|${mid}|${h.from}|${h.k}`)) return;
-      DS.UI.toast(`💚 ${who(h.from)} 용사가 도전 기회를 한 칸 채워 줬어요!`, 3500); DS.Sound.correct(); drawn = '';
+      healPop(`+1 💚 ${nickOf(h.from)} 응원`, (k++) * 700); DS.Sound.correct(); drawn = '';
       heroFx = { pose: 'healed', until: Date.now() + 1800 }; setTimeout(() => heroFlash('healed', 1600), 60);
     });
   }
@@ -314,7 +325,7 @@ DS.Student = (function () {
       const k = Raid().healsGiven(R, mid, me), to = await DS.Act.heal(code, raw, mid);
       DS.Sound.correct(); drawn = '';
       heroFx = { pose: 'heal', until: Date.now() + 1600 }; setTimeout(() => heroFlash('heal', 1400), 60);
-      DS.UI.toast(to ? `💚 ${who(to)} 용사에게 도전 기회를 한 칸 채워 줬어요!` : '💚 응원을 보냈어요! (지금은 기회가 필요한 친구가 없어요)', 3500);
+      healPop(to ? `💚 ${nickOf(to)}에게 +1` : '💚 응원 보냄!');
       if (DS.Grow && !test) DS.Grow.add(acc(), { heal: 1 }, `heal_${code}_${mid}_${k}`).catch(() => {});
     });
   }

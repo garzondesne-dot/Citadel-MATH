@@ -1463,3 +1463,68 @@ body:has(#test-bar) #ver-tag { bottom: calc(64px + env(safe-area-inset-bottom));
 .hint-fig { margin-top: 6px; background: #fbfaf7; border-radius: 6px; padding: 4px; }
 .hint-svg { display: block; width: 100%; max-width: 340px; height: auto; margin: 0 auto; font-family: 'Galmuri11', sans-serif; }
 .hint-svg text { font-family: 'DejaVu Serif', 'Times New Roman', serif; }
+
+/* ⚖ 밸런스 게임 (v0.9.7.7 · 쉼터 놀이) — 그림(assets fun.bg · fun.plat)이 오기 전엔 CSS 로 그린 「무너지는 두 갈래 다리」 */
+.fun-btn { width: 100%; margin-top: 8px; background: linear-gradient(90deg, #2f6bff33, #ff8a0033); }
+.fun-ctl { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-top: 8px; font-weight: 700; }
+.fa-wrap { position: relative; }
+.fa-head { display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap; font-size: 16px; margin-bottom: 6px; }
+.fa-wrap.big .fa-head { font-size: 30px; padding: 10px 0; }
+.fa-vs i { font-style: normal; font-weight: 800; padding: 1px 8px; border-radius: 6px; color: #fff; }
+.fa-vs i.a { background: #2f6bff; } .fa-vs i.b { background: #ff8a00; }
+.fa-t b { font: 700 1.2em var(--pixel, monospace); color: #ffd36b; }
+.fa-arena { position: relative; width: 100%; aspect-ratio: 16 / 10; overflow: hidden; border-radius: 10px; background: linear-gradient(#1b1430 0%, #2b2147 38%, #0b0814 100%); background-size: cover; background-position: center; }
+.fa-wrap.big .fa-arena { aspect-ratio: auto; height: calc(100vh - 240px); min-height: 420px; }
+.fa-arena.img .fa-pit, .fa-arena.img .fa-plaza { display: none; }
+.fa-gal { position: absolute; left: 0; right: 0; top: 0; height: 22%; background: linear-gradient(#3a2d55, #2a2140); border-bottom: 4px solid #6b5a8c; }
+.fa-arena.img .fa-gal { background: transparent; border: 0; }
+.fa-g { position: absolute; bottom: 4%; transform: translateX(-50%) scale(.55); transform-origin: bottom center; opacity: .85; }
+.fa-g.me { opacity: 1; filter: drop-shadow(0 0 4px #ffe27a); }
+.fa-gn { position: absolute; right: 8px; top: 6px; font-size: 12px; color: #e9ddff; background: #0006; padding: 1px 6px; border-radius: 6px; }
+.fa-wrap.big .fa-gn { font-size: 20px; }
+.fa-pit { position: absolute; top: 30%; bottom: 0; width: 6%; background: linear-gradient(#000 0%, #05030a 100%); box-shadow: inset 0 0 18px #000; }
+.fa-pit.l { left: 31%; } .fa-pit.r { right: 31%; }
+.fa-plaza { position: absolute; left: 37%; right: 37%; top: 38%; bottom: 0; background: repeating-linear-gradient(90deg, #6d6478 0 22px, #5d5568 22px 24px); border-top: 5px solid #8d849a; }
+.fa-plat { position: absolute; top: 34%; bottom: 0; width: 30%; background: repeating-linear-gradient(90deg, #6f6656 0 26px, #5e5647 26px 28px) center / cover; border-top: 6px solid; transition: transform 1.4s cubic-bezier(.5, 0, .9, .4), opacity 1.4s; }
+.fa-arena.img .fa-plat { background-color: transparent; border-top: 0; background-size: 100% 100%; }
+.fa-plat.a { left: 1%; border-color: #2f6bff; } .fa-plat.b { right: 1%; border-color: #ff8a00; }
+.fa-flag { position: absolute; top: -26%; left: 50%; transform: translateX(-50%); font-style: normal; font-weight: 800; color: #fff; padding: 4px 10px; border-radius: 6px; white-space: nowrap; max-width: 96%; overflow: hidden; text-overflow: ellipsis; font-size: 13px; box-shadow: 0 3px 0 #0006; }
+.fa-wrap.big .fa-flag { font-size: 30px; padding: 6px 18px; }
+.fa-plat.a .fa-flag { background: #2f6bff; } .fa-plat.b .fa-flag { background: #ff8a00; }
+.fa-cnt { position: absolute; bottom: 6%; left: 50%; transform: translateX(-50%); font: 800 28px var(--pixel, monospace); color: #fff; text-shadow: 2px 2px 0 #000; font-style: normal; }
+.fa-wrap.big .fa-cnt { font-size: 64px; }
+.fa-plat.doom { animation: faShake .3s 2 1.9s; }
+.fa-plat.fall { transform: translateY(110%) rotate(8deg); opacity: .2; }
+.fa-plat.b.fall { transform: translateY(110%) rotate(-8deg); }
+@keyframes faShake { 0%, 100% { margin-left: 0; } 25% { margin-left: -6px; } 75% { margin-left: 6px; } }
+.fa-h { position: absolute; transform: translate(-50%, -50%); transition: left 1.3s cubic-bezier(.3, .7, .3, 1), top 1.3s cubic-bezier(.3, .7, .3, 1), opacity .8s; z-index: 3; text-align: center; }
+.fa-wrap:not(.big) .fa-h { transform: translate(-50%, -50%) scale(.7); }
+.fa-h b { display: block; font-size: 11px; color: #fff; text-shadow: 1px 1px 0 #000; white-space: nowrap; }
+.fa-wrap.big .fa-h b { font-size: 15px; }
+.fa-h.me { z-index: 5; filter: drop-shadow(0 0 5px #ffe27a); }
+.fa-h.me b { color: #ffe27a; }
+.fa-h.run-r .art { transform: scaleX(-1); }
+.fa-h.fall { transition: top 1.4s cubic-bezier(.5, 0, .9, .4), opacity 1.4s; top: 130% !important; opacity: 0; }
+.fa-h.fa-lost { opacity: .25; filter: grayscale(1); }
+.fa-me { text-align: center; margin: 8px 0 4px; font-weight: 700; }
+.fa-me.ok { color: #11a36d; font-size: 20px; } .fa-me.ng { color: #d93a3a; font-size: 18px; }
+.fa-res { text-align: center; font-weight: 800; font-size: 17px; }
+.fa-pick { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+.fa-pick .btn { min-height: 92px; font-size: 19px; font-weight: 800; color: #fff; border: 3px solid transparent; white-space: normal; line-height: 1.25; }
+.fa-pick .fa-a { background: #2f6bff; } .fa-pick .fa-b { background: #ff8a00; }
+.fa-pick .btn:not(.on) { opacity: .78; }
+.fa-pick .btn.on { opacity: 1; border-color: #fff; box-shadow: 0 0 0 3px #1f2a44, 0 0 16px #ffe27a; transform: scale(1.03); }
+.fa-pick .btn.on::after { content: ' ✔'; }
+.fa-foot { text-align: center; font-size: 24px; margin: 10px 0 0; font-weight: 700; }
+.fa-win { position: absolute; left: 50%; top: 46%; transform: translate(-50%, -50%); text-align: center; background: #1a1206e6; border: 3px solid #ffd36b; border-radius: 14px; padding: 16px 40px; z-index: 6; color: #ffe7b0; }
+.fa-win h1 { margin: 0 0 6px; font-size: 54px; } .fa-win p { font-size: 28px; margin: 0; }
+.fa-pick .btn.fa-a, .fa-pick .btn.fa-b { border-image: none !important; background-image: none !important; color: #fff !important; text-shadow: 1px 1px 0 #0008; }
+.fa-pick .btn.fa-a { background-color: #2f6bff !important; } .fa-pick .btn.fa-b { background-color: #ff8a00 !important; }
+.fa-wrap.big { width: 100%; box-sizing: border-box; }
+.fa-wrap.big .fa-arena { width: 100%; }
+.fa-flag { white-space: normal; text-align: center; line-height: 1.15; text-overflow: clip; width: max-content; max-width: 92%; }
+.fa-wrap.big .fa-flag { font-size: 26px; }
+.fa-win { min-width: 46%; } .fa-win h1 { white-space: nowrap; }
+/* 💚 힐 표시 (v0.9.7.7): 용사 머리 위로 떠오르는 글자 */
+.heal-pop { position: absolute; left: 50%; bottom: 100%; transform: translateX(-50%); white-space: nowrap; font: 800 16px var(--pixel, sans-serif); font-style: normal; color: #6dff9e; text-shadow: 2px 2px 0 #053a1a, -1px -1px 0 #053a1a; z-index: 9; pointer-events: none; animation: healPop 2.5s ease-out forwards; }
+@keyframes healPop { 0% { opacity: 0; transform: translate(-50%, 10px) scale(.7); } 15% { opacity: 1; transform: translate(-50%, 0) scale(1.15); } 30% { transform: translate(-50%, -6px) scale(1); } 100% { opacity: 0; transform: translate(-50%, -54px); } }

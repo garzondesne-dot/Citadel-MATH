@@ -112,6 +112,7 @@ DS.Act = (function () {
     const st = (await N().get(P(code, 'state'))) || {};
     if (on && !st.rest) await N().update(P(code, 'state'), { rest: { at: N().now(), min: Number(min) || 5 } });
     if (!on && st.rest) await N().update(P(code, 'state'), { rest: null, pauseMs: (st.pauseMs || 0) + Math.max(0, N().now() - (st.rest.at || N().now())) });
+    if (!on && DS.Fun) await DS.Fun.stop(code).catch(() => {}); // 쉼터가 끝나면 ⚖ 밸런스 게임도 끝
   }
   const setRestMin = (code, min) => N().set(P(code, 'state/rest/min'), Math.max(1, Math.min(20, Math.round(Number(min) || 5))));
   const setPct = (code, mid, pct) => N().set(P(code, `state/pct/${mid}`), Math.max(10, Math.min(100, Math.round(pct))));

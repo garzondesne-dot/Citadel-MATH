@@ -60,12 +60,12 @@ DS.Control = (function () {
   if (typeof document !== 'undefined') setInterval(() => document.querySelectorAll('[data-rest-end]').forEach((e) => { const s = Math.max(0, Math.round((Number(e.dataset.restEnd) - DS.Net.now()) / 1000)); e.textContent = mmss(s); e.classList.toggle('over', s === 0); }), 1000);
   const mmss = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
   const restBtn = (R) => Raid().restOn(R)
-    ? `<div class="rest-ctl"><button class="btn primary rest-btn on" data-rest>▶ 쉼터 끝 · 수업으로</button><span class="rest-t">⏱ <b data-rest-end="${restEnd(R)}">${mmss(restLeft(R))}</b></span><button class="btn small" data-rest-min="-1">−1분</button><button class="btn small" data-rest-min="1">+1분</button></div>`
+    ? `<div class="rest-ctl"><button class="btn primary rest-btn on" data-rest>▶ 쉼터 끝 · 수업으로</button><span class="rest-t">⏱ <b data-rest-end="${restEnd(R)}">${mmss(restLeft(R))}</b></span><button class="btn small" data-rest-min="-1">−1분</button><button class="btn small" data-rest-min="1">+1분</button></div>${DS.Fun ? DS.Fun.ctlHtml(R) : ''}`
     : '<button class="btn rest-btn" data-rest>🏕 쉼터 (잠깐 쉬기 · 5분)</button>';
   // 🖥 종합상황실 아이콘 막대 (2026-11-04 사용자 요청 「버튼이 많아져 복잡」): 같은 기능을 아이콘 + 짧은 글자 (마우스를 올리면 설명)
   //   쉼터 중에는 [▶ 수업으로 · ⏱ · −1 · +1] 만
   function iconBar(L, R, videos, demo) {
-    if (Raid().restOn(R)) return `<div class="ic-bar rest"><button class="icb wide on" data-rest title="쉼터를 끝내고 하던 단계로">▶<small>수업으로</small></button><span class="icb-t">⏱ <b data-rest-end="${restEnd(R)}">${mmss(restLeft(R))}</b></span><button class="icb" data-rest-min="-1" title="쉼터 1분 줄이기">−1<small>분</small></button><button class="icb" data-rest-min="1" title="쉼터 1분 늘리기">+1<small>분</small></button></div>`;
+    if (Raid().restOn(R)) return `<div class="ic-bar rest"><button class="icb wide on" data-rest title="쉼터를 끝내고 하던 단계로">▶<small>수업으로</small></button><span class="icb-t">⏱ <b data-rest-end="${restEnd(R)}">${mmss(restLeft(R))}</b></span><button class="icb" data-rest-min="-1" title="쉼터 1분 줄이기">−1<small>분</small></button><button class="icb" data-rest-min="1" title="쉼터 1분 늘리기">+1<small>분</small></button>${DS.Fun ? (R.fun ? '<button class="icb" data-fun="stop" title="밸런스 게임 끝">⏹<small>게임 끝</small></button>' : '<button class="icb" data-fun="start" title="밸런스 게임 — 적은 쪽 탈락">⚖<small>밸런스</small></button>') : ''}</div>`;
     const st = Raid().stepOf(L, R), fight = st && (st.kind === 'monster' || st.kind === 'boss');
     const vid = st && DS.Video.ok(DS.Video.pick(L, videos, st.id)), von = vid && Raid().videoOn(R, st.id);
     const b = (attr, ic, cap, tip, on) => `<button class="icb${on ? ' on' : ''}" ${attr} title="${tip}">${ic}<small>${cap}</small></button>`;
@@ -74,6 +74,7 @@ DS.Control = (function () {
   const bindRest = (el, code, R) => {
     el.querySelectorAll('[data-rest]').forEach((b) => (b.onclick = () => run(() => Act().setRest(code, !Raid().restOn(R), 5))));
     el.querySelectorAll('[data-rest-min]').forEach((b) => (b.onclick = () => run(() => Act().setRestMin(code, (((R.state || {}).rest || {}).min || 5) + Number(b.dataset.restMin)))));
+    if (DS.Fun && Raid().restOn(R)) DS.Fun.bind(el, code, R); // ⚖ 밸런스 게임 (v0.9.7.7)
   };
   const focusBtn = (R) => `<button class="btn focus-btn${Raid().focusOn(R) ? ' on' : ''}" data-focus>${Raid().focusOn(R) ? '🔴 집중모드 끄기' : '🔴 집중모드 켜기'}</button>`;
   // 📄 문제 화면 버튼 (문제 · 보강 · 형성평가 단계에서만)

@@ -51,7 +51,7 @@ DS.Hall = (function () {
     videoOverlay(step);
     const el = $('#h-arena');
     el.classList.toggle('focus-on', Raid().focusOn(R) && !Raid().isLobby(R));
-    if (Raid().restOn(R) && !Raid().isLobby(R) && !Raid().isClosed(R)) return restScene();
+    if (Raid().restOn(R) && !Raid().isLobby(R) && !Raid().isClosed(R)) { if (DS.Fun && DS.Fun.on(R)) { built = 'fun'; clearInterval(bubbleT); return DS.Fun.hall($('#h-arena'), R); } return restScene(); }
     if (step && (step.kind === 'monster' || step.kind === 'boss')) { const key = `f${i}`; if (built !== key) buildFight(step, key); else updateFight(step); sheetOverlay(step); return; }
     clearInterval(bubbleT);
     if (Raid().isClosed(R)) { built = 'closed'; el.innerHTML = `<div class="h-victory"><div class="trophy"><i class="trophy-img" style="background-image:url('${DS.ASSETS.base}${DS.ASSETS.trophy}')"></i></div><h1>수업 끝!</h1><p class="muted">모두 모닥불로 돌아갔어요. 게임 기록은 수학 성적이 아니에요.</p><div class="stamp-bar big">📮 반드시 학습지 확인도장 받아가세요.</div><div class="h-acts row">${klassBtn()}<button class="btn primary" id="h-tcamp">🏛 교사 캠프 가기</button></div></div>`; bindActs(); return; }
