@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ko" data-footer="접수번호 2026-073262 · 창작 과정 보충 설명서 (보완 요청 대비)"><head><meta charset="utf-8"><title>창작 과정 보충 설명서</title>
+<style>
+  :root { --ink: #1f2a44; --sub: #5b6478; --line: #d4d9e6; }
+  body { margin: 0; font-family: 'Noto Sans CJK KR', sans-serif; color: var(--ink); font-size: 10pt; line-height: 1.65; }
+  h1 { font-size: 18pt; margin: 0 0 1mm; } .sub { color: var(--sub); margin: 0 0 5mm; }
+  h2 { font-size: 13pt; margin: 6mm 0 2.5mm; padding: 1.2mm 3mm; background: #233a7a; color: #fff; border-radius: 1.5mm; page-break-after: avoid; }
+  table { width: 100%; border-collapse: collapse; margin: 2mm 0 4mm; font-size: 9pt; }
+  tr { page-break-inside: avoid; }
+  th, td { border: 1px solid var(--line); padding: 1.4mm 2.2mm; vertical-align: top; text-align: left; } th { background: #eef2fb; }
+  code { font-size: 8.6pt; background: #f1f3f8; padding: 0 1mm; border-radius: .8mm; }
+  .box { border: 1px solid #b8c6ee; background: #f7f9ff; border-radius: 2mm; padding: 3mm 4.5mm; margin: 3mm 0; page-break-inside: avoid; }
+  .small { font-size: 8.6pt; color: var(--sub); }
+</style></head><body>
+<h1>창작 과정 보충 설명서</h1>
+<p class="sub">「모두의 던전 — 학습지 입력형 교실 협동 레이드 수업 플랫폼」 · 접수번호 2026-073262 · 신청인 김찬우 · 복제물 v{{VERSION}}</p>
+
+<div class="box">
+<b>요지.</b> 이 프로그램의 소스코드는 생성형 AI(Anthropic Claude)가 신청인의 지시에 따라 작성하였다(신청서에 밝힘). 신청인은 아이디어를 제공하는 데 그치지 않고, 프로그램이 따라야 할 <b>구체적인 규칙 · 수치 · 판정 기준 · 화면 구성 · 카드 조합표를 직접 정하고</b>, 실제 수업에 적용한 뒤 결과를 보고 고칠 내용을 다시 정하는 과정을 반복하였다. 아래 표는 신청인이 정한 각 사항이 <b>제출한 복제물의 어느 위치에 그대로 표현되어 있는지</b>를 대응시킨 것이다. 각 결정은 결정 기록 문서(날짜별 32개 항목)와 작업 대화 기록으로 확인할 수 있다.
+</div>
+
+<h2>1. 신청인이 정한 사항 ↔ 복제물 속 위치</h2>
+<table>
+<tr><th style="width:5%">#</th><th style="width:40%">신청인이 정한 구체적 사항</th><th style="width:33%">복제물 위치</th><th>결정 시기</th></tr>
+<tr><td>1</td><td>수업 단계 구성: 도입 → 복습 → 개념 ↔ 문항(몬스터) → 형성평가(보스) → 마무리 · 학생 폰 / 교사 리모컨 / 교실 화면(종합상황실)의 역할 분담</td><td><code>js/raid/model.js</code> (단계 · 방 구조), <code>js/raid/teacher.js</code> · <code>hall.js</code> · <code>student.js</code></td><td>2026-10-31</td></tr>
+<tr><td>2</td><td>몬스터 체력 = 인원 × 소문제 수 × 기준 %, 기준 기본 90 %, 교사가 수업 중 조절</td><td><code>js/raid/model.js</code> <code>pctOf</code> · <code>monsterHp</code></td><td>2026-10-31</td></tr>
+<tr><td>3</td><td>재도전 3번(시도 최대 4번) · 재도전은 숫자만 바꾼 문제 · 다 맞힌 뒤 남은 기회는 데미지 0 연습 공격</td><td><code>js/raid/model.js</code> <code>RETRIES = 3</code></td><td>2026-11-01 ~ 02</td></tr>
+<tr><td>4</td><td>친구 힐: 받는 기회는 몬스터마다 최대 +2 · 몬스터 묶기: 맞힌 소문제 1개당 1초, 최대 4초</td><td><code>js/raid/model.js</code> <code>HEAL_MAX = 2</code> · <code>BIND_PER = 1, BIND_MAX = 4</code></td><td>2026-11-02 ~ 03</td></tr>
+<tr><td>5</td><td>몬스터 공격 간격 · 멈춤 시간(레이드 · 보스), 혼자 하는 던전은 45초마다 1초</td><td><code>js/raid/model.js</code> <code>ATK</code> · <code>soloAtk</code></td><td>2026-11-03 ~ 04</td></tr>
+<tr><td>6</td><td>경험치 표: 참여 10 · 제출 2 · 맞힘 1 · <b>재도전으로 고침 3</b> · 보스 처치 10 · 만점 5 · 힐 3 … (고친 것에 더 큰 보상)</td><td><code>js/raid/grow.js</code> <code>XP</code> · 레벨 공식 <code>need = 40 + 20(L − 1)</code></td><td>2026-10-31 ~ 11-04</td></tr>
+<tr><td>7</td><td>교실 화면에는 정답 · 오답 글자를 띄우지 않고 공격 연출만 보이게</td><td><code>js/raid/hall.js</code></td><td>2026-10-31</td></tr>
+<tr><td>8</td><td>오답노트 분류: 한 번에 · 고침 · 틀림 · 나만 안 함 · 반 전체 안 함 · 불참 · 보충 완료와 각 문구, 틀림 · 안 풂만 깜빡이게</td><td><code>js/raid/note.js</code> <code>OPEN</code> · <code>WHY</code> · <code>IDX</code></td><td>2026-11-04</td></tr>
+<tr><td>9</td><td>쉼터 놀이 규칙: 적은 쪽 탈락 / 많은 쪽 탈락 / OX 틀리면 탈락, 비김 · 한쪽 몰림 = 탈락 없음, 안 고르면 탈락, 1 · 2판 15초 · 3판부터 10초, 4분 뒤 마지막 판, 2명 이하 우승, 쏠린 질문(적은 쪽 25 % 미만) 자동 제외</td><td><code>js/raid/fun.js</code> <code>judge</code> · <code>PICK</code> · <code>LIMIT</code> · <code>tilted</code></td><td>2026-11-04</td></tr>
+<tr><td>10</td><td>OX 타임: 탈락 없이 5문장 · 반 정답률 · 정답률 80 % 미만 문장을 「다시 짚어 볼 문장」으로</td><td><code>js/raid/fun.js</code> <code>QN = 5</code> · <code>quizEnd</code></td><td>2026-11-04</td></tr>
+<tr><td>11</td><td><b>⚒ 모루 연성(대장간)</b>: 카드 3장 [재료][연산][재료]를 모루에 올려 연성 · <b>엄격 연성</b>(순서 · 자리가 뜻을 바꿈) · <b>처음 만든 카드는 예제를 맞혀야 완성</b> · 연성 실패 → 힌트 조각 +1 → 재료 → 연산 순으로 공개 · 레시피 도감(<code>??? → ???</code> + 힌트 한 줄) · 카드는 공격에 쓰지 않고 꾸미기 특전만 · 배운 차시까지만 정식 카드</td><td><code>js/raid/forge.js</code> (연성 판정 · 예제 · 힌트 조각), <code>lessons/unit-set.js</code> (카드 조합표 54장 · 등급 · 예제)</td><td>2026-10-31 ~ 11-03</td></tr>
+<tr><td>12</td><td>집합 단원 연성법: 원리 유도가 아닌 <b>기호를 써 보고 외우는</b> 연성, <b>모든 카드는 연산을 한 번 이상</b> 거침, 차시별로 열리는 카드 범위</td><td><code>lessons/unit-set.js</code> 머리말 · 카드 목록</td><td>2026-10-31</td></tr>
+<tr><td>13</td><td>계정 방식: 반 + 번호(교사가 올린 명단에서 이름 자동) + 숫자 4자리 비밀번호, 잊으면 0000 초기화</td><td><code>js/raid/account.js</code></td><td>2026-10-31</td></tr>
+<tr><td>14</td><td>화면 구성의 선택 · 배열: 교사 메뉴 정리, 학생 캠프(성채 · 텐트 · 우편함 · 모루 · 허수아비) 배치, 놀이 무대 · 아이콘 템플릿 설계와 결과물 선택</td><td><code>index.html</code> · <code>js/raid/camp.js</code> · <code>assets/manifest.js</code> (배치표)</td><td>2026-11-03 ~ 04</td></tr>
+</table>
+
+<h2>2. 창작 과정</h2>
+<table>
+<tr><th style="width:24%">단계</th><th>신청인이 한 일</th></tr>
+<tr><td>설계</td><td>수업 구조 · 규칙 · 수치 · 판정 기준 · 카드 조합 원칙을 정하고, 확정안을 검토한 뒤에만 구현하게 함 (「진행」 승인 방식)</td></tr>
+<tr><td>구현 지시 · 검토</td><td>AI가 작성한 화면 · 규칙을 직접 시험하고, 틀린 점 · 바꿀 점을 구체적으로 지시 (예: 「20초마다 45초 멈춤」 오류 발견 → 「45초마다 1초」로 수정 지시)</td></tr>
+<tr><td>수업 적용</td><td>본인 담당 5개 반 실제 수업에 적용, 학생 반응을 보고 규칙을 다시 정함 (저장 시점, 학습지 분량, 쉼터 놀이 추가, 오답노트 표시 방식 등)</td></tr>
+<tr><td>그림</td><td>무대 · 몬스터 · 아이콘의 칸 배치 템플릿을 정하고 이미지 생성 AI 결과물 중에서 선택 · 배열 (그림 자체는 등록 대상에서 제외)</td></tr>
+</table>
+<p class="small">증빙: 결정 기록 문서(docs/DECISIONS.md), 공개 저장소 커밋 기록, 작업 대화 기록 — 요청 시 제출. 규칙 · 아이디어 자체가 아니라, 위 사항이 복제물의 코드 · 데이터로 구체화된 표현 부분에 대한 보충 설명입니다.</p>
+</body></html>
