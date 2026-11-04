@@ -14,11 +14,13 @@ const SCHOOL = process.env.COMCI_SCHOOL, TEACHER = process.env.COMCI_TEACHER;
 const DRY = process.argv.includes('--dry'), RAW = process.argv.includes('--raw');
 const MATH = /수학/; // 수학 칸만 (공통수학1 · 2 · 수학 등)
 
-const dec = (buf) => new TextDecoder('euc-kr').decode(buf);
-async function get(url) {
+// 첫 화면 = EUC-KR · 시간표 자료(JSON) = UTF-8 (2026-11 확인: 자료를 EUC-KR 로 읽으면 「분리」 · 교사 이름이 깨짐)
+const dec = (buf, cs = 'euc-kr') => new TextDecoder(cs).decode(buf);
+async function get(url, cs) {
   const r = await fetch(url, { headers: { 'user-agent': 'Mozilla/5.0 (school timetable sync)' }, signal: AbortSignal.timeout(20000) });
   if (!r.ok) throw new Error(`${url} → ${r.status}`);
-  return dec(Buffer.from(await r.arrayBuffer()));
+  const ct = (r.headers.get('content-type') || '').toLowerCase(), b = Buffer.from(await r.arrayBuffer());
+  return dec(b, cs || (/utf-?8/.test(ct) ? 'utf-8' : 'euc-kr'));
 }
 // 2026-11 컴시간 화면 코드가 뒤섞여 있음 (hour-obfuscated-v2): (function(a,k){… 16진 4자리 ^ ((k + n*13) & 255) …})([[0|1, "…"], …], k) → 같은 방법으로 풀어서(실행하지 않음) 글로 붙임
 function unmix(html) {
@@ -42,7 +44,7 @@ async function route() {
 }
 async function raw(r) {
   const q = Buffer.from(`${r.prefix}${SCHOOL}_0_${r.a}`).toString('base64'); // sc_data('앞글자', sc, 1, '0') → 앞글자 + 학교코드 + _0_ + 1
-  const body = await get(`${HOST}/${r.path}?${q}`);
+  const body = await get(`${HOST}/${r.path}?${q}`, 'utf-8');
   const j = body.slice(0, body.lastIndexOf('}') + 1);
   return JSON.parse(j);
 }
@@ -53,7 +55,8 @@ function shape(d) {
   const teachers = arrs.filter(([, v]) => strs(v) > 5 && v.some((x) => typeof x === 'string' && x.includes(String(TEACHER || '').slice(0, 2)))).sort((a, b) => b[1].length - a[1].length)[0];
   const subjects = arrs.filter(([k, v]) => (!teachers || k !== teachers[0]) && strs(v) > 5 && v.some((x) => typeof x === 'string' && MATH.test(x))).sort((a, b) => b[1].length - a[1].length)[0];
   // 학급 시간표: 학년(1~3) → 반 → 요일(1~5) → 교시 · 숫자 4단 배열
-  const deep = (v, n) => (n === 0 ? typeof v === 'number' : Array.isArray(v) && v.some((x) => deep(x, n - 1)));
+  const num = (x) => (typeof x === 'number' ? x : typeof x === 'string' && /^\D?\d+$/.test(x) ? Number(x.replace(/\D/g, '')) : NaN);
+  const deep = (v, n) => (n === 0 ? Number.isFinite(num(v)) : Array.isArray(v) && v.some((x) => deep(x, n - 1)));
   const tables = arrs.filter(([, v]) => deep(v, 4));
   const sep = typeof d['분리'] === 'number' ? d['분리'] : 100;
   return { teachers, subjects, tables, sep };
@@ -71,7 +74,8 @@ function week(d) {
   for (const [key, tab] of tables) for (const mode of ['tf', 'sf']) {
     const out = {}; let n = 0;
     tab.forEach((g, grade) => Array.isArray(g) && g.forEach((cl, c) => Array.isArray(cl) && cl.forEach((day, dw) => Array.isArray(day) && day.forEach((code, p) => {
-      if (typeof code !== 'number' || !code || dw < 1 || dw > 5 || p < 1 || p > 10) return;
+      code = typeof code === 'number' ? code : typeof code === 'string' ? Number(code.replace(/\D/g, '')) : NaN; // ">74032" = 이번 주 바뀐 칸
+      if (!Number.isFinite(code) || !code || dw < 1 || dw > 5 || p < 1 || p > 10) return;
       const { t, s } = split(code, sep, mode);
       if (!ids.includes(t)) return;
       const sub = String(Sb[s] || ''); if (!MATH.test(sub)) return;
