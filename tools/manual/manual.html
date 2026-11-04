@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><title>모두의 던전 교사용 사용설명서</title>
+<style>
+  @page { size: A4; }
+  :root { --ink: #1f2a44; --sub: #5b6478; --a: #2f6bff; --b: #ff8a00; --c: #e5337a; --ok: #11a36d; --no: #d93a3a; --line: #d9dde8; --soft: #f4f6fb; --gold: #b8860b; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Noto Sans CJK KR', 'Noto Sans KR', sans-serif; color: var(--ink); font-size: 10.5pt; line-height: 1.62; background: #fff; }
+  h1, h2, h3 { line-height: 1.3; }
+  .cover { height: 265mm; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; page-break-after: always; background: linear-gradient(#141a2e, #22305a); color: #fff; border-radius: 6mm; padding: 20mm; }
+  .cover img { width: 120mm; margin-bottom: 10mm; image-rendering: pixelated; }
+  .cover h1 { font-size: 30pt; margin: 0 0 4mm; } .cover p { margin: 2mm 0; color: #c9d3f0; font-size: 12pt; }
+  .cover .ver { margin-top: 14mm; font-size: 10pt; color: #9aa6c8; }
+  .toc { page-break-after: always; }
+  .toc ol { padding-left: 6mm; } .toc li { margin: 1.6mm 0; font-size: 11.5pt; } .toc li span { color: var(--sub); font-size: 9.5pt; }
+  section.ch { page-break-before: always; }
+  h2 { font-size: 19pt; margin: 0 0 4mm; padding-bottom: 2mm; border-bottom: 3px solid var(--a); }
+  h2 .no { color: var(--a); margin-right: 3mm; }
+  h3 { font-size: 13pt; margin: 6mm 0 2mm; color: #233a7a; }
+  p { margin: 1.5mm 0; }
+  .lead { background: var(--soft); border-left: 4px solid var(--a); padding: 3mm 4mm; margin: 2mm 0 4mm; }
+  table { width: 100%; border-collapse: collapse; margin: 2mm 0 4mm; font-size: 9.8pt; page-break-inside: avoid; }
+  th, td { border: 1px solid var(--line); padding: 1.6mm 2.4mm; vertical-align: top; text-align: left; }
+  th { background: #eef2fb; font-weight: 700; }
+  ol.steps { padding-left: 0; list-style: none; counter-reset: s; margin: 2mm 0 4mm; }
+  ol.steps > li { counter-increment: s; position: relative; padding: 1.2mm 0 1.2mm 9mm; }
+  ol.steps > li::before { content: counter(s); position: absolute; left: 0; top: 1.4mm; width: 6mm; height: 6mm; border-radius: 50%; background: var(--a); color: #fff; font-weight: 700; font-size: 9pt; display: flex; align-items: center; justify-content: center; }
+  .tip, .warn, .why { border-radius: 2mm; padding: 2.6mm 4mm; margin: 3mm 0; page-break-inside: avoid; font-size: 10pt; }
+  .tip { background: #eafaf2; border: 1px solid #9fdcbf; } .tip::before { content: '💡 도움말  '; font-weight: 700; color: var(--ok); }
+  .warn { background: #fff1f0; border: 1px solid #f3b2ad; } .warn::before { content: '⚠ 주의  '; font-weight: 700; color: var(--no); }
+  .why { background: #fff8e6; border: 1px solid #f0d58a; } .why::before { content: '🎯 이렇게 만든 이유  '; font-weight: 700; color: var(--gold); }
+  figure { margin: 3mm 0 5mm; text-align: center; page-break-inside: avoid; }
+  figure img { max-width: 100%; border: 1px solid var(--line); border-radius: 2mm; box-shadow: 0 1mm 3mm #0002; }
+  figure.pc img { width: 100%; } figure.mid img { width: 72%; } figure.phone img { width: 52mm; }
+  figure.pair, figure.trio { display: flex; gap: 4mm; justify-content: center; align-items: flex-start; }
+  figure.pair > div, figure.trio > div { flex: 1; } figure.pair img, figure.trio img { width: 100%; }
+  figure.phones { display: flex; gap: 4mm; justify-content: center; } figure.phones > div { width: 52mm; } figure.phones img { width: 100%; }
+  figcaption, figure .cap { font-size: 8.8pt; color: var(--sub); margin-top: 1.2mm; }
+  img[data-missing] { display: none; }
+  .k { display: inline-block; padding: 0 2mm; border-radius: 1.2mm; background: #eef2fb; border: 1px solid #c9d3ee; font-size: 9.2pt; font-weight: 700; white-space: nowrap; }
+  .chip { display: inline-block; width: 3.4mm; height: 3.4mm; border-radius: .6mm; vertical-align: -0.5mm; margin-right: 1mm; }
+  .flow { display: flex; gap: 2mm; margin: 3mm 0 5mm; page-break-inside: avoid; }
+  .flow > div { flex: 1; border-radius: 2mm; padding: 3mm; color: #fff; font-size: 9.5pt; }
+  .flow b { display: block; font-size: 11pt; margin-bottom: 1mm; }
+  .two { columns: 2; column-gap: 6mm; }
+  .small { font-size: 9pt; color: var(--sub); }
+</style></head><body>
+
+<div class="cover">
+  <img data-s="repo:assets/art/menu-logo-v1.webp" alt="">
+  <h1>교사용 사용설명서</h1>
+  <p>교실 협동 레이드로 배우는 공통수학2 · 집합과 명제</p>
+  <p>학생 스마트폰 · 교사 폰 · 교실 PC 가 함께 쓰는 수업 게임</p>
+  <p class="ver">v{{VERSION}} 기준 · 화면은 체험 모드(가상 학생)로 찍었습니다</p>
+</div>
+
+<div class="toc"><h2>차례</h2><ol>
+  <li>한눈에 보기 <span>— 무엇을 · 수업 한 시간의 흐름 · 필요한 기기</span></li>
+  <li>시작하기 <span>— 접속 · 앱 설치 · 교사 로그인 · 교사 메뉴</span></li>
+  <li>학생 관리 <span>— 명단 · 학생 가입 · 비밀번호</span></li>
+  <li>시간표와 자동 수업 <span>— 시간표 · 컴시간 · 오늘 수업</span></li>
+  <li>수업 준비와 테스트 모드</li>
+  <li>수업 진행 <span>— 리모컨 · 종합상황실 · 레이드 · 형성평가 보스 · 수업 끝</span></li>
+  <li>학생을 돕는 장치 <span>— 그림 힌트 · 친구 힐 · 집중모드 · 생각 시간</span></li>
+  <li>쉼터 놀이 <span>— 밸런스 · 반대로 · 수학 OX</span></li>
+  <li>수업 뒤 자기주도 학습 <span>— 캠프 · 오답노트 · 중단원던전 · 허수아비 · 우편함 · 모루</span></li>
+  <li>기록 보기 <span>— 출석부 · 수업 일지 · 결과 모으기 · 대시보드</span></li>
+  <li>성장과 보상</li>
+  <li>이럴 땐 이렇게 (자주 묻는 질문)</li>
+  <li>부록 <span>— 아이콘 · 색 뜻 · 차시 목록</span></li>
+</ol></div>
+
+<!-- 1 -->
+<section class="ch"><h2><span class="no">1</span>한눈에 보기</h2>
+<div class="lead"><b>「모두의 던전」</b>은 학습지 문제를 <b>몬스터</b>로 바꿔 반 전체가 함께 쓰러뜨리는 수업 게임입니다. 학생은 자기 폰으로 문제를 풀어 공격하고, 교사는 폰을 리모컨처럼 써서 단계를 넘기며, 교실 TV(종합상황실)에는 반 전체의 전투가 펼쳐집니다.</div>
+<h3>수업 한 시간의 흐름</h3>
+<div class="flow">
+  <div style="background:#3d63f5"><b>① 수업 전</b>시간표대로 던전이 저절로 열림 · 학생은 캠프의 문을 눌러 입장</div>
+  <div style="background:#8b5cf6"><b>② 수업 중</b>개념 설명 → 문제 몬스터 레이드 → 👑 형성평가 보스</div>
+  <div style="background:#11a36d"><b>③ 쉬는 시간</b>🏕 쉼터 · 반 전체 놀이 (밸런스 · OX)</div>
+  <div style="background:#e5337a"><b>④ 수업 뒤</b>📕 오답노트 · 🟪 중단원던전에서 못 푼 문제 보충</div>
+</div>
+<h3>세 가지 기기</h3>
+<table><tr><th style="width:22%">기기</th><th>하는 일</th><th style="width:30%">화면</th></tr>
+<tr><td><b>학생 폰</b></td><td>가입 · 로그인, 캠프, 문제 풀기(공격), 형성평가, 오답노트 · 보충, 쉼터 놀이</td><td>세로 화면</td></tr>
+<tr><td><b>교사 폰</b> (리모컨)</td><td>수업 만들기 · 단계 넘기기, 집중모드 · 쉼터 · 영상, 출석부 · 대시보드</td><td>세로 화면</td></tr>
+<tr><td><b>교실 PC · TV</b> (종합상황실)</td><td>반 전체 레이드 장면, 개념 학습지 · 영상, 쉼터 놀이 무대. 정답 · 오답 <b>글자는 띄우지 않고</b> 공격 연출만 보임</td><td>가로 큰 화면</td></tr></table>
+<h3>꼭 알아 둘 원칙</h3>
+<table><tr><th style="width:30%">원칙</th><th>뜻</th></tr>
+<tr><td>몬스터 = 문제</td><td>학습지의 ★ 문제가 그대로 몬스터가 됩니다. 문제 · 정답은 학습지 풀이와 같고, 시험 코드로 따로 계산해 확인합니다</td></tr>
+<tr><td>실패해도 벌이 없음</td><td>틀리면 <b>숫자만 바뀐 문제로 재도전</b>(기본 3번). 기록은 성적이 아니라 「다음에 볼 것」입니다</td></tr>
+<tr><td>반 전체가 한 팀</td><td>몬스터 체력은 반 전체가 함께 깎는 <b>공동 체력</b>. 잘하는 학생은 막힌 친구에게 💚 힐을 줄 수 있습니다</td></tr></table>
+</section>
+
+<!-- 2 -->
+<section class="ch"><h2><span class="no">2</span>시작하기</h2>
+<h3>2-1. 접속과 앱 설치</h3>
+<p>인터넷 주소창에 게임 주소를 열면 바로 실행됩니다(설치 필요 없음). 자주 쓰는 기기는 홈 화면에 앱으로 설치하면 편합니다.</p>
+<table><tr><th style="width:24%">기기</th><th>설치 방법</th></tr>
+<tr><td>안드로이드 (크롬)</td><td>첫 화면의 <span class="k">📲 앱으로 설치</span> 버튼 → 설치</td></tr>
+<tr><td>아이폰 (사파리)</td><td>아래 공유 버튼 → <b>홈 화면에 추가</b></td></tr>
+<tr><td>교실 PC</td><td>크롬 주소창 오른쪽 설치 아이콘 또는 즐겨찾기. 종합상황실은 <span class="k">⛶ 전체 화면</span> 버튼을 누릅니다</td></tr></table>
+<figure class="phones"><div><img data-s="e40/01-splash.png"><div class="cap">시작 화면 — 가볍게 터치</div></div><div><img data-s="e40/02-home.png"><div class="cap">첫 화면 — 학생 · 교사 · 종합상황실</div></div></figure>
+<h3>2-2. 교사 로그인과 교사 메뉴</h3>
+<ol class="steps"><li>첫 화면에서 <span class="k">교사</span>를 누르고 교사 아이디 · 비밀번호로 로그인합니다.</li><li>교사 메뉴가 열립니다. 위에서부터 <b>오늘 수업 → 수업 만들기 → 수업 준비 · 🧪 테스트 → 학생 관리(명단 · 출석부 · 대시보드) → 중단원 평가 열기</b> 순서입니다.</li></ol>
+<figure class="phone"><img data-s="e42/1-menu.png"><figcaption>교사 메뉴</figcaption></figure>
+<table><tr><th style="width:28%">메뉴</th><th>하는 일</th><th style="width:14%">이 설명서</th></tr>
+<tr><td>📅 오늘 수업</td><td>시간표에 따라 오늘 예약된 수업 · ▶ 리모컨</td><td>4장</td></tr>
+<tr><td>✨ 새 수업 만들기</td><td>차시 · 반을 골라 바로 수업 방 만들기 (시간표 없이)</td><td>6장</td></tr>
+<tr><td>📋 수업 준비 · 🧪 테스트</td><td>학습지 이미지 · 영상 · 체력 기준 / 학생 화면으로 미리 해 보기</td><td>5장</td></tr>
+<tr><td>📋 명단 · 🗓 출석부 · 📊 대시보드</td><td>학생 관리 · 출결 · 학습 기록</td><td>3 · 10장</td></tr>
+<tr><td>🔓 중단원 평가 열기</td><td>반마다 중단원던전 꼭대기 층(교과서 중단원 마무리)을 여는 버튼</td><td>9장</td></tr></table>
+</section>
+
+<!-- 3 -->
+<section class="ch"><h2><span class="no">3</span>학생 관리</h2>
+<h3>3-1. 명단 올리기</h3>
+<ol class="steps"><li>교사 메뉴 → <span class="k">📋 명단</span></li><li>반(예: 1-3)을 적고, 한 줄에 「번호 이름」을 붙여 넣습니다. 엑셀에서 두 열을 복사해 붙여도 됩니다.</li><li><span class="k">올리기</span>. 학생 가입 화면에 이 명단이 나옵니다.</li></ol>
+<div class="warn">학생 이름은 서버(Firebase)에만 저장되고 게임 파일(공개 저장소)에는 들어가지 않습니다. 학생 화면 · 종합상황실에는 친구 이름 일부만 보이게 가려집니다.</div>
+<figure class="phone"><img data-s="e40/05-students.png"><figcaption>명단 관리</figcaption></figure>
+<h3>3-2. 학생 가입 · 로그인</h3>
+<ol class="steps"><li>학생은 첫 화면 → <span class="k">학생</span> → 반 · 번호를 고르면 <b>이름이 저절로</b> 나옵니다(이름을 직접 쓰지 않음).</li><li>처음이면 <span class="k">새로 가입</span> → 숫자 비밀번호 4자리를 두 번 입력.</li><li>같은 번호로 두 명이 가입할 수 없습니다.</li></ol>
+<figure class="phone"><img data-s="e40/03-student-login.png"><figcaption>학생 로그인 — 반 · 번호 · 비밀번호</figcaption></figure>
+<div class="tip">비밀번호를 잊은 학생은 📋 명단에서 그 학생의 <span class="k">비밀번호 초기화</span>를 누르면 0000 이 되고, 학생이 0000 으로 들어가 새 비밀번호를 정합니다. 명단 화면에서 한 명 추가 · 이름 고치기 · 빼기도 할 수 있습니다.</div>
+</section>
+
+<!-- 4 -->
+<section class="ch"><h2><span class="no">4</span>시간표와 자동 수업</h2>
+<div class="lead">시간표를 한 번 넣어 두면 <b>그 교시 시각에 학생 캠프의 던전 문이 저절로 열리고</b>, 학생은 수업 코드 없이 문만 눌러 들어옵니다. 차시도 반마다 지난 수업을 보고 저절로 고릅니다.</div>
+<h3>4-1. 시간표 넣기</h3>
+<ol class="steps"><li>교사 메뉴 → 오늘 수업 칸의 <span class="k">📅 시간표</span></li><li>요일 × 교시 칸에서 반을 고르고 <span class="k">저장</span>. 매주 반복됩니다.</li><li>자율 · 동아리 시간(담임 배정)은 수업으로 치지 않도록 빠져 있습니다.</li></ol>
+<figure class="mid"><img data-s="e43/1-editor.png"><figcaption>시간표 창</figcaption></figure>
+<h3>4-2. 컴시간 연동</h3>
+<p>시간표 창 맨 위 <span class="k">🔄 컴시간 시간표 쓰기</span>를 켜면 학교 컴시간 시간표에서 선생님 수학 시간을 매일 밤 자동으로 가져옵니다. <b>노란 칸 = 컴시간에서 온 칸</b>, 직접 고친 칸이 먼저입니다.</p>
+<figure class="mid"><img data-s="e44/1-editor.png"><figcaption>컴시간 켬 — 노란 칸</figcaption></figure>
+<h3>4-3. 오늘 수업</h3>
+<p>교사 메뉴 맨 위에 오늘 수업이 시각 순서로 나옵니다. 수업은 <b>끝 시각 + 10분</b>까지 열려 있습니다.</p>
+<table><tr><th style="width:26%">버튼</th><th>하는 일</th></tr>
+<tr><td><span class="k">▶ 리모컨</span></td><td>그 수업의 교사 리모컨 열기 (6장)</td></tr>
+<tr><td><span class="k">차시</span></td><td>시작 전에 차시 바꾸기 (예: 진도가 다른 반)</td></tr>
+<tr><td><span class="k">쉼</span></td><td>이번 주만 이 교시 쉬기 (행사 · 시험). 시간표는 그대로</td></tr></table>
+<figure class="phones"><div><img data-s="e43/2-today.png"><div class="cap">교사 메뉴 — 오늘 수업</div></div><div><img data-s="e43/3-camp-open.png"><div class="cap">학생 캠프 — 문이 저절로 열림</div></div></figure>
+</section>
+
+<!-- 5 -->
+<section class="ch"><h2><span class="no">5</span>수업 준비와 테스트 모드</h2>
+<h3>5-1. 수업 준비</h3>
+<p>교사 메뉴 → <span class="k">📋 수업 준비 열기</span>. 차시마다 한 번만 해 두면 됩니다(2~6차시는 이미 준비돼 있음).</p>
+<table><tr><th style="width:26%">항목</th><th>내용</th></tr>
+<tr><td>학습지 이미지</td><td>개념 · 문제 칸마다 학습지 그림. 종합상황실 개념 설명과 학생의 「📄 학습지 보기」에 쓰임</td></tr>
+<tr><td>설명 영상</td><td>개념 칸의 모션그래픽(🎬). 종합상황실에서 틀고 학생 폰에서도 다시 봄</td></tr>
+<tr><td>체력 기준 %</td><td>몬스터 체력 = 인원 × 소문제 수 × 기준%(기본 90%). 낮추면 빨리 쓰러짐. 수업 중에도 리모컨에서 조절</td></tr>
+<tr><td>생각 시간</td><td>형성평가에서 틀린 뒤 다시 풀기까지 기다리는 초 (기본 5초)</td></tr></table>
+<figure class="phone"><img data-s="e40/06-prep.png"><figcaption>수업 준비</figcaption></figure>
+<h3>5-2. 🧪 테스트 모드</h3>
+<p><b>학생 계정 없이 학생 폰 화면으로 차시를 처음부터 끝까지</b> 해 볼 수 있습니다. 가상 친구 4명이 함께하고, 기록은 저장되지 않습니다. 새 차시를 수업하기 전에 꼭 한 번 해 보세요.</p>
+<ol class="steps"><li>수업 준비 옆 차시를 고르고 <span class="k">🧪 테스트</span></li><li>캠프 문 → 입장 → 아래 막대의 <span class="k">다음 ▶</span>으로 단계를 넘기며 문제를 풉니다.</li></ol>
+<figure class="phones"><div><img data-s="e20/03.png"><div class="cap">테스트 모드 — 개념 단계</div></div><div><img data-s="e45/1-hint.png"><div class="cap">테스트 모드 — 문제 단계</div></div></figure>
+</section>
+
+<!-- 6 -->
+<section class="ch"><h2><span class="no">6</span>수업 진행</h2>
+<h3>6-1. 수업 열기</h3>
+<ol class="steps"><li><b>시간표가 있으면</b>: 오늘 수업의 <span class="k">▶ 리모컨</span>. <b>없으면</b>: 차시 · 반을 고르고 <span class="k">✨ 새 수업 만들기</span>.</li><li>리모컨 위쪽에 <b>수업 코드</b>(학생용)와 <b>종합상황실 키</b>(PC용)가 나옵니다.</li><li>교실 PC: 첫 화면 → <span class="k">🖥 종합상황실</span> → 코드 · 키 입력. PC는 <b>교사 캠프</b>(학생 입장 QR)에서 시작합니다.</li><li>학생: 캠프의 빛나는 문을 누르면 입장(시간표 수업) · 또는 QR · 코드로 입장.</li></ol>
+<figure class="pair"><div><img data-s="e11/01-teacher.png"><div class="cap">교사 리모컨</div></div><div><img data-s="e11/02-hall-tcamp.png"><div class="cap">종합상황실 — 교사 캠프 · 입장 QR</div></div></figure>
+<h3>6-2. 리모컨 버튼</h3>
+<table><tr><th style="width:26%">버튼</th><th>하는 일</th></tr>
+<tr><td><span class="k">▶ 앞으로</span> <span class="k">◀ 뒤로</span></td><td>수업 단계 넘기기 (도입 → 복습 → 개념 1 → 문제 1 → … → 형성평가 → 마무리)</td></tr>
+<tr><td><span class="k">🔴 집중모드</span></td><td>학생 폰을 잠깐 멈추고 「선생님에게 주목」 화면 (설명할 때). 개념 단계에서는 저절로 켜짐</td></tr>
+<tr><td><span class="k">📄 문제 화면</span></td><td>종합상황실에 학습지 해설 그림 띄우기</td></tr>
+<tr><td><span class="k">🎬 영상</span></td><td>개념 설명 영상을 종합상황실에서 틀기</td></tr>
+<tr><td><span class="k">🏕 쉼터</span></td><td>쉬는 시간(기본 5분 · ±1분). 몬스터 공격도 멈춤 → 8장</td></tr>
+<tr><td>체력 기준 %</td><td>지금 몬스터의 체력 기준을 바로 조절</td></tr></table>
+<h3>6-3. 몬스터 레이드 (문제 단계)</h3>
+<p>문제 단계가 되면 학생 폰에 문제가 뜹니다. 소문제를 풀어 <span class="k">⚔ 공격!</span>을 누르면 <b>맞힌 소문제 수만큼 데미지</b>가 들어가고, 종합상황실에는 그 학생 용사가 공격하는 연출이 나옵니다.</p>
+<figure class="pair"><div><img data-s="e11/03-student-partial.png"><div class="cap">학생 폰 — 공격 뒤 (남은 기회 · 다시 도전)</div></div><div><img data-s="e11/04-hall-boss.png"><div class="cap">종합상황실 — 레이드 장면</div></div></figure>
+<table><tr><th style="width:26%">규칙</th><th>내용</th></tr>
+<tr><td>공동 체력</td><td>체력 = 인원 × 소문제 × 기준%. 0 이 되면 그 자리에서 쓰러짐. 안 낸 학생도 계속 풀고 공격 · 경험치 그대로</td></tr>
+<tr><td>재도전</td><td>틀린 소문제는 <b>숫자만 바뀐 문제</b>로 다시. 기본 기회 4번(첫 시도 + 재도전 3번)</td></tr>
+<tr><td>다 맞힌 뒤</td><td>남은 기회는 ⛓ 몬스터 묶기(반 전체 몬스터 공격을 늦춤) 또는 💚 친구 힐</td></tr>
+<tr><td>몬스터의 공격</td><td>게이지가 차면 학생 폰이 잠깐 멈춤(긴장감) · 쉼터 · 집중모드 동안은 멈춤</td></tr></table>
+<h3>6-4. 👑 형성평가 보스</h3>
+<p>마지막 문제 단계 뒤에는 학습지 형성평가가 보스로 나옵니다. 문항마다 답을 내고, 틀린 문항은 <b>생각 시간</b> 뒤 다른 숫자의 세트 2로 다시 풀 수 있습니다. 맞힌 문항만큼 보스 체력이 깎입니다.</p>
+<figure class="mid"><img data-s="e27/boss-demo-quiz.png"><figcaption>종합상황실 — 형성평가 보스 (교사 시연 창)</figcaption></figure>
+<h3>6-5. 마무리와 수업 끝</h3>
+<ol class="steps"><li>보스를 쓰러뜨리면 <b>마무리 · 마지막 한마디</b> 단계. 학생은 한마디를 남기고 학습지 확인 도장을 받습니다.</li><li><span class="k">수업 끝</span> → 학생 폰에 <b>⚔ 개인 결과</b>(문제마다 ✔ · 🔁 · ✖, 개념별, 복습 추천) → 모닥불 캠프로.</li><li>🏫 학급 결과(우리 반 수업 소식 카드)는 교사 화면 · 종합상황실에서 볼 수 있습니다.</li></ol>
+<figure class="pair"><div><img data-s="e11/06-hall-finale.png"><div class="cap">종합상황실 — 마무리</div></div><div><img data-s="e11/07-hall-klass.png"><div class="cap">학급 결과</div></div></figure>
+<div class="tip">학생 기록은 <b>선생님이 다음 단계로 넘길 때 · 형성평가를 마칠 때 · 학생이 앱을 내릴 때</b> 저장됩니다. 그래서 수업 끝을 누르기 전에 나간 학생도 기록이 남습니다. 혹시 빠졌으면 10장의 「📥 결과」로 다시 만듭니다.</div>
+</section>
+
+<!-- 7 -->
+<section class="ch"><h2><span class="no">7</span>학생을 돕는 장치</h2>
+<h3>7-1. 💡 그림 힌트 (집합 문제)</h3>
+<p>5 · 6차시 집합 문제 아래 <span class="k">💡 그림 힌트</span>를 누르면 <b>그 문제의 숫자로 벤 다이어그램</b>이 그려집니다. 재도전으로 숫자가 바뀌면 그림도 바뀌고, <b>답 영역은 칠하지 않습니다</b>(스스로 찾게). 형성평가 · 종합상황실에는 나오지 않습니다.</p>
+<figure class="phone"><img data-s="e45/1-hint.png"><figcaption>그림 힌트</figcaption></figure>
+<h3>7-2. 💚 친구 힐</h3>
+<p>문제를 다 맞힌 학생은 남은 기회로 <span class="k">💚 친구 힐</span>을 누를 수 있습니다. 기회를 다 쓴 친구에게 <b>도전 기회 한 칸</b>이 채워지고, 받은 학생 화면에는 용사 머리 위에 「+1 💚 이름 응원」이 떠오릅니다. 종합상황실에는 힐러 이름만 「응원!」으로 나옵니다.</p>
+<figure class="pair"><div><img data-s="e18/1-student-healed.png"><div class="cap">힐을 받은 학생 — 초록 칸 · 재도전</div></div><div><img data-s="e18/2-hall-heal.png"><div class="cap">종합상황실 — 응원 표시</div></div></figure>
+<h3>7-3. 그 밖의 장치</h3>
+<table><tr><th style="width:26%">장치</th><th>내용</th></tr>
+<tr><td>🔴 집중모드</td><td>설명할 때 학생 폰을 잠시 멈추고 「선생님에게 주목하세요」</td></tr>
+<tr><td>🤔 생각 시간</td><td>형성평가에서 틀린 뒤 몇 초 기다렸다 다시 (찍기 방지)</td></tr>
+<tr><td>문항 꼬리표</td><td>첫 시도 문제 위에 「문제 1 (2)」처럼 학습지 문항 이름 → 학습지에서 바로 찾음</td></tr>
+<tr><td>🔎 오개념</td><td>틀린 답의 종류(예: ∈ 와 ⊂ 혼동)를 모아 개인 결과 · 대시보드에 「자주 하는 실수」로 보여 줌</td></tr></table>
+</section>
+
+<!-- 8 -->
+<section class="ch"><h2><span class="no">8</span>쉼터 놀이</h2>
+<div class="lead">리모컨 · 종합상황실에서 <span class="k">🏕 쉼터</span>를 켜면 학생 폰이 쉼터로 바뀌고 몬스터 공격 · 단계가 멈춥니다. 쉼터 안에서 반 전체 놀이 3가지를 고를 수 있습니다. 쉼터를 끝내면 놀이도 끝나고 <b>하던 단계로</b> 돌아갑니다.</div>
+<figure class="pair"><div><img data-s="e38/rest-hall.png"><div class="cap">종합상황실 — 쉼터</div></div><div><img data-s="e38/rest-teacher.png"><div class="cap">리모컨 — 쉼터 · 놀이 버튼</div></div></figure>
+<table><tr><th style="width:20%">놀이</th><th>규칙</th><th style="width:26%">무대</th></tr>
+<tr><td><b>⚖ 밸런스</b></td><td>둘 중 하나를 고르고, 시간이 끝나면 <b>적은 쪽 탈락</b></td><td>무너지는 두 갈래 다리</td></tr>
+<tr><td><b>🔄 반대로</b></td><td>이번엔 <b>많은 쪽 탈락</b></td><td>숙소 · 스프링으로 「띠용」</td></tr>
+<tr><td><b>⭕ 수학 OX</b></td><td>지난 차시까지의 수학 문장 <b>참 · 거짓</b>. 틀리면 탈락 · 공개 때 해설</td><td>얼음 시험장</td></tr></table>
+<h3>공통 규칙</h3>
+<table><tr><td style="width:30%">시간</td><td>1 · 2판 15초, 3판부터 10초. 4분이 지나면 다음 판이 마지막(남은 사람 모두 우승)</td></tr>
+<tr><td>안 고르면</td><td>탈락. 비기거나 모두 같은 쪽이면(밸런스 · 반대로) 탈락 없음. 모두 탈락하게 되면 그 판은 없던 일</td></tr>
+<tr><td>탈락자</td><td>관객석에서 계속 고를 수 있음(결과에는 영향 없음)</td></tr>
+<tr><td>끝</td><td>2명 이하가 남으면 우승 화면</td></tr>
+<tr><td>눈치 싸움</td><td>고르는 동안 종합상황실엔 <b>고른 사람 수만</b> 보이고, 시간이 끝나면 한꺼번에 공개</td></tr></table>
+<figure class="pair"><div><img data-s="e48/1-hall-pick.png"><div class="cap">⚖ 밸런스 — 고르는 중</div></div><div><img data-s="e48/3-hall-show.png"><div class="cap">공개 — 적은 쪽 발판이 무너짐</div></div></figure>
+<figure class="pair"><div><img data-s="e50/2-rev-boing.png"><div class="cap">🔄 반대로 — 생존자 전광판 · 번호표 · 띠용</div></div><div><img data-s="e50/4-ox-pick.png"><div class="cap">⭕ 수학 OX — 문장 · 맞다 / 아니다</div></div></figure>
+<figure class="phones"><div><img data-s="e48/2-phone-pick.png"><div class="cap">학생 폰 — 고르기</div></div><div><img data-s="e48/4-phone-show.png"><div class="cap">학생 폰 — 살아남음</div></div><div><img data-s="e50/5-ox-phone.png"><div class="cap">학생 폰 — 수학 OX</div></div></figure>
+<div class="tip">반마다 나온 질문을 기억해서 다 쓸 때까지 같은 질문이 다시 나오지 않습니다. 실제로 한쪽에 너무 쏠린 질문(적은 쪽이 평균 25% 미만)은 자동으로 빠져서 <b>반반으로 갈리는 질문</b>만 남습니다.</div>
+</section>
+
+<!-- 9 -->
+<section class="ch"><h2><span class="no">9</span>수업 뒤 자기주도 학습</h2>
+<h3>9-1. 학생 캠프 (모닥불)</h3>
+<p>로그인한 학생이 처음 보는 곳입니다. 장소마다 하는 일이 있습니다.</p>
+<figure class="phone"><img data-s="e49/1-camp.png"><figcaption>학생 캠프 — 🏰 중단원던전 · 📮 우편함 위 빨간 숫자 = 남은 문제</figcaption></figure>
+<table><tr><th style="width:26%">장소</th><th>하는 일</th></tr>
+<tr><td>🚪 차시 던전 문</td><td>수업이 열리면 빛나고, 누르면 입장</td></tr>
+<tr><td>🏰 성채</td><td>🟪 중단원던전 (보강 · 형성평가 재대결 · 오답 보충)</td></tr>
+<tr><td>🎯 허수아비</td><td>지난 차시 수업 문제를 숫자만 바꿔 연습 (기말 대비)</td></tr>
+<tr><td>📮 우편함</td><td>개인 결과 · 복습 노트 · 📕 오답노트</td></tr>
+<tr><td>⛺ 텐트 (책장)</td><td>차시별 학습지 · 설명 영상 다시 보기</td></tr>
+<tr><td>⚒ 모루</td><td>개념 카드 연성 (대장간 · 꾸미기 특전)</td></tr></table>
+<h3>9-2. 📕 오답노트 — 못 푼 문제가 밖에서 보이게</h3>
+<div class="lead">수업 중에 <b>틀린 문제</b>와 <b>못 푼 문제</b>(불참 · 시간 부족 · 먼저 나감)를 문제마다 표시합니다. 캠프의 빨간 숫자를 0으로 만드는 것이 학생의 목표가 됩니다.</div>
+<table><tr><th style="width:18%">표시</th><th>뜻</th></tr>
+<tr><td><span class="chip" style="background:#d93a3a"></span>빨강 · 깜빡</td><td><b>틀림</b> — 기회를 다 써도 못 맞힘</td></tr>
+<tr><td><span class="chip" style="background:#fff;border:1.5px dashed #8a8f9c"></span>점선 · 깜빡</td><td><b>안 풂</b> — 불참 · 수업 시간 부족 · 먼저 나감</td></tr>
+<tr><td><span class="chip" style="background:#11a36d"></span>초록</td><td>맞힘 (한 번에 또는 재도전으로)</td></tr>
+<tr><td><span class="chip" style="background:#8b5cf6"></span>보라</td><td><b>보충 완료</b> — 나중에 중단원던전에서 해결</td></tr>
+<tr><td>⭐</td><td>형성평가 도전 문항 맞힘 (점수와 따로)</td></tr></table>
+<figure class="pair"><div><img data-s="e49/2-dungeon.png"><div class="cap">중단원던전 층 — 칩 줄 · 남은 문제 · 남은 문제부터 풀기</div></div><div><img data-s="e49/4-mail.png"><div class="cap">우편함 — 오답노트</div></div></figure>
+<h3>9-3. 🟪 중단원던전</h3>
+<p>차시마다 한 층입니다. 층 안에는 <b>📕 그 차시 수업 문제</b>(오답 보충), <b>보강 몬스터</b>(학습지 보강), <b>👑 형성평가 재대결</b>이 있습니다. 혼자 하는 곳이라 몬스터가 45초마다 1초 공격합니다.</p>
+<table><tr><th style="width:30%">보충 방법</th><th>결과</th></tr>
+<tr><td>📕 수업 문제를 처치 (숫자만 바뀐 같은 문제)</td><td>그 문제 칸이 🟪 보충 완료</td></tr>
+<tr><td>👑 형성평가 재대결 처치</td><td>형성평가 남은 문항 모두 🟪</td></tr>
+<tr><td>보강 몬스터를 모두 처치</td><td>그 층 🟪 인장 → 화려한 이펙트 해금</td></tr></table>
+<p><b>꼭대기 층</b>은 중단원 마무리(교과서 문제를 숫자만 바꿈)로, 교사 메뉴의 <span class="k">🔓 열기</span>로 반마다 엽니다(중단원 평가 날).</p>
+<figure class="pair"><div><img data-s="e36/floors-open.png"><div class="cap">중단원던전 층 목록</div></div><div><img data-s="e49/3-fight.png"><div class="cap">1:1 전투</div></div></figure>
+<h3>9-4. ⚒ 모루 (카드 연성)</h3>
+<p>수업 밖 특전입니다. 개념 카드(원소 · 집합 · 연산)를 <b>순서와 자리까지 정확히</b> 조합해 새 카드를 만들고, 처음 만든 카드는 예제를 맞혀야 완성됩니다. 카드는 공격에 쓰지 않고 이펙트 · 꾸미기만 줍니다.</p>
+<figure class="phone"><img data-s="e33/forge-10.png"><figcaption>모루</figcaption></figure>
+</section>
+
+<!-- 10 -->
+<section class="ch"><h2><span class="no">10</span>기록 보기</h2>
+<h3>10-1. 🗓 출석부</h3>
+<p>게임에 들어온 시각으로 <b>⭕ 출석 · △ 지각 · ✕ 미입장</b>이 저절로 표시됩니다. 칸을 눌러 결석 · 공결로 고치고 메모를 남길 수 있습니다. 표는 CSV(엑셀)로 내려받습니다.</p>
+<figure class="mid"><img data-s="e43/4-att.png"><figcaption>출석부</figcaption></figure>
+<h3>10-2. 📖 수업 일지 · 📥 결과 모으기</h3>
+<p>수업한 날짜 · 교시 · 차시 · 인원 · 진도가 저절로 적힙니다. 줄마다 <span class="k">✎</span> 메모, <span class="k">빼기</span>(잘못 연 방), 그리고 <span class="k">📥 결과</span>가 있습니다.</p>
+<div class="tip"><b>📥 결과</b>: 그 수업에 들어왔는데 기록이 없는 학생(먼저 나감 등)의 기록 · 경험치를 수업 방 기록으로 다시 만듭니다. 이미 기록이 있는 학생은 건드리지 않고, 두 번 눌러도 경험치는 한 번만 들어갑니다.</div>
+<figure class="mid"><img data-s="e43/5-log.png"><figcaption>수업 일지</figcaption></figure>
+<h3>10-3. 📊 학급 대시보드</h3>
+<p>교사만 보는 화면입니다(학생 · 종합상황실에는 나오지 않음). 반 탭(전체 · 반별)과 7개 보기가 있습니다.</p>
+<table><tr><th style="width:22%">보기</th><th>내용</th></tr>
+<tr><td>① 한눈에 표</td><td>차시마다 형성평가(맞힌 문항 / 문항, ⭐ 도전), <b>❗ 남은 문제</b>, 참여, 첫 시도 정답률, 고친 수, 힌트, 인장, 던전 도전, 카드, 레벨. 칸 제목을 누르면 정렬, 이름을 누르면 개인 기록</td></tr>
+<tr><td>② 랭킹</td><td>형성평가 · 성장 · 자기주도(중단원던전) TOP 5, 반 대항전</td></tr>
+<tr><td>③ 주의 학생</td><td>최근 불참 · 형성평가 50% 미만 · 첫 시도 50% 미만 · 중단원던전 0회</td></tr>
+<tr><td>④ 개념별 약점</td><td>개념마다 반 전체 첫 시도 정답률</td></tr>
+<tr><td>⑤ 성취기준</td><td>교육과정 성취기준별 정답률</td></tr>
+<tr><td>⑥ 오개념</td><td>자주 하는 실수와 바로잡은 비율</td></tr>
+<tr><td>⑦ 세특 메모</td><td>학생별 기록을 바탕으로 한 세부능력 특기사항 초안 문장</td></tr></table>
+<figure class="pc"><img data-s="e31/d-table.png"><figcaption>① 한눈에 표</figcaption></figure>
+<figure class="pair"><div><img data-s="e31/d-watch.png"><div class="cap">③ 주의 학생</div></div><div><img data-s="e31/d-weak.png"><div class="cap">④ 개념별 약점</div></div></figure>
+<figure class="pc"><img data-s="e49/5-dash.png"><figcaption>남은 문제 · ⭐ 도전 · 🟪 보충 표시</figcaption></figure>
+<div class="warn">게임 기록은 <b>성적이 아닙니다</b>. 학생의 학습 과정(재도전 · 보충 · 오개념)을 보는 자료로 쓰고, 평가 자료로 쓰려면 학교 평가 계획에 따로 정해야 합니다.</div>
+</section>
+
+<!-- 11 -->
+<section class="ch"><h2><span class="no">11</span>성장과 보상</h2>
+<table><tr><th style="width:22%">보상</th><th>얻는 방법</th><th style="width:30%">주는 것</th></tr>
+<tr><td>EXP · 레벨</td><td>레이드 참여, 제출, 맞힌 소문제, <b>재도전으로 고친 소문제(더 많이)</b>, 보스 처치, 만점, 힐, 보충</td><td>레벨 · 레벨 칭호</td></tr>
+<tr><td>🎁 첫 레이드 특전</td><td>처음 수업에 참여</td><td>레벨업 보장 · 추가 용사</td></tr>
+<tr><td>🟪 인장</td><td>중단원던전 한 층의 보강 몬스터를 모두 처치</td><td>인장 1 · 2 · 4 · 6 · 8 · 10개마다 화려한 공격 이펙트</td></tr>
+<tr><td>🏅 호칭</td><td>첫 출정, 보스 토벌, 끈기(고친 문제 누적), 던전 정복 등</td><td>이름 앞 호칭 · 메달 (⚙ 설정에서 학생이 고름)</td></tr>
+<tr><td>📚 카드</td><td>⚒ 모루 연성</td><td>도감 · 꾸미기</td></tr></table>
+<div class="why">「틀렸다가 고친 것」에 처음 맞힌 것보다 경험치를 더 줍니다. 실패를 피하지 않고 재도전하게 만드는 것이 이 게임의 핵심입니다.</div>
+<figure class="phone"><img data-s="e42/2-settings.png"><figcaption>⚙ 설정 — 용사 · 이펙트 · 호칭</figcaption></figure>
+</section>
+
+<!-- 12 -->
+<section class="ch"><h2><span class="no">12</span>이럴 땐 이렇게</h2>
+<table><tr><th style="width:34%">상황</th><th>해결</th></tr>
+<tr><td>학생이 수업 끝 전에 나갔다</td><td>단계를 넘길 때 · 앱을 내릴 때 저절로 저장됩니다. 빠졌으면 출석부 → 📖 수업 일지 → <b>📥 결과</b></td></tr>
+<tr><td>학생이 비밀번호를 잊었다</td><td>📋 명단에서 0000 으로 초기화</td></tr>
+<tr><td>종합상황실이 안 켜진다</td><td>수업 코드 · 키(리모컨 위쪽 [보기])를 다시 확인. 교사 폰 또는 종합상황실 중 하나는 켜져 있어야 학생이 들어옵니다</td></tr>
+<tr><td>늦게 온 학생</td><td>「다음 몬스터부터 함께해요」로 들어와 다음 문제부터 참여</td></tr>
+<tr><td>새 기능이 안 보인다</td><td>앱을 완전히 닫았다 다시 열기. 새 판은 첫 화면에서 저절로 적용되고, 수업 중에는 「새 판이 준비됐어요」 안내만 뜹니다</td></tr>
+<tr><td>앱이 느리다</td><td>판이 바뀐 뒤 첫 실행은 파일을 새로 받느라 1~2분 느릴 수 있습니다. 그 뒤로는 폰에 저장된 파일로 바로 열립니다</td></tr>
+<tr><td>오늘 진도가 반마다 다르다</td><td>오늘 수업의 <span class="k">차시</span>로 시작 전에 바꾸기</td></tr>
+<tr><td>행사로 수업이 없다</td><td>오늘 수업의 <span class="k">쉼</span> (이번 주만)</td></tr>
+<tr><td>테스트를 해 보고 싶다</td><td>🧪 테스트 — 기록이 남지 않습니다</td></tr></table>
+</section>
+
+<!-- 부록 -->
+<section class="ch"><h2><span class="no">부록</span>아이콘 · 차시</h2>
+<h3>자주 보이는 아이콘</h3>
+<figure class="mid"><img data-s="repo:assets/art/note-icons-v1.webp"><figcaption>오답노트 아이콘 — 틀림 · 안 풂 · 맞힘 · 보충 · 도전 별 · 알림 · 노트 완성 · 오답노트</figcaption></figure>
+<div class="two"><table>
+<tr><td>⚔</td><td>공격 · 전투</td></tr><tr><td>🔁 / ↻</td><td>재도전</td></tr><tr><td>💚</td><td>친구 힐</td></tr><tr><td>⛓</td><td>몬스터 묶기</td></tr><tr><td>👑</td><td>형성평가 보스</td></tr><tr><td>🔴</td><td>집중모드</td></tr>
+<tr><td>🏕</td><td>쉼터</td></tr><tr><td>💡</td><td>그림 힌트</td></tr><tr><td>📄</td><td>학습지 보기</td></tr><tr><td>🎬</td><td>설명 영상</td></tr><tr><td>🟪</td><td>중단원던전 · 인장 · 보충</td></tr><tr><td>📮</td><td>우편함</td></tr>
+</table></div>
+<h3>차시 목록 (집합 단원)</h3>
+<table><tr><th style="width:14%">차시</th><th>내용</th></tr>
+<tr><td>2차시</td><td>집합의 표현 · 원소의 개수 · 공집합</td></tr>
+<tr><td>3차시</td><td>집합 사이의 포함 관계</td></tr>
+<tr><td>4차시</td><td>교집합과 합집합</td></tr>
+<tr><td>5차시</td><td>연산 법칙 · 여집합과 차집합</td></tr>
+<tr><td>6차시</td><td>드모르간의 법칙 · 명제 (사각형의 포함 관계와 명제)</td></tr>
+<tr><td>중단원 마무리</td><td>중단원던전 꼭대기 층 — 교과서 중단원 마무리 (숫자만 바꿈)</td></tr></table>
+<p class="small">이 설명서의 화면은 체험 모드(가상 학생 · 가상 기록)로 찍었습니다. 실제 화면은 판(버전)에 따라 조금 다를 수 있습니다.</p>
+</section>
+</body></html>
