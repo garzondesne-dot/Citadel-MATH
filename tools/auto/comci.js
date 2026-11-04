@@ -1,6 +1,6 @@
 // 🔄 컴시간알리미 → 교사 시간표 (2026-11-04 · v0.9.7.1 · GitHub Actions 에서 매일 새벽 6시 · .github/workflows/comci.yml)
 //   컴시간에는 공식 API 가 없어 학생용 화면이 쓰는 자료(http://comci.net:4082)를 읽는다 — 화면 구조가 바뀌면 끊길 수 있음 → 실패하면 sched/comci.err 에 남기고 수동 시간표로 운영
-//   비밀 값 (GitHub Secrets · 저장소에 넣지 않음): FIREBASE_SA_JSON · COMCI_SCHOOL(학교코드) · COMCI_TEACHER(교사 이름) · FIREBASE_DB(선택)
+//   비밀 값 (GitHub Secrets · 저장소에 넣지 않음): FIREBASE_SA_JSON · COMCI_SCHOOL(학교코드) · COMCI_TEACHER(교사 이름 · 컴시간엔 「김*우」처럼 가려져 나옴) · COMCI_TEACHER_NO(선택 · 같은 모양 이름이 여럿일 때) · FIREBASE_DB(선택)
 //   쓰는 곳 (교사만 읽기 · 서비스 계정은 규칙을 거치지 않음):
 //     sched/comci = { at, ok, err, week: { '요일-교시': '학년-반' }, raw?: 원본(검증 전 · 확인 뒤 지움) }
 //   게임 반영: sched/comciOn === true 일 때만 (읽는 방식을 실제 자료로 확인한 뒤 켬) · 수동 시간표 칸이 우선 · 수학 칸만 · 월 5 · 목 7 제외는 게임 쪽에서
@@ -52,7 +52,8 @@ async function raw(r) {
 function shape(d) {
   const arrs = Object.entries(d).filter(([, v]) => Array.isArray(v));
   const strs = (v) => v.filter((x) => typeof x === 'string').length;
-  const teachers = arrs.filter(([, v]) => strs(v) > 5 && v.some((x) => typeof x === 'string' && x.includes(String(TEACHER || '').slice(0, 2)))).sort((a, b) => b[1].length - a[1].length)[0];
+  const masked = (x) => typeof x === 'string' && /\*/.test(x);
+  const teachers = arrs.filter(([, v]) => strs(v) > 5 && v.filter(masked).length > 5).sort((a, b) => b[1].length - a[1].length)[0]; // 가려진 이름(*)이 많은 목록 = 교사
   const subjects = arrs.filter(([k, v]) => (!teachers || k !== teachers[0]) && strs(v) > 5 && v.some((x) => typeof x === 'string' && MATH.test(x))).sort((a, b) => b[1].length - a[1].length)[0];
   // 학급 시간표: 학년(1~3) → 반 → 요일(1~5) → 교시 · 숫자 4단 배열
   const num = (x) => (typeof x === 'number' ? x : typeof x === 'string' && /^\D?\d+$/.test(x) ? Number(x.replace(/\D/g, '')) : NaN);
@@ -67,9 +68,19 @@ function week(d) {
   const { teachers, subjects, tables, sep } = shape(d);
   if (!teachers || !subjects || !tables.length) throw Object.assign(new Error('원본에서 교사 · 과목 · 시간표 자리를 못 찾음'), { keys: Object.keys(d).slice(0, 80) });
   const T = teachers[1], Sb = subjects[1];
-  const me = T.map((x, i) => [x, i]).filter(([x]) => typeof x === 'string' && TEACHER && (x === TEACHER || TEACHER.startsWith(x.replace(/\*/g, '')) || x.startsWith(TEACHER.slice(0, 2))));
+  // 컴시간 교사 이름은 가려져 나옴 (예: 「김*우」) → * = 아무 한 글자 · 길이가 같아야 함
+  const hit = (x) => { if (typeof x !== 'string' || !x || !TEACHER) return false; if (x === TEACHER) return true; const re = new RegExp('^' + x.replace(/[.+?^${}()|[\]\\]/g, '\\$&').replace(/\*/g, '.') + '$'); return re.test(TEACHER); };
+  const me = T.map((x, i) => [x, i]).filter(([x]) => hit(x));
   if (!me.length) throw Object.assign(new Error(`교사 목록에 「${TEACHER}」가 없음`), { names: T.filter((x) => typeof x === 'string').length });
-  const ids = me.map(([, i]) => i);
+  let ids = me.map(([, i]) => i);
+  // 같은 모양 이름이 여럿이면 수학 칸이 있는 선생님만 (COMCI_TEACHER_NO = 컴시간 교사 번호로 콕 집을 수도)
+  if (process.env.COMCI_TEACHER_NO) ids = [Number(process.env.COMCI_TEACHER_NO)];
+  else if (ids.length > 1) {
+    const mathOf = (id) => { let n = 0; tables.forEach(([, tab]) => tab.forEach((g) => Array.isArray(g) && g.forEach((cl) => Array.isArray(cl) && cl.forEach((day, dw) => Array.isArray(day) && dw >= 1 && day.forEach((c, p) => { const v = typeof c === 'number' ? c : Number(String(c).replace(/\D/g, '')); if (p >= 1 && v && ['tf', 'sf'].some((m) => { const r = split(v, sep, m); return r.t === id && MATH.test(String(Sb[r.s] || '')); })) n++; }))))); return n; };
+    const withMath = ids.filter((id) => mathOf(id) > 0);
+    if (withMath.length !== 1) throw Object.assign(new Error(`「${TEACHER}」와 모양이 같은 수학 선생님이 ${withMath.length}명 (${me.map(([x, i]) => `${i}:${x}`).join(' ')}) — GitHub 비밀 값 COMCI_TEACHER_NO 에 번호를 넣어 주세요`), {});
+    ids = withMath;
+  }
   let best = null;
   for (const [key, tab] of tables) for (const mode of ['tf', 'sf']) {
     const out = {}; let n = 0;
@@ -83,7 +94,7 @@ function week(d) {
     }))));
     if (!best || n > best.n) best = { n, out, key, mode };
   }
-  return { week: best ? best.out : {}, n: best ? best.n : 0, how: best ? `${best.key} · ${best.mode} · 분리 ${sep}` : '' , teacher: me.map(([x]) => x).join(',') };
+  return { week: best ? best.out : {}, n: best ? best.n : 0, how: best ? `${best.key} · ${best.mode} · 분리 ${sep}` : '', teacher: ids.map((i) => `${i}:${T[i]}`).join(',') };
 }
 async function put(path, val) {
   if (DRY) { console.log('[dry] PUT', path, JSON.stringify(val).slice(0, 300)); return; }

@@ -29,4 +29,5 @@ jobs:
           FIREBASE_SA_JSON: ${{ secrets.FIREBASE_SA_JSON }}
           COMCI_SCHOOL: ${{ secrets.COMCI_SCHOOL }}
           COMCI_TEACHER: ${{ secrets.COMCI_TEACHER }}
+          COMCI_TEACHER_NO: ${{ secrets.COMCI_TEACHER_NO }}
         run: node tools/auto/comci.js ${{ (github.event_name == 'workflow_dispatch' && inputs.raw) && '--raw' || '' }}
