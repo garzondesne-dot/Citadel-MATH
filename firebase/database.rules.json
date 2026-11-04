@@ -211,7 +211,7 @@
         ".read": "auth != null && root.child('admins/'+auth.uid).val() === true",
         "$n": {
           ".read": "auth != null && (root.child('accounts/'+$c+'/'+$n+'/uid').val() === auth.uid || root.child('admins/'+auth.uid).val() === true)",
-          ".write": "auth != null && root.child('accounts/'+$c+'/'+$n+'/uid').val() === auth.uid",
+          ".write": "auth != null && (root.child('accounts/'+$c+'/'+$n+'/uid').val() === auth.uid || root.child('admins/'+auth.uid).val() === true)",
           "total": {
             ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 100000"
           },
@@ -228,7 +228,7 @@
         ".read": "auth != null && root.child('admins/'+auth.uid).val() === true",
         "$n": {
           ".read": "auth != null && (root.child('accounts/'+$c+'/'+$n+'/uid').val() === auth.uid || root.child('admins/'+auth.uid).val() === true)",
-          ".write": "auth != null && root.child('accounts/'+$c+'/'+$n+'/uid').val() === auth.uid",
+          ".write": "auth != null && (root.child('accounts/'+$c+'/'+$n+'/uid').val() === auth.uid || root.child('admins/'+auth.uid).val() === true)",
           "$lesson": {
             ".validate": "newData.hasChildren(['at'])"
           }

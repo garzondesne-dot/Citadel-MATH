@@ -39,6 +39,14 @@ DS.Student = (function () {
     });
   }
   const acc = () => ({ c: info0.cls, n: info0.num, name: info0.nick, hero: info0.hero, fx: info0.fx, title: info0.title });
+  // 💾 진행 저장 (v0.9.7.6): 공격 · 형성평가 답을 낼 때마다 1.5초 뒤 기록 + EXP 저장 → 수업 끝 전에 나가도 대시보드 · EXP 가 남는다 (테스트 모드는 저장 안 함)
+  let saveT = null;
+  function saveSoon() {
+    if (test || !DS.Result || !info0 || info0.cls == null || !info0.num) return;
+    clearTimeout(saveT);
+    const c0 = code;
+    saveT = setTimeout(() => { if (!test && L && R && me && code === c0 && Raid().activeIds(R).includes(me)) DS.Result.save(L, R, me, acc(), c0).catch(() => {}); }, 1500);
+  }
   // 수업이 끝나면 모닥불로
   // v0.8.0: 수업이 끝나면 ⚔ 오늘의 전투 결과(개인) → 모닥불 (「⚔ 보강던전」 추천을 누르면 보강던전으로)
   function toCamp() {
@@ -354,7 +362,7 @@ DS.Student = (function () {
     DS.UI.dial(body, (i) => form.given[i], (i, v) => { form.given[i] = v; drawn = `form|${key}|${JSON.stringify(form.given)}|${(R.help || {})[me] ? 1 : 0}|${down}`; }); // 꾹 누르면 계속 · 숫자만 바꿈 (v0.9.6.16)
     $('#st-go').onclick = async () => {
       const given = items.map((q, i) => (q.type === 'blanks' ? form.given[i] : q.type === 'number' ? Number(form.given[i]) : form.given[i]));
-      try { await DS.Act.submit(code, raw, mid, attempt, given); retrying = ''; form = null; } catch (e) { DS.UI.toast(e.message); }
+      try { await DS.Act.submit(code, raw, mid, attempt, given); retrying = ''; form = null; saveSoon(); } catch (e) { DS.UI.toast(e.message); }
     };
   }
   // ref: 첫 시도면 '문제 1 (2)' 처럼 학습지 문항 이름 → 문제 위에 작은 꼬리표 (같은 문제를 학습지에서 바로 찾게)
@@ -427,7 +435,7 @@ DS.Student = (function () {
       const next = (ans[bossSet] || Array(L.boss.items).fill(null)).slice();
       while (next.length < L.boss.items) next.push(null);
       next[i] = r.given;
-      await DS.Act.bossAnswer(code, bossSet, next);
+      await DS.Act.bossAnswer(code, bossSet, next); saveSoon();
       const ok = DS.Quiz.grade(items[i], r.given);
       if (!ok && thinkSec() > 0) bossThink = Date.now() + thinkSec() * 1000;
       DS.UI.toast(ok ? `✔ ${i + 1}번 도달! 보스에게 데미지` : `✘ ${i + 1}번은 아직… 🤔 ${thinkSec()}초 생각하고 ${bossSet === 1 ? '세트 2 로' : '다시'} 도전!`, 2600);

@@ -80,25 +80,49 @@ DS.Result = (function () {
   }
   // 학생 폰: 수업이 끝나면 한 번 (같은 수업은 다시 저장하지 않음)
   // opt.inClass: 형성평가 직후(수업 중) — 중단원던전 버튼 대신 「대기실로」 (v0.8.1)
+  // 💾 기록 저장 (v0.9.7.6): 결과 화면 · 수업 중 진행 저장 · 교사 「결과 모으기」 · 복구 도구가 모두 이것을 쓴다
+  //   records/{반}/{번호}/{차시} 덮어쓰기 + EXP 는 같은 수업 key(raid_코드)에 「늘어난 만큼만」 더함 → 여러 번 불러도 두 번 쌓이지 않음
+  //   🎁 첫 레이드 특전: 이 차시 말고 다른 기록이 없으면 · 한 번 정한 특전 EXP 는 기록에 적어 두고 그대로 씀
+  async function save(L, R, uid, m, code, rIn, at) {
+    const r = rIn || compute(L, R, uid);
+    if (!m || m.c == null || !m.n) return { r, g: null, first: false, raids: 1 };
+    const prev = (await DS.Net.get(`records/${ck(m.c)}/${m.n}`).catch(() => null)) || {};
+    const mineNow = prev[L.id] && prev[L.id].code === String(code) ? prev[L.id] : null;
+    const others = Object.keys(prev).filter((k) => k !== L.id);
+    const first = mineNow ? !!mineNow.firstXp : !others.length;
+    if (first && DS.Grow) {
+      if (mineNow && mineNow.firstXp) r.parts.first = mineNow.firstXp;
+      else { const cur = await DS.Grow.mine(m).catch(() => DS.Grow.level(0)), base = DS.Grow.sum(r.parts); r.parts.first = Math.max(40, cur.next - cur.into - base + 1); }
+    }
+    const rec = summary(r, code); if (first && r.parts.first) rec.firstXp = r.parts.first; if (at) rec.at = at; // at: 결과 모으기 = 그 수업 시각
+    try { await DS.Net.set(`records/${ck(m.c)}/${m.n}/${L.id}`, rec); } catch (e) { /* 저장 실패해도 결과는 보여 준다 */ }
+    const g = DS.Grow ? await DS.Grow.add(m, r.parts, `raid_${code}`, { upsert: true }).catch(() => null) : null;
+    return { r, g, first: first && !!g, raids: others.length + 1 };
+  }
+  // 📥 결과 모으기 (v0.9.7.6 · 교사 · 복구 도구): 방 기록(rooms/코드)으로 학생마다 save — 수업 끝 전에 나간 학생 기록 · EXP 를 다시 만든다
+  //   그 차시 기록이 이미 있으면 그대로 둔다 (학생 폰이 저장함 · 방을 옮긴 학생) · 없는 학생만 새로 · EXP 는 같은 key 라 두 번 쌓이지 않음
+  async function gather(code, cls) {
+    const v = await DS.Net.get(`rooms/${code}`).catch(() => null);
+    if (!v || !v.meta) throw new Error('이 수업의 방 기록이 없어요.');
+    const R = DS.Act.unpackRoom(v), L = DS.Lessons.get(R.meta.lesson);
+    if (!L) throw new Error('차시를 찾지 못했어요.');
+    const out = { saved: [], kept: [], L };
+    for (const [uid, p] of Object.entries(R.players || {})) {
+      if (!p || p.teacher || p.cls == null || !p.num || (cls && p.cls !== cls)) continue;
+      const old = await DS.Net.get(`records/${ck(p.cls)}/${p.num}/${L.id}`).catch(() => null);
+      if (old) { out.kept.push(p.num); continue; } // 학생 폰이 이미 저장함 (결과 화면 · 진행 저장 · 다른 방)
+      await save(L, R, uid, { c: p.cls, n: p.num }, code, null, p.first || p.at || R.meta.created || null);
+      out.saved.push(p.num);
+    }
+    return out;
+  }
   async function show(L, R, uid, me, code, then, opt = {}) {
     const r = compute(L, R, uid);
     let g = null, first = false, raids = 1;
     const seenKey = `citadel-result-${code}`;
     let seen = false; try { seen = localStorage.getItem(seenKey) === '1'; } catch (e) { /* 무시 */ }
-    if (me && me.c != null && me.n) {
-      // 🎁 첫 레이드 특전 (v0.8.1): 처음 쌓는 기록이면 「첫 출정 축하」 EXP 로 레벨업 보장 + 추가 용사(두 번째) 해금
-      const prev = await DS.Net.get(`records/${ck(me.c)}/${me.n}`).catch(() => null);
-      first = !prev || !Object.keys(prev).length;
-      raids = Object.keys(prev || {}).filter((k) => k !== L.id).length + 1; // 🔥 n번째 출전
-      if (first && DS.Grow) {
-        const cur = await DS.Grow.mine(me).catch(() => DS.Grow.level(0)), base = DS.Grow.sum(r.parts);
-        r.parts.first = Math.max(40, cur.next - cur.into - base + 1);
-      }
-      try { await DS.Net.set(`records/${ck(me.c)}/${me.n}/${L.id}`, summary(r, code)); } catch (e) { /* 저장 실패해도 결과는 보여 준다 */ }
-      if (DS.Grow) g = await DS.Grow.add(me, r.parts, `raid_${code}`).catch(() => null);
-      if (!g) first = false;
-    }
-    if (seen && !g && !opt.force) return then(); // force: 수업이 끝날 때는 이미 본 학생도 개인 결과를 다시 (2026-11-03)
+    if (me && me.c != null && me.n) ({ g, first, raids } = await save(L, R, uid, me, code, r));
+    if (seen && !opt.force) return then(); // v0.9.7.6: 진행 저장으로 g 가 늘 있으니 「이미 봄」만 본다 · force: 수업이 끝날 때는 이미 본 학생도 개인 결과를 다시 (2026-11-03)
     try { localStorage.setItem(seenKey, '1'); } catch (e) { /* 무시 */ }
     const prep = (DS.Test && DS.Test.active() && DS.Test.prep(L.id)) || (await DS.Act.prepLite(L.id)); // 이미지는 누를 때 한 장만 (v0.8.8)
     const lv = g ? g.after : DS.Grow && me ? await DS.Grow.mine(me).catch(() => null) : null;
@@ -144,5 +168,5 @@ DS.Result = (function () {
         ${misLine(x.mis)}${(x.weak || []).length ? `<p class="small">📌 복습 추천: <b>${x.weak.map((c) => esc(names[c] || c)).join(', ')}</b></p>` : '<p class="small okc">👍 고르게 잘함</p>'}</div>`;
     }).join('');
   }
-  return { compute, summary, show, history, conceptMap, floorText };
+  return { compute, summary, save, gather, show, history, conceptMap, floorText };
 })();

@@ -105,13 +105,14 @@ DS.Att = (function () {
     if (!rows.length) return '<p class="muted">아직 수업 기록이 없어요.</p>';
     const prog = (g) => (!g.sum ? '-' : g.sum.boss ? '👑 보스 격파' : g.sum.end ? '끝까지' : g.sum.step < 0 ? '대기실까지' : `${g.sum.step + 1} / ${g.sum.steps} 단계`);
     return `<div class="att-wrap"><table class="att-tbl log-tbl"><tr><th>날짜</th><th>교시</th><th>차시</th><th>입장</th><th>진행</th><th>메모</th><th></th></tr>
-      ${rows.map((g) => { const w = W(g), L = DS.Lessons.get(g.lesson); return `<tr class="${g.hide ? 'hid' : ''}"><td>${w.date} (${w.dow})</td><td>${g.p ? `${g.p}교시` : `${w.hm} 바로`}</td><td>${L ? `${L.no}차시 · ${esc(L.title)}` : esc(g.lesson || '')}</td><td>${g.sum ? g.sum.n : 0}명</td><td>${prog(g)}</td><td>${esc(g.memo || '')}</td><td><button class="btn small" data-memo="${g.code}">✎</button><button class="btn small" data-hide="${g.code}">${g.hide ? '되살리기' : '빼기'}</button></td></tr>`; }).join('')}</table></div>
+      ${rows.map((g) => { const w = W(g), L = DS.Lessons.get(g.lesson); return `<tr class="${g.hide ? 'hid' : ''}"><td>${w.date} (${w.dow})</td><td>${g.p ? `${g.p}교시` : `${w.hm} 바로`}</td><td>${L ? `${L.no}차시 · ${esc(L.title)}` : esc(g.lesson || '')}</td><td>${g.sum ? g.sum.n : 0}명</td><td>${prog(g)}</td><td>${esc(g.memo || '')}</td><td><button class="btn small" data-gather="${g.code}" title="수업 끝 전에 나간 학생 기록 · EXP 다시 만들기">📥 결과</button><button class="btn small" data-memo="${g.code}">✎</button><button class="btn small" data-hide="${g.code}">${g.hide ? '되살리기' : '빼기'}</button></td></tr>`; }).join('')}</table></div>
       <p class="muted small">「빼기」 = 잘못 연 수업 · 연습을 출석부에서 뺌 (기록은 남음)</p><button class="btn" id="log-csv">⬇ 수업 일지 내려받기 (CSV)</button>`;
   }
   function bind(el) {
     el.querySelectorAll('[data-c]').forEach((b) => (b.onclick = () => { cls = b.dataset.c; load(); }));
     el.querySelectorAll('[data-t]').forEach((b) => (b.onclick = () => { tab = b.dataset.t; draw(); }));
     el.querySelectorAll('.att-c').forEach((td) => (td.onclick = () => fix(td.dataset.code, Number(td.dataset.n))));
+    el.querySelectorAll('[data-gather]').forEach((b) => (b.onclick = () => run(async () => { const o = await DS.Result.gather(b.dataset.gather, cls); DS.UI.toast(`📥 ${o.saved.length}명 기록 저장${o.kept.length ? ` · ${o.kept.length}명은 이미 있음` : ''}`, 3000); })));
     el.querySelectorAll('[data-memo]').forEach((b) => (b.onclick = () => run(async () => { const g = data.rows.find((x) => x.code === b.dataset.memo); const v = window.prompt('수업 메모 (예: 행사로 20분 단축)', g.memo || ''); if (v === null) return; await S().setMemo(cls, g.code, v); await load(); })));
     el.querySelectorAll('[data-hide]').forEach((b) => (b.onclick = () => run(async () => { const g = data.rows.find((x) => x.code === b.dataset.hide); await S().setHide(cls, g.code, !g.hide); await load(); })));
     const a = el.querySelector('#att-csv'); if (a) a.onclick = () => csv('att');

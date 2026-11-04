@@ -29,3 +29,11 @@ node gdrive.js check && node gdrive.js swap 03 /path/"(03차시) 22_부분집합
 - GitHub Actions `.github/workflows/comci.yml` 가 매일 06:00 KST 에 돌림 (「Run workflow」 버튼으로도). 비밀 값: `FIREBASE_SA_JSON` · `COMCI_SCHOOL` · `COMCI_TEACHER` (저장소에 넣지 않음).
 - 결과 = Firebase `sched/comci` { ok, week: { '요일-교시': '학년-반' }, err } · 수학 칸만. 게임 반영은 `sched/comciOn = true` 일 때만 (실제 자료로 읽는 방식을 확인한 뒤 켬). 수동 칸이 우선, `'-'` = 수동으로 비움.
 - 클라우드 작업 공간은 https 만 나갈 수 있어 컴시간(http · 4082 포트)을 직접 못 읽는다 → 첫 실행은 `--raw` 로 원본을 `sched/comci/raw` 에 저장해 확인한 뒤 지운다.
+
+## 📥 recover.js — 수업 기록 복구 (v0.9.7.6)
+수업 끝 전에 나간 학생의 기록 · EXP 를 방 기록으로 다시 만든다 (교사 「수업 일지 → 📥 결과」 버튼과 같은 `DS.Result.gather`). 그 차시 기록이 이미 있는 학생은 건드리지 않고, EXP 는 같은 key 라 두 번 쌓이지 않는다. `FIREBASE_SA_JSON` 필요.
+
+```
+node tools/auto/recover.js 149929 1-4 --dry   # 미리 보기
+node tools/auto/recover.js 149929 1-4         # 저장
+```
