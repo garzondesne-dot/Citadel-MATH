@@ -1686,3 +1686,10 @@ input.sv-no { width: 64px !important; display: inline-block; padding: 2px 4px; }
 @keyframes csSpark { 0% { transform: scale(0) rotate(0deg); opacity: 0; } 25% { transform: scale(1.25) rotate(45deg); opacity: 1; } 60% { transform: scale(.9) rotate(80deg); opacity: .9; } 100% { transform: scale(0) rotate(120deg); opacity: 0; } }
 .cs-v2.gate-peek:not(.gate-open) .cs-gate-on { animation: csPeek 1.2s ease-out 1; }
 @keyframes csPeek { 0%, 100% { opacity: 0; } 25% { opacity: .5; } }
+/* 🖥 PC · 종합상황실 시작 화면 (2026-11-05 사용자): 가로 화면(4:3 보다 넓으면)은 첫 장면 가로판 — 화면 가득 · 카메라는 천장 → 용사로 조금만 */
+@media (min-aspect-ratio: 4/3) {
+  .splash .sp-bg { width: 100%; height: 100%; min-width: 0; aspect-ratio: auto; object-fit: cover; object-position: center 60%; animation-name: spCamWide; }
+  .splash .sp-logo { top: 4%; width: min(40vh, 440px); }
+  .splash { background-color: #06101b; }
+}
+@keyframes spCamWide { from { transform: translate(-50%, -50%) translateY(14%) scale(1.35); } to { transform: translate(-50%, -50%); } }
