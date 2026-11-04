@@ -143,10 +143,10 @@ DS.Fun = (function () {
     const spect = Object.keys(R.players || {}).filter((u) => !R.players[u].teacher && !inPlay.includes(u) && (R.active || {})[u]);
     const cols = big ? 6 : 4;
     const fig = (u, x, y, cls = '') => `<div class="fa-h${cls}${u === me ? ' me' : ''}" data-u="${u}" style="left:${x}%;top:${y}%" ${show ? `data-go="${res.a.includes(u) ? 'a' : res.b.includes(u) ? 'b' : 'n'}"` : ''}>${heroOf(R, u)}${big || u === me ? `<b>${esc(u === me ? '나' : nameOf(R, u))}</b>` : ''}</div>`;
-    const plaza = inPlay.map((u, i) => { const s = spot(i, inPlay.length, 36, 64, 46, big ? 4 : 3); return fig(u, s.x, s.y); }).join('');
+    const plaza = inPlay.map((u, i) => { const s = spot(i, inPlay.length, 34, 66, 50, big ? 5 : 4); return fig(u, s.x, s.y); }).join('');
     const gal = spect.slice(0, big ? 24 : 10).map((u, i) => `<div class="fa-g${u === me ? ' me' : ''}" style="left:${4 + (i * (92 / Math.max(1, Math.min(spect.length, big ? 24 : 10))))}%">${heroOf(R, u)}</div>`).join('');
     const lose = show ? res.lose : '';
-    return `<div class="fa-arena${big ? ' big' : ''}${A().bg ? ' img' : ''}"${bgStyle()}>
+    return `<div class="fa-arena${big ? ' big' : ''}${A().bg ? ' img' : ''}${A().plat ? ' pimg' : ''}"${bgStyle()}>
       <div class="fa-gal">${gal}${spect.length ? `<span class="fa-gn">👀 관객 ${spect.length}</span>` : ''}</div>
       <div class="fa-pit l"></div><div class="fa-pit r"></div>
       <div class="fa-plat a${lose === 'a' ? ' doom' : ''}"${platStyle()}><i class="fa-flag">${esc(f.q[0])}</i>${show ? `<em class="fa-cnt">${res.a.length}</em>` : ''}</div>
@@ -161,7 +161,7 @@ DS.Fun = (function () {
       root.querySelectorAll('.fa-h[data-go]').forEach((h) => {
         const u = h.dataset.u, side = h.dataset.go;
         if (side === 'n') { h.classList.add('fa-lost'); return; }
-        const i = go[side].indexOf(u), s = spot(i, go[side].length, side === 'a' ? 5 : 71, side === 'a' ? 29 : 95, 40, cols);
+        const i = go[side].indexOf(u), s = spot(i, go[side].length, side === 'a' ? 2 : 81, side === 'a' ? 19 : 98, 46, cols); // 발판 위 (그림 v1: 양옆 허공 위 떠 있는 발판)
         h.style.left = `${s.x}%`; h.style.top = `${s.y}%`; h.classList.add(side === 'a' ? 'run-l' : 'run-r');
       });
       if (DS.Sound && DS.Sound.card) DS.Sound.card();
