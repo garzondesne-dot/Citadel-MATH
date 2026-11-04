@@ -105,6 +105,7 @@ DS.ASSETS = {
   // 브랜드: 공통 = 배경 · 메뉴 아이콘(학생 · 교사 · 종합상황실 · 수업 준비 · 로그인), 에디션 = 제목 화면 · 머리 배너 · 로고 (과목이 늘면 에디션만 바꿈)
   brand: { name: '모두의 던전', edition: '공통수학2', full: '모두의 던전 : 공통수학2', tagline: '함께 풀고, 모두 함께 돌파하라',
     bg: 'brand-bg-v1.webp', menu: { src: 'menu-icons-v1.webp', cols: 5, kinds: { student: 0, teacher: 1, hall: 2, prep: 3, login: 4 } },
+    wide: 'brand-bg-wide-v1.webp', // 2026-11-05 사용자 제공: 첫 장면(용사 넷이 수학 기호 문을 엶) 가로판 16:9 · 글씨 없음 — 아직 안 씀 (후보: PC · 종합상황실 시작 화면 · 발표 표지 · 교사 캠프 배경)
     title: 'brand-m2-title-v3.webp', splash: { bg: 'brand-bg-v1.webp', logo: 'menu-logo-v1.webp' }, // 시작 화면 (2026-11-04): 로고 없는 배경 + 로고 따로 — 카메라 내려옴 · 로고 떨어짐
     header: 'menu-logo-v1.webp', logo: 'brand-m2-logo-v3.webp' },
   panels: { src: 'ui-panels-v1.webp', cols: 2, rows: 2, kinds: { inventory: 0, paper: 1, dialog: 2, reward: 3 } }, // 남색 인벤토리 · 양피지 문제지 · 청록 대화창 · 보라 보상창
