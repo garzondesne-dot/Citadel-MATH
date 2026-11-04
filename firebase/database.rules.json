@@ -280,6 +280,15 @@
           ".validate": "newData.val() === true"
         }
       }
+    },
+    "held": {
+      ".read": "auth != null",
+      "$c": {
+        ".write": "auth != null",
+        "$lesson": {
+          ".validate": "newData.val() === true"
+        }
+      }
     }
   }
 }

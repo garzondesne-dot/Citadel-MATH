@@ -26,6 +26,7 @@ DS.Dash = (function () {
     const [records, xp, cards, bonus] = await Promise.all(['records', 'xp', 'cards', 'bonus'].map((p) => DS.Net.get(`${p}/${k}`).catch(() => null)));
     const d = build(roster[c] || {}, records || {}, xp || {}, cards || {}, bonus || {});
     d.studs.forEach((st) => { st.cls = c; st.key = `${c}|${st.n}`; st.held = d.held; });
+    if (d.held.length) DS.Net.update(`held/${k}`, Object.fromEntries(d.held.map((l) => [l.id, true]))).catch(() => {}); // 📕 옛 수업도 「한 차시」로 (학생 오답노트 불참 판단 · v0.9.7.9)
     return d;
   }
   async function load() {
@@ -56,14 +57,15 @@ DS.Dash = (function () {
         Object.entries(r.conc || {}).forEach(([c, v]) => { ok += v[0]; tot += v[1]; const key = `${l.id}|${c}`; conc[key] = { name: (r.names || {})[c] || c, lesson: l, ok: v[0], total: v[1] };
           const sd = DS.Standards ? DS.Standards.of(l.id, c, l.no) : null; if (sd) { std[sd] = std[sd] || [0, 0]; std[sd][0] += v[0]; std[sd][1] += v[1]; } });
         if (DS.Mis && r.mis) DS.Mis.merge(mis, r.mis);
-        bo += Number(r.boss) || 0; bt += Number(r.bossN) || 0; fixed += Number(r.fixed) || 0; perf += Number(r.perfects) || 0; hints += Number(r.hints) || 0; // 💡 그림 힌트 (v0.9.7.4 · 성적 아님)
+        bo += Math.min(Number(r.boss) || 0, Number(r.bossN) || 0); bt += Number(r.bossN) || 0; /* ⭐ 도전 문항은 따로 (옛 기록은 boss 에 섞여 있어 bossN 까지만 · v0.9.7.9) */ fixed += Number(r.fixed) || 0; perf += Number(r.perfects) || 0; hints += Number(r.hints) || 0; // 💡 그림 힌트 (v0.9.7.4 · 성적 아님)
       });
       const total = Number((xp[n] || {}).total || 0), lv = DS.Grow ? DS.Grow.level(total) : { lv: 1, title: '' };
       const seals = DS.Bonus ? DS.Bonus.seals(bonus[n]).length : 0;
       if (DS.Mis) Object.values(bonus[n] || {}).forEach((l) => Object.values(l || {}).forEach((m) => { if (m && m.mis) DS.Mis.merge(mis, m.mis); }));
+      const left = DS.Note ? held.reduce((a, l) => { const L = DS.Lessons.get(l.id); return L && L.boss && !L.eval ? a + DS.Note.lesson(L, rec[l.id], (bonus[n] || {})[l.id]).left : a; }, 0) : 0; // 📕 남은 문제
       const tries = Object.values(bonus[n] || {}).reduce((a, l) => a + Object.values(l || {}).reduce((b, m) => b + (Number((m || {}).tries) || 0), 0), 0);
       return { n, name: byN[n], rec, went: went.length, heldN: held.length, part: pct(went.length, held.length), boss: pct(bo, bt), bossRaw: [bo, bt], first: pct(ok, tot), firstRaw: [ok, tot],
-        fixed, perf, hints, seals, tries, cards: Object.keys(cards[n] || {}).length, xp: total, lv: lv.lv, lvTitle: lv.title, conc, std, mis };
+        fixed, perf, hints, seals, tries, left, bon: bonus[n] || {}, cards: Object.keys(cards[n] || {}).length, xp: total, lv: lv.lv, lvTitle: lv.title, conc, std, mis };
     });
     return { held, studs };
   }
@@ -87,7 +89,7 @@ DS.Dash = (function () {
     el.querySelectorAll('[data-copy]').forEach((b) => (b.onclick = () => copy(b.dataset.copy === 'all' ? data.studs.map((s) => `${who(s)}: ${memo(s)}`).join('\n\n') : memo(data.studs.find((s) => s.key === b.dataset.copy)))));
   }
   const who = (s) => `${isAll() ? `${s.cls}반 ` : ''}${s.n}번 ${s.name}`;
-  const COLS = [['n', '번호'], ['name', '이름'], ['part', '참여'], ['boss', '형성평가'], ['first', '첫 시도'], ['fixed', '고친 수'], ['hints', '💡 힌트'], ['seals', '인장'], ['tries', '던전 도전'], ['cards', '카드'], ['xp', 'Lv']];
+  const COLS = [['n', '번호'], ['name', '이름'], ['left', '❗ 남은 문제'], ['part', '참여'], ['boss', '형성평가'], ['first', '첫 시도'], ['fixed', '고친 수'], ['hints', '💡 힌트'], ['seals', '인장'], ['tries', '던전 도전'], ['cards', '카드'], ['xp', 'Lv']];
   function sorted() {
     const v = (s) => (s[sortKey] == null ? -1 : s[sortKey]);
     const base = (a, b) => String(a.cls).localeCompare(String(b.cls)) || a.n - b.n;
@@ -97,10 +99,18 @@ DS.Dash = (function () {
   const VIEW = {
     table() {
       const arrow = (k) => (sortKey === k ? (sortDir > 0 ? ' ▲' : ' ▼') : '');
-      const lessonCell = (s, l) => { const r = s.rec[l.id]; if (!r) return `<td class="dash-c off">${(s.held || []).some((h) => h.id === l.id) || !isAll() ? '불참' : '-'}</td>`; const p = pct(Number(r.boss) || 0, Number(r.bossN) || 0); return `<td class="dash-c ${heat(p)}" title="${esc(l.title)}">${Number(r.boss) || 0}/${Number(r.bossN) || 0}${r.won ? '' : ''}</td>`; };
+      // 차시 칸: 형성평가 기본 문항 맞힌 수 / 문항 (+ ⭐ 도전 문항) · 🟪 = 중단원던전 👑 재대결로 보충 (v0.9.7.9)
+      const lessonCell = (s, l) => {
+        const r = s.rec[l.id], fill = !!(((s.bon || {})[l.id] || {}).boss || {}).clear;
+        const ic = (k) => (DS.Note ? DS.Note.icon(k, 'chip') : '');
+        if (!r) return fill ? `<td class="dash-c fill" title="불참 → 중단원던전에서 보충">${ic('p')} 보충</td>` : `<td class="dash-c off">${(s.held || []).some((h) => h.id === l.id) || !isAll() ? '불참' : '-'}</td>`;
+        const N = Number(r.bossN) || 0, b = Math.min(Number(r.boss) || 0, N), star = r.bossX != null ? Number(r.bossX) : Math.max(0, (Number(r.boss) || 0) - N), p = pct(b, N);
+        return `<td class="dash-c ${heat(p)}" title="${esc(l.title)}">${b}/${N}${star ? ic('star') : ''}${fill && b < N ? ` <b class="fillc">→ ${ic('p')}</b>` : ''}</td>`;
+      };
       return `<p class="muted small">칸 제목을 누르면 정렬 · 차시 칸 = 형성평가(맞힌 문항 / 문항) · 색이 진할수록 높음 · 이름을 누르면 개인 기록</p>
         <div class="st-scroll"><table class="r-table dash-t"><tr>${isAll() ? '<th>반</th>' : ''}${COLS.slice(0, 2).map(([k, t]) => `<th data-sort="${k}">${t}${arrow(k)}</th>`).join('')}${data.held.map((l) => `<th>${l.no}차시</th>`).join('')}${COLS.slice(2).map(([k, t]) => `<th data-sort="${k}">${t}${arrow(k)}</th>`).join('')}</tr>
         ${sorted().map((s) => `<tr>${isAll() ? `<td>${esc(s.cls)}</td>` : ''}<td>${s.n}</td><td><button class="linkish" data-who="${s.key}">${esc(s.name)}</button></td>${data.held.map((l) => lessonCell(s, l)).join('')}
+          <td class="dash-c ${s.left ? 'nt-left' : 'ok'}">${s.left ? `❗ ${s.left}` : '✔'}</td>
           <td class="dash-c ${heat(s.part)}">${s.went}/${s.heldN}</td><td class="dash-c ${heat(s.boss)}">${show(s.boss)}</td><td class="dash-c ${heat(s.first)}">${show(s.first)}</td>
           <td>${s.fixed}</td><td>${s.hints || ''}</td><td>${s.seals}</td><td>${s.tries}</td><td>${s.cards}</td><td>Lv.${s.lv}</td></tr>`).join('')}</table></div>
         <button class="btn" id="dash-csv">⬇ 표 내려받기 (엑셀에서 열리는 CSV)</button>`;
@@ -203,8 +213,8 @@ DS.Dash = (function () {
   }
   function downloadCsv() {
     const q = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
-    const head = [...(isAll() ? ['반'] : []), '번호', '이름', ...data.held.map((l) => `${l.no}차시 형성평가`), '참여', '형성평가 평균(%)', '첫 시도 정답률(%)', '재도전으로 고친 수', '그림 힌트(소문제)', '보강 인장', '보강 도전', '카드', '레벨', 'EXP'];
-    const rows = sorted().map((s) => [...(isAll() ? [s.cls] : []), s.n, s.name, ...data.held.map((l) => (s.rec[l.id] ? `${Number(s.rec[l.id].boss) || 0}/${Number(s.rec[l.id].bossN) || 0}` : '불참')), `${s.went}/${s.heldN}`, s.boss ?? '', s.first ?? '', s.fixed, s.hints || 0, s.seals, s.tries, s.cards, s.lv, s.xp]);
+    const head = [...(isAll() ? ['반'] : []), '번호', '이름', ...data.held.map((l) => `${l.no}차시 형성평가`), '남은 문제(오답노트)', '참여', '형성평가 평균(%)', '첫 시도 정답률(%)', '재도전으로 고친 수', '그림 힌트(소문제)', '보강 인장', '보강 도전', '카드', '레벨', 'EXP'];
+    const rows = sorted().map((s) => [...(isAll() ? [s.cls] : []), s.n, s.name, ...data.held.map((l) => { const r = s.rec[l.id], fill = !!(((s.bon || {})[l.id] || {}).boss || {}).clear; if (!r) return fill ? '보충' : '불참'; const N = Number(r.bossN) || 0; return `${Math.min(Number(r.boss) || 0, N)}/${N}${fill ? ' (보충)' : ''}`; }), s.left, `${s.went}/${s.heldN}`, s.boss ?? '', s.first ?? '', s.fixed, s.hints || 0, s.seals, s.tries, s.cards, s.lv, s.xp]);
     const csv = '﻿' + [head, ...rows].map((r) => r.map(q).join(',')).join('\r\n');
     const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
     a.download = `학급대시보드_${isAll() ? '전체' : cls}_${new Date().toISOString().slice(0, 10)}.csv`; document.body.appendChild(a); a.click(); a.remove();

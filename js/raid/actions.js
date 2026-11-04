@@ -75,7 +75,9 @@ DS.Act = (function () {
       const studs = Object.entries(R.players || {}).filter(([, p]) => !p.teacher).map(([u]) => u);
       if (!studs.length) fail('입장한 학생이 없어요.');
       await N().update(P(code), { active: Object.fromEntries(studs.map((u) => [u, true])), 'state/headcount': studs.length, 'state/step': 0, 'state/stepAt': N().TS, 'state/focus': Raid.autoFocus(L.steps[0]), 'state/focusAt': Raid.autoFocus(L.steps[0]) ? N().now() : null, 'state/pauseMs': null });
-      await unlockFor(L, studs.map((u) => (R.players[u] || {}).cls).filter(Boolean));
+      const clss = [...new Set(studs.map((u) => (R.players[u] || {}).cls).filter(Boolean))];
+      await unlockFor(L, clss);
+      clss.forEach((c) => N().set(`held/${ck(c)}/${L.id}`, true).catch(() => {})); // 📕 그 반이 게임으로 수업한 차시 (오답노트 「불참」 판단 · v0.9.7.9)
       return;
     }
     if (dir > 0 && i >= L.steps.length) { // 마무리 → 수업 끝 (학생은 모닥불로 · 차원문은 꺼진 채 남음)

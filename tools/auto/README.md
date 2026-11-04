@@ -37,3 +37,11 @@ node gdrive.js check && node gdrive.js swap 03 /path/"(03차시) 22_부분집합
 node tools/auto/recover.js 149929 1-4 --dry   # 미리 보기
 node tools/auto/recover.js 149929 1-4         # 저장
 ```
+
+## 📕 notefill.js — 옛 기록에 오답노트 칸 채우기 (v0.9.7.9)
+0.9.7.9 전에 쌓인 기록(records)에 문제마다 칸(`mons` · `bossM`)과 ⭐ 도전 문항 분리(`boss` · `bossX`)를 방 기록으로 다시 계산해 넣는다. 다른 칸은 그대로 · 이미 칸이 있으면 건너뜀(`--all` 이면 다시).
+
+```
+node tools/auto/notefill.js --dry      # 미리 보기 (전체 반)
+node tools/auto/notefill.js 1-4        # 한 반만 저장
+```

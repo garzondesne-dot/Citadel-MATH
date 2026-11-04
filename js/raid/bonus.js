@@ -32,7 +32,8 @@ DS.Bonus = (function () {
     return DS.Lessons.list.filter((l) => (l.no || l.eval) && sealIds(l).length).filter((l) => sealIds(l).every((id) => ((data[l.id] || {})[id] || {}).clear)).map((l) => l.id);
   }
   // 몬스터 · 소문제 (👑 형성평가 재대결 = 세트 1 · 2 를 번갈아, 체력 문항까지만)
-  const monOf = (L, mid) => (mid === 'boss' ? { title: `👑 ${L.no}차시 형성평가 재대결`, sprite: L.boss.sprite, note: '' } : L.monsters[mid]);
+  const isField = (L, mid) => L.steps.some((st) => st.kind === 'monster' && st.id === mid); // 📕 수업 문제 (오답노트 보충 · v0.9.7.9)
+  const monOf = (L, mid) => (mid === 'boss' ? { title: `👑 ${L.no}차시 형성평가 재대결`, sprite: L.boss.sprite, note: '' } : isField(L, mid) ? { ...L.monsters[mid], title: (L.steps.find((st) => st.id === mid) || {}).title || L.monsters[mid].title || mid } : L.monsters[mid]);
   const itemsOf = (L, mid, seed, attempt) => (mid === 'boss' ? (L.boss.sets[attempt % 2 === 0 ? 1 : 2] || L.boss.sets[1]).slice(0, L.boss.hpItems || L.boss.items) : L.items(mid, seed, attempt));
   // 화려한 이펙트 열림 { fire: true, … }
   function fxOpen(data) {
@@ -42,6 +43,7 @@ DS.Bonus = (function () {
   }
   const fxCond = (i) => `🟪 던전 인장 ${UNLOCK[i]}개`;
 
+  let recs = null, heldM = {}; // 📕 records/{반}/{번호} · held/{반}
   let preview = false, evalOpen = {}; // preview = 교사 대기공간: 모든 층 미리 보기 (기록 저장 안 함) · evalOpen = 꼭대기 층 열림 { 'eval-1': true }
   async function enter(m, opt = {}) {
     me = m; preview = !!opt.preview; train = !!opt.train;
@@ -49,6 +51,8 @@ DS.Bonus = (function () {
     no = preview || (m && m.test) ? Number(opt.no) || 99 : Number(await N().get(`unlock/${ck(m.c)}`).catch(() => 0)) || 0;
     liveNo = 0; // 2026-11-03 사용자 결정: 수업 중 잠금 · 수업 중인 차시를 목록에서 빼기 없앰
     mine = preview ? {} : (await N().get(`bonus/${ck(m.c)}/${m.n}`).catch(() => null)) || {};
+    recs = preview || (m && m.test) ? null : (await N().get(`records/${ck(m.c)}/${m.n}`).catch(() => null)) || {};
+    heldM = recs ? (await N().get(`held/${ck(m.c)}`).catch(() => null)) || {} : {}; // 📕 오답노트 (null = 미리 보기 · 테스트: 표시 안 함)
     evalOpen = m && m.test ? Object.fromEntries(DS.Lessons.list.filter((l) => l.eval).map((l) => [l.id, true])) : preview ? null : (await N().get(`evalOpen/${ck(m.c)}`).catch(() => null)) || {};
     DS.UI.show('screen-bonus');
     render();
@@ -67,7 +71,7 @@ DS.Bonus = (function () {
       const topCard = !top ? '' : topOpen(top.id) ? card(top, sl.includes(top.id), `🏰 꼭대기 층 · ${top.title}`)
         : `<div class="panel framed bn-card bn-locked"><p class="bn-h"><b>🔒 꼭대기 층 · ${esc(top.title)}</b></p><p class="muted small">${D.from}~${D.to}차시를 모두 배운 뒤 선생님이 열어 줘요 (중단원 평가 날). 문제 ${(top.bonus || []).length}마리 · 교과서 중단원 마무리를 숫자만 바꾼 문제</p></div>`;
       return `<p class="bn-dtitle">🟪 ${esc(D.title)} <span class="muted small">${D.from}~${D.to}차시 · 열린 층 ${open.length} / ${floors.length}</span></p>${topCard}
-        ${open.length ? open.slice().reverse().map((l) => card(l, sl.includes(l.id), `${l.no}층 · ${l.no}차시 ${l.title}`)).join('') : `<div class="panel framed"><p class="muted">선생님이 우리 반 수업을 열면 그 차시 층이 열려요.</p></div>`}`;
+        ${open.length ? open.slice().reverse().sort((a, b) => (noteOf(b).left ? 1 : 0) - (noteOf(a).left ? 1 : 0)).map((l) => card(l, sl.includes(l.id), `${l.no}층 · ${l.no}차시 ${l.title}`)).join('') : `<div class="panel framed"><p class="muted">선생님이 우리 반 수업을 열면 그 차시 층이 열려요.</p></div>`}`;
     }).join('');
     $('#bonus').innerHTML = `<div class="bn-top"><button class="btn small" id="bn-back">≪ ${preview ? '교사 캠프' : '모닥불'}</button><b>🟪 중단원던전</b><span class="bn-seal">🟪 인장 ${sl.length}개</span></div>
       <div class="bn-portals">
@@ -79,11 +83,23 @@ DS.Bonus = (function () {
     $('#bn-back').onclick = () => (preview ? DS.TCamp.back() : DS.Camp.enter(me));
     document.querySelectorAll('[data-lock]').forEach((b) => (b.onclick = () => DS.UI.toast('🔒 대단원던전은 「집합과 명제」를 모두 마치면 열려요 (10차시 뒤)', 3200)));
     document.querySelectorAll('[data-fight]').forEach((b) => (b.onclick = () => { const [lid, mid] = b.dataset.fight.split('|'); DS.Control.run(() => fight(DS.Lessons.get(lid), mid)); }));
+    document.querySelectorAll('[data-next]').forEach((b) => (b.onclick = () => { const L = DS.Lessons.get(b.dataset.next), x = noteOf(L), open = (st) => DS.Note.OPEN[st] || st === 'a';
+      const i = x.mons.findIndex(open), mid = i >= 0 ? x.ids[i] : 'boss'; DS.Control.run(() => fight(L, mid)); }));
+  }
+  // 📕 오답노트: 그 층(차시)의 문제마다 상태 · 남은 문제
+  const noteOf = (l) => (recs && DS.Note && !l.eval && (recs[l.id] || heldM[l.id]) ? DS.Note.lesson(l, recs[l.id], mine[l.id]) : { left: 0, none: true }); // 기록도 없고 반이 게임으로 수업도 안 한 차시 = 표시 안 함
+  function noteRows(l, x) {
+    if (x.none) return '';
+    const order = x.ids.map((id, i) => ({ id, st: x.mons[i] })).sort((a, b) => (DS.Note.OPEN[b.st] || b.st === 'a' ? 1 : 0) - (DS.Note.OPEN[a.st] || a.st === 'a' ? 1 : 0));
+    return `${DS.Note.rows(x)}${x.left ? `<button class="btn primary nt-go" data-next="${l.id}">⚔ 남은 문제부터 풀기 <b>${x.left}</b></button>` : ''}
+      <p class="nt-sub">📕 수업 문제 <span class="muted small">(숫자만 바뀐 같은 문제 · 맞히면 🟪 보충)</span></p>
+      <div class="bn-list nt-list">${order.map(({ id, st }) => { const open = DS.Note.OPEN[st] || st === 'a', m = monOf(l, id); return `<div class="bn-row${open ? ' nt-open' : ' clear'}">${DS.Note.icon(st)}<span>${open ? '<b class="nt-ex">❗</b> ' : ''}${esc(m.title)} <span class="muted small">· ${esc(DS.Note.WHY[st] || '')}</span></span><button class="btn small${open ? ' primary' : ''}" data-fight="${l.id}|${id}">${open ? (st === 'x' ? '⚔ 다시 풀기' : '⚔ 풀기') : '연습'}</button></div>`; }).join('')}</div>
+      <p class="nt-sub">🟪 보강 · 👑 형성평가 재대결</p>`;
   }
   function card(l, sealed, head) {
-    const rec = mine[l.id] || {}, ids = l.eval ? l.bonus.map((b) => b.id) : floorIds(l), need = sealIds(l);
-    return `<div class="panel framed bn-card${sealed ? ' sealed' : ''}${l.eval ? ' bn-topfloor' : ''}"><p class="bn-h"><b>${esc(head)}</b>${sealed ? '<span class="bn-stamp">🟪 인장 획득</span>' : `<span class="muted small">${need.filter((id) => (rec[id] || {}).clear).length} / ${need.length}</span>`}</p>
-      <div class="bn-list">${ids.map((id) => { const r = rec[id] || {}, m = monOf(l, id); return `<div class="bn-row${r.clear ? ' clear' : ''}${id === 'boss' ? ' boss' : ''}">${DS.Art.monster(m.sprite, r.clear ? 'down' : 'idle')}<span>${esc(m.title)}${r.tries && !r.clear ? ` <span class="muted small">· ${r.tries}번 도전</span>` : ''}</span><button class="btn small${r.clear ? '' : ' primary'}" data-fight="${l.id}|${id}">${r.clear ? '✔ 다시 하기' : r.tries ? '⚔ 다시 도전' : '⚔ 도전'}</button></div>`; }).join('')}</div></div>`;
+    const rec = mine[l.id] || {}, ids = l.eval ? l.bonus.map((b) => b.id) : floorIds(l), need = sealIds(l), x = noteOf(l);
+    return `<div class="panel framed bn-card${sealed ? ' sealed' : ''}${l.eval ? ' bn-topfloor' : ''}${x.left ? ' nt-left' : ''}"><p class="bn-h"><b>${esc(head)}</b>${x.none ? '' : x.left ? `<span class="nt-cnt">❗ 남은 문제 ${x.left}</span>` : '<span class="nt-cnt ok">✔ 다 풀었음</span>'}${sealed ? '<span class="bn-stamp">🟪 인장 획득</span>' : `<span class="muted small">${need.filter((id) => (rec[id] || {}).clear).length} / ${need.length}</span>`}</p>
+      ${noteRows(l, x)}<div class="bn-list">${ids.map((id) => { const r = rec[id] || {}, m = monOf(l, id); return `<div class="bn-row${r.clear ? ' clear' : ''}${id === 'boss' ? ' boss' : ''}">${DS.Art.monster(m.sprite, r.clear ? 'down' : 'idle')}<span>${esc(m.title)}${r.tries && !r.clear ? ` <span class="muted small">· ${r.tries}번 도전</span>` : ''}</span><button class="btn small${r.clear ? '' : ' primary'}" data-fight="${l.id}|${id}">${r.clear ? '✔ 다시 하기' : r.tries ? '⚔ 다시 도전' : '⚔ 도전'}</button></div>`; }).join('')}</div></div>`;
   }
 
   function renderTrain() {
@@ -102,7 +118,7 @@ DS.Bonus = (function () {
     const mon = monOf(L, mid), rec = train ? {} : (mine[L.id] || {})[mid] || {}, prep = await prepOf(L.id);
     const first = !train && !rec.tries && !rec.clear, clearedBefore = !!rec.clear, sealedBefore = seals(mine).includes(L.id);
     const seed = `${N().uid()}|${Date.now()}`;
-    let attempt = first ? 0 : 1, left = TRIES;
+    let attempt = first && !isField(L, mid) ? 0 : 1, left = TRIES; // 📕 수업 문제 보충은 처음부터 숫자를 바꿈
     const n = itemsOf(L, mid, seed, attempt).length;
     const solved = new Array(n).fill(false);
     const el = document.createElement('div'); el.className = 'bn-fight';
@@ -201,7 +217,7 @@ DS.Bonus = (function () {
       act.innerHTML = `<button class="btn primary" id="bf-out">${train ? '허수아비로' : '던전 층 목록으로'}</button>`;
       act.querySelector('#bf-out').onclick = () => { el.remove(); render(); };
     };
-    const act = draw('', `<p>${train ? '🎯 숫자가 바뀐 연습 문제예요.' : first ? (mid === 'boss' ? '수업 때 형성평가 문제 그대로예요.' : L.eval ? '교과서 중단원 마무리를 숫자만 바꾼 문제예요. 서술형은 풀이를 학습지에 써요.' : '학습지 보강 문항이에요.') : '다시 들어오면 새 문제가 나와요.'} 기회 ${TRIES}번 — 틀린 소문제만 다시 풀어요.</p>`);
+    const act = draw('', `<p>${train ? '🎯 숫자가 바뀐 연습 문제예요.' : first ? (mid === 'boss' ? '수업 때 형성평가 문제 그대로예요.' : isField(L, mid) ? '📕 수업 때 문제를 숫자만 바꿨어요. 모두 맞히면 오답노트에 🟪 보충!' : L.eval ? '교과서 중단원 마무리를 숫자만 바꾼 문제예요. 서술형은 풀이를 학습지에 써요.' : '학습지 보강 문항이에요.') : '다시 들어오면 새 문제가 나와요.'} 기회 ${TRIES}번 — 틀린 소문제만 다시 풀어요.</p>`);
     act.innerHTML = '<button class="btn primary big" id="bf-go">⚔ 전투 시작</button>';
     act.querySelector('#bf-go').onclick = () => round();
   }

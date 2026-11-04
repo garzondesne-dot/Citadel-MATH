@@ -41,7 +41,9 @@ DS.Result = (function () {
         const q = t ? X.itemsFor(L, R, s.id, uid, t.attempt)[i] : null;
         if (q) fixEx = { where: s.title, q, concept: map[s.id] };
       }
-      return { id: s.id, title: s.title, concept: map[s.id], n, tried: rec.submitted, first: firstOk.filter(Boolean).length, fixed: fx, miss: everOk.filter((ok) => !ok).length };
+      // 📕 오답노트 칸 (v0.9.7.9): o 한 번에 · f 재도전으로 고침 · x 끝까지 못 맞힘 · - 나만 안 함(먼저 나감 · 늦게 옴) · n 반 전체가 수업에서 안 함(시간 부족)
+      const st = rec.submitted ? (everOk.every(Boolean) ? (firstOk.every(Boolean) ? 'o' : 'f') : 'x') : X.activeIds(R).some((u) => u !== uid && X.record(L, R, s.id, u).submitted) ? '-' : 'n';
+      return { id: s.id, title: s.title, concept: map[s.id], n, tried: rec.submitted, first: firstOk.filter(Boolean).length, fixed: fx, miss: everOk.filter((ok) => !ok).length, st };
     });
     const ans = ((R.bossAns || {})[uid]) || {}, tags = L.boss.tags || [];
     const set1 = Array.from({ length: L.boss.items }, (_, i) => { const g = (ans[1] || [])[i]; return g != null && g !== '' && DS.Quiz.grade(L.boss.sets[1][i], g); });
@@ -49,19 +51,21 @@ DS.Result = (function () {
     if (bossTried) set1.forEach((ok, i) => bump(tags[i] || 'boss', ok));
     const bossFixed = mast.filter((ok, i) => ok && !set1[i]).length;
     if (M) [1, 2].forEach((k) => (ans[k] || []).forEach((g, i) => { const q = L.boss.sets[k] && L.boss.sets[k][i]; if (!q || g == null || g === '' || DS.Quiz.grade(q, g)) return; M.add(mis, M.classify(q, g, M.bossTag(L.id, k, i)), !!mast[i]); }));
+    const anyBoss = X.activeIds(R).some((u) => ((R.bossAns || {})[u] || {})[1]);
+    const bossM = mast.map((ok, i) => (ok ? 'o' : [1, 2].some((k) => { const g = (ans[k] || [])[i]; return g != null && g !== ''; }) ? 'x' : anyBoss ? '-' : 'n')).join(''); // 문항마다 (⭐ 도전 문항 포함)
     const perfect = X.fullMarks(L, R, uid), bossWin = X.bossHp(L, R).won && bossTried;
     const words = !!((R.words || {})[uid] || {}).t;
     const order = Object.keys(conc).filter((c) => conc[c].total);
     const weak = order.map((c) => ({ c, r: conc[c].ok / conc[c].total })).filter((x) => x.r < 0.8).sort((a, b) => a.r - b.r).slice(0, 2).map((x) => x.c);
     const parts = { join: 1, submit: submits, correct: best + mast.filter(Boolean).length, fixed: fixed + bossFixed, bossWin: bossWin ? 1 : 0, perfect: perfect ? 1 : 0 }; // 마지막 한마디 EXP 는 한마디를 남길 때 따로 (v0.8.1)
     const hp = X.bossHp(L, R), bossShare = hp.max ? Math.min(100, Math.round((100 * mast.filter(Boolean).length) / hp.max)) : 0;
-    return { mis, lesson: L.id, no: L.no || 0, title: L.title, mons, boss: { set1, mast, tried: bossTried, hp: L.boss.hpItems, won: hp.won, share: bossShare }, conc, titles, weak, parts, perfects, fixed: fixed + bossFixed, fixEx,
+    return { mis, lesson: L.id, no: L.no || 0, title: L.title, mons, boss: { set1, mast, bossM, tried: bossTried, hp: L.boss.hpItems, won: hp.won, share: bossShare }, conc, titles, weak, parts, perfects, fixed: fixed + bossFixed, fixEx,
       words: words ? String(((R.words || {})[uid] || {}).t) : '' };
   }
   // 저장용 요약 (records/{반}/{번호}/{차시})
   const summary = (r, code) => ({ at: (DS.Net || {}).TS || Date.now(), code: String(code || ''), no: r.no,
     conc: Object.fromEntries(Object.entries(r.conc).map(([c, v]) => [c, [v.ok, v.total]])), names: r.titles,
-    miss: r.mons.filter((m) => m.miss).map((m) => m.id), weak: r.weak, ...(Object.keys(r.mis || {}).length ? { mis: r.mis } : {}), boss: r.boss.mast.filter(Boolean).length, bossN: r.boss.hp, won: !!r.boss.won, fixed: r.fixed || 0, perfects: r.perfects || 0, xp: DS.Grow ? DS.Grow.sum(r.parts) : 0, ...(DS.Student && DS.Student.hintCount && DS.Student.hintCount(code) ? { hints: DS.Student.hintCount(code) } : {}) }); // 💡 그림 힌트를 펼친 소문제 수 (v0.9.7.4 · 성적 아님)
+    miss: r.mons.filter((m) => m.miss).map((m) => m.id), weak: r.weak, ...(Object.keys(r.mis || {}).length ? { mis: r.mis } : {}), boss: r.boss.mast.slice(0, r.boss.hp).filter(Boolean).length, bossN: r.boss.hp, bossX: r.boss.mast.slice(r.boss.hp).filter(Boolean).length, bossM: r.boss.bossM, mons: Object.fromEntries(r.mons.map((m) => [m.id, m.st])), won: !!r.boss.won, fixed: r.fixed || 0, perfects: r.perfects || 0, xp: DS.Grow ? DS.Grow.sum(r.parts) : 0, ...(DS.Student && DS.Student.hintCount && DS.Student.hintCount(code) ? { hints: DS.Student.hintCount(code) } : {}) }); // 💡 그림 힌트를 펼친 소문제 수 (v0.9.7.4 · 성적 아님)
 
   const dots = (ok, total) => Array.from({ length: Math.min(total, 10) }, (_, i) => `<i class="${i < Math.round((ok / total) * Math.min(total, 10)) ? 'on' : ''}"></i>`).join('');
   // 🔎 자주 하는 실수 한 줄 (오개념 기록 · 점수 아님)

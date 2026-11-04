@@ -253,6 +253,11 @@ DS.Camp = (function () {
     DS.CampScene.lamps(stage, states, me.test ? [] : DS.CampScene.freshLamps(`citadel-lamps-${k}-${me.n}`, states));
     DS.CampScene.flag(stage, TD.bonus && ((TD.bonus['eval-1'] || {}).eb || {}).clear ? 'gold' : (evo || {})['eval-1'] ? 'open' : '');
     cues(rec, owned, Number(no) || 0);
+    // 📕 오답노트 배지 (v0.9.7.9): 남은 문제(틀림 + 안 풂) 수를 🏰 중단원던전 · 📮 우편함 위에 · 0 이면 금색 도장
+    if (DS.Note && !me.test) {
+      const held = await DS.Net.get(`held/${k}`).catch(() => null), nt = DS.Note.all(rec || {}, bonus || {}, no, held);
+      ['camp-castle', 'camp-mail'].forEach((id) => { const z = document.getElementById(id); if (!z) return; const old = z.querySelector('.nt-badge'); if (old) old.remove(); if (nt.list.length) z.insertAdjacentHTML('beforeend', DS.Note.badge(nt.left)); });
+    }
   }
   // 상태가 있을 때만 살아 움직임: 📮 새 결과 · ⚒ 만들 수 있는 카드 · ⛺ 새로 열린 차시 영상
   function cues(rec, owned, no) {
@@ -313,8 +318,17 @@ DS.Camp = (function () {
   async function note() {
     const rec = (await DS.Net.get(`records/${ck(me.c)}/${me.n}`).catch(() => null)) || {};
     const g = DS.Grow ? await DS.Grow.mine(me).catch(() => null) : null;
+    // 📕 오답노트 (v0.9.7.9): 차시마다 문제 칩 · 남은 문제 → 중단원던전 그 층에서 보충
+    let ntHtml = '';
+    if (DS.Note && !me.test) {
+      const [bon, no, held] = await Promise.all([DS.Net.get(`bonus/${ck(me.c)}/${me.n}`).catch(() => null), DS.Net.get(`unlock/${ck(me.c)}`).catch(() => 0), DS.Net.get(`held/${ck(me.c)}`).catch(() => null)]);
+      const nt = DS.Note.all(rec, bon || {}, no, held);
+      if (nt.list.length) ntHtml = `<div class="nt-box${nt.left ? ' open' : ''}"><p class="nt-h">${DS.Note.icon('book')} <b>오답노트</b> ${nt.left ? `<span class="nt-cnt">❗ 남은 문제 ${nt.left}</span>` : `<span class="nt-cnt ok">${DS.Note.icon('done')} 노트 완성!</span>`}</p>
+        ${nt.list.slice().reverse().map((x) => `<div class="nt-les${x.left ? ' open' : ''}"><b>${x.L.no}차시</b>${x.absent ? ' <span class="muted small">불참</span>' : ''}${DS.Note.rows(x)}</div>`).join('')}
+        <p class="muted small">${DS.Note.icon('x')} 틀림 · ${DS.Note.icon('-')} 안 풂 → 🟪 중단원던전 그 층에서 풀면 ${DS.Note.icon('p')} 보충 완료</p></div>`;
+    }
     const el = document.createElement('div'); el.className = 'modal camp-modal';
-    el.innerHTML = `<div class="quiz-box framed rs-box"><h2>📮 우편함 · 복습 노트</h2>${g ? `<div class="rs-lv"><b>Lv.${g.lv} ${esc(g.title)}</b> <span class="muted small">EXP ${g.total}</span><div class="rs-bar"><i style="width:${Math.round((100 * g.into) / g.next)}%"></i><span>${g.into} / ${g.next}</span></div></div>` : ''}
+    el.innerHTML = `<div class="quiz-box framed rs-box"><h2>📮 우편함 · 복습 노트</h2>${ntHtml}${g ? `<div class="rs-lv"><b>Lv.${g.lv} ${esc(g.title)}</b> <span class="muted small">EXP ${g.total}</span><div class="rs-bar"><i style="width:${Math.round((100 * g.into) / g.next)}%"></i><span>${g.into} / ${g.next}</span></div></div>` : ''}
       <p class="muted small">성적이 아니라 다음에 볼 것을 모아 둔 노트예요. 📌 복습 추천 개념은 🟪 중단원던전(그 차시 층)에서 연습할 수 있어요.</p>${DS.Result.history(rec)}
       <div class="row"><button class="btn" id="nt-x">닫기</button><button class="btn primary" id="nt-bonus">🟪 중단원던전으로</button></div></div>`;
     document.body.appendChild(el);
