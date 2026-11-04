@@ -1,7 +1,8 @@
-// 공통수학2 Ⅱ. 집합과 명제 · 6차시 「드모르간의 법칙 · 명제」 (학습과정 6차시 레이드용 v1, 2026-11-02 변경 제안 v1 사용자 컨펌)
-// 레이드 순서: 도입(생각 열기 · 말로) → 개념1(드모르간 — 시작 때 지난 시간 복습은 말로) → 문제1 → 개념2(원소의 개수) → 문제2
-//            → 개념3(생활 속 문제) → 문제3 → 개념4(명제) → 문제4 → 개념5(명제의 부정) → 문제5 → 형성평가
-// ⚔ 보강던전: ① 색칠한 부분의 원소 개수 · ② 생활 속 문제 2 · ③ 삼단논법 · 명제 고르기 · ④ 정의와 정리 (STEP 6 을 옮김)
+// 공통수학2 Ⅱ. 집합과 명제 · 6차시 「드모르간의 법칙 · 명제」 (학습과정 6차시 레이드용 v2 · 2026-11-04 사용자 확정)
+// v2: 도입 · 복습은 말로 · 학습지 ★ 칸만 게임(KEEP) · 보강 ③ → 문제 4-2(삼단논법 · 명제 고르기) · STEP 6 = 사각형의 포함 관계와 명제(문제 6)
+//     · 형성평가 6문항(도전 7 · 8 뺌 · 4번 = 사각형 명제 참 · 거짓) · 보강 ② · ④ 없앰 · 보강 ① 만 🟪 중단원던전 6층
+// 레이드 순서: 개념1(드모르간) → 문제1 → 개념2(원소의 개수) → 문제2 → 개념3(생활 속 문제) → 문제3 → 개념4(명제) → 문제4 → 문제4-2
+//            → 개념5(명제의 부정) → 문제5 → 개념6(사각형의 포함 관계와 명제) → 문제6 → 형성평가
 // 컨펌된 변경: 부정 「쓰기」 → 고르기(문제 5 · 형성평가 6 · 도전 8) · 형성평가 2 · 4 고르기 · 학습목표 번호 오타
 // 첫 시도(attempt 0)는 학습지 그대로, 재도전은 새 숫자 · 새 문장(문장 묶음). 정답은 tests/lesson6.test.js 가 따로 계산한다.
 (function () {
@@ -88,7 +89,7 @@
   const why = (s) => (TRUE.includes(s) ? '참·거짓을 분명히 판별 → 참인 명제' : FALSE.includes(s) ? '참·거짓을 분명히 판별 → 거짓인 명제 (거짓도 명제!)' : '기준이 사람마다 다름 → 명제가 아니다');
   const kindQ = (n, s) => ch(`(${n}) 「${s}」 는?`, KIND, kindOf(s), why(s), { sentence: s });
   const m4Make = (list) => list.map((s, i) => kindQ(i + 1, s));
-  const m4Retry = (r) => m4Make(r.shuffle([...r.shuffle(TRUE.slice()).slice(0, 2), ...r.shuffle(FALSE.slice()).slice(0, 2), ...r.shuffle(NONE.slice()).slice(0, 2)]));
+  const m4Retry = (r) => m4Make(r.shuffle([...r.shuffle(TRUE.slice()).slice(0, 1), ...r.shuffle(FALSE.slice()).slice(0, 1), ...r.shuffle(NONE.slice()).slice(0, 2)])); // v2: 4문장 (참 1 · 거짓 1 · 명제 아님 2)
 
   // ── 문제 5: 명제의 부정 고르기 + 참·거짓 (문장 묶음) ──────
   // p · p 의 참거짓 · 올바른 부정 · 틀린 보기 2개 (틀린 보기는 「부정」의 모양이 아닌 것)
@@ -112,7 +113,7 @@
     ];
   }
   const m5Make = (es, shuffle) => es.flatMap((e, i) => negQs(i + 1, e, shuffle ? shuffle([e.neg, ...e.wrong]) : null));
-  const m5Retry = (r) => m5Make(r.shuffle(NEG.slice(3)).slice(0, 3), (a) => r.shuffle(a));
+  const m5Retry = (r) => m5Make(r.shuffle(NEG.slice(3)).slice(0, 2), (a) => r.shuffle(a)); // v2: 2문장
 
   // ── 보강 ① 색칠한 부분의 원소 개수 ─────────────────────
   function b1Make(u, nAB, nOut) {
@@ -124,12 +125,7 @@
   }
   const b1Retry = (r) => b1Make(r.int(8, 10), r.int(1, 2), r.int(1, 3));
 
-  // ── 보강 ② 생활 속 문제 2 ─────────────────────────────
-  const ACTS = [['벽화 그리기', '교육 봉사'], ['헌혈', '환경 정화'], ['도서관 도우미', '급식 도우미']];
-  const b2Make = (x, y, both, [p, q]) => [nq(`봉사 활동에서 ${p} ${x}명, ${q} ${y}명, 두 가지 모두 ${both}명이다. ${p} 또는 ${q}를 하는 학생 수는?`, x + y - both, `${x} + ${y} − ${both}`, { x, y, both })];
-  function b2Retry(r) { for (;;) { const x = r.int(20, 60), y = r.int(20, 60), both = r.int(10, 30); if (both < x && both < y) return b2Make(x, y, both, r.pick(ACTS)); } }
-
-  // ── 보강 ③ 삼단논법 · 명제 고르기 ─────────────────────
+  // ── 문제 4-2 (옛 보강 ③) 삼단논법 · 명제 고르기 ─────────────────────
   const SYL = [
     { a: '모든 사람은 죽는다.', b: '소크라테스는 사람이다.', head: '소크라테스는', ans: '죽는다', choices: ['죽는다', '사람이다', '소크라테스다'] },
     { a: '모든 새는 날개가 있다.', b: '참새는 새이다.', head: '참새는', ans: '날개가 있다', choices: ['날개가 있다', '새이다', '참새이다'] },
@@ -144,61 +140,72 @@
   const NONE2 = ['맛초킹은 가장 맛있는 치킨이다.', '우리 반 착한 친구의 비중이 전국에서 가장 높다.', '수학 선생님은 키가 크다.', ...NONE];
   const b3Retry = (r) => { const s = r.pick(SYL.slice(1)); return [sylQ(s, r.shuffle(s.choices.slice())), propPick(r.shuffle([...r.shuffle([...TRUE, ...FALSE]).slice(0, 3), ...r.shuffle(NONE2.slice()).slice(0, 3)]))]; };
 
-  // ── 보강 ④ 정의와 정리 ─────────────────────────────────
-  const DEF = ['네 변의 길이가 같은 사각형을 마름모라 한다.', '두 변의 길이가 같은 삼각형을 이등변삼각형이라 한다.', '네 각이 모두 직각인 사각형을 직사각형이라 한다.', '1보다 큰 자연수 중 1과 자기 자신만을 약수로 가지는 수를 소수라 한다.'];
-  const THM = ['직각삼각형에서 빗변의 제곱은 다른 두 변의 제곱의 합과 같다.', '삼각형의 세 내각의 합은 180°이다.', '이등변삼각형의 두 밑각의 크기는 같다.', '맞꼭지각의 크기는 같다.'];
-  const dtQ = (n, s) => ch(`(${n}) 「${s}」 는 정의인가 정리인가?`, ['정의', '정리'], DEF.includes(s) ? '정의' : '정리', DEF.includes(s) ? '용어의 뜻을 정한 문장 → 정의' : '참임이 증명된 기본 명제 → 정리', { dt: s });
-  const b4Retry = (r) => r.shuffle([r.pick(DEF.slice(1)), r.pick(THM.slice(1))]).map((s, i) => dtQ(i + 1, s));
+  // ── 문제 6 · 형성평가 4: 사각형의 포함 관계와 명제 (v2 · 8차시 「p → q 참 ⇔ P ⊂ Q」를 미리 그림으로) ──
+  //   사각형 가족: 사다리꼴(한 쌍 이상 평행) ⊃ 평행사변형 ⊃ 직사각형 · 마름모, 정사각형 = 직사각형 ∩ 마름모
+  //   참 · 거짓 = 대표 사각형 5개(반례 후보)로 계산: 「X이면 Y」 가 참 ⇔ X 에 드는 대표가 모두 Y 에도 든다
+  const QD = ['사다리꼴', '평행사변형', '직사각형', '마름모', '정사각형'];
+  const QREP = [ // 대표 사각형 → 드는 가족 (반례로 씀)
+    { name: '한 쌍만 평행한 사다리꼴', in: ['사다리꼴'] },
+    { name: '네 각이 직각이 아닌 평행사변형', in: ['사다리꼴', '평행사변형'] },
+    { name: '가로 2, 세로 1인 직사각형', in: ['사다리꼴', '평행사변형', '직사각형'] },
+    { name: '네 각이 직각이 아닌 마름모', in: ['사다리꼴', '평행사변형', '마름모'] },
+    { name: '정사각형', in: QD.slice() },
+  ];
+  const qTrue = (x, y) => QREP.every((r) => !r.in.includes(x) || r.in.includes(y));
+  const qWhy = (x, y) => { if (qTrue(x, y)) return `${eun(x)} 모두 ${y} 안에 든다 (${x} ⊂ ${y}) → 참`; const c = QREP.find((r) => r.in.includes(x) && !r.in.includes(y)); return `반례: ${c.name} — ${x}이지만 ${iga(y)} 아니다 → 거짓`; };
+  const bat = (w) => (w.charCodeAt(w.length - 1) - 0xac00) % 28 > 0; // 받침 있음 → 은 · 이 / 없음 → 는 · 가
+  const eun = (w) => w + (bat(w) ? '은' : '는'), iga = (w) => w + (bat(w) ? '이' : '가');
+  const quadQ = (n, x, y) => ch(`${n ? `(${n}) ` : ''}「${x}이면 ${y}이다.」 는 참인가 거짓인가?`, TF, qTrue(x, y) ? '참' : '거짓', qWhy(x, y), { quad: [x, y] });
+  const m6Make = (pairs) => pairs.map(([x, y], i) => quadQ(i + 1, x, y));
+  function m6Retry(r) { // 참 2 · 거짓 2 (서로 다른 짝 · 처음 문제와 겹치지 않게)
+    const used = ['마름모|평행사변형', '평행사변형|직사각형', '정사각형|마름모', '사다리꼴|평행사변형'];
+    const all = []; QD.forEach((x) => QD.forEach((y) => { if (x !== y && !used.includes(`${x}|${y}`)) all.push([x, y]); }));
+    const t = r.shuffle(all.filter(([x, y]) => qTrue(x, y))).slice(0, 2), f = r.shuffle(all.filter(([x, y]) => !qTrue(x, y))).slice(0, 2);
+    return m6Make(r.shuffle([...t, ...f]));
+  }
 
   // ── 몬스터 (학습지 순서) ─────────────────────────────────
   // 땅굴 테마 · v1 남은 몬스터 5마리(이끼 미믹 · 서리 늑대 · 버섯 기사 · 자수정 눈알 문어 · 청록 수정룡) · 보강 = 색 변형(@h) · v2 도트가 오면 교체
+  // v2 (2026-11-04): 학습지 ★ 칸만 게임에 (KEEP = 남기는 소문제 번호 · 나머지는 학습지에서만 중간 계산)
+  const KEEP = { m1: [0, 3, 4, 5], m2: [0, 1, 4], m3: [0, 2] }, keep = (id, arr) => KEEP[id].map((i) => arr[i]);
   const MONSTERS = {
-    m1: { title: '문제 1', sprite: 'extra:3', make: (a, r) => (a === 0 ? m1Make(range(1, 6), [1, 2, 3], [3, 4]) : m1Retry(r)) },
-    m2: { title: '문제 2', sprite: 'extra:6', make: (a, r) => (a === 0 ? m2Make(30, 12, 15, 5) : m2Retry(r)) },
-    m3: { title: '문제 3', sprite: 'extra:7', make: (a, r) => (a === 0 ? m3Make(40, 18, 12, 5, CLUBS[0]) : m3Retry(r)) },
-    m4: { title: '문제 4', sprite: 'crown:6', make: (a, r) => (a === 0 ? m4Make(['3은 홀수이다.', '5 + 4 = 10', '축구는 재미있다.', '2는 소수이다.', '부산은 큰 도시이다.', '정사각형은 직사각형이다.']) : m4Retry(r)) },
-    m5: { title: '문제 5', sprite: 'crown:9', make: (a, r) => (a === 0 ? m5Make(NEG.slice(0, 3)) : m5Retry(r)) },
-    // ⚔ 보강던전 (레이드 밖 · 혼자)
+    m1: { title: '문제 1', sprite: 'extra:3', make: (a, r) => keep('m1', a === 0 ? m1Make(range(1, 6), [1, 2, 3], [3, 4]) : m1Retry(r)) },
+    m2: { title: '문제 2', sprite: 'extra:6', make: (a, r) => keep('m2', a === 0 ? m2Make(30, 12, 15, 5) : m2Retry(r)) },
+    m3: { title: '문제 3', sprite: 'extra:7', make: (a, r) => keep('m3', a === 0 ? m3Make(40, 18, 12, 5, CLUBS[0]) : m3Retry(r)) },
+    m4: { title: '문제 4', sprite: 'crown:6', make: (a, r) => (a === 0 ? m4Make(['5 + 4 = 10', '축구는 재미있다.', '2는 소수이다.', '부산은 큰 도시이다.']) : m4Retry(r)) },
+    m42: { title: '문제 4-2 · 삼단논법 · 명제 고르기', sprite: 'crown:6@h120', make: (a, r) => (a === 0 ? [sylQ(SYL[0]), propPick(PICK6)] : b3Retry(r)) },
+    m5: { title: '문제 5', sprite: 'crown:9', make: (a, r) => (a === 0 ? m5Make(NEG.slice(0, 2)) : m5Retry(r)) },
+    m6: { title: '문제 6 · 사각형 명제', sprite: 'extra:6@h300', make: (a, r) => (a === 0 ? m6Make([['마름모', '평행사변형'], ['평행사변형', '직사각형'], ['정사각형', '마름모'], ['사다리꼴', '평행사변형']]) : m6Retry(r)) },
+    // 🟪 중단원던전 6층 (레이드 밖 · 혼자)
     b1: { title: '보강 ① · 색칠한 부분의 원소 개수', bonus: true, concept: 'c2', sprite: 'extra:3@h150', make: (a, r) => (a === 0 ? b1Make(7, 1, 2) : b1Retry(r)) },
-    b2: { title: '보강 ② · 생활 속 문제 2', bonus: true, concept: 'c3', sprite: 'extra:7@h200', make: (a, r) => (a === 0 ? b2Make(37, 54, 26, ACTS[0]) : b2Retry(r)) },
-    b3: { title: '보강 ③ · 삼단논법 · 명제 고르기', bonus: true, concept: 'c4', sprite: 'crown:6@h120', make: (a, r) => (a === 0 ? [sylQ(SYL[0]), propPick(PICK6)] : b3Retry(r)) },
-    b4: { title: '보강 ④ · 정의와 정리', bonus: true, concept: 'c4', sprite: 'crown:9@h160', note: '정의 = 용어의 뜻을 정한 문장 · 정리 = 참임이 증명된 기본 명제', make: (a, r) => (a === 0 ? [dtQ(1, DEF[0]), dtQ(2, THM[0])] : b4Retry(r)) },
   };
 
-  // ── 형성평가 (보스) — 세트1: 학습지 그대로(변경 제안 v1 의 고르기), 세트2: 숫자 · 문장을 바꾼 재도전 · 7·8번(도전)은 보너스 ──
+
+  // ── 형성평가 (보스) — 세트1: 학습지 그대로, 세트2: 숫자 · 문장을 바꾼 재도전 · v2: 6문항 (도전 7 · 8 뺌 · 4번 = 사각형 명제 참 · 거짓) ──
   function bossSet(o) {
-    const aub7 = o.n7 - o.none7;
     return [
       ch(`1. ${o.q1} 의 ( ) 에 알맞은 것은?`, ['∪', '∩'], o.a1, '드모르간: 괄호를 풀면 ᶜ 이 각각 붙고 ∪ ↔ ∩', { dm: o.q1 }),
       ch(`2. ${o.q2} 과 같은 것은?`, o.c2, o.c2[0], '드모르간의 법칙', { dm2: o.q2 }),
       nq(`3. n(U) = ${o.u3}, n(A) = ${o.a3} 일 때 n(A${C}) = ?`, o.u3 - o.a3, `${o.u3} − ${o.a3}`, { u: o.u3, a: o.a3 }),
-      ch(`4. ${o.q4} ( ) 라고 한다. 알맞은 낱말은?`, ['명제', '참', '거짓', '부정'], o.a4, o.s4, { word: o.a4 }),
+      quadQ(0, o.q4[0], o.q4[1]),
       ch('5. 다음 중 명제가 아닌 것은?', o.c5, o.c5[2], '기준이 사람마다 다른 문장은 명제가 아니다', { notProp: o.c5[2] }),
       ch(`6. “${o.p6}” 의 부정은?`, o.c6, o.c6[0], 'ʻ~이 아니다’', { neg: o.p6 }),
-      nq(`7. [도전] 반 학생 ${o.n7}명 중 ${o.x7[0]} ${o.x7[1]}명, ${o.y7[0]} ${o.y7[1]}명, 둘 다 아닌 학생이 ${o.none7}명일 때, 둘 다 하는 학생은 몇 명인가?`, o.x7[1] + o.y7[1] - aub7,
-        `n(A ∪ B) = ${o.n7} − ${o.none7} = ${aub7} → ${o.x7[1]} + ${o.y7[1]} − ${aub7}`, { n: o.n7, x: o.x7[1], y: o.y7[1], none: o.none7 }),
-      ch(`8. [도전] “${o.p8}” 의 부정과 그 참·거짓은?`, o.c8, o.c8[0], o.s8, { neg8: o.p8 }),
-    ];
+    ].map((q, i) => (i === 3 ? Object.assign(q, { question: `4. ${q.question}` }) : q));
   }
   const ROT = (a, k) => a.slice(k).concat(a.slice(0, k)); // 보기 순서 섞기 (정답 = 원래 0번)
   const BOSS = {
     1: bossSet({ q1: `(A ∪ B)${C} = A${C} ( ) B${C}`, a1: '∩', q2: `(A ∩ B)${C}`, c2: [`A${C} ∪ B${C}`, `A${C} ∩ B${C}`, 'A ∪ B', `(A ∪ B)${C}`],
-      u3: 20, a3: 7, q4: '참인지 거짓인지 판별할 수 있는 문장을', a4: '명제', s4: '참·거짓을 판별할 수 있는 문장이나 식 = 명제',
-      c5: ['1 + 1 = 3', '6은 3의 배수이다.', '떡볶이는 맛있다.'], p6: '5는 홀수이다.', c6: ['5는 홀수가 아니다', '5는 짝수가 아니다', '5는 홀수이다'],
-      n7: 18, x7: ['버스 통학', 6], y7: ['기숙사', 14], none7: 1,
-      p8: '2는 짝수가 아니다.', c8: ['2는 짝수이다 · 참', '2는 짝수이다 · 거짓', '2는 홀수이다 · 거짓', '2는 짝수가 아니다 · 참'], s8: '부정의 부정 → 2는 짝수이다 (참)' }),
+      u3: 20, a3: 7, q4: ['직사각형', '평행사변형'],
+      c5: ['1 + 1 = 3', '6은 3의 배수이다.', '떡볶이는 맛있다.'], p6: '5는 홀수이다.', c6: ['5는 홀수가 아니다', '5는 짝수가 아니다', '5는 홀수이다'] }),
     2: bossSet({ q1: `(A ∩ B)${C} = A${C} ( ) B${C}`, a1: '∪', q2: `(A ∪ B)${C}`, c2: [`A${C} ∩ B${C}`, `A${C} ∪ B${C}`, 'A ∩ B', `(A ∩ B)${C}`],
-      u3: 25, a3: 9, q4: '명제 p 에 대하여 ʻp 가 아니다’를 p 의', a4: '부정', s4: 'ʻp 가 아니다’ = p 의 부정 ~p',
-      c5: ['2 + 2 = 5', '9는 3의 배수이다.', '이 영화는 재미있다.'], p6: '8은 짝수이다.', c6: ['8은 짝수가 아니다', '8은 홀수가 아니다', '8은 짝수이다'],
-      n7: 20, x7: ['수학 동아리', 9], y7: ['과학 동아리', 12], none7: 2,
-      p8: '3은 홀수가 아니다.', c8: ['3은 홀수이다 · 참', '3은 홀수이다 · 거짓', '3은 짝수이다 · 거짓', '3은 홀수가 아니다 · 참'], s8: '부정의 부정 → 3은 홀수이다 (참)' }),
+      u3: 25, a3: 9, q4: ['마름모', '정사각형'],
+      c5: ['2 + 2 = 5', '9는 3의 배수이다.', '이 영화는 재미있다.'], p6: '8은 짝수이다.', c6: ['8은 짝수가 아니다', '8은 홀수가 아니다', '8은 짝수이다'] }),
   };
   // 세트마다 보기 순서를 섞어 둔다 (정답이 늘 ①에 오지 않게) — 같은 순서가 학생 · 교사 기기에서 같게 고정
-  [[1, [0, 1, 0, 0, 2, 1, 0, 3]], [2, [1, 2, 0, 0, 1, 2, 0, 2]]].forEach(([set, ks]) => BOSS[set].forEach((q, i) => { if (q.type === 'choice' && ks[i]) { q.choices = ROT(q.choices, ks[i]); q.answerIndex = q.choices.indexOf(q.answer); } }));
+  [[1, [0, 1, 0, 0, 2, 1]], [2, [1, 2, 0, 0, 1, 2]]].forEach(([set, ks]) => BOSS[set].forEach((q, i) => { if (q.type === 'choice' && ks[i]) { q.choices = ROT(q.choices, ks[i]); q.answerIndex = q.choices.indexOf(q.answer); } }));
 
   const STEPS = [
-    { kind: 'intro', id: 'intro', title: '도입 · 생각 열기', say: '급식에서 ʻ둘 다 안 먹는’ 친구 — 라면도 싫고 떡볶이도 싫다 = (라면 또는 떡볶이)가 아니다?' },
-    { kind: 'concept', id: 'c1', title: '개념 1 · 드모르간의 법칙', say: '(먼저 지난 시간 복습: Aᶜ, A − B) (A ∪ B)ᶜ = Aᶜ ∩ Bᶜ, (A ∩ B)ᶜ = Aᶜ ∪ Bᶜ · 괄호를 풀 때 ᶜ 이 각각 붙고 ∪ ↔ ∩ 가 바뀐다!' },
+    { kind: 'concept', id: 'c1', title: '개념 1 · 드모르간의 법칙', say: '(먼저 말로: 급식에서 「둘 다 안 먹는」 친구 · 지난 시간 Aᶜ, A − B 복습) (A ∪ B)ᶜ = Aᶜ ∩ Bᶜ, (A ∩ B)ᶜ = Aᶜ ∪ Bᶜ · 괄호를 풀 때 ᶜ 이 각각 붙고 ∪ ↔ ∩ 가 바뀐다!' },
     { kind: 'monster', id: 'm1' },
     { kind: 'concept', id: 'c2', title: '개념 2 · 여집합 · 차집합의 원소의 개수', say: 'n(Aᶜ) = n(U) − n(A) · n(A − B) = n(A) − n(A ∩ B) = n(A ∪ B) − n(B)' },
     { kind: 'monster', id: 'm2' },
@@ -206,8 +213,11 @@
     { kind: 'monster', id: 'm3' },
     { kind: 'concept', id: 'c4', title: '개념 4 · 명제', say: '참인지 거짓인지 분명하게 판별할 수 있는 문장이나 식 = 명제 · 거짓인 문장도 명제! · 맛있다 · 크다 · 멋지다 처럼 기준이 모호하면 명제가 아니다' },
     { kind: 'monster', id: 'm4' },
-    { kind: 'concept', id: 'c5', title: '개념 5 · 명제의 부정', say: 'ʻp 가 아니다’ = ~p · p 가 참이면 ~p 는 거짓, p 가 거짓이면 ~p 는 참 · ~(~p) = p · (끝에 말로: 정의와 정리 — 보강던전 ④)' },
+    { kind: 'monster', id: 'm42' },
+    { kind: 'concept', id: 'c5', title: '개념 5 · 명제의 부정', say: 'ʻp 가 아니다’ = ~p · p 가 참이면 ~p 는 거짓, p 가 거짓이면 ~p 는 참 · ~(~p) = p · ' },
     { kind: 'monster', id: 'm5' },
+    { kind: 'concept', id: 'c6', title: '개념 6 · 사각형의 포함 관계와 명제', say: '사각형 가족의 뜻(정의) → 포함 그림 · 「p이면 q이다」 = p 가 q 안에 쏙 들어가면 참, 삐져나오는 반례가 있으면 거짓 · 정사각형이면 직사각형(참) / 직사각형이면 정사각형(거짓: 가로 2 세로 1) · 8차시에 진리집합으로 다시!' },
+    { kind: 'monster', id: 'm6' },
     { kind: 'boss', id: 'boss', title: '형성평가 · 그림자 드래곤' },
   ];
   STEPS.forEach((s) => { if (s.kind === 'monster') Object.assign(s, { title: MONSTERS[s.id].title, special: !!MONSTERS[s.id].special }); });
@@ -216,31 +226,25 @@
     id: 'set-06', no: 6,
     title: '드모르간의 법칙 · 명제',
     unit: '공통수학2 Ⅱ. 집합과 명제 · 6차시',
-    sheet: '학습과정 6차시 레이드용 v1',
-    // 칸 위치 (레이드용 v1 을 tools/worksheet/measure_crops.js 로 잼)
-    crops: { intro: [{ p: 1, x: 0.0426, y: 0.1447, w: 0.4458, h: 0.1392 }], c1: [{ p: 1, x: 0.0426, y: 0.3577, w: 0.4458, h: 0.1223 }], m1: [{ p: 1, x: 0.0426, y: 0.4783, w: 0.4458, h: 0.1444 }],
-      c2: [{ p: 1, x: 0.5116, y: 0.1447, w: 0.4458, h: 0.0905 }], m2: [{ p: 1, x: 0.5116, y: 0.2317, w: 0.4458, h: 0.1107 }],
-      c3: [{ p: 1, x: 0.5116, y: 0.3415, w: 0.4458, h: 0.0755 }], m3: [{ p: 1, x: 0.5116, y: 0.4134, w: 0.4458, h: 0.1049 }],
-      c4: [{ p: 1, x: 0.5116, y: 0.6298, w: 0.4458, h: 0.1086 }], m4: [{ p: 2, x: 0.0426, y: 0.103, w: 0.4458, h: 0.1687 }],
-      c5: [{ p: 2, x: 0.0426, y: 0.2726, w: 0.4458, h: 0.1664 }], m5: [{ p: 2, x: 0.0426, y: 0.4372, w: 0.4458, h: 0.1522 }],
-      boss: [{ p: 2, x: 0.5116, y: 0.103, w: 0.4458, h: 0.7156 }],
-      b1: [{ p: 1, x: 0.0426, y: 0.6236, w: 0.4458, h: 0.1194 }], b2: [{ p: 1, x: 0.5116, y: 0.5174, w: 0.4458, h: 0.0869 }], b3: [{ p: 1, x: 0.5116, y: 0.7348, w: 0.4458, h: 0.1229 }], b4: [{ p: 2, x: 0.0426, y: 0.5903, w: 0.4458, h: 0.1681 }] },
+    sheet: '학습과정 6차시 레이드용 v2',
+    // 칸 위치 (레이드용 v2 를 tools/worksheet/measure_crops.js 로 잼 · 2026-11-04)
+    crops: { c1: [{ p: 1, x: 0.0426, y: 0.1602, w: 0.4458, h: 0.1389 }], m1: [{ p: 1, x: 0.0426, y: 0.2973, w: 0.4458, h: 0.1609 }], c2: [{ p: 1, x: 0.0426, y: 0.4591, w: 0.4458, h: 0.0923 }], m2: [{ p: 1, x: 0.0426, y: 0.5496, w: 0.4458, h: 0.1308 }], c3: [{ p: 1, x: 0.0426, y: 0.6813, w: 0.4458, h: 0.0773 }], m3: [{ p: 1, x: 0.0426, y: 0.7568, w: 0.4458, h: 0.1084 }], c4: [{ p: 1, x: 0.5116, y: 0.1892, w: 0.4458, h: 0.1086 }], m4: [{ p: 1, x: 0.5116, y: 0.2942, w: 0.4458, h: 0.1392 }], m42: [{ p: 1, x: 0.5116, y: 0.4325, w: 0.4458, h: 0.2599 }], c5: [{ p: 1, x: 0.5116, y: 0.6889, w: 0.4458, h: 0.1646 }], m5: [{ p: 1, x: 0.5116, y: 0.8499, w: 0.4458, h: 0.1049 }], c6: [{ p: 2, x: 0.0426, y: 0.103, w: 0.4458, h: 0.4561 }], m6: [{ p: 2, x: 0.0426, y: 0.5574, w: 0.4458, h: 0.1298 }], boss: [{ p: 2, x: 0.5116, y: 0.103, w: 0.4458, h: 0.6544 }] },
     theme: '01-burrow', // 던전 테마: 땅굴 (배경 dg-01 · 포털 portal-01)
-    // 🎬 「공통수학2 > 05 모션그래픽」: (06차시) 09 드모르간 → c1 · m1 · 18 원소의 개수 → c2 · m2 · b1 · 19 생활 속 문제 → c3 · m3 · b2
-    //    · 20 명제 (정의 · 정리 포함) → c4 · m4 · b3 · b4 · 21 명제의 부정 → c5 · m5
+    // 🎬 「공통수학2 > 05 모션그래픽」: (06차시) 09 드모르간 → c1 · m1 · 18 원소의 개수 → c2 · m2 · b1 · 19 생활 속 문제 → c3 · m3
+    //    · 20 명제 → c4 · m4 · m42 · 21 명제의 부정 → c5 · m5 · 개념 6 · 문제 6(사각형 명제) 영상은 모션 방에서 만드는 중 (2026-11-04)
     videos: { c1: 'assets/video/v06-09.mp4', m1: 'assets/video/v06-09.mp4',
       c2: 'assets/video/v06-18.mp4', m2: 'assets/video/v06-18.mp4', b1: 'assets/video/v06-18.mp4',
-      c3: 'assets/video/v06-19.mp4', m3: 'assets/video/v06-19.mp4', b2: 'assets/video/v06-19.mp4',
-      c4: 'assets/video/v06-20.mp4', m4: 'assets/video/v06-20.mp4', b3: 'assets/video/v06-20.mp4', b4: 'assets/video/v06-20.mp4',
+      c3: 'assets/video/v06-19.mp4', m3: 'assets/video/v06-19.mp4',
+      c4: 'assets/video/v06-20.mp4', m4: 'assets/video/v06-20.mp4', m42: 'assets/video/v06-20.mp4',
       c5: 'assets/video/v06-21.mp4', m5: 'assets/video/v06-21.mp4' },
-    goal: '드모르간의 법칙을 이용한다 · 여집합 · 차집합의 원소의 개수를 구한다 · 명제와 그 부정의 참 · 거짓을 판별한다',
+    goal: '드모르간의 법칙을 이용한다 · 여집합 · 차집합의 원소의 개수를 구한다 · 명제와 그 부정의 참 · 거짓을 판별한다 · 사각형의 포함 관계를 「~이면 ~이다」 명제로 판별한다',
     defaultPct: 90,
     steps: STEPS,
     monsters: MONSTERS,
-    bonus: ['b1', 'b2', 'b3', 'b4'].map((id) => ({ id, title: MONSTERS[id].title, concept: MONSTERS[id].concept })),
+    bonus: ['b1'].map((id) => ({ id, title: MONSTERS[id].title, concept: MONSTERS[id].concept })),
     items(id, seed, attempt) { return MONSTERS[id].make(attempt, DS.Rng(`${seed}|${id}|${attempt}`)); },
-    WORDS: { TRUE, FALSE, NONE, NEG, SYL, DEF, THM, PROP_EXTRA, NONE2 },
+    WORDS: { TRUE, FALSE, NONE, NEG, SYL, PROP_EXTRA, NONE2, QD, QREP },
     next: { title: '7차시 · 조건과 진리집합', ask: '「x 는 짝수이다」 는 명제일까? x 가 정해지면?', link: '오늘 배운 명제와 부정을 「조건」으로 넓혀, 참이 되게 하는 원소들의 집합(진리집합)을 찾아요.' }, // 다음 수업 (초안)
-    boss: { title: '6차시 형성평가 · 그림자 드래곤', sprite: '2@h250', items: 8, hpItems: 6, sets: BOSS, tags: ['c1', 'c1', 'c2', 'c4', 'c4', 'c5', 'c3', 'c5'] },
+    boss: { title: '6차시 형성평가 · 그림자 드래곤', sprite: '2@h250', items: 6, hpItems: 6, sets: BOSS, tags: ['c1', 'c1', 'c2', 'c6', 'c4', 'c5'] },
   });
 })();

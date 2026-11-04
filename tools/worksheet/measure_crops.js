@@ -8,7 +8,7 @@ const { chromium } = require('playwright');
   const out = await p.evaluate(({ map, MM }) => {
     const pages = [...document.querySelectorAll('.page')], res = {};
     const kids = [...document.querySelectorAll('.col > *')];
-    const isStart = (el) => /^\s*✏/.test(el.textContent) || /^\s*문제\s*\d\)/.test(el.textContent) || el.classList.contains('pur') || !!el.querySelector('.pill') || !!el.querySelector('.h.grnc') || el.classList.contains('box') && false;
+    const isStart = (el) => /^\s*✏/.test(el.textContent) || /^\s*문제\s*\d+(-\d+)?\)/.test(el.textContent) || el.classList.contains('pur') || !!el.querySelector('.pill') || !!el.querySelector('.h.grnc') || el.classList.contains('box') && false;
     for (const [id, key] of Object.entries(map)) {
       const start = kids.find((el) => el.textContent.replace(/\s+/g, ' ').trim().startsWith(key));
       if (!start) { res[id] = null; continue; }

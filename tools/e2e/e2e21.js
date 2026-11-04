@@ -37,7 +37,7 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   await S1.waitForTimeout(2500);
   const go = () => T.evaluate(async () => { const code = DS.Teacher.code(); const R = DS.Act.unpackRoom(await DS.Net.get(`rooms/${code}`)); await DS.Act.go(code, R, DS.Lessons.get(R.meta.lesson), 1); });
   if (process.env.V2MON) await S1.evaluate(() => { const L = DS.Lessons.get('set-06'); L.monsters.m1.sprite = 'rift:0'; L.boss.sprite = 'riftboss:0'; L.theme = '03-dimensional'; }); // V2MON=1: v2 몬스터 미리보기 (이 브라우저에서만)
-  for (let k = 0; k < 3; k++) { await go(); await T.waitForTimeout(800); } // 도입 → 개념1 → 문제1
+  for (let k = 0; k < 2; k++) { await go(); await T.waitForTimeout(800); } // 개념1 → 문제1 (6차시 v2: 도입 단계 없음)
   await S1.waitForTimeout(1500);
   console.log('fight anim:', await S1.getAttribute('.enc-hero .art', 'data-anim').catch(() => 'none'));
   await S1.screenshot({ path: `${OUT}/4-raid-think.png` });
