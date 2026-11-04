@@ -157,7 +157,7 @@ DS.Bonus = (function () {
       const items = itemsOf(L, mid, seed, attempt); cur = items;
       for (let i = 0; i < n; i++) {
         if (solved[i]) continue;
-        const ok = await DS.Quiz.ask({ name: mon.title, formula: `${i + 1} / ${n}` }, items[i], { tag: attempt ? (mid === 'boss' ? '🔄 세트가 바뀌었어요' : '🔄 숫자가 바뀌었어요') : '🟪 중단원던전' });
+        const ok = await DS.Quiz.ask({ name: mon.title, formula: `${i + 1} / ${n}` }, items[i], { hint: mid !== 'boss' && !L.eval, tag: attempt ? (mid === 'boss' ? '🔄 세트가 바뀌었어요' : '🔄 숫자가 바뀌었어요') : '🟪 중단원던전' });
         if (!ok && DS.Mis && DS.Quiz.lastGiven !== undefined) wrongs.push({ i, codes: DS.Mis.classify(items[i], DS.Quiz.lastGiven, mid === 'boss' ? DS.Mis.bossTag(L.id, attempt % 2 === 0 ? 1 : 2, i) : null) }); // 🔎 오개념 (중단원던전만 저장 · 재대결은 형성평가 꼬리표)
         if (ok) { solved[i] = true; DS.FX.play(el.querySelector('.scene'), me.fx || 'flame', { scale: 0.3 }); } else wrongSeen = true;
         draw(ok ? 'hit' : 'miss');

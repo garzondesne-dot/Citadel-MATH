@@ -1456,3 +1456,10 @@ body:has(#test-bar) #ver-tag { bottom: calc(64px + env(safe-area-inset-bottom));
 .att-pick { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 8px 0; }
 .sc-tbl td.sc-auto { background: #ffd35a22; }
 .sc-comci { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 6px 0; padding: 6px; border: 1px solid #ffd35a55; background: #ffd35a11; } .sc-comci input { width: auto !important; margin: 0; }
+
+/* 💡 그림 힌트 (v0.9.7.4) — 학생 폰 집합 문제 */
+.hint-wrap { margin: 4px 0 6px; }
+.hint-btn { font-size: 13px; }
+.hint-fig { margin-top: 6px; background: #fbfaf7; border-radius: 6px; padding: 4px; }
+.hint-svg { display: block; width: 100%; max-width: 340px; height: auto; margin: 0 auto; font-family: 'Galmuri11', sans-serif; }
+.hint-svg text { font-family: 'DejaVu Serif', 'Times New Roman', serif; }

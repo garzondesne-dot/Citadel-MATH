@@ -61,7 +61,7 @@ DS.Result = (function () {
   // 저장용 요약 (records/{반}/{번호}/{차시})
   const summary = (r, code) => ({ at: (DS.Net || {}).TS || Date.now(), code: String(code || ''), no: r.no,
     conc: Object.fromEntries(Object.entries(r.conc).map(([c, v]) => [c, [v.ok, v.total]])), names: r.titles,
-    miss: r.mons.filter((m) => m.miss).map((m) => m.id), weak: r.weak, ...(Object.keys(r.mis || {}).length ? { mis: r.mis } : {}), boss: r.boss.mast.filter(Boolean).length, bossN: r.boss.hp, won: !!r.boss.won, fixed: r.fixed || 0, perfects: r.perfects || 0, xp: DS.Grow ? DS.Grow.sum(r.parts) : 0 });
+    miss: r.mons.filter((m) => m.miss).map((m) => m.id), weak: r.weak, ...(Object.keys(r.mis || {}).length ? { mis: r.mis } : {}), boss: r.boss.mast.filter(Boolean).length, bossN: r.boss.hp, won: !!r.boss.won, fixed: r.fixed || 0, perfects: r.perfects || 0, xp: DS.Grow ? DS.Grow.sum(r.parts) : 0, ...(DS.Student && DS.Student.hintCount && DS.Student.hintCount(code) ? { hints: DS.Student.hintCount(code) } : {}) }); // 💡 그림 힌트를 펼친 소문제 수 (v0.9.7.4 · 성적 아님)
 
   const dots = (ok, total) => Array.from({ length: Math.min(total, 10) }, (_, i) => `<i class="${i < Math.round((ok / total) * Math.min(total, 10)) ? 'on' : ''}"></i>`).join('');
   // 🔎 자주 하는 실수 한 줄 (오개념 기록 · 점수 아님)

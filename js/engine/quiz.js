@@ -44,6 +44,11 @@ DS.Quiz = (function () {
       $('#quiz-card').textContent = (opt.tag ? opt.tag + ' · ' : '') + (card.name || '');
       $('#quiz-formula').innerHTML = pretty(card.formula || '');
       $('#quiz-q').innerHTML = (opt.ref ? `<span class="sheet-tag">📄 ${DS.UI.esc(opt.ref)}</span>` : '') + DS.UI.rich(prob.question);
+      // 💡 그림 힌트 (v0.9.7.4): opt.hint 이고 집합 문제면 버튼 → 벤 다이어그램 펼치기 · 접기 (중단원던전 층 보강 · 허수아비)
+      if (opt.hint && DS.Hint && DS.Hint.svg(prob)) {
+        const hq = $('#quiz-q'), draw = (open) => { const w = hq.querySelector('.hint-wrap'); if (w) w.remove(); hq.insertAdjacentHTML('beforeend', DS.Hint.html(prob, 'q', open)); hq.querySelector('[data-hint]').onclick = () => { DS.Sound.clank(); draw(!open); }; };
+        draw(false);
+      }
       const sol = $('#quiz-sol'), next = $('#quiz-next'), box = $('#quiz-choices');
       sol.classList.add('hidden');
       next.classList.add('hidden');

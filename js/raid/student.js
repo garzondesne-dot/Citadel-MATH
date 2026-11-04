@@ -343,6 +343,7 @@ DS.Student = (function () {
       else form.given[k] = [v];
       DS.Sound.clank(); render();
     }));
+    body.querySelectorAll('[data-hint]').forEach((b) => b.addEventListener('click', () => { hintTap(b.dataset.hint); drawn = ''; render(); }));
     // 단답 입력: 다시 그리지 않고 값만 기억 (글자 입력 중에 화면이 바뀌지 않게) · 공격 버튼만 켜고 끔
     body.querySelectorAll('[data-text]').forEach((inp) => inp.addEventListener('input', () => {
       form.given[Number(inp.dataset.text)] = inp.value;
@@ -357,9 +358,20 @@ DS.Student = (function () {
     };
   }
   // ref: 첫 시도면 '문제 1 (2)' 처럼 학습지 문항 이름 → 문제 위에 작은 꼬리표 (같은 문제를 학습지에서 바로 찾게)
-  function itemHtml(q, i, wasWrong, ref, G = form.given) { // G: 고른 답 (v0.9.3 종합상황실 시연도 같은 칸을 쓴다)
+  // 💡 그림 힌트 (v0.9.7.4): 집합 문제면 문제 아래 버튼 → 벤 다이어그램 (학생 폰 · 몬스터만 · 종합상황실 시연에는 안 보임) · 처음 펼칠 때 한 번 센다(결과 기록 hints)
+  const hintOpen = new Set();
+  const hintKey = (i) => `${(form && form.key) || ''}|${i}`;
+  const hintCount = (c = code) => { try { return Number(localStorage.getItem(`citadel-hints-${c || ''}`)) || 0; } catch (e) { return 0; } };
+  function hintTap(k) {
+    if (hintOpen.has(k)) hintOpen.delete(k); else {
+      hintOpen.add(k);
+      try { const c = `citadel-hints-${code || ''}`, seen = `${c}|seen`, s = new Set(JSON.parse(localStorage.getItem(seen) || '[]')); if (!s.has(k)) { s.add(k); localStorage.setItem(seen, JSON.stringify([...s])); localStorage.setItem(c, String(s.size)); } } catch (e) { /* 무시 */ }
+    }
+  }
+  function itemHtml(q, i, wasWrong, ref, G = form.given, noHint) { // G: 고른 답 (v0.9.3 종합상황실 시연도 같은 칸을 쓴다)
     const tag = `<span class="item-no">${i + 1}${wasWrong ? ' <b class="ngc">✘</b>' : ''}${ref ? ` <span class="sheet-tag">📄 ${esc(ref)}</span>` : ''}</span>`;
-    const qText = (t) => `<div class="item-q">${DS.UI.rich(t)}</div>`;
+    const hk = hintKey(i), hint = noHint || !DS.Hint ? '' : DS.Hint.html(q, hk, hintOpen.has(hk));
+    const qText = (t) => `<div class="item-q">${DS.UI.rich(t)}</div>${hint}`;
     if (q.type === 'blanks') {
       const it = q.items[0], v = (G[i] || [])[0];
       // 문제 상황(예: A = {1, 3, 5} 일 때 …)을 먼저 보여 주고, 그 아래에 □ 식
@@ -430,5 +442,5 @@ DS.Student = (function () {
     bindLobby();
   }
   // v0.9.3 종합상황실 시연: 학생 폰과 같은 문항 칸 · 해설 줄
-  return { enter, stop: stop0, itemHtml: (q, i, G) => itemHtml(q, i, false, null, G), solOf, itemText };
+  return { enter, stop: stop0, itemHtml: (q, i, G) => itemHtml(q, i, false, null, G, true), solOf, itemText, hintCount };
 })();
