@@ -6,9 +6,9 @@
 
 | 항목 | 상태 |
 |---|---|
-| 배포된 판 (main · GitHub Pages) | **v0.9.8.3** (0a74cce) — 성채던전 1층 · 허수아비 복습 · 보강 삭제 · 캠프 새 배경 · ✨ 반짝 |
-| 배포 대기 (hero-v2) | **v0.9.10** — 아래 2절 · 8개 커밋 · 시험 모두 통과 · 사용자가 「배포」 함 (2026-11-05 08:53, 1교시 직전이라 보류) |
-| Firebase 규칙 | 저장소 `firebase/database.rules.json` = 0.9.10 판 (survey · surveyA · surveyDone · rift · gem · rooms/lvup 포함). **배포 때 사용자에게 게시 요청** — 파일을 scratchpad 에 복사해 보내 드림 |
+| 배포된 판 (main · GitHub Pages) | **v0.9.10** (2e2bd48 · 2026-11-05 08:55 · 사용자가 1교시 직전인 줄 알고도 「그냥 배포」) — 아래 2절 전부 |
+| 배포 대기 (hero-v2) | 없음 |
+| Firebase 규칙 | 저장소 `firebase/database.rules.json` = 0.9.10 판 (survey · surveyA · surveyDone · rift · gem · rooms/lvup 포함). 2026-11-05 배포 때 사용자에게 보냄 — **게시했는지 새 방에서 확인** (안 했으면 설문 · 이어하기 · 조각 · 레벨업 저장이 막힘) |
 | 미배포 판을 낼 때 | 수업 직전 금지 (점심 12:50~14:00 · 방과후 권장). 절차는 6절 |
 
 ## 2. v0.9.8.4 ~ 0.9.10 에 들어간 것 (배포 대기)
