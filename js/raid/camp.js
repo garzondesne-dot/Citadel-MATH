@@ -167,7 +167,7 @@ DS.Camp = (function () {
     newTitles();
     $('#camp-code').onclick = codeGate;
     $('#camp-mail').onclick = () => pick('#camp-mail', () => { if (cues.mark) cues.mark('mail'); DS.Control.run(note); });
-    $('#camp-tent').onclick = () => pick('#camp-tent', () => { if (cues.mark) cues.mark('tent'); DS.Control.run(shelf); });
+    $('#camp-tent').onclick = () => (DS.CampScene.objOn(document.querySelector('#camp .camp-stage'), 'tent', true), pick('#camp-tent', () => { if (cues.mark) cues.mark('tent'); DS.Control.run(shelf); setTimeout(() => DS.CampScene.objOn(document.querySelector('#camp .camp-stage'), 'tent', false), 1500); }));
     $('#camp-dummy').onclick = () => pick('#camp-dummy', () => DS.Control.run(() => DS.Bonus.enter(me, { train: true })));
     $('#camp-set').onclick = settings;
     drawGate();

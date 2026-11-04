@@ -55,7 +55,7 @@ DS.TCamp = (function () {
     $('#tc-anvil').onclick = () => pick('#tc-anvil', () => DS.Forge.open(ME(), { preview: true, no: maxNo() }));
     $('#tc-castle').onclick = () => pick('#tc-castle', () => DS.Control.run(() => DS.Bonus.enter(ME(), { preview: true, no: maxNo() })));
     $('#tc-dummy').onclick = () => pick('#tc-dummy', () => DS.Control.run(() => DS.Bonus.enter(ME(), { preview: true, train: true, no: maxNo() })));
-    $('#tc-tent').onclick = () => pick('#tc-tent', () => DS.Control.run(() => DS.Camp.shelf(maxNo())));
+    $('#tc-tent').onclick = () => { const st = document.querySelector('#tcamp .tc-stage'); DS.CampScene.objOn(st, 'tent', true); pick('#tc-tent', () => { DS.Control.run(() => DS.Camp.shelf(maxNo())); setTimeout(() => DS.CampScene.objOn(st, 'tent', false), 1500); }); };
     // 📮 우편함: 교사 폰 = 학급 대시보드(교사만) · 종합상황실(TV) = 우리 반 수업 소식(이름 · 순위 없음)만
     $('#tc-mail').onclick = () => pick('#tc-mail', () => DS.Control.run(async () => {
       if (!hall) return DS.Dash.enter();

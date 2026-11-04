@@ -14,13 +14,15 @@ DS.CampScene = (function () {
   const box = ([x0, y0, x1, y1]) => `left:${pct(x0, W())};top:${pct(y0, H())};width:${pct(x1 - x0, W())};height:${pct(y1 - y0, H())}`;
   // 그림 위 누르는 자리 (id · 접근성 이름 · 눌렀을 때 이름표)
   const zone = (id, key, label, cls = '') => `<button class="cs-zone cs-int ${cls}" id="${id}" style="${box(C().zones[key])}" aria-label="${label}"><i class="cs-glow"></i><span class="camp-label">${label}</span></button>`;
-  // 그림에 붙은 것(성채 · 텐트 · 아치 문)의 얇은 윤곽선 (2026-11-05 · 평소에도 보임 · 누를 수 있다는 표시)
-  const outline = () => { const o = C().outline; if (!o) return ''; return `<svg class="cs-ol" viewBox="0 0 ${W()} ${H()}" preserveAspectRatio="none" aria-hidden="true">${Object.entries(o).map(([k, d]) => `<path class="cs-ol-${k}" d="${d}"/>`).join('')}</svg>`; };
+  // 성채 · 텐트 겹 (2026-11-05 · 사용자가 배경에서 떼어 낸 그림)
+  const objs = () => Object.entries(C().objs || {}).map(([k, o]) => `<img class="cs-obj cs-obj-${k}" alt="" src="${base()}${o.src}" style="left:${pct(o.x, W())};top:${pct(o.y, H())};width:${pct(o.w, W())}">${o.on ? `<img class="cs-obj cs-obj-${k} cs-on" alt="" src="${base()}${o.on}" style="left:${pct(o.x, W())};top:${pct(o.y, H())};width:${pct(o.w, W())}">` : ''}`).join('');
+  // 누른 그림으로 바꾸기 (텐트: 책이 빛나며 나옴) — 미리 겹쳐 두고 켜기만 해서 깜빡임 없음
+  const objOn = (stage, k, on) => { const e = stage && stage.querySelector(`.cs-obj-${k}.cs-on`); if (e) e.classList.toggle('show', !!on); };
   // 장면 겹: 차시 문 빛 · 윤곽선 · 깃발 (배경 위 · 오브젝트 아래)
   function layers() {
     const g = C().gateOn, f = C().flag; // 2026-11-05: 성벽 등불 5개는 없앰 (사용자) — lamps() 는 그릴 것이 없으면 아무것도 안 함
     return `<img class="cs-gate-on" alt="" src="${base()}${g.src}" style="left:${pct(g.x, W())};top:${pct(g.y, H())};width:${pct(g.w, W())}">
-      ${outline()}
+      ${objs()}
       <i class="cs-flag" style="left:${pct(f[0], W())};top:${pct(f[1], H())}"></i>`;
   }
   // 등불 상태: states[i] = 'off' | 'on' | 'gold' · fresh = 새로 켜진 칸 (반짝)
@@ -31,8 +33,13 @@ DS.CampScene = (function () {
   const flag = (stage, st) => { const el = stage && stage.querySelector('.cs-flag'); if (el) el.className = `cs-flag ${st || ''}`; }; // '' · 'open' · 'gold'
   const gate = (stage, on) => { if (stage) stage.classList.toggle('gate-open', !!on); };
   // 들어올 때 한 번: 만질 수 있는 것들이 차례로 반짝 (0.25초 간격)
+  // ▼ 눌러 보라는 역삼각형 (2026-11-05 사용자: 테두리 대신) — 누를 수 있는 것마다 위에서 천천히 통통 (서로 박자를 어긋나게)
+  function tris(stage) {
+    stage.querySelectorAll('.cs-int, .camp-gate-z').forEach((el, i) => { if (!el.querySelector(':scope > .cs-tri')) el.insertAdjacentHTML('beforeend', `<span class="cs-tri" style="animation-delay:${(i * 0.37) % 1.6}s" aria-hidden="true"></span>`); });
+  }
   function intro(stage) {
     if (!stage) return;
+    tris(stage);
     const items = [...stage.querySelectorAll('.cs-int')];
     items.forEach((el, i) => { el.classList.remove('cs-shine'); el.style.setProperty('--cs-d', `${0.4 + i * 0.25}s`); void el.offsetWidth; el.classList.add('cs-shine'); });
     setTimeout(() => items.forEach((el) => el.classList.remove('cs-shine')), 1400 + items.length * 250);
@@ -49,5 +56,5 @@ DS.CampScene = (function () {
     try { localStorage.setItem(key, JSON.stringify(states)); } catch (e) { /* 무시 */ }
     return seen ? states.map((s, i) => (s !== 'off' && s !== seen[i] ? i : -1)).filter((i) => i >= 0) : [];
   }
-  return { zone, layers, lamps, flag, gate, intro, floorStates, freshLamps, box };
+  return { objOn, zone, layers, lamps, flag, gate, intro, floorStates, freshLamps, box };
 })();

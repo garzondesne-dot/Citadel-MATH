@@ -1670,12 +1670,14 @@ body:has(#test-bar) #ver-tag { bottom: calc(64px + env(safe-area-inset-bottom));
 input.sv-no { width: 64px !important; display: inline-block; padding: 2px 4px; }
 /* 🏫 학급 결과 카드 (v0.9.8.2 · 사용자 「너무 커서 안 보임」): 아래 .framed { max-width: 100% } 가 520px 을 덮어 종합상황실에서 화면 폭 가득 → 카드 전체가 한 화면에 들어오는 폭으로 */
 .modal > .quiz-box.sc-box { max-width: min(calc(100vw - 24px), calc((100dvh - 190px) * 0.8 + 26px)); }
-/* ✏ 오브젝트 테두리 (2026-11-05 사용자 「배경과 녹아 잘 안 누름」): 평소에도 얇은 테두리 — 그림 오브젝트 = 모양 따라 1px, 그림에 붙은 성채 · 텐트 · 아치 문 = 윤곽선 겹 */
-.cs-v2 { --ol: #fff6d8; }
-.cs-v2.ol-gold { --ol: #ffd25a; }
-.cs-v2 .cs-ol { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 3; pointer-events: none; overflow: visible; }
-.cs-v2 .cs-ol path { fill: none; stroke: var(--ol); stroke-width: 1.6px; vector-effect: non-scaling-stroke; stroke-linejoin: round; opacity: .85; filter: drop-shadow(0 0 2px #000) drop-shadow(0 0 3px var(--ol)); }
-.cs-v2 .camp-prop-img, .cs-v2 .camp-anvil-img { filter: drop-shadow(1px 0 0 var(--ol)) drop-shadow(-1px 0 0 var(--ol)) drop-shadow(0 1px 0 var(--ol)) drop-shadow(0 -1px 0 var(--ol)) drop-shadow(0 4px 5px #000b) !important; }
+/* 🏕 캠프 v2.1 (2026-11-05 사용자): 성채 · 텐트 따로 겹 · 성벽 등불 없앰 · 테두리 대신 ▼ 역삼각형 */
+.cs-v2 .cs-obj { position: absolute; z-index: 2; pointer-events: none; image-rendering: auto; }
 .cs-v2 .cs-lamps, .cs-v2 .cs-lamp { display: none; }
-.cs-v2 .camp-prop-img::after, .cs-v2 .camp-anvil-img::after { display: none !important; } /* 바닥 그림자 타원까지 테두리가 생겨 뺌 — 아래 그림자는 drop-shadow 로 */
-.cs-v2 .camp-prop, .cs-v2 .camp-anvil { --ol: inherit; }
+.cs-v2 .cs-tri { position: absolute; left: 50%; top: -4px; width: 0; height: 0; border-left: 7px solid transparent; border-right: 7px solid transparent; border-top: 10px solid #ffd25a; filter: drop-shadow(0 0 2px #000) drop-shadow(0 0 4px #ffb02e99); transform: translate(-50%, -100%); animation: csTri 1.6s ease-in-out infinite; pointer-events: none; z-index: 9; }
+.cs-v2 .cs-zone .cs-tri { top: 6%; }
+#camp-castle .cs-tri, #tc-castle .cs-tri { top: 4%; }
+.cs-v2 .picked .cs-tri, .cs-v2 .off .cs-tri, .cs-v2 .tut-hide .cs-tri { display: none; }
+@keyframes csTri { 0%, 100% { transform: translate(-50%, -100%); opacity: .85; } 50% { transform: translate(-50%, -60%); opacity: 1; } }
+.cs-v2 .camp-anvil .cs-tri { top: 30%; } .cs-v2 .camp-gate-z .cs-tri { top: 14%; }
+.cs-v2 .cs-obj.cs-on { opacity: 0; transition: opacity .25s ease; }
+.cs-v2 .cs-obj.cs-on.show { opacity: 1; }
