@@ -7,8 +7,8 @@ DS.Words = (function () {
   // 자주 쓰는 욕설·비하 표현의 뿌리 (부분 일치)
   const BAD = ['시발', '씨발', '씨빨', '시바', '씨바', 'ㅅㅂ', 'ㅆㅂ', '병신', 'ㅂㅅ', '븅신', '빙신', '좆', 'ㅈㄴ', '존나', '졸라', '개새', '개색', '새끼', 'ㅅㄲ', '닥쳐', '꺼져', '미친', 'ㅁㅊ', '지랄', 'ㅈㄹ', '엿먹', 'fuck', 'shit', '애미', '애비', '느금', '니미', '엠창', '등신', '찐따', '죽어', '꺼지', '빡대가리', '돌대가리', '장애'];
   const strip = (s) => s.toLowerCase().replace(/[\s\d!-/:-@[-`{-~·…ㆍ_]/g, '');
-  function clean(text) {
-    let t = String(text || '').replace(/\s+/g, ' ').trim().slice(0, MAX);
+  function clean(text, max = MAX) { // max: 설문 서술(100자)처럼 더 긴 글
+    let t = String(text || '').replace(/\s+/g, ' ').trim().slice(0, max);
     let bad = false;
     const flat = strip(t);
     BAD.forEach((w) => {

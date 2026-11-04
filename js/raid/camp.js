@@ -37,9 +37,16 @@ DS.Camp = (function () {
       watchRoom(); drawGate(); tutApply();
       if (live && live.open && (!was || !was.open || was.code !== live.code) && liveSeen !== live.code) { liveSeen = live.code; showGate(); status(); DS.Sound.correct(); DS.UI.toast(`⚔ ${live.no ? `${live.no}차시 ` : ''}던전이 열렸어요! 오른쪽 빛나는 문을 눌러 들어가요`, 4200); }
     }
+    if (DS.Survey && !m.test) DS.Survey.watch(m, () => svDraw());
     if (code0) setTimeout(codeGate, 300); // QR 로 들어왔으면 코드 창을 바로
   }
   const D = () => DS.ASSETS.dungeons;
+  // 📝 수업 설문 (v0.9.8.2): 선생님이 우리 반 설문을 열었고 아직 안 했으면 아래 칸에 버튼 (수업 대기실에서 못 한 학생도 여기서)
+  function svDraw() {
+    const z = document.getElementById('camp-sv'); if (!z || !DS.Survey || !me || me.test) return;
+    z.innerHTML = DS.Survey.btnHtml('camp-sv-btn');
+    const b = document.getElementById('camp-sv-btn'); if (b) b.onclick = () => DS.Survey.open(me, svDraw);
+  }
   // 한 화면에 전체가 보이므로 차원문이 열리면 반짝 강조만
   function showGate() { const g = document.getElementById('camp-gate'); if (g) { g.classList.remove('flash'); void g.offsetWidth; g.classList.add('flash'); } }
   // ── 🧭 첫 수업 튜토리얼 (2026-11-03 사용자 확정) ──────────────────────
@@ -145,7 +152,7 @@ DS.Camp = (function () {
         <div class="camp-hero">${DS.Art.hero(me.hero, 'sit', 'huff')}<i class="shadow"></i><div class="camp-plate"><span class="nm">${DS.Titles ? DS.Titles.nameHtml({ title: me.title || 'none', nick: me.name }, { num: false, size: 14 }) : esc(me.name)}</span></div></div>
         ${prop('dummy', '🎯', '허수아비', '')}${prop('mail', '📮', '우편함', '')}
       </div>
-      <div class="camp-bar"><button class="btn small" id="camp-code">코드로 입장</button></div>
+      <div class="camp-bar"><span id="camp-sv"></span><button class="btn small" id="camp-code">코드로 입장</button></div>
       <div class="camp-forge panel framed st-panel" id="camp-forge"><p class="muted small">용사 상태를 불러오는 중…</p></div>`;
     status();
     $('#camp-anvil').onclick = () => pick('#camp-anvil', () => (me.test ? DS.Forge.open(me, { preview: true, no: 99 }) : DS.Forge.open(me))); // 🧪 체험판: 모든 레시피
@@ -166,6 +173,7 @@ DS.Camp = (function () {
     drawGate();
     animateFire();
     document.querySelectorAll('#camp .camp-prop').forEach((e) => e.classList.add('cs-int'));
+    svDraw();
     DS.CampScene.intro(document.querySelector('#camp .camp-stage')); // 글씨 대신: 들어올 때 차례로 한 번 반짝
   }
   // 선택 연출 (한 번 탭 · 0.7초): 흰 테두리 번쩍 + 눌림 반동 + 소리·진동 → 금빛 외곽선 + ▼ → 내 용사가 그쪽으로 폴짝 → 열림

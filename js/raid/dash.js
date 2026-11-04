@@ -76,16 +76,17 @@ DS.Dash = (function () {
   function render() {
     const el = $('#dash-body'); if (!el) return;
     const classes = Object.keys(roster).sort();
-    const TABS = [['table', '① 한눈에 표'], ['rank', '② 랭킹'], ['watch', '③ 주의 학생'], ['weak', '④ 개념별 약점'], ['std', '⑤ 성취기준'], ['mis', '⑥ 오개념'], ['memo', '⑦ 세특 메모']];
+    const TABS = [['table', '① 한눈에 표'], ['rank', '② 랭킹'], ['watch', '③ 주의 학생'], ['weak', '④ 개념별 약점'], ['std', '⑤ 성취기준'], ['mis', '⑥ 오개념'], ['memo', '⑦ 세특 메모'], ['sv', '📝 설문']];
     el.innerHTML = `<div class="panel framed"><h2>📊 학급 대시보드 <span class="muted small">교사만 · 학생 화면과 종합상황실에는 나오지 않아요</span></h2>
         <div class="tabs st-cls">${classes.length > 1 ? `<button class="tab${isAll() ? ' on' : ''}" data-cls="${ALL}">🏫 전체</button>` : ''}${classes.map((c) => `<button class="tab${c === cls ? ' on' : ''}" data-cls="${esc(c)}">${esc(c)}</button>`).join('') || '<span class="muted">명단이 없어요 — 학생 관리에서 먼저 올려 주세요</span>'}</div>
         <div class="tabs dash-tabs">${TABS.map(([k, t]) => `<button class="tab${k === tab ? ' on' : ''}" data-tab="${k}">${t}</button>`).join('')}</div></div>
-      <div class="panel framed dash-main">${!cls ? '' : !data ? '<p class="muted">불러오는 중…</p>' : !data.held.length ? '<p class="muted">아직 저장된 수업 기록이 없어요. (학생이 수업 끝 결과를 보면 저장돼요)</p>' : VIEW[tab]()}</div>`;
-    el.querySelectorAll('[data-cls]').forEach((b) => (b.onclick = () => { cls = b.dataset.cls; load(); }));
+      <div class="panel framed dash-main">${!cls ? '' : !data ? '<p class="muted">불러오는 중…</p>' : !data.held.length && tab !== 'sv' ? '<p class="muted">아직 저장된 수업 기록이 없어요. (학생이 수업 끝 결과를 보면 저장돼요)</p>' : VIEW[tab]()}</div>`;
+    el.querySelectorAll('[data-cls]').forEach((b) => (b.onclick = () => { cls = b.dataset.cls; words = null; load(); }));
     el.querySelectorAll('[data-tab]').forEach((b) => (b.onclick = () => { tab = b.dataset.tab; render(); }));
     el.querySelectorAll('[data-sort]').forEach((b) => (b.onclick = () => { const k = b.dataset.sort; sortDir = sortKey === k ? -sortDir : (k === 'n' || k === 'name' ? 1 : -1); sortKey = k; render(); }));
     el.querySelectorAll('[data-who]').forEach((b) => (b.onclick = () => detail(b.dataset.who)));
     const csv = el.querySelector('#dash-csv'); if (csv) csv.onclick = downloadCsv;
+    if (tab === 'sv') svBind(el);
     el.querySelectorAll('[data-copy]').forEach((b) => (b.onclick = () => copy(b.dataset.copy === 'all' ? data.studs.map((s) => `${who(s)}: ${memo(s)}`).join('\n\n') : memo(data.studs.find((s) => s.key === b.dataset.copy)))));
   }
   const who = (s) => `${isAll() ? `${s.cls}반 ` : ''}${s.n}번 ${s.name}`;
@@ -210,6 +211,65 @@ DS.Dash = (function () {
   async function copy(text) {
     try { await navigator.clipboard.writeText(text); DS.UI.toast('복사했어요'); }
     catch (e) { const t = document.createElement('textarea'); t.value = text; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove(); DS.UI.toast('복사했어요'); }
+  }
+  // ── 📝 설문 탭 (v0.9.8.2): 반별 열기 · 닫기 · 응답 수 · 회고 비교(중간고사 전 → 지금) · 도움 된 것 · 서술 · CSV · 💬 마지막 한마디 모아 보기
+  //   응답은 익명(이름 · 번호 · 시각 없음) — 응답 수 / 응답한 학생 수만 셈. 탭을 열 때 한 번 읽고 「새로 고침」으로 다시
+  let sv = null, svFor = '', words = null;
+  const svClasses = () => (isAll() ? Object.keys(roster).sort() : [cls]);
+  async function svLoad() {
+    const cs = svClasses(), key = cs.join(',');
+    svFor = key; sv = null;
+    const parts = await Promise.all(cs.map(async (c) => ({ c, st: await DS.Survey.state(c), list: await DS.Survey.answers(c), done: await DS.Survey.doneCount(c), size: Object.keys(roster[c] || {}).length })));
+    if (svFor !== key) return;
+    sv = parts; render();
+  }
+  const bar = (n, max) => `<i class="sv-bar" style="width:${max ? Math.round((100 * n) / max) : 0}%"></i>`;
+  const sign = (d) => (d == null ? '-' : `${d > 0 ? '+' : ''}${d.toFixed(2)}`);
+  VIEW.sv = function () {
+    if (!DS.Survey) return '<p class="muted">설문 모듈이 없어요.</p>';
+    if (svFor !== svClasses().join(',') || !sv) { if (svFor !== svClasses().join(',')) svLoad(); return '<p class="muted">설문 불러오는 중…</p>'; }
+    const maxNo = Math.max(0, ...data.held.map((l) => l.no || 0));
+    const ctl = sv.map((p) => `<tr><td>${esc(p.c)}반</td><td>${p.st && p.st.open ? `<b class="gold">열림 · ${p.st.no}차시</b>` : '<span class="muted">닫힘</span>'}</td><td>${p.done}/${p.size}명 응답 · 응답 ${p.list.length}개</td>
+      <td>${p.st && p.st.open ? `<button class="btn small" data-svc="${esc(p.c)}" data-on="0">닫기</button>` : `<button class="btn small" data-svc="${esc(p.c)}" data-on="1">열기</button>`}</td></tr>`).join('');
+    const all = sv.flatMap((p) => p.list), S = DS.Survey.summary(all);
+    const pMax = Math.max(1, ...S.picks.map((x) => x.n)), cMax = Math.max(1, ...S.cmp.map((x) => x.n));
+    const body = !S.n ? '<p class="muted">아직 응답이 없어요. 7~8차시 마무리 때 위에서 「열기」 (또는 교사 리모컨 마무리 화면의 📝 설문 열기)</p>' : `
+      <h3>A. 회고 비교 <span class="muted small">(1~5점 평균 · 응답 ${S.n}개)</span></h3>
+      <div class="st-scroll"><table class="r-table sv-t"><tr><th>문장</th><th>중간고사 전</th><th>지금</th><th>변화</th><th>오름 / 같음 / 내림</th></tr>
+      ${S.pairs.map((r, i) => `<tr><td>${i + 1}. ${esc(r.q)}</td><td>${r.pre ?? '-'}</td><td><b>${r.now ?? '-'}</b></td><td class="${r.diff > 0 ? 'sv-up' : r.diff < 0 ? 'sv-down' : ''}">${sign(r.diff)}</td><td>${r.up} / ${r.same} / ${r.down}</td></tr>`).join('')}</table></div>
+      <h3>B. 지금 수업</h3>
+      <div class="sv-cols"><div><p class="gold small">8. 가장 도움이 된 것 (2개까지)</p>${S.picks.slice().sort((a, b) => b.n - a.n).map((x) => `<p class="sv-row"><span>${esc(x.t)}</span>${bar(x.n, pMax)}<b>${x.n}</b></p>`).join('')}</div>
+        <div><p class="gold small">9. 쉼터 놀이 vs 예전 5분 퀴즈</p>${S.cmp.map((x) => `<p class="sv-row"><span>${esc(x.t)}</span>${bar(x.n, cMax)}<b>${x.n}</b></p>`).join('')}</div></div>
+      <h3>10. 달라진 점 <span class="muted small">(${S.say.length}개)</span></h3><ul class="sv-texts">${S.say.map((t) => `<li>${esc(t)}</li>`).join('') || '<li class="muted">없음</li>'}</ul>
+      <h3>11. 바꿨으면 하는 점 <span class="muted small">(${S.want.length}개)</span></h3><ul class="sv-texts">${S.want.map((t) => `<li>${esc(t)}</li>`).join('') || '<li class="muted">없음</li>'}</ul>
+      <button class="btn" id="sv-csv">⬇ 설문 응답 내려받기 (CSV · 이름 없음)</button>`;
+    const W = words ? `<h3>💬 마지막 한마디 <span class="muted small">(${words.length}개 · 수업 화면에 이미 보인 말풍선)</span></h3><ul class="sv-texts">${words.map((w) => `<li><span class="muted small">${esc(w.cls)} · ${w.no ? `${w.no}차시` : ''}</span> ${esc(w.t)}</li>`).join('') || '<li class="muted">없음</li>'}</ul>` : '<button class="btn small" id="sv-words">💬 마지막 한마디 모아 보기</button>';
+    return `<p class="muted small">🔒 응답에는 이름 · 번호 · 시각이 저장되지 않아요. 「응답한 학생 수」만 따로 세요 (한 번만 · +5 EXP).</p>
+      <table class="r-table sv-ctlt"><tr><th>반</th><th>상태</th><th>응답</th><th></th></tr>${ctl}</table>
+      <p class="muted small">열 때 차시 = 이 반 기록의 마지막 차시(${maxNo || '?'}) — 바꾸려면 열기 전에 숫자를 고쳐요 <input id="sv-no" type="number" min="1" max="20" value="${maxNo || 7}" class="sv-no"> · <button class="btn small" id="sv-re">↻ 새로 고침</button></p>
+      ${body}${W}`;
+  };
+  function svBind(el) {
+    el.querySelectorAll('[data-svc]').forEach((b) => (b.onclick = () => DS.Control.run(async () => {
+      const on = b.dataset.on === '1', no = Number((el.querySelector('#sv-no') || {}).value) || 0;
+      if (on && !confirm(`${b.dataset.svc}반 설문을 ${no}차시로 열까요? (학생 폰 대기실 · 캠프에 📝 버튼)`)) return;
+      await DS.Survey.setOpen(b.dataset.svc, on, no); svFor = ''; render();
+    })));
+    const re = el.querySelector('#sv-re'); if (re) re.onclick = () => { svFor = ''; render(); };
+    const c = el.querySelector('#sv-csv'); if (c) c.onclick = () => {
+      const q = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+      const rows = DS.Survey.csvRows(Object.fromEntries(sv.map((p) => [p.c, p.list])));
+      const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['\ufeff' + rows.map((r) => r.map(q).join(',')).join('\r\n')], { type: 'text/csv;charset=utf-8' }));
+      a.download = `수업설문_${isAll() ? '전체' : cls}_${new Date().toISOString().slice(0, 10)}.csv`; document.body.appendChild(a); a.click(); a.remove();
+    };
+    const w = el.querySelector('#sv-words'); if (w) w.onclick = () => DS.Control.run(async () => {
+      w.disabled = true; w.textContent = '모으는 중…';
+      const rooms = (await DS.Net.get('rooms').catch(() => null)) || {}, want = new Set(svClasses());
+      words = Object.values(rooms).filter((r) => r && r.meta && r.words && want.has(r.meta.cls))
+        .flatMap((r) => { const L = DS.Lessons.get(r.meta.lesson) || {}; return Object.values(r.words).filter((x) => x && x.t && !x.bad).map((x) => ({ cls: r.meta.cls, no: L.no || 0, t: x.t })); })
+        .sort((a, b) => a.no - b.no || String(a.cls).localeCompare(String(b.cls)));
+      render();
+    });
   }
   function downloadCsv() {
     const q = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;

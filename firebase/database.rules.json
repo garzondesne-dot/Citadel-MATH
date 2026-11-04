@@ -292,6 +292,31 @@
           ".validate": "newData.val() === true"
         }
       }
+    },
+    "survey": {
+      ".read": "auth != null",
+      "$c": {
+        ".write": "auth != null && root.child('admins/'+auth.uid).val() === true",
+        ".validate": "!newData.exists() || (newData.hasChildren(['open', 'no']) && newData.child('open').val() === true && newData.child('no').isNumber())"
+      }
+    },
+    "surveyA": {
+      "$c": {
+        ".read": "auth != null && root.child('admins/'+auth.uid).val() === true",
+        "$k": {
+          ".write": "auth != null && ((!data.exists() && root.child('survey/'+$c+'/open').val() === true) || (!newData.exists() && root.child('admins/'+auth.uid).val() === true))",
+          ".validate": "!newData.exists() || (newData.hasChildren(['no', 'r', 'pick', 'cmp']) && newData.child('no').isNumber() && newData.child('cmp').isNumber() && (!newData.child('say').exists() || (newData.child('say').isString() && newData.child('say').val().length <= 100)) && (!newData.child('want').exists() || (newData.child('want').isString() && newData.child('want').val().length <= 100)))"
+        }
+      }
+    },
+    "surveyDone": {
+      "$c": {
+        ".read": "auth != null && root.child('admins/'+auth.uid).val() === true",
+        "$n": {
+          ".read": "auth != null && (root.child('accounts/'+$c+'/'+$n+'/uid').val() === auth.uid || root.child('admins/'+auth.uid).val() === true)",
+          ".write": "auth != null && ((!data.exists() && newData.val() === true && root.child('accounts/'+$c+'/'+$n+'/uid').val() === auth.uid) || (!newData.exists() && root.child('admins/'+auth.uid).val() === true))"
+        }
+      }
     }
   }
 }

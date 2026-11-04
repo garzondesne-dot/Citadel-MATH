@@ -8,6 +8,7 @@ DS.Teacher = (function () {
   const C = () => DS.Control, Raid = () => DS.Raid;
   let wasClosed = null, curKey = '';
   let code = null, L = null, R = null, raw = null, stop = null, tick = 0, showKey = 0, videos = {}, vStop = null, vLesson = '';
+  let svSt = null, svStop = null, svCls = ''; // 📝 이 반 설문 열림 상태 (v0.9.8.2)
   // 교사 폰에서는 종합상황실 키를 바로 보여 준다 (종합상황실 입력칸만 **** 로 가림 — 사용자 결정 v0.5.0)
   const keyHtml = () => `<b>${esc($('#t-key').textContent) || '—'}</b>`;
 
@@ -29,6 +30,7 @@ DS.Teacher = (function () {
     if (stop) stop();
     stop = DS.Net.watch(`rooms/${code}`, (v) => { if (!v) return; raw = v; R = DS.Act.unpackRoom(v); L = DS.Lessons.get(R.meta.lesson);
       if (vLesson !== L.id) { vLesson = L.id; if (vStop) vStop(); vStop = DS.Net.watch(`prep/${L.id}/video`, (x) => { videos = x || {}; if (R) render(); }); }
+      if (DS.Survey && R.meta.cls && svCls !== R.meta.cls) { svCls = R.meta.cls; if (svStop) svStop(); svStop = DS.Net.watch(`survey/${String(svCls).replace(/[.#$/[\]]/g, '_')}`, (x) => { svSt = x; if (R) render(); }); }
       render(); DS.Act.admitLate(code, R, L); DS.Act.markBossWin(code, R, L);
       // v0.9.2: 수업이 끝나도 이 화면에 남는다 → 「🏛 교사 캠프 가기」 버튼이 켜짐
       wasClosed = DS.Raid.isClosed(R); });
@@ -45,11 +47,12 @@ DS.Teacher = (function () {
     const body = $('#t-body');
     const live = !Raid().isLobby(R) && !Raid().isClosed(R);
     body.innerHTML = `<div class="panel framed t-now">${now()}${C().pctHtml(L, R)}${live ? C().restBtn(R) + (Raid().restOn(R) ? '' : C().videoBtn(L, R, videos) + C().sheetBtn(L, R) + C().focusBtn(R)) : ''}${DS.ShareCard.klassReady(L, R) ? '<button class="btn sc-btn" id="t-news">🏫 학급 결과 · 우리 반 수업 소식</button>' : ''}${Raid().isClosed(R) ? '<button class="btn primary" id="t-tcamp">🏛 교사 캠프 가기</button>' : ''}</div>
-      ${Raid().isLobby(R) ? lobby() : Raid().isEnd(L, R) ? `<div class="panel framed">${C().wordsHtml(R)}</div>` : helpPanel()}
+      ${Raid().isLobby(R) ? lobby() : Raid().isEnd(L, R) ? `<div class="panel framed">${DS.Survey ? DS.Survey.ctlHtml(R, svSt) : ''}${C().wordsHtml(R)}</div>` : helpPanel()}
       <p class="t-next muted small">다음 ▶ <b>${esc(C().nextName(L, R))}</b></p>
       <div class="t-pad"><button class="btn t-back" id="t-back"${i < 0 ? ' disabled' : ''}>◀<br>뒤로</button><button class="btn primary t-fwd" id="t-fwd"${Raid().isClosed(R) ? ' disabled' : ''}>▶<br>${Raid().isFinale(L, R) ? '수업 끝' : '앞으로'}</button></div>`;
     if (Raid().isLobby(R)) drawQR();
     C().bindRest(body, code, R); C().bindPct(body, code, R, L); C().bindFocus(body, code, R); C().bindSheet(body, code, R); C().bindVideo(body, code, R); C().bindWords(body, code, R);
+    if (DS.Survey) DS.Survey.bindCtl(body, R, L);
     const nb = $('#t-news'); if (nb) nb.onclick = () => C().run(() => DS.ShareCard.klassOpen(L, R, { praise: true }));
     const cb = $('#t-tcamp'); if (cb) cb.onclick = () => C().run(() => { if (stop) stop(); stop = null; clearInterval(tick); return DS.TCamp.enter({ code, hallKey: curKey }); });
     body.querySelectorAll('[data-help]').forEach((b) => (b.onclick = () => C().run(() => DS.Act.clearHelp(code, b.dataset.help))));
