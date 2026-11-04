@@ -27,7 +27,7 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   await S.screenshot({ path: `${OUT}/1-camp.png` });
   // 🏰 성채던전
   await S.click('#camp-castle', { force: true }); await S.waitForTimeout(1500);
-  const rooms = await S.evaluate(() => ({ all: document.querySelectorAll('.cs-floor .cs-room').length, ready: document.querySelectorAll('.cs-room.ready').length, lock: document.querySelectorAll('.cs-room.lock').length, boss: document.querySelector('.cs-room.boss').className, news: document.querySelectorAll('.cs-room .cs-rnew').length, floor2: !!document.querySelector('.cs-floor.lock') }));
+  const rooms = await S.evaluate(() => { const f = [...document.querySelectorAll('.cs-floor')]; const q = (i, sel) => f[i].querySelectorAll(sel).length; return { all: q(0, '.cs-room'), ready: q(0, '.cs-room.ready'), lock: q(0, '.cs-room.lock'), photo: [...f[0].querySelectorAll('.cs-room.lock')].filter((e) => /사진 분석/.test(e.textContent)).length, boss: f[0].querySelector('.cs-room.boss').className, news: q(0, '.cs-rnew'), all2: q(1, '.cs-room'), ready2: q(1, '.cs-room.ready'), photo2: [...f[1].querySelectorAll('.cs-room.lock')].filter((e) => /사진 분석/.test(e.textContent)).length }; });
   log.push('성채: ' + JSON.stringify(rooms));
   await S.screenshot({ path: `${OUT}/2-castle.png`, fullPage: true });
   await S.click('[data-fight="eval-1|q04"]'); await S.waitForTimeout(800);
@@ -57,7 +57,7 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   const review = await S.evaluate(() => ({ head: (document.querySelector('.bn-top b') || {}).textContent, cards: [...document.querySelectorAll('.bn-card .bn-h b')].map((e) => e.textContent), rows: document.querySelectorAll('.bn-card .bn-row').length, bo: /보강/.test(document.getElementById('bonus').textContent) }));
   log.push('허수아비: ' + JSON.stringify(review));
   await S.screenshot({ path: `${OUT}/8-review.png`, fullPage: true });
-  const ok = newB === 'NEW 11' && mailBadge && !castleNt && dot && rooms.all === 12 + 0 && rooms.ready === 11 && rooms.lock === 1 && /lock/.test(rooms.boss) && rooms.news === 11 && rooms.floor2
+  const ok = newB === 'NEW 16' && mailBadge && !castleNt && dot && rooms.all === 12 && rooms.ready === 9 && rooms.lock === 3 && rooms.photo === 2 && /lock/.test(rooms.boss) && rooms.news === 9 && rooms.all2 === 17 && rooms.ready2 === 7 && rooms.photo2 === 3
     && fightBg && /성채던전 1층/.test(fightTag) && !q04new && bossOpen && bossBg && goBtns.includes('set-04|m1') && goBtns.includes('set-04|boss') && quick.screen && quick.fight && /복습! 4차시/.test(quick.tag)
     && /복습 허수아비/.test(review.head) && review.cards.some((c) => /복습! 4차시/.test(c));
   console.log(log.join('\n')); console.log(ok ? '✅ 통과' : '❌ 기대와 다름', { fightBg, fightTag, q04new, bossOpen, bossBg }); console.log('errors', errs.length ? errs : 'none'); await b.close(); if (!ok || errs.length) process.exit(1);

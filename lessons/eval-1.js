@@ -151,11 +151,11 @@
     R('q04', 4, '04 교집합의 원소의 개수', 'castle1:3', m04, ['04']),
     R('q05', 5, '05 교 · 합 · 여 · 차집합', 'castle1:4', m05, ['05 ⑴', '05 ⑵', '05 ⑶', '05 ⑷']),
     R('q06', 4, '06 서로소인 집합', 'castle1:3@h300', m06, ['06']),
-    R('q07', 4, '07 조건을 만족하는 X (서술형)', 'castle1:2@h300', m07, ['07 서술형']),
+    R('q07', 4, '07 조건을 만족하는 X (서술형)', 'castle1:2@h300', m07, ['07 서술형'], { photo: true }),
     R('q08', 4, '08 미지수 x', 'castle1:0@h60', m08, ['08'], { note: 'B 의 원소가 모두 A 에 있어야 해요 — x 가 A 의 어느 원소와 같을 수 있을까?' }),
     R('q09', 4, '09 배수의 집합', 'castle1:1@h300', m09, ['09']),
     R('q10', 5, '10 여집합의 원소의 개수', 'castle1:4@h60', m10, ['10']),
-    R('q11', 4, '11 겹침의 최대 · 최소 (서술형)', 'castle1:3@h60', m11, ['11 서술형', '11 서술형']),
+    R('q11', 4, '11 겹침의 최대 · 최소 (서술형)', 'castle1:3@h60', m11, ['11 서술형', '11 서술형'], { photo: true }),
     R('q12', 6, '👑 12 「~이 아니거나」의 개수', 'castleboss:0', m12, ['12'], { boss: true }),
   ];
   const MONSTERS = Object.fromEntries(ROOMS.map((r) => [r.id, r]));
@@ -171,7 +171,7 @@
     videos: { q04: 'assets/video/e1-32.mp4', q05: 'assets/video/e1-33.mp4', q07: 'assets/video/e1-34.mp4', q10: 'assets/video/e1-35.mp4', q11: 'assets/video/e1-36.mp4' },
     steps: [],
     monsters: MONSTERS,
-    rooms: ROOMS.map(({ id, no, title, boss }) => ({ id, no, title, boss: !!boss })),
+    rooms: ROOMS.map(({ id, no, title, boss, photo }) => ({ id, no, title, boss: !!boss, photo: !!photo })), // photo = 서술형 → 📷 사진 분석 전까지 잠금 (2026-11-05)
     legacy: LEGACY,
     items(id, seed, attempt) { return MONSTERS[id].make(attempt, DS.Rng(`${seed}|${id}|${attempt}`)); },
   });

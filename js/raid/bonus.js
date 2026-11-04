@@ -17,7 +17,8 @@ DS.Bonus = (function () {
   const ck = (c) => String(c).replace(/[.#$/[\]]/g, '_');
   const UNLOCK = [1, 2, 4, 6, 8, 10];             // 인장 개수 → 화려한 이펙트 FANCY[i]
   const TRIES = (DS.Raid ? DS.Raid.RETRIES : 3) + 1; // 레이드와 같은 기회 수
-  const BOSS_PCT = 60;                             // 👑 보스 방: 열린 방의 60% 처치 (2026-11-05 사용자 규칙)
+  const BOSS_PCT = 60;
+  const PHOTO_READY = () => !!(DS.Photo && DS.Photo.ready && DS.Photo.ready()); // 📷 서술형 사진 분석 (v0.9.10) — 생기기 전까지 서술형 방은 잠금 · 보스 60% 계산에서도 뺌 (2026-11-05 사용자)                             // 👑 보스 방: 열린 방의 60% 처치 (2026-11-05 사용자 규칙)
   let me = null, no = 0, mine = {}, prepCache = {};
   let train = false; // true = 🎯 허수아비 복습 · false = 🏰 성채던전
   const fieldIds = (l) => l.steps.filter((st) => st.kind === 'monster' && l.monsters[st.id]).map((st) => st.id);
@@ -37,10 +38,11 @@ DS.Bonus = (function () {
   // 열린 방 · 👑 보스 방 조건 (upto = 우리 반이 연 마지막 차시)
   function roomsState(L, data, upto, all) {
     const rooms = L.rooms || [], boss = bossOf(L);
-    const open = rooms.filter((r) => all || r.no <= upto), plain = open.filter((r) => !r.boss);
+    const usable = (r) => !r.photo || PHOTO_READY();
+    const open = rooms.filter((r) => usable(r) && (all || r.no <= upto)), plain = open.filter((r) => !r.boss);
     const cleared = plain.filter((r) => roomRec(data, L, r.id).clear).length, need = Math.ceil((plain.length * BOSS_PCT) / 100);
-    const bossOpen = !!boss && (all || boss.no <= upto) && cleared >= need && plain.length > 0;
-    return { rooms, open, plain, cleared, need, boss, bossOpen, isOpen: (r) => (r.boss ? bossOpen : all || r.no <= upto) };
+    const bossOpen = !!boss && usable(boss) && (all || boss.no <= upto) && cleared >= need && plain.length > 0;
+    return { rooms, open, plain, cleared, need, boss, bossOpen, usable, isOpen: (r) => (!usable(r) ? false : r.boss ? bossOpen : all || r.no <= upto) };
   }
   // 인장 = 처치한 곳 목록: 차시 = 👑 형성평가 재대결 처치 · 성채 층 = 👑 보스 방 처치 · 옛 규칙 인장 그대로
   function seals(data) {
@@ -103,8 +105,8 @@ DS.Bonus = (function () {
       const tile = (r) => {
         const rr = roomRec(mine, L, r.id), open = S.isOpen(r), m = L.monsters[r.id], isNew = fresh.has(`${L.id}/${r.id}`);
         const st = !open ? 'lock' : rr.clear ? 'clear' : rr.tries ? 'drop' : 'ready';
-        const sub = !open ? (r.boss && (all() || r.no <= no) ? `${S.cleared} / ${S.need} 처치하면 열려요` : `${r.no}차시 수업 뒤`) : rr.clear ? '✔ 처치' : rr.tries ? `💧 ${rr.tries}번 도전` : '⚔ 도전';
-        return `<button class="cs-room ${st}${r.boss ? ' boss' : ''}"${open ? ` data-fight="${L.id}|${r.id}"` : ` data-lockmsg="${esc(r.boss ? `👑 보스 방은 열린 방 ${S.need}개를 처치하면 열려요 (지금 ${S.cleared}개)` : `${r.no}차시 수업을 하면 열려요`)}"`}>
+        const sub = !open ? (!S.usable(r) ? '📷 사진 분석 준비 중' : r.boss && (all() || r.no <= no) ? `${S.cleared} / ${S.need} 처치하면 열려요` : `${r.no}차시 수업 뒤`) : rr.clear ? '✔ 처치' : rr.tries ? `💧 ${rr.tries}번 도전` : '⚔ 도전';
+        return `<button class="cs-room ${st}${r.boss ? ' boss' : ''}"${open ? ` data-fight="${L.id}|${r.id}"` : ` data-lockmsg="${esc(!S.usable(r) ? '서술형 방이에요. 📷 사진으로 풀이를 올리는 기능이 생기면 열려요' : r.boss ? `👑 보스 방은 열린 방 ${S.need}개를 처치하면 열려요 (지금 ${S.cleared}개)` : `${r.no}차시 수업을 하면 열려요`)}"`}>
           ${isNew ? '<span class="cs-rnew">NEW</span>' : ''}<span class="cs-no">${r.id.slice(1)}</span>${open ? DS.Art.monster(m.sprite, rr.clear ? 'down' : 'idle') : '<i class="cs-lockic">🔒</i>'}
           <span class="cs-rt">${esc(r.title.replace(/^👑 /, '').replace(/^\d+ /, ''))}</span><span class="cs-rs">${sub}</span></button>`;
       };

@@ -28,14 +28,14 @@ check(!['set-02', 'set-03', 'set-04', 'set-05', 'set-06'].some((id) => (DS.Lesso
 // 🏰 성채던전 1층: 차시 해금 · 👑 보스 60% · 옛 7마리 기록
 if (DS.Lessons.get('eval-1')) {
   const E = DS.Lessons.get('eval-1');
-  const S4 = B.roomsState(E, {}, 4), plain4 = E.rooms.filter((r) => !r.boss && r.no <= 4).length;
+  const S4 = B.roomsState(E, {}, 4), plain4 = E.rooms.filter((r) => !r.boss && !r.photo && r.no <= 4).length;
   check(S4.open.length === plain4 && !S4.bossOpen && S4.isOpen(E.rooms[0]) && !S4.isOpen(E.rooms.find((r) => r.id === 'q05')), `4차시까지 = 열린 방 ${plain4}개 · 5차시 방은 잠김 · 보스 잠김`);
   const S6 = B.roomsState(E, {}, 6);
-  check(S6.plain.length === 11 && S6.need === 7 && !S6.bossOpen, '6차시: 보스 제외 11방 · 60% = 7방 (올림)');
-  const six = { 'eval-1': Object.fromEntries(['q01', 'q02', 'q03', 'q04', 'q05', 'q06'].map((id) => [id, { clear: true }])) };
-  check(!B.roomsState(E, six, 6).bossOpen, '6방 처치 → 보스 아직');
-  six['eval-1'].q07 = { clear: true };
-  check(B.roomsState(E, six, 6).bossOpen && !B.roomsState(E, six, 5).bossOpen, '7방 처치 + 6차시 진도 → 👑 보스 열림 · 5차시면 보스 차시 조건으로 잠김');
+  check(S6.plain.length === 9 && S6.need === 6 && !S6.bossOpen && !S6.isOpen(E.rooms.find((r) => r.id === 'q07')), '6차시: 서술형 07 · 11 은 사진 분석 전 잠금 → 보스 제외 9방 · 60% = 6방 (올림)');
+  const six = { 'eval-1': Object.fromEntries(['q01', 'q02', 'q03', 'q04', 'q05'].map((id) => [id, { clear: true }])) };
+  check(!B.roomsState(E, six, 6).bossOpen, '5방 처치 → 보스 아직');
+  six['eval-1'].q06 = { clear: true };
+  check(B.roomsState(E, six, 6).bossOpen && !B.roomsState(E, six, 5).bossOpen, '6방 처치 + 6차시 진도 → 👑 보스 열림 · 5차시면 보스 차시 조건으로 잠김');
   check(!B.roomsState(E, { 'eval-1': { q01: { tries: 4 } } }, 6).cleared, '💧(도전만) 은 처치로 안 셈');
   const old = { 'eval-1': { e1: { clear: true }, e6: { clear: true } } };
   check(['q01', 'q02', 'q09', 'q10'].every((id) => B.roomRec(old, E, id).clear) && !B.roomRec(old, E, 'q03').clear, '옛 7마리 처치 기록 → 그 방들 처치로');
