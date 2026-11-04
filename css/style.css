@@ -1454,3 +1454,4 @@ body:has(#test-bar) #ver-tag { bottom: calc(64px + env(safe-area-inset-bottom));
 .att-c.s-o { color: #7dffb0; } .att-c.s-l { color: #ffd35a; } .att-c.s-x { color: #ff8a8a; } .att-c.s-a { color: #ff5a5a; font-size: 11px; } .att-c.s-e { color: #8fc8ff; font-size: 11px; }
 .log-tbl td { white-space: normal; } .log-tbl td:nth-child(2), .log-tbl td:nth-child(4) { white-space: nowrap; } .log-tbl tr.hid { opacity: .45; }
 .att-pick { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 8px 0; }
+.sc-tbl td.sc-auto { background: #ffd35a22; }

@@ -29,6 +29,16 @@ DS.Sched = (function () {
 
   // ── 시간표 (수동) ──────────────────────────────────────────
   const getWeek = async () => (await N().get('sched/week').catch(() => null)) || {};
+  // 🔄 컴시간 자동 (v0.9.7.1 · GitHub 가 매일 새벽 sched/comci 에 수학 칸만) — sched/comciOn 이 켜져 있을 때만 합침 · 수동 칸이 우선 ('-' = 수동으로 비움)
+  const getComci = async () => (await N().get('sched/comci').catch(() => null)) || null;
+  async function comci() { const [c, on] = await Promise.all([getComci(), N().get('sched/comciOn').catch(() => null)]); return { on: on === true, c }; }
+  async function effective(manual) {
+    const [m, { on, c }] = await Promise.all([manual ? Promise.resolve(manual) : getWeek(), comci()]);
+    const out = {}, auto = {};
+    if (on && c && c.week) Object.entries(c.week).forEach(([k, v]) => { const [d, p] = k.split('-').map(Number); if (usable(d, p)) { out[k] = String(v); auto[k] = String(v); } });
+    Object.entries(m).forEach(([k, v]) => { if (v === '-') delete out[k]; else out[k] = v; });
+    return { week: out, auto, manual: m, on, comci: c };
+  }
   const getOff = async () => (await N().get('sched/off').catch(() => null)) || {};
   // 앞으로 7일 동안 시간표에 있는 수업 칸 = [{ key, date, dow, p, cls, from, to }]
   function upcoming(week, off, now) {
@@ -68,7 +78,7 @@ DS.Sched = (function () {
   function ensure() { if (!busy) busy = run().finally(() => { busy = null; }); return busy; }
   async function run() {
     if (!(await DS.Account.isAdmin())) return { made: 0 };
-    const now = N().now(), [week, off] = await Promise.all([getWeek(), getOff()]);
+    const now = N().now(), [{ week }, off] = await Promise.all([effective(), getOff()]);
     const want = upcoming(week, off, now), made = (await N().get('sched/made').catch(() => null)) || {};
     let n = 0;
     const plan = {};
@@ -179,5 +189,5 @@ DS.Sched = (function () {
   const setHide = (cls, code, on) => N().set(`classlog/${ck(cls)}/${code}/hide`, on ? true : null);
   const when = (g) => { const k = kst(g.from || g.at || 0); return { date: k.date, dow: DOW[k.dow], hm: k.hm }; };
 
-  return { BELLS, PERIODS, SKIP, DOW, AFTER, LATE, ST, CYCLE, kst, times, usable, skipped, upcoming, nextLesson, ensure, active, today, skipSlot, relesson, logs, sheet, judge, setAtt, setMemo, setHide, when, label, getWeek, ck };
+  return { BELLS, PERIODS, SKIP, DOW, AFTER, LATE, ST, CYCLE, kst, times, usable, skipped, upcoming, nextLesson, ensure, active, today, skipSlot, relesson, logs, sheet, judge, setAtt, setMemo, setHide, when, label, getWeek, effective, comci, ck };
 })();

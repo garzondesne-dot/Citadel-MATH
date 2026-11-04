@@ -1,0 +1,32 @@
+# 🔄 컴시간 → 교사 시간표 (v0.9.7.1): 매일 한국 시각 새벽 6시 + 「Run workflow」 버튼
+#   비밀 값(Settings → Secrets and variables → Actions): FIREBASE_SA_JSON · COMCI_SCHOOL · COMCI_TEACHER
+#   결과는 Firebase sched/comci 에만 (저장소 · 로그에 열쇠 없음). 게임 반영은 sched/comciOn 이 켜져 있을 때만
+name: comci-timetable
+on:
+  schedule:
+    - cron: '0 21 * * *'   # 21:00 UTC = 06:00 KST
+  workflow_dispatch:
+    inputs:
+      raw:
+        description: '원본 자료도 저장 (첫 확인용)'
+        type: boolean
+        default: true
+permissions:
+  contents: read
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: tools/auto
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: 컴시간 → Firebase
+        env:
+          FIREBASE_SA_JSON: ${{ secrets.FIREBASE_SA_JSON }}
+          COMCI_SCHOOL: ${{ secrets.COMCI_SCHOOL }}
+          COMCI_TEACHER: ${{ secrets.COMCI_TEACHER }}
+        run: node tools/auto/comci.js ${{ (github.event_name == 'workflow_dispatch' && inputs.raw) && '--raw' || '' }}

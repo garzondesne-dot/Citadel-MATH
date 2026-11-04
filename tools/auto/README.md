@@ -24,3 +24,8 @@ mkdir -p /home/user/dtools && cd /home/user/dtools && for f in google gdrive; do
 node gdrive.js check && node gdrive.js swap 03 /path/"(03차시) 22_부분집합.mp4" … --dry
 ```
 `google.js` · `gdrive.js` 는 Node 기본 모듈만 쓴다(설치 없음). 이 두 파일이 다른 파일을 require 하게 바꾸지 말 것.
+
+## 🔄 comci.js — 컴시간 → 교사 시간표 (v0.9.7.1)
+- GitHub Actions `.github/workflows/comci.yml` 가 매일 06:00 KST 에 돌림 (「Run workflow」 버튼으로도). 비밀 값: `FIREBASE_SA_JSON` · `COMCI_SCHOOL` · `COMCI_TEACHER` (저장소에 넣지 않음).
+- 결과 = Firebase `sched/comci` { ok, week: { '요일-교시': '학년-반' }, err } · 수학 칸만. 게임 반영은 `sched/comciOn = true` 일 때만 (실제 자료로 읽는 방식을 확인한 뒤 켬). 수동 칸이 우선, `'-'` = 수동으로 비움.
+- 클라우드 작업 공간은 https 만 나갈 수 있어 컴시간(http · 4082 포트)을 직접 못 읽는다 → 첫 실행은 `--raw` 로 원본을 `sched/comci/raw` 에 저장해 확인한 뒤 지운다.

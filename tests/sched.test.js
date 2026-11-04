@@ -27,4 +27,11 @@ t('닫힘 (10:59)', !!S.active(slots, K('2026-11-09T10:59:00')), false);
 // 출석 판정: 시작 + 5분 안 = 출석 · 뒤 = 지각 · 없음 = 미입장 · 선생님이 고친 것 우선
 const g = { from: K('2026-11-09T11:00:00'), sum: { players: { 1: K('2026-11-09T11:04:59'), 2: K('2026-11-09T11:05:01') } } };
 t('출석', S.judge(g, 1), 'o'); t('지각', S.judge(g, 2), 'l'); t('미입장', S.judge(g, 3), 'x'); t('고친 것 우선', S.judge(g, 3, { s: 'e' }), 'e');
-console.log(bad ? `❌ ${bad}개 틀림 · ${ok}개 맞음` : `✅ 시간표 계산 ${ok}개 모두 맞음`); process.exit(bad ? 1 : 0);
+// 🔄 컴시간 합치기: 켜져 있을 때만 · 월 5 제외 · 수동 칸 우선 · '-' = 수동으로 비움
+(async () => {
+  const db = { 'sched/week': { '2-3': '1-5', '3-1': '-' }, 'sched/comci': { ok: true, week: { '1-5': '1-3', '2-3': '1-3', '3-1': '1-2', '4-2': '1-1' } }, 'sched/comciOn': true };
+  DS.Net = { get: async (k) => db[k] ?? null, now: () => 0 };
+  let e = await S.effective(); t('켜짐: 합친 시간표', e.week, { '2-3': '1-5', '4-2': '1-1' });
+  db['sched/comciOn'] = null; e = await S.effective(); t('꺼짐: 수동만', e.week, { '2-3': '1-5' });
+  console.log(bad ? `❌ ${bad}개 틀림 · ${ok}개 맞음` : `✅ 시간표 계산 ${ok}개 모두 맞음`); process.exit(bad ? 1 : 0);
+})();
