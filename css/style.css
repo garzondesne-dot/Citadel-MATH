@@ -1569,3 +1569,30 @@ body:has(#test-bar) #ver-tag { bottom: calc(64px + env(safe-area-inset-bottom));
 .dash-c.fill { background: #4b2a85; color: #fff; font-weight: 700; }
 .dash-c .fillc { color: #d9c2ff; }
 .dash-c.nt-left { background: #6a1a20; color: #fff; font-weight: 800; }
+/* 🎲 놀이 종류 (v0.9.8.0): 무대 그림은 .fa-bg (종류마다 색 · 그림) · ⚖ 다리 · 🔄 침대 숙소 + 스프링 · ⭕ 얼음 시험장 */
+.fa-bg { position: absolute; inset: 0; background-size: 100% 100%; background-repeat: no-repeat; pointer-events: none; }
+.fa-arena.img { background-image: none !important; }
+.fun-ctl.pick { gap: 6px; }
+.fun-ctl.pick .fun-btn { width: auto; margin: 0; }
+.fa-rule { font-style: normal; font-size: .7em; font-weight: 800; color: #fff; background: #d93a3a; border-radius: 10px; padding: 1px 9px; }
+.fa-st { flex-basis: 100%; order: 5; text-align: center; font-weight: 800; color: #fff; background: #1f2a44; border: 2px solid #8fb4ff; border-radius: 10px; padding: 6px 10px; font-size: 15px; line-height: 1.35; }
+.fa-wrap.big .fa-st { font-size: 32px; padding: 10px 20px; }
+/* ⭕ 수학 OX: 다리 그림을 얼음빛으로 · 깃발 크게 */
+.k-ox .fa-bg { filter: hue-rotate(185deg) saturate(1.25) brightness(1.08); }
+.k-ox .fa-flag { font-size: 16px; }
+.fa-wrap.big .k-ox .fa-flag { font-size: 34px; }
+/* 🔄 반대로: 침대 숙소 (그림 bgRev 가 오기 전엔 CSS) · 낭떠러지 대신 바닥 · 발판 밑 스프링 → 많은 쪽은 띠용~ 튕겨 나감 */
+.fa-bg.dorm { background:
+  linear-gradient(#0000 78%, #4a4f5c 78%, #2c3039 100%),
+  repeating-linear-gradient(90deg, #0000 0 15.5%, #8a93a6 15.5% 16.3%),
+  repeating-linear-gradient(#0000 0 9%, #9aa2b4 9% 10.2%, #3c6b76 10.2% 12%, #0000 12% 19.5%),
+  linear-gradient(#1c3d45, #24525c 60%, #173238); }
+.k-rev .fa-gal { background: linear-gradient(#0000, #0000); border: 0; }
+.k-rev .fa-plat { top: 40%; bottom: 26%; border-radius: 6px; }
+.k-rev .fa-spring { position: absolute; left: 32%; right: 32%; top: 100%; height: 58%; background: repeating-linear-gradient(180deg, #e3e6ee 0 5px, #6b7080 5px 7px, #0000 7px 13px); border-radius: 40%; box-shadow: 0 4px 0 #0006; transform-origin: bottom center; }
+.k-rev .fa-plat.doom { animation: none; }
+.k-rev .fa-plat.fall { transform: none; opacity: 1; animation: faBoing .9s ease-out; }
+.k-rev .fa-plat.fall .fa-spring { animation: faSpring .9s ease-out; }
+@keyframes faBoing { 0% { transform: translateY(0); } 30% { transform: translateY(18%); } 48% { transform: translateY(-22%); } 70% { transform: translateY(6%); } 100% { transform: translateY(0); } }
+@keyframes faSpring { 0% { transform: scaleY(1); } 30% { transform: scaleY(.45); } 48% { transform: scaleY(1.35); } 70% { transform: scaleY(.9); } 100% { transform: scaleY(1); } }
+.k-rev .fa-h.fall { top: -45% !important; opacity: 0; transform: translate(-50%, -50%) rotate(600deg); transition: top 1.2s cubic-bezier(.2, .9, .3, 1) .28s, opacity 1s .7s, transform 1.3s .28s; }

@@ -1,7 +1,7 @@
 // ⚖ 밸런스 게임 검증 (v0.9.7.7): node tests/fun.test.js
 // (1) 판정: 적은 쪽 탈락 · 비김 / 한쪽 몰림 = 탈락 없음 · 안 고르면 탈락 · 모두 탈락이면 없던 일  (2) 진행: 시간 · 2명 이하 끝 · 4분 마지막 판  (3) 질문 150개 · 겹침 · 길이 · 안 쓴 것부터
 const load = require('./load');
-const DS = load(['js/engine/ui.js', 'js/raid/model.js', 'js/raid/fun-q.js', 'js/raid/fun.js']);
+const DS = load(['js/engine/ui.js', 'js/raid/model.js', 'js/raid/fun-q.js', 'js/raid/fun-ox.js', 'js/raid/fun.js']);
 let fail = 0;
 const check = (c, m) => { if (!c) { fail++; console.error('FAIL:', m); } };
 const F = DS.Fun, list = DS.FunQ.list;
@@ -79,5 +79,75 @@ check(F.queue({}, 24).q.length === 24 && !F.queue({}, 24).reset, '처음엔 그�
 const st = { 3: { n: 2, m: 0.3 }, 4: { n: 3, m: 0.9 }, 7: { n: 1, m: 0.05 } }; // 3번 = 평균 15% (쏠림) · 4번 = 30% · 7번 = 한 번뿐
 check(F.tilted(st[3]) && !F.tilted(st[4]) && !F.tilted(st[7]), '쏠림 = 2번 이상 · 적은 쪽 평균 25% 아래');
 check([...Array(20)].every(() => !F.queue({}, 24, Math.random, st).q.includes(3)), '쏠린 질문은 줄에 안 들어감');
+// ── 4. 🔄 반대로 · ⭕ 수학 OX 판정 (v0.9.8.0) ──
+let rv = F.judge(al, V(al.slice(0, 6), al.slice(6)), 'rev');
+check(rv.lose === 'a' && rv.out.length === 6 && rv.left.length === 4, '반대로: 6 : 4 → 많은 쪽 6명 탈락');
+rv = F.judge(al, V(al.slice(0, 5), al.slice(5)), 'rev');
+check(rv.lose === '' && !rv.out.length, '반대로: 비김 → 탈락 없음');
+rv = F.judge(al, V(al, []), 'rev');
+check(rv.lose === '' && !rv.out.length, '반대로: 모두 같은 쪽 → 탈락 없음 (모두 탈락 방지)');
+let oxj = F.judge(al, V(al.slice(0, 8), al.slice(8)), 'ox', 'b');
+check(oxj.lose === 'a' && oxj.left.join() === 'u9,u10', 'OX: 정답 ❌ → ⭕ 고른 8명 탈락 (적은 쪽이어도 정답이면 생존)');
+oxj = F.judge(al, V(al, []), 'ox', 'a');
+check(oxj.lose === 'b' && !oxj.out.length && oxj.left.length === 10, 'OX: 모두 정답 → 탈락 없음');
+oxj = F.judge(al, V([], al), 'ox', 'a');
+check(oxj.voided && oxj.left.length === 10, 'OX: 모두 틀림 → 없던 일');
+const fo = { g: 1, kind: 'ox', at0: 0, queue: [0, 1, 2], alive: Object.fromEntries(us(4).map((u) => [u, true])), outAt: {} };
+let fx = { ...fo, ...F.round(fo, 1, 0) };
+check(fx.s === DS.FunOX.list[0].t && fx.ans === (DS.FunOX.list[0].a ? 'a' : 'b') && fx.q[0].includes('맞다'), 'OX 판: 문장 · 정답 · 버튼');
+fx = F.step(fx, { u1: fx.ans, u2: fx.ans, u3: fx.ans === 'a' ? 'b' : 'a' }, fx.to);
+check(Object.keys(fx.alive).join() === 'u1,u2' && fx.res.none.join() === 'u4', 'OX 진행: 틀린 사람 · 안 고른 사람 탈락');
+// 수학 OX 문제: 차시 2~6 · 10개씩 · 겹침 없음 · 해설
+const OX = DS.FunOX.list, byNo = {};
+OX.forEach((x) => { byNo[x.no] = (byNo[x.no] || 0) + 1; });
+check([2, 3, 4, 5, 6].every((n) => byNo[n] === 10) && OX.every((x) => x.t && x.why && typeof x.a === 'boolean'), `OX 문제 차시마다 10개 (${JSON.stringify(byNo)})`);
+check(new Set(OX.map((x) => x.t)).size === OX.length, 'OX 문장 겹침 없음');
+check(OX.filter((x) => x.a).length >= 20 && OX.filter((x) => !x.a).length >= 15, `⭕ · ❌ 고르게 (${OX.filter((x) => x.a).length} : ${OX.filter((x) => !x.a).length})`);
+// 독립 계산: 숫자 · 집합으로 판별되는 문장
+const S0 = (a) => new Set(a), eq = (a, b) => a.size === b.size && [...a].every((x) => b.has(x)), sub = (a, b) => [...a].every((x) => b.has(x));
+const I = (a, b) => S0([...a].filter((x) => b.has(x))), Un = (a, b) => S0([...a, ...b]), D = (a, b) => S0([...a].filter((x) => !b.has(x)));
+const div = (n) => S0(Array.from({ length: n }, (_, i) => i + 1).filter((d) => n % d === 0));
+const rnd = (seed) => { let s0 = seed; return () => (s0 = (s0 * 1103515245 + 12345) % 2147483648) / 2147483648; };
+const always = (f) => { const r = rnd(7), U = S0([1, 2, 3, 4, 5, 6]); for (let t = 0; t < 300; t++) { const pick = () => S0([...U].filter(() => r() < 0.5)); if (!f(pick(), pick(), pick(), U)) return false; } return true; };
+const C = (a, U) => D(U, a);
+const truth = {
+  '{1, 2, 3} 의 원소의 개수는 3이다.': S0([1, 2, 3]).size === 3,
+  '{x | x는 6의 약수} = {1, 2, 3, 6} 이다.': eq(div(6), S0([1, 2, 3, 6])),
+  '{1, 2, 2, 3} 의 원소의 개수는 4이다.': S0([1, 2, 2, 3]).size === 4,
+  '3 ∈ {1, 3, 5} 이다.': S0([1, 3, 5]).has(3),
+  '{1, 2} ⊂ {1, 2, 3} 이다.': sub(S0([1, 2]), S0([1, 2, 3])),
+  '{1, 2, 3} 의 부분집합은 모두 6개이다.': 2 ** 3 === 6,
+  '{a, b} 의 진부분집합은 3개이다.': 2 ** 2 - 1 === 3,
+  '{1, 2} = {2, 1} 이다.': eq(S0([1, 2]), S0([2, 1])),
+  '{2, 4} ⊂ {x | x는 4의 약수} 이다.': sub(S0([2, 4]), div(4)),
+  '{1, 3} ⊂ {1, 2} 이다.': sub(S0([1, 3]), S0([1, 2])),
+  'A = {1, 2, 3}, B = {2, 3, 4} 이면 A ∩ B = {2, 3} 이다.': eq(I(S0([1, 2, 3]), S0([2, 3, 4])), S0([2, 3])),
+  'A = {1, 2}, B = {3, 4} 이면 A ∪ B = {1, 2, 3, 4} 이다.': eq(Un(S0([1, 2]), S0([3, 4])), S0([1, 2, 3, 4])),
+  '{1, 2} 와 {2, 3} 은 서로소이다.': I(S0([1, 2]), S0([2, 3])).size === 0,
+  '{1, 3} 과 {2, 4} 는 서로소이다.': I(S0([1, 3]), S0([2, 4])).size === 0,
+  'A ∩ B ⊂ A ∪ B 는 항상 성립한다.': always((a, b) => sub(I(a, b), Un(a, b))),
+  'n(A) = 5, n(B) = 4, n(A ∩ B) = 2 이면 n(A ∪ B) = 9 이다.': 5 + 4 - 2 === 9,
+  'A ∪ ∅ = A 이다.': always((a) => eq(Un(a, S0([])), a)),
+  'A ∩ ∅ = A 이다.': always((a) => eq(I(a, S0([])), a)),
+  'A ⊂ B 이면 A ∩ B = A 이다.': always((a, b) => !sub(a, b) || eq(I(a, b), a)),
+  'A 와 B 가 서로소이면 n(A ∪ B) = n(A) + n(B) 이다.': always((a, b) => I(a, b).size > 0 || Un(a, b).size === a.size + b.size),
+  'A ∪ B = B ∪ A 이다.': always((a, b) => eq(Un(a, b), Un(b, a))),
+  'U = {1, 2, 3, 4, 5}, A = {1, 2} 이면 Aᶜ = {3, 4, 5} 이다.': eq(C(S0([1, 2]), S0([1, 2, 3, 4, 5])), S0([3, 4, 5])),
+  'A = {1, 2, 3}, B = {2, 3, 4} 이면 A − B = {1} 이다.': eq(D(S0([1, 2, 3]), S0([2, 3, 4])), S0([1])),
+  'A − B = B − A 는 항상 성립한다.': always((a, b) => eq(D(a, b), D(b, a))),
+  '(Aᶜ)ᶜ = A 이다.': always((a, b, c, U) => eq(C(C(a, U), U), a)),
+  'A ∪ Aᶜ = ∅ 이다.': always((a, b, c, U) => Un(a, C(a, U)).size === 0),
+  'A ∩ Aᶜ = ∅ 이다.': always((a, b, c, U) => I(a, C(a, U)).size === 0),
+  'A − B = A ∩ Bᶜ 이다.': always((a, b, c, U) => eq(D(a, b), I(a, C(b, U)))),
+  'A ∩ (B ∪ C) = (A ∩ B) ∪ (A ∩ C) 이다.': always((a, b, c) => eq(I(a, Un(b, c)), Un(I(a, b), I(a, c)))),
+  'U = {1, 2, 3, 4}, A = {1, 2, 3} 이면 n(Aᶜ) = 2 이다.': C(S0([1, 2, 3]), S0([1, 2, 3, 4])).size === 2,
+  '(A ∪ B)ᶜ = Aᶜ ∩ Bᶜ 이다.': always((a, b, c, U) => eq(C(Un(a, b), U), I(C(a, U), C(b, U)))),
+  '(A ∩ B)ᶜ = Aᶜ ∩ Bᶜ 이다.': always((a, b, c, U) => eq(C(I(a, b), U), I(C(a, U), C(b, U)))),
+};
+const bad2 = Object.entries(truth).filter(([t, v]) => { const x = OX.find((y) => y.t === t); return !x || x.a !== v; }).map(([t]) => t);
+check(!bad2.length, `OX 문장 독립 계산 ${Object.keys(truth).length}개 (${bad2.join(' / ')})`);
+const qp = F.queue({ x3: true }, 24, Math.random, null, [1, 2, 3, 4], 'x');
+check(qp.q.length === 4 && qp.q.slice(0, 3).every((i) => i !== 3), 'OX 줄: 지금 차시까지만 · 쓴 것(x 앞글자)은 뒤로');
+
 if (fail) { console.error(`\n${fail}건 실패`); process.exit(1); }
-console.log('OK: 밸런스 게임 — 판정(적은 쪽 · 비김 · 안 고름 · 없던 일 · 무작위 1만 번) · 진행(15 → 10초 · 2명 끝 · 4분 마지막 판 · 18명 시뮬) · 질문 150개 통과');
+console.log('OK: 밸런스 게임 — 판정(적은 쪽 · 비김 · 안 고름 · 없던 일 · 무작위 1만 번) · 진행(15 → 10초 · 2명 끝 · 4분 마지막 판 · 18명 시뮬) · 질문 150개 · 반대로 · 수학 OX(판정 · 문장 독립 계산) 통과');

@@ -25,7 +25,7 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   }, code);
   const H = await mk('H'); await H.setViewportSize({ width: 1600, height: 900 });
   await H.goto(`${U}&role=hall&code=${code}&key=${key}`); await H.waitForTimeout(3000);
-  const hb = await H.$('[data-fun="start"]'); log.push('종합상황실 ⚖ 버튼: ' + !!hb);
+  const hb = await H.$('[data-fun="start:bal"]'); log.push('종합상황실 ⚖ 버튼: ' + !!hb);
   await hb.click(); await H.waitForTimeout(1500);
   await H.screenshot({ path: `${OUT}/1-hall-pick.png` });
   const pick1 = await S.$$eval('.fa-pick .btn', (x) => x.map((e) => e.textContent.trim()));

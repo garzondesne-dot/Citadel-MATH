@@ -61,7 +61,7 @@ DS.ASSETS = {
   tcamp: { bg: 'tcamp-sanctuary-v1.webp' },
   trophy: 'trophy-v1.webp', // 클리어 · 수업 끝 트로피 (사용자 제공, 투명 배경)
   note: { src: 'note-icons-v1.webp', cell: 128, names: ['x', 'none', 'ok', 'fill', 'star', 'badge', 'done', 'book'] }, // 📕 오답노트 아이콘 (v0.9.7.9 · 사용자 생성): 틀림 · 안 풂 · 맞힘 · 보충 · 도전 별 · 알림 배지(숫자는 코드) · 노트 완성 · 오답노트 책
-  fun: { bg: 'fun-arena-v1.webp', plat: null }, // ⚖ 밸런스 게임 「무너지는 두 갈래 다리」 (v0.9.7.7): bg = 배경 1920×1080 · plat = 발판(투명) — 그림이 오기 전엔 null → CSS 로 그림
+  fun: { bg: 'fun-arena-v1.webp', plat: null, bgRev: null, bgOx: null }, // bgRev = 🔄 반대로 「침대 숙소」(그림 오기 전엔 CSS) · bgOx = ⭕ OX 전용(없으면 bg 를 얼음빛으로) // ⚖ 밸런스 게임 「무너지는 두 갈래 다리」 (v0.9.7.7): bg = 배경 1920×1080 · plat = 발판(투명) — 그림이 오기 전엔 null → CSS 로 그림
   dportals: { bonus: 'dportal-bonus-v1.webp', mid: 'dportal-mid-v1.webp', big: 'dportal-big-v1.webp' },
   fields: { forest: 'field-forest-v1.webp', lava: 'field-lava-v1.webp', ice: 'field-ice-v1.webp' }, // 전투 배경 (달빛 숲 유적 · 화산 대장간 · 빙결 신전)
   camp: {
