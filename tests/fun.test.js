@@ -149,5 +149,19 @@ check(!bad2.length, `OX 문장 독립 계산 ${Object.keys(truth).length}개 (${
 const qp = F.queue({ x3: true }, 24, Math.random, null, [1, 2, 3, 4], 'x');
 check(qp.q.length === 4 && qp.q.slice(0, 3).every((i) => i !== 3), 'OX 줄: 지금 차시까지만 · 쓴 것(x 앞글자)은 뒤로');
 
+// ── 5. ⭕ OX 타임 (v0.9.8.1): 탈락 없음 · 5문장 · 사람마다 o x - · 반 정답률 ──
+const fq0 = { g: 2, kind: 'quiz', at0: 0, queue: [10, 11, 12, 13, 14, 15, 16], alive: Object.fromEntries(us(4).map((u) => [u, true])), outAt: {} };
+let fq = { ...fq0, ...F.round(fq0, 1, 0) }, tq = 0;
+check(fq.to === 10000 && fq.s === DS.FunOX.list[10].t, 'OX 타임: 10초 · 문장');
+for (let k = 0; k < 6 && fq.phase !== 'end'; k++) {
+  const w = fq.ans === 'a' ? 'b' : 'a';
+  tq = fq.to; fq = F.step(fq, { u1: fq.ans, u2: fq.ans, u3: w }, tq); // u4 안 고름
+  check(Object.keys(fq.alive).length === 4, `OX 타임 ${k + 1}번: 아무도 탈락 안 함`);
+  tq = fq.until; fq = F.step(fq, null, tq);
+}
+check(fq.phase === 'end' && fq.n === 5, `5문장 뒤 끝 (${fq.n})`);
+check(fq.marks.u1 === 'ooooo' && fq.marks.u3 === 'xxxxx' && fq.marks.u4 === '-----', `사람마다 기록 ${JSON.stringify(fq.marks)}`);
+check(fq.hist.length === 5 && fq.hist.every((h) => h.ok === 2 && h.n === 4), '판마다 반 정답 수');
+
 if (fail) { console.error(`\n${fail}건 실패`); process.exit(1); }
-console.log('OK: 밸런스 게임 — 판정(적은 쪽 · 비김 · 안 고름 · 없던 일 · 무작위 1만 번) · 진행(15 → 10초 · 2명 끝 · 4분 마지막 판 · 18명 시뮬) · 질문 150개 · 반대로 · 수학 OX(판정 · 문장 독립 계산) 통과');
+console.log('OK: 밸런스 게임 — 판정(적은 쪽 · 비김 · 안 고름 · 없던 일 · 무작위 1만 번) · 진행(15 → 10초 · 2명 끝 · 4분 마지막 판 · 18명 시뮬) · 질문 150개 · 반대로 · 수학 OX(판정 · 문장 독립 계산) · OX 타임(탈락 없음 · 5문장 · 기록) 통과');

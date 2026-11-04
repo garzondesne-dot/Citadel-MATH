@@ -45,5 +45,9 @@ const all = Nt.all({ 'set-03': sm }, {}, 4, { 'set-04': true });
 check(all.list.length >= 2 && all.list.find((y) => y.L.id === 'set-04').absent && all.left === Nt.lesson(L, sm, {}).left + Nt.lesson(DS.Lessons.get('set-04'), null, {}).left, '열린 차시 전체 합 (기록 없는 차시 = 불참)');
 check(/nt-badge/.test(Nt.badge(3)) && /done/.test(Nt.badge(0)), '배지 · 0 이면 노트 완성');
 
+R.oxq = { 9: { marks: { a: 'oox-o' } } };
+const rx = DS.Result.summary(DS.Result.compute(L, R, 'a'), '1');
+check(rx.ox && rx.ox[0] === 3 && rx.ox[1] === 5, `OX 타임 결과 → 기록 ox [3, 5] (${JSON.stringify(rx.ox)})`);
+delete R.oxq;
 if (fail) { console.error(`\n${fail}건 실패`); process.exit(1); }
 console.log('OK: 오답노트 — 문제 칸(o f x - n) · 형성평가 칸 · ⭐ 도전 분리 · 남은 문제 · 보충(문제 · 재대결) · 불참 · 옛 기록 통과');

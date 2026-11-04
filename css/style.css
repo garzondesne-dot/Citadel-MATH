@@ -1578,9 +1578,9 @@ body:has(#test-bar) #ver-tag { bottom: calc(64px + env(safe-area-inset-bottom));
 .fa-st { flex-basis: 100%; order: 5; text-align: center; font-weight: 800; color: #fff; background: #1f2a44; border: 2px solid #8fb4ff; border-radius: 10px; padding: 6px 10px; font-size: 15px; line-height: 1.35; }
 .fa-wrap.big .fa-st { font-size: 32px; padding: 10px 20px; }
 /* ⭕ 수학 OX: 다리 그림을 얼음빛으로 · 깃발 크게 */
-.k-ox .fa-bg { filter: hue-rotate(185deg) saturate(1.25) brightness(1.08); }
-.k-ox .fa-flag { font-size: 16px; }
-.fa-wrap.big .k-ox .fa-flag { font-size: 34px; }
+.k-ox .fa-bg, .k-quiz .fa-bg { filter: hue-rotate(185deg) saturate(1.25) brightness(1.08); }
+.k-ox .fa-flag, .k-quiz .fa-flag { font-size: 16px; }
+.fa-wrap.big .k-ox .fa-flag, .fa-wrap.big .k-quiz .fa-flag { font-size: 34px; }
 /* 🔄 반대로: 침대 숙소 (그림 bgRev 가 오기 전엔 CSS) · 낭떠러지 대신 바닥 · 발판 밑 스프링 → 많은 쪽은 띠용~ 튕겨 나감 */
 .fa-bg.dorm { background:
   linear-gradient(#0000 78%, #4a4f5c 78%, #2c3039 100%),
@@ -1625,3 +1625,12 @@ body:has(#test-bar) #ver-tag { bottom: calc(64px + env(safe-area-inset-bottom));
 .k-rev .fa-spring { height: 133%; left: 36%; right: 36%; background: repeating-linear-gradient(180deg, #f1f3f8 0 6px, #59607a 6px 8px, #0000 8px 16px); }
 .k-rev .fa-cnt { bottom: auto; top: 50%; transform: translate(-50%, -50%); color: #1a1d29; text-shadow: 0 2px 0 #fff; }
 .fa-arena.k-rev .fa-flag { top: auto; bottom: 104%; }
+/* ⭕ OX 타임 (v0.9.8.1): 끝 화면 = 반 정답률 · 다시 짚어 볼 문장 */
+.fa-win.quiz { min-width: 70%; text-align: left; padding: 14px 26px; }
+.fa-win.quiz h1 { text-align: center; }
+.fa-worst { margin: 8px 0 2px !important; font-size: 20px !important; color: #ffd36b; }
+.fa-wq { font-size: 19px !important; margin: 4px 0 !important; line-height: 1.4; }
+.fa-wq small { display: block; font-size: 14px; color: #ffe7b0cc; }
+.fa-wrap:not(.big) .fa-win.quiz { min-width: 88%; padding: 8px 10px; }
+.fa-wrap:not(.big) .fa-win h1 { font-size: 22px; } .fa-wrap:not(.big) .fa-wq, .fa-wrap:not(.big) .fa-worst { font-size: 12px !important; }
+.fa-wq.me { background: #0003; border-left: 3px solid #ffd36b; padding: 4px 8px; border-radius: 4px; font-size: 13px !important; text-align: left; } .fa-wq.me small { display: block; color: #c9c2dc; font-size: 11px; }

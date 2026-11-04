@@ -4,7 +4,7 @@
 //  - v0.9.6 차시별 다운로드: STATIC = 공통 그림만. 던전 배경 · 포털 · 몬스터는 그 차시에 들어갈 때 받고(DS.Art.lessonEnter), 지금 · 바로 전 차시 것만 남긴다
 //  - Firebase(다른 주소)는 건드리지 않는다. 수업 진행에는 인터넷이 필요하다
 // 새 버전을 낼 때 CACHE 이름을 'ds-' + DS.VERSION 과 맞춘다 (tests/pwa.test.js 가 확인)
-const CACHE = 'ds-citadel-0.9.8.0';
+const CACHE = 'ds-citadel-0.9.8.1';
 const ASSETS = 'ds-assets';
 const CORE = [
   './', './index.html', './css/style.css', './manifest.webmanifest',
@@ -44,7 +44,7 @@ self.addEventListener('fetch', (e) => {
     }))));
     return;
   }
-  // v0.9.8.0 속도: 앱 파일(html · js · css)은 이 판 캐시에서 바로 (예전: 열 때마다 깃허브에서 50여 개를 다시 받음 → 학교 망에서 느림)
+  // v0.9.8.1 속도: 앱 파일(html · js · css)은 이 판 캐시에서 바로 (예전: 열 때마다 깃허브에서 50여 개를 다시 받음 → 학교 망에서 느림)
   //   새 판은 sw.js 가 바뀌면(배포) 설치 때 통째로 새로 받음 → 섞이지 않음 · 캐시에 없는 것만 네트워크
   e.respondWith(caches.open(CACHE).then((c) => c.match(req, { ignoreSearch: req.mode === 'navigate' }).then((hit) => hit || fetch(req).then((res) => {
     if (res.ok && url.pathname.match(/\.(js|css|html|webmanifest)$|\/$/)) c.put(req, res.clone());

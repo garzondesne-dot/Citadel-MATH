@@ -92,6 +92,9 @@
               ".validate": "newData.val() === 'a' || newData.val() === 'b'"
             }
           }
+        },
+        "oxq": {
+          ".write": "auth != null && (root.child('rooms/'+$code+'/meta/teacher').val() === auth.uid || (root.child('rooms/'+$code+'/hosts/'+auth.uid).isString() && root.child('rooms/'+$code+'/hosts/'+auth.uid).val() === root.child('secrets/'+$code+'/hallKey').val()))"
         }
       }
     },

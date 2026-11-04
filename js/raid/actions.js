@@ -110,9 +110,9 @@ DS.Act = (function () {
     else await N().update(P(code, 'state'), { focus: false, focusAt: null, pauseMs: (st.pauseMs || 0) + Math.max(0, N().now() - (st.focusAt || N().now())) });
   }
   // 🏕 쉼터: 켜면 { at, min(기본 5분) } · 끄면 쉰 시간을 pauseMs 에 더해 몬스터 공격 게이지가 이어짐 · 분 조절은 쉼터 중에
-  async function setRest(code, on, min) {
+  async function setRest(code, on, min, opt = {}) { // opt.quiz (v0.9.8.1): ⭕ OX 타임 = 쉼터처럼 멈추되 이름만 다름
     const st = (await N().get(P(code, 'state'))) || {};
-    if (on && !st.rest) await N().update(P(code, 'state'), { rest: { at: N().now(), min: Number(min) || 5 } });
+    if (on && !st.rest) await N().update(P(code, 'state'), { rest: { at: N().now(), min: Number(min) || 5, ...(opt.quiz ? { quiz: true } : {}) } });
     if (!on && st.rest) await N().update(P(code, 'state'), { rest: null, pauseMs: (st.pauseMs || 0) + Math.max(0, N().now() - (st.rest.at || N().now())) });
     if (!on && DS.Fun) await DS.Fun.stop(code).catch(() => {}); // 쉼터가 끝나면 ⚖ 밸런스 게임도 끝
   }

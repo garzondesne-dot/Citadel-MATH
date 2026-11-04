@@ -60,8 +60,8 @@ DS.Control = (function () {
   if (typeof document !== 'undefined') setInterval(() => document.querySelectorAll('[data-rest-end]').forEach((e) => { const s = Math.max(0, Math.round((Number(e.dataset.restEnd) - DS.Net.now()) / 1000)); e.textContent = mmss(s); e.classList.toggle('over', s === 0); }), 1000);
   const mmss = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
   const restBtn = (R) => Raid().restOn(R)
-    ? `<div class="rest-ctl"><button class="btn primary rest-btn on" data-rest>▶ 쉼터 끝 · 수업으로</button><span class="rest-t">⏱ <b data-rest-end="${restEnd(R)}">${mmss(restLeft(R))}</b></span><button class="btn small" data-rest-min="-1">−1분</button><button class="btn small" data-rest-min="1">+1분</button></div>${DS.Fun ? DS.Fun.ctlHtml(R) : ''}`
-    : '<button class="btn rest-btn" data-rest>🏕 쉼터 (잠깐 쉬기 · 5분)</button>';
+    ? `<div class="rest-ctl"><button class="btn primary rest-btn on" data-rest>▶ ${((R.state || {}).rest || {}).quiz ? 'OX 타임' : '쉼터'} 끝 · 수업으로</button><span class="rest-t">⏱ <b data-rest-end="${restEnd(R)}">${mmss(restLeft(R))}</b></span><button class="btn small" data-rest-min="-1">−1분</button><button class="btn small" data-rest-min="1">+1분</button></div>${DS.Fun ? DS.Fun.ctlHtml(R) : ''}`
+    : '<button class="btn rest-btn" data-rest>🏕 쉼터 (잠깐 쉬기 · 5분)</button><div class="fun-ctl pick"><span class="muted small">⭕ OX 타임 (탈락 없는 복습 · 5문장)</span><button class="btn small" data-oxq="prev">지난 차시</button><button class="btn small" data-oxq="now">이번 차시</button></div>';
   // 🖥 종합상황실 아이콘 막대 (2026-11-04 사용자 요청 「버튼이 많아져 복잡」): 같은 기능을 아이콘 + 짧은 글자 (마우스를 올리면 설명)
   //   쉼터 중에는 [▶ 수업으로 · ⏱ · −1 · +1] 만
   function iconBar(L, R, videos, demo) {
@@ -69,12 +69,15 @@ DS.Control = (function () {
     const st = Raid().stepOf(L, R), fight = st && (st.kind === 'monster' || st.kind === 'boss');
     const vid = st && DS.Video.ok(DS.Video.pick(L, videos, st.id)), von = vid && Raid().videoOn(R, st.id);
     const b = (attr, ic, cap, tip, on) => `<button class="icb${on ? ' on' : ''}" ${attr} title="${tip}">${ic}<small>${cap}</small></button>`;
-    return `<div class="ic-bar">${b('data-rest', '🏕', '쉼터', '쉼터 — 잠깐 쉬기 (기본 5분)')}${vid ? b(`data-video="${st.id}"`, '🎬', von ? '닫기' : '영상', von ? '설명 영상 닫기' : '설명 영상 틀기 (큰 화면)', von) : ''}${fight ? b('data-sheet', '📄', Raid().sheetOn(R) ? '레이드' : '문제', Raid().sheetOn(R) ? '레이드 화면으로' : '문제 화면 (학습지 해설)', Raid().sheetOn(R)) : ''}${b('data-focus', '🔴', '집중', Raid().focusOn(R) ? '집중모드 끄기' : '집중모드 켜기 (학생 폰 잠깐 멈춤)', Raid().focusOn(R))}${fight && demo ? b('id="h-demo"', '🎮', '시연', st.kind === 'boss' ? '시연: 형성평가 풀어 보기' : '시연: 문제 풀어 보기') : ''}</div>`;
+    return `<div class="ic-bar">${b('data-rest', '🏕', '쉼터', '쉼터 — 잠깐 쉬기 (기본 5분)')}${b('data-oxq="prev"', '⭕', 'OX 지난', 'OX 타임 — 지난 차시 복습 5문장 (탈락 없음)')}${b('data-oxq="now"', '⭕', 'OX 오늘', 'OX 타임 — 이번 차시 점검 5문장 (탈락 없음)')}${vid ? b(`data-video="${st.id}"`, '🎬', von ? '닫기' : '영상', von ? '설명 영상 닫기' : '설명 영상 틀기 (큰 화면)', von) : ''}${fight ? b('data-sheet', '📄', Raid().sheetOn(R) ? '레이드' : '문제', Raid().sheetOn(R) ? '레이드 화면으로' : '문제 화면 (학습지 해설)', Raid().sheetOn(R)) : ''}${b('data-focus', '🔴', '집중', Raid().focusOn(R) ? '집중모드 끄기' : '집중모드 켜기 (학생 폰 잠깐 멈춤)', Raid().focusOn(R))}${fight && demo ? b('id="h-demo"', '🎮', '시연', st.kind === 'boss' ? '시연: 형성평가 풀어 보기' : '시연: 문제 풀어 보기') : ''}</div>`;
   }
   const bindRest = (el, code, R) => {
     el.querySelectorAll('[data-rest]').forEach((b) => (b.onclick = () => run(() => Act().setRest(code, !Raid().restOn(R), 5))));
     el.querySelectorAll('[data-rest-min]').forEach((b) => (b.onclick = () => run(() => Act().setRestMin(code, (((R.state || {}).rest || {}).min || 5) + Number(b.dataset.restMin)))));
     if (DS.Fun && Raid().restOn(R)) DS.Fun.bind(el, code, R); // ⚖ 밸런스 게임 (v0.9.7.7)
+    el.querySelectorAll('[data-oxq]').forEach((b) => (b.onclick = () => run(async () => { // ⭕ OX 타임 (v0.9.8.1): 쉼터처럼 멈춤 → 탈락 없는 OX 5문장
+      if (!DS.Fun) return; await Act().setRest(code, true, 5, { quiz: true }); await DS.Fun.start(code, R, 'quiz', b.dataset.oxq);
+    })));
   };
   const focusBtn = (R) => `<button class="btn focus-btn${Raid().focusOn(R) ? ' on' : ''}" data-focus>${Raid().focusOn(R) ? '🔴 집중모드 끄기' : '🔴 집중모드 켜기'}</button>`;
   // 📄 문제 화면 버튼 (문제 · 보강 · 형성평가 단계에서만)
