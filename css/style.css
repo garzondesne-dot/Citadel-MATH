@@ -1455,3 +1455,4 @@ body:has(#test-bar) #ver-tag { bottom: calc(64px + env(safe-area-inset-bottom));
 .log-tbl td { white-space: normal; } .log-tbl td:nth-child(2), .log-tbl td:nth-child(4) { white-space: nowrap; } .log-tbl tr.hid { opacity: .45; }
 .att-pick { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 8px 0; }
 .sc-tbl td.sc-auto { background: #ffd35a22; }
+.sc-comci { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 6px 0; padding: 6px; border: 1px solid #ffd35a55; background: #ffd35a11; } .sc-comci input { width: auto !important; margin: 0; }

@@ -54,11 +54,14 @@ DS.Att = (function () {
     };
     const days = [1, 2, 3, 4, 5], ps = [1, 2, 3, 4, 5, 6, 7];
     m.innerHTML = `<div class="quiz-box framed"><div class="quiz-head"><b>📅 시간표 (매주 반복)</b><button class="btn small" data-x>✕ 닫기</button><button class="btn primary" id="sc-save">저장</button></div>
+      ${eff.comci && eff.comci.ok ? `<label class="sc-comci"><input type="checkbox" id="sc-comci"${eff.on ? ' checked' : ''}> 🔄 <b>컴시간 시간표 쓰기</b> <span class="muted small">수학 ${eff.comci.n || 0}칸 · ${esc(S().kst(eff.comci.at || 0).date)} 받음 · 매일 새벽 6시 갱신 · 고친 칸이 우선</span></label>` : eff.comci ? `<p class="ngc small">⚠ 컴시간 연동 실패: ${esc(eff.comci.err || '')}</p>` : ''}
       <p class="muted small">칸마다 수학 수업 반을 고르세요. 저장하면 앞으로 7일 수업 방을 미리 만들고, 그 시각(끝 + 10분까지)에 학생 캠프 문이 저절로 열려요. 차시는 그 반의 다음 차시로 저절로.</p>
       ${cs.length ? '' : '<p class="ngc">먼저 학생 관리 → 명단 관리에서 반 명단을 올려 주세요.</p>'}
       <div class="sc-wrap"><table class="sc-tbl"><tr><th></th>${days.map((d) => `<th>${S().DOW[d]}</th>`).join('')}</tr>${ps.map((p) => `<tr><th>${p}교시<small>${S().BELLS[p][0]}</small></th>${days.map((d) => cell(d, p)).join('')}</tr>`).join('')}</table></div>
       <p class="muted small">월 5교시 · 목 7교시 = 자율 · 동아리(담임)라 빼요. 수 7교시 = 특기적성 · 금 6 · 7교시 = 없음.${eff.on ? ' 🔄 노란 칸 = 컴시간에서 가져온 칸 (고치면 수동이 우선)' : ''}</p></div>`;
     m.querySelector('[data-x]').onclick = () => m.remove();
+    // 🔄 컴시간 켜기 · 끄기 → 시간표 칸을 다시 그림 (저장을 눌러야 수업 방을 준비)
+    const cb = m.querySelector('#sc-comci'); if (cb) cb.onchange = () => run(async () => { await DS.Net.set('sched/comciOn', cb.checked ? true : null); m.remove(); await editor(done); DS.UI.toast(cb.checked ? '🔄 컴시간 시간표를 써요 — 「저장」을 누르면 수업 방을 준비해요' : '컴시간 시간표를 껐어요', 3000); });
     // 수동 칸만 저장: 컴시간과 같으면 수동 기록을 지움 · 컴시간 칸을 비우면 '-'
     m.querySelectorAll('[data-dp]').forEach((s) => (s.onchange = () => { const k = s.dataset.dp, a = auto[k] || ''; if (s.value === a) delete man[k]; else man[k] = s.value || '-'; s.parentNode.classList.toggle('sc-auto', !!a && !(k in man)); }));
     m.querySelector('#sc-save').onclick = () => run(async () => {
