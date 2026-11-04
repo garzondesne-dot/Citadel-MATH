@@ -254,10 +254,10 @@
     theme: '07-volcano', // 던전 테마: 화산 심연 (배경 dg-07 · 포털 portal-07)
     // 🎬 05 모션그래픽 v2 (2026-11-03 교체, 옛 07·08·11~14 는 99 지난판): 26 교환·결합 → c1·m1 · 27 분배 → c2·m2 · 28 간단히 → b1
     //    29 전체집합과 여집합 → c3·m3(문제 3 · 4) · 30 차집합 → c4·b3 · 31 여집합 · 차집합의 성질 → c5·m5·b2
-    videos: { c1: 'assets/video/v05-26.mp4', m1: 'assets/video/v05-26.mp4', c2: 'assets/video/v05-27.mp4', m2: 'assets/video/v05-27.mp4',
-      b1: 'assets/video/v05-28.mp4', c3: 'assets/video/v05-29.mp4', m3: 'assets/video/v05-29.mp4',
-      c4: 'assets/video/v05-30.mp4', b3: 'assets/video/v05-30.mp4',
-      c5: 'assets/video/v05-31.mp4', m5: 'assets/video/v05-31.mp4', b2: 'assets/video/v05-31.mp4' },
+    videos: { c1: 'assets/video/v05-26-v2.mp4', m1: 'assets/video/v05-26-v2.mp4', c2: 'assets/video/v05-27-v2.mp4', m2: 'assets/video/v05-27-v2.mp4',
+      b1: 'assets/video/v05-28-v2.mp4', c3: 'assets/video/v05-29-v2.mp4', m3: 'assets/video/v05-29-v2.mp4',
+      c4: 'assets/video/v05-30-v2.mp4', b3: 'assets/video/v05-30-v2.mp4',
+      c5: 'assets/video/v05-31-v2.mp4', m5: 'assets/video/v05-31-v2.mp4', b2: 'assets/video/v05-31-v2.mp4' },
     goal: '교환·결합·분배법칙을 안다 · 여집합과 차집합을 구한다 · A − B = A ∩ Bᶜ 임을 안다',
     defaultPct: 90,
     steps: STEPS,

@@ -95,7 +95,7 @@ const sprites = [...Object.values(L.monsters).map((m) => m.sprite), L.boss.sprit
 check(new Set(sprites).size === sprites.length, '몬스터 그림 겹치지 않음');
 const sheetOf = { extra: 'monstersExtra', new: 'monstersNew', crown: 'monstersCrown' };
 check(sprites.every((s) => { const [k, n] = String(s).split(':'); const sh = DS.ASSETS[sheetOf[k]]; return sh && Number(n) < sh.rows; }), '몬스터 그림이 시트에 있음');
-check(Object.keys(L.videos).every((k) => L.steps.some((s) => s.id === k) || L.bonus.some((b) => b.id === k)) && Object.values(L.videos).every((u) => /^assets\/video\/v05-\d+\.mp4$/.test(u) && require('fs').existsSync(require('path').join(__dirname, '..', u))), '영상 칸 · 게임 서버 영상 파일 (assets/video)');
+check(Object.keys(L.videos).every((k) => L.steps.some((s) => s.id === k) || L.bonus.some((b) => b.id === k)) && Object.values(L.videos).every((u) => /^assets\/video\/v05-\d+(-v\d+)?\.mp4$/.test(u) && require('fs').existsSync(require('path').join(__dirname, '..', u))), '영상 칸 · 게임 서버 영상 파일 (assets/video)');
 check([...L.steps.filter((s) => s.kind !== 'intro').map((s) => s.id), 'b2'].every((k) => (L.crops[k] || []).length && L.crops[k].every((c) => c.x >= 0 && c.y >= 0 && c.x + c.w <= 1 && c.y + c.h <= 1)), '학습지 칸 위치(crops) 모두 있음');
 
 // ── 2. 첫 시도 = 학습지 · 교사용 정답 ─────────────────────

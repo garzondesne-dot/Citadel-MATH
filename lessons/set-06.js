@@ -237,7 +237,7 @@
       c3: 'assets/video/v06-19.mp4', m3: 'assets/video/v06-19.mp4',
       c4: 'assets/video/v06-20.mp4', m4: 'assets/video/v06-20.mp4', m42: 'assets/video/v06-20.mp4',
       c5: 'assets/video/v06-21.mp4', m5: 'assets/video/v06-21.mp4',
-      c6: 'assets/video/v06-22.mp4', m6: 'assets/video/v06-22.mp4' },
+      c6: 'assets/video/v06-37.mp4', m6: 'assets/video/v06-22.mp4' }, // 2026-11-04: 개념 6 = 37 사각형의 포함관계(꼭짓점 끌기) · 문제 6 = 22 (사각형 명제)
     goal: '드모르간의 법칙을 이용한다 · 여집합 · 차집합의 원소의 개수를 구한다 · 명제와 그 부정의 참 · 거짓을 판별한다 · 사각형의 포함 관계를 「~이면 ~이다」 명제로 판별한다',
     defaultPct: 90,
     steps: STEPS,
