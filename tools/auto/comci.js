@@ -20,12 +20,24 @@ async function get(url) {
   if (!r.ok) throw new Error(`${url} → ${r.status}`);
   return dec(Buffer.from(await r.arrayBuffer()));
 }
-// 학생용 첫 화면에서 자료 주소(경로 번호 · 앞 글자)를 찾는다
+// 2026-11 컴시간 화면 코드가 뒤섞여 있음 (hour-obfuscated-v2): (function(a,k){… 16진 4자리 ^ ((k + n*13) & 255) …})([[0|1, "…"], …], k) → 같은 방법으로 풀어서(실행하지 않음) 글로 붙임
+function unmix(html) {
+  let out = '';
+  const re = /\}\)\((\[\[[\s\S]*?\]\])\s*,\s*(\d+)\s*\)/g; let m;
+  while ((m = re.exec(html))) {
+    let a; try { a = JSON.parse(m[1]); } catch (e) { continue; }
+    const k = Number(m[2]);
+    a.forEach(([plain, b]) => { if (plain) { out += b; return; } for (let j = 0; j < b.length; j += 4) out += String.fromCharCode(parseInt(b.substr(j, 4), 16) ^ ((k + (j / 4) * 13) & 255)); });
+    out += '\n';
+  }
+  return out;
+}
+// 학생용 첫 화면에서 자료 주소(경로 번호 · 앞 글자)를 찾는다 (뒤섞인 코드는 풀어서 함께 찾음)
 async function route() {
-  const html = await get(`${HOST}/st`);
+  const page = await get(`${HOST}/st`), html = page + '\n' + unmix(page);
   const ra = html.match(/school_ra\(sc\)[\s\S]{0,120}?url\s*:\s*'\.?\/?(\d+)\?/);
   const sd = html.match(/sc_data\(\s*'([^']*)'\s*,\s*sc\s*,\s*(\d+)\s*,\s*'?(\d+)'?\s*\)/) || html.match(/sc_data\(\s*'([^']*)'\s*,\s*sc\s*,\s*'?(\d+)'?/);
-  if (!ra || !sd) throw Object.assign(new Error('컴시간 첫 화면에서 자료 주소를 못 찾음 (화면 구조가 바뀐 듯)'), { snip: html.slice(0, 4000) });
+  if (!ra || !sd) { const u = unmix(page), at = Math.max(0, u.search(/school_ra|sc_data|url\s*:/)); throw Object.assign(new Error('컴시간 첫 화면에서 자료 주소를 못 찾음 (화면 구조가 바뀐 듯)'), { snip: (u ? `[풀린 코드 ${u.length}자]\n` + u.slice(Math.max(0, at - 3000), at + 12000) : page.slice(0, 20000)) }); }
   return { path: ra[1], prefix: sd[1], a: sd[2] || '0', b: sd[3] || '1' };
 }
 async function raw(r) {
