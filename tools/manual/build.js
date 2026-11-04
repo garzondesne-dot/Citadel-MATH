@@ -29,7 +29,7 @@ const html = html0.replace(/\{\{FONT:([^}]+)\}\}/g, (m, f) => `data:font/woff2;b
   if (/data-bleed/.test(html0)) { await p.pdf({ path: OUT, format: 'A4', printBackground: true, margin: { top: 0, bottom: 0, left: 0, right: 0 } }); await b.close(); console.log(`✅ ${OUT} (${(fs.statSync(OUT).size / 1048576).toFixed(1)}MB)${missing.length ? ` · ⚠ 그림 없음: ${missing.join(', ')}` : ''}`); return; }
   await p.pdf({ path: OUT, format: 'A4', printBackground: true, margin: { top: '14mm', bottom: '16mm', left: '14mm', right: '14mm' },
     displayHeaderFooter: true, headerTemplate: '<div></div>',
-    footerTemplate: `<div style="width:100%;font-size:8px;color:#8a8f9c;padding:0 14mm;display:flex;justify-content:space-between;font-family:'Noto Sans CJK KR',sans-serif"><span>모두의 던전 : 공통수학2 · 교사용 사용설명서 · v${VERSION}</span><span><span class="pageNumber"></span> / <span class="totalPages"></span></span></div>` });
+    footerTemplate: `<div style="width:100%;font-size:8px;color:#8a8f9c;padding:0 14mm;display:flex;justify-content:space-between;font-family:'Noto Sans CJK KR',sans-serif"><span>${(html0.match(/data-footer="([^"]+)"/) || [])[1] || `모두의 던전 : 공통수학2 · 교사용 사용설명서 · v${VERSION}`}</span><span><span class="pageNumber"></span> / <span class="totalPages"></span></span></div>` });
   await b.close();
   console.log(`✅ ${OUT} (${(fs.statSync(OUT).size / 1048576).toFixed(1)}MB)${missing.length ? ` · ⚠ 그림 없음 ${missing.length}: ${missing.join(', ')}` : ''}`);
 })();
