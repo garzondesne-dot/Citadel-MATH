@@ -88,7 +88,7 @@ DS.Fun = (function () {
     const used = cls ? await N().get(`funUsed/${ck(cls)}`).catch(() => null) : null, stats = kind === 'ox' ? null : await N().get('funStats').catch(() => null);
     const { q, reset } = queue(used, QUEUE, Math.random, stats, pool, k.pre);
     if (cls && reset) await N().update(`funUsed/${ck(cls)}`, Object.fromEntries((pool || Q().map((_, i) => i)).map((i) => [k.pre + i, null]))).catch(() => {}); // 그 종류 질문만 처음부터
-    const f0 = { g: now, kind, at0: now, queue: q, alive: Object.fromEntries(alive.map((u) => [u, true])), outAt: {}, drv: { u: N().uid(), at: now } };
+    const f0 = { g: now, kind, total: alive.length, at0: now, queue: q, alive: Object.fromEntries(alive.map((u) => [u, true])), outAt: {}, drv: { u: N().uid(), at: now } };
     await N().set(P(code, 'fv'), null);
     await N().set(P(code, 'fun'), { ...f0, ...round(f0, 1, now) });
     mark(cls, k.pre + q[0]);
@@ -162,8 +162,10 @@ DS.Fun = (function () {
     const inPlay = show ? [...res.a, ...res.b, ...res.none] : f.phase === 'end' ? (f.win || []) : alive;
     const spect = Object.keys(R.players || {}).filter((u) => !R.players[u].teacher && !inPlay.includes(u) && (R.active || {})[u]);
     const cols = big ? 6 : 4;
-    const fig = (u, x, y, cls = '') => `<div class="fa-h${cls}${u === me ? ' me' : ''}" data-u="${u}" style="left:${x}%;top:${y}%" ${show ? `data-go="${res.a.includes(u) ? 'a' : res.b.includes(u) ? 'b' : 'n'}"` : ''}>${heroOf(R, u)}${big || u === me ? `<b>${esc(u === me ? '나' : nameOf(R, u))}</b>` : ''}</div>`;
-    const plaza = inPlay.map((u, i) => { const s = spot(i, inPlay.length, 34, 66, 50, big ? 5 : 4); return fig(u, s.x, s.y); }).join('');
+    const bib = (u) => String((R.players[u] || {}).num || 0).padStart(2, '0'); // 🔄 반대로: 이름 대신 번호표
+    const fig = (u, x, y, cls = '') => `<div class="fa-h${cls}${u === me ? ' me' : ''}" data-u="${u}" style="left:${x}%;top:${y}%" ${show ? `data-go="${res.a.includes(u) ? 'a' : res.b.includes(u) ? 'b' : 'n'}"` : ''}>${heroOf(R, u)}${(f.kind || 'bal') === 'rev' ? `<b class="bib">${bib(u)}</b>` : big || u === me ? `<b>${esc(u === me ? '나' : nameOf(R, u))}</b>` : ''}</div>`;
+    const py = (f.kind || 'bal') === 'rev' ? 68 : 50; // 🔄 숙소 그림: 바닥이 아래쪽
+    const plaza = inPlay.map((u, i) => { const s = spot(i, inPlay.length, 34, 66, py, big ? 5 : 4); return fig(u, s.x, s.y); }).join('');
     const gal = spect.slice(0, big ? 24 : 10).map((u, i) => `<div class="fa-g${u === me ? ' me' : ''}" style="left:${4 + (i * (92 / Math.max(1, Math.min(spect.length, big ? 24 : 10))))}%">${heroOf(R, u)}</div>`).join('');
     const lose = show ? res.lose : '';
     const kind = f.kind || 'bal', bg = bgOf(kind), spring = kind === 'rev' ? '<i class="fa-spring"></i>' : '';
@@ -172,24 +174,34 @@ DS.Fun = (function () {
       <div class="fa-pit l"></div><div class="fa-pit r"></div>
       <div class="fa-plat a${lose === 'a' ? ' doom' : ''}"${platStyle()}><i class="fa-flag">${kind === 'ox' ? '⭕' : esc(f.q[0])}</i>${show ? `<em class="fa-cnt">${res.a.length}</em>` : ''}${spring}</div>
       <div class="fa-plat b${lose === 'b' ? ' doom' : ''}"${platStyle()}><i class="fa-flag">${kind === 'ox' ? '❌' : esc(f.q[1])}</i>${show ? `<em class="fa-cnt">${res.b.length}</em>` : ''}${spring}</div>
-      <div class="fa-plaza"></div>${plaza}</div>`;
+      <div class="fa-plaza"></div>${plaza}${kind === 'rev' ? board(f) : ''}</div>`;
+  }
+  // 🔄 생존자 전광판 (그림의 아치 위 검은 판) · 안내 방송 자막 (판 시작 때 한 글자씩)
+  function board(f) {
+    const res = f.res || {}, now = Object.keys(f.alive || {}).length, before = f.phase === 'show' ? arr(res.a).length + arr(res.b).length + arr(res.none).length : now;
+    const pad = (n) => String(n).padStart(2, '0');
+    return `<div class="fa-board"><b data-after="${pad(now)}">${pad(before)}</b><span>/${pad(f.total || before)}</span></div><i class="fa-board-l">생존자</i>${f.phase === 'pick' ? `<div class="fa-ann"><i>📢</i><span>${f.n === 1 ? '참가자 여러분, ' : ''}이번 판은… 많은 쪽이 탈락합니다</span></div>` : ''}`;
   }
   // 공개 연출: 광장 → 자기 쪽 발판으로 우르르 → 적은 쪽 무너짐
   function animate(root, f, big) {
-    const res = f.res || {}, cols = big ? 3 : 3;
+    const res = f.res || {}, cols = big ? 3 : 3, rev = f.kind === 'rev';
     const go = { a: res.a, b: res.b };
     setTimeout(() => {
       root.querySelectorAll('.fa-h[data-go]').forEach((h) => {
         const u = h.dataset.u, side = h.dataset.go;
         if (side === 'n') { h.classList.add('fa-lost'); return; }
-        const i = go[side].indexOf(u), s = spot(i, go[side].length, side === 'a' ? 2 : 81, side === 'a' ? 19 : 98, 46, cols); // 발판 위 (그림 v1: 양옆 허공 위 떠 있는 발판)
+        const i = go[side].indexOf(u), s = spot(i, go[side].length, side === 'a' ? 2 : 81, side === 'a' ? 19 : 98, rev ? 50 : 46, cols); // 발판 위 (그림 v1: 양옆 허공 위 떠 있는 발판)
         h.style.left = `${s.x}%`; h.style.top = `${s.y}%`; h.classList.add(side === 'a' ? 'run-l' : 'run-r');
       });
       if (DS.Sound && DS.Sound.card) DS.Sound.card();
     }, 300);
+    if (res.lose && rev) setTimeout(() => { // 🔄 버저 → 전광판 빨갛게 · 숫자 줄어듦 → 띠용
+      if (DS.Sound && DS.Sound.buzz) DS.Sound.buzz();
+      const b = root.querySelector('.fa-board'); if (b) { b.classList.add('hot'); const n = b.querySelector('b'); if (n) setTimeout(() => { n.textContent = n.dataset.after; }, 500); }
+    }, 1900);
     if (res.lose) setTimeout(() => {
       root.querySelectorAll(`.fa-plat.${res.lose}, .fa-h[data-go="${res.lose}"]`).forEach((e) => e.classList.add('fall'));
-      if (DS.Sound && DS.Sound.hit) DS.Sound.hit();
+      if (DS.Sound) (rev && DS.Sound.boing ? DS.Sound.boing() : DS.Sound.hit && DS.Sound.hit());
     }, 2600);
   }
   const head = (f) => (f.phase === 'end' ? `<b>🏆 ${esc(K(f).name)} 끝!</b>`

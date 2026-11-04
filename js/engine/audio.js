@@ -62,6 +62,9 @@ DS.Sound = (function () {
     get muted() { return muted; },
 
     card() { noise({ dur: 0.06, vol: 0.15, freq: 5000 }); },
+    // ⚖ 쉼터 놀이 (v0.9.8.0): 탈락 버저 · 스프링 띠용
+    buzz() { tone({ type: 'square', f0: 150, f1: 140, dur: 0.55, vol: 0.16 }); },
+    boing() { tone({ type: 'sine', f0: 140, f1: 620, dur: 0.18, vol: 0.32 }); tone({ type: 'sine', f0: 620, f1: 260, dur: 0.35, vol: 0.22, delay: 0.18 }); },
     // 검기 베기 + 서브베이스
     slash() {
       noise({ dur: 0.2, vol: 0.5, freq: 7000, sweepTo: 700, q: 0.7 });

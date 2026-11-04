@@ -1591,8 +1591,37 @@ body:has(#test-bar) #ver-tag { bottom: calc(64px + env(safe-area-inset-bottom));
 .k-rev .fa-plat { top: 40%; bottom: 26%; border-radius: 6px; }
 .k-rev .fa-spring { position: absolute; left: 32%; right: 32%; top: 100%; height: 58%; background: repeating-linear-gradient(180deg, #e3e6ee 0 5px, #6b7080 5px 7px, #0000 7px 13px); border-radius: 40%; box-shadow: 0 4px 0 #0006; transform-origin: bottom center; }
 .k-rev .fa-plat.doom { animation: none; }
-.k-rev .fa-plat.fall { transform: none; opacity: 1; animation: faBoing .9s ease-out; }
+.fa-arena.k-rev .fa-plat.fall { transform: none; opacity: 1; animation: faBoing .9s ease-out; }
 .k-rev .fa-plat.fall .fa-spring { animation: faSpring .9s ease-out; }
 @keyframes faBoing { 0% { transform: translateY(0); } 30% { transform: translateY(18%); } 48% { transform: translateY(-22%); } 70% { transform: translateY(6%); } 100% { transform: translateY(0); } }
 @keyframes faSpring { 0% { transform: scaleY(1); } 30% { transform: scaleY(.45); } 48% { transform: scaleY(1.35); } 70% { transform: scaleY(.9); } 100% { transform: scaleY(1); } }
 .k-rev .fa-h.fall { top: -45% !important; opacity: 0; transform: translate(-50%, -50%) rotate(600deg); transition: top 1.2s cubic-bezier(.2, .9, .3, 1) .28s, opacity 1s .7s, transform 1.3s .28s; }
+/* 🔄 숙소 그림 v1 (fun-dorm-v1 · 사용자 생성 · 네온 수학 기호 · 아치 위 검은 판 = 전광판): 발판은 양옆 침대 앞 · 바닥은 아래쪽 */
+.k-rev .fa-plat { top: 50%; bottom: 24%; }
+.k-rev .fa-spring { height: 60%; }
+.fa-h b.bib { display: inline-block; margin-top: 1px; padding: 0 5px; background: #fff; color: #1a1d29; border: 2px solid #1a1d29; border-radius: 3px; font: 800 12px var(--pixel, monospace); text-shadow: none; }
+.fa-wrap.big .fa-h b.bib { font-size: 17px; padding: 0 7px; }
+.fa-h.me b.bib { background: #ffe27a; }
+.fa-board { position: absolute; left: 46.6%; width: 6.8%; top: 29.3%; height: 2.9%; display: flex; align-items: center; justify-content: center; gap: 3%; font: 800 1.2vw var(--pixel, monospace); color: #7dffb0; text-shadow: 0 0 6px #2fff8a; white-space: nowrap; z-index: 2; }
+.fa-wrap:not(.big) .fa-board { font-size: 7px; }
+.fa-board span { font-size: .6em; color: #b8ffd6; }
+.fa-board b { font-size: 1.25em; }
+.fa-board.hot { color: #ff6b6b; text-shadow: 0 0 8px #ff2f2f; animation: faHot .25s 3; }
+.fa-board.hot span { color: #ffb3b3; }
+@keyframes faHot { 50% { opacity: .3; } }
+.fa-ann { position: absolute; left: 50%; top: 40%; transform: translateX(-50%); z-index: 4; display: flex; gap: 6px; align-items: center; background: #0b0f1ccc; border: 2px solid #7dffb0; border-radius: 8px; padding: 4px 12px; color: #fff; font-weight: 800; font-size: 12px; white-space: nowrap; animation: faAnnOut .6s 3.4s forwards; }
+.fa-wrap.big .fa-ann { font-size: 26px; padding: 8px 22px; }
+.fa-ann span { display: inline-block; overflow: hidden; max-width: 0; animation: faType 1.8s steps(24, end) .2s forwards; }
+@keyframes faType { to { max-width: 40em; } }
+@keyframes faAnnOut { to { opacity: 0; visibility: hidden; } }
+/* 🔄 숙소 v1 다듬기: 무대 너비 기준 글자(cqw) · 번호표는 용사 밑 · 발판 = 철제 판(침대가 비치게) + 긴 스프링 */
+.fa-arena { container-type: inline-size; }
+.fa-board { font-size: 1.7cqw !important; gap: 0; }
+.fa-board b { font-size: 1em; } .fa-board span { font-size: .75em; }
+.fa-board-l { position: absolute; left: 46.6%; width: 6.8%; top: 26.6%; text-align: center; font-style: normal; font-size: 1cqw; font-weight: 800; color: #b8ffd6; z-index: 2; }
+.fa-h b.bib { display: block; width: max-content; margin: 1px auto 0; }
+.fa-arena.k-rev .fa-plat { top: 54%; bottom: 30%; background: repeating-linear-gradient(90deg, #d7dce8 0 10px, #aeb6c8 10px 12px) !important; border: 3px solid #2a2f3d; border-top-width: 6px; box-shadow: 0 6px 0 #0007 !important; }
+.fa-arena.k-rev .fa-plat.a { border-top-color: #2f6bff; } .fa-arena.k-rev .fa-plat.b { border-top-color: #ff8a00; }
+.k-rev .fa-spring { height: 133%; left: 36%; right: 36%; background: repeating-linear-gradient(180deg, #f1f3f8 0 6px, #59607a 6px 8px, #0000 8px 16px); }
+.k-rev .fa-cnt { bottom: auto; top: 50%; transform: translate(-50%, -50%); color: #1a1d29; text-shadow: 0 2px 0 #fff; }
+.fa-arena.k-rev .fa-flag { top: auto; bottom: 104%; }
