@@ -82,7 +82,9 @@ function week(d) {
     ids = withMath;
   }
   let best = null;
-  for (const [key, tab] of tables) for (const mode of ['tf', 'sf']) {
+  // 읽는 방향: 교사 번호 · 과목 번호가 둘 다 목록 안에 드는 칸이 더 많은 쪽 (2026-11-04 실제 자료: 과목*1000+교사 = 480/480칸 유효)
+  const validOf = (tab, mode) => { let v = 0; tab.forEach((g) => Array.isArray(g) && g.forEach((cl) => Array.isArray(cl) && cl.forEach((day, dw) => Array.isArray(day) && dw >= 1 && day.forEach((c, p) => { const x = typeof c === 'number' ? c : Number(String(c).replace(/\D/g, '')); if (p < 1 || !x) return; const r = split(x, sep, mode); if (r.t > 0 && T[r.t] !== undefined && Sb[r.s] !== undefined) v++; })))); return v; };
+  for (const [key, tab] of tables) for (const mode of [validOf(tab, 'sf') >= validOf(tab, 'tf') ? 'sf' : 'tf']) {
     const out = {}; let n = 0;
     tab.forEach((g, grade) => Array.isArray(g) && g.forEach((cl, c) => Array.isArray(cl) && cl.forEach((day, dw) => Array.isArray(day) && day.forEach((code, p) => {
       code = typeof code === 'number' ? code : typeof code === 'string' ? Number(code.replace(/\D/g, '')) : NaN; // ">74032" = 이번 주 바뀐 칸
