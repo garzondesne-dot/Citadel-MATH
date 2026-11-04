@@ -52,7 +52,7 @@ DS.ASSETS = {
   // 던전 테마 10종: 던전 안 전투 배경(dg-) + 같은 번호의 포털(portal-, 2열: 활성 / 봉쇄). 차시 파일의 theme 으로 고른다
   dungeons: { ids: ['01-burrow', '02-deep-forest', '03-dimensional', '04-mine', '05-ruins', '06-frost', '07-volcano', '08-crypt', '09-underwater', '10-sky'],
     names: ['땅굴', '깊은 숲 성역', '차원 균열 지대', '폐광 갱도', '고대 유적 심장부', '빙결 동굴', '화산 심연', '망자의 지하 묘실', '수중 신전', '천공 성소'],
-    bg: (id) => ({ '03-dimensional': 'dg-03-dimensional-v2.webp' })[id] || `dg-${id}-v1.webp`, portal:  // v2 도트 배경이 온 테마만 바꿔 씀 (2026-11-03: 03 차원 균열)
+    bg: (id) => ({ '03-dimensional': 'dg-03-dimensional-v2.webp', '04-mine': 'dg-04-mine-v2.webp' })[id] || `dg-${id}-v1.webp`, portal:  // v2 도트 배경이 온 테마만 바꿔 씀 (2026-11-03: 03 차원 균열)
        (id) => `portal-${id}-v1.webp` },
   // 특수 차원문 3종 (투명 배경 · 400×600): 보강던전(파랑) · 중단원던전(보라) · 대단원던전(빨강). 원본 무손실은 assets/img/dportal-*-v1.png
   // 메달 (v0.9.1 · 사용자 제공 · 5열 × 2행): rank = 업적 · 성장 10종, dungeon = 던전 테마 01~10 정복
