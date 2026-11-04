@@ -49,6 +49,10 @@ DS.ASSETS = {
   monstersRiftBoss: { src: 'monsters-riftboss-v2.webp', cols: 3, rows: 1, poses: { idle: 0, attack: 1, down: 2 }, names: ['균열의 감시자'] },
   // 8차시 🪞 거울 수정 광산 (2026-11-04 · 사용자 생성 · 칸 192 · 보스 384 · tools/sprite/cut_grid.py): 'mirror:번호' · 보스 'mirrorboss:0'
   monstersMirror: { src: 'monsters-mirror-v2.webp', cols: 3, rows: 5, poses: { idle: 0, attack: 1, down: 2 }, names: ['거울 박쥐', '반사 골렘', '뒤집힌 거미', '수정 광부 유령', '반쪽 슬라임'] },
+  // 🏰 성채던전 (2026-11-05 · 사용자 생성 · 칸 192 · 보스 384): 'castle1:번호' (1층) · 'castle2:번호' (2층) · 보스 'castleboss:0' 성주 · 'castleboss:1' 군주
+  monstersCastle1: { src: 'monsters-castle1-v1.webp', cols: 3, rows: 5, poses: { idle: 0, attack: 1, down: 2 }, names: ['집합 방패 기사', '원소 촛대 정령', '포함 가고일', '벤 다이어그램 미믹 상자', '공집합 갑옷 유령'] },
+  monstersCastle2: { src: 'monsters-castle2-v1.webp', cols: 3, rows: 5, poses: { idle: 0, attack: 1, down: 2 }, names: ['참 · 거짓 쌍두 까마귀', '화살표 뱀', '대우 거울 기사', '저울 골렘', '증명 두루마리'] },
+  monstersCastleBoss: { src: 'monsters-castleboss-v1.webp', cols: 3, rows: 2, poses: { idle: 0, attack: 1, down: 2 }, names: ['집합의 성주', '대단원의 군주'] },
   monstersMirrorBoss: { src: 'monsters-mirrorboss-v2.webp', cols: 3, rows: 1, poses: { idle: 0, attack: 1, down: 2 }, names: ['대우의 거울 마왕'] },
   monstersCrown: { src: 'monsters-crown-v1.webp', cols: 3, rows: 10, poses: { idle: 0, attack: 1, down: 2 },
     names: ['에메랄드 왕관 슬라임', '루비 박쥐', '사파이어 뿔벌레', '자수정 뼈뱀', '버섯 전사', '자수정 눈알 문어', '이끼 골렘', '서리 왕관 늑대', '덩굴 미믹', '청록 수정룡'] },

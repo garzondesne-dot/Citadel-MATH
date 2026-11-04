@@ -1721,3 +1721,4 @@ input.sv-no { width: 64px !important; display: inline-block; padding: 2px 4px; }
 .fc-tile .fc-cardname.fm.long { font-size: clamp(9px, 2.4vw, 11px); }
 .fc-tile.mini .fc-cardname.fm.long { font-size: 8px; white-space: nowrap; letter-spacing: -.3px; }
 .fc-tile.mini .fc-cardname.fm.xl { white-space: normal; font-size: 8px; }
+.cs-bossroom .enc-mon .art.monster { transform: scale(1.4); transform-origin: 50% 100%; } /* 👑 성채 보스 크게 */
