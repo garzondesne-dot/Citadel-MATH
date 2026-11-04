@@ -114,7 +114,7 @@ DS.Bonus = (function () {
       if (!document.body.contains(el)) { clearInterval(gTimer); return; }
       const now = Date.now(), dt = Math.min(1, (now - gLast) / 1000); gLast = now;
       const g = el.querySelector('.atk-gauge'); if (!g || document.hidden || document.querySelector('.sheet-modal, .video-modal')) return;
-      const [per, lock] = (window.DS_ATK || DS.Raid.ATK).monster;
+      const { per, lock } = DS.Raid.soloAtk(window.DS_ATK || null); // 45초마다 1초 멈춤 (2026-11-04 버그 고침)
       gT += dt; const p = Math.min(1, gT / per), bar = g.querySelector('i');
       bar.style.width = `${(p * 100).toFixed(1)}%`; g.classList.toggle('hot', p > 0.8);
       if (gT < per) return;

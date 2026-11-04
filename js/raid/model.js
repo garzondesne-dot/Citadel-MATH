@@ -164,6 +164,9 @@ DS.Raid = (function () {
   // 2026-11-03 수업 뒤 변경: 체력이 많을 때 빠르게 → 닳을수록 느리게 (폰만 보고 서두르는 학생이 펜을 들게, 끝까지 푸는 학생은 여유 있게)
   //   [가득일 때 주기, 거의 0 일 때 주기, 잠금 초] · 주기 = 빠름 + (느림 − 빠름) × (1 − 남은 체력 비율)
   const ATK = { monster: [20, 45, 1], boss: [30, 60, 2] }, BIND_PER = 1, BIND_MAX = 4;
+  // 🟪 혼자 하는 중단원던전 공격 (2026-11-04 버그 고침): 레이드 값 [가장 빠름, 가장 느림, 멈춤] 중 「가장 느림마다 멈춤」 = 45초마다 1초
+  //   (0.9.6.6 에서 ATK 가 세 칸이 된 뒤 중단원던전이 앞 두 칸을 [간격, 멈춤]으로 읽어 「20초마다 45초 멈춤」이 되던 것)
+  const soloAtk = (cfg) => { const a = (cfg || ATK).monster; return a.length >= 3 ? { per: a[1], lock: a[2] } : { per: a[0], lock: a[1] }; };
   function bindOf(L, R, mid, uid) {
     const r = record(L, R, mid, uid); if (!r.perfect) return 0;
     return Math.min(BIND_MAX, r.tries.slice(r.perfectAt + 1).reduce((a, t) => a + t.correct, 0) * BIND_PER);
@@ -190,5 +193,5 @@ DS.Raid = (function () {
     if (p >= 1) { memo.start += c.per; return { p: 0, strike: true }; }
     return { p, strike: false };
   }
-  return { ATK, BIND_PER, BIND_MAX, bindOf, bindTotal, atkClock, atkTrack, RETRIES, HEAL_MAX, healsOf, healsGiven, healsTo, healsReceived, healTarget, LIVE_MS, lateIds, liveOpen, roomDone, inClass, activeIds, teacherUid, num, newRoom, stepOf, isLobby, isEnd, isFinale, isClosed, focusOn, restOn, sheetOn, videoOn, autoFocus, fullMarks, canLobby, online, seedOf, itemsFor, attemptsOf, gradeAttempt, record, resultLabel, headcount, pctOf, monsterHp, waiting, allSubmitted, cleared, mastery, bossHp, helpList };
+  return { ATK, soloAtk, BIND_PER, BIND_MAX, bindOf, bindTotal, atkClock, atkTrack, RETRIES, HEAL_MAX, healsOf, healsGiven, healsTo, healsReceived, healTarget, LIVE_MS, lateIds, liveOpen, roomDone, inClass, activeIds, teacherUid, num, newRoom, stepOf, isLobby, isEnd, isFinale, isClosed, focusOn, restOn, sheetOn, videoOn, autoFocus, fullMarks, canLobby, online, seedOf, itemsFor, attemptsOf, gradeAttempt, record, resultLabel, headcount, pctOf, monsterHp, waiting, allSubmitted, cleared, mastery, bossHp, helpList };
 })();

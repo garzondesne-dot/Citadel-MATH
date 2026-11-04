@@ -178,4 +178,7 @@ check(X.online(R2, 'a') && !X.online(R2, 'b'), '접속 표시');
   Q.state.step = -1; check(X.atkClock(L, Q, 70000) === null, '대기실에서는 공격 없음');
 }
 if (fail) { console.error(`\n${fail}건 실패`); process.exit(1); }
+// 🟪 중단원던전 공격 = 45초마다 1초 멈춤 (2026-11-04: 「20초마다 45초 멈춤」 버그 다시 나오지 않게)
+{ const sa = X.soloAtk(); if (!(sa.per === 45 && sa.lock === 1)) { console.error('FAIL: 중단원던전 공격', sa); process.exit(1); }
+  const old2 = X.soloAtk({ monster: [30, 2] }); if (!(old2.per === 30 && old2.lock === 2)) { console.error('FAIL: 두 칸 설정', old2); process.exit(1); } }
 console.log('OK: 레이드 — 체력·기준%·데미지(늘어난 만큼)·재도전 3번·체력 0 즉시 격파·미제출 제외·보스 즉시 승리·7번 보너스·도움 목록·마무리·집중모드·🏕 쉼터·만점 · 💚 힐 통과');
