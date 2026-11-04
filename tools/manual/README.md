@@ -11,3 +11,13 @@ mkdir -p $S/x && node tools/manual/cap-login.js $S/x
 node tools/manual/build.js $S 모두의던전_교사용_사용설명서.pdf
 ```
 - 그림은 폭 1300px · JPEG 82 로 줄이고 너무 긴 세로 화면은 위쪽만(가로 × 2.3). 기능이 바뀌면 시험을 다시 돌려 그대로 다시 만든다.
+
+## 📣 홍보 팸플릿 (A4 2쪽 · `pamphlet.html`)
+```
+python3 -c "from PIL import Image; S='/tmp/manual-shots'; Image.open(S+'/e45/1-hint.png').crop((0,440,390,790)).save(S+'/x/hint-crop.png'); Image.open(S+'/e49/4-mail.png').crop((0,120,390,470)).save(S+'/x/mail-crop.png')"
+node tools/manual/build.js /tmp/manual-shots 모두의던전_홍보팸플릿.pdf pamphlet.html
+```
+- 꽉 찬 배경(`data-bleed`) · 글꼴 Galmuri(저장소) · 마지막 QR = 게임 주소 (`{{SCRIPT:js/engine/qrcode.min.js}}`)
+
+## 드라이브
+「학습지 > 공통수학2 > 07 안내·홍보」(id `1wzEDaDLFkYuZz8kLXJhSN4kU7s7-ecA1`) · `node tools/auto/gdrive.js up <pdf> <폴더 id> <이름>` (같은 이름이면 새 판으로 덮어씀 · 링크 유지)

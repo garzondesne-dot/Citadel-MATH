@@ -3,9 +3,9 @@
 //   node tools/manual/build.js <스크린샷 폴더> <출력.pdf>      (그림 태그: <img data-s="e11/01-teacher.png">)
 const fs = require('fs'), path = require('path');
 const { chromium } = require('playwright');
-const [SHOTS, OUT] = process.argv.slice(2);
+const [SHOTS, OUT, SRC] = process.argv.slice(2); // SRC: 원고 html (기본 manual.html · 팸플릿 = pamphlet.html)
 if (!SHOTS || !OUT) { console.error('쓰는 법: node tools/manual/build.js <스크린샷 폴더> <출력.pdf>'); process.exit(1); }
-const html0 = fs.readFileSync(path.join(__dirname, 'manual.html'), 'utf8');
+const html0 = fs.readFileSync(path.join(__dirname, SRC || 'manual.html'), 'utf8');
 const root = path.join(__dirname, '..', '..');
 const VERSION = (fs.readFileSync(path.join(root, 'js/config.js'), 'utf8').match(/VERSION = 'citadel-([^']+)'/) || [])[1] || '';
 const missing = [];
@@ -18,7 +18,7 @@ const shrink = (f) => {
   return r === 'ok' ? out : f;
 };
 const uri = (f0) => { const f = /\.(png|jpe?g)$/i.test(f0) ? shrink(f0) : f0; const ext = path.extname(f).slice(1).replace('jpg', 'jpeg'); return `data:image/${ext};base64,${fs.readFileSync(f).toString('base64')}`; };
-const html = html0.replace(/\{\{VERSION\}\}/g, VERSION).replace(/data-s="([^"]+)"/g, (m, rel) => {
+const html = html0.replace(/\{\{FONT:([^}]+)\}\}/g, (m, f) => `data:font/woff2;base64,${fs.readFileSync(path.join(root, f)).toString('base64')}`).replace(/\{\{SCRIPT:([^}]+)\}\}/g, (m, f) => fs.readFileSync(path.join(root, f), 'utf8')).replace(/\{\{VERSION\}\}/g, VERSION).replace(/data-s="([^"]+)"/g, (m, rel) => {
   const f = rel.startsWith('repo:') ? path.join(root, rel.slice(5)) : path.join(SHOTS, rel);
   if (!fs.existsSync(f)) { missing.push(rel); return 'src="" data-missing="1"'; }
   return `src="${uri(f)}"`;
@@ -26,6 +26,7 @@ const html = html0.replace(/\{\{VERSION\}\}/g, VERSION).replace(/data-s="([^"]+)
 (async () => {
   const b = await chromium.launch(); const p = await b.newPage();
   await p.setContent(html, { waitUntil: 'networkidle' }); await p.waitForTimeout(500);
+  if (/data-bleed/.test(html0)) { await p.pdf({ path: OUT, format: 'A4', printBackground: true, margin: { top: 0, bottom: 0, left: 0, right: 0 } }); await b.close(); console.log(`✅ ${OUT} (${(fs.statSync(OUT).size / 1048576).toFixed(1)}MB)${missing.length ? ` · ⚠ 그림 없음: ${missing.join(', ')}` : ''}`); return; }
   await p.pdf({ path: OUT, format: 'A4', printBackground: true, margin: { top: '14mm', bottom: '16mm', left: '14mm', right: '14mm' },
     displayHeaderFooter: true, headerTemplate: '<div></div>',
     footerTemplate: `<div style="width:100%;font-size:8px;color:#8a8f9c;padding:0 14mm;display:flex;justify-content:space-between;font-family:'Noto Sans CJK KR',sans-serif"><span>모두의 던전 : 공통수학2 · 교사용 사용설명서 · v${VERSION}</span><span><span class="pageNumber"></span> / <span class="totalPages"></span></span></div>` });

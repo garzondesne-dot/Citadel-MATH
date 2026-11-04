@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ko" data-bleed><head><meta charset="utf-8"><title>모두의 던전 홍보 팸플릿</title>
+<style>
+  @font-face { font-family: 'Galmuri'; src: url('{{FONT:assets/fonts/Galmuri11-Bold.woff2}}') format('woff2'); font-weight: 700; }
+  @font-face { font-family: 'Galmuri'; src: url('{{FONT:assets/fonts/Galmuri11.woff2}}') format('woff2'); font-weight: 400; }
+  @page { size: A4; margin: 0; }
+  :root { --gold: #f3c35b; --gold2: #b8862b; --ink: #eef2ff; --sub: #aab5d8; --a: #4f86ff; --b: #ff9a2e; --c: #ff4f94; --ok: #2fd58f; --pur: #a87bff; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: 'Noto Sans CJK KR', sans-serif; color: var(--ink); -webkit-print-color-adjust: exact; }
+  .pg { width: 210mm; height: 297mm; position: relative; overflow: hidden; page-break-after: always;
+    background: radial-gradient(120mm 90mm at 80% 8%, #3a2f8f66, transparent 70%), radial-gradient(140mm 120mm at 10% 95%, #0f6b6b55, transparent 70%), linear-gradient(#0c1024, #141b3c 55%, #0b0f22); }
+  .stars { position: absolute; inset: 0; background-image: radial-gradient(1px 1px at 12% 18%, #fff9, transparent), radial-gradient(1px 1px at 34% 9%, #fff7, transparent), radial-gradient(1.5px 1.5px at 72% 22%, #fff9, transparent), radial-gradient(1px 1px at 88% 40%, #fff6, transparent), radial-gradient(1px 1px at 55% 14%, #fff8, transparent), radial-gradient(1px 1px at 20% 42%, #fff5, transparent), radial-gradient(1.5px 1.5px at 93% 8%, #fffa, transparent); }
+  .pix { font-family: 'Galmuri', 'Noto Sans CJK KR', sans-serif; }
+  .gold { color: var(--gold); }
+  .frame { border: 2.2mm solid transparent; border-image: linear-gradient(135deg, #ffe29a, #b8862b 40%, #ffe29a 60%, #8a5f16) 1; box-shadow: 0 3mm 8mm #0009; }
+  img { display: block; }
+  /* 1쪽 */
+  .top { position: absolute; left: 0; right: 0; top: 14mm; text-align: center; }
+  .top .logo { width: 128mm; margin: 0 auto; image-rendering: pixelated; filter: drop-shadow(0 2mm 3mm #000a); }
+  .tag { margin-top: 5mm; font-size: 27pt; letter-spacing: .5mm; text-shadow: 0 1mm 0 #000; }
+  .tag b { color: var(--gold); }
+  .subt { margin-top: 2mm; font-size: 11.5pt; color: var(--sub); }
+  .hero { position: absolute; left: 14mm; right: 14mm; top: 112mm; }
+  .hero .big { width: 158mm; }
+  .hero .phone { position: absolute; right: 0; top: 18mm; width: 44mm; border-radius: 4mm; border: 1.6mm solid #e8ecf8; box-shadow: 0 3mm 10mm #000c; }
+  .hero .bubble { position: absolute; left: -2mm; top: -6mm; background: var(--c); color: #fff; font-size: 10.5pt; padding: 1.2mm 4mm; border-radius: 3mm; font-weight: 800; box-shadow: 0 1mm 0 #0007; }
+  .hero .bubble2 { left: auto; right: 4mm; top: 8mm; background: var(--ok); }
+  .three { position: absolute; left: 14mm; right: 14mm; top: 214mm; display: flex; gap: 4mm; }
+  .three > div { flex: 1; background: #ffffff0f; border: 1px solid #ffffff2a; border-radius: 4mm; padding: 4mm; }
+  .three .ic { font-size: 19pt; } .three b { display: block; font-size: 12.5pt; margin: 1mm 0 1mm; color: #fff; } .three p { margin: 0; font-size: 9.3pt; color: var(--sub); line-height: 1.5; }
+  .flow { position: absolute; left: 14mm; right: 14mm; bottom: 14mm; display: flex; align-items: stretch; gap: 0; border-radius: 4mm; overflow: hidden; box-shadow: 0 2mm 6mm #0008; }
+  .flow > div { flex: 1; padding: 3mm 3.5mm; font-size: 9pt; line-height: 1.45; color: #fff; }
+  .flow b { display: block; font-size: 11pt; margin-bottom: .6mm; }
+  /* 2쪽 */
+  .pg2 { padding: 11mm 14mm 0; } .pg2 > * { position: relative; }
+  .h2 { margin-bottom: 4mm; font-size: 20pt; text-shadow: 0 1mm 0 #000; }
+  .h2 small { display: block; font-family: 'Noto Sans CJK KR'; font-size: 10pt; color: var(--sub); margin-top: 1mm; letter-spacing: 0; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5mm; }
+  .card { background: #ffffff0d; border: 1px solid #ffffff26; border-radius: 4mm; overflow: hidden; }
+  .card .shot { height: 33mm; overflow: hidden; background: #000; }
+  .card .shot img { width: 100%; height: 100%; object-fit: cover; object-position: top; }
+  .card .tx { padding: 3mm 4mm 3.5mm; }
+  .card .no { display: inline-block; font-size: 9pt; font-weight: 800; color: #0b0f22; background: var(--gold); border-radius: 2mm; padding: 0 2mm; margin-right: 2mm; }
+  .card b { font-size: 12pt; } .card p { margin: 1.2mm 0 0; font-size: 9pt; color: var(--sub); line-height: 1.5; }
+  .duo { margin-top: 5mm; display: flex; gap: 5mm; }
+  .duo > div { flex: 1; border-radius: 4mm; padding: 4mm 5mm; }
+  .duo .t { background: linear-gradient(135deg, #1d3b8a, #16244f); border: 1px solid #4f86ff66; }
+  .duo .s { background: linear-gradient(135deg, #5a1d6e, #2a1640); border: 1px solid #a87bff66; }
+  .duo h3 { margin: 0 0 2mm; font-size: 13pt; }
+  .duo ul { margin: 0; padding-left: 0; list-style: none; font-size: 9.4pt; line-height: 1.55; }
+  .duo li { margin: 1.3mm 0; padding-left: 5.5mm; position: relative; } .duo li::before { content: '◆'; position: absolute; left: 0; color: var(--gold); font-size: 8pt; top: .6mm; }
+  .duo li b { color: #fff; }
+  .dash { margin-top: 5mm; display: flex; gap: 5mm; align-items: center; }
+  .dash .img { flex: 1.5; height: 33mm; overflow: hidden; border-radius: 3mm; }
+  .dash .img img { width: 100%; height: 100%; object-fit: cover; object-position: 0 32%; }
+  .dash .cap { flex: 1; font-size: 9.2pt; color: var(--sub); line-height: 1.55; }
+  .dash .cap b { color: #fff; font-size: 11pt; display: block; margin-bottom: 1mm; }
+  .foot { position: absolute; left: 14mm; right: 14mm; bottom: 9mm; display: flex; align-items: center; gap: 5mm; border-top: 1px solid #ffffff30; padding-top: 4mm; }
+  .foot .qr { width: 22mm; height: 22mm; background: #fff; padding: 1.5mm; border-radius: 2mm; flex: none; }
+  .foot .qr img, .foot .qr canvas { width: 100% !important; height: 100% !important; }
+  .foot .t { font-size: 9.3pt; color: var(--sub); line-height: 1.55; } .foot .t b { color: #fff; font-size: 12pt; }
+  .chip { display: inline-block; width: 3.2mm; height: 3.2mm; border-radius: .6mm; vertical-align: -.4mm; margin: 0 .5mm; }
+</style></head><body>
+
+<!-- 1쪽 -->
+<div class="pg"><div class="stars"></div>
+  <div class="top">
+    <img class="logo" data-s="repo:assets/art/menu-logo-v1.webp" alt="모두의 던전 : 공통수학2">
+    <div class="tag pix">학습지가 <b>던전</b>이 된다.</div>
+    <div class="subt">반 전체가 한 팀이 되어 수학 몬스터를 쓰러뜨리는 · 공통수학2 「집합과 명제」 수업 게임</div>
+  </div>
+  <div class="hero">
+    <img class="big frame" data-s="e29/6-hall-m1.png" alt="">
+    <img class="phone" data-s="e29/5-phone-m1.png" alt="">
+    <span class="bubble pix">교실 TV = 반 전체 레이드</span>
+    <span class="bubble bubble2 pix">학생 폰 = 문제 풀어 공격!</span>
+  </div>
+  <div class="three">
+    <div><div class="ic">⚔</div><b class="pix">문제 = 몬스터</b><p>학습지 ★ 문제가 그대로 몬스터. 맞힌 소문제 수만큼 반 전체의 공동 체력을 깎습니다.</p></div>
+    <div><div class="ic">🔁</div><b class="pix">틀려도 벌은 없다</b><p>틀리면 숫자만 바뀐 문제로 재도전. 고친 문제에 경험치를 더 줘서 「다시 해 보기」가 습관이 됩니다.</p></div>
+    <div><div class="ic">📱</div><b class="pix">설치 없이 바로</b><p>학생 폰 · 교사 폰(리모컨) · 교실 PC(종합상황실)만 있으면 웹으로 바로 시작합니다.</p></div>
+  </div>
+  <div class="flow">
+    <div style="background:#2f56d6"><b class="pix">① 수업 전</b>시간표대로 던전이 저절로 열림</div>
+    <div style="background:#7b4fe0"><b class="pix">② 수업 중</b>개념 → 문제 레이드 → 👑 형성평가 보스</div>
+    <div style="background:#13a874"><b class="pix">③ 쉬는 시간</b>반 전체 놀이 · 밸런스 · 수학 OX</div>
+    <div style="background:#d93a7a"><b class="pix">④ 수업 뒤</b>📕 오답노트 · 🟪 못 푼 문제 보충</div>
+  </div>
+</div>
+
+<!-- 2쪽 -->
+<div class="pg pg2"><div class="stars" style="position:absolute"></div>
+  <div class="h2 pix gold">한 시간의 수업이 이렇게 바뀝니다<small>모든 화면은 실제 게임 화면입니다 (가상 학생으로 촬영)</small></div>
+  <div class="grid">
+    <div class="card"><div class="shot"><img data-s="e11/04-hall-boss.png"></div><div class="tx"><span class="no">레이드</span><b>함께 쓰러뜨리는 몬스터 · 보스</b><p>공동 체력 · 친구 힐 💚 · 몬스터 묶기. 정답 글자는 TV에 띄우지 않고 공격 연출만 보여 주어 틀려도 부끄럽지 않습니다.</p></div></div>
+    <div class="card"><div class="shot"><img data-s="e50/2-rev-boing.png"></div><div class="tx"><span class="no">쉼터</span><b>쉬는 시간 5분, 반 전체 놀이</b><p>⚖ 밸런스(적은 쪽 탈락) · 🔄 반대로(많은 쪽 탈락) · ⭕ 수학 OX(지난 차시 복습). 18명이 한 화면에서 심리전!</p></div></div>
+    <div class="card"><div class="shot"><img data-s="x/hint-crop.png" style="object-position:center"></div><div class="tx"><span class="no">힌트</span><b>💡 그 문제 숫자로 그려 주는 벤 다이어그램</b><p>재도전으로 숫자가 바뀌면 그림도 바뀝니다. 답 영역은 칠하지 않아 스스로 찾게 합니다.</p></div></div>
+    <div class="card"><div class="shot"><img data-s="x/mail-crop.png" style="object-position:center"></div><div class="tx"><span class="no">오답노트</span><b>못 푼 문제는 밖에서도 보이게</b><p><span class="chip" style="background:#d93a3a"></span>틀림 <span class="chip" style="background:#fff;border:1px dashed #999"></span>안 풂이 깜빡이고, 캠프 빨간 숫자를 0으로 만들면 <span class="chip" style="background:#8b5cf6"></span>보충 완료.</p></div></div>
+  </div>
+  <div class="duo">
+    <div class="t"><h3 class="pix">👩‍🏫 선생님은 편해지고</h3><ul>
+      <li><b>시간표 · 컴시간 연동</b> — 그 교시에 수업이 저절로 열림</li>
+      <li><b>출석부 · 수업 일지 자동</b> — 입장 시각으로 출석 · 지각</li>
+      <li><b>폰 하나로 진행</b> — 단계 넘기기 · 집중모드 · 영상</li>
+      <li><b>먼저 나간 학생도</b> 기록이 남고, 📥 한 번에 되살리기</li></ul></div>
+    <div class="s"><h3 class="pix">🧑‍🎓 학생은 다시 도전하고</h3><ul>
+      <li><b>내 폰으로 내가 푼다</b> — 반 전체 속에서 내 몫이 보임</li>
+      <li><b>재도전 · 보충에 더 큰 보상</b> — 실패가 끝이 아님</li>
+      <li><b>EXP · 칭호 · 용사 · 이펙트</b> — 꾸미기로만, 성적과 무관</li>
+      <li><b>혼자서도</b> 중단원던전 · 허수아비로 기말 대비</li></ul></div>
+  </div>
+  <div class="dash">
+    <div class="img frame"><img data-s="e31/d-table.png"></div>
+    <div class="cap"><b class="pix gold">📊 학급 대시보드</b>문제마다 · 학생마다 · 개념마다. 첫 시도 정답률, 재도전으로 고친 수, 자주 하는 실수(오개념), 남은 문제, 세특 메모 초안까지 교사에게만 보여 줍니다.</div>
+  </div>
+  <div class="foot">
+    <div class="qr" id="qr"></div>
+    <div class="t"><b class="pix">모두의 던전 : 공통수학2</b><br>특성화고 1학년 공통수학2 · 집합 단원(2~6차시 · 중단원 마무리) 수록 · 명제 단원 준비 중<br>QR 로 바로 체험해 보세요 (첫 화면 → 학생 → 「체험판」) · 제작 김찬우 · v{{VERSION}}</div>
+  </div>
+</div>
+<script>{{SCRIPT:js/engine/qrcode.min.js}}</script>
+<script>new QRCode(document.getElementById('qr'), { text: 'https://garzondesne-dot.github.io/Citadel-MATH/', width: 256, height: 256, correctLevel: QRCode.CorrectLevel.M });</script>
+</body></html>

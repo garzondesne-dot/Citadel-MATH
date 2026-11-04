@@ -140,6 +140,7 @@
 | ├ 04 수업PPT | `1JRrjbcpNYVXgBdJQjOFFCbkt-bJiCa7R` | (0n차시) 수업PPT · 학습지PPT |
 | ├ 05 모션그래픽 | `1wCaC9DlV8rofxd6uNYWdkIrRKrBAaBsT` | 개념 영상 mp4 (게임 `videos` 링크, 링크 공유) |
 | ├ 06 교과서·원본 | `1B8Jr77T_y_yi4KIp4TVbX1zKdun3cJfn` | 미래엔 교과서 hwpx · 공통수학2(3차시) hwpx/pdf |
+| ├ 07 안내·홍보 | `1wzEDaDLFkYuZz8kLXJhSN4kU7s7-ecA1` | 교사용 사용설명서 · 홍보 팸플릿 PDF (`tools/manual`, 2026-11-04) |
 | └ 99 지난판 | `1WZJ1FO-Kbql1jBjEWmrlvMM0j8KHdx0F` | 시안 · v1 · v2 · 옛 중단원/대단원평가 |
 | 항만물류고 수업지 | `1XYc2BynMfM533fWRLianNZxohR5q5xTt` | 예전 학교 고1 수업지 hwp · pdf |
 | 3학년 실용수학 · 퀴즈 | — | 그대로 |

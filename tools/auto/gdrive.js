@@ -3,6 +3,7 @@
 // node tools/auto/gdrive.js down <파일 id> <저장 경로>
 // node tools/auto/gdrive.js ls <폴더 id>
 // node tools/auto/gdrive.js check                       → 열쇠 확인 (내 드라이브 이름)
+// node tools/auto/gdrive.js mkdir <부모 폴더 id> <이름>     → 폴더 id (같은 이름이 있으면 그것)
 // ── 모션그래픽 교체 (2026-11-03) ── 폴더 기본값: 05 모션그래픽 → 99 지난판
 // node tools/auto/gdrive.js swap <차시 2자리> <새 mp4 …> [--trash] [--dry]
 //     ① 새 mp4 를 05 모션그래픽에 올리고 ② 같은 「(0n차시)」 옛 영상 중 이번에 올린 이름이 아닌 것을 99 지난판으로 옮김
@@ -71,6 +72,12 @@ if (require.main === module) {
   const args = process.argv.slice(2), flags = { trash: args.includes('--trash'), dry: args.includes('--dry') };
   const [cmd, a, b, c] = args.filter((x) => !x.startsWith('--'));
   (async () => {
+    if (cmd === 'mkdir') {
+      const same = (await ls(a)).find((f) => f.name === b && f.mimeType === 'application/vnd.google-apps.folder');
+      if (same) { console.log(same.id); return; }
+      const j = await (await call(`${API}/files?fields=id`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ name: b, mimeType: 'application/vnd.google-apps.folder', parents: [a] }) })).json();
+      console.log(j.id); return;
+    }
     if (cmd === 'up') console.log(JSON.stringify(await up(a, b, c)));
     else if (cmd === 'down') console.log(await down(a, b));
     else if (cmd === 'ls') (await ls(a)).forEach((f) => console.log(`${f.id}  ${f.size || '-'}  ${f.name}`));
