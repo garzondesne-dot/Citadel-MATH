@@ -1715,3 +1715,9 @@ input.sv-no { width: 64px !important; display: inline-block; padding: 2px 4px; }
 .cs-bg { background-size: cover; background-position: center 65%; }
 .nt-go-list { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 2px; }
 .cs-v2 .camp-prop.nt-dot::before { content: ''; position: absolute; top: 4%; right: 22%; width: 12px; height: 12px; border-radius: 50%; background: #ff3355; box-shadow: 0 0 0 2px #0a1424, 0 0 6px #ff3355; z-index: 7; }
+.fc-tile .fc-cardname.fm, .fc-chip .fc-cardname { font-family: var(--pixel); letter-spacing: 0; white-space: nowrap; } .fc-tile.mini .fc-cardname.fm { font-size: 11px; }
+.fc-tile .fc-cardname.fm { white-space: normal; overflow-wrap: anywhere; line-height: 1.05; text-align: center; padding: 0 2px; }
+.fc-tile.mini .fc-cardname.fm.long { font-size: 8.5px; }
+.fc-tile .fc-cardname.fm.long { font-size: clamp(9px, 2.4vw, 11px); }
+.fc-tile.mini .fc-cardname.fm.long { font-size: 8px; white-space: nowrap; letter-spacing: -.3px; }
+.fc-tile.mini .fc-cardname.fm.xl { white-space: normal; font-size: 8px; }

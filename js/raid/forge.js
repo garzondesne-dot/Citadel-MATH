@@ -11,7 +11,8 @@ DS.Forge = (function () {
   let me = null, no = 0, owned = {}, tab = 'forge', slots = { l: null, op: null, r: null }, pick = 'l', busy = false;
   const key = (c) => String(c).replace(/[.#$/[\]]/g, '_');
   const tok = (t) => (t && t.startsWith('card:') ? U().card(t.slice(5)) : null);
-  const symOf = (t) => { if (!t) return ''; const c = tok(t); if (c) return c.short || c.name; const m = U().MATS.find((x) => x.id === t); return m ? m.sym : t; };
+  const cardFm = (c) => c.mf || c.fm; // 재료로 쓸 때는 수식 (2026-11-05)
+  const symOf = (t) => { if (!t) return ''; const c = tok(t); if (c) return cardFm(c); const m = U().MATS.find((x) => x.id === t); return m ? m.sym : t; };
 
   let preview = false; // 교사 대기공간: 모든 차시 미리 보기 (저장하지 않음)
   async function open(m, opt = {}) {
@@ -42,7 +43,7 @@ DS.Forge = (function () {
 
   // ── 연성 (v0.9.0 C안 「황금 보강 망치」: 모루 위 카드 3장 · 모루 옆 「연성」 · 망치가 내려와 덮고 충격파) ──────
   const FC = () => DS.ASSETS.forgeC, img = (k) => `${DS.ASSETS.base}${FC()[k]}`;
-  const matLabel = (t) => (tok(t) ? (tok(t).short || tok(t).name) : symOf(t));
+  const matLabel = (t) => (tok(t) ? cardFm(tok(t)) : symOf(t));
   const tile = (inner, cls = '', attrs = '') => `<button class="fc-tile ${cls}" ${attrs}>${inner}</button>`;
   function forgeTab() {
     const o = slots.op ? U().opOf(slots.op) : null;
@@ -50,7 +51,7 @@ DS.Forge = (function () {
       const t = slots[k], pickCls = pick === k ? ' pick' : '';
       if (k === 'op') return tile(t ? pretty(U().opOf(t).sym) : '<span class="fc-ph">연산</span>', `op${t ? '' : ' empty'}${pickCls}`, `data-slot="op"`);
       if (k === 'r' && o && o.unary) return tile('<span class="fc-ph">—</span>', `mat empty off`, `data-slot="r"`);
-      return tile(t ? `<span class="${tok(t) ? 'fc-cardname' : ''}">${pretty(matLabel(t))}</span>` : '<span class="fc-ph">재료</span>', `mat${t ? '' : ' empty'}${tok(t) ? ' card' : ''}${pickCls}`, `data-slot="${k}"`);
+      return tile(t ? `<span class="${tok(t) ? `fc-cardname fm${matLabel(t).length > 8 ? ' long xl' : matLabel(t).length > 5 ? ' long' : ''}` : ''}">${pretty(matLabel(t))}</span>` : '<span class="fc-ph">재료</span>', `mat${t ? '' : ' empty'}${tok(t) ? ' card' : ''}${pickCls}`, `data-slot="${k}"`);
     };
     const opsOpen = U().OPS.filter((x) => x.no <= no), opsLock = U().OPS.filter((x) => x.no > no);
     // v0.9.3 (사용자 결정): 연성은 한 화면 안에서 — 위: 연산 줄 · 가운데: 모루(카드 3칸 + 연성) · 아래: 재료 칩 · 힌트는 「💡 힌트」 창(차시별 접기)
@@ -66,7 +67,7 @@ DS.Forge = (function () {
         <div class="fc-ring" id="fc-ring"></div><div class="fc-sparks" id="fg-spark"></div>
       </div>
       <p class="fg-msg" id="fg-msg">${o && o.unary ? `${esc(o.sym)} 는 한 칸 연산 — 재료 하나만 올려요.` : '연산을 고르고 재료 · 연산 · 재료를 올려 연성하세요.'}</p>
-      <div class="fc-mats">${U().MATS.map((m) => tile(pretty(m.sym), `mat mini${m.sym.length > 3 ? ' long' : ''}`, `data-put="${m.id}" title="${esc(m.tip)}"`)).join('')}${have().map((c) => tile(`<span class="fc-cardname">${esc(c.short || c.name)}</span>`, 'mat mini card', `data-put="card:${c.id}"`)).join('')}</div>
+      <div class="fc-mats">${U().MATS.map((m) => tile(pretty(m.sym), `mat mini${m.sym.length > 3 ? ' long' : ''}`, `data-put="${m.id}" title="${esc(m.tip)}"`)).join('')}${have().map((c) => tile(`<span class="fc-cardname fm${cardFm(c).length > 8 ? ' long xl' : cardFm(c).length > 5 ? ' long' : ''}">${pretty(cardFm(c))}</span>`, 'mat mini card', `data-put="card:${c.id}" title="${esc(c.name)}"`)).join('')}</div>
       <div class="fc-foot"><button class="btn small" id="fg-hints">💡 힌트 <b class="fc-ptsn">${h.pts}</b> · 남은 ${todo}장</button><button class="btn small" id="fg-clear">비우기</button></div>
     </div>`;
   }

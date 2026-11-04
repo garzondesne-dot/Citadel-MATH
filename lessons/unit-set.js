@@ -2,6 +2,7 @@
 // 원칙: 원리를 유도하지 않고 기호를 바르게 써 보고 외우는 연성 · 모든 카드는 연산을 한 번 이상 거친다 · 순서·자리가 뜻을 바꾼다(엄격 연성).
 // 열리는 범위: 반마다 교사가 배포한 차시까지 (unlock/{반}). 2차시 7장 · 3차시 +9장 · 4차시 +6 · 5차시 +8 · 6차시 +6 · 7차시 +6 · 8차시 +6 · 9차시 +4 · 10차시 +2 = 53장 (2026-11-03)
 // 두 가지로 만들 수 있는 카드는 alt 에 두 번째 연성식 (다른 연산이어도 됨)
+// mf = 이 카드를 다른 카드의 재료로 올릴 때 보이는 수식 (없으면 fm) — 2026-11-05 사용자: 재료 칸은 한글 이름 대신 수식으로 (속한다 → a ∈ A)
 // 등급: 1 일반(흰색) · 2 매직(파랑) · 3 레어(보라). 카드는 공격에 쓰지 않는다 (꾸미기 특전만).
 window.DS = window.DS || {};
 
@@ -30,7 +31,7 @@ DS.Unit = (function () {
     // ── 01 집합 (1~2차시 · 교과서 64~66쪽) ──
     { id: 'belong', no: 2, sec: '01 집합', name: '속한다', fm: 'a ∈ A', desc: 'a는 집합 A에 속한다', grade: 1, art: 0, page: '65쪽', op: 'in', in: ['a', 'A'], ordered: true, hint: '원소가 집합 안에 쏙 들어간다',
       ex: q({ type: 'choice', question: '3 □ {1, 2, 3} — □ 에 알맞은 기호는?', choices: ['∈', '∉'], answerIndex: 0, solution: '3은 {1, 2, 3}의 원소 → 3 ∈ {1, 2, 3}' }) },
-    { id: 'notbelong', no: 2, sec: '01 집합', name: '속하지 않는다', fm: 'b ∉ A', desc: 'b는 집합 A에 속하지 않는다', grade: 1, art: 0, flip: true, page: '65쪽', op: 'notin', in: ['a', 'A'], ordered: true, hint: '원소가 집합 밖에 있다',
+    { id: 'notbelong', mf: 'a ∉ A', no: 2, sec: '01 집합', name: '속하지 않는다', fm: 'b ∉ A', desc: 'b는 집합 A에 속하지 않는다', grade: 1, art: 0, flip: true, page: '65쪽', op: 'notin', in: ['a', 'A'], ordered: true, hint: '원소가 집합 밖에 있다',
       ex: q({ type: 'choice', question: '4 □ {1, 2, 3} — □ 에 알맞은 기호는?', choices: ['∈', '∉'], answerIndex: 1, solution: '4는 {1, 2, 3}에 없다 → 4 ∉ {1, 2, 3}' }) },
     { id: 'roster', no: 2, sec: '01 집합', name: '원소나열법', fm: '{1, 2, 4, 8}', desc: '원소를 모두 적는다 (순서·중복 X)', grade: 1, art: 6, page: '65쪽', op: 'brace', in: ['a'], hint: '원소를 중괄호에 하나씩 넣어 보자',
       ex: q({ type: 'choice', question: '6의 약수의 집합을 원소나열법으로 바르게 나타낸 것은?', choices: ['{2, 3}', '{1, 2, 3, 6}', '{1, 2, 3, 4, 6}'], answerIndex: 1, solution: '6의 약수: 1, 2, 3, 6' }) },
@@ -57,7 +58,7 @@ DS.Unit = (function () {
       ex: q({ type: 'choice', question: '{1, 2} □ {1, 2, 3}', choices: ['=', '≠'], answerIndex: 1, solution: '3 이 왼쪽에 없다' }) },
     { id: 'proper', no: 3, sec: '02 포함 관계', name: '진부분집합', fm: 'A ⊂ B 이고 A ≠ B', desc: '부분집합 중에서 자기 자신을 뺀 것', grade: 2, art: 7, page: '68쪽', op: 'and', in: ['card:subset', 'card:notequal'], hint: '부분집합인데 같지는 않다면?',
       ex: q({ type: 'number', question: '집합 {1, 2, 3}의 진부분집합의 개수는?', answer: 7, solution: '부분집합 8개 − 자기 자신 1개 = 7' }) },
-    { id: 'allsub', no: 3, sec: '02 포함 관계', name: '부분집합 모두 구하기', short: '부분집합 모두', fm: '∅, {a}, {b}, {a, b}', desc: '원소를 0개, 1개, 2개 … 골라', grade: 2, art: 7, flip: true, page: '68쪽', op: 'to', in: ['E', 'A'], ordered: true, hint: '가장 작은 것부터 가장 큰 것까지',
+    { id: 'allsub', mf: '∅,{a},{b},{a,b}', no: 3, sec: '02 포함 관계', name: '부분집합 모두 구하기', short: '부분집합 모두', fm: '∅, {a}, {b}, {a, b}', desc: '원소를 0개, 1개, 2개 … 골라', grade: 2, art: 7, flip: true, page: '68쪽', op: 'to', in: ['E', 'A'], ordered: true, hint: '가장 작은 것부터 가장 큰 것까지',
       ex: q({ type: 'number', question: '집합 {a, b}의 부분집합의 개수는?', answer: 4, solution: '∅, {a}, {b}, {a, b}' }) },
     { id: 'subcount', no: 3, sec: '02 포함 관계', name: '부분집합의 개수', short: '부분집합 개수', fm: '2ⁿ개 · 반드시 포함 2ⁿ⁻ᵖ · 포함 안 함 2ⁿ⁻ᑫ', desc: '원소가 하나 늘 때마다 부분집합은 2배', grade: 2, art: 1, page: '3차시 학습지', op: 'n', in: ['card:allsub'], hint: '모두 구한 부분집합을 세어 보면?',
       ex: q({ type: 'number', question: '집합 {a, b, c, d}의 부분집합의 개수는?', answer: 16, solution: '원소 4개 → 2⁴ = 16' }) },
@@ -70,7 +71,7 @@ DS.Unit = (function () {
       ex: q({ type: 'ox', question: '{1, 3} 과 {2, 4} 는 서로소이다.', answer: true, solution: '공통인 원소가 없다 → {1, 3} ∩ {2, 4} = ∅' }) },
     { id: 'incl', no: 4, sec: '03 집합의 연산', name: '포함과 연산', fm: 'A ⊂ B 이면 A ∩ B = A, A ∪ B = B', desc: '작은 집합이 큰 집합에 들어 있을 때', grade: 2, art: 3, page: '4차시 학습지', op: 'and', in: ['card:subset', 'card:inter'], alt: [{ op: 'and', in: ['card:subset', 'card:union'] }], hint: 'A가 B 안에 있으면 둘의 ∩ · ∪ 는?',
       ex: q({ type: 'choice', question: 'A ⊂ B 일 때 A ∩ B 는?', choices: ['A', 'B', '∅'], answerIndex: 0, solution: 'A의 원소는 모두 B에도 있다 → A ∩ B = A' }) },
-    { id: 'unioncount', no: 4, sec: '03 집합의 연산', name: '합집합의 원소의 개수', short: 'n(A∪B)', fm: 'n(A∪B) = n(A) + n(B) − n(A∩B)', desc: '겹친 부분은 한 번만 센다', grade: 2, art: 1, page: '4차시 학습지', op: 'n', in: ['card:union'], hint: '합집합의 원소를 세면? 겹친 곳 주의',
+    { id: 'unioncount', mf: 'n(A∪B)', no: 4, sec: '03 집합의 연산', name: '합집합의 원소의 개수', short: 'n(A∪B)', fm: 'n(A∪B) = n(A) + n(B) − n(A∩B)', desc: '겹친 부분은 한 번만 센다', grade: 2, art: 1, page: '4차시 학습지', op: 'n', in: ['card:union'], hint: '합집합의 원소를 세면? 겹친 곳 주의',
       ex: q({ type: 'number', question: 'n(A) = 5, n(B) = 4, n(A ∩ B) = 2 일 때 n(A ∪ B) = ?', answer: 7, solution: '5 + 4 − 2 = 7' }) },
     { id: 'disjointcount', no: 4, sec: '03 집합의 연산', name: '서로소의 원소의 개수', short: '서로소 개수', fm: 'n(A∪B) = n(A) + n(B)', desc: '서로소이면 겹친 부분이 없어 그냥 더한다', grade: 3, art: 1, flip: true, page: '4차시 학습지', op: 'and', in: ['card:unioncount', 'card:disjoint'], alt: [{ op: 'n', in: ['card:disjoint'] }], hint: '겹친 부분이 없다면 빼기는?',
       ex: q({ type: 'number', question: 'A, B 가 서로소이고 n(A) = 3, n(B) = 6 일 때 n(A ∪ B) = ?', answer: 9, solution: '겹친 부분 0 → 3 + 6 = 9' }) },
@@ -80,7 +81,7 @@ DS.Unit = (function () {
       ex: q({ type: 'ox', question: '(A ∩ B) ∩ C = A ∩ (B ∩ C) 이다.', answer: true, solution: '결합법칙' }) },
     { id: 'distrib', no: 5, sec: '03 집합의 연산', name: '분배법칙', fm: 'A ∩ (B ∪ C) = (A ∩ B) ∪ (A ∩ C)', desc: '괄호 밖의 연산을 안으로 나누어 준다 (∪ · ∩ 를 바꿔도 성립)', grade: 3, art: 6, page: '5차시 학습지', op: 'cap', in: ['A', 'card:union'], ordered: true, alt: [{ op: 'cup', in: ['A', 'card:inter'], ordered: true }], hint: '수의 2 × (3 + 4) 처럼',
       ex: q({ type: 'choice', question: 'A ∪ (B ∩ C) 와 같은 것은?', choices: ['(A ∪ B) ∩ (A ∪ C)', '(A ∩ B) ∪ (A ∩ C)', '(A ∪ B) ∪ C'], answerIndex: 0, solution: '분배법칙: ∪ 를 괄호 안 집합마다 나누어 준다' }) },
-    { id: 'comp', no: 5, sec: '03 집합의 연산', name: '여집합', fm: 'Aᶜ = U − A', desc: '전체집합 U에서 A에 속하지 않는 원소의 집합', grade: 1, art: 2, page: '5차시 학습지', op: 'comp', in: ['A'], alt: [{ op: 'minus', in: ['U', 'A'], ordered: true }], hint: '전체에서 A 만 빼면?',
+    { id: 'comp', mf: 'Aᶜ', no: 5, sec: '03 집합의 연산', name: '여집합', fm: 'Aᶜ = U − A', desc: '전체집합 U에서 A에 속하지 않는 원소의 집합', grade: 1, art: 2, page: '5차시 학습지', op: 'comp', in: ['A'], alt: [{ op: 'minus', in: ['U', 'A'], ordered: true }], hint: '전체에서 A 만 빼면?',
       ex: q({ type: 'choice', question: 'U = {1, 2, 3, 4, 5}, A = {1, 3} 일 때 Aᶜ 는?', choices: ['{2, 4, 5}', '{1, 3}', '{1, 2, 3, 4, 5}'], answerIndex: 0, solution: 'U 에서 1, 3 을 뺀다 → {2, 4, 5}' }) },
     { id: 'diff', no: 5, sec: '03 집합의 연산', name: '차집합', fm: 'A − B', desc: 'A에는 속하고 B에는 속하지 않는 원소의 집합', grade: 1, art: 2, flip: true, page: '5차시 학습지', op: 'minus', in: ['A', 'B'], ordered: true, hint: 'A 에서 B 에 있는 것을 빼면 (A − B ≠ B − A)',
       ex: q({ type: 'choice', question: 'A = {1, 2, 3, 4}, B = {3, 4, 5} 일 때 A − B 는?', choices: ['{1, 2}', '{5}', '{3, 4}'], answerIndex: 0, solution: 'A 에서 3, 4 를 뺀다 → {1, 2}' }) },
@@ -101,22 +102,22 @@ DS.Unit = (function () {
     // ── 04 명제와 조건 (6~7차시) ──
     { id: 'prop', no: 6, sec: '04 명제와 조건', name: '명제', fm: '참 · 거짓을 판별할 수 있는 문장이나 식', desc: '거짓인 문장도 명제 · 기준이 모호하면 명제가 아니다', grade: 1, art: 4, page: '6차시 학습지', op: 'tf', in: ['S'], hint: '참인지 거짓인지 가릴 수 있으면',
       ex: q({ type: 'choice', question: '다음 중 명제인 것은?', choices: ['2는 짝수이다.', '수학은 재미있다.', 'x + 1 = 3'], answerIndex: 0, solution: '참 · 거짓을 분명히 가릴 수 있다 (재미있다 = 기준이 모호, x + 1 = 3 = x 에 따라 달라지는 조건)' }) },
-    { id: 'neg', no: 6, sec: '04 명제와 조건', name: '명제의 부정', short: '~p', fm: '~p : p가 아니다', desc: 'p 가 참이면 ~p 는 거짓, p 가 거짓이면 ~p 는 참', grade: 1, art: 4, flip: true, page: '6차시 학습지', op: 'not', in: ['p'], hint: '‘아니다’를 붙이면',
+    { id: 'neg', mf: '~p', no: 6, sec: '04 명제와 조건', name: '명제의 부정', short: '~p', fm: '~p : p가 아니다', desc: 'p 가 참이면 ~p 는 거짓, p 가 거짓이면 ~p 는 참', grade: 1, art: 4, flip: true, page: '6차시 학습지', op: 'not', in: ['p'], hint: '‘아니다’를 붙이면',
       ex: q({ type: 'choice', question: '명제 ‘√2는 유리수이다.’의 부정은?', choices: ['√2는 유리수가 아니다.', '√2는 정수이다.', '2는 유리수이다.'], answerIndex: 0, solution: '‘p 가 아니다’' }) },
-    { id: 'cond', no: 7, sec: '04 명제와 조건', name: '조건', fm: 'p(x) : x 의 값에 따라 참 · 거짓이 정해지는 문장이나 식', desc: '변수 x 가 있어서 x 를 정해야 참 · 거짓이 정해진다', grade: 1, art: 4, page: '7차시 학습지', op: 'tf', in: ['P'], hint: 'x 에 따라 참이 되기도 거짓이 되기도',
+    { id: 'cond', mf: 'p(x)', no: 7, sec: '04 명제와 조건', name: '조건', fm: 'p(x) : x 의 값에 따라 참 · 거짓이 정해지는 문장이나 식', desc: '변수 x 가 있어서 x 를 정해야 참 · 거짓이 정해진다', grade: 1, art: 4, page: '7차시 학습지', op: 'tf', in: ['P'], hint: 'x 에 따라 참이 되기도 거짓이 되기도',
       ex: q({ type: 'choice', question: '다음 중 조건인 것은?', choices: ['x는 3보다 크다.', '5는 3보다 크다.', '2 + 3 = 6'], answerIndex: 0, solution: 'x 의 값에 따라 참 · 거짓이 달라진다' }) },
-    { id: 'truth', no: 7, sec: '04 명제와 조건', name: '진리집합', fm: 'P = {x | p(x) 가 참}', desc: '조건을 참이 되게 하는 원소 전체의 집합', grade: 2, art: 3, page: '7차시 학습지', op: 'build', in: ['card:cond'], hint: '조건을 참으로 만드는 x 를 모으면',
+    { id: 'truth', mf: 'P={x|p(x)}', no: 7, sec: '04 명제와 조건', name: '진리집합', fm: 'P = {x | p(x) 가 참}', desc: '조건을 참이 되게 하는 원소 전체의 집합', grade: 2, art: 3, page: '7차시 학습지', op: 'build', in: ['card:cond'], hint: '조건을 참으로 만드는 x 를 모으면',
       ex: q({ type: 'choice', question: '전체집합 U = {1, 2, 3, 4, 5, 6} 에서 조건 ‘x는 짝수’의 진리집합은?', choices: ['{2, 4, 6}', '{1, 3, 5}', '{1, 2, 3, 4, 5, 6}'], answerIndex: 0, solution: '짝수인 x → {2, 4, 6}' }) },
     { id: 'negtruth', no: 7, sec: '04 명제와 조건', name: '부정의 진리집합', short: '~p 의 진리집합', fm: '~p 의 진리집합 = Pᶜ', desc: '조건의 부정은 진리집합의 여집합', grade: 2, art: 2, page: '7차시 학습지', op: 'comp', in: ['card:truth'], alt: [{ op: 'build', in: ['card:neg'] }], hint: 'p 가 아닌 것들을 모으면',
       ex: q({ type: 'choice', question: 'U = {1, 2, 3, 4}, p: x ≤ 2 일 때 ~p 의 진리집합은?', choices: ['{3, 4}', '{1, 2}', '∅'], answerIndex: 0, solution: 'P = {1, 2} → Pᶜ = {3, 4}' }) },
-    { id: 'all', no: 7, sec: '04 명제와 조건', name: '‘모든’ 명제', short: '모든', fm: '‘모든 x에 대하여 p’ 참 ⇔ P = U', desc: '전체집합의 모든 원소가 조건을 만족할 때만 참', grade: 2, art: 7, page: '7차시 학습지', op: 'all', in: ['card:cond'], hint: '하나도 빠짐없이 참이어야',
+    { id: 'all', mf: '모든 x, p(x)', no: 7, sec: '04 명제와 조건', name: '‘모든’ 명제', short: '모든', fm: '‘모든 x에 대하여 p’ 참 ⇔ P = U', desc: '전체집합의 모든 원소가 조건을 만족할 때만 참', grade: 2, art: 7, page: '7차시 학습지', op: 'all', in: ['card:cond'], hint: '하나도 빠짐없이 참이어야',
       ex: q({ type: 'ox', question: 'U = {1, 2, 3} 에서 ‘모든 x에 대하여 x > 0’ 은 참이다.', answer: true, solution: 'P = {1, 2, 3} = U' }) },
     { id: 'some', no: 7, sec: '04 명제와 조건', name: '‘어떤’ 명제', short: '어떤', fm: '‘어떤 x에 대하여 p’ 참 ⇔ P ≠ ∅', desc: '조건을 만족하는 원소가 하나라도 있으면 참', grade: 2, art: 7, flip: true, page: '7차시 학습지', op: 'some', in: ['card:cond'], hint: '하나만 있어도 참',
       ex: q({ type: 'ox', question: 'U = {1, 2, 3} 에서 ‘어떤 x에 대하여 x > 3’ 은 참이다.', answer: false, solution: 'P = ∅ → 거짓' }) },
     { id: 'allneg', no: 7, sec: '04 명제와 조건', name: '‘모든’의 부정', short: '모든의 부정', fm: '‘모든 x에 대하여 p’ 의 부정 = ‘어떤 x에 대하여 ~p’', desc: '‘모든’ ↔ ‘어떤’ 이 바뀌고 조건은 부정', grade: 3, art: 4, page: '7차시 학습지', op: 'not', in: ['card:all'], alt: [{ op: 'some', in: ['card:neg'] }], hint: '모두 그런 건 아니다 = 아닌 것이 하나는 있다',
       ex: q({ type: 'choice', question: '‘모든 학생은 안경을 썼다.’의 부정은?', choices: ['어떤 학생은 안경을 쓰지 않았다.', '모든 학생은 안경을 쓰지 않았다.', '어떤 학생은 안경을 썼다.'], answerIndex: 0, solution: '모든 → 어떤, 썼다 → 쓰지 않았다' }) },
     // ── 05 명제 사이의 관계 (8~9차시) ──
-    { id: 'imp', no: 8, sec: '05 명제 사이의 관계', name: '명제 p → q', short: 'p → q', fm: 'p → q (p: 가정, q: 결론)', desc: '‘p 이면 q 이다’ 꼴의 명제', grade: 1, art: 5, page: '8차시 학습지', op: 'then', in: ['p', 'q'], ordered: true, hint: '가정에서 결론으로',
+    { id: 'imp', mf: 'p → q', no: 8, sec: '05 명제 사이의 관계', name: '명제 p → q', short: 'p → q', fm: 'p → q (p: 가정, q: 결론)', desc: '‘p 이면 q 이다’ 꼴의 명제', grade: 1, art: 5, page: '8차시 학습지', op: 'then', in: ['p', 'q'], ordered: true, hint: '가정에서 결론으로',
       ex: q({ type: 'choice', question: '명제 ‘x = 2 이면 x² = 4 이다.’의 가정은?', choices: ['x = 2', 'x² = 4', 'x = −2'], answerIndex: 0, solution: '‘이면’ 앞 = 가정' }) },
     { id: 'conv', no: 8, sec: '05 명제 사이의 관계', name: '역', fm: 'q → p', desc: '가정과 결론을 서로 바꾼 명제', grade: 1, art: 5, flip: true, page: '8차시 학습지', op: 'then', in: ['q', 'p'], ordered: true, hint: '가정과 결론의 자리를 바꾸면',
       ex: q({ type: 'choice', question: '명제 ‘x = 2 이면 x² = 4 이다.’의 역은?', choices: ['x² = 4 이면 x = 2 이다.', 'x ≠ 2 이면 x² ≠ 4 이다.', 'x² ≠ 4 이면 x ≠ 2 이다.'], answerIndex: 0, solution: '가정 ↔ 결론' }) },
@@ -128,9 +129,9 @@ DS.Unit = (function () {
       ex: q({ type: 'choice', question: '명제 ‘x = 2 이면 x² = 4 이다.’의 대우는?', choices: ['x² ≠ 4 이면 x ≠ 2 이다.', 'x² = 4 이면 x = 2 이다.', 'x ≠ 2 이면 x² ≠ 4 이다.'], answerIndex: 0, solution: '결론의 부정 → 가정의 부정' }) },
     { id: 'contraeq', no: 8, sec: '05 명제 사이의 관계', name: '대우와 참 · 거짓', short: '대우 = 참 · 거짓', fm: '명제가 참이면 대우도 참 (참 · 거짓이 같다)', desc: 'P ⊂ Q ⇔ Qᶜ ⊂ Pᶜ', grade: 3, art: 5, flip: true, page: '8차시 학습지', op: 'eq', in: ['card:imp', 'card:contra'], hint: '명제와 짝이 늘 같은 것은?',
       ex: q({ type: 'ox', question: '명제가 참이면 그 대우도 반드시 참이다.', answer: true, solution: '명제와 대우는 참 · 거짓이 같다' }) },
-    { id: 'suff', no: 9, sec: '05 명제 사이의 관계', name: '충분조건 · 필요조건', short: '충분 · 필요', fm: 'p ⇒ q : p 는 q 이기 위한 충분조건, q 는 p 이기 위한 필요조건', desc: 'p → q 가 참일 때', grade: 1, art: 3, page: '9차시 학습지', op: 'imp', in: ['p', 'q'], ordered: true, hint: '화살표 앞이 충분, 뒤가 필요',
+    { id: 'suff', mf: 'p ⇒ q', no: 9, sec: '05 명제 사이의 관계', name: '충분조건 · 필요조건', short: '충분 · 필요', fm: 'p ⇒ q : p 는 q 이기 위한 충분조건, q 는 p 이기 위한 필요조건', desc: 'p → q 가 참일 때', grade: 1, art: 3, page: '9차시 학습지', op: 'imp', in: ['p', 'q'], ordered: true, hint: '화살표 앞이 충분, 뒤가 필요',
       ex: q({ type: 'choice', question: 'x = 1 은 x² = 1 이기 위한 어떤 조건인가?', choices: ['충분조건', '필요조건', '필요충분조건'], answerIndex: 0, solution: 'x = 1 ⇒ x² = 1 (역은 x = −1 에서 거짓)' }) },
-    { id: 'iff', no: 9, sec: '05 명제 사이의 관계', name: '필요충분조건', short: 'p ⇔ q', fm: 'p ⇔ q : p ⇒ q 이고 q ⇒ p', desc: '서로가 서로의 충분조건 · 필요조건', grade: 2, art: 3, flip: true, page: '9차시 학습지', op: 'iff', in: ['p', 'q'], alt: [{ op: 'and', in: ['card:suff', 'card:conv'] }], hint: '양쪽 화살표가 모두 참이면',
+    { id: 'iff', mf: 'p ⇔ q', no: 9, sec: '05 명제 사이의 관계', name: '필요충분조건', short: 'p ⇔ q', fm: 'p ⇔ q : p ⇒ q 이고 q ⇒ p', desc: '서로가 서로의 충분조건 · 필요조건', grade: 2, art: 3, flip: true, page: '9차시 학습지', op: 'iff', in: ['p', 'q'], alt: [{ op: 'and', in: ['card:suff', 'card:conv'] }], hint: '양쪽 화살표가 모두 참이면',
       ex: q({ type: 'choice', question: 'x > 0 은 −x < 0 이기 위한 어떤 조건인가?', choices: ['필요충분조건', '충분조건', '필요조건'], answerIndex: 0, solution: 'x > 0 ⇔ −x < 0' }) },
     { id: 'iffset', no: 9, sec: '05 명제 사이의 관계', name: '필요충분조건과 진리집합', short: 'P = Q', fm: 'p ⇔ q ⇔ P = Q', desc: '두 조건의 진리집합이 서로 같다', grade: 3, art: 3, page: '9차시 학습지', op: 'eq', in: ['card:iff', 'card:equal'], hint: '진리집합이 어떤 관계일 때?',
       ex: q({ type: 'ox', question: 'P = Q 이면 p 는 q 이기 위한 필요충분조건이다.', answer: true, solution: 'P ⊂ Q 이고 Q ⊂ P' }) },
