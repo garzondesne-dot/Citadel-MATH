@@ -4,6 +4,13 @@ require('../js/raid/sched.js');
 const S = DS.Sched; let ok = 0, bad = 0;
 const t = (name, got, want) => { if (JSON.stringify(got) === JSON.stringify(want)) ok++; else { bad++; console.log('❌', name, '\n  got ', JSON.stringify(got), '\n  want', JSON.stringify(want)); } };
 const K = (s) => Date.parse(s + '+09:00');
+// ⏳ 보스 타임바 (2026-11-05): 교시 끝 = 문 닫힘 · 10분 전부터 그 교시 · 교시 밖 = 없음 · 예약 수업은 그 교시
+t('3교시 중 11:05 → 11:50', S.periodEnd(K('2026-11-05T11:05:00')), K('2026-11-05T11:50:00'));
+t('10:55 (3교시 5분 전) → 11:50', S.periodEnd(K('2026-11-05T10:55:00')), K('2026-11-05T11:50:00'));
+t('7교시 16:30 → 17:00', S.periodEnd(K('2026-11-05T16:30:00')), K('2026-11-05T17:00:00'));
+t('점심 13:10 → 없음', S.periodEnd(K('2026-11-05T13:10:00')), null);
+t('방과후 18:00 → 없음', S.periodEnd(K('2026-11-05T18:00:00')), null);
+t('예약 4교시 → 12:50', S.periodEnd(K('2026-11-05T12:00:00'), 4), K('2026-11-05T12:50:00'));
 // 2026-11-09 = 월요일
 t('요일', S.kst(K('2026-11-09T08:00:00')).dow, 1);
 t('날짜(자정 직후 한국 날짜)', S.kst(K('2026-11-10T00:30:00')).date, '2026-11-10');

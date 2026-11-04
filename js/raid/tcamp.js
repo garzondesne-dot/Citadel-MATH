@@ -114,7 +114,7 @@ DS.TCamp = (function () {
   function toHall() { if (stop) stop(); stop = null; DS.UI.show('screen-hall'); }
   async function leave() {
     if (hall) return toHall();
-    if (code && R && !DS.Raid.isClosed(R) && window.confirm('수업도 끝낼까요?\n\n[확인] 수업 끝내기 — 학생은 결과를 보고 모닥불로, 차원문은 꺼져요\n[취소] 잠깐 나가기 — 수업은 계속돼요 (교사 메뉴 「📋 만든 수업」에서 다시 들어오기)')) await DS.Act.endClass(code).catch(() => {});
+    if (code && R && !DS.Raid.isClosed(R) && window.confirm('수업도 끝낼까요?\n\n[확인] 수업 끝내기 — 학생은 결과를 보고 모닥불로, 차원문은 꺼져요\n[취소] 잠깐 나가기 — 수업은 계속돼요 (교사 메뉴 「📋 만든 수업」에서 다시 들어오기)')) await DS.Act.endClassAsk(code).catch(() => {});
     if (stop) stop(); stop = null; DS.Scene.clear(); location.replace(`${location.pathname}?${DS.Net.mode === 'local' ? 'local&' : ''}role=teacher`);
   }
   // 캠프 소품 (학생 캠프와 같은 그림 · 이모지 팻말 대신)

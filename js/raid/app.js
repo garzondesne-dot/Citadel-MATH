@@ -299,7 +299,7 @@ DS.App = (function () {
     box.querySelectorAll('[data-lx]').forEach((b) => (b.onclick = () => DS.Control.run(async () => {
       const code = b.dataset.lx, open = b.dataset.lopen === '1';
       if (!confirm(open ? `수업 ${code} 을(를) 끝내고 목록에서 없앨까요?\n학생은 결과를 보고 모닥불로 가고, 차원문은 사라져요.` : `수업 ${code} 을(를) 목록에서 없앨까요?\n(모닥불의 꺼진 차원문도 사라져요)`)) return;
-      if (open) await DS.Act.endClass(code);
+      if (open) await DS.Act.endClassAsk(code);
       const cls = b.dataset.lcls;
       if (cls) { const k = `live/${String(cls).replace(/[.#$/[\\]]/g, '_')}`; const lv = await DS.Net.get(k).catch(() => null); if (lv && lv.code === code) await DS.Net.remove(k).catch(() => {}); }
       roomsSet(roomsGet().filter((r) => r.code !== code));

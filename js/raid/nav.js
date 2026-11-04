@@ -39,8 +39,8 @@ DS.Nav = (function () {
   // v0.8.1: 교사 화면에서 나갈 때 한 번 더 — [확인] 수업 끝내기 / [취소] 잠깐 나가기 (수업은 계속 · 교사 메뉴에서 이어서)
   const END = '수업도 끝낼까요?\n\n[확인] 수업 끝내기 — 학생은 결과를 보고 모닥불로, 차원문은 꺼져요\n[취소] 잠깐 나가기 — 수업은 계속돼요 (교사 메뉴에서 이어서)';
   const endHook = (id) => {
-    if (id === 'screen-tcamp' && DS.TCamp && !DS.TCamp.hallMode() && DS.TCamp.code() && DS.TCamp.open() && window.confirm(END)) return DS.Act.endClass(DS.TCamp.code()).catch(() => {});
-    if (id === 'screen-teacher' && DS.Teacher && DS.Teacher.live() && window.confirm(END)) return DS.Act.endClass(DS.Teacher.code()).catch(() => {});
+    if (id === 'screen-tcamp' && DS.TCamp && !DS.TCamp.hallMode() && DS.TCamp.code() && DS.TCamp.open() && window.confirm(END)) return DS.Act.endClassAsk(DS.TCamp.code()).catch(() => {});
+    if (id === 'screen-teacher' && DS.Teacher && DS.Teacher.live() && window.confirm(END)) return DS.Act.endClassAsk(DS.Teacher.code()).catch(() => {});
     return null;
   };
   // v0.9.2: 종합상황실 기기의 교사 캠프 · 미리 보기 보강던전 → 화면을 새로 열지 않고 제자리에서 종합상황실 / 교사 캠프로

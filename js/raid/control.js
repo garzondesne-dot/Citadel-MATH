@@ -117,5 +117,34 @@ DS.Control = (function () {
     })));
   }
 
-  return { iconBar, restBtn, bindRest, restLeft, restEnd, mmss, name, run, wordsHtml, bindWords, stepName, nextName, stepTitles, FINALE, forward, back, pctHtml, bindPct, focusBtn, bindFocus, sheetBtn, bindSheet, videoBtn, bindVideo, esc };
+  // ⏳ 보스 타임바 (2026-11-05 사용자 확정): 교시 끝 = 👑 보스가 던전 문을 닫는 시각 · 종합상황실 늘 · 리모컨 늘 · 학생 폰은 남은 10분부터
+  //   막대 = 남은 시간 (50분 기준) · 👑 보스가 🚪 문 쪽으로 다가옴 · 10분 노랑 · 5분 빨강 · 1분 큰 숫자 · 아래 ⚔ 던전 진행 막대 (진행이 시간보다 앞서면 초록)
+  const TB_TOTAL = 50 * 60e3;
+  const hm = (ms) => { const d = new Date(ms + 9 * 3600e3); return `${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}`; };
+  function tbarHtml(L, R, opt = {}) {
+    const d = Raid().deadline(R); if (!d || Raid().isClosed(R) || Raid().isLobby(R)) return '';
+    const prog = Raid().progress(L, R), ext = Number((R.state || {}).extend) || 0, won = Raid().bossHp(L, R).won || Raid().isEnd(L, R);
+    return `<div class="tb${opt.mini ? ' mini' : ''}${won ? ' won' : ''}" data-dl="${d}" data-total="${TB_TOTAL + ext * 60e3}" data-prog="${prog}"${opt.only ? ` data-only="${opt.only}"` : ''}>
+      <div class="tb-row"><span class="tb-t">${won ? '⏰ 시간 안에 클리어!' : `⏳ <b>${hm(d)}</b> 👑 보스가 문을 닫아요`} · 남은 <b class="tb-left">--:--</b></span>${opt.ext && !ext && !won ? '<button class="btn small tb-ext" data-extend>⏰ +5분</button>' : ext ? '<span class="muted small">(+5분 연장)</span>' : ''}</div>
+      <div class="tb-bar"><i class="tb-door">🚪</i><div class="tb-fill"></div><i class="tb-boss">👑</i></div>
+      ${opt.prog ? `<div class="tb-prog"><div class="tb-pf" style="width:${(prog * 100).toFixed(1)}%"></div><span>⚔ 던전 진행 ${Math.round(prog * 100)}%</span></div>` : ''}</div>`;
+  }
+  const timeUpFns = {};
+  const onTimeUp = (key, fn) => { if (fn) timeUpFns[key] = fn; else delete timeUpFns[key]; };
+  function tbTick() {
+    const now = DS.Net.now();
+    document.querySelectorAll('.tb[data-dl]').forEach((e) => {
+      const dl = Number(e.dataset.dl), total = Number(e.dataset.total) || TB_TOTAL, left = Math.max(0, dl - now), frac = Math.max(0, Math.min(1, left / total));
+      const only = Number(e.dataset.only || 0); e.hidden = !!only && left > only * 60e3 && !e.classList.contains('won');
+      const s = Math.ceil(left / 1000), t = e.querySelector('.tb-left'); if (t) t.textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+      const f = e.querySelector('.tb-fill'); if (f) f.style.width = `${(frac * 100).toFixed(2)}%`;
+      const b = e.querySelector('.tb-boss'); if (b) b.style.left = `calc(${(frac * 100).toFixed(2)}% - 10px)`;
+      e.classList.toggle('warn', left <= 10 * 60e3); e.classList.toggle('hot', left <= 5 * 60e3); e.classList.toggle('last', left <= 60e3 && left > 0);
+      const pf = e.querySelector('.tb-pf'); if (pf) pf.parentElement.classList.toggle('behind', Number(e.dataset.prog) + 0.02 < 1 - frac);
+    });
+    Object.values(timeUpFns).forEach((fn) => { try { fn(now); } catch (err) { console.error(err); } });
+  }
+  if (typeof document !== 'undefined') setInterval(tbTick, 1000);
+  const bindExtend = (el, code, R) => el.querySelectorAll('[data-extend]').forEach((b) => (b.onclick = () => run(async () => { if (!confirm('⏰ 문 닫히는 시각을 5분 늦출까요? (한 번만)')) return; await Act().extendTime(code, R); DS.UI.toast('⏰ 5분 늘렸어요'); })));
+  return { tbarHtml, onTimeUp, bindExtend, hm, iconBar, restBtn, bindRest, restLeft, restEnd, mmss, name, run, wordsHtml, bindWords, stepName, nextName, stepTitles, FINALE, forward, back, pctHtml, bindPct, focusBtn, bindFocus, sheetBtn, bindSheet, videoBtn, bindVideo, esc };
 })();

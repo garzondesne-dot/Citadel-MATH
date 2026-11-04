@@ -42,19 +42,33 @@ DS.Hall = (function () {
   const inClass = () => studs().filter(([u]) => Raid().isLobby(R) || (R.active || {})[u]);
   const dungeonName = () => { const D = DS.ASSETS.dungeons, i = D.ids.indexOf(L.theme); return i >= 0 ? D.names[i] : '던전'; };
 
+  // 🎯 오늘의 목표 (수업 시작 순간 한 번) · ⏰ 시간 안 클리어 (보스를 이긴 순간 한 번) · 👑 문 닫힘 (교시 끝)
+  let goalSeen = '', clearSeen = '';
+  function bigNote(html, ms = 3600, cls = '') { const n = document.createElement('div'); n.className = `h-bignote ${cls}`; n.innerHTML = html; document.getElementById('screen-hall').appendChild(n); setTimeout(() => n.remove(), ms); }
+  function goalAndClear(i) {
+    const d = Raid().deadline(R);
+    if (d && i === 0 && goalSeen !== code && R.state.stepAt && DS.Net.now() - R.state.stepAt < 15000) { goalSeen = code; bigNote(`<p>🎯 오늘의 목표</p><b>${C().hm(d)} 종이 치기 전에<br>👑 보스 처치!</b>`, 4200, 'goal'); }
+    if (d && Raid().bossHp(L, R).won && clearSeen !== code) {
+      clearSeen = code; const st = R.state || {}, won = Number(st.bossWonAt || 0) || DS.Net.now(), left = Math.max(0, Math.round((d - won) / 60e3));
+      if (won < d) { bigNote(`<p>⏰ 시간 안에 클리어!</p><b>${left}분 남기고 보스 처치</b>`, 4200, 'clear'); if (DS.Act.isHost(R) && st.clearLeft == null) DS.Net.set(`rooms/${code}/state/clearLeft`, left).catch(() => {}); }
+    }
+  }
+  C().onTimeUp('hall', (now) => { if (!R || !L || !DS.Act.isHost(R) || !document.getElementById('screen-hall').classList.contains('active')) return; const d = Raid().deadline(R); if (d && now >= d && !Raid().isClosed(R)) DS.Act.timeUp(code, R, L).catch(() => {}); });
   function render() {
     const i = R.state.step ?? -1;
     $('#h-top').innerHTML = `<b>${esc(L.unit)} · ${esc(L.title)}</b><span>${esc(C().stepName(L, R))}</span><span class="muted">수업 코드 <b>${code}</b></span>${DS.UI.fs.btn('h-fs')}`;
+    const tb = $('#h-tbar'); if (tb) { const sig = `${Raid().deadline(R)}|${Raid().progress(L, R)}|${Raid().isClosed(R)}|${Raid().bossHp(L, R).won}|${Raid().isLobby(R)}`; if (tb.dataset.sig !== sig) { tb.dataset.sig = sig; tb.innerHTML = C().tbarHtml(L, R, { prog: true }); } }
+    goalAndClear(i);
     DS.UI.fs.bind('h-fs');
     heroes(); side(i);
     const step = Raid().stepOf(L, R);
     videoOverlay(step);
     const el = $('#h-arena');
     el.classList.toggle('focus-on', Raid().focusOn(R) && !Raid().isLobby(R));
+    if (Raid().isClosed(R)) { built = 'closed'; el.innerHTML = `<div class="h-victory"><div class="trophy"><i class="trophy-img" style="background-image:url('${DS.ASSETS.base}${DS.ASSETS.trophy}')"></i></div>${(R.state || {}).timeUp ? '<h1>👑 보스가 문을 닫았다!</h1><p class="tu-msg">⏳ 남은 몬스터 · 형성평가는 <b>이어하기 포털</b>에서 7일 동안 마저 해요 (캠프의 차시 문)</p>' : '<h1>수업 끝!</h1>'}<p class="muted">모두 모닥불로 돌아갔어요. 게임 기록은 수학 성적이 아니에요.</p><div class="stamp-bar big">📮 반드시 학습지 확인도장 받아가세요.</div><div class="h-acts row">${klassBtn()}<button class="btn primary" id="h-tcamp">🏛 교사 캠프 가기</button></div></div>`; bindActs(); return; }
     if (Raid().restOn(R) && !Raid().isLobby(R) && !Raid().isClosed(R)) { if (DS.Fun && DS.Fun.on(R)) { built = 'fun'; clearInterval(bubbleT); return DS.Fun.hall($('#h-arena'), R); } return restScene(); }
     if (step && (step.kind === 'monster' || step.kind === 'boss')) { const key = `f${i}`; if (built !== key) buildFight(step, key); else updateFight(step); sheetOverlay(step); return; }
     clearInterval(bubbleT);
-    if (Raid().isClosed(R)) { built = 'closed'; el.innerHTML = `<div class="h-victory"><div class="trophy"><i class="trophy-img" style="background-image:url('${DS.ASSETS.base}${DS.ASSETS.trophy}')"></i></div><h1>수업 끝!</h1><p class="muted">모두 모닥불로 돌아갔어요. 게임 기록은 수학 성적이 아니에요.</p><div class="stamp-bar big">📮 반드시 학습지 확인도장 받아가세요.</div><div class="h-acts row">${klassBtn()}<button class="btn primary" id="h-tcamp">🏛 교사 캠프 가기</button></div></div>`; bindActs(); return; }
     if (Raid().isLobby(R) || Raid().isFinale(L, R)) return lobbyScene(Raid().isFinale(L, R));
     // v0.9.2: 개념 설명 = 왼쪽 개념 · 오른쪽 바로 이어지는 문제 (일반 문제 m 만 — ⭐ 스페셜 난입은 미리 보이지 않게). 문제 칸 이미지가 없으면 개념 하나만 크게
     const nx = L.steps[i + 1], prob = nx && nx.kind === 'monster' && !nx.special && !nx.review ? nx : null;

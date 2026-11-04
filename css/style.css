@@ -1722,3 +1722,36 @@ input.sv-no { width: 64px !important; display: inline-block; padding: 2px 4px; }
 .fc-tile.mini .fc-cardname.fm.long { font-size: 8px; white-space: nowrap; letter-spacing: -.3px; }
 .fc-tile.mini .fc-cardname.fm.xl { white-space: normal; font-size: 8px; }
 .cs-bossroom .enc-mon .art.monster { transform: scale(1.4); transform-origin: 50% 100%; } /* 👑 성채 보스 크게 */
+/* ⏳ 보스 타임바 (2026-11-05) */
+#h-tbar, #t-tbar, #st-tbar { margin: 4px 0; }
+.tb { padding: 6px 10px; border: 1px solid var(--line); border-radius: 10px; background: #0d1830cc; font-size: 14px; }
+.tb.mini { padding: 4px 8px; font-size: 12px; }
+.tb[hidden] { display: none; }
+.tb-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.tb-bar { position: relative; height: 12px; margin: 5px 0 2px 22px; border-radius: 6px; background: #0a1220; border: 1px solid #2c4370; }
+.tb.mini .tb-bar { height: 8px; }
+.tb-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 6px; background: linear-gradient(90deg, #2ec4b6, #6fe3a5); transition: width 1s linear; }
+.tb-door { position: absolute; left: -22px; top: 50%; transform: translateY(-50%); font-style: normal; font-size: 16px; }
+.tb-boss { position: absolute; top: 50%; transform: translateY(-55%); font-style: normal; font-size: 18px; transition: left 1s linear; filter: drop-shadow(0 0 4px #000); }
+.tb.warn .tb-fill { background: linear-gradient(90deg, #e8b04a, #ffd25a); }
+.tb.hot .tb-fill { background: linear-gradient(90deg, #ff3355, #ff7a59); animation: tbHot 1s ease-in-out infinite; }
+.tb.hot { border-color: #ff3355; }
+.tb.last .tb-left { font-size: 1.6em; color: #ff5470; }
+.tb.won .tb-fill { background: linear-gradient(90deg, #ffd25a, #fff3b0); }
+@keyframes tbHot { 50% { opacity: .55; } }
+.tb-prog { position: relative; height: 14px; margin-top: 4px; border-radius: 7px; background: #0a1220; overflow: hidden; }
+.tb-pf { position: absolute; left: 0; top: 0; bottom: 0; background: #2f7bff; transition: width .6s; }
+.tb-prog.behind .tb-pf { background: #ff8a3a; }
+.tb-prog span { position: relative; z-index: 1; font-size: 11px; padding-left: 6px; line-height: 14px; }
+.h-bignote { position: fixed; left: 50%; top: 42%; transform: translate(-50%, -50%); z-index: 80; padding: 22px 40px; border-radius: 18px; background: #0a1424ee; border: 3px solid var(--gold); text-align: center; animation: bigNote 4.2s ease both; pointer-events: none; }
+.h-bignote p { margin: 0 0 6px; color: var(--gold); font-size: 26px; }
+.h-bignote b { font-size: 40px; line-height: 1.25; }
+.h-bignote.clear { border-color: #6fe3a5; }
+@keyframes bigNote { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.6); } 10% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); } 16% { transform: translate(-50%, -50%) scale(1); } 85% { opacity: 1; } 100% { opacity: 0; } }
+.tu-msg { font-size: 18px; color: #ffd25a; }
+/* ⏳ 이어하기 포털: 차시 문이 주황빛 */
+.cs-v2.gate-rift .cs-gate-on { filter: hue-rotate(170deg) saturate(1.6) brightness(1.05); }
+.cs-v2 .camp-gate-z.rift .camp-label { color: #ffb45a; }
+.rift-head { margin: 8px 0; padding: 10px 12px; border-radius: 10px; border: 1px solid #ff9d3a; background: #2a1606cc; }
+.rift-head.done { border-color: #6fe3a5; background: #082a1ccc; }
+.rift-head p { margin: 0 0 4px; }

@@ -317,6 +317,19 @@
           ".write": "auth != null && ((!data.exists() && newData.val() === true && root.child('accounts/'+$c+'/'+$n+'/uid').val() === auth.uid) || (!newData.exists() && root.child('admins/'+auth.uid).val() === true))"
         }
       }
+    },
+    "rift": {
+      ".read": "auth != null",
+      "$c": {
+        "$lesson": {
+          ".write": "auth != null && (root.child('admins/'+auth.uid).val() === true || (newData.child('code').isString() && root.child('rooms/'+newData.child('code').val()+'/hosts/'+auth.uid).exists()) || (newData.child('code').isString() && root.child('rooms/'+newData.child('code').val()+'/meta/teacher').val() === auth.uid))",
+          "done": {
+            "$n": {
+              ".write": "auth != null && newData.val() === true && root.child('accounts/'+$c+'/'+$n+'/uid').val() === auth.uid"
+            }
+          }
+        }
+      }
     }
   }
 }

@@ -18,6 +18,7 @@ DS.Teacher = (function () {
     try { const a = JSON.parse(localStorage.getItem('citadel-rooms')) || []; a.unshift({ code: r.code, cls: cls || '', lesson: lessonId, uid: DS.Net.uid(), at: Date.now() }); localStorage.setItem('citadel-rooms', JSON.stringify(a.slice(0, 30))); } catch (e) { /* 무시 */ } // 📋 만든 수업 목록
     return open(r.code, r.hallKey); // v0.9.2: 교사 폰은 리모컨에서 바로 시작 (교사 캠프는 종합상황실 첫 화면 · 수업 끝 뒤 버튼)
   }
+  C().onTimeUp('teacher', (now) => { if (!R || !L || !code || !document.getElementById('screen-teacher').classList.contains('active')) return; const d = Raid().deadline(R); if (d && now >= d && !Raid().isClosed(R)) DS.Act.timeUp(code, R, L).catch(() => {}); });
   async function open(c, hallKey) {
     const R0 = await DS.Net.get(`rooms/${c}`);
     if (!R0 || !R0.meta) throw Object.assign(new Error('수업을 찾을 수 없어요.'), { user: true });
@@ -44,6 +45,7 @@ DS.Teacher = (function () {
     $('#t-head').innerHTML = `<div><b>수업 ${code}</b> <span class="muted small">${esc(L.title)}</span><br><span class="muted small">종합상황실 키 ${keyHtml()} · 입장 ${studs.length}${Raid().isLobby(R) ? '' : ` · 대기실 인원 ${Raid().headcount(R)}`}</span></div>
       <div class="phase-pill">${i < 0 ? '대기' : Raid().isClosed(R) ? '끝' : i >= total ? '마무리' : `${i + 1}/${total}`}</div>`;
     $('#t-tabs').innerHTML = '';
+    const tb = $('#t-tbar'); if (tb) { tb.innerHTML = C().tbarHtml(L, R, { mini: true, ext: true }); C().bindExtend(tb, code, R); }
     const body = $('#t-body');
     const live = !Raid().isLobby(R) && !Raid().isClosed(R);
     body.innerHTML = `<div class="panel framed t-now">${now()}${C().pctHtml(L, R)}${live ? C().restBtn(R) + (Raid().restOn(R) ? '' : C().videoBtn(L, R, videos) + C().sheetBtn(L, R) + C().focusBtn(R)) : ''}${DS.ShareCard.klassReady(L, R) ? '<button class="btn sc-btn" id="t-news">🏫 학급 결과 · 우리 반 수업 소식</button>' : ''}${Raid().isClosed(R) ? '<button class="btn primary" id="t-tcamp">🏛 교사 캠프 가기</button>' : ''}</div>

@@ -38,6 +38,7 @@ DS.Camp = (function () {
       if (live && live.open && (!was || !was.open || was.code !== live.code) && liveSeen !== live.code) { liveSeen = live.code; showGate(); status(); DS.Sound.correct(); DS.UI.toast(`⚔ ${live.no ? `${live.no}차시 ` : ''}던전이 열렸어요! 오른쪽 빛나는 문을 눌러 들어가요`, 4200); }
     }
     if (DS.Survey && !m.test) DS.Survey.watch(m, () => svDraw());
+    if (riftStop) riftStop(); riftStop = m.test ? null : DS.Net.watch(`rift/${ck(m.c)}`, (v) => { const had = !!riftNow(); rifts = v || {}; if (document.getElementById('camp-gate')) drawGate(); if (!had && riftNow() && !(live && live.open)) DS.UI.toast(`⏳ ${riftNow().no}차시 이어하기 포털이 열렸어요! 오른쪽 문에서 남은 문제를 마저 해요`, 4200); });
     if (code0) setTimeout(codeGate, 300); // QR 로 들어왔으면 코드 창을 바로
   }
   const D = () => DS.ASSETS.dungeons;
@@ -48,6 +49,9 @@ DS.Camp = (function () {
     const b = document.getElementById('camp-sv-btn'); if (b) b.onclick = () => DS.Survey.open(me, svDraw);
   }
   // 한 화면에 전체가 보이므로 차원문이 열리면 반짝 강조만
+  // ⏳ 이어하기 (2026-11-05): rift/{반}/{차시} = { code, lesson, no, until } — 기한 안 · 아직 완주 안 한 것 중 가장 최근
+  let rifts = null, riftStop = null;
+  const riftNow = () => { const now = Date.now(); const list = Object.values(rifts || {}).filter((r) => r && r.until > now && !((r.done || {})[me && me.n])); return list.sort((a, b) => (b.at || 0) - (a.at || 0))[0] || null; };
   function showGate() { const g = document.getElementById('camp-gate'); if (g) { g.classList.remove('flash'); void g.offsetWidth; g.classList.add('flash'); } }
   // ── 🧭 첫 수업 튜토리얼 (2026-11-03 사용자 확정) ──────────────────────
   //   A 입장: 튜토리얼을 본 적 없고 (수업 중이거나 수업 기록이 아직 없는) 학생 → 모루 · 보강던전 · 소품을 숨기고 차시 던전만, 들어가는 법 안내
@@ -128,10 +132,11 @@ DS.Camp = (function () {
     lockSide();
     const el = document.getElementById('camp-gate'); if (!el) return;
     const on = !!(live && live.open), i = live && live.theme ? D().ids.indexOf(live.theme) : -1, name = i >= 0 ? D().names[i] : '던전';
-    DS.CampScene.gate(document.querySelector('#camp .camp-stage'), on);
-    el.classList.toggle('open', on);
+    const rf = !on ? riftNow() : null; // ⏳ 이어하기 포털 (수업이 열려 있으면 수업이 먼저)
+    DS.CampScene.gate(document.querySelector('#camp .camp-stage'), on || !!rf);
+    el.classList.toggle('open', on); el.classList.toggle('rift', !!rf); document.querySelector('#camp .camp-stage').classList.toggle('gate-rift', !!rf);
     const lb = el.querySelector('.camp-label');
-    if (lb) lb.innerHTML = on ? `⚔ ${live.no ? `${live.no}차시 ` : ''}입장!` : '🔒 차시 던전'; el.setAttribute('aria-label', on ? `${live.no ? `${live.no}차시 ` : ''}${name} 입장` : '차시 던전 (닫힘)');
+    if (lb) lb.innerHTML = on ? `⚔ ${live.no ? `${live.no}차시 ` : ''}입장!` : rf ? `⏳ ${rf.no}차시 이어하기 D-${Math.max(1, Math.ceil((rf.until - Date.now()) / 86400e3))}` : '🔒 차시 던전'; el.setAttribute('aria-label', on ? `${live.no ? `${live.no}차시 ` : ''}${name} 입장` : rf ? `${rf.no}차시 이어하기` : '차시 던전 (닫힘)');
   }
   // 그림 칸 하나 (배치표 시트에서 열·행)
   const sheet = (s, col, row, cls, style = '') => `<i class="${cls}" style="background-image:url('${base()}${s.src}');background-size:${s.cols * 100}% ${(s.rows || 1) * 100}%;background-position:${s.cols > 1 ? (col / (s.cols - 1)) * 100 : 0}% ${(s.rows || 1) > 1 ? (row / (s.rows - 1)) * 100 : 0}%;${style}"></i>`;
@@ -158,6 +163,8 @@ DS.Camp = (function () {
     $('#camp-anvil').onclick = () => pick('#camp-anvil', () => (me.test ? DS.Forge.open(me, { preview: true, no: 99 }) : DS.Forge.open(me))); // 🧪 체험판: 모든 레시피
     $('#camp-castle').onclick = () => pick('#camp-castle', () => DS.Control.run(() => DS.Bonus.enter(me)));
     $('#camp-gate').onclick = () => {
+      const rf = !(live && live.open) ? riftNow() : null;
+      if (rf) return pick('#camp-gate', () => DS.Control.run(() => DS.Bonus.enter(me, { train: true, rift: rf })), 'portal');
       if (live && live.open) { if (tutMode === 'A') { tutMark('a'); tutClear(); } return pick('#camp-gate', () => DS.Control.run(() => enterCode(live.code)), 'portal'); }
       nope('#camp-gate');
       if (live) DS.UI.toast('지난 던전은 닫혔어요. 선생님이 다음 수업을 열면 문에 다시 빛이 들어와요.', 3200);

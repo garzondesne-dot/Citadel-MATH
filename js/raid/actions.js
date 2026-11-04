@@ -39,6 +39,9 @@ DS.Act = (function () {
     const room = Raid.newRoom(code, lessonId, N().uid(), N().now(), pct, DS.Art ? DS.Art.teacherHero() : 7, DS.Art && DS.Art.teacherLook ? DS.Art.teacherLook().fx : undefined);
     if (cls) room.meta.cls = String(cls);
     if (opt.slot) room.meta.slot = { key: String(opt.slot.key), p: Number(opt.slot.p), from: Number(opt.slot.from), to: Number(opt.slot.to) };
+    // ⏳ 보스 타임바 (2026-11-05 사용자): 교시 끝 = 문 닫힘 (opt.noLimit = 시간 제한 끄기 · 시험 · 시연)
+    const dl = opt.noLimit || !DS.Sched ? null : opt.slot ? DS.Sched.periodEnd(Number(opt.slot.from), Number(opt.slot.p)) : DS.Sched.periodEnd(N().now());
+    if (dl) room.meta.deadline = dl;
     let think = null;
     try { think = await N().get(prepPath(lessonId, 'think')); } catch (e) { /* 기본 5초 */ }
     const Lp = DS.Lessons.get(lessonId);
@@ -122,11 +125,36 @@ DS.Act = (function () {
   const skip = (code, mid, uids) => N().update(P(code, `state/skip/${mid}`), Object.fromEntries(uids.map((u) => [u, true])));
   const setActive = (code, uid, on) => N().set(P(code, `active/${uid}`), on ? true : null);
   // v0.8.1: 어느 단계에서든 수업 끝 (선생님이 나가면서 · 교사 메뉴 「⏹ 끝내기」) → 학생은 결과 → 모닥불, 차원문 꺼짐
-  async function endClass(code) {
+  async function endClass(code, opt = {}) {
     const R = await N().get(P(code)); if (!R || !R.meta) return;
-    await N().update(P(code, 'state'), { closed: true, focus: false, stepAt: N().TS });
+    await N().update(P(code, 'state'), { closed: true, focus: false, stepAt: N().TS, ...(opt.timeUp ? { timeUp: N().TS } : {}) });
     const cls = R.meta.cls;
     if (cls) { const lv = await N().get(`live/${ck(cls)}`).catch(() => null); if (lv && lv.code === code) await N().set(`live/${ck(cls)}/open`, false); }
+    if (opt.rift && cls) await openRift(code, unpackRoom(R), opt.days || 7);
+  }
+  // ⏳ 수업을 끝낼 때: 남은 단계(몬스터 · 형성평가)가 있으면 이어하기 포털을 열지 묻는다 (2026-11-05)
+  const cutShort = (L, R) => !!(L && R && !Raid.isClosed(R) && !Raid.isLobby(R) && !Raid.isEnd(L, R) && !Raid.bossHp(L, R).won);
+  async function endClassAsk(code) {
+    const raw = await N().get(P(code)); if (!raw || !raw.meta) return;
+    const R = unpackRoom(raw), L = DS.Lessons.get(R.meta.lesson);
+    const rift = cutShort(L, R) && R.meta.cls ? window.confirm(`⏳ 시간이 부족했나요?\n\n[확인] 이어하기 던전을 7일 동안 열어요 — 학생들이 캠프에서 남은 문제 · 형성평가를 마저 해요\n[취소] 그냥 끝내기`) : false;
+    return endClass(code, { rift });
+  }
+  // ⏳ 교시 끝 (보스가 문을 닫음): 남은 단계가 있으면 이어하기 7일 자동 · 이미 마무리 · 보스를 이겼으면 평소처럼 끝 (여러 기기가 불러도 한 번)
+  async function timeUp(code, R, L) {
+    if (!R || Raid.isClosed(R) || (R.state || {}).timeUp) return;
+    if (Raid.isLobby(R)) return; // 시작도 안 한 수업은 그대로 (선생님이 정리)
+    return endClass(code, { timeUp: true, rift: cutShort(L, R) });
+  }
+  // ⏰ +5분 (종 치기 전 한 번)
+  async function extendTime(code, R) {
+    if ((R.state || {}).extend) throw Object.assign(new Error('연장은 한 번만 할 수 있어요.'), { user: true });
+    await N().set(P(code, 'state/extend'), 5);
+  }
+  // ⏳ 이어하기 포털: rift/{반}/{차시} = { code, lesson, no, at, until } — 학생 캠프 차시 문이 주황빛 포털로 (기한까지)
+  async function openRift(code, R, days = 7) {
+    const cls = (R.meta || {}).cls, L = DS.Lessons.get(R.meta.lesson); if (!cls || !L) return;
+    await N().set(`rift/${ck(cls)}/${L.id}`, { code, lesson: L.id, no: L.no || 0, at: N().TS, until: N().now() + days * 86400e3 });
   }
   // 🏫 보스 격파 시각 (우리 반 수업 소식의 「보스까지 걸린 시간」): 보스 단계에서 격파되면 한 번만 적는다
   let bossMarked = '';
@@ -204,5 +232,5 @@ DS.Act = (function () {
     return out;
   }
 
-  return { setRest, setRestMin, markBossWin, prepLite, prepImg, hasImg, setVideoFile, setVideoOn, endClass, admitLate, getPrep, setImage, setVideo, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, heal, bossAnswer, unpackRoom, P };
+  return { endClassAsk, timeUp, extendTime, openRift, cutShort, setRest, setRestMin, markBossWin, prepLite, prepImg, hasImg, setVideoFile, setVideoOn, endClass, admitLate, getPrep, setImage, setVideo, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, heal, bossAnswer, unpackRoom, P };
 })();

@@ -21,6 +21,7 @@ DS.Bonus = (function () {
   const PHOTO_READY = () => !!(DS.Photo && DS.Photo.ready && DS.Photo.ready()); // 📷 서술형 사진 분석 (v0.9.10) — 생기기 전까지 서술형 방은 잠금 · 보스 60% 계산에서도 뺌 (2026-11-05 사용자)                             // 👑 보스 방: 열린 방의 60% 처치 (2026-11-05 사용자 규칙)
   let me = null, no = 0, mine = {}, prepCache = {};
   let train = false; // true = 🎯 허수아비 복습 · false = 🏰 성채던전
+  let rift = null;   // ⏳ 이어하기 포털 { lesson, no, until, code } — 허수아비 복습 화면을 그 차시 하나로 (2026-11-05)
   const fieldIds = (l) => l.steps.filter((st) => st.kind === 'monster' && l.monsters[st.id]).map((st) => st.id);
   // 옛 보강 · 옛 꼭대기 층 인장 (2026-11-05 전 규칙): 그 몬스터를 모두 처치했으면 인장 그대로
   const LEGACY = { 'set-04': ['b1', 'b2', 'b3'], 'set-05': ['b1', 'b2', 'b3'], 'set-06': ['b1'], 'eval-1': ['e1', 'e2', 'e3', 'e4', 'e5', 'e6', 'eb'] };
@@ -76,7 +77,7 @@ DS.Bonus = (function () {
   let preview = false; // preview = 교사 캠프: 모든 방 · 모든 차시 미리 보기 (기록 저장 안 함)
   // opt.train = 🎯 허수아비 · opt.go = [차시 id, 몬스터 id] → 들어가자마자 그 문제 (📮 우편함 「바로 풀기」)
   async function enter(m, opt = {}) {
-    me = m; preview = !!opt.preview; train = !!opt.train;
+    me = m; preview = !!opt.preview; train = !!opt.train; rift = opt.rift || null;
     no = preview || (m && m.test) ? Number(opt.no) || 99 : Number(await N().get(`unlock/${ck(m.c)}`).catch(() => 0)) || 0;
     mine = preview ? {} : (await N().get(`bonus/${ck(m.c)}/${m.n}`).catch(() => null)) || {};
     recs = preview || (m && m.test) ? null : (await N().get(`records/${ck(m.c)}/${m.n}`).catch(() => null)) || {};
@@ -124,8 +125,17 @@ DS.Bonus = (function () {
   // 📕 오답노트: 그 차시의 문제마다 상태 · 남은 문제
   const noteOf = (l) => (recs && DS.Note && (recs[l.id] || heldM[l.id]) ? DS.Note.lesson(l, recs[l.id], mine[l.id]) : { left: 0, none: true }); // 기록도 없고 반이 게임으로 수업도 안 한 차시 = 표시 안 함
   // 🎯 허수아비 = 복습! n차시: 수업 문제 + 👑 형성평가 재대결 (남은 문제 먼저)
+  // ⏳ 이어하기 완주: 기한 안에 그 차시 남은 문제 0 → rift/{반}/{차시}/done/{번호} = true · EXP (한 번)
+  async function riftDone() {
+    if (!rift || !me || !me.n) return;
+    const p = `rift/${ck(me.c)}/${rift.lesson}/done/${me.n}`;
+    if ((await N().get(p).catch(() => null)) === true) return;
+    await N().set(p, true).catch(() => {});
+    if (DS.Grow) DS.Grow.add(me, { rift: 1 }, `rift_${rift.lesson}`).catch(() => {});
+    DS.Sound.correct(); DS.UI.toast(`⏳ ${rift.no}차시 이어하기 완주! 끝까지 간 용사 🎉`, 3600);
+  }
   function renderTrain() {
-    const sl = seals(mine), open = lessons().filter((l) => all() || l.no <= no).sort((a, b) => (noteOf(b).left ? 1 : 0) - (noteOf(a).left ? 1 : 0) || b.no - a.no);
+    const sl = seals(mine), open = lessons().filter((l) => (rift ? l.id === rift.lesson : all() || l.no <= no)).sort((a, b) => (noteOf(b).left ? 1 : 0) - (noteOf(a).left ? 1 : 0) || b.no - a.no);
     const card = (l) => {
       const x = noteOf(l), rec = mine[l.id] || {}, sealed = sl.includes(l.id);
       const ids = [...fieldIds(l), 'boss'];
@@ -136,7 +146,11 @@ DS.Bonus = (function () {
         <div class="bn-list">${order.map((id) => { const s = stOf(id), r = rec[id] || {}, m = monOf(l, id), need = s && (DS.Note.OPEN[s] || s === 'a'), bossNeed = id === 'boss' && !r.clear;
           return `<div class="bn-row${need ? ' nt-open' : r.clear || (s && !need) ? ' clear' : ''}${id === 'boss' ? ' boss' : ''}">${s ? DS.Note.icon(s) : DS.Art.monster(m.sprite, r.clear ? 'down' : 'idle')}<span>${need ? '<b class="nt-ex">❗</b> ' : ''}${esc(m.title)}${s ? ` <span class="muted small">· ${esc(DS.Note.WHY[s] || '')}</span>` : bossNeed ? ' <span class="muted small">· 처치하면 🟪 인장</span>' : ''}</span><button class="btn small${need || bossNeed ? ' primary' : ''}" data-fight="${l.id}|${id}">${need ? (s === 'x' ? '⚔ 다시 풀기' : '⚔ 풀기') : r.clear ? '✔ 다시 하기' : id === 'boss' ? '👑 재대결' : '🎯 연습'}</button></div>`; }).join('')}</div></div>`;
     };
-    $('#bonus').innerHTML = `<div class="bn-top"><button class="btn small" id="bn-back">≪ ${preview ? '교사 캠프' : '모닥불'}</button><b>🎯 복습 허수아비</b><span class="bn-seal">🟪 인장 ${sl.length}개</span></div>
+    const rx = rift && open[0] ? noteOf(open[0]) : null, rdone = rx && !rx.none && rx.left === 0, rdays = rift ? Math.max(1, Math.ceil((rift.until - Date.now()) / 86400e3)) : 0;
+    if (rift && rdone && me && !all()) riftDone();
+    $('#bonus').innerHTML = rift ? `<div class="bn-top"><button class="btn small" id="bn-back">≪ 모닥불</button><b>⏳ ${rift.no}차시 이어하기</b><span class="bn-seal">D-${rdays}</span></div>
+      <div class="rift-head${rdone ? ' done' : ''}"><p>${rdone ? '✔ <b>이어하기 완주!</b> 끝까지 해낸 용사예요.' : `수업 시간이 모자라 멈춘 던전이에요. <b>남은 몬스터 · 👑 형성평가</b>를 ${rdays}일 안에 마저 해요. 완주하면 보상!`}</p><span class="muted small">📚 못 본 개념은 ⛺ 텐트 책장에서 다시 볼 수 있어요 · 기한이 지나도 🎯 허수아비에서 계속 풀 수 있어요 (벌 없음)</span></div>
+      ${open.map(card).join('')}` : `<div class="bn-top"><button class="btn small" id="bn-back">≪ ${preview ? '교사 캠프' : '모닥불'}</button><b>🎯 복습 허수아비</b><span class="bn-seal">🟪 인장 ${sl.length}개</span></div>
       <p class="bn-fx">배운 차시의 <b>수업 문제를 숫자만 바꿔</b> 다시 풀어요. 틀림 · 안 푼 문제를 맞히면 📕 오답노트에 <b>복습 완료</b>! 👑 형성평가 재대결을 처치하면 🟪 인장.</p>
       ${open.length ? open.map(card).join('') : '<div class="panel framed"><p class="muted">선생님이 우리 반 수업을 열면 그 차시를 복습할 수 있어요.</p></div>'}`;
     bindFight();

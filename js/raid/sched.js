@@ -25,6 +25,13 @@ DS.Sched = (function () {
   const skipped = (d, p) => SKIP.includes(`${d}-${p}`);
   const usable = (d, p) => (PERIODS[d] || []).includes(p) && !skipped(d, p);
   const keyOf = (date, p) => `${date}_${p}`;
+  // ⏳ 보스 타임바 (2026-11-05): 그 교시가 끝나는 시각 = 던전 문이 닫히는 시각. 시간표 수업은 그 교시 · 바로 연 수업은 지금 교시(시작 10분 전부터 그 교시로) · 교시 밖이면 null (제한 없음)
+  function periodEnd(now, p) {
+    const k = kst(now);
+    if (p && BELLS[p]) return at(k.date, BELLS[p][1]);
+    for (const q of Object.keys(BELLS).map(Number)) { const [s, e] = BELLS[q]; if (now >= at(k.date, s) - 10 * 60e3 && now < at(k.date, e)) return at(k.date, e); }
+    return null;
+  }
   const label = (s) => { const k = kst(s.from); return `${k.date.slice(5).replace('-', '/')}(${DOW[k.dow]}) ${s.p}교시`; };
 
   // ── 시간표 (수동) ──────────────────────────────────────────
@@ -189,5 +196,5 @@ DS.Sched = (function () {
   const setHide = (cls, code, on) => N().set(`classlog/${ck(cls)}/${code}/hide`, on ? true : null);
   const when = (g) => { const k = kst(g.from || g.at || 0); return { date: k.date, dow: DOW[k.dow], hm: k.hm }; };
 
-  return { BELLS, PERIODS, SKIP, DOW, AFTER, LATE, ST, CYCLE, kst, times, usable, skipped, upcoming, nextLesson, ensure, active, today, skipSlot, relesson, logs, sheet, judge, setAtt, setMemo, setHide, when, label, getWeek, effective, comci, ck };
+  return { periodEnd, BELLS, PERIODS, SKIP, DOW, AFTER, LATE, ST, CYCLE, kst, times, usable, skipped, upcoming, nextLesson, ensure, active, today, skipSlot, relesson, logs, sheet, judge, setAtt, setMemo, setHide, when, label, getWeek, effective, comci, ck };
 })();
