@@ -146,10 +146,12 @@ DS.Dash = (function () {
         if (miss.length) why.push(`최근 불참: ${miss.map((l) => `${l.no}차시`).join(', ')}`);
         if (s.boss != null && s.boss < 50) why.push(`형성평가 평균 ${s.boss}%`);
         if (s.first != null && s.first < 50) why.push(`첫 시도 정답률 ${s.first}%`);
-        if (s.went && !s.tries) why.push('중단원던전 0회');
+        if (s.went && !s.tries) why.push('허수아비 · 성채 0회');
+        // 🔍 고침 패턴 (2026-11-05 · 벌 아님 · 선생님 확인용): 형성평가는 잘하는데 레이드 첫 시도만 낮고 「틀림 → 고침」이 많음 = 일부러 틀렸을 수도
+        if (s.boss != null && s.first != null && s.boss >= 85 && s.first < 60 && s.fixed >= 6) why.push(`🔍 고침 패턴 확인 (형성평가 ${s.boss}% · 레이드 첫 시도 ${s.first}% · 고친 ${s.fixed}개)`);
         return { s, why };
       }).filter((r) => r.why.length);
-      return `<p class="muted small">최근 2차시(${isAll() ? '반마다' : last2.map((l) => `${l.no}차시`).join(' · ')}) 불참 · 형성평가 50% 미만 · 첫 시도 50% 미만 · 중단원던전 0회</p>
+      return `<p class="muted small">최근 2차시(${isAll() ? '반마다' : last2.map((l) => `${l.no}차시`).join(' · ')}) 불참 · 형성평가 50% 미만 · 첫 시도 50% 미만 · 허수아비 · 성채 0회 · 🔍 고침 패턴(형성평가 85% 이상인데 레이드 첫 시도 60% 미만 · 고친 6개 이상 — 벌이 아니라 확인용)</p>
         ${rows.length ? `<table class="r-table">${rows.map(({ s, why }) => `<tr><td>${isAll() ? `${esc(s.cls)} ` : ''}${s.n}번</td><td><button class="linkish" data-who="${s.key}">${esc(s.name)}</button></td><td>${why.map((w) => `<span class="dash-tag">${esc(w)}</span>`).join(' ')}</td></tr>`).join('')}</table>` : '<p class="okc">👍 지금 눈에 띄는 학생이 없어요.</p>'}`;
     },
     weak() {

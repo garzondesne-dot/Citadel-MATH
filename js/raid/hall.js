@@ -26,10 +26,34 @@ DS.Hall = (function () {
       L = DS.Lessons.get(R.meta.lesson); if (L && L.id !== DS.Art._entered) { DS.Art._entered = L.id; DS.Art.lessonEnter(L); } // v0.9.6 차시별 다운로드
       if (DS.Act.isHost(R)) { DS.Act.admitLate(code, R, L); DS.Act.markBossWin(code, R, L); }
       if (first) { if (stopPrep) stopPrep(); stopPrep = DS.Net.watch(`prep/${L.id}`, (p) => { prep = p || {}; built = ''; if (R) render(); }); }
+      xpHall(); lvHall();
       render();
       // v0.9.2: 종합상황실은 교사 캠프(학생 입장 QR · 모루 · 보강던전)에서 시작 — 수업이 시작되면 저절로 이 화면으로
       if (first && !camped && Raid().isLobby(R) && DS.TCamp) { camped = true; DS.TCamp.enter({ code, hallKey, hall: true }).catch(() => {}); }
     });
+  }
+  // 🆙 몬스터가 쓰러질 때 공격한 용사들 머리 위 +EXP · 🎉 레벨업 알림 (2026-11-05 · 좋은 순간만 크게 · 레벨 목록 · 순위는 안 보임)
+  let hxSeen = null, lvSeen = null, lvQ = [], lvBusy = false;
+  function xpHall() {
+    if (!L || !R) return;
+    const ids = L.steps.filter((s) => s.kind === 'monster' && L.monsters[s.id]).map((s) => s.id), first = !hxSeen;
+    if (first) hxSeen = {};
+    ids.forEach((mid) => { if (!Raid().cleared(L, R, mid) || hxSeen[mid]) return; hxSeen[mid] = true; if (first) return;
+      setTimeout(() => Raid().activeIds(R).forEach((u, k) => { const x = C().xpOf(Raid().record(L, R, mid, u)); if (x) setTimeout(() => C().xpFloat(document.getElementById(`fh-${u}`), `+${x} EXP`), (k % 6) * 120); }), 600); });
+    if (Raid().bossHp(L, R).won && !hxSeen.boss) { hxSeen.boss = true; if (!first) setTimeout(() => Object.keys(R.bossAns || {}).forEach((u, k) => setTimeout(() => C().xpFloat(document.getElementById(`fh-${u}`), '+10 EXP', 'big'), (k % 6) * 120)), 900); }
+  }
+  function lvHall() {
+    const v = R.lvup || {}, first = !lvSeen; if (first) lvSeen = {};
+    Object.entries(v).forEach(([u, x]) => { const key = `${u}|${x && x.lv}`; if (!x || lvSeen[key]) return; lvSeen[key] = true; if (!first) lvQ.push([u, x.lv]); });
+    if (!lvBusy) lvNext();
+  }
+  function lvNext() {
+    const it = lvQ.shift(); if (!it) { lvBusy = false; return; } lvBusy = true;
+    const [u, lv] = it, p = (R.players || {})[u] || {};
+    const n = document.createElement('div'); n.className = 'h-lvup'; n.innerHTML = `${DS.Art.hero(p.hero || 0, 'attack', 'pairhop')}<div><p>🎉 LEVEL UP!</p><b>${p.num ? `${p.num}번 ` : ''}${esc(p.nick || '')}</b><span>Lv.${lv}</span></div>`;
+    document.getElementById('screen-hall').appendChild(n); DS.Sound.correct();
+    const h = document.getElementById(`fh-${u}`); if (h) h.classList.add('lv-glow');
+    setTimeout(() => { n.remove(); if (h) h.classList.remove('lv-glow'); lvNext(); }, 2200);
   }
   const toCamp = () => DS.Control.run(() => DS.TCamp.enter({ code, hallKey, hall: true }));
   const klassBtn = () => (DS.ShareCard.klassReady(L, R) ? '<button class="btn sc-btn" id="h-klass">🏫 학급 결과</button>' : '');

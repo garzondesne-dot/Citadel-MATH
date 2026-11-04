@@ -1761,3 +1761,13 @@ input.sv-no { width: 64px !important; display: inline-block; padding: 2px 4px; }
 @keyframes gemPop { 0% { opacity: 0; transform: translateY(-10px) scale(.8); } 12% { opacity: 1; transform: translateY(0) scale(1.08); } 20% { transform: scale(1); } 80% { opacity: 1; } 100% { opacity: 0; transform: translateY(-8px); } }
 .gem-bar { margin: 6px 0 10px; padding: 8px 10px; border-radius: 10px; background: #0d1d3a; border: 1px solid #2f7bff66; font-size: 15px; }
 .gem-bar b { color: #9fe3ff; font-size: 18px; }
+/* 🆙 +EXP · 🎉 레벨업 (2026-11-05) */
+.xp-pop { position: absolute; left: 50%; bottom: 100%; transform: translateX(-50%); z-index: 30; white-space: nowrap; font: 700 15px var(--pixel); color: #b8ff7a; text-shadow: 0 2px 0 #000, 0 0 6px #4cff7a99; animation: xpUp 2.4s ease-out both; pointer-events: none; }
+.xp-pop.big { font-size: 19px; color: #ffe27a; }
+@keyframes xpUp { 0% { opacity: 0; transform: translate(-50%, 8px) scale(.7); } 12% { opacity: 1; transform: translate(-50%, 0) scale(1.15); } 25% { transform: translate(-50%, -4px) scale(1); } 80% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -34px); } }
+.h-lvup { position: fixed; left: 50%; top: 22%; transform: translateX(-50%); z-index: 85; display: flex; align-items: center; gap: 16px; padding: 14px 28px; border-radius: 16px; background: radial-gradient(#3b2a0aee, #120c02ee); border: 3px solid #ffd25a; box-shadow: 0 0 40px #ffd25a88; animation: bigNote 2.2s ease both; pointer-events: none; }
+.h-lvup .art { width: 96px; height: 96px; }
+.h-lvup p { margin: 0; color: #ffd25a; font-size: 22px; } .h-lvup b { display: block; font-size: 28px; } .h-lvup span { color: #b8ff7a; font-size: 22px; }
+.lv-glow { filter: drop-shadow(0 0 10px #ffd25a) drop-shadow(0 0 20px #ffb02e); }
+.lvup-full { position: fixed; inset: 0; z-index: 95; display: grid; place-items: center; background: radial-gradient(#3b2a0add, #000c); animation: bigNote 2.8s ease both; pointer-events: none; }
+.lvup-full div { text-align: center; } .lvup-full p { margin: 0; color: #ffd25a; font-size: 28px; } .lvup-full b { display: block; font-size: 64px; color: #fff; text-shadow: 0 0 20px #ffd25a; } .lvup-full span { font-size: 20px; color: #b8ff7a; }

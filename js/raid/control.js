@@ -146,5 +146,12 @@ DS.Control = (function () {
   }
   if (typeof document !== 'undefined') setInterval(tbTick, 1000);
   const bindExtend = (el, code, R) => el.querySelectorAll('[data-extend]').forEach((b) => (b.onclick = () => run(async () => { if (!confirm('⏰ 문 닫히는 시각을 5분 늦출까요? (한 번만)')) return; await Act().extendTime(code, R); DS.UI.toast('⏰ 5분 늘렸어요'); })));
-  return { tbarHtml, onTimeUp, bindExtend, hm, iconBar, restBtn, bindRest, restLeft, restEnd, mmss, name, run, wordsHtml, bindWords, stepName, nextName, stepTitles, FINALE, forward, back, pctHtml, bindPct, focusBtn, bindFocus, sheetBtn, bindSheet, videoBtn, bindVideo, esc };
+  // 🆙 머리 위 「+12 EXP」 (2026-11-05): 몬스터 · 보스를 쓰러뜨리는 순간 (정답 · 오답 글자 대신 숫자만)
+  function xpFloat(host, text, cls = '') {
+    if (!host) return; const e = document.createElement('span'); e.className = `xp-pop ${cls}`; e.textContent = text;
+    if (getComputedStyle(host).position === 'static') host.style.position = 'relative';
+    host.appendChild(e); setTimeout(() => e.remove(), 2400);
+  }
+  const xpOf = (rec) => (rec && rec.tries ? rec.tries.length * 2 + (Number(rec.best) || 0) * 2 : 0); // 제출 2 + 맞힌 소문제 2 (EXP 표와 같게)
+  return { xpFloat, xpOf, tbarHtml, onTimeUp, bindExtend, hm, iconBar, restBtn, bindRest, restLeft, restEnd, mmss, name, run, wordsHtml, bindWords, stepName, nextName, stepTitles, FINALE, forward, back, pctHtml, bindPct, focusBtn, bindFocus, sheetBtn, bindSheet, videoBtn, bindVideo, esc };
 })();

@@ -95,6 +95,12 @@
         },
         "oxq": {
           ".write": "auth != null && (root.child('rooms/'+$code+'/meta/teacher').val() === auth.uid || (root.child('rooms/'+$code+'/hosts/'+auth.uid).isString() && root.child('rooms/'+$code+'/hosts/'+auth.uid).val() === root.child('secrets/'+$code+'/hallKey').val()))"
+        },
+        "lvup": {
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid",
+            ".validate": "newData.hasChildren(['lv', 'at']) && newData.child('lv').isNumber()"
+          }
         }
       }
     },

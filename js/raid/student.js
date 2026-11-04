@@ -39,9 +39,25 @@ DS.Student = (function () {
       { const st = (R.state || {}).step ?? -1; if (lastStep !== null && st !== lastStep && dirty) setTimeout(saveNow, 300 + Math.random() * 2500); lastStep = st; } // 단계가 바뀌면 저장 (18명이 한꺼번에 몰리지 않게 조금씩 늦춤)
       L = DS.Lessons.get(R.meta.lesson); if (L && L.id !== DS.Art._entered) { DS.Art._entered = L.id; DS.Art.lessonEnter(L); } // v0.9.6 차시별 다운로드
       if (!test && DS.Gem && R.state && R.state.clearLeft != null && Raid().activeIds(R).includes(me) && clearPaid !== code) { clearPaid = code; DS.Gem.add(acc(), DS.Gem.G.clear, `clear_${code}`, '⏰ 시간 안 클리어').catch(() => {}); }
+      xpWatch();
       render();
     });
   }
+  // 🆙 몬스터를 쓰러뜨리는 순간 내 용사 머리 위 +EXP · 보스 처치 +EXP (처음 들어왔을 때 이미 쓰러진 것은 빼고)
+  let xpSeen = null;
+  function xpWatch() {
+    if (!L || !R || test) return;
+    const ids = L.steps.filter((s) => s.kind === 'monster' && L.monsters[s.id]).map((s) => s.id), first = !xpSeen;
+    if (first) xpSeen = {};
+    ids.forEach((mid) => { if (!Raid().cleared(L, R, mid) || xpSeen[mid]) return; xpSeen[mid] = true; const x = DS.Control.xpOf(Raid().record(L, R, mid, me)); if (!first && x) setTimeout(() => DS.Control.xpFloat(document.querySelector('#st-body .enc-hero') || document.querySelector('#st-body'), `+${x} EXP`), 400); });
+    if (Raid().bossHp(L, R).won && !xpSeen.boss) { xpSeen.boss = true; if (!first && ((R.bossAns || {})[me])) setTimeout(() => DS.Control.xpFloat(document.querySelector('#st-body .enc-hero') || document.querySelector('#st-body'), '+10 EXP 보스 처치!', 'big'), 500); }
+  }
+  // 🎉 레벨업 (모두가 봄 · 2026-11-05): 폰 축하 + 수업 중이면 종합상황실에 알림 (rooms/{코드}/lvup/{uid})
+  if (typeof window !== 'undefined') window.addEventListener('ds-levelup', (e) => {
+    const { after, m } = e.detail || {}; if (!after || !info0 || !m || Number(m.n) !== Number(info0.num)) return;
+    const o = document.createElement('div'); o.className = 'lvup-full'; o.innerHTML = `<div><p>🎉 LEVEL UP!</p><b>Lv.${after.lv}</b><span>${esc(after.title)}</span></div>`; document.body.appendChild(o); DS.Sound.correct(); setTimeout(() => o.remove(), 2800);
+    if (code && R && !test && !Raid().isClosed(R)) DS.Net.set(`rooms/${code}/lvup/${me}`, { lv: after.lv, at: DS.Net.TS }).catch(() => {});
+  });
   let clearPaid = '';
   const acc = () => ({ c: info0.cls, n: info0.num, name: info0.nick, hero: info0.hero, fx: info0.fx, title: info0.title });
   // 💾 진행 저장 (v0.9.7.6 → v0.9.8.0 줄임 · 사용자 확정): ① 선생님이 다음 단계로 넘길 때 ② 형성평가는 마지막 답 10초 뒤 한 번 ③ 앱을 내리거나 닫을 때
