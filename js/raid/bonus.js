@@ -132,6 +132,7 @@ DS.Bonus = (function () {
     if ((await N().get(p).catch(() => null)) === true) return;
     await N().set(p, true).catch(() => {});
     if (DS.Grow) DS.Grow.add(me, { rift: 1 }, `rift_${rift.lesson}`).catch(() => {});
+    if (DS.Gem) DS.Gem.add(me, DS.Gem.G.rift, `rift_${rift.lesson}`, '이어하기 완주').catch(() => {});
     DS.Sound.correct(); DS.UI.toast(`⏳ ${rift.no}차시 이어하기 완주! 끝까지 간 용사 🎉`, 3600);
   }
   function renderTrain() {
@@ -161,6 +162,7 @@ DS.Bonus = (function () {
     const mon = monOf(L, mid), castle = !!L.rooms, rec = Object.assign({}, castle ? roomRec(mine, L, mid) : (mine[L.id] || {})[mid] || {}), prep = await prepOf(L.id);
     if (castle && me && !all()) seenAdd(me, `${L.id}/${mid}`); // NEW 끔
     const first = !rec.tries && !rec.clear, clearedBefore = !!rec.clear, sealedBefore = seals(mine).includes(L.id);
+    const wasOpen = (() => { const x = !castle && isField(L, mid) ? noteOf(L) : null; const st = x && !x.none ? x.mons[x.ids.indexOf(mid)] : null; return !!(st && (DS.Note.OPEN[st] || st === 'a')); })(); // 📕 틀림 · 안 풂이었던 문제
     const seed = `${N().uid()}|${Date.now()}`;
     let attempt = first && !isField(L, mid) ? 0 : 1, left = TRIES; // 📕 수업 문제 복습은 처음부터 숫자를 바꿈
     const n = itemsOf(L, mid, seed, attempt).length;
@@ -250,6 +252,16 @@ DS.Bonus = (function () {
       const sealed = !sealedBefore && seals(mine).includes(L.id);
       DS.Sound.correct();
       if (DS.Grow && !clearedBefore && !preview) DS.Grow.add(me, { bonusClear: 1, seal: sealed ? 1 : 0 }).catch(() => {});
+      if (DS.Gem && !preview && me && !me.test) { // 💎 (2026-11-05)
+        const G = DS.Gem.G, gm = (n, k, why, o) => DS.Gem.add(me, n, k, why, o).catch(() => {});
+        if (!clearedBefore) {
+          if (castle) { gm((L.rooms.find((r) => r.id === mid) || {}).boss ? G.roomBoss : G.room, `room_${L.id}_${mid}`, '성채 방 처치'); gm(G.first, 'firstcastle', '성채 첫 방'); }
+          else { if (mid === 'boss') gm(G.bossRe, `bossre_${L.id}`, '형성평가 재대결'); gm(G.first, 'firstreview', '첫 복습'); }
+        }
+        if (!castle && mid !== 'boss' && wasOpen) DS.Gem.addDaily(me, G.review, 'review', G.reviewDay, '복습으로 해결').catch(() => {});
+        if (sealed) gm(G.seal, `seal_${L.id}`, '🟪 인장', { free: true });
+        if (!castle) { const x = noteOf(L); if (!x.none && x.left === 0) gm(G.note, `note_${L.id}`, '오답노트 완성'); }
+      }
       const fx = sealed ? DS.FX.FANCY.find((k, i) => seals(mine).length === UNLOCK[i]) : null;
       const act = draw('', `<p class="okc"><b>🎉 처치!</b>${sealed ? ` <b class="gold">🟪 ${castle ? `성채 ${L.floor || 1}층` : `${L.no}차시`} 인장을 얻었어요!</b>` : ''}${fx ? `<br>✨ 화려한 이펙트 「${esc(DS.FX.NAMES[fx])}」이 열렸어요! ⚙ 설정에서 바꿀 수 있어요` : ''}</p>`);
       act.innerHTML = `<button class="btn primary" id="bf-out">${castle ? '성채 방 목록으로' : '허수아비로'}</button>`;

@@ -109,6 +109,11 @@ DS.Result = (function () {
       try { await DS.Net.set(`records/${ck(m.c)}/${m.n}/${L.id}`, rec); mm.sig = sig; prev[L.id] = { ...rec }; } catch (e) { /* 저장 실패해도 결과는 보여 준다 */ }
     }
     const g = DS.Grow ? await DS.Grow.add(m, r.parts, `raid_${code}`, { upsert: true, cache: !!opt.cache }).catch(() => null) : null;
+    if (DS.Gem && !(g && g.same)) { // 💎 (2026-11-05): 참여 3 + 맞힌 소문제 1개당 1 (처음이든 고쳐서든 · 최대 5) · 🔁 연속 참여 3 · 5 · 10차시 (한도 밖)
+      const G = DS.Gem.G; DS.Gem.add(m, G.join + Math.min(G.solvedMax, Number(r.parts.correct) || 0), `raid_${code}`, '레이드', { upsert: true }).catch(() => {});
+      (async () => { const ck2 = (c) => String(c).replace(/[.#$/[\]]/g, '_'); const [recs, held] = await Promise.all([DS.Net.get(`records/${ck2(m.c)}/${m.n}`).catch(() => null), DS.Net.get(`held/${ck2(m.c)}`).catch(() => null)]);
+        const s = DS.Gem.streak(recs || {}, Object.assign({}, held, { [L.id]: true })); if (G.streak[s]) DS.Gem.add(m, G.streak[s], `streak${s}_${L.id}`, `${s}차시 연속 참여`, { free: true }).catch(() => {}); })().catch(() => {});
+    }
     return { r, g, first: first && !!g, raids: others.length + 1 };
   }
   // 📥 결과 모으기 (v0.9.7.6 · 교사 · 복구 도구): 방 기록(rooms/코드)으로 학생마다 save — 수업 끝 전에 나간 학생 기록 · EXP 를 다시 만든다

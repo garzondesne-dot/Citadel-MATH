@@ -25,7 +25,7 @@ DS.Grow = (function () {
   // opt.upsert (v0.9.7.6 · 수업 중 진행 저장): 같은 key 가 있으면 늘어난 만큼만 더함 · before = 이 key 를 받기 전 레벨 (결과 화면 레벨업 연출)
   //   opt.cache (v0.9.8.0 · 저장 줄이기): 이 기기가 이미 쓴 key 의 EXP 를 기억 → 늘어난 게 없으면 서버에 묻지도 쓰지도 않음 · 늘었을 때만 total 을 새로 읽어 더함
   const seen = {};
-  async function add(m, parts, key, opt = {}) {
+  async function add0(m, parts, key, opt = {}) {
     if (!m || m.c == null || !m.n) return null;
     const gained = Math.min(300, sum(parts));
     const k = String(key || `${Date.now()}`).replace(/[.#$/[\]]/g, '_'), sk = `${path(m)}|${k}`;
@@ -44,6 +44,15 @@ DS.Grow = (function () {
     await N().set(`${path(m)}/log/${k}`, { xp: gained, at: N().TS, why: lines(parts).map((l) => l.why).join(' · ').slice(0, 120) });
     await N().set(`${path(m)}/total`, total0 + gained);
     return { before: level(total0), after: level(total0 + gained), gained };
+  }
+  // 레벨이 오르면: 🆙 레벨업 알림(ds-levelup · 폰 축하 + 종합상황실) · 💎 레벨 5 · 10 · 15 … 보너스 (2026-11-05)
+  async function add(m, parts, key, opt = {}) {
+    const r = await add0(m, parts, key, opt);
+    if (r && r.before && r.after && r.after.lv > r.before.lv) {
+      for (let lv = r.before.lv + 1; lv <= r.after.lv; lv++) if (lv % 5 === 0 && DS.Gem) DS.Gem.add(m, DS.Gem.G.level5, `lv${lv}`, `Lv.${lv} 달성`, { free: true }).catch(() => {});
+      if (typeof window !== 'undefined' && window.dispatchEvent && typeof CustomEvent !== 'undefined') window.dispatchEvent(new CustomEvent('ds-levelup', { detail: { m, before: r.before, after: r.after } }));
+    }
+    return r;
   }
   async function mine(m) { return level(Number((await N().get(`${path(m)}/total`).catch(() => 0)) || 0)); }
   return { XP, WHY, TITLES, need, level, sum, lines, add, mine };

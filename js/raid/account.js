@@ -140,9 +140,15 @@ DS.Account = (function () {
     const fo = DS.Bonus ? DS.Bonus.fxOpen(bonus) : {}, seals = DS.Bonus ? DS.Bonus.seals(bonus).length : 0;
     heroes.push({ id: 16, open: seals >= 3, cond: `🟪 중단원던전 인장 ${Math.min(seals, 3)} / 3개 모으면 열려요` }); // 2026-11-03 사용자 결정: 금발 검사 = 인장 3개
     const fx = DS.FX.BASE.map((k) => ({ id: k, open: true })).concat(DS.FX.FANCY.map((k, i) => ({ id: k, open: !!fo[k], cond: DS.Bonus ? DS.Bonus.fxCond(i) : '해금 조건은 추후 공개' })));
+    // 💎 조각 상점 (2026-11-05): 용사 12~15 · 화려한 이펙트 = 조각으로 골라 해금 (인장으로 이미 연 이펙트는 그대로) · 도감 · 첫 레이드 · 인장 3개 용사는 업적 전용
+    const gem = DS.Gem && m ? await DS.Gem.mine(m) : {};
+    if (DS.Gem) {
+      heroes.forEach((h) => { const p = DS.Gem.price('hero', h.id); if (p == null) return; h.shop = { kind: 'hero', id: h.id, price: p }; h.open = h.open || DS.Gem.owns(gem, 'hero', h.id); h.cond = `💎 ${p} 조각으로 해금`; });
+      fx.forEach((f) => { const p = DS.Gem.price('fx', f.id); if (p == null) return; f.shop = { kind: 'fx', id: f.id, price: p }; f.open = f.open || DS.Gem.owns(gem, 'fx', f.id); f.cond = `💎 ${p} 조각으로 해금`; });
+    }
     // 🧪 테스트 · 🎮 체험판 (2026-11-04 사용자 요청): 해금 요소 모두 열림 (용사 · 이펙트)
     if (m && m.test) { heroes.forEach((h) => { h.open = true; }); fx.forEach((f) => { f.open = true; }); }
-    return { heroes, fx, got, need: need.length, seals };
+    return { heroes, fx, got, need: need.length, seals, gem: Number(gem.total) || 0, medal: gem.medal || {} };
   }
   async function logout() { cache = null; tsess(false); await N().signOut(); }
 

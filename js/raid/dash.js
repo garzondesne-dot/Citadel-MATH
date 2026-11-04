@@ -287,10 +287,18 @@ DS.Dash = (function () {
       <p>형성평가 ${show(s.boss)} · 첫 시도 ${show(s.first)} · 참여 ${s.went}/${s.heldN} · 고친 수 ${s.fixed}</p>
       ${DS.Result ? DS.Result.history(s.rec || {}) : ''}
       <div class="dash-memo"><b>세특 메모 초안</b><p>${esc(memo(s))}</p></div>
-      <div class="row"><button class="btn" id="dd-copy">메모 복사</button><button class="btn" id="dd-x">닫기</button></div></div>`;
+      <div class="row"><button class="btn" id="dd-gem">💎 조각 주기</button><button class="btn" id="dd-copy">메모 복사</button><button class="btn" id="dd-x">닫기</button></div></div>`;
     document.body.appendChild(el);
     el.querySelector('#dd-x').onclick = () => el.remove();
     el.querySelector('#dd-copy').onclick = () => copy(memo(s));
+    // 💎 선생님 지급 (2026-11-05): 1회 최대 5 · 이유 한 줄 (기록에 남음 · 세특 근거) · 하루 한도 밖
+    el.querySelector('#dd-gem').onclick = () => DS.Control.run(async () => {
+      const max = DS.Gem.G.teacherMax, n = Math.round(Number(prompt(`${s.name} 학생에게 줄 💎 조각 수 (1~${max})`, '3')));
+      if (!n) return; if (n < 1 || n > max) throw Object.assign(new Error(`1~${max} 사이로 적어 주세요.`), { user: true });
+      const why = String(prompt('이유 한 줄 (예: 친구에게 풀이를 설명함)', '') || '').trim(); if (!why) throw Object.assign(new Error('이유를 적어 주세요.'), { user: true });
+      const g = await DS.Gem.add({ c: s.cls, n: s.n }, n, `teacher_${Date.now()}`, `👩‍🏫 ${why}`, { free: true });
+      DS.UI.toast(`💎 ${g}개를 줬어요 · 「${why}」`);
+    });
   }
   return { enter, _build: build };
 })();

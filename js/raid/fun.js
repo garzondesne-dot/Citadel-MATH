@@ -245,6 +245,7 @@ DS.Fun = (function () {
     if (f.phase === 'show') animate(el.querySelector('.fa-arena'), f, true);
   }
   // 학생 폰
+  const funPaid = {}; // 💎 이 기기에서 이미 받은 판
   let phoneSig = '';
   function phone(body, R, me, code) {
     const f = norm(R.fun), alive = !!(f.alive || {})[me], mine = ((R.fv || {})[f.rk] || {})[me] || pend[`${f.g}|${f.rk}`] || '';
@@ -254,6 +255,18 @@ DS.Fun = (function () {
     const r = f.res || {}, wasIn = f.phase !== 'pick' && (r.a || []).concat(r.b || [], r.none || []).includes(me);
     const mk = String((f.marks || {})[me] || ''), myOk = (mk.match(/o/g) || []).length;
     if (f.kind === 'quiz' && f.phase === 'end' && myOk && DS.Grow) { const p = (R.players || {})[me] || {}; if (p.cls != null && p.num) DS.Grow.add({ c: p.cls, n: p.num }, { ox: myOk }, `oxq_${f.g}`).catch(() => {}); } // 맞힌 문장 × 2 EXP (같은 OX 타임은 한 번)
+    if (f.phase === 'end' && DS.Gem && !funPaid[f.g]) { // 💎 · 🎖 (2026-11-05): 운 놀이는 작게 · 실력(OX)은 크게 · 참여만 해도 +1 · 같은 판은 한 번
+      const p = (R.players || {})[me] || {}, m = p.cls != null && p.num ? { c: p.cls, n: p.num } : null, G = DS.Gem.G;
+      const joined = f.kind === 'quiz' ? mk.length > 0 : (f.outAt || {})[me] != null || (f.win || []).includes(me) || (f.alive || {})[me];
+      if (m && joined) {
+        funPaid[f.g] = true;
+        if (f.kind === 'quiz') { if (mk.length && myOk === mk.length) DS.Gem.add(m, G.quizAll, `quizall_${f.g}`, 'OX 타임 모두 정답').catch(() => {}); }
+        else {
+          DS.Gem.add(m, G.funJoin, `fun_${f.g}`, '쉼터 놀이 참여').catch(() => {});
+          if ((f.win || []).includes(me)) { DS.Gem.add(m, f.kind === 'ox' ? G.oxWin : G.funWin, `funwin_${f.g}`, '놀이 우승').catch(() => {}); DS.Gem.medal(m, f.kind).catch(() => {}); }
+        }
+      }
+    }
     const me2 = f.kind === 'quiz' ? (f.phase === 'show' ? (mk.slice(-1) === 'o' ? '<p class="fa-me ok">⭕ 정답!</p>' : `<p class="fa-me ng">${mk.slice(-1) === '-' ? '⏱ 시간이 지났어요' : '❌ 아쉬워요'} — 해설을 확인해요</p>`)
         : f.phase === 'end' ? `<p class="fa-me ok">⭕ ${myOk} / ${mk.length} 정답${myOk ? ` · +${myOk * 2} EXP` : ''}</p>${arr(f.hist).map((h, i) => (mk[i] && mk[i] !== 'o' ? (() => { const q = OXL()[h.qi] || {}; return `<p class="fa-wq me">📌 「${esc(q.t)}」 → ${q.a ? '⭕' : '❌'}<small>${esc(q.why)}</small></p>`; })() : '')).join('')}` : '<p class="fa-me">맞을까 틀릴까? <b>탈락 없이 끝까지!</b> · 시간 안에는 바꿀 수 있어요</p>')
       : f.phase === 'show' ? (wasIn ? (alive ? '<p class="fa-me ok">🎉 살아남았다!</p>' : `<p class="fa-me ng">💥 ${(r.none || []).includes(me) ? '안 골라서' : K(f).out} 탈락… 관객석으로</p>`) : '<p class="fa-me">👀 관객석</p>')

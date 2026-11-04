@@ -23,6 +23,10 @@ DS.Titles = (function () {
     { id: 'sage', name: '도감 수집가', tier: 'o', medal: ['rank', 8], cond: '1~3차시 연성 도감 15장 완성', test: (d) => { const need = DS.Unit ? DS.Unit.CARDS.filter((c) => c.no <= 3) : []; return need.length > 0 && need.every((c) => (d.cards || {})[c.id]); } },
     { id: 'king', name: '집합의 지배자', tier: 'o', medal: ['rank', 9], cond: '🏰 성채던전 1층 👑 보스 방 처치', test: (d) => { const e = (d.bonus || {})['eval-1'] || {}; return !!((e.q12 || {}).clear || (e.eb || {}).clear); } }, // 2026-11-05: 12번 보스 방 (옛 eb 기록도) · 2026-11-03 변경 제안 v1
     { id: 'sovereign', name: '명제의 군주', tier: 'o', medal: ['rank', 9], cond: '🏰 성채던전 2층 👑 보스 방(17번) 처치', test: (d) => !!((((d.bonus || {})['eval-3'] || {}).q17 || {}).clear) }, // 2026-11-05 대단원 컨펌
+    // 🎖 놀이 메달 · 🔁 연속 참여 (2026-11-05): gem/{반}/{번호}.medal · log
+    { id: 'gambler', name: '쉼터의 승부사', tier: 'b', medal: ['rank', 4], cond: '🎖 쉼터 놀이 우승 메달 3개', test: (d) => Object.values(((d.gem || {}).medal) || {}).reduce((a, b) => a + (Number(b) || 0), 0) >= 3 },
+    { id: 'oxsurv', name: 'OX 서바이버', tier: 'p', medal: ['rank', 6], cond: '🎖 수학 OX 우승 메달 3개', test: (d) => (Number((((d.gem || {}).medal) || {}).ox) || 0) >= 3 },
+    { id: 'steady', name: '꾸준한 용사', tier: 'b', medal: ['rank', 2], cond: '🔁 10차시 연속 참여', test: (d) => Object.keys(((d.gem || {}).log) || {}).some((k) => k.startsWith('streak10_')) },
   ];
   // 던전 정복: 차시마다 그 던전 테마의 메달 (보스 격파 또는 형성평가 만점)
   function dungeonTitles() {
@@ -36,8 +40,8 @@ DS.Titles = (function () {
   const get = (id) => all().find((t) => t.id === id) || null;
   // 한 학생의 기록 모으기 (모닥불 · 설정에서)
   async function data(m) {
-    const k = ck(m.c), [records, cards, xp, bonus] = await Promise.all(['records', 'cards', 'xp', 'bonus'].map((p) => DS.Net.get(`${p}/${k}/${m.n}`).catch(() => null)));
-    return { records: records || {}, cards: cards || {}, xp: Number((xp || {}).total || 0), bonus: bonus || {} };
+    const k = ck(m.c), [records, cards, xp, bonus, gem] = await Promise.all(['records', 'cards', 'xp', 'bonus', 'gem'].map((p) => DS.Net.get(`${p}/${k}/${m.n}`).catch(() => null)));
+    return { records: records || {}, cards: cards || {}, xp: Number((xp || {}).total || 0), bonus: bonus || {}, gem: gem || {} };
   }
   const earned = (d) => all().filter((t) => { try { return t.test(d); } catch (e) { return false; } });
   // 메달 그림 칸
