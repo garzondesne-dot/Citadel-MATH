@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ko" data-footer="모두의 던전 · 저작권 등록 신청 준비 자료 (초안 · 신청인 확인용)"><head><meta charset="utf-8"><title>저작권 등록 준비 자료</title>
+<style>
+  :root { --ink: #1f2a44; --sub: #5b6478; --line: #d4d9e6; --no: #d93a3a; }
+  body { margin: 0; font-family: 'Noto Sans CJK KR', sans-serif; color: var(--ink); font-size: 10.3pt; line-height: 1.68; }
+  h1 { font-size: 19pt; margin: 0 0 2mm; } .sub { color: var(--sub); margin: 0 0 6mm; }
+  h2 { font-size: 13.5pt; margin: 7mm 0 2.5mm; padding: 1.2mm 3mm; background: #233a7a; color: #fff; border-radius: 1.5mm; page-break-after: avoid; }
+  h3 { font-size: 11.3pt; margin: 4mm 0 1.5mm; color: #233a7a; page-break-after: avoid; }
+  table { width: 100%; border-collapse: collapse; margin: 2mm 0 4mm; font-size: 9.4pt; page-break-inside: avoid; }
+  th, td { border: 1px solid var(--line); padding: 1.5mm 2.4mm; vertical-align: top; text-align: left; } th { background: #eef2fb; width: 26%; }
+  .box { border: 1px solid var(--line); border-radius: 2mm; padding: 3mm 4.5mm; margin: 3mm 0; page-break-inside: avoid; }
+  .warn { background: #fff1f0; border-color: #f3b2ad; } .draft { background: #f7f9ff; border-color: #b8c6ee; font-size: 9.8pt; }
+  .draft b.t { display: block; color: #233a7a; margin-top: 2mm; }
+  ul { margin: 1mm 0; padding-left: 6mm; } li { margin: .5mm 0; }
+  .pb { page-break-before: always; }
+  .small { font-size: 8.8pt; color: var(--sub); }
+</style></head><body>
+<h1>저작권 등록 신청 준비 자료</h1>
+<p class="sub">「모두의 던전」 — 학습지 입력형 교실 협동 레이드 수업 플랫폼 · 컴퓨터프로그램저작물 · v{{VERSION}} · 신청인(저작자) 김찬우</p>
+
+<div class="box warn"><b>⚠ 신청 전에 반드시 읽어 주세요</b>
+<ul>
+<li>「생성형 인공지능 활용 저작물의 저작권 등록 안내서」(문화체육관광부 · 한국저작권위원회, 2025. 6.)에 따르면 등록 효력은 <b>인간의 창작적 기여 부분에만</b> 미치고, <b>프롬프트 입력은 일반적으로 아이디어 제공 · 지시에 불과</b>하여 창작적 기여로 보기 어렵습니다.</li>
+<li>이 프로그램의 <b>소스코드는 대부분 생성형 AI(Claude)가 신청인의 기획 · 지시 · 검토에 따라 작성</b>하였고, 그림은 이미지 생성 AI 산출물입니다. 따라서 <b>코드 전체를 신청인이 직접 작성한 것으로 적으면 허위 등록(법 제136조 제2항 제2호)</b>이 될 수 있습니다.</li>
+<li>아래 「저작물 내용」 초안은 이 사실을 그대로 구분해 적었습니다. <b>신청인이 직접 확인 · 수정</b>하시고, 등록 가능 범위는 신청 전에 <b>한국저작권위원회 등록상담(1800-5455)</b>에서 확인하시기 바랍니다. 이 자료는 법률 자문이 아닙니다.</li>
+</ul></div>
+
+<h2>1. 신청 정보 (초안)</h2>
+<table>
+<tr><th>저작물 종류</th><td>컴퓨터프로그램저작물</td></tr>
+<tr><th>제호(제목)</th><td>모두의 던전 — 학습지 입력형 교실 협동 레이드 수업 플랫폼</td></tr>
+<tr><th>저작자 · 신청인</th><td>김찬우 (개인) — 업무상저작물 여부는 소속 학교 · 교육청에 확인 후 결정</td></tr>
+<tr><th>창작 연월일</th><td>2026년 10월 31일 착수(결정 문서 기준) · 등록 판 v{{VERSION}} — <span class="small">신청인 확인 필요</span></td></tr>
+<tr><th>공표 연월일</th><td>2026년 11월 2일 무렵 웹(GitHub Pages)으로 처음 공개 — <span class="small">공개 저장소 · 배포 기록으로 확인 필요</span></td></tr>
+<tr><th>실행 환경</th><td>웹 브라우저(HTML · CSS · JavaScript), 서비스 워커(PWA), 실시간 데이터베이스(Firebase Realtime Database)</td></tr>
+<tr><th>복제물</th><td>「모두의던전_엔진소스_v{{VERSION}}.zip」 (인터넷 전송) — 엔진 소스 69개 파일 · 약 1만 줄 · 예시 차시 1개</td></tr>
+</table>
+
+<h2>2. 「저작물 내용」 란 초안 (안내서 부록 1 형식: ① 개요 ② GAI 산출물 ③ 인간의 창작적 표현)</h2>
+<div class="box draft">
+<b class="t">① 신청물 전체 개요</b>
+교사가 입력한 학습지 문항을 「몬스터」로 바꾸어, 학생 스마트폰 · 교사 스마트폰(리모컨) · 교실 화면(종합상황실)이 실시간으로 함께 진행하는 협동 수업 프로그램이다. 반 전체가 공동 체력을 깎는 레이드, 숫자를 바꾼 재도전, 친구 돕기(힐), 형성평가 보스전, 쉬는 시간 반 전체 놀이(밸런스 · 반대로 · 수학 OX), 수업 뒤 오답노트 · 보충 던전, 교사용 출석부 · 수업 일지 · 학급 대시보드로 구성된다. 특정 교과서의 내용은 포함하지 않으며, 문항은 교사가 입력하는 차시 데이터이다(복제물에는 등록용 예시 차시 1개만 포함).
+<b class="t">② 활용된 GAI 산출물</b>
+• 소스코드: 생성형 AI(Anthropic Claude, 코드 작성 도구)가 신청인의 지시에 따라 작성 · 수정한 코드가 대부분을 차지한다. 신청인은 기능 · 규칙 · 화면을 문장으로 지시하고, 결과를 실제 수업에서 시험하여 수정을 지시하였다.<br>
+• 그림(몬스터 · 배경 · 아이콘 등): 이미지 생성 AI 산출물 — <b>복제물에서 제외</b>하였고 등록 대상이 아니다.<br>
+• 놀이 질문 · OX 문장 · 화면 문구: AI가 초안을 쓰고 신청인이 고르고 고쳤다 (신청인이 직접 쓴 문장이 있으면 ③에 옮겨 적을 것).
+<b class="t">③ 인간의 창작적 표현 부분</b> <span class="small">(신청인이 사실대로 채울 칸 — 아래는 기록에 남은 것 중 후보)</span><br>
+• 수업 구조와 게임 규칙의 구체적 설계: 차시 = 던전, 문항 = 몬스터, 공동 체력 공식(인원 × 소문제 × 기준%), 재도전 4회 · 숫자 변경, 고친 문항에 더 큰 경험치, 정답 · 오답 글자를 교실 화면에 띄우지 않는 원칙, 쉼터 · 집중모드, 오답노트 색 체계 등 (결정 기록 32개 항목)<br>
+• 화면 구성 · 배열의 선택: 교사 메뉴 · 캠프 · 무대의 배치, 아이콘 · 무대 그림의 선택과 배열<br>
+• 신청인이 직접 작성한 문서 · 문항 · 코드가 있다면 그 파일과 위치<br>
+<span class="small">※ 안내서: 「단순 아이디어만을 기술하면 안 되고, 그 아이디어를 어떻게 구체화하여 최종 결과물에 표현하였는지」를 적어야 하며, 복제물에서 확인할 수 있어야 함. 규칙 · 아이디어 자체는 저작권 보호 대상이 아닐 수 있음.</span>
+</div>
+
+<h2 class="pb">3. 등록 범위와 제외 범위</h2>
+<table>
+<tr><th>포함 (복제물)</th><td>js/ (엔진 · 수업 진행 · 전투 · 놀이 · 오답노트 · 대시보드 · 출석 · 시간표 등), css/, index.html · privacy.html · sw.js · manifest, 데이터베이스 규칙, 배치표(assets/manifest.js), 성취기준 · 오개념 분류(lessons/curriculum.js), 카드 조합표(lessons/unit-set.js), 예시 차시(lessons/sample-01.js), 자체 시험 코드 일부</td></tr>
+<tr><th>제외 · 교과서</th><td>실제 수업 차시 lessons/set-02 ~ 06 (학습지 · 교과서를 바탕으로 한 문항), eval-1 (교과서 중단원 마무리를 숫자만 바꾼 문항), 학습지 이미지(서버)</td></tr>
+<tr><th>제외 · AI 산출물</th><td>assets/art (몬스터 · 배경 · 아이콘 · 무대 그림), assets/video (개념 영상)</td></tr>
+<tr><th>제외 · 외부 요소</th><td>Galmuri 픽셀 글꼴 (SIL Open Font License) · qrcode.js (MIT License) · Firebase (Google 서비스)</td></tr>
+<tr><th>참고</th><td>교육과정 성취기준 코드([10공수2-02-01] 등)는 교육부 고시 교육과정의 공개 정보로, 분류용으로만 인용함</td></tr>
+</table>
+
+<h2>4. 창작 과정 기록 (증빙 후보)</h2>
+<table>
+<tr><th>결정 기록</th><td>docs/DECISIONS.md — 신청인이 확정한 설계 결정 32개 항목 (날짜 · 내용)</td></tr>
+<tr><th>개발 기록</th><td>공개 저장소 커밋 기록(이 저장소 2026-11-02 ~ , 111건 이상) — 언제 무엇을 바꿨는지</td></tr>
+<tr><th>수업 적용</th><td>실제 수업 기록(익명 합계) · 수업 뒤 개선 순환 (선진사례 보고서 Ⅳ장)</td></tr>
+<tr><th>대화 기록</th><td>AI 도구와의 작업 대화(지시 · 결정 · 수정 요청) — 필요하면 별도 보충 자료로 제출</td></tr>
+</table>
+
+<h2>5. 신청 순서 체크리스트</h2>
+<ul>
+<li>☐ 학교 · 교육청에 업무상저작물 여부 확인 (개인 명의로 신청할 수 있는지)</li>
+<li>☐ 등록상담(1800-5455): 「AI가 대부분 작성한 코드 + 교사 설계」의 등록 가능 범위와 ③ 작성 방법 문의</li>
+<li>☐ cros.or.kr 회원가입 → 컴퓨터프로그램 등록 → 공표 여부 「예」 · 공표일 · 창작일 입력</li>
+<li>☐ 「저작물 내용」에 2장 ① ② ③ 입력 (③은 사실대로 수정)</li>
+<li>☐ 복제물: 엔진 소스 zip 「인터넷 전송」 · 보충 자료: 이 문서 · 결정 기록</li>
+<li>☐ 수수료 · 등록면허세 확인 후 결제 (여러 건이면 모두 신청 뒤 한 번에)</li>
+</ul>
+<p class="small">근거: 「생성형 인공지능 활용 저작물의 저작권 등록 안내서」(2025. 6.) 3장 · 4장 · 부록 1 — 신청인이 제공한 PDF.</p>
+</body></html>
