@@ -12,8 +12,8 @@ check(G.level(39).lv === 1 && G.level(40).lv === 2 && G.level(40).into === 0, 'L
 check(G.level(40 + 60).lv === 3 && G.level(40 + 60 + 80).lv === 4, 'Lv.3 = 100, Lv.4 = 180 (40 + 20 × (L − 1))');
 check(G.level(1e6).title.startsWith('전설의 용사'), '높은 레벨 칭호');
 if (!DS.Lessons.get('eval-1')) { fail++; console.error('FAIL: eval-1 불러오기'); }
-check(G.sum({ join: 1, submit: 4, correct: 9, fixed: 2, bossWin: 1, perfect: 1, words: 1 }) === 10 + 8 + 9 + 6 + 10 + 5 + 2, 'EXP 합계');
-check(G.XP.fixed > G.XP.correct, '고친 소문제가 처음 맞힌 것보다 많이 (실패도 재도전)');
+check(G.sum({ join: 1, submit: 4, correct: 9, fixed: 2, bossWin: 1, perfect: 1, words: 1 }) === 10 + 8 + 18 + 0 + 10 + 5 + 2, 'EXP 합계');
+check(G.XP.correct === 2 && G.XP.fixed === 0, '처음 맞힘 ≥ 고침 > 포기: 맞힌 소문제는 처음이든 고쳐서든 +2 (correct 가 고친 것도 셈 · 일부러 틀려 이득 없음)');
 
 // ── 2. 인장 · 이펙트 해금 (2026-11-05: 차시 = 🎯 허수아비 👑 재대결 처치 · 성채 층 = 👑 보스 방 · 옛 규칙 인장 그대로) ──
 const L4 = DS.Lessons.get('set-04');
