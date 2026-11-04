@@ -1668,3 +1668,5 @@ body:has(#test-bar) #ver-tag { bottom: calc(64px + env(safe-area-inset-bottom));
 .sv-texts li { margin: 2px 0; }
 .sv-no { width: 56px; }
 input.sv-no { width: 64px !important; display: inline-block; padding: 2px 4px; }
+/* 🏫 학급 결과 카드 (v0.9.8.2 · 사용자 「너무 커서 안 보임」): 아래 .framed { max-width: 100% } 가 520px 을 덮어 종합상황실에서 화면 폭 가득 → 카드 전체가 한 화면에 들어오는 폭으로 */
+.modal > .quiz-box.sc-box { max-width: min(calc(100vw - 24px), calc((100dvh - 190px) * 0.8 + 26px)); }
