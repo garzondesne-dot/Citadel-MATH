@@ -14,11 +14,13 @@ DS.CampScene = (function () {
   const box = ([x0, y0, x1, y1]) => `left:${pct(x0, W())};top:${pct(y0, H())};width:${pct(x1 - x0, W())};height:${pct(y1 - y0, H())}`;
   // 그림 위 누르는 자리 (id · 접근성 이름 · 눌렀을 때 이름표)
   const zone = (id, key, label, cls = '') => `<button class="cs-zone cs-int ${cls}" id="${id}" style="${box(C().zones[key])}" aria-label="${label}"><i class="cs-glow"></i><span class="camp-label">${label}</span></button>`;
-  // 장면 겹: 차시 문 빛 · 등불 · 깃발 (배경 위 · 오브젝트 아래)
+  // 그림에 붙은 것(성채 · 텐트 · 아치 문)의 얇은 윤곽선 (2026-11-05 · 평소에도 보임 · 누를 수 있다는 표시)
+  const outline = () => { const o = C().outline; if (!o) return ''; return `<svg class="cs-ol" viewBox="0 0 ${W()} ${H()}" preserveAspectRatio="none" aria-hidden="true">${Object.entries(o).map(([k, d]) => `<path class="cs-ol-${k}" d="${d}"/>`).join('')}</svg>`; };
+  // 장면 겹: 차시 문 빛 · 윤곽선 · 깃발 (배경 위 · 오브젝트 아래)
   function layers() {
-    const g = C().gateOn, L = C().lamps, f = C().flag;
+    const g = C().gateOn, f = C().flag; // 2026-11-05: 성벽 등불 5개는 없앰 (사용자) — lamps() 는 그릴 것이 없으면 아무것도 안 함
     return `<img class="cs-gate-on" alt="" src="${base()}${g.src}" style="left:${pct(g.x, W())};top:${pct(g.y, H())};width:${pct(g.w, W())}">
-      <div class="cs-lamps">${L.xs.map((x, i) => `<i class="cs-lamp off" data-lamp="${i}" style="left:${pct(x, W())};top:${pct(L.y, H())}"></i>`).join('')}</div>
+      ${outline()}
       <i class="cs-flag" style="left:${pct(f[0], W())};top:${pct(f[1], H())}"></i>`;
   }
   // 등불 상태: states[i] = 'off' | 'on' | 'gold' · fresh = 새로 켜진 칸 (반짝)
