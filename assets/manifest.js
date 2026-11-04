@@ -47,6 +47,9 @@ DS.ASSETS = {
   // v2 도트 몬스터 (2026-11-03 · 7차시 차원 균열 · 3자세 대기 | 공격 | 쓰러짐 · 왼쪽을 봄): 'rift:번호' · 보스 'riftboss:0' (칸 96 · 보스 192)
   monstersRift: { src: 'monsters-rift-v2.webp', cols: 3, rows: 5, poses: { idle: 0, attack: 1, down: 2 }, names: ['균열 슬라임', '프리즘 골렘', '틈새 박쥐', '태엽 눈알 거미', '공허 가오리'] },
   monstersRiftBoss: { src: 'monsters-riftboss-v2.webp', cols: 3, rows: 1, poses: { idle: 0, attack: 1, down: 2 }, names: ['균열의 감시자'] },
+  // 8차시 🪞 거울 수정 광산 (2026-11-04 · 사용자 생성 · 칸 192 · 보스 384 · tools/sprite/cut_grid.py): 'mirror:번호' · 보스 'mirrorboss:0'
+  monstersMirror: { src: 'monsters-mirror-v2.webp', cols: 3, rows: 5, poses: { idle: 0, attack: 1, down: 2 }, names: ['거울 박쥐', '반사 골렘', '뒤집힌 거미', '수정 광부 유령', '반쪽 슬라임'] },
+  monstersMirrorBoss: { src: 'monsters-mirrorboss-v2.webp', cols: 3, rows: 1, poses: { idle: 0, attack: 1, down: 2 }, names: ['대우의 거울 마왕'] },
   monstersCrown: { src: 'monsters-crown-v1.webp', cols: 3, rows: 10, poses: { idle: 0, attack: 1, down: 2 },
     names: ['에메랄드 왕관 슬라임', '루비 박쥐', '사파이어 뿔벌레', '자수정 뼈뱀', '버섯 전사', '자수정 눈알 문어', '이끼 골렘', '서리 왕관 늑대', '덩굴 미믹', '청록 수정룡'] },
   // 던전 테마 10종: 던전 안 전투 배경(dg-) + 같은 번호의 포털(portal-, 2열: 활성 / 봉쇄). 차시 파일의 theme 으로 고른다
