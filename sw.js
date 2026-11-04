@@ -22,7 +22,7 @@ const isStatic = (url) => /\/(assets\/(img|art|fonts)|icons)\//.test(url.pathnam
 
 self.addEventListener('install', (e) => {
   e.waitUntil(Promise.all([
-    caches.open(CACHE).then((c) => c.addAll(CORE)),
+    caches.open(CACHE).then((c) => c.addAll(CORE.map((u) => new Request(u, { cache: 'reload' })))), // 브라우저 HTTP 캐시(깃허브 10분)를 건너뛰고 새 판 그대로
     caches.open(ASSETS).then((c) => c.addAll(STATIC)),
   ]).then(() => self.skipWaiting()));
 });
@@ -44,8 +44,10 @@ self.addEventListener('fetch', (e) => {
     }))));
     return;
   }
-  e.respondWith(fetch(req).then((res) => {
-    if (res.ok) { const copy = res.clone(); caches.open(CACHE).then((c) => c.put(req, copy)); }
+  // v0.9.8.0 속도: 앱 파일(html · js · css)은 이 판 캐시에서 바로 (예전: 열 때마다 깃허브에서 50여 개를 다시 받음 → 학교 망에서 느림)
+  //   새 판은 sw.js 가 바뀌면(배포) 설치 때 통째로 새로 받음 → 섞이지 않음 · 캐시에 없는 것만 네트워크
+  e.respondWith(caches.open(CACHE).then((c) => c.match(req, { ignoreSearch: req.mode === 'navigate' }).then((hit) => hit || fetch(req).then((res) => {
+    if (res.ok && url.pathname.match(/\.(js|css|html|webmanifest)$|\/$/)) c.put(req, res.clone());
     return res;
-  }).catch(() => caches.match(req, { ignoreSearch: true }).then((hit) => hit || caches.match('./index.html'))));
+  }).catch(() => c.match('./index.html')))));
 });

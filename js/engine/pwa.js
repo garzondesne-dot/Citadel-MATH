@@ -14,7 +14,14 @@ DS.PWA = (function () {
   function init() {
     const btn = $('#btn-install'), tip = $('#install-tip');
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
-      navigator.serviceWorker.register('./sw.js').catch(() => { /* 등록 실패해도 수업은 그대로 */ });
+      navigator.serviceWorker.register('./sw.js').then((r) => { r.update().catch(() => {}); }).catch(() => { /* 등록 실패해도 수업은 그대로 */ });
+      // v0.9.8.0: 앱 파일을 캐시에서 바로 쓰므로 새 판이 깔리면 → 첫 화면이면 바로 새로고침 · 수업 중이면 안내만 (다음에 열 때 적용)
+      let had = !!navigator.serviceWorker.controller;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!had) { had = true; return; }
+        const home = document.querySelector('#screen-home.active, #screen-login.active');
+        if (home) location.reload(); else if (DS.UI && DS.UI.toast) DS.UI.toast('🔄 새 판이 준비됐어요 — 앱을 다시 열면 적용돼요', 4000);
+      });
     }
     if (!btn || standalone()) return;
     if (ios()) { tip.hidden = false; return; }
