@@ -30,6 +30,7 @@
   ④ 아직 없는 차시용이면 연결하지 않고 HANDOVER 「모션그래픽 영상」 대기 목록에 적는다
   ⑤ 테스트 통과 → 커밋 → 배포한다 (수업 직전이면 배포는 미룬다)
   ⑥ 어떤 영상을 어느 칸에 연결했는지 표로 알린다
+- **학습지 PDF 는 스킬 `math-lesson-designer` 가 만든다** (사용자 지침, 2026-11-04): 그 스킬의 설계 원칙(한 STEP 에 개념 하나 · 낱말 상자 + 빈칸 · 생각 열기 소재 · 형성평가 · 확인 도장 4cm) 과 조판 엔진 `tools/worksheet/wslib.py`(스킬 4-3 원문 그대로 · CSS 새로 짜지 않음)를 쓴다. 세션마다 `bash tools/worksheet/setup_wslib.sh` (Noto Sans CJK KR · DejaVu Serif 이탤릭 · 파이썬 playwright) 뒤 `PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers` 로 실행. 출력 뒤 `pdffonts` 에 NotoSansCJKkr · DejaVuSerif-Italic · DejaVuSans 만 · 단 아래끝 281mm 이하 · `pdftoppm` 으로 쪽 확인. 레이드용(게임 칸)은 그 위에 `GAME()` 태그 · ★ · `measure_crops.js` 칸 위치를 더한다.
 - **레이드용 학습지 PDF 를 만들면 사용자의 Google 드라이브 「내 드라이브 > 학습지 > 공통수학2 > 02 레이드학습지」 폴더(id `1gcvXDs8FQETGkNZJrI2WlHJ3x8Jdzs0W`)에 저장**한다 (사용자 지침). 이 작업 공간은 PDF · mp4 를 드라이브에 직접 못 올리므로 파일을 보내 드리고 사용자가 올린다. 이름은 「(0n차시) 레이드용_vN.pdf」. 드라이브 폴더 구조는 `docs/HANDOVER.md` 「드라이브 폴더」.
 - **「n차시 학습지 컨펌」 = 차시 자동화** (사용자 지침, 2026-11-02 · 도구 `tools/auto/` README): 사용자가 변경 제안 PDF 를 컨펌하면 →
   ① 레이드용 학습지 생성(`tools/worksheet/gen_wsN.py`) · 칸 위치(`measure_crops.js`) · 차시 파일 · 독립 검산 테스트 · e2e 테스트 모드
