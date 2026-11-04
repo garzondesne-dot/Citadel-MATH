@@ -55,6 +55,18 @@ const give = (u, a, n) => { const items = X.itemsFor(L, R, mid, u, a); R.subs[mi
   await DS.Result.gather(code, '1-4');
   check(get('xp/1-4/3/total') === t3c, '결과 모으기 두 번 → EXP 한 번만');
 
+  // 저장 줄이기 (v0.9.8.0 · cache): 두 번째부터 바뀐 게 없으면 서버 요청 0 · 늘어나면 기록 + EXP 만
+  const m4 = { c: '1-4', n: 2 }, R4 = { ...R };
+  let calls = 0; const g0 = DS.Net.get, s0 = DS.Net.set;
+  DS.Net.get = async (p2) => { calls++; return g0(p2); }; DS.Net.set = async (p2, v) => { calls++; return s0(p2, v); };
+  await DS.Result.save(L, R4, 'b', m4, code, null, null, { cache: true });
+  calls = 0; await DS.Result.save(L, R4, 'b', m4, code, null, null, { cache: true });
+  check(calls === 0, `바뀐 게 없으면 서버 요청 0 (${calls})`);
+  const tB = get('xp/1-4/2/total'); give('b', 1, 99); calls = 0;
+  await DS.Result.save(L, R4, 'b', m4, code, null, null, { cache: true });
+  check(get('xp/1-4/2/total') > tB && calls <= 6, `더 맞히면 기록 + EXP 만 (요청 ${calls}번 · EXP ${tB} → ${get('xp/1-4/2/total')})`);
+  DS.Net.get = g0; DS.Net.set = s0;
+
   if (fail) { console.error(`\n${fail}건 실패`); process.exit(1); }
   console.log('OK: 기록 저장 — 진행 저장 EXP 늘어난 만큼만 · 첫 레이드 특전 한 번 · 결과 모으기(없는 학생만 · 두 번 눌러도 한 번) 통과');
 })().catch((e) => { console.error(e); process.exit(1); });

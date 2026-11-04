@@ -23,17 +23,22 @@ DS.Grow = (function () {
   const path = (m) => `xp/${ck(m.c)}/${m.n}`;
   // 쌓기 (key 가 있으면 같은 key 는 한 번만) → { before, after, gained }
   // opt.upsert (v0.9.7.6 · 수업 중 진행 저장): 같은 key 가 있으면 늘어난 만큼만 더함 · before = 이 key 를 받기 전 레벨 (결과 화면 레벨업 연출)
+  //   opt.cache (v0.9.8.0 · 저장 줄이기): 이 기기가 이미 쓴 key 의 EXP 를 기억 → 늘어난 게 없으면 서버에 묻지도 쓰지도 않음 · 늘었을 때만 total 을 새로 읽어 더함
+  const seen = {};
   async function add(m, parts, key, opt = {}) {
     if (!m || m.c == null || !m.n) return null;
     const gained = Math.min(300, sum(parts));
-    const k = String(key || `${Date.now()}`).replace(/[.#$/[\]]/g, '_');
+    const k = String(key || `${Date.now()}`).replace(/[.#$/[\]]/g, '_'), sk = `${path(m)}|${k}`;
+    if (opt.cache && opt.upsert && sk in seen && gained <= seen[sk]) return { before: null, after: null, gained: seen[sk], same: true };
     const had = key ? await N().get(`${path(m)}/log/${k}`).catch(() => null) : null;
     if (had && !opt.upsert) return null;
     if (had) {
       const old = Number(had.xp) || 0, total = Number((await N().get(`${path(m)}/total`).catch(() => 0)) || 0), d = Math.max(0, gained - old);
       if (d) { await N().set(`${path(m)}/log/${k}`, { xp: old + d, at: N().TS, why: lines(parts).map((l) => l.why).join(' · ').slice(0, 120) }); await N().set(`${path(m)}/total`, total + d); }
+      if (key) seen[sk] = old + d;
       return { before: level(total - old), after: level(total + d), gained: old + d };
     }
+    if (key && opt.upsert) seen[sk] = gained;
     const total0 = Number((await N().get(`${path(m)}/total`).catch(() => 0)) || 0);
     if (!gained) return { before: level(total0), after: level(total0), gained: 0 };
     await N().set(`${path(m)}/log/${k}`, { xp: gained, at: N().TS, why: lines(parts).map((l) => l.why).join(' · ').slice(0, 120) });

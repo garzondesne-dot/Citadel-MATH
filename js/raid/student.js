@@ -23,7 +23,7 @@ DS.Student = (function () {
     test = opt.test || null;
     cleared0 = false; resulted = false; drawn = ''; shown = ''; form = null; retrying = ''; bossSet = 1; othersSeen = {};
     await DS.Act.join(c, info);
-    code = c; info0 = info;
+    code = c; info0 = info; lastStep = null; dirty = false; clearTimeout(saveT);
     me = DS.Net.uid();
     if (!test) { try { localStorage.setItem('citadel-student', JSON.stringify({ code: c, ...info })); } catch (e) { /* 무시 */ } }
     DS.UI.show('screen-student'); atkStart();
@@ -34,18 +34,21 @@ DS.Student = (function () {
     stop = DS.Net.watch(`rooms/${code}`, (v) => {
       if (!v) return;
       raw = v; R = DS.Act.unpackRoom(v);
+      { const st = (R.state || {}).step ?? -1; if (lastStep !== null && st !== lastStep && dirty) setTimeout(saveNow, 300 + Math.random() * 2500); lastStep = st; } // 단계가 바뀌면 저장 (18명이 한꺼번에 몰리지 않게 조금씩 늦춤)
       L = DS.Lessons.get(R.meta.lesson); if (L && L.id !== DS.Art._entered) { DS.Art._entered = L.id; DS.Art.lessonEnter(L); } // v0.9.6 차시별 다운로드
       render();
     });
   }
   const acc = () => ({ c: info0.cls, n: info0.num, name: info0.nick, hero: info0.hero, fx: info0.fx, title: info0.title });
-  // 💾 진행 저장 (v0.9.7.6): 공격 · 형성평가 답을 낼 때마다 1.5초 뒤 기록 + EXP 저장 → 수업 끝 전에 나가도 대시보드 · EXP 가 남는다 (테스트 모드는 저장 안 함)
-  let saveT = null;
-  function saveSoon() {
-    if (test || !DS.Result || !info0 || info0.cls == null || !info0.num) return;
-    clearTimeout(saveT);
-    const c0 = code;
-    saveT = setTimeout(() => { if (!test && L && R && me && code === c0 && Raid().activeIds(R).includes(me)) DS.Result.save(L, R, me, acc(), c0).catch(() => {}); }, 1500);
+  // 💾 진행 저장 (v0.9.7.6 → v0.9.8.0 줄임 · 사용자 확정): ① 선생님이 다음 단계로 넘길 때 ② 형성평가는 마지막 답 10초 뒤 한 번 ③ 앱을 내리거나 닫을 때
+  //   → 수업 끝 전에 나가도 대시보드 · EXP 가 남는다 · 기록 목록은 한 번만 읽고 바뀐 게 없으면 안 씀 (테스트 모드는 저장 안 함)
+  let saveT = null, lastStep = null, dirty = false;
+  const canSave = () => !test && DS.Result && info0 && info0.cls != null && info0.num && L && R && me && Raid().activeIds(R).includes(me);
+  function saveNow() { clearTimeout(saveT); saveT = null; if (!dirty || !canSave()) return; dirty = false; DS.Result.save(L, R, me, acc(), code, null, null, { cache: true }).catch(() => { dirty = true; }); }
+  function saveSoon(ms = 10000) { dirty = true; clearTimeout(saveT); saveT = setTimeout(saveNow, ms); }
+  if (typeof document !== 'undefined') {
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveNow(); });
+    window.addEventListener('pagehide', saveNow);
   }
   // 수업이 끝나면 모닥불로
   // v0.8.0: 수업이 끝나면 ⚔ 오늘의 전투 결과(개인) → 모닥불 (「⚔ 보강던전」 추천을 누르면 보강던전으로)
@@ -56,7 +59,7 @@ DS.Student = (function () {
     if (DS.Result && L && R && me && Raid().activeIds(R).includes(me)) return DS.Result.show(L, R, me, t ? null : acc(), code, go, { force: true }).catch(() => go()); // 2026-11-03: 수업이 끝나면 언제나 ⚔ 개인 결과 → 모닥불 (학급 결과는 대기실 버튼)
     go();
   }
-  const stop0 = () => { if (stop) stop(); stop = null; focus(false); atkStop(); test = null; };
+  const stop0 = () => { saveNow(); if (stop) stop(); stop = null; focus(false); atkStop(); test = null; };
   // 집중모드 막
   function focus(on) {
     const el = $('#focus');
@@ -373,7 +376,7 @@ DS.Student = (function () {
     DS.UI.dial(body, (i) => form.given[i], (i, v) => { form.given[i] = v; drawn = `form|${key}|${JSON.stringify(form.given)}|${(R.help || {})[me] ? 1 : 0}|${down}`; }); // 꾹 누르면 계속 · 숫자만 바꿈 (v0.9.6.16)
     $('#st-go').onclick = async () => {
       const given = items.map((q, i) => (q.type === 'blanks' ? form.given[i] : q.type === 'number' ? Number(form.given[i]) : form.given[i]));
-      try { await DS.Act.submit(code, raw, mid, attempt, given); retrying = ''; form = null; saveSoon(); } catch (e) { DS.UI.toast(e.message); }
+      try { await DS.Act.submit(code, raw, mid, attempt, given); retrying = ''; form = null; dirty = true; } catch (e) { DS.UI.toast(e.message); }
     };
   }
   // ref: 첫 시도면 '문제 1 (2)' 처럼 학습지 문항 이름 → 문제 위에 작은 꼬리표 (같은 문제를 학습지에서 바로 찾게)
@@ -446,7 +449,7 @@ DS.Student = (function () {
       const next = (ans[bossSet] || Array(L.boss.items).fill(null)).slice();
       while (next.length < L.boss.items) next.push(null);
       next[i] = r.given;
-      await DS.Act.bossAnswer(code, bossSet, next); saveSoon();
+      await DS.Act.bossAnswer(code, bossSet, next); saveSoon(10000);
       const ok = DS.Quiz.grade(items[i], r.given);
       if (!ok && thinkSec() > 0) bossThink = Date.now() + thinkSec() * 1000;
       DS.UI.toast(ok ? `✔ ${i + 1}번 도달! 보스에게 데미지` : `✘ ${i + 1}번은 아직… 🤔 ${thinkSec()}초 생각하고 ${bossSet === 1 ? '세트 2 로' : '다시'} 도전!`, 2600);

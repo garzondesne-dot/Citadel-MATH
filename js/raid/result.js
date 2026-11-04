@@ -87,10 +87,14 @@ DS.Result = (function () {
   // 💾 기록 저장 (v0.9.7.6): 결과 화면 · 수업 중 진행 저장 · 교사 「결과 모으기」 · 복구 도구가 모두 이것을 쓴다
   //   records/{반}/{번호}/{차시} 덮어쓰기 + EXP 는 같은 수업 key(raid_코드)에 「늘어난 만큼만」 더함 → 여러 번 불러도 두 번 쌓이지 않음
   //   🎁 첫 레이드 특전: 이 차시 말고 다른 기록이 없으면 · 한 번 정한 특전 EXP 는 기록에 적어 두고 그대로 씀
-  async function save(L, R, uid, m, code, rIn, at) {
+  //   opt.cache (v0.9.8.0 · 수업 중 저장 줄이기): 기록 목록은 처음 한 번만 읽고 기억 · 바뀐 게 없으면 쓰지 않음 · EXP 도 늘었을 때만
+  const memo = {};
+  async function save(L, R, uid, m, code, rIn, at, opt = {}) {
     const r = rIn || compute(L, R, uid);
     if (!m || m.c == null || !m.n) return { r, g: null, first: false, raids: 1 };
-    const prev = (await DS.Net.get(`records/${ck(m.c)}/${m.n}`).catch(() => null)) || {};
+    const mk = `${ck(m.c)}/${m.n}|${code}`, mm = opt.cache ? (memo[mk] = memo[mk] || {}) : {};
+    const prev = mm.prev || (await DS.Net.get(`records/${ck(m.c)}/${m.n}`).catch(() => null)) || {};
+    if (opt.cache) mm.prev = prev;
     const mineNow = prev[L.id] && prev[L.id].code === String(code) ? prev[L.id] : null;
     const others = Object.keys(prev).filter((k) => k !== L.id);
     const first = mineNow ? !!mineNow.firstXp : !others.length;
@@ -99,8 +103,11 @@ DS.Result = (function () {
       else { const cur = await DS.Grow.mine(m).catch(() => DS.Grow.level(0)), base = DS.Grow.sum(r.parts); r.parts.first = Math.max(40, cur.next - cur.into - base + 1); }
     }
     const rec = summary(r, code); if (first && r.parts.first) rec.firstXp = r.parts.first; if (at) rec.at = at; // at: 결과 모으기 = 그 수업 시각
-    try { await DS.Net.set(`records/${ck(m.c)}/${m.n}/${L.id}`, rec); } catch (e) { /* 저장 실패해도 결과는 보여 준다 */ }
-    const g = DS.Grow ? await DS.Grow.add(m, r.parts, `raid_${code}`, { upsert: true }).catch(() => null) : null;
+    const sig = JSON.stringify({ ...rec, at: 0 });
+    if (!opt.cache || mm.sig !== sig) {
+      try { await DS.Net.set(`records/${ck(m.c)}/${m.n}/${L.id}`, rec); mm.sig = sig; prev[L.id] = { ...rec }; } catch (e) { /* 저장 실패해도 결과는 보여 준다 */ }
+    }
+    const g = DS.Grow ? await DS.Grow.add(m, r.parts, `raid_${code}`, { upsert: true, cache: !!opt.cache }).catch(() => null) : null;
     return { r, g, first: first && !!g, raids: others.length + 1 };
   }
   // 📥 결과 모으기 (v0.9.7.6 · 교사 · 복구 도구): 방 기록(rooms/코드)으로 학생마다 save — 수업 끝 전에 나간 학생 기록 · EXP 를 다시 만든다
