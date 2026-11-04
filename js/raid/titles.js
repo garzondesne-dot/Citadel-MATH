@@ -21,7 +21,7 @@ DS.Titles = (function () {
     { id: 'rare', name: '레어 연성사', tier: 'p', medal: ['rank', 5], cond: '레어(보라) 카드 만들기', test: (d) => cardsOf(d, 3).length > 0 },
     { id: 'grit', name: '끈기의 용사', tier: 'p', medal: ['rank', 6], cond: '재도전으로 고친 문제 모두 10개', test: (d) => recs(d).reduce((a, r) => a + (Number(r.fixed) || 0), 0) >= 10 },
     { id: 'sage', name: '도감 수집가', tier: 'o', medal: ['rank', 8], cond: '1~3차시 연성 도감 15장 완성', test: (d) => { const need = DS.Unit ? DS.Unit.CARDS.filter((c) => c.no <= 3) : []; return need.length > 0 && need.every((c) => (d.cards || {})[c.id]); } },
-    { id: 'king', name: '집합의 지배자', tier: 'o', medal: ['rank', 9], cond: '🟪 중단원던전 꼭대기 층 👑 발전 보스 처치', test: (d) => !!(((d.bonus || {})['eval-1'] || {}).eb || {}).clear }, // 2026-11-03 변경 제안 v1
+    { id: 'king', name: '집합의 지배자', tier: 'o', medal: ['rank', 9], cond: '🏰 성채던전 1층 👑 보스 방 처치', test: (d) => { const e = (d.bonus || {})['eval-1'] || {}; return !!((e.q12 || {}).clear || (e.eb || {}).clear); } } // 2026-11-05: 12번 보스 방 (옛 eb 기록도), // 2026-11-03 변경 제안 v1
   ];
   // 던전 정복: 차시마다 그 던전 테마의 메달 (보스 격파 또는 형성평가 만점)
   function dungeonTitles() {

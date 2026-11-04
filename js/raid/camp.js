@@ -72,8 +72,8 @@ DS.Camp = (function () {
     return !tut.b && !inClass() ? 'B' : '';
   }
   const TUT_B = [
-    ['#camp-castle', '🏰 성채 · 중단원던전', '배운 차시마다 <b>성벽 등불이 하나씩 켜지는</b> 혼자 도전 던전이에요. 보강 몬스터 · 형성평가 재대결 · 꼭대기 집합 관문! 한 층을 다 깨면 등불이 금빛(🟪 인장), 인장을 모으면 화려한 공격 이펙트가 열려요!'],
-    ['#camp-dummy', '🎯 훈련 허수아비', '지난 차시 문제를 <b>숫자만 바꿔</b> 연습해요. 기록은 남지 않고 경험치가 조금 쌓여요. 시험 전에 딱!'],
+    ['#camp-castle', '🏰 성채던전', '교과서 <b>단원 평가 문제</b>가 방마다 몬스터 한 마리씩 기다려요. 그 차시 진도를 나가면 방이 열리고(🆕 파란 배지), 👑 보스 방은 열린 방의 60%를 처치하면 열려요!'],
+    ['#camp-dummy', '🎯 복습 허수아비', '배운 차시를 <b>복습</b>해요. 수업 문제를 숫자만 바꿔 다시 풀고, 틀림 · 안 푼 문제를 맞히면 📕 오답노트에 복습 완료! 👑 형성평가 재대결을 처치하면 🟪 인장.'],
     ['#camp-tent', '⛺ 텐트 · 책장', '텐트 안 책장에서 차시별 🎬 <b>개념 영상</b>과 📄 <b>학습지 개념</b>을 다시 볼 수 있어요.'],
     ['#camp-mail', '📮 우편함', '내 <b>수업 결과</b>와 <b>복습 노트</b>가 도착해요. 틀린 문제를 다시 확인해요.'],
     ['#camp-anvil', '⚒ 모루', '수업에서 배운 개념으로 <b>카드를 만드는 대장간</b>이에요. 수업이 없을 때 여기서만 열려요.'],
@@ -145,12 +145,12 @@ DS.Camp = (function () {
       ${stampToday() ? '<div class="stamp-bar">📮 반드시 학습지 확인도장 받아가세요.</div>' : ''}
       <div class="camp-stage cs-v2" style="background-image:url('${base()}${c.bg}');aspect-ratio:${c.size[0]} / ${c.size[1]}">
         ${S.layers()}
-        ${S.zone('camp-castle', 'castle', '🏰 집합 중단원던전')}${S.zone('camp-tent', 'tent', '⛺ 텐트 · 책장')}
+        ${S.zone('camp-castle', 'castle', '🏰 성채던전')}${S.zone('camp-tent', 'tent', '⛺ 텐트 · 책장')}
         <button class="cs-zone camp-gate-z" id="camp-gate" style="${S.box(c.zones.gate)}" aria-label="차시 던전"><span class="camp-label">🔒 차시 던전</span></button>
         <button class="camp-anvil cs-int" id="camp-anvil" aria-label="모루">${sheet(c.anvil, c.anvil.states.idle, 0, 'camp-anvil-img')}<span class="camp-label">⚒ 모루</span></button>
         <div class="camp-fire"><i class="camp-glow"></i><i class="camp-glow g2"></i>${sheet(c.fire, 0, 0, 'camp-fire-img', '')}</div>
         <div class="camp-hero">${DS.Art.hero(me.hero, 'sit', 'huff')}<i class="shadow"></i><div class="camp-plate"><span class="nm">${DS.Titles ? DS.Titles.nameHtml({ title: me.title || 'none', nick: me.name }, { num: false, size: 14 }) : esc(me.name)}</span></div></div>
-        ${prop('dummy', '🎯', '허수아비', '')}${prop('mail', '📮', '우편함', '')}
+        ${prop('dummy', '🎯', '복습 허수아비', '')}${prop('mail', '📮', '우편함', '')}
       </div>
       <div class="camp-bar"><span id="camp-sv"></span><button class="btn small" id="camp-code">코드로 입장</button></div>
       <div class="camp-forge panel framed st-panel" id="camp-forge"><p class="muted small">용사 상태를 불러오는 중…</p></div>`;
@@ -241,7 +241,7 @@ DS.Camp = (function () {
   async function status() {
     const el = document.getElementById('camp-forge'); if (!el) return;
     const k = ck(me.c), get = (p) => DS.Net.get(`${p}/${k}/${me.n}`).catch(() => null);
-    const [rec, bonus, cards, no, evo] = await Promise.all([get('records'), get('bonus'), get('cards'), DS.Net.get(`unlock/${k}`).catch(() => 0), DS.Net.get(`evalOpen/${k}`).catch(() => null)]);
+    const [rec, bonus, cards, no] = await Promise.all([get('records'), get('bonus'), get('cards'), DS.Net.get(`unlock/${k}`).catch(() => 0)]);
     const L = DS.Account ? await DS.Account.looks(me).catch(() => ({ heroes: [], seals: 0 })) : { heroes: [], seals: 0 };
     const g = DS.Grow ? await DS.Grow.mine(me).catch(() => null) : null;
     const TD = DS.Titles ? await DS.Titles.data(me).catch(() => ({})) : {}, earned = DS.Titles ? DS.Titles.earned(TD).filter((t) => !/^lv\d/.test(t.id)) : [];
@@ -257,14 +257,21 @@ DS.Camp = (function () {
       <div class="st-next">🎁 <b>다음 보상</b> — ${nextReward(L, owned, seals)}</div>`;
     el.querySelectorAll('[data-gear]').forEach((b) => (b.onclick = settings));
     // 장면: 등불 · 깃발 · 상태 표시 (글씨 없이)
-    const stage = document.querySelector('#camp .camp-stage'), states = DS.CampScene.floorStates(me.test ? 99 : Number(no) || 0, sealed);
-    DS.CampScene.lamps(stage, states, me.test ? [] : DS.CampScene.freshLamps(`citadel-lamps-${k}-${me.n}`, states));
-    DS.CampScene.flag(stage, TD.bonus && ((TD.bonus['eval-1'] || {}).eb || {}).clear ? 'gold' : (evo || {})['eval-1'] ? 'open' : '');
+    const stage = document.querySelector('#camp .camp-stage'); // 2026-11-05: 성벽 등불(차시 층) 없앰
+    DS.CampScene.flag(stage, sealed.includes('eval-1') ? 'gold' : ''); // 🏰 성채 1층 보스 처치 = 금빛 깃발
     cues(rec, owned, Number(no) || 0);
-    // 📕 오답노트 배지 (v0.9.7.9): 남은 문제(틀림 + 안 풂) 수를 🏰 중단원던전 · 📮 우편함 위에 · 0 이면 금색 도장
+    // 📕 오답노트 배지: 남은 문제(틀림 + 안 풂) 수는 📮 우편함 한 곳에만 (0 이면 금색 도장) · 🎯 허수아비엔 작은 점 (2026-11-05 정신없음 줄이기)
     if (DS.Note && !me.test) {
       const held = await DS.Net.get(`held/${k}`).catch(() => null), nt = DS.Note.all(rec || {}, bonus || {}, no, held);
-      ['camp-castle', 'camp-mail'].forEach((id) => { const z = document.getElementById(id); if (!z) return; const old = z.querySelector('.nt-badge'); if (old) old.remove(); if (nt.list.length) z.insertAdjacentHTML('beforeend', DS.Note.badge(nt.left)); });
+      const z = document.getElementById('camp-mail'); if (z) { const old = z.querySelector('.nt-badge'); if (old) old.remove(); if (nt.list.length) z.insertAdjacentHTML('beforeend', DS.Note.badge(nt.left)); }
+      const d = document.getElementById('camp-dummy'); if (d) d.classList.toggle('nt-dot', nt.left > 0);
+    }
+    // 🏰 성채던전 NEW (2026-11-05): 진도를 나가 새로 열린 방 수 → 파란 배지 · 늘었으면 한 번 안내
+    if (DS.Bonus && !me.test) {
+      const fresh = DS.Bonus.newRooms(me, bonus || {}, Number(no) || 0).length, z = document.getElementById('camp-castle');
+      if (z) { const old = z.querySelector('.cs-newb'); if (old) old.remove(); if (fresh) z.insertAdjacentHTML('beforeend', `<span class="cs-newb">NEW ${fresh}</span>`); }
+      const nk = `citadel-castle-new-${k}-${me.n}`; let was = 0; try { was = Number(localStorage.getItem(nk)) || 0; localStorage.setItem(nk, String(fresh)); } catch (e) { /* 무시 */ }
+      if (fresh > was) DS.UI.toast(`🏰 성채던전에 새 방 ${fresh - was}개가 열렸어요!`, 3200);
     }
   }
   // 상태가 있을 때만 살아 움직임: 📮 새 결과 · ⚒ 만들 수 있는 카드 · ⛺ 새로 열린 차시 영상
@@ -332,16 +339,20 @@ DS.Camp = (function () {
       const [bon, no, held] = await Promise.all([DS.Net.get(`bonus/${ck(me.c)}/${me.n}`).catch(() => null), DS.Net.get(`unlock/${ck(me.c)}`).catch(() => 0), DS.Net.get(`held/${ck(me.c)}`).catch(() => null)]);
       const nt = DS.Note.all(rec, bon || {}, no, held);
       if (nt.list.length) ntHtml = `<div class="nt-box${nt.left ? ' open' : ''}"><p class="nt-h">${DS.Note.icon('book')} <b>오답노트</b> ${nt.left ? `<span class="nt-cnt">❗ 남은 문제 ${nt.left}</span>` : `<span class="nt-cnt ok">${DS.Note.icon('done')} 노트 완성!</span>`}</p>
-        ${nt.list.slice().reverse().map((x) => `<div class="nt-les${x.left ? ' open' : ''}"><b>${x.L.no}차시</b>${x.absent ? ' <span class="muted small">불참</span>' : ''}${DS.Note.rows(x)}</div>`).join('')}
-        <p class="muted small">${DS.Note.icon('x')} 틀림 · ${DS.Note.icon('-')} 안 풂 → 🟪 중단원던전 그 층에서 풀면 ${DS.Note.icon('p')} 보충 완료</p></div>`;
+        ${nt.list.slice().reverse().map((x) => { const todo = x.ids.map((id, i) => ({ id, st: x.mons[i] })).filter((o) => DS.Note.OPEN[o.st] || o.st === 'a'), bossTodo = x.boss.slice(0, x.hp).some((st) => DS.Note.OPEN[st] || st === 'a');
+          const title = (id) => (x.L.steps.find((s) => s.id === id) || {}).title || id;
+          return `<div class="nt-les${x.left ? ' open' : ''}"><b>${x.L.no}차시</b>${x.absent ? ' <span class="muted small">불참</span>' : ''}${DS.Note.rows(x)}
+            ${todo.length || bossTodo ? `<div class="nt-go-list">${todo.map((o) => `<button class="btn small primary" data-go="${x.L.id}|${o.id}">🎯 바로 풀기 · ${esc(title(o.id))}</button>`).join('')}${bossTodo ? `<button class="btn small primary" data-go="${x.L.id}|boss">🎯 바로 풀기 · 👑 형성평가</button>` : ''}</div>` : ''}</div>`; }).join('')}
+        <p class="muted small">${DS.Note.icon('x')} 틀림 · ${DS.Note.icon('-')} 안 풂 → 「🎯 바로 풀기」로 허수아비에서 풀면 ${DS.Note.icon('p')} 복습 완료</p></div>`;
     }
     const el = document.createElement('div'); el.className = 'modal camp-modal';
     el.innerHTML = `<div class="quiz-box framed rs-box"><h2>📮 우편함 · 복습 노트</h2>${ntHtml}${g ? `<div class="rs-lv"><b>Lv.${g.lv} ${esc(g.title)}</b> <span class="muted small">EXP ${g.total}</span><div class="rs-bar"><i style="width:${Math.round((100 * g.into) / g.next)}%"></i><span>${g.into} / ${g.next}</span></div></div>` : ''}
-      <p class="muted small">성적이 아니라 다음에 볼 것을 모아 둔 노트예요. 📌 복습 추천 개념은 🟪 중단원던전(그 차시 층)에서 연습할 수 있어요.</p>${DS.Result.history(rec)}
-      <div class="row"><button class="btn" id="nt-x">닫기</button><button class="btn primary" id="nt-bonus">🟪 중단원던전으로</button></div></div>`;
+      <p class="muted small">성적이 아니라 다음에 볼 것을 모아 둔 노트예요. 📌 복습 추천 개념은 🎯 복습 허수아비에서 그 차시를 골라 연습할 수 있어요.</p>${DS.Result.history(rec)}
+      <div class="row"><button class="btn" id="nt-x">닫기</button><button class="btn primary" id="nt-bonus">🎯 복습 허수아비로</button></div></div>`;
     document.body.appendChild(el);
     el.querySelector('#nt-x').onclick = () => el.remove();
-    el.querySelector('#nt-bonus').onclick = () => { el.remove(); pick('#camp-castle', () => DS.Control.run(() => DS.Bonus.enter(me))); };
+    el.querySelector('#nt-bonus').onclick = () => { el.remove(); pick('#camp-dummy', () => DS.Control.run(() => DS.Bonus.enter(me, { train: true }))); };
+    el.querySelectorAll('[data-go]').forEach((b) => (b.onclick = () => { el.remove(); pick('#camp-dummy', () => DS.Control.run(() => DS.Bonus.enter(me, { train: true, go: b.dataset.go.split('|') }))); }));
   }
   // 코드로 입장 (QR · 만약을 위해)
   function codeGate() {

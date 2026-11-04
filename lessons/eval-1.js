@@ -141,27 +141,38 @@
   // 소문제마다 학습지 번호(ref) · 풀이 영상(video = 교과서 숫자로 푼 예제, 한 번 틀린 뒤 열림). 영상이 없는 문항(01 · 02 · 06 · 08 · 09 · 12)은 주문서 37~40 대기
   const V = { '03': 'assets/video/v03-22.mp4', '04': 'assets/video/e1-32.mp4', '05': 'assets/video/e1-33.mp4', '07': 'assets/video/e1-34.mp4', '10': 'assets/video/e1-35.mp4', '11': 'assets/video/e1-36.mp4' };
   const tagRefs = (arr, refs) => arr.map((q, i) => Object.assign(q, { ref: refs[i] }, V[refs[i].slice(0, 2)] ? { video: V[refs[i].slice(0, 2)] } : {}));
-  const MONSTERS = {
-    e1: { title: '① 기본 · 집합의 뜻', sprite: 'extra:1@h270', make: (a, r) => tagRefs([...m01(a ? r : null), ...m02(a ? r : null)], ['01 ⑴', '01 ⑵', '01 ⑶', '02 ⑴', '02 ⑵']) },
-    e2: { title: '② 기본 · 포함과 개수', sprite: 'new:7@h90', make: (a, r) => tagRefs([...m03(a ? r : null), ...m04(a ? r : null)], ['03 ⑴', '03 ⑵', '04']) },
-    e3: { title: '③ 기본 · 연산', sprite: 'extra:2@h300', make: (a, r) => tagRefs(m05(a ? r : null), ['05 ⑴', '05 ⑵', '05 ⑶', '05 ⑷']) },
-    e4: { title: '④ 표준 · 서로소와 X', sprite: 'crown:3@h200', make: (a, r) => tagRefs([...m06(a ? r : null), ...m07(a ? r : null)], ['06', '07 서술형']) },
-    e5: { title: '⑤ 표준 · 미지수', sprite: 'crown:5@h60', note: 'B 의 원소가 모두 A 에 있어야 해요 — x 가 A 의 어느 원소와 같을 수 있을까?', make: (a, r) => tagRefs(m08(a ? r : null), ['08']) },
-    e6: { title: '⑥ 표준 · 배수와 여집합', sprite: 'extra:5@h120', make: (a, r) => tagRefs([...m09(a ? r : null), ...m10(a ? r : null)], ['09', '10']) },
-    eb: { title: '👑 발전 · 겹침의 최대 · 최소', sprite: 'extra:9@h270', make: (a, r) => tagRefs([...m11(a ? r : null), ...m12(a ? r : null)], ['11 서술형', '11 서술형', '12']) },
-  };
-  const IDS = ['e1', 'e2', 'e3', 'e4', 'e5', 'e6', 'eb'];
+  // 🏰 성채던전 1층 (2026-11-05 사용자 확정): 방 하나 = 문항 하나 (12방) · no = 그 문항을 풀 수 있는 차시 (우리 반이 그 차시 수업을 열면 방이 열림)
+  //   12번 = 👑 보스 방: 열린 방(보스 제외)의 60% 이상(올림)을 처치해야 열림 · 옛 7마리(e1~eb) 기록은 LEGACY 로 이어 셈
+  const R = (id, no, title, sprite, fn, refs, extra = {}) => ({ id, no, title, sprite, make: (a, r) => tagRefs(fn(a ? r : null), refs), ...extra });
+  const ROOMS = [
+    R('q01', 2, '01 집합인 것 · 아닌 것', 'extra:1@h270', m01, ['01 ⑴', '01 ⑵', '01 ⑶']),
+    R('q02', 2, '02 원소나열법', 'extra:1@h200', m02, ['02 ⑴', '02 ⑵']),
+    R('q03', 3, '03 포함 관계', 'new:7@h90', m03, ['03 ⑴', '03 ⑵']),
+    R('q04', 4, '04 교집합의 원소의 개수', 'new:7@h20', m04, ['04']),
+    R('q05', 5, '05 교 · 합 · 여 · 차집합', 'extra:2@h300', m05, ['05 ⑴', '05 ⑵', '05 ⑶', '05 ⑷']),
+    R('q06', 4, '06 서로소인 집합', 'crown:3@h200', m06, ['06']),
+    R('q07', 4, '07 조건을 만족하는 X (서술형)', 'crown:3@h120', m07, ['07 서술형']),
+    R('q08', 4, '08 미지수 x', 'crown:5@h60', m08, ['08'], { note: 'B 의 원소가 모두 A 에 있어야 해요 — x 가 A 의 어느 원소와 같을 수 있을까?' }),
+    R('q09', 4, '09 배수의 집합', 'extra:5@h120', m09, ['09']),
+    R('q10', 5, '10 여집합의 원소의 개수', 'extra:5@h40', m10, ['10']),
+    R('q11', 4, '11 겹침의 최대 · 최소 (서술형)', 'extra:9@h200', m11, ['11 서술형', '11 서술형']),
+    R('q12', 6, '👑 12 「~이 아니거나」의 개수', 'extra:9@h270', m12, ['12'], { boss: true }),
+  ];
+  const MONSTERS = Object.fromEntries(ROOMS.map((r) => [r.id, r]));
+  // 옛 7마리 → 방 (예전 중단원던전 꼭대기 층에서 처치한 기록을 이어 셈)
+  const LEGACY = { e1: ['q01', 'q02'], e2: ['q03', 'q04'], e3: ['q05'], e4: ['q06', 'q07'], e5: ['q08'], e6: ['q09', 'q10'], eb: ['q11', 'q12'] };
 
   DS.Lessons.register({
-    id: 'eval-1', no: 0, eval: true, after: 6, // 중단원던전 꼭대기 층 (레이드 아님 · 차시 목록 · 테스트 모드에 안 나옴) · after = 마지막 차시
+    id: 'eval-1', no: 0, eval: true, after: 6, floor: 1, // 🏰 성채던전 1층 (레이드 아님 · 차시 목록 · 테스트 모드에 안 나옴) · after = 마지막 차시
     title: '집합 중단원 마무리', unit: '공통수학2 Ⅱ-1 집합 · 평가1', sheet: '(평가1) 집합_중단원평가',
     theme: '08-crypt', // 보라 차원문 안 (묘실 배경)
     goal: '집합 단원 개념을 스스로 점검한다 · 틀린 문항으로 보충할 부분을 찾는다',
     // 🎬 (평가1) 32~36 — 교과서 숫자로 푼 예제 (모션그래픽 방 제작 · 2026-11-03)
-    videos: { e2: 'assets/video/e1-32.mp4', e3: 'assets/video/e1-33.mp4', e4: 'assets/video/e1-34.mp4', e6: 'assets/video/e1-35.mp4', eb: 'assets/video/e1-36.mp4' },
+    videos: { q04: 'assets/video/e1-32.mp4', q05: 'assets/video/e1-33.mp4', q07: 'assets/video/e1-34.mp4', q10: 'assets/video/e1-35.mp4', q11: 'assets/video/e1-36.mp4' },
     steps: [],
     monsters: MONSTERS,
-    bonus: IDS.map((id) => ({ id, title: MONSTERS[id].title, concept: null })),
+    rooms: ROOMS.map(({ id, no, title, boss }) => ({ id, no, title, boss: !!boss })),
+    legacy: LEGACY,
     items(id, seed, attempt) { return MONSTERS[id].make(attempt, DS.Rng(`${seed}|${id}|${attempt}`)); },
   });
 })();

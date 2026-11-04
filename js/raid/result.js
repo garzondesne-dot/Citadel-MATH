@@ -72,15 +72,15 @@ DS.Result = (function () {
   // 🔎 자주 하는 실수 한 줄 (오개념 기록 · 점수 아님)
   const misLine = (mis) => { const t = DS.Mis ? DS.Mis.top(mis, 1)[0] : null; return t ? `<p class="rs-mis small">🔎 자주 하는 실수: ${esc(t.kid)} <span class="muted">(${t.wrong}번${t.fixed ? ` · ${t.fixed}번은 스스로 고침 ✔` : ''})</span></p>` : ''; };
   // 🔓 중단원던전 소개 (2026-11-03): 이 차시 수업이 열리면 그 차시 층이 열린다 — 결과 화면 · 종합상황실 마무리에서 한 줄
-  const floorText = (L) => { const b = (L.bonus || []).length; return L.no && L.boss ? `🔓 🟪 중단원던전 <b>${L.no}층</b>이 열렸어요 — ${b ? `보강 몬스터 ${b}마리 · ` : ''}👑 형성평가 재대결` : ''; };
-  const floorLine = (L) => (floorText(L) ? `<p class="rs-floor small">${floorText(L)} <span class="muted">(모닥불의 보라 차원문 · 혼자 도전)</span></p>` : '');
+  const floorText = (L) => { if (!L.no || !L.boss) return ''; const ev = DS.Lessons.list.filter((x) => x.rooms).flatMap((x) => x.rooms.filter((r) => r.no === L.no)).length; return `🔓 🎯 허수아비에서 <b>복습! ${L.no}차시</b>가 열렸어요 — 수업 문제 · 👑 형성평가 재대결${ev ? ` · 🏰 성채던전 새 방 ${ev}개` : ''}`; }; // 2026-11-05 성채던전 · 허수아비 개편
+  const floorLine = (L) => (floorText(L) ? `<p class="rs-floor small">${floorText(L)} <span class="muted">(모닥불 캠프 · 혼자 도전)</span></p>` : '');
   // 복습 추천 버튼: 학습지 개념 · 중단원던전(그 차시 층의 보강 · 재대결) · 영상
   function recs(L, r, prep, inClass) {
-    if (!r.weak.length) return '<p class="okc">👍 오늘 개념을 고르게 잘 해냈어요! 🟪 중단원던전에서 인장을 모아 보세요.</p>';
+    if (!r.weak.length) return '<p class="okc">👍 오늘 개념을 고르게 잘 해냈어요! 🏰 성채던전에서 단원 평가 문제에 도전해 보세요.</p>';
     return r.weak.map((c) => {
-      const img = DS.Act.hasImg(prep, c), vid = DS.Video.pick(L, prep.video, c), bon = (L.bonus || []).filter((b) => b.concept === c);
+      const img = DS.Act.hasImg(prep, c), vid = DS.Video.pick(L, prep.video, c);
       return `<div class="rs-rec"><b>📌 ${esc(r.titles[c] || c)}</b> <span class="muted small">첫 시도 ${r.conc[c].ok} / ${r.conc[c].total}</span>
-        <div class="row">${img ? `<button class="btn small" data-img="${c}">📄 학습지 개념 보기</button>` : ''}${L.no ? (inClass ? `<span class="muted small">🟪 수업이 끝나면 중단원던전 ${L.no}층 · ${esc(bon.length ? bon[0].title : '👑 형성평가 재대결')}</span>` : `<button class="btn small" data-bonus="1">🟪 중단원던전 ${L.no}층 · ${esc(bon.length ? bon[0].title : '👑 형성평가 재대결')}</button>`) : ''}${vid && DS.Video.ok(vid) ? `<button class="btn small" data-vid="${c}">🎬 설명 영상</button>` : ''}</div></div>`;
+        <div class="row">${img ? `<button class="btn small" data-img="${c}">📄 학습지 개념 보기</button>` : ''}${L.no ? (inClass ? `<span class="muted small">🎯 수업이 끝나면 허수아비에서 복습! ${L.no}차시</span>` : `<button class="btn small" data-bonus="1">🎯 복습! ${L.no}차시 (허수아비)</button>`) : ''}${vid && DS.Video.ok(vid) ? `<button class="btn small" data-vid="${c}">🎬 설명 영상</button>` : ''}</div></div>`;
     }).join('');
   }
   // 학생 폰: 수업이 끝나면 한 번 (같은 수업은 다시 저장하지 않음)

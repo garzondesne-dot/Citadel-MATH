@@ -37,7 +37,7 @@ DS.TCamp = (function () {
     $('#tcamp').innerHTML = `${hall ? '' : '<button class="btn small ui-back" id="tc-back">≪ 교사 메뉴</button>'}<div class="tc-top" style="background-image:linear-gradient(#050b1cdd,#050b1cdd),url('${base}${DS.ASSETS.tcamp.bg}')">${code ? `<div class="tc-qr" id="tc-qr"></div><div class="tc-code"><span class="muted small">${hall ? '📱 휴대폰 카메라로 QR 을 찍고 입장해요' : '학생 입장 · QR 찍기 또는 모닥불 차원문'}</span><b>수업 코드 ${esc(code)}</b><span id="tc-info" class="small"></span></div>` : '<div class="tc-code"><b>🏛 교사 캠프</b><span class="muted small">수업을 열면 여기에 학생 입장 QR 이 크게 떠요</span></div>'}</div>
       <div class="tc-stage camp-like cs-v2" style="background-image:url('${base}${c.bg}');aspect-ratio:${c.size[0]} / ${c.size[1]}">
         ${DS.CampScene.layers()}
-        ${DS.CampScene.zone('tc-castle', 'castle', '🏰 집합 중단원던전')}${DS.CampScene.zone('tc-tent', 'tent', '⛺ 텐트 · 책장')}
+        ${DS.CampScene.zone('tc-castle', 'castle', '🏰 성채던전')}${DS.CampScene.zone('tc-tent', 'tent', '⛺ 텐트 · 책장')}
         <div class="camp-fire"><i class="camp-glow"></i><i class="camp-glow g2"></i><i class="camp-fire-img" style="background-image:url('${base}${c.fire.src}');background-size:${c.fire.cols * 100}% ${(c.fire.rows || 1) * 100}%;background-position:0 0"></i></div>
         ${prop('dummy', '🎯', '허수아비')}${prop('mail', '📮', hall ? '우리 반 소식' : '대시보드')}
         <button class="camp-anvil tc-anvil" id="tc-anvil" aria-label="모루"><i class="camp-anvil-img" style="background-image:url('${base}${c.anvil.src}');background-size:${c.anvil.cols * 100}% 100%;background-position:0 0"></i><span class="camp-label">⚒ 모루</span></button>
@@ -85,8 +85,7 @@ DS.TCamp = (function () {
       sealed = Object.keys(cnt).filter((id) => n && cnt[id] * 2 >= n);
     }
     const stage = document.querySelector('#tcamp .tc-stage');
-    DS.CampScene.lamps(stage, DS.CampScene.floorStates(no, sealed));
-    const ev = (await DS.Net.get(`evalOpen/${k}`).catch(() => null)) || {}; DS.CampScene.flag(stage, ev['eval-1'] ? 'open' : '');
+    DS.CampScene.flag(stage, ''); // 2026-11-05: 성채 꼭대기 층 「열기」 없앰 (방은 진도로 저절로)
   }
   function drawLive() {
     const g = $('#tc-gate'); if (!g) return;

@@ -83,8 +83,11 @@ function verify(q, tag) {
 }
 
 // (1) 구성 · 첫 시도 = 변경 제안 v1
-check(L.eval && L.no === 0 && L.steps.length === 0 && L.bonus.map((b) => b.id).join() === 'e1,e2,e3,e4,e5,e6,eb', '꼭대기 층 구성 (몬스터 6 + 발전 보스)');
-const first = Object.fromEntries(L.bonus.map((b) => [b.id, L.items(b.id, 'x', 0)]));
+check(L.eval && L.no === 0 && L.steps.length === 0 && L.rooms.map((b) => b.id).join() === 'q01,q02,q03,q04,q05,q06,q07,q08,q09,q10,q11,q12' && L.rooms.filter((r) => r.boss).map((r) => r.id).join() === 'q12', '🏰 성채 1층 = 12방 (문항 하나씩 · 12번 보스)');
+check(L.rooms.map((r) => r.no).join() === '2,2,3,4,5,4,4,4,4,5,4,6', '방마다 해금 차시 (그 문항을 풀 수 있는 차시)');
+check(Object.entries(L.legacy).every(([k, ids]) => ids.every((id) => L.monsters[id])) && Object.values(L.legacy).flat().sort().join() === L.rooms.map((r) => r.id).sort().join(), '옛 7마리 → 12방 이어 셈 (빠짐 · 겹침 없음)');
+const ROOMOF = { e1: ['q01', 'q02'], e2: ['q03', 'q04'], e3: ['q05'], e4: ['q06', 'q07'], e5: ['q08'], e6: ['q09', 'q10'], eb: ['q11', 'q12'] };
+const first = Object.fromEntries(Object.entries(ROOMOF).map(([k, ids]) => [k, ids.flatMap((id) => L.items(id, 'x', 0))]));
 check(Object.values(first).flat().length === 20, '소문제 20개 (01 ×3 · 02 ×2 · 03 ×2 · 04 · 05 ×4 · 06 · 07 · 08 · 09 · 10 · 11 ×2 · 12)');
 const ans = (q) => (q.type === 'multi' ? picked(q).join(',') : String(q.answer));
 const WANT = {
@@ -101,7 +104,8 @@ check(V0.filter((q) => q.video).map((q) => q.ref.slice(0, 2)).join() === '03,03,
 check(Object.values(L.videos).every((u) => require('fs').existsSync(require('path').join(__dirname, '..', u))) && Object.keys(L.videos).every((k) => L.monsters[k]), '영상 32~36 파일 · 칸');
 
 // (2) 첫 시도 + 재도전 독립 검산
-for (const b of L.bonus) {
+for (const b of L.rooms) {
+  first[b.id] = L.items(b.id, 'x', 0);
   const n0 = first[b.id].length;
   first[b.id].forEach((q, i) => verify(q, `${b.id}/0(${i + 1})`));
   for (let s = 0; s < 300; s++) for (const a of [1, 2, 3]) {
@@ -114,4 +118,4 @@ for (const b of L.bonus) {
 }
 
 if (fail) { console.error(`\n${fail}건 실패 / ${count}건`); process.exit(1); }
-console.log(`OK: 집합 중단원던전 꼭대기 층 — 제안서 정답 · 교과서 숫자 안 씀 · 재도전 300×3 독립 검산 ${count}건 통과`);
+console.log(`OK: 🏰 성채던전 1층 12방 — 제안서 정답 · 교과서 숫자 안 씀 · 재도전 300×3 독립 검산 ${count}건 통과`);

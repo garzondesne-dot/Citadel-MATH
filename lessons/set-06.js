@@ -242,7 +242,7 @@
     defaultPct: 90,
     steps: STEPS,
     monsters: MONSTERS,
-    bonus: ['b1'].map((id) => ({ id, title: MONSTERS[id].title, concept: MONSTERS[id].concept })),
+    // 보강(bonus)은 2026-11-05 사용자 결정으로 삭제 — 위 b1~ 몬스터는 게임에 나오지 않음 (지난 기록 이어 셈용 · Bonus.LEGACY)
     items(id, seed, attempt) { return MONSTERS[id].make(attempt, DS.Rng(`${seed}|${id}|${attempt}`)); },
     WORDS: { TRUE, FALSE, NONE, NEG, SYL, PROP_EXTRA, NONE2, QD, QREP },
     next: { title: '7차시 · 조건과 진리집합', ask: '「x 는 짝수이다」 는 명제일까? x 가 정해지면?', link: '오늘 배운 명제와 부정을 「조건」으로 넓혀, 참이 되게 하는 원소들의 집합(진리집합)을 찾아요.' }, // 다음 수업 (초안)

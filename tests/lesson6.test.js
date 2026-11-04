@@ -111,7 +111,7 @@ function verify(mid, q, tag) {
 // (1) 순서
 const order = L.steps.map((s) => s.id).join(' ');
 check(order === 'c1 m1 c2 m2 c3 m3 c4 m4 m42 c5 m5 c6 m6 boss', `순서 ${order}`);
-check(L.no === 6 && L.theme === '01-burrow' && L.bonus.map((b) => b.id).join() === 'b1', '차시 번호 · 테마 · 중단원던전 6층 보강 ①');
+check(L.no === 6 && L.theme === '01-burrow' && !L.bonus, '차시 번호 · 테마 · 보강 삭제 (2026-11-05)');
 check(Object.keys(L.crops).length === 14 && L.steps.every((st) => L.crops[st.id]), '칸 위치 14칸 · 단계마다');
 
 // (2) 첫 시도 = 학습지 (교사용 정답)

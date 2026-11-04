@@ -1,7 +1,7 @@
 // 성장 · 보강던전 · 개인 결과 검증: node tests/grow.test.js
 // (1) EXP 표 · 레벨 경계 · 칭호  (2) 보강 인장 · 화려한 이펙트 해금 (인장 1·2·4·6·8·10개)  (3) 개인 결과: 첫 시도 / 고침 / 못 맞힘 · 개념별 · 복습 추천
 const load = require('./load');
-const DS = load(['assets/manifest.js', 'js/engine/ui.js', 'js/engine/setgen.js', 'js/engine/quiz.js', 'js/engine/lessons.js', 'lessons/set-02.js', 'lessons/set-03.js', 'lessons/set-04.js', 'lessons/set-05.js', 'js/engine/fx.js', 'js/raid/model.js', 'js/raid/grow.js', 'js/raid/bonus.js', 'js/raid/result.js', 'lessons/unit-set.js', 'js/raid/titles.js']);
+const DS = load(['assets/manifest.js', 'js/engine/ui.js', 'js/engine/setgen.js', 'js/engine/quiz.js', 'js/engine/lessons.js', 'lessons/set-02.js', 'lessons/set-03.js', 'lessons/set-04.js', 'lessons/set-05.js', 'lessons/set-06.js', 'lessons/eval-1.js', 'js/engine/fx.js', 'js/raid/model.js', 'js/raid/grow.js', 'js/raid/bonus.js', 'js/raid/result.js', 'lessons/unit-set.js', 'js/raid/titles.js']);
 let fail = 0;
 const check = (c, m) => { if (!c) { fail++; console.error('FAIL:', m); } };
 const G = DS.Grow, B = DS.Bonus, X = DS.Raid;
@@ -11,17 +11,37 @@ check(G.level(0).lv === 1 && G.level(0).title === '견습 용사', 'Lv.1 견습 
 check(G.level(39).lv === 1 && G.level(40).lv === 2 && G.level(40).into === 0, 'Lv.2 = 40 EXP');
 check(G.level(40 + 60).lv === 3 && G.level(40 + 60 + 80).lv === 4, 'Lv.3 = 100, Lv.4 = 180 (40 + 20 × (L − 1))');
 check(G.level(1e6).title.startsWith('전설의 용사'), '높은 레벨 칭호');
+if (!DS.Lessons.get('eval-1')) { fail++; console.error('FAIL: eval-1 불러오기'); }
 check(G.sum({ join: 1, submit: 4, correct: 9, fixed: 2, bossWin: 1, perfect: 1, words: 1 }) === 10 + 8 + 9 + 6 + 10 + 5 + 2, 'EXP 합계');
 check(G.XP.fixed > G.XP.correct, '고친 소문제가 처음 맞힌 것보다 많이 (실패도 재도전)');
 
-// ── 2. 보강 인장 · 이펙트 해금 ───────────────────────────
+// ── 2. 인장 · 이펙트 해금 (2026-11-05: 차시 = 🎯 허수아비 👑 재대결 처치 · 성채 층 = 👑 보스 방 · 옛 규칙 인장 그대로) ──
 const L4 = DS.Lessons.get('set-04');
-const allClear = { 'set-04': Object.fromEntries(L4.bonus.map((b) => [b.id, { clear: true, tries: 1 }])) };
-check(B.seals({}).length === 0 && B.seals(allClear).join() === 'set-04', '4차시 보강 3마리 모두 처치 → 인장 1개');
-check(B.seals({ 'set-04': { b1: { clear: true }, b2: { clear: true }, b3: { tries: 2 } } }).length === 0, '하나라도 못 잡으면 인장 없음');
-check(JSON.stringify(B.fxOpen(allClear)) === JSON.stringify({ fire: true }), '인장 1개 → 첫 화려한 이펙트(화염)');
+const oldClear = { 'set-04': { b1: { clear: true }, b2: { clear: true }, b3: { clear: true } } };
+check(B.seals({}).length === 0 && B.seals(oldClear).join() === 'set-04', '옛 보강 3마리 모두 처치한 인장 → 그대로 1개');
+check(B.seals({ 'set-04': { b1: { clear: true }, b2: { clear: true }, b3: { tries: 2 } } }).length === 0, '옛 보강 하나라도 못 잡았으면 인장 없음');
+check(B.seals({ 'set-04': { boss: { clear: true } } }).join() === 'set-04' && B.seals({ 'set-02': { boss: { clear: true } } }).join() === 'set-02', '👑 형성평가 재대결 처치 → 그 차시 인장');
+check(B.seals({ 'set-04': { m1: { clear: true }, boss: { tries: 3 } } }).length === 0, '수업 문제만 복습 = 인장 아님 (재대결 처치해야)');
+check(JSON.stringify(B.fxOpen(oldClear)) === JSON.stringify({ fire: true }), '인장 1개 → 첫 화려한 이펙트(화염)');
 check(B.UNLOCK.join() === '1,2,4,6,8,10' && DS.FX.FANCY.length === B.UNLOCK.length, '해금 단계 6개');
-check(!DS.Lessons.get('set-02').bonus && !DS.Lessons.get('set-03').bonus, '2·3차시 보강은 레이드에 남음 (보강던전 없음)');
+check(!['set-02', 'set-03', 'set-04', 'set-05', 'set-06'].some((id) => (DS.Lessons.get(id) || {}).bonus), '보강 삭제 (2026-11-05)');
+// 🏰 성채던전 1층: 차시 해금 · 👑 보스 60% · 옛 7마리 기록
+if (DS.Lessons.get('eval-1')) {
+  const E = DS.Lessons.get('eval-1');
+  const S4 = B.roomsState(E, {}, 4), plain4 = E.rooms.filter((r) => !r.boss && r.no <= 4).length;
+  check(S4.open.length === plain4 && !S4.bossOpen && S4.isOpen(E.rooms[0]) && !S4.isOpen(E.rooms.find((r) => r.id === 'q05')), `4차시까지 = 열린 방 ${plain4}개 · 5차시 방은 잠김 · 보스 잠김`);
+  const S6 = B.roomsState(E, {}, 6);
+  check(S6.plain.length === 11 && S6.need === 7 && !S6.bossOpen, '6차시: 보스 제외 11방 · 60% = 7방 (올림)');
+  const six = { 'eval-1': Object.fromEntries(['q01', 'q02', 'q03', 'q04', 'q05', 'q06'].map((id) => [id, { clear: true }])) };
+  check(!B.roomsState(E, six, 6).bossOpen, '6방 처치 → 보스 아직');
+  six['eval-1'].q07 = { clear: true };
+  check(B.roomsState(E, six, 6).bossOpen && !B.roomsState(E, six, 5).bossOpen, '7방 처치 + 6차시 진도 → 👑 보스 열림 · 5차시면 보스 차시 조건으로 잠김');
+  check(!B.roomsState(E, { 'eval-1': { q01: { tries: 4 } } }, 6).cleared, '💧(도전만) 은 처치로 안 셈');
+  const old = { 'eval-1': { e1: { clear: true }, e6: { clear: true } } };
+  check(['q01', 'q02', 'q09', 'q10'].every((id) => B.roomRec(old, E, id).clear) && !B.roomRec(old, E, 'q03').clear, '옛 7마리 처치 기록 → 그 방들 처치로');
+  check(B.seals({ 'eval-1': { q12: { clear: true } } }).join() === 'eval-1' && B.seals({ 'eval-1': { eb: { clear: true } } }).join() === 'eval-1' && B.seals({ 'eval-1': { q11: { clear: true } } }).length === 0, '성채 1층 인장 = 👑 12번 보스 처치 (옛 발전 보스 eb = 12번 포함)');
+  check(B.newRooms({ c: '9-9', n: 1 }, { 'eval-1': { q01: { tries: 1 } } }, 2).join() === 'eval-1/q02', 'NEW = 열렸는데 아직 안 들어가 본 방');
+}
 
 // ── 3. 개인 결과 ────────────────────────────────────────
 const L = L4, code = '123456', u = 'stu1';

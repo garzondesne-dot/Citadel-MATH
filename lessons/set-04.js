@@ -199,7 +199,7 @@
     defaultPct: 90,
     steps: STEPS,
     monsters: MONSTERS,
-    bonus: ['b1', 'b2', 'b3'].map((id) => ({ id, title: MONSTERS[id].title, concept: MONSTERS[id].concept })),
+    // 보강(bonus)은 2026-11-05 사용자 결정으로 삭제 — 위 b1~ 몬스터는 게임에 나오지 않음 (지난 기록 이어 셈용 · Bonus.LEGACY)
     items(id, seed, attempt) { return MONSTERS[id].make(attempt, DS.Rng(`${seed}|${id}|${attempt}`)); },
     WORDS,
     next: { title: '5차시 · 여집합과 차집합', ask: '우리 반 전체에서 안경 쓴 친구를 빼면, 남은 친구들은 어떤 집합일까?', link: '오늘 배운 교집합(∩)으로 차집합을 A − B = A ∩ Bᶜ 처럼 나타낼 수 있어요.' }, // 다음 수업 (초안)

@@ -86,7 +86,7 @@ function checkItem(q, tag) {
 // ── 1. 레이드 순서 · 구성 ─────────────────────────────────
 check(L.steps.map((s) => s.id).join() === 'c1,m1,c2,m2,c3,c4,m3,c5,m5,boss', `순서 ${L.steps.map((s) => s.id)}`);
 check(!L.steps.some((s) => s.kind === 'intro' || s.id === 'r1'), '도입 · 복습 몬스터 없음 (사용자 결정)');
-check(L.bonus.map((b) => b.id).join() === 'b1,b2,b3' && L.bonus.every((b) => L.steps.some((s) => s.id === b.concept)), '보강던전 3마리 · 개념 연결');
+check(!L.bonus, '보강 삭제 (2026-11-05 · 성채던전이 대신)');
 check(L.boss.items === 6 && L.boss.hpItems === 6 && L.boss.tags.length === 6 && L.boss.tags.every((t) => L.steps.some((s) => s.id === t)), '형성평가 6문항 (v4) · 개념 표시');
 check(JSON.stringify(L.split) === JSON.stringify({ m3: ['c3', 'c3', 'c4', 'c4'] }) && L.items('m3', 'x', 0).map((q) => q.ref).join('|') === '문제 3 (1)|문제 3 (2)|문제 4 (1)|문제 4 (2)', '문제 3 · 4 한 몬스터: 소문제마다 개념 · 학습지 꼬리표');
 check(['m1', 'm2', 'm3', 'm5'].reduce((a, id) => a + L.items(id, 'x', 0).length, 0) === 12, '레이드 소문제 12개 (19 → 12)');
@@ -95,7 +95,7 @@ const sprites = [...Object.values(L.monsters).map((m) => m.sprite), L.boss.sprit
 check(new Set(sprites).size === sprites.length, '몬스터 그림 겹치지 않음');
 const sheetOf = { extra: 'monstersExtra', new: 'monstersNew', crown: 'monstersCrown' };
 check(sprites.every((s) => { const [k, n] = String(s).split(':'); const sh = DS.ASSETS[sheetOf[k]]; return sh && Number(n) < sh.rows; }), '몬스터 그림이 시트에 있음');
-check(Object.keys(L.videos).every((k) => L.steps.some((s) => s.id === k) || L.bonus.some((b) => b.id === k)) && Object.values(L.videos).every((u) => /^assets\/video\/v05-\d+(-v\d+)?\.mp4$/.test(u) && require('fs').existsSync(require('path').join(__dirname, '..', u))), '영상 칸 · 게임 서버 영상 파일 (assets/video)');
+check(Object.keys(L.videos).every((k) => L.steps.some((s) => s.id === k) || /^b\d$/.test(k)) && Object.values(L.videos).every((u) => /^assets\/video\/v05-\d+(-v\d+)?\.mp4$/.test(u) && require('fs').existsSync(require('path').join(__dirname, '..', u))), '영상 칸 · 게임 서버 영상 파일 (assets/video)');
 check([...L.steps.filter((s) => s.kind !== 'intro').map((s) => s.id), 'b2'].every((k) => (L.crops[k] || []).length && L.crops[k].every((c) => c.x >= 0 && c.y >= 0 && c.x + c.w <= 1 && c.y + c.h <= 1)), '학습지 칸 위치(crops) 모두 있음');
 
 // ── 2. 첫 시도 = 학습지 · 교사용 정답 ─────────────────────

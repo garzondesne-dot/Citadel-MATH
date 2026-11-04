@@ -70,8 +70,8 @@ check(L.no === 4 && L.theme === '06-frost', '4차시 · 빙결 동굴');
 check(L.steps.map((s) => s.kind).join() === 'intro,monster,concept,monster,concept,monster,concept,monster,boss', `순서 ${L.steps.map((s) => s.kind)}`);
 check(L.steps.filter((s) => s.kind === 'monster').map((s) => s.id).join() === 'r1,m1,m2,m3', '레이드 몬스터 = 복습 + 문제 1·2·3');
 check(!L.steps.some((s) => s.special), '4차시부터 레이드에 보강 스페셜 없음');
-check(L.bonus.map((b) => b.id).join() === 'b1,b2,b3' && L.bonus.every((b) => L.monsters[b.id].bonus && /^c\d$/.test(b.concept)), '보강던전 3마리 · 개념 연결');
-[...L.steps.filter((s) => s.kind !== 'monster' || s.id), ...L.bonus].forEach((s) => { const rs = (L.crops || {})[s.id]; check(rs && rs.length && rs.every((r) => r.p >= 1 && r.p <= 2 && r.x >= 0 && r.y >= 0 && r.w > 0.1 && r.h > 0.05 && r.x + r.w <= 1 && r.y + r.h <= 1), `${s.id}: PDF 자르기 위치`); });
+check(!L.bonus, '보강 삭제 (2026-11-05 · 성채던전이 대신)');
+[...L.steps.filter((s) => s.kind !== 'monster' || s.id)].forEach((s) => { const rs = (L.crops || {})[s.id]; check(rs && rs.length && rs.every((r) => r.p >= 1 && r.p <= 2 && r.x >= 0 && r.y >= 0 && r.w > 0.1 && r.h > 0.05 && r.x + r.w <= 1 && r.y + r.h <= 1), `${s.id}: PDF 자르기 위치`); });
 check(L.boss.tags.length === L.boss.items && L.boss.tags.every((t) => L.steps.some((s) => s.id === t && s.kind === 'concept')), '형성평가 문항마다 개념 표시');
 
 // ── 2. 첫 시도 = 학습지 정답 ─────────────────────────────────

@@ -262,7 +262,7 @@
     defaultPct: 90,
     steps: STEPS,
     monsters: MONSTERS,
-    bonus: ['b1', 'b2', 'b3'].map((id) => ({ id, title: MONSTERS[id].title, concept: MONSTERS[id].concept })),
+    // 보강(bonus)은 2026-11-05 사용자 결정으로 삭제 — 위 b1~ 몬스터는 게임에 나오지 않음 (지난 기록 이어 셈용 · Bonus.LEGACY)
     items(id, seed, attempt) { return MONSTERS[id].make(attempt, DS.Rng(`${seed}|${id}|${attempt}`)); },
     COND,
     next: { title: '6차시 · 드모르간의 법칙', ask: '(A ∪ B)ᶜ 는 Aᶜ ∪ Bᶜ 일까, Aᶜ ∩ Bᶜ 일까?', link: '오늘 배운 여집합(ᶜ)과 분배법칙으로 「괄호 밖 ᶜ」를 안으로 넣는 방법을 알아봐요.' }, // 다음 수업 (초안)
