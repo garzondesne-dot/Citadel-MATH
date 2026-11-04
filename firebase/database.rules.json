@@ -266,13 +266,19 @@
       ".write": "auth != null && root.child('admins/'+auth.uid).val() === true"
     },
     "funStats": {
-      ".read": "auth != null && root.child('admins/'+auth.uid).val() === true",
-      ".write": "auth != null && root.child('admins/'+auth.uid).val() === true"
+      ".read": "auth != null",
+      "$qi": {
+        ".write": "auth != null",
+        ".validate": "newData.hasChildren(['n', 'm']) && newData.child('n').isNumber() && newData.child('n').val() === (data.exists() ? data.child('n').val() + 1 : 1) && newData.child('m').isNumber() && newData.child('m').val() >= 0 && newData.child('m').val() <= newData.child('n').val() * 0.5 + 0.01"
+      }
     },
     "funUsed": {
       "$c": {
-        ".read": "auth != null && root.child('admins/'+auth.uid).val() === true",
-        ".write": "auth != null && root.child('admins/'+auth.uid).val() === true"
+        ".read": "auth != null",
+        ".write": "auth != null",
+        "$qi": {
+          ".validate": "newData.val() === true"
+        }
       }
     }
   }
