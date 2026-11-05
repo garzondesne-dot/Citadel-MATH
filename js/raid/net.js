@@ -63,6 +63,7 @@ DS.Net = (function () {
       },
       useAcc(u) { uid = u; try { sessionStorage.setItem(`${UIDKEY}-acc`, u); } catch (e) { /* 무시 */ } return u; },
       async signOut() { try { sessionStorage.removeItem(`${UIDKEY}-acc`); } catch (e) { /* 무시 */ } uid = null; return this.init(); },
+      async reauth() { return uid; },
       now: () => Date.now(),
       async get(p) { return clone(at(load(), p)); },
       async set(p, v) { const t = load(); put(t, p, v); save(t); changed(); },
@@ -94,7 +95,10 @@ DS.Net = (function () {
         if (!firebase.apps.length) firebase.initializeApp(cfg);
         // 이 기기에 로그인해 둔 계정이 있으면 그대로, 없으면 익명 로그인
         const prev = await new Promise((res) => { const off = firebase.auth().onAuthStateChanged((u) => { off(); res(u); }); });
-        uid = prev ? prev.uid : (await firebase.auth().signInAnonymously()).user.uid;
+        // 2026-11-05 (아이폰 사파리 가입 막힘): 저장돼 있던 접속이 이미 무효면(지워진 손님 계정 등) 읽기가 모두 Permission denied → 확인하고 새 손님 접속
+        let ok = !!prev;
+        if (prev) { try { await prev.getIdToken(); } catch (e) { ok = false; try { await firebase.auth().signOut(); } catch (e2) { /* 무시 */ } } }
+        uid = ok ? prev.uid : (await firebase.auth().signInAnonymously()).user.uid;
         db = firebase.database();
         db.ref('.info/serverTimeOffset').on('value', (s) => { offset = s.val() || 0; });
         return uid;
@@ -104,6 +108,13 @@ DS.Net = (function () {
       async signUp(email, pw) { const c = await firebase.auth().createUserWithEmailAndPassword(email, pw); uid = c.user.uid; return uid; },
       async signIn(email, pw) { const c = await firebase.auth().signInWithEmailAndPassword(email, pw); uid = c.user.uid; return uid; },
       async signOut() { await firebase.auth().signOut(); uid = (await firebase.auth().signInAnonymously()).user.uid; return uid; },
+      // 접속 자격 새로 받기 (Permission denied 가 났을 때 한 번): 지금 계정 토큰을 강제로 새로 → 안 되면 새 손님 접속
+      async reauth() {
+        const u = firebase.auth().currentUser;
+        if (u) { try { await u.getIdToken(true); return uid; } catch (e) { /* 아래로 */ } }
+        try { await firebase.auth().signOut(); } catch (e) { /* 무시 */ }
+        uid = (await firebase.auth().signInAnonymously()).user.uid; return uid;
+      },
       now: () => Date.now() + offset,
       async get(p) { return (await db.ref(p).get()).val(); },
       set: (p, v) => db.ref(p).set(sv(v)),
@@ -139,6 +150,8 @@ DS.Net = (function () {
     signUp: (e, p) => api.impl.signUp(e, p),
     signIn: (e, p) => api.impl.signIn(e, p),
     signOut: () => api.impl.signOut(),
+    reauth: () => (api.impl.reauth ? api.impl.reauth() : Promise.resolve(api.impl.uid())),
+    denied: (e) => !!e && (e.code === 'PERMISSION_DENIED' || /permission.denied|permission_denied/i.test(e.message || '')),
     now: () => api.impl.now(),
     get: (p) => api.impl.get(p),
     set: (p, v) => api.impl.set(p, v),

@@ -35,7 +35,7 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   const vote = (rk, v) => T.evaluate(async ({ code, rk, v }) => { for (const [u, x] of Object.entries(v)) await DS.Net.set(`rooms/${code}/fv/${rk}/${u}`, x); }, { code, rk, v });
   await vote('r1', { bot1: 'a', bot2: 'a', bot3: 'a', bot4: 'b', bot5: 'b' });
   log.push('종합상황실 고른 사람: ' + (await H.textContent('.fa-voted')).trim());
-  await H.waitForFunction(() => document.querySelector('.fa-plat.fall'), null, { timeout: 12000 });
+  await H.waitForFunction(() => document.querySelector('.fa-plat.broken .fa-piece'), null, { timeout: 12000 });
   await H.waitForTimeout(900); await H.screenshot({ path: `${OUT}/3-hall-show.png` });
   log.push('공개: ' + (await H.textContent('.fa-foot')).trim());
   await S.screenshot({ path: `${OUT}/4-phone-show.png` });

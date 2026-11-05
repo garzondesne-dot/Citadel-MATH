@@ -1,7 +1,7 @@
 // 모루 연성창 (대장간 · 번외 특전): 모닥불(수업 코드 없이 언제나) · 단체 대기실(형성평가 만점)에서 연다.
 // v0.9.0 C안: 모루 위 카드 3장 [재료] [연산] [재료] → 모루 옆 「연성」 → 엄격 판정 → 처음 만드는 카드는 마력 예제 → 망치가 내려와 덮고 충격파 → 카드 등장.
 // 💡 만들 수 있는 카드 목록: 실패하면 힌트 조각 +1 → 재료 → 연산 순서로 공개 (「힌트 한 줄」 결정을 사용자 확정으로 바꿈, 2026-11-01)
-// 열린 범위 = unlock/{반} (교사가 그 반에 배포한 차시). 가진 카드 = cards/{반}/{번호}/{카드id} (비밀번호 초기화해도 남는다)
+// 열린 범위 = 모든 차시 (2026-11-05 · 예전: unlock/{반}). 가진 카드 = cards/{반}/{번호}/{카드id} (비밀번호 초기화해도 남는다)
 window.DS = window.DS || {};
 
 DS.Forge = (function () {
@@ -17,7 +17,7 @@ DS.Forge = (function () {
   let preview = false; // 교사 대기공간: 모든 차시 미리 보기 (저장하지 않음)
   async function open(m, opt = {}) {
     me = m; tab = 'forge'; slots = { l: null, op: null, r: null }; pick = 'l'; preview = !!opt.preview;
-    no = preview ? Number(opt.no) || 0 : Number(await N().get(`unlock/${key(m.c)}`).catch(() => 0)) || 0;
+    no = 99; // 2026-11-05 사용자: 연성 도감은 진도(unlock)와 상관없이 모두 해금 가능 (처음 만든 카드는 예제를 맞혀야 완성 · 그대로)
     owned = preview ? {} : (await N().get(`cards/${key(m.c)}/${m.n}`).catch(() => null)) || {};
     $('#forge').hidden = false; document.body.classList.add('forge-open');
     render();

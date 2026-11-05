@@ -149,7 +149,7 @@ DS.Fun = (function () {
   };
   const ctlHtml = (R) => (R.fun
     ? `<div class="fun-ctl"><span>${esc(status(R))}</span><button class="btn small" data-fun="stop">⏹ 게임 끝</button><button class="btn small" data-fun="again">↻ 새 게임</button></div>`
-    : `<div class="fun-ctl pick"><span class="muted small">쉬는 시간 놀이</span>${Object.entries(KIND).map(([k, v]) => `<button class="btn small fun-btn k-${k}" data-fun="start:${k}" title="${esc(v.rule)}">${esc(v.short)}</button>`).join('')}</div>`);
+    : `<div class="fun-ctl pick"><span class="muted small">쉬는 시간 놀이</span>${Object.entries(KIND).filter(([k]) => k !== 'quiz').map(([k, v]) => `<button class="btn small fun-btn k-${k}" data-fun="start:${k}" title="${esc(v.rule)}">${esc(v.short)}</button>`).join('')}<button class="btn small fun-btn k-quiz" data-oxq="prev" title="탈락 없는 복습 5문장">⭕ OX 지난</button><button class="btn small fun-btn k-quiz" data-oxq="now" title="이번 차시 점검 5문장">⭕ OX 오늘</button></div>`); // 2026-11-05: OX 타임은 쉼터 안에서만
   function bind(el, code, R) {
     if (R.fun) drive(code);
     el.querySelectorAll('[data-fun]').forEach((b) => (b.onclick = () => DS.Control.run(async () => {
@@ -214,9 +214,27 @@ DS.Fun = (function () {
       if (DS.Sound && DS.Sound.buzz) DS.Sound.buzz();
       const b = root.querySelector('.fa-board'); if (b) { b.classList.add('hot'); const n = b.querySelector('b'); if (n) setTimeout(() => { n.textContent = n.dataset.after; }, 500); }
     }, 1900);
+    // 💥 바닥 꺼짐 (2026-11-05 사용자): 금이 감 → 발판이 조각조각 무너짐 → 용사가 빙글 떨어짐 · 먼지 · 흔들림 (폰은 내 쪽이면 진동)
     if (res.lose && f.kind !== 'quiz') setTimeout(() => {
-      root.querySelectorAll(`.fa-plat.${res.lose}, .fa-h[data-go="${res.lose}"]`).forEach((e) => e.classList.add('fall'));
-      if (DS.Sound) (rev && DS.Sound.boing ? DS.Sound.boing() : DS.Sound.hit && DS.Sound.hit());
+      const plat = root.querySelector(`.fa-plat.${res.lose}`); if (plat) { const c = document.createElement('i'); c.className = 'fa-crack'; plat.appendChild(c); }
+      if (DS.Sound && DS.Sound.clank) DS.Sound.clank();
+    }, 2000);
+    if (res.lose && f.kind !== 'quiz') setTimeout(() => {
+      const plat = root.querySelector(`.fa-plat.${res.lose}`);
+      if (plat) {
+        const n = 6, bg = getComputedStyle(plat).backgroundImage;
+        plat.classList.add('broken');
+        for (let i = 0; i < n; i++) {
+          const pc = document.createElement('i'); pc.className = 'fa-piece';
+          pc.style.cssText = `left:${(i * 100) / n}%;width:${100 / n + 0.6}%;background-image:${bg};background-size:${n * 100}% 100%;background-position:${(i / (n - 1)) * 100}% 0;--r:${(i % 2 ? 1 : -1) * (12 + ((i * 37) % 30))}deg;--dx:${(i - n / 2) * 6}px;animation-delay:${(Math.abs(i - (n - 1) / 2) * 0.09).toFixed(2)}s`;
+          plat.appendChild(pc);
+        }
+        const dust = document.createElement('i'); dust.className = 'fa-dust'; plat.appendChild(dust);
+      }
+      root.querySelectorAll(`.fa-h[data-go="${res.lose}"]`).forEach((h, k) => { h.style.transitionDelay = `${0.12 + (k % 5) * 0.06}s`; h.classList.add('fall', 'tumble'); });
+      root.classList.remove('fa-quake'); void root.offsetWidth; root.classList.add('fa-quake'); setTimeout(() => root.classList.remove('fa-quake'), 700);
+      const me = root.querySelector(`.fa-h.me[data-go="${res.lose}"]`); if (me && navigator.vibrate) navigator.vibrate([120, 60, 200]);
+      if (DS.Sound) { if (DS.Sound.hit) DS.Sound.hit(); if (DS.Sound.rumble) DS.Sound.rumble(); if (rev && DS.Sound.boing) setTimeout(() => DS.Sound.boing(), 350); }
     }, 2600);
   }
   const head = (f) => (f.phase === 'end' ? `<b>${f.kind === 'quiz' ? '' : '🏆 '}${esc(K(f).name)} 끝!</b>`

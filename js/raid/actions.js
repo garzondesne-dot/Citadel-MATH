@@ -46,7 +46,7 @@ DS.Act = (function () {
     try { think = await N().get(prepPath(lessonId, 'think')); } catch (e) { /* 기본 5초 */ }
     const Lp = DS.Lessons.get(lessonId);
     room.meta.think = think != null ? Number(think) : Lp && Lp.think != null ? Lp.think : 5;
-    // 🔥 반 최고 콤보 · 🥊 반대항 끄기 (v0.9.11)
+    // 🔥 반 최고 콤보 · 🏁 반대항 끄기 (v0.9.11)
     if (cls) { try { const cb = await N().get(`combo/${ck(cls)}`); room.meta.comboBest = Number((cb || {}).best) || 0; } catch (e) { room.meta.comboBest = 0; } }
     try { if ((await N().get(prepPath('_cfg', 'punchOff'))) === true) room.meta.punchOff = true; } catch (e) { /* 기본 켬 */ }
     if (cls) { try { const ot = await finishOvertime(cls); if (ot) room.meta.otShow = ot; } catch (e) { /* 연장전 결과는 다음에 */ } }
@@ -191,7 +191,7 @@ DS.Act = (function () {
   }
   const clearHelp = (code, uid) => N().remove(P(code, `help/${uid}`));
 
-  // ── 🥊 반대항 · 🔥 반 최고 콤보 저장 (v0.9.11 · 교사 · 종합상황실 기기) ─────────────
+  // ── 🏁 반대항 · 🔥 반 최고 콤보 저장 (v0.9.11 · 교사 · 종합상황실 기기) ─────────────
   //   punch/{차시}/{반} = { s(0~1000), m{참여 · 고침 · 콤보 · 첫 시도 · 돕기 0~100}, best, at, code, ot(연장전 중) } · combo/{반} = { best, at, code }
   async function savePunch(code, R, L, opt = {}) {
     const cls = (R.meta || {}).cls; if (!cls || !DS.Combo || !L || !L.no || L.eval || Raid.isLobby(R)) return null;

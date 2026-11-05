@@ -58,9 +58,9 @@ DS.Hall = (function () {
   }
   const toCamp = () => DS.Control.run(() => DS.TCamp.enter({ code, hallKey, hall: true }));
   const klassBtn = () => (DS.ShareCard.klassReady(L, R) ? '<button class="btn sc-btn" id="h-klass">🏫 학급 결과</button>' : '');
-  // 🥊 반대항 펀치 기계 (v0.9.11): 수업이 끝나면 저절로 한 번 · 버튼으로 다시 · ⏳ 연장전 결과는 다음 수업 대기실에서
+  // 🏁 반대항 경주 (v0.9.11): 수업이 끝나면 저절로 한 번 · 버튼으로 다시 · ⏳ 연장전 결과는 다음 수업 대기실에서
   const punchable = () => !!(DS.Punch && L && R && R.meta.cls && L.no && !L.eval && !DS.Act.punchOff(R));
-  const punchBtn = () => (punchable() ? '<button class="btn" id="h-punch">🥊 반대항 펀치 기계</button>' : '');
+  const punchBtn = () => (punchable() ? '<button class="btn" id="h-punch">🏁 반대항 경주</button>' : '');
   let punchSeen = '', otSeen = '';
   function punchAuto() { if (!punchable() || punchSeen === code) return; punchSeen = code; setTimeout(() => DS.Punch.open(L, R, { big: true, wait: true }).catch(() => {}), 1800); }
   function otAuto() {

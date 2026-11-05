@@ -1867,3 +1867,69 @@ input.sv-no { width: 64px !important; display: inline-block; padding: 2px 4px; }
 .pm-season { font-size: 13px; color: #d8c8a0; margin: 6px 0; }
 .pm-ov.big .pm-after { font-size: 20px; } .pm-ov.big .pm-bar { grid-template-columns: 170px 1fr 50px; font-size: 20px; } .pm-ov.big .pm-bar i { height: 18px; } .pm-ov.big .pm-rank li { font-size: 22px; padding: 8px 14px; }
 @media (max-width: 420px) { .pm-stage { height: 240px; } .pm-dig { width: 22px; height: 40px; } .pm-dig .s-g { top: 17.5px; } .pm-dig .s-f, .pm-dig .s-b, .pm-dig .s-e, .pm-dig .s-c { height: 14px; } .pm-bar { grid-template-columns: 92px 1fr 30px; font-size: 12px; } }
+/* 📱 교사 리모컨 아이콘 4칸 (2026-11-05) */
+.rg { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 10px 0 4px; }
+.rg-b { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 2px 8px; border-radius: 12px; background: #1a2342; border: 2px solid #c9a24a; color: #f2e6c8; font: inherit; cursor: pointer; }
+.rg-b i { font-style: normal; font-size: 26px; line-height: 1; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; }
+.rg-b span { font-size: 13px; white-space: nowrap; }
+.rg-b.on { background: #c9a24a; color: #1a1408; }
+.rg-b:disabled { opacity: .35; cursor: default; }
+/* 🏁 반대항 달리기 경주 (2026-11-05) */
+.rc-track { position: relative; padding: 18px 16px 14px; background: linear-gradient(#1f3a1f, #2b4a24 40%, #233d1d); background-size: cover; background-position: center; }
+.rc-ov.big .rc-track { padding: 26px 30px 20px; }
+.rc-start, .rc-goal { position: absolute; top: 8px; bottom: 8px; width: 6px; z-index: 1; }
+.rc-start { left: calc(16px + 92px); background: #fff8; } .rc-ov.big .rc-start { left: calc(30px + 150px); }
+.rc-goal { right: 16px; background: repeating-linear-gradient(#fff 0 8px, #222 8px 16px); } .rc-ov.big .rc-goal { right: 30px; width: 10px; }
+.rc-lane { position: relative; display: grid; grid-template-columns: 92px 1fr; align-items: center; height: 64px; border-bottom: 2px dashed #ffffff33; }
+.rc-ov.big .rc-lane { grid-template-columns: 150px 1fr; height: min(11vh, 104px); }
+.rc-lane:last-of-type { border-bottom: none; }
+.rc-lane.me { background: linear-gradient(90deg, #e8b04a33, transparent); outline: 2px solid var(--gold); border-radius: 8px; }
+.rc-name b { display: block; font-size: 18px; color: #fff; text-shadow: 0 1px 2px #000; } .rc-ov.big .rc-name b { font-size: 28px; }
+.rc-name small { display: inline-block; margin-top: 2px; padding: 1px 6px; border-radius: 6px; background: #0008; color: #ffd9a8; font-size: 11px; } .rc-ov.big .rc-name small { font-size: 16px; }
+.rc-run { position: relative; height: 100%; margin-right: 18px; }
+.rc-bar { position: absolute; left: 0; top: 50%; height: 14px; width: 0; transform: translateY(-50%); border-radius: 0 7px 7px 0; background: linear-gradient(90deg, #6f8cff, #6bff9e); box-shadow: 0 0 8px #6bff9e66; }
+.rc-ov.big .rc-bar { height: 22px; border-radius: 0 11px 11px 0; }
+.rc-lane.near .rc-bar { background: repeating-linear-gradient(45deg, #8a93b8 0 8px, #6c7596 8px 16px); box-shadow: none; }
+.rc-hero { position: absolute; left: 0; bottom: 6px; transform: translateX(-60%); z-index: 2; }
+.rc-hero .art { transform: scale(.9); transform-origin: bottom center; } .rc-ov.big .rc-hero .art { transform: scale(1.4); }
+.rc-num { position: absolute; left: 50%; bottom: 100%; transform: translateX(-50%); padding: 0 6px; border-radius: 6px; background: #000c; color: #ffd84a; font-weight: bold; font-size: 15px; white-space: nowrap; } .rc-ov.big .rc-num { font-size: 26px; margin-bottom: 18px; }
+.rc-badge { position: absolute; right: -6px; top: 4px; padding: 2px 8px; border-radius: 8px; background: #1a2038; border: 2px solid #9fb4ff; color: #dfe7ff; font-weight: bold; font-size: 13px; z-index: 3; }
+.rc-badge.win { background: #3a2a06; border-color: #ffd700; color: #ffd700; } .rc-badge.try { border-color: #ffb980; color: #ffb980; } .rc-ov.big .rc-badge { font-size: 22px; }
+.rc-wait { margin: 10px 0 0; color: #dfe; font-size: 13px; text-align: center; }
+.pm-dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: middle; }
+.pm-dot.k-join { background: #6fc8ff; } .pm-dot.k-fix { background: #ffb547; } .pm-dot.k-combo { background: #ff6b4a; } .pm-dot.k-first { background: #c58aff; } .pm-dot.k-heal { background: #6bff9e; }
+.pm-bar { min-height: 22px; } .pm-bar > span { white-space: nowrap; }
+.pm-track { display: block; height: 12px; border-radius: 6px; background: #0007; overflow: hidden; font-style: normal; } .pm-track b { display: block; height: 100%; background: linear-gradient(90deg, #6f8cff, #6bff9e); }
+.pm-ov.big .pm-track { height: 18px; }
+/* 💥 밸런스 게임 바닥 꺼짐 (2026-11-05) */
+.fa-crack { position: absolute; inset: 0; z-index: 2; pointer-events: none; background:
+  linear-gradient(62deg, transparent 47%, #0009 48%, #0009 50%, transparent 51%) 10% 0 / 40% 60% no-repeat,
+  linear-gradient(-58deg, transparent 47%, #000a 48%, #000a 50%, transparent 51%) 70% 10% / 45% 70% no-repeat,
+  linear-gradient(85deg, transparent 47%, #0008 48%, #0008 50%, transparent 51%) 40% 40% / 30% 60% no-repeat;
+  animation: faCrack .5s ease-out both; }
+@keyframes faCrack { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: scale(1); } }
+.fa-plat.broken { background: none !important; border-color: transparent !important; box-shadow: none !important; transform: none !important; opacity: 1 !important; }
+.fa-plat.broken .fa-crack, .fa-plat.broken .fa-flag, .fa-plat.broken .fa-cnt { opacity: 0; transition: opacity .3s; }
+.fa-piece { position: absolute; top: 0; bottom: 0; z-index: 1; background-color: #5a5048; background-repeat: no-repeat; border-top: 5px solid #8a7a66; box-shadow: inset 0 -20px 30px #0007; animation: faPiece 1.3s cubic-bezier(.5, 0, .9, .45) both; }
+.fa-plat.a .fa-piece { border-top-color: #2f6bff; } .fa-plat.b .fa-piece { border-top-color: #ff8a00; }
+.fa-arena.pimg .fa-piece { background-color: transparent; border-top: 0; box-shadow: none; }
+@keyframes faPiece { 0% { transform: none; } 15% { transform: translateY(6px) rotate(calc(var(--r) / 6)); } 100% { transform: translate(var(--dx), 140%) rotate(var(--r)); opacity: 0; } }
+.fa-dust { position: absolute; left: -10%; right: -10%; top: -20px; height: 60px; z-index: 3; pointer-events: none; background: radial-gradient(ellipse at 20% 60%, #cbbca4aa 0 18%, transparent 40%), radial-gradient(ellipse at 55% 50%, #d8cab2aa 0 20%, transparent 42%), radial-gradient(ellipse at 85% 65%, #cbbca4aa 0 16%, transparent 38%); animation: faDust 1.1s ease-out both; }
+@keyframes faDust { from { opacity: .9; transform: scale(.6); } to { opacity: 0; transform: scale(1.6) translateY(-20px); } }
+.fa-h.tumble .art { animation: faTumble 1.4s ease-in both; }
+@keyframes faTumble { to { transform: rotate(540deg) scale(.7); } }
+.fa-arena.fa-quake { animation: shake .1s linear 6; }
+/* 이모지 글꼴 (교실 TV · 안드로이드 보드): 기본 글꼴(Galmuri)이 일부 이모지를 빈칸으로 그려서 이모지 자리엔 시스템 이모지 글꼴 먼저 */
+.th-emo, .th-combo b, .th-note p, .th-perfect b, .th-bat-t, .th-chest-t, .pm-head b, .rg-b i { font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Galmuri11", sans-serif; }
+.th-bat .th-spr { width: 128px; height: 128px; }
+.th-bat-card .th-spr { width: 96px; height: 96px; }
+.th-chest-box .th-spr { width: 128px; height: 128px; }
+.th-spr.th-k-bat.flap { animation: thBatFlap .45s steps(1) infinite; }
+@keyframes thBatFlap { 0% { background-position: 0 0; } 33% { background-position: 33.333% 0; } 66% { background-position: 66.667% 0; } }
+/* 📱 리모컨 쉼터 조절판 정리 (2026-11-05) */
+.t-now .rest-ctl { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center; margin-top: 10px; }
+.t-now .rest-ctl .rest-btn { grid-column: 1 / -1; width: 100%; }
+.t-now .rest-ctl .rest-t { justify-self: start; font-size: 20px; }
+.t-now .fun-ctl.pick { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 8px; }
+.t-now .fun-ctl.pick > span { grid-column: 1 / -1; }
+.t-now .fun-ctl.pick .btn { width: 100%; margin: 0; padding: 8px 2px; font-size: 13px; }

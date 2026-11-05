@@ -29,7 +29,7 @@ DS.Gem = (function () {
     funJoin: 1, funWin: 3, oxWin: 6, quizAll: 2, // 🎖 쉼터 놀이 · OX 타임
     comboBest: 3,       // 🔥 반 최고 콤보를 깬 사슬에 낀 학생 (한도 밖 · v0.9.11)
     bat: 3,             // 🦇 황금 박쥐 포획 → 반 전체 (v0.9.11)
-    punchFirst: 5, punchUp: 3, // 🥊 반대항 1등 반 · 지난 차시보다 +10% (한도 밖)
+    punchFirst: 5, punchUp: 3, // 🏁 반대항 1등 반 · 지난 차시보다 +10% (한도 밖)
     teacherMax: 5,      // 👩‍🏫 선생님 지급 1회 최대
   };
   // 상점 (조각으로 해금) · 업적 전용(도감 · 첫 레이드 · 인장 3개 · 놀이 메달)은 여기 없음

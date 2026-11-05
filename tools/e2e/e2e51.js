@@ -26,7 +26,7 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   const H = await mk('H'); await H.setViewportSize({ width: 1600, height: 900 });
   await H.goto(`${U}&role=hall&code=${code}&key=${key}`); await H.waitForTimeout(3000);
   const vote = (rk, v) => T.evaluate(async ({ code, rk, v }) => { for (const [u, x] of Object.entries(v)) await DS.Net.set(`rooms/${code}/fv/${rk}/${u}`, x); }, { code, rk, v });
-  await H.click('[data-oxq="prev"]'); await H.waitForTimeout(1500);
+  await H.click('[data-rest]'); await H.waitForTimeout(1200); await H.click('[data-oxq="prev"]'); await H.waitForTimeout(1500); // 2026-11-05: OX 는 쉼터 안에서
   const f0 = await T.evaluate((code) => DS.Net.get(`rooms/${code}/fun`), code);
   log.push(`시작: ${f0.kind} · ${f0.which}`);
   const no = await T.evaluate((q) => DS.FunOX.list[q].no, f0.qi); log.push(`첫 문장 ${no}차시 (수업 4차시 → 지난 차시 3)`);

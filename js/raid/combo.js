@@ -1,4 +1,4 @@
-// 🔥 반 콤보 · ✨ 퍼펙트 · ⛓ 묶기 상한 · 👑 보스 단계 · 🦇 황금 박쥐 · 🎁 보물 상자 · 🥊 반대항 점수 (v0.9.11 · 2026-11-05 사용자 확정 · NEXT-ROOM 3절)
+// 🔥 반 콤보 · ✨ 퍼펙트 · ⛓ 묶기 상한 · 👑 보스 단계 · 🦇 황금 박쥐 · 🎁 보물 상자 · 🏁 반대항 점수 (v0.9.11 · 2026-11-05 사용자 확정 · NEXT-ROOM 3절)
 // 순수 함수만 (화면 · 서버와 분리 · tests/combo.test.js 가 검증). 모든 화면이 같은 방 값으로 같은 결과를 계산한다.
 // 방 데이터에 더해지는 것:
 //   hits/{uid}/{키} = { at: 서버 시각, ac: 콤보 시계(ms) }  ← 학생 폰이 공격할 때 남김 (Firebase 규칙: at === now)
@@ -23,7 +23,7 @@ DS.Combo = (function () {
   const CHEST = { p: 0.15, streakBonus: 0.10, day: 2, pity: 3, feathers: 5,
     table: [{ id: 'common', name: '흔함', p: 0.60, gem: [1, 2] }, { id: 'rare', name: '희귀', p: 0.30, gem: [3, 5] }, { id: 'hero', name: '영웅', p: 0.09, feather: 1 }, { id: 'legend', name: '전설', p: 0.01, feather: 3 }] };
   const PUNCH_W = { join: 25, fix: 25, combo: 20, first: 20, heal: 10 };
-  const PUNCH_NAMES = { join: '🙋 참여', fix: '🔁 고침', combo: '🔥 콤보', first: '🎯 첫 시도', heal: '💚 돕기' };
+  const PUNCH_NAMES = { join: '참여', fix: '고침', combo: '콤보', first: '첫 시도', heal: '돕기' }; // 교실 TV 에 이모지 글꼴이 없어 글자만 (2026-11-05)
 
   const keys = (o) => Object.keys(o || {});
   const Raid = () => DS.Raid;
@@ -177,7 +177,7 @@ DS.Combo = (function () {
     return { tier: t.id, name: t.name, gem: t.gem ? t.gem[0] + Math.floor(r3 * (t.gem[1] - t.gem[0] + 1)) : 0, feather: t.feather || 0 };
   }
 
-  // ── 🥊 반대항 펀치 기계 점수 (A안) ─────────────────────────
+  // ── 🏁 반대항 경주 점수 (A안) ─────────────────────────
   function punch(L, R, an) {
     an = an || analyze(L, R);
     const ids = Raid().activeIds(R), cur = (R.state || {}).step ?? -1, closed = Raid().isClosed(R) || Raid().isEnd(L, R);
@@ -213,19 +213,29 @@ DS.Combo = (function () {
     all = all || {};
     const order = (DS.Lessons ? DS.Lessons.list : []).filter((l) => l.no && !l.eval).sort((a, b) => a.no - b.no).map((l) => l.id);
     const rows = Object.entries(all[lessonId] || {}).map(([c, e]) => ({ cls: c, ...e }));
+    // 2026-11-05 사용자: 다른 반이 아직 이 차시를 안 했으면 그 반의 「가장 가까운 차시」 기록으로 비교 (같은 거리면 앞 차시) · near = 그 차시 id
+    const noOf = (id) => { const L = DS.Lessons && DS.Lessons.get(id); return (L && L.no) || 0; }, here = noOf(lessonId);
+    const classes = new Set(); Object.values(all).forEach((byC) => Object.keys(byC || {}).forEach((c) => classes.add(c)));
+    classes.forEach((c) => {
+      if ((all[lessonId] || {})[c]) return;
+      let best = null;
+      Object.entries(all).forEach(([lid, byC]) => { const e = (byC || {})[c]; if (!e || e.ot || !(e.s > 0) || lid === lessonId || !noOf(lid)) return; const d = Math.abs(noOf(lid) - here), k = d * 2 + (noOf(lid) > here ? 1 : 0); if (!best || k < best.k) best = { k, lid, e }; });
+      if (best) rows.push({ cls: c, ...best.e, near: best.lid, nearNo: noOf(best.lid) });
+    });
     const scored = rows.filter((r) => !r.ot).sort((a, b) => b.s - a.s || String(a.cls).localeCompare(String(b.cls)));
     scored.forEach((r, i) => { r.rank = i + 1; });
     const idx = order.indexOf(lessonId);
     rows.forEach((r) => {
+      if (r.near) { r.last = scored.length > 1 && r.rank === scored.length; return; } // 가까운 차시 기록은 지난 차시 비교 안 함
       for (let i = idx - 1; i >= 0; i--) { const p = (all[order[i]] || {})[r.cls]; if (p && !p.ot && p.s > 0) { r.prev = p.s; r.prevLesson = order[i]; r.delta = Math.round(((r.s - p.s) / p.s) * 100); break; } }
       r.last = scored.length > 1 && r.rank === scored.length; // 꼴찌 대신 「도전 중」
     });
     const season = {};
     Object.values(all).forEach((byC) => Object.entries(byC || {}).forEach(([c, e]) => { if (!e || e.ot) return; season[c] = season[c] || { cls: c, total: 0, n: 0 }; season[c].total += e.s || 0; season[c].n++; }));
-    return { rows: scored.concat(rows.filter((r) => r.ot)), season: Object.values(season).sort((a, b) => b.total - a.total), me: rows.find((r) => r.cls === String(cls)) || null };
+    return { rows: scored.concat(rows.filter((r) => r.ot)), season: Object.values(season).sort((a, b) => b.total - a.total), me: rows.find((r) => r.cls === String(cls) && !r.near) || null };
   }
   // 받을 조각: 1등 반 💎 +5 (그 차시를 한 반이 둘 이상일 때) · 지난 차시보다 +10% 이상 💎 +3
-  const punchGems = (me, b) => (!me || me.ot ? [] : [me.rank === 1 && (!b || b.rows.filter((r) => !r.ot).length >= 2) ? ['first', 5, '🥊 반대항 1등'] : null, me.delta != null && me.delta >= 10 ? ['up', 3, `🥊 지난 차시보다 +${me.delta}%`] : null].filter(Boolean));
+  const punchGems = (me, b) => (!me || me.ot ? [] : [me.rank === 1 && (!b || b.rows.filter((r) => !r.ot).length >= 2) ? ['first', 5, '🏁 반대항 1등'] : null, me.delta != null && me.delta >= 10 ? ['up', 3, `🏁 지난 차시보다 +${me.delta}%`] : null].filter(Boolean));
 
   return { GAP, TIERS, TIER_BIND, PF_BIND, BOSS_PF_BIND, CAP_WIN, CAP, BOSS_LOCK, BAT, CHEST, PUNCH_W, PUNCH_NAMES,
     pausedNow, activeNow, cpPatch, tierOf, events, analyze, comboNow, bindFor, bossPhase, batPlan, batQ, batDue, bat, hash, rnd, chestRoll, punch, overtime, board, punchGems };

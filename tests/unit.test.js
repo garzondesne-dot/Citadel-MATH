@@ -63,7 +63,7 @@ check(!U.forge('in', 'a', null, 2).ok, '두 칸 연산에 재료 하나면 실�
 Object.keys(U.MISTAKES).forEach((k) => { const [op, rest] = k.split('|'); const p = rest.split(','); const g = U.forge(op, p[0], p[1] || null, 10); check(!g.ok && g.msg === U.MISTAKES[k], `실수 메시지(10차시) ${k}`); });
 Object.keys(U.MISTAKES).forEach((k) => { const [op, rest] = k.split('|'); const p = rest.split(','); const g = U.forge(op, p[0], p[1] || null, 3); check(!g.ok && g.msg === U.MISTAKES[k] || (U.opOf(op).no > 3), `실수 메시지 ${k}`); });
 // 열리는 범위
-const want = { 2: 7, 3: 16, 4: 22, 5: 30, 6: 36, 7: 42, 8: 48, 9: 52, 10: 54 };
+const want = { 2: 7, 3: 16, 4: 22, 5: 30, 6: 36, 7: 42, 8: 48, 9: 51, 10: 53, 11: 54 }; // 2026-11-05 재조직: 대우 증명 9→10 · 절대부등식 10→11
 Object.entries(want).forEach(([no, n]) => check(U.opens(Number(no)).length === n, `${no}차시까지 ${n}장 (${U.opens(Number(no)).length})`));
 check(U.opens(1).length === 0, '1차시 0장');
 if (fail) { console.error(`\n${fail}건 실패`); process.exit(1); }

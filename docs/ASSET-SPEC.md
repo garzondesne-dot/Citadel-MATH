@@ -136,37 +136,24 @@ One equipment item for the 64x64 chibi hero (attach the hero sheet as reference)
 Native canvas 32x32 px, drawn at the correct scale for that hero, facing RIGHT. Single image.
 ```
 
-### 6-7. v0.9.11 반대항 · 황금 박쥐 · 보물 상자 (2026-11-05 · 템플릿 `assets/templates/v0911/tpl-*.png`)
+### 6-7. v0.9.11 그림 묶음 (2026-11-05 갱신 · 템플릿 `assets/templates/v0911/tpl-*.png` · 다시 만들기 `node tools/sprite/templates_v0911.js`)
 템플릿 PNG 를 그림 AI 에 **참고 그림으로 함께 첨부**하고 아래 프롬프트를 붙인다 (6-0 머리말 먼저). 칸 · 기준선 · 빨간 자리 표시는 그리지 말라고 적혀 있다.
-게임은 그림이 오기 전엔 이모지 + CSS 로 돌아간다 (`assets/manifest.js` `thrill` 이 null). 받으면 Claude 가 `{ src, frames }` 로 등록.
+교실 TV 에 이모지 글꼴이 없어 이모지가 빈칸으로 나온다 → 이 묶음이 오면 게임 안 이모지를 그림으로 바꾼다. 박쥐 · 상자 · 깃털은 그동안 Claude 가 코드로 그린 임시 도트(`thrill-*-v0`)를 쓴다.
+(펀치 기계 · 경기장은 반대항이 「달리기 경주」로 바뀌어 없앰)
 
 | 그림 | 템플릿 | 원본 칸 | 칸 | 보낼 파일 |
 |---|---|---|---|---|
-| 🥊 펀치 기계 | `tpl-punch.png` | 128×192 | 기본 · 맞은 순간 | `thrill-punch-v1.png` (256×192) |
-| 🏟 경기장 배경 | `tpl-arena.png` | 480×270 | 1 | `thrill-arena-v1.png` |
 | 🦇 황금 박쥐 | `tpl-bat.png` | 64×64 | 날갯짓 3 + 잡힘 1 | `thrill-bat-v1.png` (256×64) |
 | 🎁 보물 상자 | `tpl-chest.png` | 64×64 | 닫힘 · 흔들림 · 열림 | `thrill-chest-v1.png` (192×64) |
 | 🪶 황금 깃털 | `tpl-feather.png` | 32×32 | 1 | `thrill-feather-v1.png` |
+| ✨ 아이콘 18개 | `tpl-icons.png` | 32×32 | 6 × 3 | `thrill-icons-v1.png` (192×96) |
+| 🔥 콤보 창 | `tpl-combo.png` | 96×48 | 단계 4 | `thrill-combo-v1.png` (384×48) |
+| 🏁 경주 트랙 | `tpl-track.png` | 480×270 | 1 | `thrill-track-v1.png` |
+| 🃏 카드 틀 | `tpl-card.png` | 64×88 | 1 | `card-frame-v2.png` |
+| 🃏 카드 그림 16개 | `tpl-cardart.png` | 32×32 | 8 × 2 | `card-arts-v2.png` (256×64) |
+| ⚖ 밸런스 발판 | `tpl-plat.png` | 160×120 | 멀쩡 · 금 감 | `fun-plat-v2.png` (320×120) |
 
-① 펀치 기계
-```
-[STYLE BIBLE above]
-Use the attached template only for layout (cell size, ground line); do NOT draw the grid, guide lines or labels.
-Sprite sheet of ONE arcade boxing machine: a sturdy metal arcade cabinet base with a red leather punching bag
-on a spring arm, slight 3/4 view, facing LEFT (toward the hero). Native cell 128x192 px, 2 cells in one row,
-same base position on the cyan ground line: (1) idle, (2) just punched — bag swung back and up, small white impact
-flash and 3 speed lines. No numbers, no screen, no text on the machine.
-```
-② 경기장 배경
-```
-[STYLE BIBLE above — backgrounds: no outline, dithering allowed]
-Use the attached template only for composition; do NOT draw the red boxes or labels.
-Side-view background, native 480x270 px: an underground gladiator training arena in a gothic dungeon,
-wooden plank floor across the lower 18%, stone walls with torches, dark silhouettes of a crowd on balconies,
-a hanging banner without letters. Keep the top-center, the right edge and the center-right floor area simple
-and dark (UI and the punch machine go there). Dark and desaturated, no characters, no text.
-```
-③ 황금 박쥐
+① 황금 박쥐
 ```
 [STYLE BIBLE above]
 Use the attached template only for layout; do NOT draw guide lines or labels.
@@ -174,21 +161,60 @@ Sprite sheet of ONE cute golden bat (shiny gold fur, big sparkling eyes, tiny fa
 Native cell 64x64 px, 4 cells in one row, body centered in the same spot:
 (1) wings up, (2) wings level, (3) wings down, (4) caught in a small golden net, dizzy swirl eyes.
 ```
-④ 보물 상자
+② 보물 상자
 ```
 [STYLE BIBLE above]
 Use the attached template only for layout; do NOT draw guide lines or labels.
 Sprite sheet of ONE treasure chest: dark wood with gold trim and a round gold lock, front view from slightly above.
 Native cell 64x64 px, 3 cells in one row, bottom on the cyan ground line:
-(1) closed, (2) rattling — tilted 10 degrees, light leaking from the lid seam, (3) open — lid up, warm golden light
-beams and sparkles rising (nothing drawn inside).
+(1) closed, (2) rattling — tilted 10 degrees, light leaking from the lid seam, (3) open — lid up, warm golden light beams and sparkles rising (nothing drawn inside).
 ```
-⑤ 황금 깃털
+③ 황금 깃털
 ```
 [STYLE BIBLE above]
 One icon: a single golden feather, diagonal from bottom-left to top-right, soft shine. Native 32x32 px.
 ```
-템플릿을 다시 만들 때: `node tools/sprite/templates_v0911.js` (Playwright · Galmuri 글꼴).
+④ 아이콘 18개
+```
+[STYLE BIBLE above]
+Use the attached template only for layout; do NOT draw guide lines or labels. Icon sheet, native 32x32 px cells,
+6 columns x 3 rows, no gaps, each icon centered, readable at small size, bright colors, 1px dark outline, no text:
+row1: (1) orange flame, (2) yellow lightning bolt, (3) small rainbow arc, (4) golden crown, (5) four-point sparkle star, (6) short iron chain link
+row2: (7) treasure chest, (8) golden feather, (9) golden bat face, (10) blue magic gem shard, (11) gold trophy cup, (12) checkered finish flag
+row3: (13) raised hand, (14) circular arrow, (15) flame with a small number plate, (16) archery target with arrow, (17) green heart, (18) hourglass
+```
+⑤ 콤보 창
+```
+[STYLE BIBLE above]
+Use the attached template only for layout; do NOT draw guide lines or labels. Native cell 96x48 px, 4 cells in one row:
+a small rounded badge frame for a COMBO counter, dark navy center left EMPTY (the game writes numbers there).
+(1) orange ember frame, (2) yellow lightning frame, (3) rainbow crystal frame, (4) golden crown frame with gems — each richer than the last, same size.
+```
+⑥ 경주 트랙
+```
+[STYLE BIBLE above — backgrounds: no outline, dithering allowed]
+Use the attached template only for composition; do NOT draw the red boxes or labels.
+Background, native 480x270 px: a training race track inside a torch-lit gothic dungeon hall, slight top-down view,
+4–6 straight dirt lanes running left to right separated by low stone curbs, a start line near the left and a checkered
+finish line at the right edge, a dark area at the far left for class names. Dark and desaturated, no characters, no text.
+```
+⑦ 카드 틀 + ⑧ 카드 그림
+```
+[STYLE BIBLE above]
+Use the attached template only for layout; do NOT draw the red boxes or labels.
+(7) ONE collectible math card frame, native 64x88 px: dark navy inner panel, simple metal-and-gold pixel border with a small gem at the bottom,
+an empty square window at the top (32x32), an empty band in the middle, an empty name plate at the bottom. Same pixel style as the heroes.
+(8) Icon sheet, native 32x32 px cells, 8 columns x 2 rows, magical objects with a glowing math rune, no text:
+row1: (1) crystal orb with ∈ rune, (2) abacus, (3) empty glass jar, (4) nested rings, (5) two identical crystals, (6) branching tree of gems, (7) two overlapping shields (∩), (8) joined twin crystals (∪)
+row2: (9) cracked shield missing a piece, (10) mirror-flipping hourglass, (11) scroll with a question mark seal, (12) crowd banner with ∀ rune, (13) magic mirror, (14) key and padlock, (15) quill and sealed proof scroll, (16) golden balance scale
+```
+⑨ 밸런스 발판
+```
+[STYLE BIBLE above]
+Use the attached template only for layout; do NOT draw guide lines or labels.
+Native cell 160x120 px, 2 cells in one row: a floating stone-and-wood platform hanging over a void, flat top on the cyan line
+where 6–8 tiny heroes will stand. (1) intact, (2) the same platform with glowing cracks across it. No characters, no text.
+```
 
 ## 7. 넘기는 방법
 

@@ -180,6 +180,11 @@ const total = (mid) => L.monsters[mid] ? X.itemsFor(L, { meta: { code: '777777' 
   check(b.season[0].cls === '2' && b.season[0].total === 1140 && b.season.find((s) => s.cls === '1').total === 1060, '시즌 누적 (연장전 중은 빼고)');
   check(JSON.stringify(C.punchGems(b.me).map((g) => [g[0], g[1]])) === '[["up",3]]', '1반: 2등이지만 +12% → 💎 +3');
   { const b3 = C.board(all, 'set-03', '3'); check(JSON.stringify(C.punchGems(b3.me, b3).map((g) => [g[0], g[1]])) === '[["first",5]]', '3반: 1등 → 💎 +5 (지난 기록 없음)'); }
+  // 다른 반이 이 차시를 아직 안 했으면 가장 가까운 차시 기록으로 비교 (표시 near)
+  { const all2 = { 'set-02': { 5: { s: 300, m: {} } }, 'set-04': { 5: { s: 900, m: {} }, 6: { s: 700, m: {} } }, 'set-03': { 1: { s: 600, m: {} } } };
+    const b5 = C.board(all2, 'set-03', '1'), r5 = b5.rows.find((r) => r.cls === '5'), r6 = b5.rows.find((r) => r.cls === '6');
+    check(r5 && r5.near === 'set-02' && r5.s === 300 && r6 && r6.near === 'set-04' && r6.s === 700, `가까운 차시: 5반 거리 같음 → 앞 차시(2차시) · 6반 4차시 (${JSON.stringify(b5.rows.map((r) => [r.cls, r.near, r.s]))})`);
+    check(b5.me.cls === '1' && b5.me.rank === 2 && !b5.me.near && b5.season.find((x) => x.cls === '5').total === 1200, '순위에 함께 들어감 · 시즌은 실제 기록만'); }
   { const solo = C.board({ 'set-03': { 1: { s: 400, m: {} } } }, 'set-03', '1'); check(C.punchGems(solo.me, solo).length === 0, '그 차시를 한 반만 했으면 1등 보상 없음 (첫 반이 늘 1등이 되지 않게)'); }
   check(C.punchGems(C.board(all, 'set-03', '4').me).length === 0, '연장전 중인 반은 보상 대기');
 }

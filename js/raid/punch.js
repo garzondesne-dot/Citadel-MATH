@@ -1,7 +1,8 @@
-// 🥊 반대항 펀치 기계 (v0.9.11 · 2026-11-05 사용자 확정 A안): 같은 차시를 한 반끼리 · 학기 누적 시즌
-//   점수 = 🙋 참여 25 · 🔁 고침 25 · 🔥 콤보 20 · 🎯 첫 시도 20 · 💚 돕기 10 (DS.Combo.punch · 0~1000)
-//   연출: 용사가 샌드백 펀치 → 7세그 숫자 돌기 → 다른 반 기록선 근처에서 느려짐 → 쾅 → 순위 · 지표 막대 · 지난 차시 대비
-//   꼴찌 대신 「도전 중」 · 1등 반 🏆 깃발 + 💎 +5 · 지난 차시보다 +10% 이상 💎 +3 · ⏳ 이어하기 중 = 「연장전 중」
+// 🏁 반대항 달리기 경주 (2026-11-05 사용자 「캐릭터들이 게이지를 뒤에 달고 왼쪽에서 오른쪽으로 뛰어오기」 · 예전 🥊 펀치 기계를 바꿈)
+//   점수 = 참여 25 · 고침 25 · 콤보 20 · 첫 시도 20 · 돕기 10 (DS.Combo.punch · 0~1000) · 같은 차시를 한 반끼리
+//   다른 반이 이 차시를 아직 안 했으면 그 반의 가장 가까운 차시 기록으로 함께 달림 (레인에 「n차시 기록」 표시)
+//   연출: 반마다 레인 하나 · 그 반 용사가 왼쪽에서 출발 · 지나간 자리에 게이지가 늘어남 · 모두 같은 속도라 점수 자리에서 멈춤 → 1등 🏆 · 꼴찌 대신 「도전 중」
+//   이모지는 교실 TV 에서 안 보일 수 있어 글자 · CSS 로 (그림이 오면 assets/manifest.js thrill.track)
 window.DS = window.DS || {};
 
 DS.Punch = (function () {
@@ -9,10 +10,7 @@ DS.Punch = (function () {
   const ck = (c) => String(c).replace(/[.#$/[\]]/g, '_');
   const N = () => DS.Net;
   const MAX = 1000;
-  // 7세그 숫자 (a b c d e f g)
-  const SEG = ['abcdef', 'bc', 'abged', 'abgcd', 'fgbc', 'afgcd', 'afgedc', 'abc', 'abcdefg', 'abcdfg'];
-  const seg = (d) => `<span class="pm-dig">${'abcdefg'.split('').map((x) => `<i class="s-${x}${d != null && SEG[d].includes(x) ? ' on' : ''}"></i>`).join('')}</span>`;
-  const segs = (v, n = 4) => String(Math.max(0, Math.round(v))).padStart(n, ' ').split('').map((c) => seg(c === ' ' ? null : Number(c))).join('');
+  const noOf = (id) => { const L = DS.Lessons && DS.Lessons.get(id); return (L && L.no) || 0; };
 
   // 이 차시 반 기록 (지금 방이면 방에서 바로 계산한 값으로 · 저장 전이어도 보이게)
   async function load(L, R, opt = {}) {
@@ -27,71 +25,69 @@ DS.Punch = (function () {
     }
     return { all, b: DS.Combo.board(all, L.id, cls ? ck(cls) : '') };
   }
-  // 공격 용사 고르기 (이름 · 순위 없이 그 반 용사 하나)
-  function heroOf(R) {
-    const ps = Object.values((R && R.players) || {}).filter((p) => !p.teacher);
-    if (!ps.length) return DS.Art.teacherHero ? DS.Art.teacherHero(R) : 7;
-    return ps[DS.Combo.hash(String((R.meta || {}).code || '')) % ps.length].hero || 0;
+  // 레인 용사: 우리 반 = 그 방에서 가장 많이 고른 용사 · 다른 반 = 반 이름으로 고정 (이름 · 순위 없이)
+  function heroOf(R, cls, mine) {
+    if (mine) {
+      const cnt = {}; Object.values((R && R.players) || {}).filter((p) => !p.teacher).forEach((p) => { cnt[p.hero || 0] = (cnt[p.hero || 0] || 0) + 1; });
+      const top = Object.entries(cnt).sort((a, b) => b[1] - a[1])[0]; if (top) return Number(top[0]);
+    }
+    return DS.Combo.hash(`lane|${cls}`) % 16;
   }
 
   async function open(L, R, opt = {}) {
     const { b } = await load(L, R, opt);
-    const me = b.me, cls = R.meta.cls;
-    const target = me && !me.ot ? me.s : 0;
-    const lines = b.rows.filter((r) => r !== me && !r.ot).map((r) => ({ cls: r.cls, s: r.s }));
-    const A = (DS.ASSETS && DS.ASSETS.thrill) || {};
-    const o = document.createElement('div'); o.className = `pm-ov${opt.big ? ' big' : ''}`;
-    o.innerHTML = `<div class="pm">
-      <div class="pm-head"><b>🥊 반대항 펀치 기계</b><span>${L.no ? `${L.no}차시 ` : ''}${esc(L.title)}${opt.overtime ? ' · ⏳ 연장전 결과' : ''}</span><button class="btn small pm-x">닫기</button></div>
-      <div class="pm-stage"${A.arena ? ` style="background-image:url('${DS.ASSETS.base}${A.arena.src}')"` : ''}>
-        <div class="pm-gauge"><div class="pm-fill"></div>${lines.map((l) => `<i class="pm-line" style="bottom:${(l.s / MAX) * 100}%"><span>${esc(l.cls)}반 ${l.s}</span></i>`).join('')}</div>
-        <div class="pm-seg">${segs(0)}</div>
-        <div class="pm-mach">${DS.Thrill.sprite('punch', 0, 'idle')}</div>
-        <div class="pm-hero">${DS.Art.hero(heroOf(R), 'idle')}</div>
-        <p class="pm-cls">${cls ? `${esc(cls)}반` : ''}${me && me.ot ? ' · ⏳ 연장전 중' : ''}</p>
+    const me = b.me, A = (DS.ASSETS && DS.ASSETS.thrill) || {};
+    const lanes = b.rows.slice(0, 8);
+    const o = document.createElement('div'); o.className = `pm-ov rc-ov${opt.big ? ' big' : ''}`;
+    o.innerHTML = `<div class="pm rc">
+      <div class="pm-head"><b>🏁 반대항 경주</b><span>${L.no ? `${L.no}차시 ` : ''}${esc(L.title)}${opt.overtime ? ' · ⏳ 연장전 결과' : ''}</span><button class="btn small pm-x">닫기</button></div>
+      <div class="rc-track"${A.track ? ` style="background-image:url('${DS.ASSETS.base}${A.track.src}')"` : ''}>
+        <i class="rc-start"></i><i class="rc-goal"></i>
+        ${lanes.map((r, i) => `<div class="rc-lane${me && r === me ? ' me' : ''}${r.near ? ' near' : ''}" data-i="${i}">
+          <div class="rc-name"><b>${esc(r.cls)}반</b>${r.near ? `<small>${noOf(r.near)}차시 기록</small>` : r.ot ? '<small>연장전 중</small>' : ''}</div>
+          <div class="rc-run"><div class="rc-bar"></div><div class="rc-hero"><span class="rc-num">0</span>${DS.Art.hero(heroOf(R, r.cls, me && r === me), 'walk')}</div><span class="rc-badge" hidden></span></div></div>`).join('')}
+        ${lanes.length < 2 ? '<p class="rc-wait">다른 반 기록을 기다리는 중 — 다른 반이 수업하면 함께 달려요</p>' : ''}
       </div>
       <div class="pm-after" hidden></div></div>`;
     document.body.appendChild(o);
     o.querySelector('.pm-x').onclick = () => { o.remove(); if (opt.onClose) opt.onClose(); };
-    if (!me || me.ot) { after(o, L, b, opt); return; }
-    // 1) 돌진 → 펀치
-    const hero = o.querySelector('.pm-hero'), mach = o.querySelector('.pm-mach'), digits = o.querySelector('.pm-seg'), fill = o.querySelector('.pm-fill');
-    setTimeout(() => { hero.classList.add('dash'); hero.innerHTML = DS.Art.hero(heroOf(R), 'attack'); }, 300);
-    setTimeout(() => { mach.innerHTML = DS.Thrill.sprite('punch', 1, 'hit'); o.querySelector('.pm-stage').classList.add('shake'); if (DS.Sound) DS.Sound.hit(); }, 850);
-    setTimeout(() => { hero.classList.remove('dash'); hero.innerHTML = DS.Art.hero(heroOf(R), 'idle'); mach.innerHTML = DS.Thrill.sprite('punch', 0, 'idle'); o.querySelector('.pm-stage').classList.remove('shake'); }, 1500);
-    // 2) 숫자 돌기 (기록선 근처 느려짐)
-    const base = Math.max(120, target / 2.4);
-    let x = 0, last = 0, tick = 0;
-    const speed = (v) => lines.reduce((k, l) => k * (1 - 0.8 * Math.exp(-(((v - l.s) / 45) ** 2))), 1);
+    const top = Math.max(1, ...lanes.filter((r) => !r.ot).map((r) => r.s || 0)), v = top / 3.6; // 1초에 v 점 · 1등은 3.6초 만에 들어옴
+    const els = [...o.querySelectorAll('.rc-lane')].map((e, i) => ({ r: lanes[i], bar: e.querySelector('.rc-bar'), hero: e.querySelector('.rc-hero'), num: e.querySelector('.rc-num'), badge: e.querySelector('.rc-badge'), done: false }));
+    els.filter((x) => x.r.ot).forEach((x) => { x.done = true; x.hero.innerHTML = DS.Art.hero(heroOf(R, x.r.cls), 'sit'); x.num.textContent = '⏳'; });
+    let t0 = 0, tick = 0;
+    const finish = (x) => {
+      x.done = true; x.num.textContent = x.r.s;
+      const win = x.r.rank === 1 && lanes.filter((r) => !r.ot).length > 1;
+      x.hero.innerHTML = `<span class="rc-num">${x.r.s}</span>${DS.Art.hero(heroOf(R, x.r.cls, me && x.r === me), win ? 'win' : 'idle', win ? 'pairhop' : '')}`;
+      x.badge.hidden = false; x.badge.className = `rc-badge${win ? ' win' : x.r.last ? ' try' : ''}`; x.badge.textContent = win ? '1등' : x.r.last ? '도전 중' : `${x.r.rank}등`;
+      if (DS.Sound) (win ? DS.Sound.correct() : DS.Sound.hit());
+    };
     const run = (now) => {
       if (!o.isConnected) return;
-      if (!last) last = now;
-      const dt = Math.min(0.05, (now - last) / 1000); last = now;
-      x = Math.min(target, x + base * Math.max(0.18, speed(x)) * dt * (x > target * 0.92 ? 0.55 : 1));
-      digits.innerHTML = segs(x); fill.style.height = `${(x / MAX) * 100}%`;
-      if (++tick % 4 === 0 && DS.Sound && DS.Sound.tick) DS.Sound.tick();
-      lines.forEach((l) => { const e = [...o.querySelectorAll('.pm-line')].find((i) => i.textContent.startsWith(`${l.cls}반`)); if (e) e.classList.toggle('passed', x >= l.s); });
-      if (x < target) requestAnimationFrame(run);
-      else { // 3) 쾅
-        const st = o.querySelector('.pm-stage'); st.classList.add('bang'); if (DS.Sound) { DS.Sound.hit(); setTimeout(() => DS.Sound.correct(), 150); }
-        setTimeout(() => after(o, L, b, opt), 700);
-      }
+      if (!t0) t0 = now;
+      const t = (now - t0) / 1000, x0 = v * t;
+      els.forEach((x) => {
+        if (x.done) return;
+        const s = Math.min(x.r.s || 0, x0), w = (s / MAX) * 100;
+        x.bar.style.width = `${w}%`; x.hero.style.left = `${w}%`; x.num.textContent = Math.round(s);
+        if (s >= (x.r.s || 0)) finish(x);
+      });
+      if (++tick % 5 === 0 && DS.Sound && DS.Sound.tick) DS.Sound.tick();
+      if (els.some((x) => !x.done)) requestAnimationFrame(run);
+      else setTimeout(() => after(o, L, b), 700);
     };
-    setTimeout(() => requestAnimationFrame(run), 1100);
+    setTimeout(() => requestAnimationFrame(run), 600);
   }
-  // 순위 · 지표 막대 · 지난 차시 대비 · 보상 · 시즌
-  function after(o, L, b, opt) {
-    const me = b.me, el = o.querySelector('.pm-after'), C = DS.Combo;
-    const scored = b.rows.filter((r) => !r.ot);
-    const rowHtml = (r) => `<li class="${r === me ? 'me' : ''}${r.rank === 1 ? ' first' : ''}"><span class="pm-rk">${r.ot ? '⏳' : r.rank === 1 ? '🏆' : r.last ? '🔥' : `${r.rank}등`}</span><b>${esc(r.cls)}반</b><span class="pm-s">${r.ot ? '연장전 중' : r.s}</span>${r.last && !r.ot ? '<small>도전 중</small>' : ''}${r.delta != null && !r.ot ? `<small class="${r.delta >= 0 ? 'up' : 'down'}">${r.delta >= 0 ? '+' : ''}${r.delta}%</small>` : ''}</li>`;
-    const gems = C.punchGems(me, b);
-    el.innerHTML = `${me && !me.ot ? `<div class="pm-me">${me.rank === 1 && scored.length > 1 ? '<p class="pm-flag">🏆 우리 반 1등!</p>' : me.last ? '<p class="pm-flag try">🔥 도전 중 — 다음 차시에 뒤집자!</p>' : ''}
+  // 우리 반 지표 막대 · 지난 차시 대비 · 보상 · 시즌
+  function after(o, L, b) {
+    const me = b.me, el = o.querySelector('.pm-after'), C = DS.Combo, scored = b.rows.filter((r) => !r.ot), gems = C.punchGems(me, b);
+    el.innerHTML = `${me && !me.ot ? `<div class="pm-me">${me.rank === 1 && scored.length > 1 ? '<p class="pm-flag">우리 반 1등!</p>' : me.last ? '<p class="pm-flag try">도전 중 — 다음 차시에 뒤집자!</p>' : ''}
         ${me.delta != null ? `<p class="pm-delta ${me.delta >= 0 ? 'up' : 'down'}">지난 차시보다 <b>${me.delta >= 0 ? '+' : ''}${me.delta}%</b></p>` : '<p class="muted small">첫 기록 — 다음 차시부터 지난 차시와 비교해요</p>'}
-        <div class="pm-bars">${Object.entries(C.PUNCH_W).map(([k, w]) => `<div class="pm-bar"><span>${C.PUNCH_NAMES[k]} <small>${w}</small></span><i><b style="width:${(me.m || {})[k] || 0}%"></b></i><em>${(me.m || {})[k] || 0}</em></div>`).join('')}</div>
-        ${gems.length ? `<p class="pm-gem">${gems.map(([, g, why]) => `${esc(why)} → 모두 💎 +${g}`).join('<br>')}</p>` : ''}</div>` : me && me.ot ? '<p class="pm-flag try">⏳ 연장전 중 — 이어하기 포털(7일)이 끝나면 다음 수업 때 결과를 펀치해요</p>' : '<p class="muted">아직 이 반 기록이 없어요.</p>'}
-      ${scored.length > 1 || b.rows.some((r) => r.ot) ? `<ol class="pm-rank">${b.rows.map(rowHtml).join('')}</ol>` : '<p class="muted small">다른 반이 같은 차시를 하면 순위가 생겨요.</p>'}
-      ${b.season.length > 1 ? `<p class="pm-season">🏅 시즌 누적: ${b.season.map((s, i) => `<b>${i + 1}. ${esc(s.cls)}반</b> ${s.total}`).join(' · ')}</p>` : ''}
-      <p class="muted small">같은 차시끼리 겨뤄요 · 게임 기록은 수학 성적이 아니에요</p>`;
+        <div class="pm-bars">${Object.entries(C.PUNCH_W).map(([k, w]) => `<div class="pm-bar"><span><i class="pm-dot k-${k}"></i>${C.PUNCH_NAMES[k]} <small>${w}</small></span><i class="pm-track"><b style="width:${(me.m || {})[k] || 0}%"></b></i><em>${(me.m || {})[k] || 0}</em></div>`).join('')}</div>
+        ${gems.length ? `<p class="pm-gem">${gems.map(([, g, why]) => `${esc(why)} → 모두 💎 +${g}`).join('<br>')}</p>` : ''}</div>` : me && me.ot ? '<p class="pm-flag try">연장전 중 — 이어하기 포털(7일)이 끝나면 다음 수업 때 결과가 나와요</p>' : '<p class="muted">아직 이 반 기록이 없어요.</p>'}
+      ${b.rows.some((r) => r.near) ? '<p class="muted small">「n차시 기록」 = 그 반이 아직 이 차시를 안 해서 가장 가까운 차시 기록으로 함께 달렸어요</p>' : ''}
+      ${b.season.length > 1 ? `<p class="pm-season">시즌 누적: ${b.season.map((s, i) => `<b>${i + 1}. ${esc(s.cls)}반</b> ${s.total}`).join(' · ')}</p>` : ''}
+      <p class="muted small">게임 기록은 수학 성적이 아니에요</p>`;
     el.hidden = false; o.querySelector('.pm').classList.add('done');
   }
   // 학생 보상: 끝난 뒤 저장된 기록(같은 수업 코드)을 기다렸다가 1등 💎 +5 · +10% 💎 +3 (한도 밖 · 한 번)
@@ -107,5 +103,5 @@ DS.Punch = (function () {
       await new Promise((r) => setTimeout(r, 1500));
     }
   }
-  return { open, load, reward, segs };
+  return { open, load, reward };
 })();

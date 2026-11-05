@@ -9,7 +9,7 @@ const R = (a, b) => Array.from({ length: b - a + 1 }, (_, i) => a + i);
 const divs = (n) => R(1, n).filter((d) => n % d === 0);
 check(L && L.eval && L.floor === 2 && L.rooms.length === 17 && L.rooms.filter((r) => r.boss).map((r) => r.id).join() === 'q17', '17방 · 17번 보스');
 check(L.rooms.filter((r) => r.photo).map((r) => r.id).join() === 'q15,q16,q17', '서술형 = 15 · 16 · 17 (사진 분석 전 잠금)');
-check(L.rooms.map((r) => r.no).join() === '2,3,3,3,3,5,5,7,7,8,9,9,9,10,4,10,10', '해금 차시');
+check(L.rooms.map((r) => r.no).join() === '2,3,3,3,3,5,5,7,7,8,9,9,9,11,4,10,11', '해금 차시 (2026-11-05 재조직: 14 · 17 절대부등식 = 11차시)');
 const got = (q) => (q.type === 'choice' ? q.answer : q.type === 'multi' ? q.answer.map((i) => q.options[i]).join(',') : q.answer);
 const WANT = { q01: ['④ 우리 반에서 안경을 쓴 학생의 모임'], q02: ['② {12} ⊂ A'], q03: [5], q04: [16], q05: [32], q06: [24], q07: [12], q08: ['② P ⊂ Q 이면 명제 q → p 는 참이다.'], q09: ['1,2,3'], q10: ['② ~p → q'], q11: [18], q12: ['③ ~p 는 q 이기 위한 필요조건이다.'], q13: ['ㄱ,ㄴ'], q14: [49], q15: [3], q16: [5, 5], q17: ['(a + b)(a − b)²', 'a + b > 0, (a − b)² ≥ 0', 'a = b'] };
 const first = Object.fromEntries(L.rooms.map((r) => [r.id, L.items(r.id, 'x', 0)]));

@@ -1,4 +1,4 @@
-// v0.9.11 🔥 콤보 · ✨ 퍼펙트 · 🦇 황금 박쥐 · 🎁 상자 · 👑 보스 단계 · 🥊 반대항 펀치 기계 — node tools/e2e/e2e57.js <출력 폴더>
+// v0.9.11 🔥 콤보 · ✨ 퍼펙트 · 🦇 황금 박쥐 · 🎁 상자 · 👑 보스 단계 · 🏁 반대항 경주 — node tools/e2e/e2e57.js <출력 폴더>
 //   학생 폰 1 (김민준) + 봇 11 · 종합상황실 · 교사 리모컨 (로컬 체험 모드)
 const { chromium } = require('playwright');
 const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
@@ -11,7 +11,7 @@ const RIGHT = `(p) => (p.type === 'blanks' ? p.items.map((i) => i.answer) : p.ty
   await T.fill('#f-teacher .t-id', 'e2e-teacher'); await T.fill('#f-teacher .t-pw', '909090'); await T.click('#f-teacher .t-login'); await T.waitForTimeout(1000);
   await T.click('#s-go'); await T.waitForTimeout(500); await T.fill('#r-cls', '1-3'); await T.fill('#r-text', '1 김민준\n2 이서연'); await T.click('#r-up'); await T.waitForTimeout(800);
   // 다른 반 · 지난 차시 기록 (순위 · +n% 확인용)
-  await T.evaluate(async () => { await DS.Net.set('punch/set-04/1-4', { s: 380, m: { join: 50, fix: 40, combo: 20, first: 30, heal: 50 }, at: Date.now(), code: 'x1' }); await DS.Net.set('punch/set-03/1-3', { s: 420, m: {}, at: Date.now(), code: 'x2' }); await DS.Net.set('combo/1-3', { best: 6, at: Date.now(), code: 'x2' }); });
+  await T.evaluate(async () => { await DS.Net.set('punch/set-04/1-4', { s: 380, m: { join: 50, fix: 40, combo: 20, first: 30, heal: 50 }, at: Date.now(), code: 'x1' }); await DS.Net.set('punch/set-03/1-3', { s: 420, m: {}, at: Date.now(), code: 'x2' }); await DS.Net.set('punch/set-03/1-5', { s: 510, m: {}, at: Date.now(), code: 'x3' }); await DS.Net.set('combo/1-3', { best: 6, at: Date.now(), code: 'x2' }); });
   const S = await mk('S'); await S.goto(U + '&role=student'); await S.waitForTimeout(1500);
   if (await S.isVisible('#splash')) { await S.click('#splash'); await S.waitForTimeout(500); }
   await S.selectOption('#s-cls', '1-3'); await S.waitForTimeout(200); await S.selectOption('#s-num', '1'); await S.waitForTimeout(300);
@@ -83,25 +83,25 @@ const RIGHT = `(p) => (p.type === 'blanks' ? p.items.map((i) => i.answer) : p.ty
   const ph2 = await H.evaluate(() => ({ note: (document.querySelector('.th-note.phase') || {}).textContent || '', atk: (document.querySelector('#rh-atk span') || {}).textContent || '', cls: document.querySelector('#raid').className }));
   await H.screenshot({ path: `${OUT}/9-hall-boss-phase.png` });
   log.push(`👑 보스: 처음 「${ph1.slice(0, 22)}」 → 「${ph2.note.trim()}」 · 「${ph2.atk.slice(0, 22)}」`);
-  // 마무리 → 수업 끝 → 🥊 펀치 기계
+  // 마무리 → 수업 끝 → 🏁 반대항 경주
   await T.evaluate(async (code) => { const L = DS.Lessons.get('set-04'); let R = DS.Act.unpackRoom(await DS.Net.get(`rooms/${code}`)); await DS.Act.go(code, R, L, 1); R = DS.Act.unpackRoom(await DS.Net.get(`rooms/${code}`)); await DS.Act.go(code, R, L, 1); }, code);
   await H.waitForTimeout(4200);
-  await H.screenshot({ path: `${OUT}/10-hall-punch-run.png` });
+  await H.screenshot({ path: `${OUT}/10-hall-race-run.png` });
   await H.waitForTimeout(7000);
-  const pm = await H.evaluate(() => ({ seg: !!document.querySelector('.pm-seg .pm-dig'), after: (document.querySelector('.pm-after:not([hidden])') || {}).textContent || '', lines: document.querySelectorAll('.pm-line').length }));
-  await H.screenshot({ path: `${OUT}/11-hall-punch.png` });
+  const pm = await H.evaluate(() => ({ lanes: document.querySelectorAll('.rc-lane').length, near: [...document.querySelectorAll('.rc-lane.near small')].map((e) => e.textContent).join(), badge: [...document.querySelectorAll('.rc-badge:not([hidden])')].map((e) => e.textContent).join(), after: (document.querySelector('.pm-after:not([hidden])') || {}).textContent || '' }));
+  await H.screenshot({ path: `${OUT}/11-hall-race.png` });
   const saved = await T.evaluate(() => DS.Net.get('punch/set-04/1-3')), cbest = await T.evaluate(() => DS.Net.get('combo/1-3'));
   await S.waitForTimeout(9000);
   const g = await S.evaluate(() => DS.Gem.mine({ c: '1-3', n: 1 }));
   await S.screenshot({ path: `${OUT}/12-phone-after.png` });
   const logs = Object.keys(g.log || {});
-  log.push(`🥊 펀치: 7세그 ${pm.seg} · 기록선 ${pm.lines} · 결과 「${pm.after.replace(/\s+/g, ' ').slice(0, 80)}」 · 저장 ${saved && saved.s} · 반 콤보 ${cbest && cbest.best} · 조각 기록 ${logs.join(',')} · 상자 ${JSON.stringify(g.chest && g.chest.log)}`);
+  log.push(`🏁 경주: 레인 ${pm.lanes} · 가까운 차시 「${pm.near}」 · 배지 「${pm.badge}」 · 결과 「${pm.after.replace(/\s+/g, ' ').slice(0, 80)}」 · 저장 ${saved && saved.s} · 반 콤보 ${cbest && cbest.best} · 조각 기록 ${logs.join(',')} · 상자 ${JSON.stringify(g.chest && g.chest.log)}`);
   // 🪶 이펙트 목록
   const fxw = await S.evaluate(async () => (await DS.Account.looks({ c: '1-3', n: 1 })).fx.find((f) => f.id === 'wings'));
   log.push(`🪶 황금 날개: ${JSON.stringify(fxw)}`);
   const C = { 콤보복사: meta.comboBest === 6, 박쥐나타남: !!bat0 && /황금 박쥐/.test(phoneBat), 박쥐포획폰: /포획 성공/.test(batRes), 박쥐포획큰화면: /포획 성공/.test(hallBat), 상자: /보물 상자/.test(chest),
     퍼펙트: /PERFECT/.test(pf), 콤보미터: /COMBO/.test(hc.combo), 콤보10: /10 COMBO/.test(hc.note), 묶기표시: /⛓/.test(hc.atk), 보스1단계: /1단계 · 멈춤 4초/.test(ph1), 보스2단계: /보스 2단계/.test(ph2.note) && /2단계 · 멈춤 3초/.test(ph2.atk),
-    펀치화면: pm.seg && pm.lines === 1 && /지난 차시보다/.test(pm.after), 펀치저장: !!saved && saved.s > 0 && saved.best >= 10 /* combo/{반} 은 로컬 체험 모드에서 여러 창이 같은 순간 저장하면 덮일 수 있어 punch.best 로 */,
+    경주화면: pm.lanes === 3 && /3차시 기록/.test(pm.near) && /1등/.test(pm.badge) && /지난 차시보다/.test(pm.after), 펀치저장: !!saved && saved.s > 0 && saved.best >= 10 /* combo/{반} 은 로컬 체험 모드에서 여러 창이 같은 순간 저장하면 덮일 수 있어 punch.best 로 */,
     박쥐조각: logs.some((k) => k.startsWith('bat_')), 콤보조각: logs.some((k) => k.startsWith('combo_')), 반대항조각: logs.some((k) => k.startsWith('punch_set-04')), 황금날개잠김: !!fxw && !fxw.open };
   const bad = Object.keys(C).filter((k) => !C[k]), ok = !bad.length; if (bad.length) log.push('틀린 항목: ' + bad.join(', '));
   console.log(log.join('\n')); console.log(ok ? '✅ 통과' : '❌ 기대와 다름'); console.log('errors', errs.length ? errs : 'none'); await b.close(); if (!ok || errs.length) process.exit(1);

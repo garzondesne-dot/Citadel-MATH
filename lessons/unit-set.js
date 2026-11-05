@@ -135,12 +135,12 @@ DS.Unit = (function () {
       ex: q({ type: 'choice', question: 'x > 0 은 −x < 0 이기 위한 어떤 조건인가?', choices: ['필요충분조건', '충분조건', '필요조건'], answerIndex: 0, solution: 'x > 0 ⇔ −x < 0' }) },
     { id: 'iffset', no: 9, sec: '05 명제 사이의 관계', name: '필요충분조건과 진리집합', short: 'P = Q', fm: 'p ⇔ q ⇔ P = Q', desc: '두 조건의 진리집합이 서로 같다', grade: 3, art: 3, page: '9차시 학습지', op: 'eq', in: ['card:iff', 'card:equal'], hint: '진리집합이 어떤 관계일 때?',
       ex: q({ type: 'ox', question: 'P = Q 이면 p 는 q 이기 위한 필요충분조건이다.', answer: true, solution: 'P ⊂ Q 이고 Q ⊂ P' }) },
-    { id: 'contraproof', no: 9, sec: '06 명제의 증명', name: '대우를 이용한 증명', short: '대우로 증명', fm: '대우가 참임을 보이면 처음 명제도 참', desc: '직접 보이기 어려울 때 대우를 증명한다', grade: 3, art: 0, page: '9차시 학습지', op: 'imp', in: ['card:contra', 'card:imp'], ordered: true, hint: '대우가 참이면 명제는?',
+    { id: 'contraproof', no: 10, sec: '06 명제의 증명', name: '대우를 이용한 증명', short: '대우로 증명', fm: '대우가 참임을 보이면 처음 명제도 참', desc: '직접 보이기 어려울 때 대우를 증명한다', grade: 3, art: 0, page: '9차시 학습지', op: 'imp', in: ['card:contra', 'card:imp'], ordered: true, hint: '대우가 참이면 명제는?',
       ex: q({ type: 'ox', question: '명제 ‘n²이 짝수이면 n은 짝수이다.’는 대우 ‘n이 홀수이면 n²은 홀수이다.’를 보여 증명할 수 있다.', answer: true, solution: '대우가 참 → 명제도 참' }) },
-    // ── 06 명제의 증명 · 절대부등식 (10차시) ──
+    // ── 06 명제의 증명 (10차시 대우 증명 · 귀류법) · 절대부등식 (11차시) — 2026-11-05 7~11차시 재조직 A안 ──
     { id: 'contradiction', no: 10, sec: '06 명제의 증명', name: '귀류법', fm: '결론을 부정 → 모순 → 처음 명제가 참', desc: '결론을 부정하여 모순을 이끌어 내는 증명', grade: 3, art: 0, flip: true, page: '10차시 학습지', op: 'then', in: ['card:neg', 'X'], ordered: true, hint: '아니라고 가정했더니 말이 안 된다면?',
       ex: q({ type: 'choice', question: '‘√2는 무리수이다.’를 귀류법으로 증명할 때 처음 가정은?', choices: ['√2는 유리수이다.', '√2는 무리수이다.', '√2는 정수이다.'], answerIndex: 0, solution: '결론(무리수)을 부정 → 유리수라고 가정' }) },
-    { id: 'absineq', no: 10, sec: '06 명제의 증명', name: '절대부등식', fm: '모든 실수 x 에 대하여 항상 성립하는 부등식', desc: '예: x² ≥ 0', grade: 2, art: 7, page: '10차시 학습지', op: 'all', in: ['I'], hint: '어떤 값을 넣어도 성립하면',
+    { id: 'absineq', no: 11, sec: '06 명제의 증명', name: '절대부등식', fm: '모든 실수 x 에 대하여 항상 성립하는 부등식', desc: '예: x² ≥ 0', grade: 2, art: 7, page: '10차시 학습지', op: 'all', in: ['I'], hint: '어떤 값을 넣어도 성립하면',
       ex: q({ type: 'ox', question: '부등식 x² ≥ 0 은 모든 실수 x 에 대하여 성립하는 절대부등식이다.', answer: true, solution: '제곱은 0 이상' }) },
   ];
   // 엄격 연성 실수 메시지 (op|왼쪽,오른쪽 — 순서 그대로)
