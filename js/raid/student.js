@@ -111,7 +111,7 @@ DS.Student = (function () {
     const inClass = !!(code && R && !Raid().isClosed(R));
     const o = document.createElement('div'); o.className = inClass ? 'lvup-mini' : 'lvup-full';
     o.innerHTML = inClass ? `<b>🎉 LEVEL UP!</b> Lv.${after.lv} <span>${esc(after.title)}</span>` : `<div><p>🎉 LEVEL UP!</p><b>Lv.${after.lv}</b><span>${esc(after.title)}</span></div>`;
-    document.body.appendChild(o); DS.Sound.correct(); setTimeout(() => o.remove(), inClass ? 3200 : 2800);
+    document.body.appendChild(o); if (DS.Sound.levelup) DS.Sound.levelup(); else DS.Sound.correct(); setTimeout(() => o.remove(), inClass ? 3200 : 2800);
     if (code && R && !test && !Raid().isClosed(R)) DS.Net.set(`rooms/${code}/lvup/${me}`, { lv: after.lv, at: DS.Net.TS }).catch(() => {});
   });
   let clearPaid = '';

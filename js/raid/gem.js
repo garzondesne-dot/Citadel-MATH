@@ -37,7 +37,8 @@ DS.Gem = (function () {
     hero: { 12: 30, 13: 30, 14: 60, 15: 60 },
     fx: { fire: 40, lightning: 40, ice: 40, stars: 60, slash: 60, vortex: 80, // Ⅲ 화려 (인장으로도)
       moon: 20, ring: 20, chain: 20, spikes: 20, mana: 20, crit: 20, // Ⅱ 숙련 (2026-11-06)
-      twin: 120, pillar: 120, thunder: 120, nova: 120, meteor: 120, void: 120 }, // Ⅳ 전설 = 같은 계열 Ⅲ 이 있어야 (account.js need)
+      twin: 120, pillar: 120, thunder: 120, nova: 120, meteor: 120, void: 120, // Ⅳ 전설 = 같은 계열 Ⅲ 이 있어야 (account.js need)
+      upper: 20, sweep: 20, hammer: 60, spin: 60, quake: 120, reap: 120 }, // 🔨 강타 · 🌪 연격 (2026-11-06 · Ⅲ 은 인장 없이 💎60)
   };
   const itemKey = (kind, id) => `${kind}_${id}`;
   const price = (kind, id) => (SHOP[kind] || {})[id] ?? null;
@@ -84,6 +85,7 @@ DS.Gem = (function () {
     if (typeof document === 'undefined' || !g) return;
     const e = document.createElement('div'); e.className = 'gem-pop'; e.innerHTML = `💎 +${g}${why ? ` <small>${String(why).replace(/[<>&]/g, '')}</small>` : ''}`;
     document.body.appendChild(e); setTimeout(() => e.remove(), 2600);
+    if (window.DS && DS.Sound && DS.Sound.coin) DS.Sound.coin(); // 🔊 2026-11-06
   }
   // 🔁 연속 참여: 그 반이 게임으로 수업한 차시(held) 를 차시 순서로 · 끝에서부터 연속으로 기록이 있는 수
   function streak(records, held) {

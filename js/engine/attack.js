@@ -36,7 +36,7 @@ DS.Attack = (function () {
     knock(monBox, o.finish ? 24 : 12); shake(scene, Math.max(2, hit[3] || 2) * (o.finish ? 2 : 1.2), Math.max(0.14, hit[2] || 0.18) * (o.finish ? 2000 : 1000));
     if (!o.noDmg) dmg(scene, cx, M.y + 6);
     if (o.finish) wave(scene, cx, floor);
-    if (DS.Sound) { DS.Sound.hit && DS.Sound.hit(); }
+    if (DS.Sound) { if (o.finish && DS.Sound.finish) DS.Sound.finish(); else if (DS.Sound.fxHit) DS.Sound.fxHit(fx); else if (DS.Sound.hit) DS.Sound.hit(); }
     await hitstop(scene, (o.finish ? 0.32 : Math.max(0.05, hit[1] || 0.08)) * 1000);
   }
   // 근접 돌진: heroBox 를 dx 만큼 (잔상 남김)
@@ -84,20 +84,22 @@ DS.Attack = (function () {
     if (isRanged(hero)) {
       setPose(heroBox, hero, 'attack');
       await wait(200);
+      if (DS.Sound && DS.Sound.launch) DS.Sound.launch();
       const from = { x: H.x + H.w * 0.8, y: H.y + H.h * 0.5 }, to = { x: M.x + M.w * 0.42, y: M.y + M.h * 0.5 };
       await fly(scene, projOf(hero), from, o.miss ? { x: M.x + M.w * 0.3, y: M.y - M.h * 0.35 } : to, o.ps || s * 1.15, o.miss);
       if (!scene.isConnected) return;
-      if (o.miss) { if (monBox.animate) monBox.animate([{ rotate: '0deg' }, { rotate: '-6deg' }, { rotate: '0deg' }], { duration: 300 }); }
+      if (o.miss) { if (DS.Sound && DS.Sound.block) DS.Sound.block(); if (monBox.animate) monBox.animate([{ rotate: '0deg' }, { rotate: '-6deg' }, { rotate: '0deg' }], { duration: 300 }); }
       else await impact(scene, monBox, fx, { s, finish: o.finish, noDmg: o.noDmg });
       await wait(120);
     } else {
       const reach = Math.max(0, M.x - (H.x + H.w * 0.55));
       setPose(heroBox, hero, 'walk');
+      if (DS.Sound && DS.Sound.swing) DS.Sound.swing();
       await dash(scene, heroBox, 0, reach, 230, true);
       if (!scene.isConnected) return;
       setPose(heroBox, hero, 'attack');
       await wait(110);
-      if (o.miss) { knock(heroBox, -18); if (monBox.animate) monBox.animate([{ scale: '1' }, { scale: '1.08' }, { scale: '1' }], { duration: 260 }); shake(scene, 2, 120); await wait(200); }
+      if (o.miss) { if (DS.Sound && DS.Sound.block) DS.Sound.block(); knock(heroBox, -18); if (monBox.animate) monBox.animate([{ scale: '1' }, { scale: '1.08' }, { scale: '1' }], { duration: 260 }); shake(scene, 2, 120); await wait(200); }
       else await impact(scene, monBox, fx, { s, finish: o.finish, noDmg: o.noDmg });
       await wait(140);
       if (!scene.isConnected) return;

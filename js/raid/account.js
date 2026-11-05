@@ -160,7 +160,8 @@ DS.Account = (function () {
     DS.FX.FAMS.forEach((fam) => fam.ids.forEach((k, t) => {
       const f = { id: k, fam: fam.id, tier: t };
       if (t === 0) f.open = true;
-      else if (t === 2) { const i = DS.FX.FANCY.indexOf(k); f.open = !!fo[k]; f.cond = DS.Bonus ? DS.Bonus.fxCond(i) : '해금 조건은 추후 공개'; }
+      else if (t === 2 && DS.FX.FANCY.includes(k)) { const i = DS.FX.FANCY.indexOf(k); f.open = !!fo[k]; f.cond = DS.Bonus ? DS.Bonus.fxCond(i) : '해금 조건은 추후 공개'; }
+      else if (t === 2) { f.open = false; f.cond = '💎 조각으로 해금'; } // 🔨 강타 · 🌪 연격 Ⅲ = 인장 없이 💎
       else { f.open = false; f.cond = '💎 조각으로 해금'; if (t === 3) f.need = fam.ids[2]; }
       fx.push(f);
     }));
@@ -168,7 +169,7 @@ DS.Account = (function () {
     const gem = DS.Gem && m ? await DS.Gem.mine(m) : {};
     if (DS.Gem) {
       heroes.forEach((h) => { const p = DS.Gem.price('hero', h.id); if (p == null) return; h.shop = { kind: 'hero', id: h.id, price: p }; h.open = h.open || DS.Gem.owns(gem, 'hero', h.id); h.cond = `💎 ${p} 조각으로 해금`; });
-      fx.forEach((f) => { const p = DS.Gem.price('fx', f.id); if (p == null) return; f.shop = { kind: 'fx', id: f.id, price: p }; f.open = f.open || DS.Gem.owns(gem, 'fx', f.id); f.cond = f.tier === 2 ? `🟪${DS.Bonus ? DS.Bonus.UNLOCK[DS.FX.FANCY.indexOf(f.id)] : ''} · 💎${p}` : `💎${p}`; });
+      fx.forEach((f) => { const p = DS.Gem.price('fx', f.id); if (p == null) return; f.shop = { kind: 'fx', id: f.id, price: p }; f.open = f.open || DS.Gem.owns(gem, 'fx', f.id); f.cond = f.tier === 2 && DS.FX.FANCY.includes(f.id) ? `🟪${DS.Bonus ? DS.Bonus.UNLOCK[DS.FX.FANCY.indexOf(f.id)] : ''} · 💎${p}` : `💎${p}`; });
       fx.forEach((f) => { if (!f.need || f.open) return; const nd = fx.find((x) => x.id === f.need); if (nd && !nd.open) { f.locked = `먼저 Ⅲ 「${DS.FX.NAMES[f.need].replace(/^\S+\s/, '')}」`; f.cond = `💎${f.shop ? f.shop.price : 120} · Ⅲ먼저`; } });
     }
     // 🪶 황금 날개 (v0.9.11 업적 전용): 🎁 보물 상자에서 황금 깃털 5개

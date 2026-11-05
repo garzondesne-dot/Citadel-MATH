@@ -1,4 +1,5 @@
 // 절차적 Web Audio 신디사이저: 효과음을 파일 없이 오실레이터와 노이즈로 합성한다.
+// 2026-11-06: 녹음 효과음(assets/sfx · manifest sfx)을 먼저 쓰고, 아직 못 받았으면 합성음으로 대신한다 · 성채 · 허수아비 배경음(bgm)
 window.DS = window.DS || {};
 
 DS.Sound = (function () {
@@ -56,9 +57,49 @@ DS.Sound = (function () {
     s.stop(t + dur + 0.02);
   }
 
+  // 🔊 녹음 소리: 받아서 해독해 두고(buf) 바로 재생 · 아직이면 받기 시작하고 합성음(fb)으로
+  const buf = {}, loading = {};
+  const sfxCfg = () => (window.DS && DS.ASSETS && DS.ASSETS.sfx) || null;
+  const sfxUrl = (k) => { const c = sfxCfg(); return c && (c.keys.includes(k) || c.bgm.includes(k)) ? `${c.dir}${k}-v${c.v}.mp3` : null; };
+  function load(k) {
+    const c = ensure(), u = sfxUrl(k);
+    if (!c || !u || buf[k] || loading[k] || typeof fetch !== 'function') return;
+    loading[k] = fetch(u).then((r) => r.arrayBuffer()).then((a) => new Promise((res, rej) => c.decodeAudioData(a, res, rej))).then((b) => { buf[k] = b; }).catch(() => {}).finally(() => { delete loading[k]; });
+  }
+  function sample(k, vol = 0.9, fb) {
+    if (muted) return true;
+    const c = ensure(); if (!c) return false;
+    if (buf[k]) { const s = c.createBufferSource(), g = c.createGain(); s.buffer = buf[k]; g.gain.value = vol; s.connect(g).connect(master); s.start(); return true; }
+    load(k); if (fb) fb(); return false;
+  }
+  const preload = () => { const c = sfxCfg(); if (c) c.keys.forEach(load); };
+  // 🎵 배경음: 성채 · 허수아비에서만 · 작게 · 소리 끄기 · 화면 숨김이면 멈춤
+  let bgmEl = null, bgmKey = null;
+  function bgm(k) {
+    if (typeof Audio === 'undefined') return;
+    if (bgmKey === k && bgmEl) { if (!muted && bgmEl.paused && !document.hidden) bgmEl.play().catch(() => {}); return; }
+    if (bgmEl) { bgmEl.pause(); bgmEl = null; } bgmKey = k || null;
+    const u = k && sfxUrl(k); if (!u) return;
+    bgmEl = new Audio(u); bgmEl.loop = true; bgmEl.volume = 0.22;
+    if (!muted && !document.hidden) bgmEl.play().catch(() => {});
+  }
+  // 첫 터치 때 소리 장치를 깨우고 녹음 소리를 미리 받음 (0.5MB 안쪽 · 배경음은 성채 · 허수아비에서만)
+  if (typeof document !== 'undefined') document.addEventListener('pointerdown', () => { ensure(); preload(); }, { once: true, capture: true });
+  if (typeof document !== 'undefined') document.addEventListener('visibilitychange', () => { if (!bgmEl) return; if (document.hidden) bgmEl.pause(); else if (!muted) bgmEl.play().catch(() => {}); });
+  // 공격 계열 → 맞는 소리
+  const FAM_SFX = { cut: 'cut', smash: 'smash', sweep: 'sweep', fire: 'fire', spark: 'spark', frost: 'frost', star: 'star', magic: 'magic' };
+
   return {
-    unlock: ensure,
-    toggle() { muted = !muted; return muted; },
+    unlock() { const c = ensure(); preload(); return c; },
+    toggle() { muted = !muted; if (bgmEl) { if (muted) bgmEl.pause(); else bgmEl.play().catch(() => {}); } return muted; },
+    sample, preload, bgm,
+    // ⚔ 공격 소리 (attack.js): 휘두름 · 발사 · 맞음(이펙트 계열) · 막힘 · 처치
+    swing() { sample('swing', 0.6, () => noise({ dur: 0.25, vol: 0.25, freq: 600, sweepTo: 3500, q: 0.8 })); },
+    launch() { sample('launch', 0.6, () => noise({ dur: 0.2, vol: 0.2, freq: 1500, sweepTo: 5000, q: 1 })); },
+    fxHit(kind) { const f = window.DS && DS.FX && DS.FX.famOf ? DS.FX.famOf(kind) : null; const k = f ? FAM_SFX[f.id] : 'special'; sample(k, 0.85, () => { noise({ dur: 0.12, vol: 0.4, freq: 900, type: 'lowpass' }); tone({ type: 'square', f0: 170, f1: 60, dur: 0.12, vol: 0.18 }); }); },
+    finish() { sample('finish', 0.95, () => { noise({ dur: 0.45, vol: 0.5, freq: 4500, sweepTo: 400 }); tone({ type: 'sine', f0: 75, f1: 30, dur: 0.45, vol: 0.6 }); }); },
+    coin() { sample('coin', 0.7, () => tone({ type: 'square', f0: 1320, f1: 1980, dur: 0.12, vol: 0.08 })); },
+    levelup() { sample('levelup', 0.85, () => [523, 659, 784, 1047].forEach((f, i) => tone({ type: 'triangle', f0: f, dur: 0.45, vol: 0.18, delay: i * 0.12 }))); },
     get muted() { return muted; },
 
     card() { noise({ dur: 0.06, vol: 0.15, freq: 5000 }); },
@@ -80,10 +121,7 @@ DS.Sound = (function () {
       tone({ type: 'sine', f0: 440, f1: 880, dur: 0.4, vol: 0.15 });
       tone({ type: 'sine', f0: 443, f1: 1320, dur: 0.45, vol: 0.1, delay: 0.03 });
     },
-    block() {
-      tone({ type: 'triangle', f0: 520, f1: 470, dur: 0.18, vol: 0.2 });
-      noise({ dur: 0.08, vol: 0.18, freq: 3200 });
-    },
+    block() { sample('block', 0.75, () => { tone({ type: 'triangle', f0: 520, f1: 470, dur: 0.18, vol: 0.2 }); noise({ dur: 0.08, vol: 0.18, freq: 3200 }); }); },
     // 금속 철갑 파쇄음
     armorBreak() {
       for (let i = 0; i < 6; i++) {
@@ -96,10 +134,8 @@ DS.Sound = (function () {
       for (let i = 0; i < 4; i++) tone({ type: 'triangle', f0: 2200 - i * 300, f1: 600, dur: 0.3, vol: 0.09, delay: i * 0.05 });
       noise({ dur: 0.5, vol: 0.45, freq: 6000, sweepTo: 600, q: 2 });
     },
-    correct() {
-      [660, 880, 1320].forEach((f, i) => tone({ type: 'triangle', f0: f, dur: 0.25, vol: 0.18, delay: i * 0.07 }));
-    },
-    wrong() { tone({ type: 'sawtooth', f0: 220, f1: 110, dur: 0.35, vol: 0.13 }); },
+    correct() { sample('correct', 0.75, () => [660, 880, 1320].forEach((f, i) => tone({ type: 'triangle', f0: f, dur: 0.25, vol: 0.18, delay: i * 0.07 }))); },
+    wrong() { sample('wrong', 0.6, () => tone({ type: 'sawtooth', f0: 220, f1: 110, dur: 0.35, vol: 0.13 })); },
     // 공격 실패: 물렁한 소리 (아무 일도 일어나지 않음)
     squish() {
       tone({ type: 'sine', f0: 210, f1: 120, dur: 0.22, vol: 0.2 });
@@ -144,8 +180,6 @@ DS.Sound = (function () {
       tone({ type: 'square', f0: 1600, f1: 3200, dur: 0.12, vol: 0.12 });
       noise({ dur: 0.3, vol: 0.4, freq: 8000, sweepTo: 1500, q: 1.5 });
     },
-    victory() {
-      [523, 659, 784, 1047].forEach((f, i) => tone({ type: 'triangle', f0: f, dur: 0.45, vol: 0.18, delay: i * 0.12 }));
-    },
+    victory() { sample('victory', 0.85, () => [523, 659, 784, 1047].forEach((f, i) => tone({ type: 'triangle', f0: f, dur: 0.45, vol: 0.18, delay: i * 0.12 }))); },
   };
 })();

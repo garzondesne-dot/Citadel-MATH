@@ -17,6 +17,7 @@ DS.Camp = (function () {
   const stampToday = () => { try { return localStorage.getItem('citadel-stamp') === today(); } catch (e) { return false; } };
 
   async function enter(m, code) {
+    if (DS.Sound && DS.Sound.bgm) DS.Sound.bgm(null); // 🎵 캠프로 오면 성채 · 허수아비 배경음 끔
     me = m; code0 = code || '';
     DS.UI.show('screen-camp');
     if (!m.test) DS.Scene.save({ role: 'camp' });
