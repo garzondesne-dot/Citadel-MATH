@@ -376,11 +376,12 @@ DS.Student = (function () {
     const prac = rec.practice; // v0.9.2 연습 공격: 다 맞힌 뒤의 시도 → 이펙트는 그대로 · 데미지 0 · 「이미 성공」
     const fx = `${mid}|${t.attempt}` !== shown ? (label === 'fail' && !prac ? 'miss' : 'hit') : '';
     if (fx && t.correct < t.total && thinkSec() > 0) thinkUntil[`${mid}|${t.attempt}`] = Date.now() + thinkSec() * 1000;
-    if (fx) { shown = `${mid}|${t.attempt}`; if (label === 'fail' && !prac) DS.Sound.squish(); else { DS.Sound.slash(); setTimeout(() => DS.Sound.hit(), 160); setTimeout(() => { const sc = body.querySelector('.scene'); if (sc) DS.FX.play(sc, myP().fx || 'flame', { perfect: label === 'success', scale: label === 'success' ? 0.42 : 0.3 }); }, 60); } }
+    const atk = !!(fx && DS.Attack); // ⚔ 공격 개편 2단계 (2026-11-06): 근접 = 돌진 · 원거리 = 탄 → 그림을 그린 뒤 DS.Attack.play (아래)
+    if (fx) { shown = `${mid}|${t.attempt}`; if (!atk) { if (label === 'fail' && !prac) DS.Sound.squish(); else { DS.Sound.slash(); setTimeout(() => DS.Sound.hit(), 160); setTimeout(() => { const sc = body.querySelector('.scene'); if (sc) DS.FX.play(sc, myP().fx || 'flame', { perfect: label === 'success', scale: label === 'success' ? 0.42 : 0.3 }); }, 60); } } }
     // ⚔ 마무리 일격: 내 이번 공격이 몬스터 체력을 0 으로 만들었으면
     const bestBefore = rec.tries.slice(0, -1).reduce((m, x) => Math.max(m, x.correct), 0), gain = rec.best - bestBefore;
     const finish = fx && !prac && gain > 0 && Raid().cleared(L, R, mid) && hp.left + gain > 0;
-    if (finish) setTimeout(() => { const sc = body.querySelector('.scene'); if (sc) { sc.classList.add('fin-flash'); DS.FX.play(sc, myP().fx || 'flame', { perfect: true, scale: 0.6 }); } DS.Sound.correct(); }, 500);
+    if (finish) setTimeout(() => { const sc = body.querySelector('.scene'); if (sc) { sc.classList.add('fin-flash'); DS.FX.play(sc, myP().fx || 'flame', { perfect: true, scale: 0.6 }); } DS.Sound.correct(); }, atk ? 1300 : 500);
     const head = prac ? `⛓ 몬스터 묶기 ${t.correct}/${t.total} — 지금까지 <b>${Raid().bindOf(L, R, mid, me)}초</b> 묶음 <span class="small muted">(최대 ${Raid().BIND_MAX}초)</span>` : { success: '⚔ 공격 성공!', partial: `⚔ 부분 성공 (${t.correct}/${t.total})`, fail: '💨 공격 실패…' }[label];
     const done = Raid().cleared(L, R, mid);
     // ⚡ 수업 필살기 (2026-11-06 확정 ①): 첫 시도 퍼펙트 + 묶기 2번 퍼펙트 = 3연속 · 특화 Ⅳ 전설 스킬 · 마지막 기회가 남아 있을 때
@@ -388,7 +389,7 @@ DS.Student = (function () {
     const sig = `res|${mid}|${t.attempt}|${done}|${rec.canRetry}|${rec.left}|${ult ? 'u' : ''}|${(R.help || {})[me] ? 1 : 0}`;
     if (sig === drawn && body.querySelector('.marks')) { hpText(body, hp); return; }
     drawn = sig;
-    body.innerHTML = `<div class="panel framed">${scene(step, rec, hp, fx)}
+    body.innerHTML = `<div class="panel framed">${scene(step, rec, hp, atk ? '' : fx)}
       ${finish ? '<div class="fin-me">⚔ 마무리 일격! <small>내 공격으로 몬스터가 쓰러졌어요 — 모두의 과제를 마무리했어요!</small></div>' : ''}<h2 class="res-${prac ? 'success' : label}">${head}</h2>
       <div class="marks">${items.map((q, i) => `<div class="mark ${t.marks[i] ? 'ok' : 'ng'}"><b>${i + 1}</b> ${t.marks[i] ? '✔' : '✘'} <span class="math">${pretty(itemText(q))}</span>${t.marks[i] ? '' : `<br><span class="sol-line math">${pretty(solOf(q))}</span>`}</div>`).join('')}</div>
       ${ult ? `<p class="okc">⚡ <b>3연속 퍼펙트!</b> 특화 전설 스킬이 깨어났어요</p><p>마지막 기회 하나로 무엇을 할까요?</p>
@@ -406,7 +407,8 @@ DS.Student = (function () {
     bindHelp();
     const sb = $('#st-sheet'); if (sb) sb.onclick = () => sheetModal(step);
     // v0.9.3 (⑤): 공격 자세는 잠깐만 → 다시 서 있는 자세 (격파됐으면 승리 자세 그대로)
-    if (fx && !done) setTimeout(() => { const a = body.querySelector('.enc-hero .art'); if (a) a.outerHTML = heroNow('idle', fx === 'miss' ? 'slump' : 'huff'); }, 650);
+    if (atk) { const sc = body.querySelector('.scene'); if (sc) DS.Attack.play(sc, { heroBox: sc.querySelector('.enc-hero'), monBox: sc.querySelector('.enc-mon'), hero: myP().hero || 0, fx: myP().fx || 'flame', miss: label === 'fail' && !prac, s: 1, rest: done ? 'win' : 'idle', noDmg: prac }); }
+    else if (fx && !done) setTimeout(() => { const a = body.querySelector('.enc-hero .art'); if (a) a.outerHTML = heroNow('idle', fx === 'miss' ? 'slump' : 'huff'); }, 650);
     const rb = $('#st-retry');
     if (rb) { thinkTimer(rb, `${mid}|${t.attempt}`, rec.perfect ? '⛓ 몬스터 묶기' : '↻ 다시 도전'); rb.onclick = () => { retrying = `${mid}|${rec.nextAttempt}`; form = null; DS.Sound.clank(); render(); }; }
     const ub = $('#st-ult');

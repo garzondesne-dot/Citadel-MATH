@@ -373,9 +373,10 @@ DS.Hall = (function () {
       const hr = h.getBoundingClientRect(), mr = m0.getBoundingClientRect(), ar = arena.getBoundingClientRect();
       h.style.setProperty('--tx', `${(mr.left + mr.width / 2 - (hr.left + hr.width / 2)) * (ok ? 0.8 : 0.35)}px`);
       h.style.setProperty('--ty', `${(mr.top + mr.height * 0.7 - (hr.top + hr.height / 2)) * (ok ? 0.8 : 0.35)}px`);
-      h.classList.remove('dash', 'swing'); void h.offsetWidth; h.classList.add(ok ? 'dash' : 'swing');
-      pose(h, (R.players[a.u] || {}).hero || 0, 'attack', 820); // v0.9.3 (사용자 지적 ⑤): 돌진하는 동안 공격 자세 → 돌아오면 서 있는 자세
-      setTimeout(() => {
+      const hid = (R.players[a.u] || {}).hero || 0, ranged = !!(DS.Attack && DS.Attack.isRanged(hid)); // ⚔ 2026-11-06: 원거리 = 제자리에서 탄 · 근접 = 돌진
+      h.classList.remove('dash', 'swing'); void h.offsetWidth; h.classList.add(ok && !ranged ? 'dash' : 'swing');
+      pose(h, hid, 'attack', 820); // v0.9.3 (사용자 지적 ⑤): 돌진하는 동안 공격 자세 → 돌아오면 서 있는 자세
+      const hit = () => {
         if (ok) {
           DS.Sound.hit();
           const p = (R.players[a.u] || {}).fx || 'flame';
@@ -389,7 +390,12 @@ DS.Hall = (function () {
             arena.classList.remove('shake'); void arena.offsetWidth; arena.classList.add('shake'); setTimeout(() => DS.Sound.correct(), 120);
           }
         } else DS.Sound.squish();
-      }, 330);
+      };
+      if (ranged) { // 탄: 용사 손 → 몬스터 (곡선 · 머리 돌림) · 빗나가면 위로 사라짐
+        const from = { x: hr.left - ar.left + hr.width * 0.7, y: hr.top - ar.top + hr.height * 0.45 }, to = { x: mr.left - ar.left + mr.width * 0.45, y: mr.top - ar.top + mr.height * 0.5 };
+        if (DS.Sound.launch) DS.Sound.launch();
+        setTimeout(() => DS.Attack.fly(arena, DS.Attack.projOf(hid), from, ok ? to : { x: to.x - mr.width * 0.3, y: mr.top - ar.top - 20 }, Math.max(1, Math.min(ar.width, ar.height) / 380), !ok).then(hit), 120);
+      } else setTimeout(hit, 330);
       setTimeout(() => h.classList.remove('dash', 'swing'), 850);
     }
     setTimeout(() => { playing = false; play(); }, 350);
