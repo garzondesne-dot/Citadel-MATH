@@ -26,7 +26,7 @@ DS.Hall = (function () {
       L = DS.Lessons.get(R.meta.lesson); if (L && L.id !== DS.Art._entered) { DS.Art._entered = L.id; DS.Art.lessonEnter(L); } // v0.9.6 차시별 다운로드
       if (DS.Act.isHost(R)) { DS.Act.admitLate(code, R, L); DS.Act.markBossWin(code, R, L); }
       if (first) { if (stopPrep) stopPrep(); stopPrep = DS.Net.watch(`prep/${L.id}`, (p) => { prep = p || {}; built = ''; if (R) render(); }); }
-      xpHall(); lvHall();
+      xpHall(); lvHall(); ulHall();
       render();
       thrillHall();
       // v0.9.2: 종합상황실은 교사 캠프(학생 입장 QR · 모루 · 보강던전)에서 시작 — 수업이 시작되면 저절로 이 화면으로
@@ -34,7 +34,7 @@ DS.Hall = (function () {
     });
   }
   // 🆙 몬스터가 쓰러질 때 공격한 용사들 머리 위 +EXP · 🎉 레벨업 알림 (2026-11-05 · 좋은 순간만 크게 · 레벨 목록 · 순위는 안 보임)
-  let hxSeen = null, lvSeen = null, lvQ = [], lvBusy = false;
+  let hxSeen = null, lvSeen = null, lvQ = [], lvBusy = false, ulSeen = null, ulQ = [], ulBusy = false;
   function xpHall() {
     if (!L || !R) return;
     const ids = L.steps.filter((s) => s.kind === 'monster' && L.monsters[s.id]).map((s) => s.id), first = !hxSeen;
@@ -42,6 +42,19 @@ DS.Hall = (function () {
     ids.forEach((mid) => { if (!Raid().cleared(L, R, mid) || hxSeen[mid]) return; hxSeen[mid] = true; if (first) return;
       setTimeout(() => Raid().activeIds(R).forEach((u, k) => { const x = C().xpOf(Raid().record(L, R, mid, u)); if (x) setTimeout(() => C().xpFloat(document.getElementById(`fh-${u}`), `+${x} EXP`), (k % 6) * 120); }), 600); });
     if (Raid().bossHp(L, R).won && !hxSeen.boss) { hxSeen.boss = true; if (!first) setTimeout(() => Raid().activeIds(R).filter((u) => Raid().bossAnswered(R, u) > 0).forEach((u, k) => setTimeout(() => C().xpFloat(document.getElementById(`fh-${u}`), '+10 EXP', 'big'), (k % 6) * 120)), 900); }
+  }
+  // ⚡ 학생 필살기 (2026-11-06): heals 칸 '!ult' → 종합상황실 큰 화면 컷인 · 한 번에 1명 · 겹치면 3명까지 차례로
+  function ulHall() {
+    const H = R.heals || {}, first = !ulSeen; if (first) ulSeen = {};
+    Object.entries(H).forEach(([mid, byU]) => Object.entries(byU || {}).forEach(([u, byK]) => Object.entries(byK || {}).forEach(([k, v]) => { const key = `${mid}|${u}|${k}`; if (v !== '!ult' || ulSeen[key]) return; ulSeen[key] = true; if (!first && ulQ.length < 3) ulQ.push(u); })));
+    // 👑 형성평가 퍼펙트 (모든 문항 첫 시도 정답) + 특화 Ⅳ → 한 번
+    if (L.boss && DS.Attack) Raid().activeIds(R).forEach((u) => { const key = `boss|${u}`; if (ulSeen[key]) return; const p = (R.players || {})[u] || {}, f = Raid().bossFirst(L, R, u); if (f.length && f.every(Boolean) && DS.Attack.canUlt(p.fx, p.hero)) { ulSeen[key] = true; if (!first && ulQ.length < 3) ulQ.push(u); } });
+    if (!ulBusy) ulNext();
+  }
+  function ulNext() {
+    const u = ulQ.shift(); if (!u || !DS.Attack) { ulBusy = false; return; } ulBusy = true;
+    const p = (R.players || {})[u] || {};
+    DS.Attack.cutin(p.hero || 0, p.fx || 'flame').then(() => { const arena = $('#raid'), m0 = $('#rm'); if (arena && m0) { const ar = arena.getBoundingClientRect(), mr = m0.getBoundingClientRect(); DS.FX.play(arena, p.fx || 'flame', { x: mr.left - ar.left + mr.width / 2, y: mr.top - ar.top + mr.height / 2, scale: Math.min(ar.width, ar.height) / 700, perfect: true }); } setTimeout(ulNext, 900); });
   }
   function lvHall() {
     const v = R.lvup || {}, first = !lvSeen; if (first) lvSeen = {};
@@ -458,7 +471,7 @@ DS.Hall = (function () {
       if (okNow) DS.Sound.slash(); else DS.Sound.squish();
       const was = items.slice(0, hp).every((_, k) => demo.ok[k]);
       bossDemo(step, set, next);
-      if (!was && items.slice(0, hp).every((_, k) => next[k])) setTimeout(() => { demoClose(); teacherStrike(step); }, 1200);
+      if (!was && items.slice(0, hp).every((_, k) => next[k])) setTimeout(() => { demoClose(); teacherStrike(step, true); }, 1200);
     }));
   }
   function demoClose() { const ov = document.getElementById('h-demo-ov'); if (ov) ov.remove(); demo = null; }
@@ -488,11 +501,12 @@ DS.Hall = (function () {
       const given = d.items.map((q, i) => (q.type === 'number' ? Number(d.given[i]) : d.given[i]));
       d.marks = d.items.map((q, i) => DS.Quiz.grade(q, given[i]));
       demoDraw();
-      if (d.marks.every(Boolean)) { DS.Sound.slash(); setTimeout(() => { demoClose(); teacherStrike(d.step); }, 1100); } else DS.Sound.squish();
+      if (d.marks.every(Boolean)) { DS.Sound.slash(); setTimeout(() => { demoClose(); teacherStrike(d.step, true); }, 1100); } else DS.Sound.squish(); // ⚡ 선생님 시연 퍼펙트 = 언제나 필살기 (2026-11-06)
     };
   }
   // 선생님 일격: 왼쪽에서 등장 → 몬스터로 돌진 → 팍! (이미 공략된 몬스터면 소멸)
-  function teacherStrike(step) {
+  async function teacherStrike(step, ult) {
+    if (ult && DS.Attack) await DS.Attack.cutin(DS.Art.teacherHero(R), DS.FX.usable(DS.Art.teacherFx(R), Object.fromEntries(DS.FX.KINDS.map((k) => [k, true])))); // ⚡ 선생님 필살기 (시연 퍼펙트)
     const arena = $('#raid'), m0 = $('#rm'); if (!arena || !m0 || Raid().stepOf(L, R) !== step) return;
     const kill = step.kind === 'boss' ? Raid().bossHp(L, R).won : Raid().cleared(L, R, step.id), ar = arena.getBoundingClientRect(), mr = m0.getBoundingClientRect();
     const t = document.createElement('div'); t.className = 'teach-strike'; t.innerHTML = DS.Art.hero(DS.Art.teacherHero(R), 'attack');

@@ -360,7 +360,7 @@ DS.Student = (function () {
   function healNotice(mid) {
     if (test) return;
     let k = 0;
-    Raid().healsTo(R, mid, me).slice(0, Raid().HEAL_MAX).forEach((h) => {
+    Raid().healsTo(R, mid, me, L).slice(0, Raid().HEAL_MAX).forEach((h) => {
       if (healSeen(`${code}|${mid}|${h.from}|${h.k}`)) return;
       healPop(`+1 💚 ${nickOf(h.from)} 응원`, (k++) * 700); DS.Sound.correct(); drawn = '';
       heroFx = { pose: 'healed', until: Date.now() + 1800 }; setTimeout(() => heroFlash('healed', 1600), 60);
@@ -383,13 +383,18 @@ DS.Student = (function () {
     if (finish) setTimeout(() => { const sc = body.querySelector('.scene'); if (sc) { sc.classList.add('fin-flash'); DS.FX.play(sc, myP().fx || 'flame', { perfect: true, scale: 0.6 }); } DS.Sound.correct(); }, 500);
     const head = prac ? `⛓ 몬스터 묶기 ${t.correct}/${t.total} — 지금까지 <b>${Raid().bindOf(L, R, mid, me)}초</b> 묶음 <span class="small muted">(최대 ${Raid().BIND_MAX}초)</span>` : { success: '⚔ 공격 성공!', partial: `⚔ 부분 성공 (${t.correct}/${t.total})`, fail: '💨 공격 실패…' }[label];
     const done = Raid().cleared(L, R, mid);
-    const sig = `res|${mid}|${t.attempt}|${done}|${rec.canRetry}|${rec.left}|${(R.help || {})[me] ? 1 : 0}`;
+    // ⚡ 수업 필살기 (2026-11-06 확정 ①): 첫 시도 퍼펙트 + 묶기 2번 퍼펙트 = 3연속 · 특화 Ⅳ 전설 스킬 · 마지막 기회가 남아 있을 때
+    const ult = !test && rec.perfectAt === 0 && Raid().perfStreak(rec) >= 3 && rec.left > 0 && !Raid().ultUsed(R, mid, me) && DS.Attack && DS.Attack.canUlt(myP().fx, myP().hero);
+    const sig = `res|${mid}|${t.attempt}|${done}|${rec.canRetry}|${rec.left}|${ult ? 'u' : ''}|${(R.help || {})[me] ? 1 : 0}`;
     if (sig === drawn && body.querySelector('.marks')) { hpText(body, hp); return; }
     drawn = sig;
     body.innerHTML = `<div class="panel framed">${scene(step, rec, hp, fx)}
       ${finish ? '<div class="fin-me">⚔ 마무리 일격! <small>내 공격으로 몬스터가 쓰러졌어요 — 모두의 과제를 마무리했어요!</small></div>' : ''}<h2 class="res-${prac ? 'success' : label}">${head}</h2>
       <div class="marks">${items.map((q, i) => `<div class="mark ${t.marks[i] ? 'ok' : 'ng'}"><b>${i + 1}</b> ${t.marks[i] ? '✔' : '✘'} <span class="math">${pretty(itemText(q))}</span>${t.marks[i] ? '' : `<br><span class="sol-line math">${pretty(solOf(q))}</span>`}</div>`).join('')}</div>
-      ${rec.perfect && rec.canRetry ? `<p class="okc">✔ 이미 성공한 몬스터예요!</p><p>남은 기회 <b>${rec.left}</b>번으로 무엇을 할까요?</p>
+      ${ult ? `<p class="okc">⚡ <b>3연속 퍼펙트!</b> 특화 전설 스킬이 깨어났어요</p><p>마지막 기회 하나로 무엇을 할까요?</p>
+        <div class="heal-pick"><button class="btn primary big ult-go" id="st-ult">⚡ ${esc(String(DS.FX.NAMES[myP().fx] || '').replace(/^\S+\s/, ''))}<br><small>필살기</small></button><button class="btn big heal-btn" id="st-party">💚 파티 힐<br><small>못 맞힌 친구 모두 +1</small></button></div>
+        <p class="muted small">필살기 = 내 폰 · 종합상황실에 필살기 연출 · 파티 힐 = 아직 다 못 맞힌 친구 모두에게 도전 기회 한 칸 (둘 중 하나)</p>`
+        : rec.perfect && rec.canRetry ? `<p class="okc">✔ 이미 성공한 몬스터예요!</p><p>남은 기회 <b>${rec.left}</b>번으로 무엇을 할까요?</p>
         <div class="heal-pick"><button class="btn primary big" id="st-retry">⛓ 몬스터 묶기</button><button class="btn big heal-btn" id="st-heal">💚 친구 힐</button></div>
         <p class="muted small">몬스터 묶기 = 숫자 바뀐 문제를 맞힌 만큼 몬스터 공격을 늦춤 (1개 1초 · 최대 ${Raid().BIND_MAX}초) · 친구 힐 = 기회가 필요한 친구에게 도전 기회 한 칸</p>`
         : done && rec.canRetry ? `<p class="okc big-msg">🎉 몬스터 격파!</p><p>틀린 소문제를 다시 풀어 볼까요? <span class="muted small">(남은 기회 ${rec.left}번 · 숫자가 모두 바뀌어요 · 고친 만큼 경험치가 더 쌓여요)</span></p><button class="btn primary big" id="st-retry">↻ 다시 도전</button>`
@@ -404,6 +409,18 @@ DS.Student = (function () {
     if (fx && !done) setTimeout(() => { const a = body.querySelector('.enc-hero .art'); if (a) a.outerHTML = heroNow('idle', fx === 'miss' ? 'slump' : 'huff'); }, 650);
     const rb = $('#st-retry');
     if (rb) { thinkTimer(rb, `${mid}|${t.attempt}`, rec.perfect ? '⛓ 몬스터 묶기' : '↻ 다시 도전'); rb.onclick = () => { retrying = `${mid}|${rec.nextAttempt}`; form = null; DS.Sound.clank(); render(); }; }
+    const ub = $('#st-ult');
+    if (ub) ub.onclick = () => DS.Control.run(async () => {
+      ub.disabled = true; await DS.Act.heal(code, raw, mid, { ult: true }); drawn = '';
+      if (DS.Attack) { const sc = body.querySelector('.scene'); await DS.Attack.cutin(myP().hero || 0, myP().fx); if (sc) DS.FX.play(sc, myP().fx, { scale: 0.6, perfect: true }); }
+      if (DS.Grow && !test) DS.Grow.add(acc(), { heal: 1 }, `ult_${code}_${mid}`).catch(() => {});
+    });
+    const pb2 = $('#st-party');
+    if (pb2) pb2.onclick = () => DS.Control.run(async () => {
+      pb2.disabled = true; await DS.Act.heal(code, raw, mid, { party: true }); DS.Sound.correct(); drawn = '';
+      heroFx = { pose: 'heal', until: Date.now() + 1600 }; setTimeout(() => heroFlash('heal', 1400), 60); healPop('💚 파티 힐 — 못 맞힌 친구 모두 +1!');
+      if (DS.Grow && !test) DS.Grow.add(acc(), { heal: 1 }, `party_${code}_${mid}`).catch(() => {});
+    });
     const hb = $('#st-heal');
     if (hb) hb.onclick = () => DS.Control.run(async () => {
       hb.disabled = true;
@@ -536,6 +553,8 @@ DS.Student = (function () {
       if (!ok && thinkSec() > 0) bossThink = Date.now() + thinkSec() * 1000;
       DS.UI.toast(ok ? `✔ ${i + 1}번 도달! 보스에게 데미지` : st.left - 1 > 0 ? `✘ ${i + 1}번은 아직… 🤔 ${thinkSec()}초 생각하고 숫자가 바뀐 문제로 다시! (기회 ${st.left - 1})` : `✘ ${i + 1}번 기회를 모두 썼어요 — 해설을 보며 학습지에 정리해요`, 2800);
       if (ok) { DS.Sound.slash(); setTimeout(() => DS.Sound.hit(), 160); const sc = document.querySelector('#st-body .scene'); if (sc) DS.FX.play(sc, myP().fx || 'flame', { scale: 0.32 }); } else DS.Sound.squish();
+      // ⚡ 형성평가 퍼펙트 (2026-11-06): 모든 문항을 첫 시도에 맞힘 + 특화 Ⅳ 전설 스킬 → 마지막 문항에서 필살기 (형성평가는 맞히면 그 문항이 끝나서 「세트 2 · 3」 퍼펙트는 없음)
+      if (ok && a === 0 && DS.Attack && DS.Attack.canUlt(myP().fx, myP().hero)) { const fr = Raid().bossState(L, R, me).map((x, k) => (k === i ? true : x.first)); if (fr.length && fr.every(Boolean)) setTimeout(() => DS.Attack.cutin(myP().hero || 0, myP().fx), 300); }
     }));
   }
   function endView(body) {

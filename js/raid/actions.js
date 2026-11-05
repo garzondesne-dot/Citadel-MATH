@@ -285,11 +285,16 @@ DS.Act = (function () {
     await hit(code, R, `m_${mid}_${attempt}`);
   }
   // 💚 힐 (v0.9.6): 다 맞힌 학생이 남은 기회 한 칸을 친구에게. 받을 친구가 없으면 '_' (응원 — 경험치만). 반환 = 받은 uid | null
-  async function heal(code, packed, mid) {
+  async function heal(code, packed, mid, opt = {}) {
     const R = unpackRoom(packed), L = DS.Lessons.get(R.meta.lesson), step = L.steps[R.state.step], me = N().uid();
     if (!step || step.id !== mid) fail('지금은 이 몬스터와 싸우는 시간이 아니에요.');
     const rec = Raid.record(L, R, mid, me);
     if (!rec.canHeal) fail('힐은 몬스터를 다 맞힌 뒤 남은 기회로 할 수 있어요.');
+    if (opt.party || opt.ult) { // ⚡ 3연속 퍼펙트 (2026-11-06): 필살기 또는 💚 파티 힐 — 둘 중 하나 (마지막 기회)
+      if (Raid.perfStreak(rec) < 3 || Raid.ultUsed(R, mid, me)) fail('3연속 퍼펙트일 때만 쓸 수 있어요.');
+      await N().set(P(code, `heals/${mid}/${me}/${Raid.healsGiven(R, mid, me)}`), opt.ult ? '!ult' : '*');
+      return opt.ult ? '!ult' : '*';
+    }
     const to = Raid.healTarget(L, R, mid, me);
     await N().set(P(code, `heals/${mid}/${me}/${Raid.healsGiven(R, mid, me)}`), to || '_');
     return to;

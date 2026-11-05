@@ -112,6 +112,28 @@ check(X.fullMarks(L, R2, 'b'), '세트2 에서 맞히면 만점');
 R2.online = { a: true };
 check(X.online(R2, 'a') && !X.online(R2, 'b'), '접속 표시');
 
+// ── ⚡ 3연속 퍼펙트 · 필살기('!ult') · 💚 파티 힐('*') (2026-11-06) ── 못 맞힌 친구에게만 +1 · 받는 쪽 최대 +2 · 마지막 기회를 씀
+{
+  const U = X.newRoom('888888', 'set-03', 'T', 1000);
+  ['h', 'x', 'y', 'p'].forEach((u, i) => { U.players[u] = { num: i + 1, nick: u, hero: 0 }; });
+  U.active = { h: true, x: true, y: true, p: true }; U.state.headcount = 4; U.state.step = 8;
+  const ans = (u, a, k) => X.itemsFor(L, U, 'm4', u, a).map((q, i) => (i < k ? right(q) : wrong(q)));
+  const full = X.itemsFor(L, U, 'm4', 'h', 0).length;
+  U.subs = { m4: { h: { 0: ans('h', 0, full), 1: ans('h', 1, full), 2: ans('h', 2, full) }, x: { 0: ans('x', 0, 0), 1: ans('x', 1, 1), 2: ans('x', 2, 1), 3: ans('x', 3, 1) }, y: { 0: ans('y', 0, 1) }, p: { 0: ans('p', 0, full) } } };
+  const rh = X.record(L, U, 'm4', 'h');
+  check(X.perfStreak(rh) === 3 && rh.left === 1 && !X.ultUsed(U, 'm4', 'h'), `3연속 퍼펙트 · 마지막 기회 1 (${X.perfStreak(rh)} · ${rh.left})`);
+  check(X.perfStreak(X.record(L, U, 'm4', 'x')) === 0, '첫 시도가 아니면 연속 0');
+  U.heals = { m4: { h: { 0: '*' } } };
+  const rx = X.record(L, U, 'm4', 'x'), ry = X.record(L, U, 'm4', 'y'), rp = X.record(L, U, 'm4', 'p'), rh2 = X.record(L, U, 'm4', 'h');
+  check(rx.slots === 5 && rx.left === 1 && rx.canRetry, `파티 힐: 기회를 다 쓴 x 에게 +1 (${rx.slots})`);
+  check(ry.slots === 5, '파티 힐: 아직 못 맞힌 y 에게도 +1');
+  check(rp.slots === 4, '파티 힐: 이미 다 맞힌 p 는 받지 않음 (추천안)');
+  check(rh2.slots === 4 && rh2.left === 0, '파티 힐을 준 h 는 자기 기회 1을 씀 · 자기는 안 받음');
+  U.heals = { m4: { h: { 0: '!ult' } } };
+  check(X.ultUsed(U, 'm4', 'h') && X.record(L, U, 'm4', 'h').left === 0 && X.record(L, U, 'm4', 'x').slots === 4, '필살기: 마지막 기회를 쓰고 · 아무도 기회를 받지 않음');
+  U.heals = { m4: { h: { 0: '*' }, p: { 0: '*', 1: 'x' } } };
+  check(X.record(L, U, 'm4', 'x').slots === 6, '받는 힐은 최대 +2 (파티 힐 2 + 친구 힐 1 → 2)');
+}
 // ── 💚 힐 (v0.9.6) ── 다 맞힌 학생이 남은 기회 한 칸을 친구에게 · 받는 쪽 최대 +2 · 막힌 친구일수록 높은 확률
 {
   const H = X.newRoom('777777', 'set-03', 'T', 1000);
