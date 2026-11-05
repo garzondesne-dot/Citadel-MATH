@@ -7,12 +7,13 @@ window.DS = window.DS || {};
 DS.FX = (function () {
   const BASE = ['cut', 'flame', 'spark', 'frost', 'twinkle', 'orb'];           // 기본 (열림)
   const FANCY = ['fire', 'lightning', 'ice', 'stars', 'slash', 'vortex'];     // 화려 (잠금)
-  const KINDS = BASE.concat(FANCY);
+  const ACHV = ['wings'];                                                     // 업적 전용 (v0.9.11: 🪶 황금 깃털 5개)
+  const KINDS = BASE.concat(FANCY, ACHV);
   const NAMES = { cut: '⚔ 베기', flame: '🔥 불꽃', spark: '⚡ 번개', frost: '❄ 얼음', twinkle: '✨ 별', orb: '🔮 마법탄',
-    fire: '🔥 화염 폭발', lightning: '⚡ 천둥 낙뢰', ice: '❄ 얼음 파쇄', stars: '✨ 별빛 폭죽', slash: '⚔ 삼연 참격', vortex: '🌀 차원 소용돌이' };
+    fire: '🔥 화염 폭발', lightning: '⚡ 천둥 낙뢰', ice: '❄ 얼음 파쇄', stars: '✨ 별빛 폭죽', slash: '⚔ 삼연 참격', vortex: '🌀 차원 소용돌이', wings: '🪶 황금 날개' };
   // 잠긴 이펙트를 가진 계정은 같은 계열 기본 이펙트로 (해금되면 그대로 씀)
-  const BASE_OF = { fire: 'flame', lightning: 'spark', ice: 'frost', stars: 'twinkle', slash: 'cut', vortex: 'orb' };
-  const usable = (k, unlocked = {}) => (BASE.includes(k) || (FANCY.includes(k) && unlocked[k]) ? k : BASE_OF[k] || 'flame');
+  const BASE_OF = { fire: 'flame', lightning: 'spark', ice: 'frost', stars: 'twinkle', slash: 'cut', vortex: 'orb', wings: 'twinkle' };
+  const usable = (k, unlocked = {}) => (BASE.includes(k) || ((FANCY.includes(k) || ACHV.includes(k)) && unlocked[k]) ? k : BASE_OF[k] || 'flame');
   const rng = (s) => () => (s = (s * 1664525 + 1013904223) >>> 0) / 4294967296;
   function star(g, x, y, r, n = 5, ins = 0.45) { g.beginPath(); for (let i = 0; i < n * 2; i++) { const a = (Math.PI * i) / n - Math.PI / 2, rr = i % 2 ? r * ins : r; g.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr); } g.closePath(); g.fill(); }
   function glow(g, x, y, r, c0, c1) { if (r <= 0) return; const gr = g.createRadialGradient(x, y, 0, x, y, r); gr.addColorStop(0, c0); gr.addColorStop(1, c1); g.fillStyle = gr; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); }
@@ -100,6 +101,21 @@ DS.FX = (function () {
       for (let i = 0; i < 50; i++) { const a = R() * 7 + spin, d = R() * 200 * k * (1 - t * 0.6); g.fillStyle = 'rgba(230,180,255,.9)'; g.beginPath(); g.arc(x + Math.cos(a) * d, y + Math.sin(a) * d * 0.75, (1.5 + R() * 3) * k, 0, 7); g.fill(); }
       g.globalCompositeOperation = 'source-over'; glow(g, x, y, 50 * k, 'rgba(20,0,40,1)', 'rgba(60,0,120,0)');
     },
+    // 🪶 황금 날개 (업적): 금빛 날개 한 쌍이 펼쳐지며 깃털이 흩날림
+    wings(g, x, y, k, t, R) {
+      g.globalCompositeOperation = 'lighter'; glow(g, x, y, 170 * k, 'rgba(255,230,150,.75)', 'rgba(255,170,40,0)');
+      const open = Math.min(1, t * 2.2);
+      [-1, 1].forEach((side) => {
+        for (let f = 0; f < 7; f++) {
+          const a = -Math.PI / 2 + side * (0.35 + f * 0.2) * open, len = (90 + f * 16) * k;
+          g.save(); g.translate(x, y); g.rotate(a);
+          g.fillStyle = `rgba(255,${(200 + f * 7) | 0},${(90 + f * 12) | 0},.85)`;
+          g.beginPath(); g.ellipse(0, -len / 2, 13 * k, len / 2, 0, 0, 7); g.fill();
+          g.strokeStyle = 'rgba(255,250,220,.9)'; g.lineWidth = 2 * k; g.beginPath(); g.moveTo(0, 0); g.lineTo(0, -len); g.stroke(); g.restore();
+        }
+      });
+      for (let i = 0; i < 26; i++) { const a = R() * 7, d = (40 + R() * 170) * k * t; g.fillStyle = 'rgba(255,225,130,.9)'; g.save(); g.translate(x + Math.cos(a) * d, y + Math.sin(a) * d + t * 40 * k); g.rotate(a + t * 3); g.beginPath(); g.ellipse(0, 0, 3 * k, 9 * k, 0, 0, 7); g.fill(); g.restore(); }
+    },
   };
   const ease = (t) => 1 - Math.pow(1 - t, 3);
   function frameAt(g, kind, x, y, scale, t, seed, frame) {
@@ -131,5 +147,5 @@ DS.FX = (function () {
     const g = cv.getContext('2d'); g.clearRect(0, 0, cv.width, cv.height);
     frameAt(g, kind, cv.width / 2, cv.height * 0.5, Math.min(cv.width, cv.height) / 480, 0.45, 7, 0);
   }
-  return { KINDS, BASE, FANCY, NAMES, BASE_OF, usable, play, still };
+  return { KINDS, BASE, FANCY, ACHV, NAMES, BASE_OF, usable, play, still };
 })();

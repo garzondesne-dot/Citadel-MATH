@@ -19,6 +19,7 @@ DS.Teacher = (function () {
     return open(r.code, r.hallKey); // v0.9.2: 교사 폰은 리모컨에서 바로 시작 (교사 캠프는 종합상황실 첫 화면 · 수업 끝 뒤 버튼)
   }
   C().onTimeUp('teacher', (now) => { if (!R || !L || !code || !document.getElementById('screen-teacher').classList.contains('active')) return; const d = Raid().deadline(R); if (d && now >= d && !Raid().isClosed(R)) DS.Act.timeUp(code, R, L).catch(() => {}); });
+  C().onTimeUp('teacher-bat', () => { if (R && L && code && document.getElementById('screen-teacher').classList.contains('active')) DS.Act.batTick(code, R, L).catch(() => {}); }); // 🦇 황금 박쥐 (v0.9.11)
   async function open(c, hallKey) {
     const R0 = await DS.Net.get(`rooms/${c}`);
     if (!R0 || !R0.meta) throw Object.assign(new Error('수업을 찾을 수 없어요.'), { user: true });
@@ -48,7 +49,7 @@ DS.Teacher = (function () {
     const tb = $('#t-tbar'); if (tb) { tb.innerHTML = C().tbarHtml(L, R, { mini: true, ext: true }); C().bindExtend(tb, code, R); }
     const body = $('#t-body');
     const live = !Raid().isLobby(R) && !Raid().isClosed(R);
-    body.innerHTML = `<div class="panel framed t-now">${now()}${C().pctHtml(L, R)}${live ? C().restBtn(R) + (Raid().restOn(R) ? '' : C().videoBtn(L, R, videos) + C().sheetBtn(L, R) + C().focusBtn(R)) : ''}${DS.ShareCard.klassReady(L, R) ? '<button class="btn sc-btn" id="t-news">🏫 학급 결과 · 우리 반 수업 소식</button>' : ''}${Raid().isClosed(R) ? '<button class="btn primary" id="t-tcamp">🏛 교사 캠프 가기</button>' : ''}</div>
+    body.innerHTML = `<div class="panel framed t-now">${now()}${C().pctHtml(L, R)}${live ? C().restBtn(R) + (Raid().restOn(R) ? '' : C().videoBtn(L, R, videos) + C().sheetBtn(L, R) + C().focusBtn(R)) : ''}${DS.ShareCard.klassReady(L, R) ? '<button class="btn sc-btn" id="t-news">🏫 학급 결과 · 우리 반 수업 소식</button>' : ''}${DS.Punch && R.meta.cls && L.no && !L.eval ? `<button class="btn small" id="t-punch">🥊 반대항 펀치 기계 ${DS.Act.punchOff(R) ? '꺼짐 → 켜기' : '켜짐 → 끄기'}</button>` : ''}${Raid().isClosed(R) ? '<button class="btn primary" id="t-tcamp">🏛 교사 캠프 가기</button>' : ''}</div>
       ${Raid().isLobby(R) ? lobby() : Raid().isEnd(L, R) ? `<div class="panel framed">${DS.Survey ? DS.Survey.ctlHtml(R, svSt) : ''}${C().wordsHtml(R)}</div>` : helpPanel()}
       <p class="t-next muted small">다음 ▶ <b>${esc(C().nextName(L, R))}</b></p>
       <div class="t-pad"><button class="btn t-back" id="t-back"${i < 0 ? ' disabled' : ''}>◀<br>뒤로</button><button class="btn primary t-fwd" id="t-fwd"${Raid().isClosed(R) ? ' disabled' : ''}>▶<br>${Raid().isFinale(L, R) ? '수업 끝' : '앞으로'}</button></div>`;
@@ -56,6 +57,7 @@ DS.Teacher = (function () {
     C().bindRest(body, code, R); C().bindPct(body, code, R, L); C().bindFocus(body, code, R); C().bindSheet(body, code, R); C().bindVideo(body, code, R); C().bindWords(body, code, R);
     if (DS.Survey) DS.Survey.bindCtl(body, R, L);
     const nb = $('#t-news'); if (nb) nb.onclick = () => C().run(() => DS.ShareCard.klassOpen(L, R, { praise: true }));
+    const pb = $('#t-punch'); if (pb) pb.onclick = () => C().run(async () => { const off = !DS.Act.punchOff(R); await DS.Act.setPunchOff(code, off); DS.UI.toast(off ? '🥊 반대항 펀치 기계를 껐어요 (다음 수업도 꺼짐)' : '🥊 반대항 펀치 기계를 켰어요'); });
     const cb = $('#t-tcamp'); if (cb) cb.onclick = () => C().run(() => { if (stop) stop(); stop = null; clearInterval(tick); return DS.TCamp.enter({ code, hallKey: curKey }); });
     body.querySelectorAll('[data-help]').forEach((b) => (b.onclick = () => C().run(() => DS.Act.clearHelp(code, b.dataset.help))));
     $('#t-fwd').onclick = () => C().run(() => C().forward(code, R, L));

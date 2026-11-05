@@ -28,6 +28,7 @@ DS.Hall = (function () {
       if (first) { if (stopPrep) stopPrep(); stopPrep = DS.Net.watch(`prep/${L.id}`, (p) => { prep = p || {}; built = ''; if (R) render(); }); }
       xpHall(); lvHall();
       render();
+      thrillHall();
       // v0.9.2: 종합상황실은 교사 캠프(학생 입장 QR · 모루 · 보강던전)에서 시작 — 수업이 시작되면 저절로 이 화면으로
       if (first && !camped && Raid().isLobby(R) && DS.TCamp) { camped = true; DS.TCamp.enter({ code, hallKey, hall: true }).catch(() => {}); }
     });
@@ -57,7 +58,18 @@ DS.Hall = (function () {
   }
   const toCamp = () => DS.Control.run(() => DS.TCamp.enter({ code, hallKey, hall: true }));
   const klassBtn = () => (DS.ShareCard.klassReady(L, R) ? '<button class="btn sc-btn" id="h-klass">🏫 학급 결과</button>' : '');
+  // 🥊 반대항 펀치 기계 (v0.9.11): 수업이 끝나면 저절로 한 번 · 버튼으로 다시 · ⏳ 연장전 결과는 다음 수업 대기실에서
+  const punchable = () => !!(DS.Punch && L && R && R.meta.cls && L.no && !L.eval && !DS.Act.punchOff(R));
+  const punchBtn = () => (punchable() ? '<button class="btn" id="h-punch">🥊 반대항 펀치 기계</button>' : '');
+  let punchSeen = '', otSeen = '';
+  function punchAuto() { if (!punchable() || punchSeen === code) return; punchSeen = code; setTimeout(() => DS.Punch.open(L, R, { big: true, wait: true }).catch(() => {}), 1800); }
+  function otAuto() {
+    const ot = (R.meta || {}).otShow; if (!ot || !DS.Punch || otSeen === code || DS.Act.punchOff(R)) return; otSeen = code;
+    const Lo = DS.Lessons.get(ot.lesson); if (Lo) setTimeout(() => DS.Punch.open(Lo, R, { big: true, overtime: true }).catch(() => {}), 2500);
+  }
   function bindActs() {
+    const pb = $('#h-punch'); if (pb) pb.onclick = () => DS.Control.run(() => DS.Punch.open(L, R, { big: true }));
+    const ob = $('#h-ot'); if (ob) ob.onclick = () => { const Lo = DS.Lessons.get(R.meta.otShow.lesson); if (Lo) DS.Control.run(() => DS.Punch.open(Lo, R, { big: true, overtime: true })); };
     const k = $('#h-klass'); if (k) k.onclick = () => DS.Control.run(() => DS.ShareCard.klassOpen(L, R));
     const c = $('#h-tcamp'); if (c) c.onclick = toCamp;
   }
@@ -77,6 +89,32 @@ DS.Hall = (function () {
       if (won < d) { bigNote(`<p>⏰ 시간 안에 클리어!</p><b>${left}분 남기고 보스 처치</b>`, 4200, 'clear'); if (DS.Act.isHost(R) && st.clearLeft == null) DS.Net.set(`rooms/${code}/state/clearLeft`, left).catch(() => {}); }
     }
   }
+  C().onTimeUp('hall-bat', () => { if (R && L && code && DS.Act.isHost(R) && document.getElementById('screen-hall').classList.contains('active')) DS.Act.batTick(code, R, L).catch(() => {}); }); // 🦇 (v0.9.11)
+  // ── v0.9.11 🔥 콤보 미터 · ✨ 퍼펙트 쇠사슬 · ⚡ 단계 · 👑 보스 단계 · 🦇 박쥐 ─────────────
+  let han = null, hthSeen = null, hPhase = 0;
+  function thrillHall() {
+    if (!L || !R || !DS.Combo || !DS.Thrill) return;
+    han = DS.Combo.analyze(L, R, DS.Net.now());
+    const first = !hthSeen; if (first) hthSeen = {};
+    const host = document.getElementById('screen-hall');
+    han.ev.forEach((e) => { const k = `${e.u}|${e.k}`; if (hthSeen[k]) return; hthSeen[k] = true; if (first || !e.pf) return;
+      setTimeout(() => { DS.Thrill.chain($('#rm'), e.bind, 'pf'); const h = document.getElementById(`fh-${e.u}`); if (h && e.streak > 1) { const t = document.createElement('span'); t.className = 'pf-tag'; t.textContent = `✨ ×${e.streak}`; h.appendChild(t); setTimeout(() => t.remove(), 1800); } }, 900); });
+    han.marks.forEach((m) => { const k = `t${m.at}|${m.n}`; if (hthSeen[k]) return; hthSeen[k] = true; if (!first) { DS.Thrill.tierNote(m.n, host); DS.Thrill.chain($('#rm'), DS.Combo.TIER_BIND[m.n]); } });
+    const st = Raid().stepOf(L, R), bh = Raid().bossHp(L, R);
+    if (st && st.kind === 'boss' && !bh.won && !Raid().isClosed(R)) {
+      const ph = DS.Combo.bossPhase(bh.max ? bh.left / bh.max : 1);
+      if (hPhase && ph.phase > hPhase) { DS.Thrill.phaseNote(ph, host); const a = $('#raid'); if (a) { a.classList.remove('quake-big'); void a.offsetWidth; a.classList.add('quake-big'); setTimeout(() => a.classList.remove('quake-big'), 1500); } DS.Sound.rumble(); }
+      hPhase = ph.phase; const a = $('#raid'); if (a) { a.classList.toggle('ph-2', ph.phase === 2); a.classList.toggle('ph-3', ph.phase === 3); }
+    } else hPhase = 0;
+    comboHall();
+  }
+  function comboHall() {
+    if (!L || !R || !DS.Combo || !DS.Thrill) return;
+    const now = DS.Net.now(), b = DS.Combo.bat(L, R, now);
+    if (b && !b.live && b.ok && han && !han.ev.some((e) => e.kind === 'bat')) return thrillHall();
+    const cb = $('#h-combo'); if (cb) { const h = DS.Thrill.badge(DS.Combo.comboNow(han, R, now), { big: true }) + (han && han.best >= 5 ? `<small class="th-best">오늘 최고 ${han.best}${(R.meta || {}).comboBest ? ` · 반 기록 ${R.meta.comboBest}` : ''}</small>` : ''); if (cb.innerHTML !== h) cb.innerHTML = h; }
+    DS.Thrill.batHall($('#raid'), Raid().isClosed(R) ? null : b);
+  }
   C().onTimeUp('hall', (now) => { if (!R || !L || !DS.Act.isHost(R) || !document.getElementById('screen-hall').classList.contains('active')) return; const d = Raid().deadline(R); if (d && now >= d && !Raid().isClosed(R)) DS.Act.timeUp(code, R, L).catch(() => {}); });
   function render() {
     const i = R.state.step ?? -1;
@@ -89,7 +127,7 @@ DS.Hall = (function () {
     videoOverlay(step);
     const el = $('#h-arena');
     el.classList.toggle('focus-on', Raid().focusOn(R) && !Raid().isLobby(R));
-    if (Raid().isClosed(R)) { built = 'closed'; el.innerHTML = `<div class="h-victory"><div class="trophy"><i class="trophy-img" style="background-image:url('${DS.ASSETS.base}${DS.ASSETS.trophy}')"></i></div>${(R.state || {}).timeUp ? '<h1>👑 보스가 문을 닫았다!</h1><p class="tu-msg">⏳ 남은 몬스터 · 형성평가는 <b>이어하기 포털</b>에서 7일 동안 마저 해요 (캠프의 차시 문)</p>' : '<h1>수업 끝!</h1>'}<p class="muted">모두 모닥불로 돌아갔어요. 게임 기록은 수학 성적이 아니에요.</p><div class="stamp-bar big">📮 반드시 학습지 확인도장 받아가세요.</div><div class="h-acts row">${klassBtn()}<button class="btn primary" id="h-tcamp">🏛 교사 캠프 가기</button></div></div>`; bindActs(); return; }
+    if (Raid().isClosed(R)) { built = 'closed'; el.innerHTML = `<div class="h-victory"><div class="trophy"><i class="trophy-img" style="background-image:url('${DS.ASSETS.base}${DS.ASSETS.trophy}')"></i></div>${(R.state || {}).timeUp ? '<h1>👑 보스가 문을 닫았다!</h1><p class="tu-msg">⏳ 남은 몬스터 · 형성평가는 <b>이어하기 포털</b>에서 7일 동안 마저 해요 (캠프의 차시 문)</p>' : '<h1>수업 끝!</h1>'}<p class="muted">모두 모닥불로 돌아갔어요. 게임 기록은 수학 성적이 아니에요.</p><div class="stamp-bar big">📮 반드시 학습지 확인도장 받아가세요.</div><div class="h-acts row">${klassBtn()}${punchBtn()}<button class="btn primary" id="h-tcamp">🏛 교사 캠프 가기</button></div></div>`; bindActs(); punchAuto(); return; }
     if (Raid().restOn(R) && !Raid().isLobby(R) && !Raid().isClosed(R)) { if (DS.Fun && DS.Fun.on(R)) { built = 'fun'; clearInterval(bubbleT); return DS.Fun.hall($('#h-arena'), R); } return restScene(); }
     if (step && (step.kind === 'monster' || step.kind === 'boss')) { const key = `f${i}`; if (built !== key) buildFight(step, key); else updateFight(step); sheetOverlay(step); return; }
     clearInterval(bubbleT);
@@ -156,8 +194,8 @@ DS.Hall = (function () {
       ${pos.map((o, i) => `<div class="lb2-h" style="left:${o.x}%;top:${o.y}%;z-index:${5 + Math.round(o.y / 10)};--sz:${size}px;animation-delay:${(i * 0.13) % 0.9}s"><span class="nm">${DS.Titles.nameHtml(o.p, { size: 16, short: true })}</span><div class="${(finale ? i % 2 === 1 : o.flip) ? 'face-l' : ''}">${DS.Art.hero(o.p.hero, 'idle', finale ? 'pairhop' : 'huff')}</div><i class="shadow"></i>${finale && words.includes(o.u) ? `<span class="lb2-bub" data-u="${o.u}">${esc(R.words[o.u].t)}</span>` : ''}</div>`).join('')}
       ${finale ? '<div class="stamp-bar wide">📮 반드시 학습지 확인도장 받아가세요.</div>' : ''}
       ${Raid().focusOn(R) ? '<div class="h-focus-badge">⚠ 집중모드</div>' : ''}
-      <div class="h-acts corner${finale ? '' : ' below-qr'}">${finale ? klassBtn() : '<button class="btn small" id="h-tcamp">🏛 교사 캠프</button>'}</div></div>`;
-    bindActs();
+      <div class="h-acts corner${finale ? '' : ' below-qr'}">${finale ? klassBtn() + punchBtn() : `<button class="btn small" id="h-tcamp">🏛 교사 캠프</button>${(R.meta || {}).otShow && DS.Punch && !DS.Act.punchOff(R) ? '<button class="btn small" id="h-ot">⏳ 연장전 결과</button>' : ''}`}</div></div>`;
+    bindActs(); if (!finale) otAuto();
     if (!finale && window.QRCode) new QRCode($('#h-qr'), { text: studentUrl(), width: 150, height: 150 });
     if (finale) rotateBubbles();
   }
@@ -218,7 +256,7 @@ DS.Hall = (function () {
       ${step.special ? '<div class="raid-banner">⭐ 스페셜 몬스터 난입!</div>' : step.kind === 'boss' ? '<div class="raid-banner boss">👑 보스 출현!</div>' : ''}
       <div class="raid2-shadow"></div><div class="raid2-mon" id="rm"><div class="raid-bars over-head"><div class="raid-hp"><i id="rh-bar"></i><span id="rh-txt"></span></div><div class="raid-atk" id="rh-atk" title="몬스터 공격 게이지 (학생 폰과 같은 시계)"><i></i><span></span></div></div>${DS.Art.monster(f.sprite, 'idle', 'float')}<div id="rm-fx"></div></div>
       ${pos.map((o) => `<div class="fh2" id="fh-${o.u}" style="left:${o.x}%;top:${o.y}%;z-index:${5 + Math.round(o.y / 10)}"><span class="fh-name">${DS.Titles.nameHtml(o.p, { size: 16, short: true })}</span><div class="${o.x > 50 ? 'face-l' : ''}">${DS.Art.hero(o.p.hero, 'idle')}</div><i class="shadow"></i></div>`).join('')}
-      <div class="raid-clear" id="r-clear" hidden></div><div class="h-focus-badge">⚠ 집중모드</div>
+      <div class="raid-clear" id="r-clear" hidden></div><div class="h-focus-badge">⚠ 집중모드</div><div class="h-combo" id="h-combo"></div>
     </div>`;
     seen = attacks(step);
     if (step.kind === 'boss') DS.Sound.rumble();
@@ -272,6 +310,7 @@ DS.Hall = (function () {
   // 👾 몬스터 공격 (학생 폰과 같은 시계 DS.Raid.atkClock): 체력바 바로 밑 게이지 → 다 차면 큰 공격 연출 + 용사 전원 피격 · 헉헉
   let atkT = null, atkMemo = {};
   function hallAtk() {
+    comboHall();
     const g = document.getElementById('rh-atk'); if (!g || !L || !R) return;
     const c = Raid().atkClock(L, R, DS.Net.now(), window.DS_ATK || null);
     const bar = g.querySelector('i'), txt = g.querySelector('span');
@@ -279,7 +318,7 @@ DS.Hall = (function () {
     if (c.paused) { g.classList.add('bound'); txt.textContent = '⏸ 집중모드'; return; }
     const tr = Raid().atkTrack(atkMemo, c, `${code}|${(R.state || {}).step}|${c.kind}`);
     bar.style.width = `${(tr.p * 100).toFixed(1)}%`; g.classList.toggle('hot', tr.p > 0.8); g.classList.remove('bound');
-    txt.textContent = `👾 공격까지 ${Math.max(0, Math.ceil((1 - tr.p) * c.per))}초 · ${c.per < 30 ? '🔥 빠름' : c.per < 40 ? '보통' : '🐢 느려짐'}${c.bind ? `  ·  ⛓ 묶기 ${c.bind}초` : ''}`;
+    txt.textContent = `${c.phase ? `👑 ${c.phase}단계 · 멈춤 ${c.lock}초 · ` : ''}👾 공격까지 ${Math.max(0, Math.ceil((1 - tr.p) * c.per))}초 · ${c.per < 30 ? '🔥 빠름' : c.per < 40 ? '보통' : '🐢 느려짐'}${c.bind ? `  ·  ⛓ 묶기 ${c.bind}초` : ''}`;
     if (tr.strike) hallStrike(c);
   }
   function hallStrike(c) {

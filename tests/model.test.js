@@ -2,7 +2,7 @@
 // 체력 = ⌊대기실 인원 × 소문제 수 × 기준%⌋ · 데미지 = 가장 많이 맞힌 수(늘어난 만큼만) · 재도전 3번 · 체력 0 이 되면 즉시 격파 (v0.9.2)
 // 미제출 제외 · 기준% 실시간 조정 · 보스 체력(1~6번) + 7번 보너스 · 체력 0 즉시 승리 · 도움 필요 목록
 const load = require('./load');
-const DS = load(['js/engine/ui.js', 'js/engine/setgen.js', 'js/engine/quiz.js', 'js/engine/lessons.js', 'lessons/set-03.js', 'js/raid/model.js']);
+const DS = load(['js/engine/ui.js', 'js/engine/setgen.js', 'js/engine/quiz.js', 'js/engine/lessons.js', 'lessons/set-03.js', 'js/raid/model.js', 'js/raid/combo.js']);
 const L = DS.Lessons.get('set-03'), X = DS.Raid, S = DS.SetGen;
 let fail = 0;
 const check = (c, m) => { if (!c) { fail++; console.error('FAIL:', m); } };
@@ -166,7 +166,7 @@ check(X.online(R2, 'a') && !X.online(R2, 'b'), '접속 표시');
   tr = X.atkTrack(memo, { t: 30, per: 40 }, 'k'); check(!tr.strike && Math.abs(tr.p - 0.25) < 1e-9, '느려진 주기는 이번 바퀴부터 (게이지 그대로 이어짐)');
   tr = X.atkTrack(memo, { t: 18, per: 40 }, 'k'); check(!tr.strike && tr.p >= 0, '묶기로 시계가 뒤로 가도 게이지가 음수가 되지 않음');
   Q.state.step = L.steps.findIndex((st) => st.kind === 'boss'); c = X.atkClock(L, Q, 70000);
-  check(c && c.kind === 'boss' && c.per === 30 && c.lock === 2 && c.bind === 0, `보스 가득 = 30초 주기 · 2초 잠금 ${JSON.stringify(c)}`);
+  check(c && c.kind === 'boss' && c.per === 30 && c.lock === 4 && c.phase === 1 && c.bind === 0, `보스 가득 = 30초 주기 · 1단계 4초 멈춤 (v0.9.11) ${JSON.stringify(c)}`);
   check(X.atkClock(L, Q, 70000, { monster: [4, 1], boss: [5, 2] }).per === 5, '시험용 [주기, 잠금] 두 칸도 그대로');
   // 🏕 쉼터: 쉬는 동안 게이지 멈춤 · 끝나면 쉰 시간만큼 빼고 이어짐
   { const st0 = JSON.parse(JSON.stringify(Q.state)), c0 = X.atkClock(L, Q, 70000);

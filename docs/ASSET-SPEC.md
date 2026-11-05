@@ -136,6 +136,60 @@ One equipment item for the 64x64 chibi hero (attach the hero sheet as reference)
 Native canvas 32x32 px, drawn at the correct scale for that hero, facing RIGHT. Single image.
 ```
 
+### 6-7. v0.9.11 반대항 · 황금 박쥐 · 보물 상자 (2026-11-05 · 템플릿 `assets/templates/v0911/tpl-*.png`)
+템플릿 PNG 를 그림 AI 에 **참고 그림으로 함께 첨부**하고 아래 프롬프트를 붙인다 (6-0 머리말 먼저). 칸 · 기준선 · 빨간 자리 표시는 그리지 말라고 적혀 있다.
+게임은 그림이 오기 전엔 이모지 + CSS 로 돌아간다 (`assets/manifest.js` `thrill` 이 null). 받으면 Claude 가 `{ src, frames }` 로 등록.
+
+| 그림 | 템플릿 | 원본 칸 | 칸 | 보낼 파일 |
+|---|---|---|---|---|
+| 🥊 펀치 기계 | `tpl-punch.png` | 128×192 | 기본 · 맞은 순간 | `thrill-punch-v1.png` (256×192) |
+| 🏟 경기장 배경 | `tpl-arena.png` | 480×270 | 1 | `thrill-arena-v1.png` |
+| 🦇 황금 박쥐 | `tpl-bat.png` | 64×64 | 날갯짓 3 + 잡힘 1 | `thrill-bat-v1.png` (256×64) |
+| 🎁 보물 상자 | `tpl-chest.png` | 64×64 | 닫힘 · 흔들림 · 열림 | `thrill-chest-v1.png` (192×64) |
+| 🪶 황금 깃털 | `tpl-feather.png` | 32×32 | 1 | `thrill-feather-v1.png` |
+
+① 펀치 기계
+```
+[STYLE BIBLE above]
+Use the attached template only for layout (cell size, ground line); do NOT draw the grid, guide lines or labels.
+Sprite sheet of ONE arcade boxing machine: a sturdy metal arcade cabinet base with a red leather punching bag
+on a spring arm, slight 3/4 view, facing LEFT (toward the hero). Native cell 128x192 px, 2 cells in one row,
+same base position on the cyan ground line: (1) idle, (2) just punched — bag swung back and up, small white impact
+flash and 3 speed lines. No numbers, no screen, no text on the machine.
+```
+② 경기장 배경
+```
+[STYLE BIBLE above — backgrounds: no outline, dithering allowed]
+Use the attached template only for composition; do NOT draw the red boxes or labels.
+Side-view background, native 480x270 px: an underground gladiator training arena in a gothic dungeon,
+wooden plank floor across the lower 18%, stone walls with torches, dark silhouettes of a crowd on balconies,
+a hanging banner without letters. Keep the top-center, the right edge and the center-right floor area simple
+and dark (UI and the punch machine go there). Dark and desaturated, no characters, no text.
+```
+③ 황금 박쥐
+```
+[STYLE BIBLE above]
+Use the attached template only for layout; do NOT draw guide lines or labels.
+Sprite sheet of ONE cute golden bat (shiny gold fur, big sparkling eyes, tiny fangs), facing LEFT, flying.
+Native cell 64x64 px, 4 cells in one row, body centered in the same spot:
+(1) wings up, (2) wings level, (3) wings down, (4) caught in a small golden net, dizzy swirl eyes.
+```
+④ 보물 상자
+```
+[STYLE BIBLE above]
+Use the attached template only for layout; do NOT draw guide lines or labels.
+Sprite sheet of ONE treasure chest: dark wood with gold trim and a round gold lock, front view from slightly above.
+Native cell 64x64 px, 3 cells in one row, bottom on the cyan ground line:
+(1) closed, (2) rattling — tilted 10 degrees, light leaking from the lid seam, (3) open — lid up, warm golden light
+beams and sparkles rising (nothing drawn inside).
+```
+⑤ 황금 깃털
+```
+[STYLE BIBLE above]
+One icon: a single golden feather, diagonal from bottom-left to top-right, soft shine. Native 32x32 px.
+```
+템플릿을 다시 만들 때: `node tools/sprite/templates_v0911.js` (Playwright · Galmuri 글꼴).
+
 ## 7. 넘기는 방법
 
 - 뽑은 그림은 드라이브 「학습지 > 공통수학2 > 07 에셋 원본」 에 올리고 Claude 에게 「에셋 도착」.

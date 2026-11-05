@@ -176,13 +176,16 @@ DS.Raid = (function () {
     const st = R.state || {}, step = stepOf(L, R); if (!step || st.closed) return null;
     const kind = step.kind === 'monster' && L.monsters[step.id] && !cleared(L, R, step.id) ? 'monster' : step.kind === 'boss' && !bossHp(L, R).won ? 'boss' : null;
     if (!kind) return null;
-    const a = (cfg || ATK)[kind], bind = kind === 'monster' ? bindTotal(L, R, step.id) : 0;
+    // v0.9.11: ⛓ 묶기 = 연습 공격 + ✨ 퍼펙트 + 🔥 콤보 단계 + 🦇 박쥐 (DS.Combo · 30초 창마다 10초 상한) · 보스도 묶임
+    const a = (cfg || ATK)[kind], bind = DS.Combo ? DS.Combo.bindFor(L, R, kind === 'monster' ? step.id : 'boss', null, now) : kind === 'monster' ? bindTotal(L, R, step.id) : 0;
     const hp = kind === 'monster' ? monsterHp(L, R, step.id) : bossHp(L, R), ratio = hp.max ? Math.max(0, Math.min(1, hp.left / hp.max)) : 1;
-    const per = a.length >= 3 ? a[0] + (a[1] - a[0]) * (1 - ratio) : a[0], lock = a[a.length - 1];
+    const per = a.length >= 3 ? a[0] + (a[1] - a[0]) * (1 - ratio) : a[0];
+    // 👑 보스 단계 멈춤 (v0.9.11): 체력 100~67% 4초 · 66~34% 3초 · 33~0% 2초 (시험용 cfg 를 주면 그 값 그대로)
+    const phase = kind === 'boss' && !cfg && DS.Combo ? DS.Combo.bossPhase(ratio) : null, lock = phase ? phase.lock : a[a.length - 1];
     const rest = st.rest && st.rest.at != null ? st.rest : null, paused = !!st.focus || !!rest, start = st.stepAt != null ? st.stepAt : now;
     const held = (st.focus ? now - (st.focusAt != null ? st.focusAt : now) : 0) + (rest ? Math.max(0, now - rest.at) : 0);
     const t = Math.max(0, (now - start - (st.pauseMs || 0) - held) / 1000 - bind);
-    return { kind, mid: step.id || 'boss', per, lock, bind, paused, ratio, t, k: Math.floor(t / per), p: (t % per) / per };
+    return { kind, mid: step.id || 'boss', per, lock, phase: phase ? phase.phase : 0, bind, paused, ratio, t, k: Math.floor(t / per), p: (t % per) / per };
   }
   // 게이지 진행 (기기마다 같은 규칙): 주기가 체력에 따라 바뀌어도 게이지가 거꾸로 튀지 않게 「이번 바퀴 시작 시각」을 기억한다
   //   memo = { key, start } (기기에서 들고 있음) · 모든 기기가 같은 서버 시각 t 와 같은 체력으로 계산 → 거의 같은 순간 공격
@@ -198,5 +201,5 @@ DS.Raid = (function () {
   const timeLeft = (R, now) => { const d = deadline(R); return d == null ? null : Math.max(0, d - now); };
   // 던전 진행: 지나온 단계 / 전체 (마무리 = 끝)
   const progress = (L, R) => { const i = (R.state || {}).step ?? -1, n = L.steps.length; return Math.max(0, Math.min(1, (i + (isEnd(L, R) || bossHp(L, R).won ? 1 : 0)) / n)); };
-  return { deadline, timeLeft, progress, ATK, soloAtk, BIND_PER, BIND_MAX, bindOf, bindTotal, atkClock, atkTrack, RETRIES, HEAL_MAX, healsOf, healsGiven, healsTo, healsReceived, healTarget, LIVE_MS, lateIds, liveOpen, roomDone, inClass, activeIds, teacherUid, num, newRoom, stepOf, isLobby, isEnd, isFinale, isClosed, focusOn, restOn, sheetOn, videoOn, autoFocus, fullMarks, canLobby, online, seedOf, itemsFor, attemptsOf, gradeAttempt, record, resultLabel, headcount, pctOf, monsterHp, waiting, allSubmitted, cleared, mastery, bossHp, helpList };
+  return { skipped, deadline, timeLeft, progress, ATK, soloAtk, BIND_PER, BIND_MAX, bindOf, bindTotal, atkClock, atkTrack, RETRIES, HEAL_MAX, healsOf, healsGiven, healsTo, healsReceived, healTarget, LIVE_MS, lateIds, liveOpen, roomDone, inClass, activeIds, teacherUid, num, newRoom, stepOf, isLobby, isEnd, isFinale, isClosed, focusOn, restOn, sheetOn, videoOn, autoFocus, fullMarks, canLobby, online, seedOf, itemsFor, attemptsOf, gradeAttempt, record, resultLabel, headcount, pctOf, monsterHp, waiting, allSubmitted, cleared, mastery, bossHp, helpList };
 })();

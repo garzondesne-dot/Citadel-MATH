@@ -146,9 +146,12 @@ DS.Account = (function () {
       heroes.forEach((h) => { const p = DS.Gem.price('hero', h.id); if (p == null) return; h.shop = { kind: 'hero', id: h.id, price: p }; h.open = h.open || DS.Gem.owns(gem, 'hero', h.id); h.cond = `💎 ${p} 조각으로 해금`; });
       fx.forEach((f) => { const p = DS.Gem.price('fx', f.id); if (p == null) return; f.shop = { kind: 'fx', id: f.id, price: p }; f.open = f.open || DS.Gem.owns(gem, 'fx', f.id); f.cond = `💎 ${p} 조각으로 해금`; });
     }
+    // 🪶 황금 날개 (v0.9.11 업적 전용): 🎁 보물 상자에서 황금 깃털 5개
+    const fe = DS.Gem ? DS.Gem.feathers(gem) : 0;
+    if (DS.FX.ACHV) fx.push({ id: 'wings', open: fe >= 5, cond: `🪶 황금 깃털 ${Math.min(fe, 5)} / 5개 (🎁 보물 상자 영웅 · 전설)` });
     // 🧪 테스트 · 🎮 체험판 (2026-11-04 사용자 요청): 해금 요소 모두 열림 (용사 · 이펙트)
     if (m && m.test) { heroes.forEach((h) => { h.open = true; }); fx.forEach((f) => { f.open = true; }); }
-    return { heroes, fx, got, need: need.length, seals, gem: Number(gem.total) || 0, medal: gem.medal || {} };
+    return { heroes, fx, got, need: need.length, seals, gem: Number(gem.total) || 0, medal: gem.medal || {}, feather: fe };
   }
   async function logout() { cache = null; tsess(false); await N().signOut(); }
 

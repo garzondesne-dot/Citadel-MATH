@@ -46,6 +46,10 @@ DS.Act = (function () {
     try { think = await N().get(prepPath(lessonId, 'think')); } catch (e) { /* 기본 5초 */ }
     const Lp = DS.Lessons.get(lessonId);
     room.meta.think = think != null ? Number(think) : Lp && Lp.think != null ? Lp.think : 5;
+    // 🔥 반 최고 콤보 · 🥊 반대항 끄기 (v0.9.11)
+    if (cls) { try { const cb = await N().get(`combo/${ck(cls)}`); room.meta.comboBest = Number((cb || {}).best) || 0; } catch (e) { room.meta.comboBest = 0; } }
+    try { if ((await N().get(prepPath('_cfg', 'punchOff'))) === true) room.meta.punchOff = true; } catch (e) { /* 기본 켬 */ }
+    if (cls) { try { const ot = await finishOvertime(cls); if (ot) room.meta.otShow = ot; } catch (e) { /* 연장전 결과는 다음에 */ } }
     room.meta.created = N().TS;
     room.state.stepAt = N().TS;
     const hallKey = String(1000 + Math.floor(Math.random() * 9000));
@@ -77,13 +81,15 @@ DS.Act = (function () {
     if (dir > 0 && i < 0) {
       const studs = Object.entries(R.players || {}).filter(([, p]) => !p.teacher).map(([u]) => u);
       if (!studs.length) fail('입장한 학생이 없어요.');
-      await N().update(P(code), { active: Object.fromEntries(studs.map((u) => [u, true])), 'state/headcount': studs.length, 'state/step': 0, 'state/stepAt': N().TS, 'state/focus': Raid.autoFocus(L.steps[0]), 'state/focusAt': Raid.autoFocus(L.steps[0]) ? N().now() : null, 'state/pauseMs': null });
+      const f0 = Raid.autoFocus(L.steps[0]), plan = DS.Combo ? DS.Combo.batPlan(L, Math.random(), Math.random()) : null;
+      await N().update(P(code), { active: Object.fromEntries(studs.map((u) => [u, true])), 'state/headcount': studs.length, 'state/step': 0, 'state/stepAt': N().TS, 'state/focus': f0, 'state/focusAt': f0 ? N().now() : null, 'state/pauseMs': null, 'state/batPlan': plan, 'state/cpAt': f0 ? N().now() : null, 'state/cpMs': 0 });
       const clss = [...new Set(studs.map((u) => (R.players[u] || {}).cls).filter(Boolean))];
       await unlockFor(L, clss);
       clss.forEach((c) => N().set(`held/${ck(c)}/${L.id}`, true).catch(() => {})); // 📕 그 반이 게임으로 수업한 차시 (오답노트 「불참」 판단 · v0.9.7.9)
       return;
     }
     if (dir > 0 && i >= L.steps.length) { // 마무리 → 수업 끝 (학생은 모닥불로 · 차원문은 꺼진 채 남음)
+      await savePunch(code, unpackRoom(R), L, { final: true }).catch(() => {}); // 🥊 끝내기 전에 저장 → 학생이 결과를 볼 때 이미 있음
       await N().update(P(code, 'state'), { closed: true, focus: false, stepAt: N().TS });
       const cls = (R.meta || {}).cls;
       if (cls) { const lv = await N().get(`live/${ck(cls)}`).catch(() => null); if (lv && lv.code === code) await N().set(`live/${ck(cls)}/open`, false); }
@@ -91,7 +97,9 @@ DS.Act = (function () {
     }
     const next = Math.max(-1, Math.min(L.steps.length, i + dir));
     if (next === i) return;
-    await N().update(P(code, 'state'), { step: next, stepAt: N().TS, focus: Raid.autoFocus(L.steps[next]), focusAt: Raid.autoFocus(L.steps[next]) ? N().now() : null, pauseMs: null, closed: null, sheet: null, video: null }); // 단계가 바뀌면 문제 화면 · 영상은 닫힘
+    const fN = Raid.autoFocus(L.steps[next]), st0 = R.state || {};
+    await N().update(P(code, 'state'), { step: next, stepAt: N().TS, focus: fN, focusAt: fN ? N().now() : null, pauseMs: null, closed: null, sheet: null, video: null, ...cp(st0, { focus: fN, video: null }) }); // 단계가 바뀌면 문제 화면 · 영상은 닫힘
+    if (next >= L.steps.length) savePunch(code, unpackRoom(R), L).catch(() => {}); // 🥊 마무리에 들어서면 반대항 점수 (끝낼 때 한 번 더)
   }
   // 모루 레시피는 반마다 "배포한 차시까지" 열린다: unlock/{반} = 가장 큰 차시 번호
   async function unlockFor(L, classes) {
@@ -104,19 +112,24 @@ DS.Act = (function () {
   const setThink = (lessonId, sec) => N().set(prepPath(lessonId, 'think'), Number(sec));
   // 📄 문제 화면: 종합상황실에 지금 문제의 학습지 이미지를 크게 (교사 해설용, 레이드는 뒤에서 계속)
   const setSheet = (code, on) => N().set(P(code, 'state/sheet'), on ? true : null);
-  const setVideoOn = (code, stepId) => N().set(P(code, 'state/video'), stepId || null); // 🎬 큰 화면에 설명 영상 (null = 닫기)
+  async function setVideoOn(code, stepId) { // 🎬 큰 화면에 설명 영상 (null = 닫기) · 🔥 콤보 시계 멈춤 (v0.9.11)
+    const st = (await N().get(P(code, 'state'))) || {};
+    await N().update(P(code, 'state'), { video: stepId || null, ...cp(st, { video: stepId || null }) });
+  }
+  // 🔥 콤보 시계 멈춤 (쉼터 · OX 타임 · 영상 · 집중모드): 바뀐 뒤 상태를 보고 cpAt · cpMs 를 같이 적는다
+  const cp = (st, next) => (DS.Combo ? DS.Combo.cpPatch(st, next, N().now()) : {});
   // 집중모드: 켜고 끈 시각을 남겨 👾 몬스터 공격 게이지가 모두 함께 멈춘다 (state.focusAt · pauseMs)
   async function setFocus(code, on) {
     const st = (await N().get(P(code, 'state'))) || {};
     if (!!on === !!st.focus) return;
-    if (on) await N().update(P(code, 'state'), { focus: true, focusAt: N().now() });
-    else await N().update(P(code, 'state'), { focus: false, focusAt: null, pauseMs: (st.pauseMs || 0) + Math.max(0, N().now() - (st.focusAt || N().now())) });
+    if (on) await N().update(P(code, 'state'), { focus: true, focusAt: N().now(), ...cp(st, { focus: true }) });
+    else await N().update(P(code, 'state'), { focus: false, focusAt: null, pauseMs: (st.pauseMs || 0) + Math.max(0, N().now() - (st.focusAt || N().now())), ...cp(st, { focus: false }) });
   }
   // 🏕 쉼터: 켜면 { at, min(기본 5분) } · 끄면 쉰 시간을 pauseMs 에 더해 몬스터 공격 게이지가 이어짐 · 분 조절은 쉼터 중에
   async function setRest(code, on, min, opt = {}) { // opt.quiz (v0.9.8.1): ⭕ OX 타임 = 쉼터처럼 멈추되 이름만 다름
     const st = (await N().get(P(code, 'state'))) || {};
-    if (on && !st.rest) await N().update(P(code, 'state'), { rest: { at: N().now(), min: Number(min) || 5, ...(opt.quiz ? { quiz: true } : {}) } });
-    if (!on && st.rest) await N().update(P(code, 'state'), { rest: null, pauseMs: (st.pauseMs || 0) + Math.max(0, N().now() - (st.rest.at || N().now())) });
+    if (on && !st.rest) await N().update(P(code, 'state'), { rest: { at: N().now(), min: Number(min) || 5, ...(opt.quiz ? { quiz: true } : {}) }, ...cp(st, { rest: true }) });
+    if (!on && st.rest) await N().update(P(code, 'state'), { rest: null, pauseMs: (st.pauseMs || 0) + Math.max(0, N().now() - (st.rest.at || N().now())), ...cp(st, { rest: null }) });
     if (!on && DS.Fun) await DS.Fun.stop(code).catch(() => {}); // 쉼터가 끝나면 ⚖ 밸런스 게임도 끝
   }
   const setRestMin = (code, min) => N().set(P(code, 'state/rest/min'), Math.max(1, Math.min(20, Math.round(Number(min) || 5))));
@@ -127,6 +140,7 @@ DS.Act = (function () {
   // v0.8.1: 어느 단계에서든 수업 끝 (선생님이 나가면서 · 교사 메뉴 「⏹ 끝내기」) → 학생은 결과 → 모닥불, 차원문 꺼짐
   async function endClass(code, opt = {}) {
     const R = await N().get(P(code)); if (!R || !R.meta) return;
+    { const U = unpackRoom(R), Lx = DS.Lessons.get(R.meta.lesson); if (Lx) await savePunch(code, U, Lx, { final: true, ot: !!(opt.rift && R.meta.cls) }).catch(() => {}); }
     await N().update(P(code, 'state'), { closed: true, focus: false, stepAt: N().TS, ...(opt.timeUp ? { timeUp: N().TS } : {}) });
     const cls = R.meta.cls;
     if (cls) { const lv = await N().get(`live/${ck(cls)}`).catch(() => null); if (lv && lv.code === code) await N().set(`live/${ck(cls)}/open`, false); }
@@ -177,6 +191,53 @@ DS.Act = (function () {
   }
   const clearHelp = (code, uid) => N().remove(P(code, `help/${uid}`));
 
+  // ── 🥊 반대항 · 🔥 반 최고 콤보 저장 (v0.9.11 · 교사 · 종합상황실 기기) ─────────────
+  //   punch/{차시}/{반} = { s(0~1000), m{참여 · 고침 · 콤보 · 첫 시도 · 돕기 0~100}, best, at, code, ot(연장전 중) } · combo/{반} = { best, at, code }
+  async function savePunch(code, R, L, opt = {}) {
+    const cls = (R.meta || {}).cls; if (!cls || !DS.Combo || !L || !L.no || L.eval || Raid.isLobby(R)) return null;
+    const an = DS.Combo.analyze(L, R), p = DS.Combo.punch(L, R, an);
+    const was = await N().get(`punch/${L.id}/${ck(cls)}`).catch(() => null);
+    if (was && was.code && was.code !== code && !opt.final) return null; // 같은 반이 같은 차시를 또 열면: 마지막 수업 기준 (끝낼 때만 덮음)
+    const e = { s: p.s, m: p.m, best: p.best, n: p.n, at: N().TS, code, ...(opt.ot ? { ot: true } : {}) };
+    await N().set(`punch/${L.id}/${ck(cls)}`, e);
+    if (opt.final && an.best > (Number((R.meta || {}).comboBest) || 0)) {
+      const cb = await N().get(`combo/${ck(cls)}`).catch(() => null);
+      if (!cb || an.best > (Number(cb.best) || 0)) await N().set(`combo/${ck(cls)}`, { best: an.best, at: N().TS, code }).catch(() => {});
+    }
+    return e;
+  }
+  // ⏳ 연장전: 이 반의 「연장전 중」 기록을 이어하기 완주율로 다시 재고 마무리 → 다음 수업 대기실에서 펀치 (반환 = { lesson } | null)
+  async function finishOvertime(cls) {
+    if (!DS.Combo) return null;
+    const all = (await N().get('punch').catch(() => null)) || {}; let out = null;
+    for (const [lid, byC] of Object.entries(all)) {
+      const e = (byC || {})[ck(cls)]; if (!e || !e.ot) continue;
+      const room = e.code ? await N().get(P(e.code)).catch(() => null) : null;
+      const done = Object.keys(((await N().get(`rift/${ck(cls)}/${lid}/done`).catch(() => null)) || {})).length;
+      const n = room ? Object.keys(room.active || {}).length : 0;
+      await N().set(`punch/${lid}/${ck(cls)}`, { ...DS.Combo.overtime(e, n ? done / n : 0), at: N().TS });
+      out = { lesson: lid };
+    }
+    return out;
+  }
+  const setPunchOff = async (code, off) => { await N().set(prepPath('_cfg', 'punchOff'), off ? true : null); if (code) await N().set(P(code, 'state/punchOff'), off ? true : false).catch(() => {}); };
+  const punchOff = (R) => { const s = (R && R.state) || {}; return s.punchOff != null ? !!s.punchOff : !!((R && R.meta) || {}).punchOff; };
+  // 🦇 황금 박쥐: 때가 되면 state.bat (여러 기기가 불러도 한 번)
+  let batBusy = '';
+  async function batTick(code, R, L) {
+    if (!DS.Combo || batBusy === code || !DS.Combo.batDue(L, R, N().now())) return;
+    batBusy = code;
+    const q = DS.Combo.batQ(L, code); if (q < 0) return;
+    const st = (await N().get(P(code, 'state')).catch(() => null)) || {}; if (st.bat) return;
+    await N().set(P(code, 'state/bat'), { mid: st.batPlan.mid, at: N().now(), ac: DS.Combo.activeNow(R, N().now()), q, n: Raid.activeIds(R).length }).catch(() => { batBusy = ''; });
+  }
+  const batAnswer = (code, v) => N().set(P(code, `batA/${N().uid()}`), v === 'o' ? 'o' : 'x');
+  // ✨ 공격 기록 (학생): hits/{나}/{키} = { at: 서버 시각, ac: 콤보 시계 } · 같은 키는 한 번만
+  async function hit(code, R, key, extra = {}) {
+    if (!DS.Combo) return;
+    await N().set(P(code, `hits/${N().uid()}/${key}`), { at: N().TS, ac: DS.Combo.activeNow(R, N().now()), ...extra }).catch(() => {});
+  }
+
   // ── 학생 ────────────────────────────────────────────────
   async function join(code, info) {
     const R = await N().get(P(code));
@@ -211,6 +272,7 @@ DS.Act = (function () {
     if (attempt > 0 && !Raid.record(DS.Lessons.get(R.meta.lesson), unpackRoom(R), mid, me).left) fail('재도전 기회를 모두 썼어요.'); // v0.9.6: 기본 4번 + 받은 힐
     if ((((R.subs || {})[mid] || {})[me] || {})[attempt] != null) return;
     await N().set(P(code, `subs/${mid}/${me}/${attempt}`), N().pack(given));
+    await hit(code, R, `m_${mid}_${attempt}`);
   }
   // 💚 힐 (v0.9.6): 다 맞힌 학생이 남은 기회 한 칸을 친구에게. 받을 친구가 없으면 '_' (응원 — 경험치만). 반환 = 받은 uid | null
   async function heal(code, packed, mid) {
@@ -232,5 +294,5 @@ DS.Act = (function () {
     return out;
   }
 
-  return { endClassAsk, timeUp, extendTime, openRift, cutShort, setRest, setRestMin, markBossWin, prepLite, prepImg, hasImg, setVideoFile, setVideoOn, endClass, admitLate, getPrep, setImage, setVideo, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, heal, bossAnswer, unpackRoom, P };
+  return { savePunch, finishOvertime, setPunchOff, punchOff, batTick, batAnswer, hit, endClassAsk, timeUp, extendTime, openRift, cutShort, setRest, setRestMin, markBossWin, prepLite, prepImg, hasImg, setVideoFile, setVideoOn, endClass, admitLate, getPrep, setImage, setVideo, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, heal, bossAnswer, unpackRoom, P };
 })();

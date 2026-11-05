@@ -101,6 +101,20 @@
             ".write": "auth != null && auth.uid === $uid",
             ".validate": "newData.hasChildren(['lv', 'at']) && newData.child('lv').isNumber()"
           }
+        },
+        "hits": {
+          "$uid": {
+            "$k": {
+              ".write": "auth != null && auth.uid === $uid && !data.exists() && root.child('rooms/'+$code+'/active/'+$uid).val() === true && $k.length <= 40",
+              ".validate": "newData.hasChildren(['at', 'ac']) && newData.child('at').val() === now && newData.child('ac').isNumber() && (!newData.child('ok').exists() || newData.child('ok').isBoolean())"
+            }
+          }
+        },
+        "batA": {
+          "$uid": {
+            ".write": "auth != null && auth.uid === $uid && !data.exists() && root.child('rooms/'+$code+'/active/'+$uid).val() === true && root.child('rooms/'+$code+'/state/bat/at').isNumber() && now <= root.child('rooms/'+$code+'/state/bat/at').val() + 21500",
+            ".validate": "newData.val() === 'o' || newData.val() === 'x'"
+          }
         }
       }
     },
@@ -343,6 +357,22 @@
         "$n": {
           ".read": "auth != null && (root.child('accounts/'+$c+'/'+$n+'/uid').val() === auth.uid || root.child('admins/'+auth.uid).val() === true)",
           ".write": "auth != null && (root.child('accounts/'+$c+'/'+$n+'/uid').val() === auth.uid || root.child('admins/'+auth.uid).val() === true)"
+        }
+      }
+    },
+    "combo": {
+      ".read": "auth != null",
+      "$c": {
+        ".write": "auth != null && (root.child('admins/'+auth.uid).val() === true || (newData.child('code').isString() && root.child('rooms/'+newData.child('code').val()+'/hosts/'+auth.uid).exists()) || (newData.child('code').isString() && root.child('rooms/'+newData.child('code').val()+'/meta/teacher').val() === auth.uid))",
+        ".validate": "newData.hasChildren(['best', 'at', 'code']) && newData.child('best').isNumber()"
+      }
+    },
+    "punch": {
+      ".read": "auth != null",
+      "$lesson": {
+        "$c": {
+          ".write": "auth != null && (root.child('admins/'+auth.uid).val() === true || (newData.child('code').isString() && root.child('rooms/'+newData.child('code').val()+'/hosts/'+auth.uid).exists()) || (newData.child('code').isString() && root.child('rooms/'+newData.child('code').val()+'/meta/teacher').val() === auth.uid))",
+          ".validate": "newData.hasChildren(['s', 'm', 'at', 'code']) && newData.child('s').isNumber() && newData.child('s').val() >= 0 && newData.child('s').val() <= 1000"
         }
       }
     }

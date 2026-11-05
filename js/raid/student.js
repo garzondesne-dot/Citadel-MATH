@@ -22,6 +22,7 @@ DS.Student = (function () {
   async function enter(c, info, opt = {}) {
     test = opt.test || null;
     cleared0 = false; resulted = false; drawn = ''; shown = ''; form = null; retrying = ''; bossSet = 1; othersSeen = {};
+    an = null; thSeen = null; phaseWas = 0; chestDone = {}; chestQ = []; chestBusy = false; batPaid = ''; endPaid = ''; // v0.9.11
     await DS.Act.join(c, info);
     code = c; info0 = info; lastStep = null; lastOx = null; dirty = false; clearTimeout(saveT);
     me = DS.Net.uid();
@@ -41,7 +42,58 @@ DS.Student = (function () {
       if (!test && DS.Gem && R.state && R.state.clearLeft != null && Raid().activeIds(R).includes(me) && clearPaid !== code) { clearPaid = code; DS.Gem.add(acc(), DS.Gem.G.clear, `clear_${code}`, '⏰ 시간 안 클리어').catch(() => {}); }
       xpWatch();
       render();
+      thrillWatch();
     });
+  }
+  // ── v0.9.11 🔥 반 콤보 · ✨ 퍼펙트 · 👑 보스 단계 · 🦇 황금 박쥐 · 🎁 보물 상자 ─────────────
+  let an = null, thSeen = null, phaseWas = 0, chestDone = {}, chestQ = [], chestBusy = false, batPaid = '', endPaid = '';
+  function thrillWatch() {
+    if (!L || !R || !DS.Combo || !DS.Thrill) return;
+    an = DS.Combo.analyze(L, R, DS.Net.now());
+    const first = !thSeen; if (first) thSeen = {};
+    an.ev.forEach((e) => { const k = `${e.u}|${e.k}`; if (thSeen[k]) return; thSeen[k] = true; if (!first && e.u === me && e.pf) setTimeout(() => DS.Thrill.perfect(e.streak, e.bind), 700); });
+    an.marks.forEach((m) => { const k = `t${m.at}|${m.n}`; if (thSeen[k]) return; thSeen[k] = true; if (!first) DS.Thrill.tierNote(m.n); });
+    const st = Raid().stepOf(L, R), bh = Raid().bossHp(L, R);
+    if (st && st.kind === 'boss' && !bh.won && !Raid().isClosed(R)) { const ph = DS.Combo.bossPhase(bh.max ? bh.left / bh.max : 1); if (phaseWas && ph.phase > phaseWas) DS.Thrill.phaseNote(ph); phaseWas = ph.phase; } else phaseWas = 0;
+    if (!test) chestCheck();
+    comboTick();
+  }
+  function chestCheck() {
+    if (!DS.Gem || !info0 || info0.cls == null || !Raid().activeIds(R).includes(me)) return;
+    L.steps.filter((s) => s.kind === 'monster' && L.monsters[s.id]).forEach((s) => {
+      if (chestDone[s.id] || !Raid().cleared(L, R, s.id)) return; chestDone[s.id] = true;
+      if (Raid().record(L, R, s.id, me).best > 0) chestQ.push({ code, mid: s.id, uid: me, streak3: ((an && an.streak[me]) || 0) >= 3 });
+    });
+    const b = DS.Combo.bat(L, R, DS.Net.now());
+    if (b && !b.live && b.ok && batPaid !== `${code}|${b.at}`) {
+      batPaid = `${code}|${b.at}`;
+      DS.Gem.add(acc(), DS.Gem.G.bat, `bat_${code}`, '🦇 황금 박쥐 포획').catch(() => {});
+      const mine = (R.batA || {})[me]; if (mine && (mine === 'o') === !!(b.q || {}).a) chestQ.push({ code, mid: 'bat', uid: me, force: true });
+    }
+    chestNext();
+  }
+  function chestNext() {
+    if (chestBusy || !chestQ.length) return; chestBusy = true;
+    const c = chestQ.shift();
+    DS.Gem.chest(acc(), c).then((r) => { if (!r) { chestBusy = false; chestNext(); return; } setTimeout(() => DS.Thrill.chestOpen(r, () => { chestBusy = false; chestNext(); }), 1400); }).catch(() => { chestBusy = false; });
+  }
+  // 200ms 마다: 콤보 배지 · 박쥐 창 (박쥐가 끝나는 순간 콤보 +3 이 들어가게 다시 계산)
+  function comboTick() {
+    if (!L || !R || !DS.Combo || !DS.Thrill) return;
+    const now = DS.Net.now(), b = DS.Combo.bat(L, R, now);
+    if (b && !b.live && b.ok && an && !an.ev.some((e) => e.kind === 'bat')) return thrillWatch();
+    const cb = document.getElementById('st-combo');
+    if (cb) { const live = !Raid().isLobby(R) && !Raid().isClosed(R) && !myP().lobby; const h = live ? DS.Thrill.badge(DS.Combo.comboNow(an, R, now)) : ''; if (cb.innerHTML !== h) cb.innerHTML = h; }
+    if (!(R.active || {})[me] || DS.Thrill.batShut(b) || Raid().isClosed(R)) { DS.Thrill.batPhone(null); return; }
+    DS.Thrill.batPhone(b, (R.batA || {})[me], (v) => DS.Act.batAnswer(code, v).then(() => DS.Sound.clank()).catch((e) => DS.UI.toast(e.message || '시간이 끝났어요.')));
+  }
+  // 수업이 끝날 때: 🔥 반 최고 콤보를 깬 사슬에 낀 용사 💎 +3 · 🥊 반대항 보상
+  function endRewards() {
+    if (test || !DS.Gem || !DS.Combo || !info0 || info0.cls == null || !L || !R || endPaid === code || !Raid().activeIds(R).includes(me)) return;
+    endPaid = code;
+    const a = DS.Combo.analyze(L, R), was = Number((R.meta || {}).comboBest) || 0;
+    if (a.best >= 10 && a.best > was && a.bestUsers.includes(me)) DS.Gem.add(acc(), DS.Gem.G.comboBest, `combo_${code}`, `🔥 반 최고 콤보 ${a.best}!`, { free: true }).catch(() => {});
+    if (DS.Punch && !DS.Act.punchOff(R)) DS.Punch.reward(acc(), L, R, code).catch(() => {});
   }
   // 🆙 몬스터를 쓰러뜨리는 순간 내 용사 머리 위 +EXP · 보스 처치 +EXP (처음 들어왔을 때 이미 쓰러진 것은 빼고)
   let xpSeen = null;
@@ -73,13 +125,14 @@ DS.Student = (function () {
   // 수업이 끝나면 모닥불로
   // v0.8.0: 수업이 끝나면 ⚔ 오늘의 전투 결과(개인) → 모닥불 (「⚔ 보강던전」 추천을 누르면 보강던전으로)
   function toCamp() {
-    if (stop) stop(); stop = null; focus(false); atkStop();
+    endRewards();
+    if (stop) stop(); stop = null; focus(false); atkStop(); DS.Thrill && DS.Thrill.batPhone(null); { const cb = document.getElementById('st-combo'); if (cb) cb.innerHTML = ''; }
     const t = test; test = null;
     const go = (bonus) => { if (t) { t.exit(); return; } if (bonus && DS.Bonus) DS.Bonus.enter(acc(), { train: true }); else DS.Camp.enter(acc()); };
     if (DS.Result && L && R && me && Raid().activeIds(R).includes(me)) return DS.Result.show(L, R, me, t ? null : acc(), code, go, { force: true }).catch(() => go()); // 2026-11-03: 수업이 끝나면 언제나 ⚔ 개인 결과 → 모닥불 (학급 결과는 대기실 버튼)
     go();
   }
-  const stop0 = () => { saveNow(); if (stop) stop(); stop = null; focus(false); atkStop(); test = null; };
+  const stop0 = () => { saveNow(); if (stop) stop(); stop = null; focus(false); atkStop(); test = null; if (DS.Thrill) DS.Thrill.batPhone(null); const cb = document.getElementById('st-combo'); if (cb) cb.innerHTML = ''; };
   // 집중모드 막
   function focus(on) {
     const el = $('#focus');
@@ -162,11 +215,12 @@ DS.Student = (function () {
         <div class="lb-h teacher" style="left:50%;bottom:20%">${DS.Art.hero(DS.ASSETS.heroes.teacher, 'idle', after && finale ? 'pairhop' : 'huff')}<i class="shadow"></i></div>
         ${crowd}<div class="lb-h me" style="left:34%;bottom:12%">${DS.Art.hero(myP().hero, 'idle', after && finale ? 'pairhop' : 'huff')}<i class="shadow"></i>${w && !(R.hide || {})[me] ? `<span class="lb-say">${esc(w.t)}</span>` : ''}</div>
         <p class="lb-greet">${after ? '모두 수고했네! 오늘 배운 것 한마디씩 남기게' : `${L.no ? `${L.no}차시 ` : ''}${esc(L.title.split('·')[0].trim())} 던전에 온 것을 환영하네!`}</p></div>
-      ${after ? `<div class="stamp-bar">📮 반드시 학습지 확인도장 받아가세요.</div>${sv ? DS.Survey.btnHtml('st-survey') : ''}<button class="btn primary" id="st-mine">⚔ 내 전투 결과 보기</button>${kr ? '<button class="btn sc-btn" id="st-klass">🏫 우리 반 학급 결과 보기</button>' : ''}${wordsForm(w)}${'' /* 2026-11-03 사용자 확정: 모루는 개인 캠프(모닥불)에서만 — 대기실에서는 열지 않는다 (수업 중엔 여유가 없음) */}`
+      ${after ? `<div class="stamp-bar">📮 반드시 학습지 확인도장 받아가세요.</div>${sv ? DS.Survey.btnHtml('st-survey') : ''}<button class="btn primary" id="st-mine">⚔ 내 전투 결과 보기</button>${kr ? '<button class="btn sc-btn" id="st-klass">🏫 우리 반 학급 결과 보기</button>' : ''}${kr && DS.Punch && !DS.Act.punchOff(R) && R.meta.cls && L.no && !L.eval ? '<button class="btn" id="st-punch">🥊 반대항 펀치 기계</button>' : ''}${wordsForm(w)}${'' /* 2026-11-03 사용자 확정: 모루는 개인 캠프(모닥불)에서만 — 대기실에서는 열지 않는다 (수업 중엔 여유가 없음) */}`
         : test ? '<p class="center">친구들이 다 모이면 아래 「수업 시작 ▶」을 눌러요!</p>' : '<p class="center">선생님이 수업을 시작할 때까지 기다려요. 학습지를 꺼내 두세요!</p>'}</div>`;
     if (after) bindWords();
     const svb = $('#st-survey'); if (svb) svb.onclick = () => DS.Survey.open(acc(), () => { drawn = ''; render(); });
     const kb = $('#st-klass'); if (kb) kb.onclick = () => DS.Control.run(() => DS.ShareCard.klassOpen(L, R));
+    const pb = $('#st-punch'); if (pb) pb.onclick = () => DS.Control.run(() => DS.Punch.open(L, R));
     const mb = $('#st-mine'); if (mb) mb.onclick = () => DS.Control.run(() => DS.Result.show(L, R, me, test ? null : acc(), code, () => {}, { inClass: true, force: true }));
   }
   function wordsForm(w) {
@@ -247,6 +301,7 @@ DS.Student = (function () {
   let atkTimer = null, stunUntil = 0, atkMemo = {};
   function atkTick() {
     if (!L || !R || !code) return;
+    comboTick();
     const c = Raid().atkClock(L, R, DS.Net.now(), window.DS_ATK || null); // DS_ATK = 브라우저 시험용 짧은 시간 (e2e21)
     const g = document.querySelector('#st-body .atk-gauge');
     if (!c) { if (g) g.querySelector('i').style.width = '0%'; atkMemo = {}; return; }
@@ -474,6 +529,7 @@ DS.Student = (function () {
       next[i] = r.given;
       await DS.Act.bossAnswer(code, bossSet, next); saveSoon(10000);
       const ok = DS.Quiz.grade(items[i], r.given);
+      { const hk = Object.keys(((R.hits || {})[me]) || {}).filter((k) => k.startsWith(`b${bossSet}_${i}_`)).length; DS.Act.hit(code, raw, `b${bossSet}_${i}_${hk}`, { ok }); } // ✨ 보스 문항 퍼펙트 · 🔥 콤보 (v0.9.11)
       if (!ok && thinkSec() > 0) bossThink = Date.now() + thinkSec() * 1000;
       DS.UI.toast(ok ? `✔ ${i + 1}번 도달! 보스에게 데미지` : `✘ ${i + 1}번은 아직… 🤔 ${thinkSec()}초 생각하고 ${bossSet === 1 ? '세트 2 로' : '다시'} 도전!`, 2600);
       if (ok) { DS.Sound.slash(); setTimeout(() => DS.Sound.hit(), 160); const sc = document.querySelector('#st-body .scene'); if (sc) DS.FX.play(sc, myP().fx || 'flame', { scale: 0.32 }); } else DS.Sound.squish();
