@@ -49,7 +49,7 @@ DS.Teacher = (function () {
     const tb = $('#t-tbar'); if (tb) { tb.innerHTML = C().tbarHtml(L, R, { mini: true, ext: true }); C().bindExtend(tb, code, R); }
     const body = $('#t-body');
     const live = !Raid().isLobby(R) && !Raid().isClosed(R);
-    body.innerHTML = `<div class="panel framed t-now">${now()}${C().pctHtml(L, R)}${live ? C().remoteGrid(L, R, videos) : ''}${DS.ShareCard.klassReady(L, R) ? '<button class="btn sc-btn" id="t-news">🏫 학급 결과 · 우리 반 수업 소식</button>' : ''}${DS.Punch && R.meta.cls && L.no && !L.eval && (Raid().isEnd(L, R) || Raid().isClosed(R)) ? `<button class="btn small" id="t-punch">🏁 반대항 경주 ${DS.Act.punchOff(R) ? '꺼짐 → 켜기' : '켜짐 → 끄기'}</button>` : ''}${Raid().isClosed(R) ? '<button class="btn primary" id="t-tcamp">🏛 교사 캠프 가기</button>' : ''}</div>
+    body.innerHTML = `<div class="panel framed t-now">${now()}${C().pctHtml(L, R)}${live ? C().remoteGrid(L, R, videos) : ''}${DS.ShareCard.klassReady(L, R) ? '<button class="btn sc-btn" id="t-news">🏫 학급 결과 · 우리 반 수업 소식</button>' : ''}${DS.Punch && R.meta.cls && L.no && !L.eval && (Raid().isEnd(L, R) || Raid().isClosed(R)) ? `<button class="btn small" id="t-punch">🏁 반대항 경주 ${DS.Act.punchOff(R) ? '꺼짐 → 켜기' : '켜짐 → 끄기'}</button>` : ''}${DS.Gem && R.meta.cls ? '<button class="btn small" id="t-gift">💎 마정석 선물</button>' : ''}${Raid().isClosed(R) ? '<button class="btn primary" id="t-tcamp">🏛 교사 캠프 가기</button>' : ''}</div>
       ${Raid().isLobby(R) ? lobby() : Raid().isEnd(L, R) ? `<div class="panel framed">${DS.Survey ? DS.Survey.ctlHtml(R, svSt) : ''}${C().wordsHtml(R)}</div>` : helpPanel()}
       <p class="t-next muted small">다음 ▶ <b>${esc(C().nextName(L, R))}</b></p>
       <div class="t-pad"><button class="btn t-back" id="t-back"${i < 0 ? ' disabled' : ''}>◀<br>뒤로</button><button class="btn primary t-fwd" id="t-fwd"${Raid().isClosed(R) ? ' disabled' : ''}>▶<br>${Raid().isFinale(L, R) ? '수업 끝' : '앞으로'}</button></div>`;
@@ -58,10 +58,38 @@ DS.Teacher = (function () {
     if (DS.Survey) DS.Survey.bindCtl(body, R, L);
     const nb = $('#t-news'); if (nb) nb.onclick = () => C().run(() => DS.ShareCard.klassOpen(L, R, { praise: true }));
     const pb = $('#t-punch'); if (pb) pb.onclick = () => C().run(async () => { const off = !DS.Act.punchOff(R); await DS.Act.setPunchOff(code, off); DS.UI.toast(off ? '🏁 반대항 경주를 껐어요 (다음 수업도 꺼짐)' : '🏁 반대항 경주를 켰어요'); });
+    const gb = $('#t-gift'); if (gb) gb.onclick = () => giftModal();
     const cb = $('#t-tcamp'); if (cb) cb.onclick = () => C().run(() => { if (stop) stop(); stop = null; clearInterval(tick); return DS.TCamp.enter({ code, hallKey: curKey }); });
     body.querySelectorAll('[data-help]').forEach((b) => (b.onclick = () => C().run(() => DS.Act.clearHelp(code, b.dataset.help))));
     $('#t-fwd').onclick = () => C().run(() => C().forward(code, R, L));
     $('#t-back').onclick = () => C().run(() => C().back(code, R, L));
+  }
+  // 💎 마정석 선물 (2026-11-06 사용자 · 교사 폰 리모컨에서만): +10 기준 · 5개씩 조정 · 고른 학생 또는 모두에게 (하루 한도 밖)
+  function giftModal() {
+    const cls = R.meta.cls, studs = Object.keys(R.players || {}).filter((u) => !R.players[u].teacher && R.players[u].num).map((u) => R.players[u]).sort((a, b) => a.num - b.num);
+    if (!studs.length) { DS.UI.toast('아직 들어온 학생이 없어요.'); return; }
+    let g = 10; const pick = new Set();
+    const ov = document.createElement('div'); ov.className = 'modal'; document.body.appendChild(ov);
+    const draw = () => {
+      ov.innerHTML = `<div class="quiz-box framed gift-box"><div class="set-head"><h2>💎 마정석 선물</h2><button class="btn" id="gf-x">닫기</button></div>
+        <div class="gift-amt"><button class="btn" id="gf-m">− 5</button><b>💎 ${g}</b><button class="btn" id="gf-p">+ 5</button></div>
+        <p class="muted small">${esc(cls)}반 · 학생을 눌러 고르세요 (하루 한도와 상관없이 바로 들어가요 · 학생 캠프에 「🎁 선생님 선물」 알림)</p>
+        <div class="gift-grid">${studs.map((p) => `<button class="gift-st${pick.has(p.num) ? ' on' : ''}" data-n="${p.num}"><b>${p.num}</b> ${esc(p.nick || '')}</button>`).join('')}</div>
+        <div class="gift-go"><button class="btn primary" id="gf-sel"${pick.size ? '' : ' disabled'}>고른 ${pick.size}명에게 💎${g}</button><button class="btn" id="gf-all">모두에게 💎${g} (${studs.length}명)</button></div></div>`;
+      ov.querySelector('#gf-x').onclick = () => ov.remove();
+      ov.querySelector('#gf-m').onclick = () => { g = Math.max(5, g - 5); draw(); };
+      ov.querySelector('#gf-p').onclick = () => { g = Math.min(100, g + 5); draw(); };
+      ov.querySelectorAll('[data-n]').forEach((b) => (b.onclick = () => { const n = Number(b.dataset.n); if (pick.has(n)) pick.delete(n); else pick.add(n); draw(); }));
+      const send = (list) => C().run(async () => {
+        if (!list.length || !confirm(`${list.length}명에게 💎 ${g}개씩 선물할까요?`)) return;
+        const tag = Date.now().toString(36);
+        for (const n of list) await DS.Gem.gift(cls, n, g, tag);
+        DS.Sound.coin && DS.Sound.coin(); DS.UI.toast(`🎁 ${list.length}명에게 💎 ${g}개씩 선물했어요!`, 3000); ov.remove();
+      });
+      ov.querySelector('#gf-sel').onclick = () => send([...pick]);
+      ov.querySelector('#gf-all').onclick = () => send(studs.map((p) => p.num));
+    };
+    draw();
   }
   function now() {
     const step = Raid().stepOf(L, R);

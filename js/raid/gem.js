@@ -61,6 +61,15 @@ DS.Gem = (function () {
     pop(g, why);
     return g;
   }
+  // 🎁 선생님 선물 (2026-11-06 · 교사 폰 리모컨에서만): 하루 한도 밖 · 받은 학생 캠프에 알림 (log 키 gift_…)
+  async function gift(c, n, g, tag) {
+    g = Math.max(1, Math.min(100, Math.floor(Number(g) || 0)));
+    const m = { c, n: Number(n) }, d = await mine(m), k = kk(`gift_${tag}_${n}`);
+    await N().update(path(m), { total: (Number(d.total) || 0) + g, earned: (Number(d.earned) || 0) + g, [`log/${k}`]: { g, at: N().TS, why: '🎁 선생님 선물', gift: true } });
+    return g;
+  }
+  // 아직 안 본 선물 합계 (학생 캠프 알림용 · seen = 마지막으로 본 시각)
+  const giftsSince = (d, seen) => Object.values((d || {}).log || {}).filter((x) => x && x.gift && Number(x.at) > (Number(seen) || 0)).reduce((a, x) => ({ g: a.g + (Number(x.g) || 0), at: Math.max(a.at, Number(x.at) || 0) }), { g: 0, at: 0 });
   // 하루 n 번까지만 (허수아비 복습처럼)
   async function addDaily(m, n, base, limit, why) {
     const d = await mine(m), day = today(), keys = Object.keys(d.log || {}).filter((k) => k.startsWith(`${kk(base)}_${day}_`));
@@ -113,5 +122,5 @@ DS.Gem = (function () {
     return r ? { ...r, pity, feathers: (Number(d.feather) || 0) + (r.feather || 0) } : null;
   }
   const feathers = (d) => Number((d || {}).feather) || 0;
-  return { chest, feathers, G, SHOP, DAY_CAP, price, mine, add, addDaily, medal, buy, owns, itemKey, streak, today };
+  return { chest, feathers, G, SHOP, DAY_CAP, price, mine, add, gift, giftsSince, addDaily, medal, buy, owns, itemKey, streak, today };
 })();

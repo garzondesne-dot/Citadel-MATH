@@ -2081,3 +2081,12 @@ input.sv-no { width: 64px !important; display: inline-block; padding: 2px 4px; }
 .ult .u-flash { position: absolute; inset: 0; background: #fff; opacity: 0; animation: uFlash .35s 1s ease-out forwards; }
 @keyframes uFlash { 0% { opacity: 0; } 20% { opacity: .55; } 100% { opacity: 0; } }
 .ult-btn { margin: 0 0 6px; }
+/* 💎 마정석 선물 (교사 리모컨 · 2026-11-06) */
+.gift-box { max-width: 460px; }
+.gift-amt { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 6px 0 8px; }
+.gift-amt b { font-size: 26px; color: #9fe0ff; min-width: 90px; text-align: center; }
+.gift-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 5px; max-height: 46dvh; overflow-y: auto; margin-bottom: 8px; }
+.gift-st { font: 13px var(--pixel); color: var(--text); background: #0b1630; border: 2px solid var(--line); border-radius: 6px; padding: 7px 4px; cursor: pointer; text-align: left; }
+.gift-st.on { border-color: #7cf; background: #0f2a4a; box-shadow: 0 0 8px #7cf8; }
+.gift-st b { color: #ffd25a; }
+.gift-go { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
