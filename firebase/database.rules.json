@@ -89,7 +89,7 @@
           "$rk": {
             "$uid": {
               ".write": "auth != null && auth.uid === $uid && root.child('rooms/'+$code+'/players/'+$uid).exists() && root.child('rooms/'+$code+'/fun/rk').val() === $rk && root.child('rooms/'+$code+'/fun/phase').val() === 'pick' && now <= root.child('rooms/'+$code+'/fun/to').val() + 1500",
-              ".validate": "newData.val() === 'a' || newData.val() === 'b'"
+              ".validate": "newData.val() === 'a' || newData.val() === 'b' || newData.val() === 'c'"
             }
           }
         },

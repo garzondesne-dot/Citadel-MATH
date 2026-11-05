@@ -62,10 +62,11 @@ DS.Hall = (function () {
   const punchable = () => !!(DS.Punch && L && R && R.meta.cls && L.no && !L.eval && !DS.Act.punchOff(R));
   const punchBtn = () => (punchable() ? '<button class="btn" id="h-punch">🏁 반대항 경주</button>' : '');
   let punchSeen = '', otSeen = '';
-  function punchAuto() { if (!punchable() || punchSeen === code) return; punchSeen = code; setTimeout(() => DS.Punch.open(L, R, { big: true, wait: true }).catch(() => {}), 1800); }
+  const hallOn = () => typeof document !== 'undefined' && !!(document.getElementById('screen-hall') || {}).classList && document.getElementById('screen-hall').classList.contains('active');
+  function punchAuto() { if (!punchable() || punchSeen === code) return; punchSeen = code; setTimeout(() => { if (hallOn()) DS.Punch.open(L, R, { big: true, wait: true }).catch(() => {}); }, 1800); } // 2026-11-05: 그사이 교사 캠프 · 성채로 옮겼으면 띄우지 않음 (덮개가 ≪ 버튼을 가리던 것)
   function otAuto() {
     const ot = (R.meta || {}).otShow; if (!ot || !DS.Punch || otSeen === code || DS.Act.punchOff(R)) return; otSeen = code;
-    const Lo = DS.Lessons.get(ot.lesson); if (Lo) setTimeout(() => DS.Punch.open(Lo, R, { big: true, overtime: true }).catch(() => {}), 2500);
+    const Lo = DS.Lessons.get(ot.lesson); if (Lo) setTimeout(() => { if (hallOn()) DS.Punch.open(Lo, R, { big: true, overtime: true }).catch(() => {}); }, 2500);
   }
   function bindActs() {
     const pb = $('#h-punch'); if (pb) pb.onclick = () => DS.Control.run(() => DS.Punch.open(L, R, { big: true }));

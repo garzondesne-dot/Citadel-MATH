@@ -50,7 +50,10 @@ DS.Punch = (function () {
       </div>
       <div class="pm-after" hidden></div></div>`;
     document.body.appendChild(o);
-    o.querySelector('.pm-x').onclick = () => { o.remove(); if (opt.onClose) opt.onClose(); };
+    const shut = () => { if (!o.isConnected) return; o.remove(); document.removeEventListener('keydown', esc1); if (opt.onClose) opt.onClose(); };
+    const esc1 = (e) => { if (e.key === 'Escape') shut(); };
+    document.addEventListener('keydown', esc1); // Esc 로도 닫힘 (종합상황실 PC)
+    o.querySelector('.pm-x').onclick = shut;
     const top = Math.max(1, ...lanes.filter((r) => !r.ot).map((r) => r.s || 0)), v = top / 3.6; // 1초에 v 점 · 1등은 3.6초 만에 들어옴
     const els = [...o.querySelectorAll('.rc-lane')].map((e, i) => ({ r: lanes[i], bar: e.querySelector('.rc-bar'), hero: e.querySelector('.rc-hero'), num: e.querySelector('.rc-num'), badge: e.querySelector('.rc-badge'), done: false }));
     els.filter((x) => x.r.ot).forEach((x) => { x.done = true; x.hero.innerHTML = DS.Art.hero(heroOf(R, x.r.cls), 'sit'); x.num.textContent = '⏳'; });

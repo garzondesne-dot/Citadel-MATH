@@ -1987,3 +1987,18 @@ input.sv-no { width: 64px !important; display: inline-block; padding: 2px 4px; }
 .hd-rw-i.seal { color: #ffe27a; background: #3a1d5ce6; border-color: #c58aff; box-shadow: 0 0 10px #c58aff88; }
 @keyframes hdIn { from { opacity: 0; transform: translateY(14px) scale(.8); } to { opacity: 1; transform: none; } }
 @keyframes hdOut { to { opacity: 0; transform: translateY(-12px); } }
+/* 🎉 수업 중 레벨업 = 위쪽 작은 띠 (문제를 가리지 않음 · 2026-11-05) */
+.lvup-mini { position: fixed; left: 50%; top: 6px; transform: translateX(-50%); z-index: 95; pointer-events: none; padding: 4px 12px; border-radius: 14px; background: #2a1d06ee; border: 2px solid #ffd25a; color: #fff; font-size: 14px; white-space: nowrap; box-shadow: 0 0 14px #ffd25a88; animation: lvMini 3.2s ease both; }
+.lvup-mini b { color: #ffd25a; } .lvup-mini span { color: #b8ff7a; font-size: 12px; }
+@keyframes lvMini { 0% { opacity: 0; transform: translate(-50%, -20px); } 10%, 85% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -10px); } }
+/* ✊✌✋ 가위바위보 (밸런스 · 반대로 5명 이하 · 2026-11-05) */
+.fa-rps { position: absolute; left: 50%; top: 16%; transform: translateX(-50%); z-index: 4; text-align: center; padding: 6px 18px 10px; border-radius: 16px; background: #10162ccc; border: 2px solid #ffd25a; box-shadow: 0 0 18px #ffd25a66; }
+.fa-rps p { margin: 0; font-size: 13px; color: #ffd25a; } .fa-rps b { display: block; font-size: 54px; line-height: 1.1; } .fa-wrap:not(.big) .fa-rps b { font-size: 34px; }
+.fa-rps b.spin { font-size: 30px; animation: rpsSpin .5s steps(3) infinite; }
+@keyframes rpsSpin { 50% { transform: scale(1.12); } }
+.fa-hand { position: absolute; left: 50%; bottom: 100%; transform: translateX(-50%); font-style: normal; font-size: 13px; font-weight: 700; line-height: 1.2; padding: 0 5px; border-radius: 6px; background: #ffd25a; color: #2a1d06; white-space: nowrap; }
+.fa-rps em { display: block; font-style: normal; font-size: 18px; font-weight: 700; color: #fff; }
+.fa-hand.lose { background: #6a6f80; color: #e8e8e8; }
+.fa-pick.rps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.fa-pick.rps .btn { font-size: 18px; padding: 10px 0; }
+.fa-pick .fa-c { border-color: #6bd16b; } .fa-pick .fa-c.on { background: #1f5a2a; }

@@ -64,6 +64,9 @@ DS.Nav = (function () {
     if (leaving === 'back') { reopen(); return; }
     if (leaving) return;
     const id = current();
+    const qOpen = !!document.querySelector('#quiz:not(.hidden)');
+    const ov = document.querySelector('.pm-ov .pm-x') || (!qOpen && document.querySelector('.bn-fight #bf-x')); // 2026-11-05: 경주 결과 · (문제를 풀고 있지 않은) 성채 · 허수아비 전투 창이 떠 있으면 그 창부터 닫음
+    if (ov) { ov.click(); history.pushState({ cm: 'top' }, ''); return; }
     if (id !== 'screen-home' && inPlace(id)) { history.pushState({ cm: 'top' }, ''); return; }
     if (id !== 'screen-home') { if (ask(id)) { const p = endHook(id); if (p) { leaving = true; p.then(reopen); } else reopen(); } else history.pushState({ cm: 'top' }, ''); return; }
     // 경고하는 동안은 막지 않으므로 그사이 한 번 더 누르면 앱이 꺼진다. 시간이 지나면 다시 막는다

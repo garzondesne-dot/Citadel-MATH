@@ -1,4 +1,4 @@
-// ⚖ 밸런스 게임 (2026-11-04 · v0.9.7.7): 쉼터 → 교사 「⚖ 밸런스 게임」 → 학생 폰 고르기 · 종합상황실 공개(우르르 · 무너짐) → 2명 남으면 우승 → 쉼터 끝이면 게임도 끝 — node tools/e2e/e2e48.js <출력 폴더>
+// ⚖ 밸런스 게임 (2026-11-04 · v0.9.7.7 · 2026-11-05 5명 이하 = ✊✌✋ 가위바위보): 쉼터 → 교사 「⚖ 밸런스 게임」 → 학생 폰 고르기 · 종합상황실 공개(우르르 · 무너짐) → 2명 남으면 우승 → 쉼터 끝이면 게임도 끝 — node tools/e2e/e2e48.js <출력 폴더>
 const { chromium } = require('playwright');
 const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
 (async () => {
@@ -40,8 +40,16 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   log.push('공개: ' + (await H.textContent('.fa-foot')).trim());
   await S.screenshot({ path: `${OUT}/4-phone-show.png` });
   log.push('학생 폰: ' + (await S.textContent('.fa-me')).trim());
-  await S.waitForSelector('.fa-pick .fa-a', { timeout: 10000 }); await S.click('.fa-pick .fa-a');
-  await vote('r2', { bot1: 'a', bot2: 'b' });
+  // 2판 = 4명 남음 → ✊✌✋ 가위바위보 (2026-11-05 · 5명 이하) · 선생님 손을 이기는 손 = 김민준 · 봇1, 지는 손 = 봇2 · 봇3(안 냄)
+  await S.waitForSelector('.fa-pick.rps .fa-a', { timeout: 10000 });
+  const rps = await S.evaluate(() => ({ n: document.querySelectorAll('.fa-pick.rps .btn').length, t: [...document.querySelectorAll('.fa-pick.rps .btn')].map((b) => b.textContent.trim()).join(' | ') }));
+  const hand = await T.evaluate(async (code) => { const f = await DS.Net.get(`rooms/${code}/fun`); return DS.Fun.tHand(f.g, f.n); }, code);
+  const winK = { a: 'c', b: 'a', c: 'b' }[hand], loseK = { a: 'b', b: 'c', c: 'a' }[hand];
+  await S.click(`.fa-pick.rps .fa-${winK}`);
+  await vote('r2', { bot1: winK, bot2: loseK });
+  await H.waitForSelector('.fa-rps', { timeout: 8000 }); await H.waitForFunction(() => /선생님/.test((document.querySelector('.fa-foot') || {}).textContent || ''), null, { timeout: 12000 });
+  await H.waitForTimeout(1200); await H.screenshot({ path: `${OUT}/4b-hall-rps.png` }); await S.screenshot({ path: `${OUT}/4c-phone-rps.png` });
+  log.push(`가위바위보: 폰 버튼 ${rps.t} · 선생님 ${hand} · 공개 「${(await H.textContent('.fa-foot')).trim().slice(0, 50)}」 · 손 ${(await H.$$('.fa-hand')).length}개`);
   await H.waitForFunction(() => /우승/.test((document.querySelector('.fa-win') || {}).textContent || ''), null, { timeout: 20000 });
   await H.waitForTimeout(600); await H.screenshot({ path: `${OUT}/5-hall-win.png` });
   const win = (await H.textContent('.fa-win')).replace(/\s+/g, ' ').trim(); log.push('끝: ' + win);
@@ -51,6 +59,6 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   await T.evaluate((code) => DS.Act.setRest(code, false), code); await S.waitForTimeout(1500);
   const after = await T.evaluate((code) => DS.Net.get(`rooms/${code}/fun`), code); const back = !(await S.$('.fa-wrap'));
   log.push(`쉼터 끝 → fun ${after ? '남음' : '지움'} · 학생 화면 ${back ? '레이드로' : '그대로'}`);
-  const ok = !!hb && pick1.length === 2 && /2명 탈락/.test(log.join()) && /살아남았다/.test(log.join()) && /김민준/.test(win) && /봇1/.test(win) && /우승/.test(meWin) && !after && back;
+  const ok = !!hb && pick1.length === 2 && rps.n === 3 && /탈락/.test(log.join()) && /2명 탈락/.test(log.join()) && /살아남았다/.test(log.join()) && /김민준/.test(win) && /봇1/.test(win) && /우승/.test(meWin) && !after && back;
   console.log(log.join('\n')); console.log(ok ? '✅ 통과' : '❌ 기대와 다름'); console.log('errors', errs.length ? errs : 'none'); await b.close(); if (!ok || errs.length) process.exit(1);
 })();

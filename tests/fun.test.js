@@ -35,24 +35,30 @@ for (let t = 0; t < 10000; t++) {
 check(!bad, `무작위 판정 1만 번 (${bad}건 이상)`);
 
 // ── 2. 진행 ──
-const f0 = { g: 1, at0: 0, queue: [5, 9, 12, 33], alive: Object.fromEntries(us(5).map((u) => [u, true])), outAt: {} };
+const f0 = { g: 1, at0: 0, queue: [5, 9, 12, 33], alive: Object.fromEntries(us(7).map((u) => [u, true])), outAt: {} };
 let f = { ...f0, ...F.round(f0, 1, 0) };
 check(f.phase === 'pick' && f.to === 15000 && f.q[0] === list[5][0] && f.rk === 'r1', '1판: 15초 · 줄의 첫 질문');
 check(F.step(f, {}, 14999) === null, '시간 전엔 그대로');
-f = F.step(f, V(['u1', 'u2', 'u3'], ['u4', 'u5']), 15000);
-check(f.phase === 'show' && Object.keys(f.alive).join() === 'u1,u2,u3' && f.outAt.u4 === 1, '공개: 적은 쪽 2명 탈락 기록');
+f = F.step(f, V(['u1', 'u2', 'u3', 'u6', 'u7'], ['u4', 'u5']), 15000);
+check(f.phase === 'show' && Object.keys(f.alive).join() === 'u1,u2,u3,u6,u7' && f.outAt.u4 === 1 && !f.rps, '공개: 적은 쪽 2명 탈락 기록 (7명 = 밸런스)');
 check(F.step(f, null, 15000 + F.SHOW - 1) === null, '공개 6.5초');
 f = F.step(f, null, 15000 + F.SHOW);
-check(f.phase === 'pick' && f.n === 2 && f.qi === 9 && f.to - f.from === 15000, '2판 = 다음 질문 · 15초');
-f = F.step(F.step(f, V(['u1', 'u2'], ['u3']), f.to), null, f.to + F.SHOW);
-check(f.phase === 'end' && f.win.join() === 'u1,u2', '2명 남으면 끝 · 우승 2명');
+check(f.phase === 'pick' && f.n === 2 && f.to - f.from === 15000 && f.rps && f.q.join() === F.HANDS.join(), '5명 남음 → 2판은 바로 ✊✌✋ 가위바위보 · 15초');
+{ // 선생님 손에 지는 손을 낸 사람 탈락
+  const h = F.tHand(f.g, f.n), beat = { a: 'b', b: 'c', c: 'a' }[h], keep = { a: 'c', b: 'a', c: 'b' }[h]; // keep = 선생님 손을 이기는 손
+  const v = { u1: beat, u2: beat, u3: h, u6: keep };  // u7 안 냄
+  f = F.step(f, v, f.to);
+  check(f.phase === 'show' && Object.keys(f.alive).join() === 'u3,u6' && f.res.hand === h && f.res.out.sort().join() === 'u1,u2,u7', `가위바위보: 진 2명 + 안 낸 1명 탈락 · 비긴 u3 · 이긴 u6 생존 (선생님 ${h})`);
+  f = F.step(f, null, f.to + F.SHOW);
+  check(f.phase === 'end' && f.win.join() === 'u3,u6', '2명 남으면 끝 · 우승 2명');
+}
 const g3 = { ...f0, alive: Object.fromEntries(us(9).map((u) => [u, true])) };
 const r3 = F.round(g3, 3, 100000);
-check(r3.to - r3.from === 10000, '3판부터 10초');
+check(r3.to - r3.from === 5000 && !r3.rps, '3판부터 5초 (9명 = 아직 밸런스)');
 const late = F.round(g3, 4, F.LIMIT + 1);
 check(late.final, '4분이 지나면 마지막 판');
 let lf = { ...g3, ...late };
-lf = F.step(F.step(lf, V(us(5), us(9).slice(5)), lf.to), null, lf.to + F.SHOW);
+lf = F.step(F.step(lf, V(us(5), us(9).slice(5)), lf.to), null, lf.to + F.SHOW); // 9명 = 밸런스
 check(lf.phase === 'end' && lf.win.length === 5, '마지막 판 뒤 살아 있는 5명 모두 우승');
 // 전체 시뮬: 18명 · 고르게 갈림 → 4분 안
 let sim = { ...f0, queue: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9], alive: Object.fromEntries(us(18).map((u) => [u, true])) }, now = 0, guard = 0;
@@ -60,9 +66,30 @@ sim = { ...sim, ...F.round(sim, 1, 0) };
 while (sim.phase !== 'end' && guard++ < 100) {
   now = sim.phase === 'pick' ? sim.to : sim.until;
   const al2 = Object.keys(sim.alive), k = Math.ceil(al2.length * 0.6);
-  sim = F.step(sim, sim.phase === 'pick' ? V(al2.slice(0, k), al2.slice(k)) : null, now) || sim;
+  let vv = null;
+  if (sim.phase === 'pick') { if (sim.rps) { const h = F.tHand(sim.g, sim.n), beat = { a: 'b', b: 'c', c: 'a' }[h]; vv = Object.fromEntries(al2.map((u, i) => [u, i === 0 ? beat : h])); } else vv = V(al2.slice(0, k), al2.slice(k)); }
+  sim = F.step(sim, vv, now) || sim;
 }
 check(sim.phase === 'end' && sim.win.length <= 2 && now < F.LIMIT, `18명 6 : 4 진행 → ${Math.round(now / 1000)}초에 끝 · 우승 ${sim.win.length}명`);
+
+// ── 2-1. ✊✌✋ 가위바위보 판정 (2026-11-05) ──
+{
+  const al3 = us(4);
+  for (const h of ['a', 'b', 'c']) {
+    const beat = { a: 'b', b: 'c', c: 'a' }[h];
+    let j = F.judgeRps(al3, { u1: 'a', u2: 'b', u3: 'c' }, h);
+    check(j.out.sort().join() === ['u4', al3[['a', 'b', 'c'].indexOf(beat)]].sort().join() && j.lose === beat && !j.voided, `선생님 ${h}: ${beat} 낸 사람 + 안 낸 u4 탈락`);
+    j = F.judgeRps(al3, { u1: beat, u2: beat, u3: beat, u4: beat }, h);
+    check(j.voided && !j.out.length && j.left.length === 4, `선생님 ${h}: 모두 지면 없던 일`);
+    j = F.judgeRps(al3, { u1: h, u2: h, u3: h, u4: h }, h);
+    check(!j.out.length && !j.voided, `선생님 ${h}: 모두 비기면 아무도 탈락 안 함`);
+  }
+  const hs = new Set(); for (let g = 0; g < 60; g++) hs.add(F.tHand(g, 1)); check(hs.size === 3 && F.tHand(7, 3) === F.tHand(7, 3), '선생님 손: 세 가지 고루 · 같은 판은 같은 손');
+  const ox5 = { g: 2, at0: 0, kind: 'ox', queue: [0, 1, 2], alive: Object.fromEntries(us(4).map((u) => [u, true])) };
+  check(!F.round(ox5, 1, 0).rps, '⭕ 수학 OX 는 5명 이하여도 가위바위보 아님 (실력 놀이)');
+  const rv6 = { g: 3, at0: 0, kind: 'rev', queue: [0, 1, 2], alive: Object.fromEntries(us(6).map((u) => [u, true])) };
+  check(!F.round(rv6, 1, 0).rps && F.round({ ...rv6, alive: Object.fromEntries(us(5).map((u) => [u, true])) }, 1, 0).rps, '🔄 반대로: 6명 = 그대로 · 5명 = 가위바위보');
+}
 
 // ── 3. 질문 ──
 check(list.length === 150, `질문 150개 (${list.length})`);
@@ -164,4 +191,4 @@ check(fq.marks.u1 === 'ooooo' && fq.marks.u3 === 'xxxxx' && fq.marks.u4 === '---
 check(fq.hist.length === 5 && fq.hist.every((h) => h.ok === 2 && h.n === 4), '판마다 반 정답 수');
 
 if (fail) { console.error(`\n${fail}건 실패`); process.exit(1); }
-console.log('OK: 밸런스 게임 — 판정(적은 쪽 · 비김 · 안 고름 · 없던 일 · 무작위 1만 번) · 진행(15 → 10초 · 2명 끝 · 4분 마지막 판 · 18명 시뮬) · 질문 150개 · 반대로 · 수학 OX(판정 · 문장 독립 계산) · OX 타임(탈락 없음 · 5문장 · 기록) 통과');
+console.log('OK: 밸런스 게임 — 판정(적은 쪽 · 비김 · 안 고름 · 없던 일 · 무작위 1만 번) · 진행(15 → 5초 · 5명 이하 ✊✌✋ 가위바위보 · 2명 끝 · 4분 마지막 판 · 18명 시뮬) · 질문 150개 · 반대로 · 수학 OX(판정 · 문장 독립 계산) · OX 타임(탈락 없음 · 5문장 · 기록) 통과');
