@@ -93,5 +93,87 @@ check(!upto(2).some((x) => x % 3 === 0) && B[2][3].answerIndex === 2, '세트2 4
 check(B[2][4].choices[B[2][4].answerIndex] === '2, 0', '세트2 5번');
 [1, 2].forEach((set) => B[set].forEach((q, i) => { check(Q.grade(q, right(q)), `세트${set} ${i + 1}번 정답 인정`); check(!Q.grade(q, wrong(q)), `세트${set} ${i + 1}번 오답 거부`); }));
 
+// 5. 형성평가 재도전 생성기 L.boss.make(i, 시도 1~3, rng) — 시드 300개 × 3번, 정답은 q.check 로 독립 계산
+check(typeof L.boss.make === 'function', '형성평가 재도전 생성기 L.boss.make 있음');
+const B1 = JSON.stringify(B[1]);
+check(L.boss.sets[1] === B[1] && JSON.stringify(L.boss.sets[1]) === B1, '시도 0 = BOSS[1] 그대로');
+const setText = (arr) => (arr.length ? `{${arr.join(', ')}}` : '∅');
+const nat = upto(200);
+const condSet = (s) => { // 조건제시법 보기 글 → 원소 (무한집합은 null)
+  let m;
+  if ((m = /^\{x \| x는 (\d+)의 약수\}$/.exec(s))) return divs(+m[1]);
+  if ((m = /^\{x \| x는 (\d+)의 배수\}$/.exec(s))) return null;
+  if ((m = /^\{x \| x는 (\d+) 이하의 (짝수|홀수)\}$/.exec(s))) return upto(+m[1]).filter((x) => x % 2 === (m[2] === '홀수' ? 1 : 0));
+  return undefined;
+};
+const emptyCand = (s) => { // 공집합 보기 글 → 원소
+  let m;
+  if ((m = /^\{(\d+)\}$/.exec(s))) return [+m[1]];
+  if ((m = /^\{x \| x는 (\d+)보다 작은 (\d+)의 배수인 자연수\}$/.exec(s))) return nat.filter((x) => x < +m[1] && x % +m[2] === 0);
+  if ((m = /^\{x \| x는 (\d+)보다 크고 (\d+)보다 작은 자연수\}$/.exec(s))) return nat.filter((x) => x > +m[1] && x < +m[2]);
+  if ((m = /^\{x \| x는 (\d+)의 약수 중 (\d+)보다 큰 수\}$/.exec(s))) return divs(+m[1]).filter((x) => x > +m[2]);
+  return undefined;
+};
+const marks = (q) => q.choices.every((c, k) => c.startsWith('①②③④'[k] + ' '));
+const bare = (c) => c.replace(/^[①②③④] /, '');
+let bossCount = 0;
+for (let i = 0; i < 5; i++) {
+  const texts = new Set();
+  for (let k = 0; k < 300; k++) for (const a of [1, 2, 3]) {
+    const q = L.boss.make(i, a, DS.Rng(`s${k}|boss|${i}|${a}`)), lab = `형성평가 ${i + 1}번 #${k}/${a}`, c = q.check || {};
+    bossCount++;
+    check(q.type === B[1][i].type, `${lab}: 형식 ${q.type} = 학습지 ${B[1][i].type}`);
+    check(q.question.startsWith(`${i + 1}. `) && !/위 |번의/.test(q.question), `${lab}: 문항 번호 · 다른 문항을 가리키지 않음 — ${q.question}`);
+    texts.add(q.question + '|' + (q.choices || []).map(bare).sort().join('/'));
+    let rightAns;
+    if (q.type === 'choice') {
+      check(q.choices.length === B[1][i].choices.length && new Set(q.choices).size === q.choices.length, `${lab}: 보기 ${q.choices.length}개 · 모두 다름`);
+      check(q.answer === q.choices[q.answerIndex] && q.choices.filter((x) => x === q.answer).length === 1, `${lab}: 정답 보기 하나`);
+      check(marks(q) === /^①/.test(B[1][i].choices[0]), `${lab}: ①②③ 번호 = 학습지와 같게, 섞은 뒤 다시 매김`);
+    }
+    if (i === 0) { // 정답 = 원소를 그대로 묘사하는 조건 하나뿐
+      check(same(c.base, divs(c.n)) && q.question.includes(`집합 ${setText(c.base)}을`), `${lab}: 집합 ${c.base} = ${c.n}의 약수`);
+      const hits = q.choices.map((x, j) => [j, condSet(bare(x))]);
+      check(hits.every(([, s]) => s !== undefined), `${lab}: 보기 해석 ${q.choices}`);
+      const ok = hits.filter(([, s]) => s && same(s, c.base)).map(([j]) => j);
+      check(ok.length === 1, `${lab}: 맞는 조건 ${ok.length}개`);
+      rightAns = ok[0];
+    } else if (i === 1) {
+      const [kind, m] = c.parity, want = upto(m).filter((x) => (kind === 'odd' ? x % 2 === 1 : x % 2 === 0));
+      check(q.question.includes(`${m} 이하의 ${kind === 'odd' ? '홀수' : '짝수'}`) && same(q.options.map(Number), upto(10)), `${lab}: 조건 · 보기 1~10`);
+      check(same(chosenNums(q), want), `${lab}: ${chosenNums(q)} (독립 ${want})`);
+      rightAns = want.map((x) => q.options.indexOf(String(x)));
+      const extra = q.options.findIndex((_, j) => !rightAns.includes(j));
+      check(!Q.grade(q, rightAns.slice(1)) && !Q.grade(q, rightAns.concat([extra])), `${lab}: 하나 빠짐 · 하나 더 → 오답`);
+    } else if (i === 2) {
+      const { name: N, elems: E } = c;
+      check(E.length >= 3 && new Set(E).size === E.length && q.question.includes(`[[venn:${N}|${E.join(' ')}]]`), `${lab}: 벤 다이어그램 ${N} ${E}`);
+      rightAns = q.choices.indexOf(`${N} = {${E.join(', ')}}, n(${N}) = ${E.length}`);
+      check(rightAns >= 0, `${lab}: 독립 정답 보기 있음`);
+      check(q.choices.some((x) => x.includes(`{${E.join(' ')}}`)), `${lab}: 쉼표 함정`);
+    } else if (i === 3) {
+      const sets = q.choices.map((x) => emptyCand(bare(x)));
+      check(sets.every((s) => s !== undefined), `${lab}: 보기 해석 ${q.choices}`);
+      const emp = sets.map((s, j) => (s && !s.length ? j : -1)).filter((j) => j >= 0);
+      check(emp.length === 1 && q.choices.some((x) => bare(x) === '{0}'), `${lab}: 공집합 ${emp.length}개 · {0} 함정`);
+      rightAns = emp[0];
+      check(c.empty.slice(1).every((p) => q.choices[rightAns].includes(String(p))), `${lab}: check 와 정답 보기 일치`);
+    } else if (i === 4) {
+      const [X, Y] = c.sets;
+      check(q.question.includes(`n(${setText(X)}) 와 n(${setText(Y)})`) && !(X.length === 0 && Y.length === 1 && Y[0] === 0), `${lab}: 집합 글 · 학습지와 다른 짝`);
+      rightAns = q.choices.indexOf(`${new Set(X).size}, ${new Set(Y).size}`);
+      check(rightAns >= 0, `${lab}: 독립 정답 보기 있음`);
+    }
+    if (q.type === 'choice') {
+      check(rightAns === q.answerIndex, `${lab}: 정답 위치 ${q.answerIndex} (독립 ${rightAns})`);
+      check(Q.grade(q, rightAns) && q.choices.every((_, j) => j === rightAns || !Q.grade(q, j)), `${lab}: 정답 인정 · 오답 보기 모두 거부`);
+    } else check(Q.grade(q, rightAns), `${lab}: 정답 인정`);
+    check(!!q.solution, `${lab}: 해설`);
+  }
+  check(texts.size >= 5, `형성평가 ${i + 1}번: 서로 다른 문제 ${texts.size}개 (5개 이상)`);
+  check(JSON.stringify(L.boss.make(i, 1, DS.Rng('same'))) === JSON.stringify(L.boss.make(i, 1, DS.Rng('same'))), `형성평가 ${i + 1}번: 같은 시드 → 같은 문제`);
+}
+check(JSON.stringify(L.boss.sets[1]) === B1, '생성기를 돌린 뒤에도 BOSS[1] 그대로');
+
 if (fail) { console.error(`\n${fail}건 실패`); process.exit(1); }
-console.log(`OK: 2차시 v3 — 수업 순서 · 학습지 첫 시도 · 재도전 소문제 ${count}개 독립 검산 · 형성평가 세트1·2 통과`);
+console.log(`OK: 2차시 v3 — 수업 순서 · 학습지 첫 시도 · 재도전 소문제 ${count}개 독립 검산 · 형성평가 세트1·2 · 형성평가 재도전 ${bossCount}문항 독립 검산 통과`);

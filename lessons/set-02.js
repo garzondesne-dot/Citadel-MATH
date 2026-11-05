@@ -136,6 +136,67 @@
     ],
   };
 
+  // 형성평가 재도전 (2026-11-05 사용자 결정): 시도 0 = BOSS[1][i] 그대로 · 시도 1~3 = 같은 유형 · 같은 난이도로 숫자 · 문자 · 집합만 바꾼 새 문제
+  // 문항마다 그 문항만 보고 풀 수 있게 쓴다 (다른 문항을 가리키지 않음). check = tests/lesson2.test.js 독립 검산용
+  const MARK = ['①', '②', '③', '④'];
+  const choiceItem = (question, bare, right, solution, check, r, marks) => { // bare: 번호 없는 보기 (right = 정답 위치) → 섞고 번호를 다시 붙인다
+    const order = r.shuffle(bare.map((_, k) => k));
+    const choices = order.map((k, pos) => (marks ? `${MARK[pos]} ` : '') + bare[k]);
+    const answerIndex = order.indexOf(right);
+    return { type: 'choice', question, choices, answerIndex, answer: choices[answerIndex], solution, check };
+  };
+  const LETTERS = 'abcdefghkmnpqrstuvwxyz'.split(''); // i · j · l · o 는 1 · 0 과 헷갈려 뺀다
+  const BOSS_MAKE = [
+    (no, r) => { // 1. 원소나열법 → 조건제시법 (정답 = n의 약수 · 함정 = n의 배수 · n 이하의 짝수/홀수)
+      const n = r.pick([6, 9, 10, 12, 14, 15, 16, 18, 20]);
+      const par = n % 2 ? '홀수' : '짝수', parSet = range(1, n).filter((x) => x % 2 === n % 2);
+      const D = divisors(n);
+      return choiceItem(`${no}. 집합 ${st(D)}을 조건제시법으로 바르게 나타낸 것은?`, [`{x | x는 ${n}의 배수}`, `{x | x는 ${n}의 약수}`, `{x | x는 ${n} 이하의 ${par}}`], 1,
+        `${D.join(', ')} 은 모두 ${n}의 약수 (${n}의 배수는 {${n}, ${2 * n}, ${3 * n}, …}, ${n} 이하의 ${par}는 ${st(parSet)})`, { base: D, n }, r, true);
+    },
+    (no, r) => { // 2. 조건제시법 → 원소나열법 (m 이하의 홀수 · 짝수, 보기 1~10)
+      let kind, m;
+      do { kind = r.pick(['odd', 'even']); m = r.int(5, 10); } while (kind === 'odd' && m === 10);
+      const want = range(1, m).filter((x) => (kind === 'odd' ? x % 2 : !(x % 2)));
+      return { type: 'multi', question: `${no}. {x | x는 ${m} 이하의 ${kind === 'odd' ? '홀수' : '짝수'}}를 원소나열법으로 — 원소를 모두 고르시오.`, options: range(1, 10).map(String), answer: want.map((x) => x - 1), solution: st(want), check: { parity: [kind, m], options: range(1, 10) } };
+    },
+    (no, r) => { // 3. 벤 다이어그램 → 원소나열법 · n(A) (함정 = 개수 하나 더 · 쉼표 없음 · 원소 빠짐)
+      const N = r.pick(['A', 'B', 'C', 'D', 'P', 'S']);
+      const k = r.int(3, 5);
+      const E = r.shuffle(LETTERS).slice(0, k).sort();
+      const drop = r.int(0, k - 1), miss = E.filter((_, j) => j !== drop);
+      return choiceItem(`${no}. [[venn:${N}|${E.join(' ')}]]이 벤 다이어그램이 나타내는 집합 ${N} 와 n(${N}) 는?`,
+        [`${N} = {${E.join(', ')}}, n(${N}) = ${k}`, `${N} = {${E.join(', ')}}, n(${N}) = ${k + 1}`, `${N} = {${E.join(' ')}}, n(${N}) = ${k}`, `${N} = {${miss.join(', ')}}, n(${N}) = ${k - 1}`], 0,
+        `원소나열법은 쉼표로 → {${E.join(', ')}}, 원소 ${k}개`, { name: N, elems: E }, r, false);
+    },
+    (no, r) => { // 4. 공집합 고르기 (함정 = {0} · 원소 하나짜리 집합)
+      const t = r.pick(['smallMult', 'between', 'bigDiv']);
+      let empty, why, p;
+      if (t === 'smallMult') { const k = r.int(2, 9); p = [k, k]; empty = `{x | x는 ${k}보다 작은 ${k}의 배수인 자연수}`; why = `${k}보다 작은 자연수 ${k <= 4 ? range(1, k - 1).join(', ') : `1, 2, …, ${k - 1}`} 중 ${k}의 배수는 없다`; }
+      else if (t === 'between') { const a = r.int(1, 9); p = [a, a + 1]; empty = `{x | x는 ${a}보다 크고 ${a + 1}보다 작은 자연수}`; why = `${a} 보다 크고 ${a + 1} 보다 작은 자연수는 없다`; }
+      else { const m = r.pick([4, 6, 8, 9, 10, 12]); p = [m, m]; empty = `{x | x는 ${m}의 약수 중 ${m}보다 큰 수}`; why = `${m}의 약수 ${st(divisors(m))} 중 ${m}보다 큰 수는 없다`; }
+      const c = r.int(1, 9);
+      return choiceItem(`${no}. 다음 중 공집합인 것은?`, ['{0}', empty, `{${c}}`], 1,
+        `${why} → 공집합 ({0}의 원소는 0, {${c}}의 원소는 ${c} → 둘 다 원소가 1개)`, { empty: [t, ...p], lit: [0, c] }, r, true);
+    },
+    (no, r) => { // 5. n(∅) · n({0}) · n(집합) 두 개를 차례로 (함정 = n(∅) = 1 · n({0}) = 0 · 하나 더 · 하나 덜)
+      const S = sorted(r.shuffle(range(0, 9)).slice(0, r.int(2, 4)));
+      const pairs = [[[], [0]], [[0], []], [S, []], [[], S], [S, [0]], [[0], S]];
+      const [X, Y] = pairs[r.int(1, pairs.length - 1)]; // [∅, {0}] 순서는 학습지 문항이라 뺀다
+      const a = X.length, b = Y.length;
+      const miss = (s) => (!s.length ? [1] : s.length === 1 && s[0] === 0 ? [0] : [s.length + 1, s.length - 1]); // 흔한 실수
+      const cands = [];
+      miss(X).forEach((wa) => cands.push([wa, b]));
+      miss(Y).forEach((wb) => cands.push([a, wb]));
+      cands.push([miss(X)[0], miss(Y)[0]], [a + 1, b], [a, b + 1], [b, a]);
+      const wrongs = [];
+      cands.forEach(([u, v]) => { const s = `${u}, ${v}`; if (u >= 0 && v >= 0 && s !== `${a}, ${b}` && !wrongs.includes(s) && wrongs.length < 3) wrongs.push(s); });
+      const say = (s) => (!s.length ? '∅ 은 원소가 없다 → 0' : s.length === 1 && s[0] === 0 ? '{0}은 원소 0이 하나 → 1' : `${st(s)} → ${s.length}개`);
+      return choiceItem(`${no}. n(${st(X)}) 와 n(${st(Y)}) 의 값을 차례로 나타낸 것은?`, [`${a}, ${b}`, ...wrongs], 0,
+        `${say(X)}, ${say(Y)}`, { sets: [X, Y] }, r, false);
+    },
+  ];
+
   const STEPS = [
     { kind: 'monster', id: 'r0' },
     { kind: 'concept', id: 'c1', title: '개념 1 · 조건제시법', say: '원소들의 공통된 성질(조건)을 제시하는 방법: {x | x는 8의 약수}. 조건제시법은 답이 여러 가지일 수 있다' },
@@ -169,6 +230,7 @@
     items(id, seed, attempt) { return MONSTERS[id].make(attempt, DS.Rng(`${seed}|${id}|${attempt}`)); },
     // 📘 오늘의 수학 노트 · 우리 반 수업 소식의 「다음 수업」 (초안 — 사용자 확인 전)
     next: { title: '3차시 · 집합 사이의 포함 관계', ask: '어떤 그룹의 멤버가 다른 그룹에 모두 들어 있다면, 두 집합은 어떤 관계일까?', link: '오늘 배운 「원소가 집합에 속한다(∈)」에서 「집합이 집합에 포함된다(⊂)」로 넓혀 가요.' },
-    boss: { title: '2차시 형성평가 · 숲의 수호자', sprite: 'new:6', items: 5, hpItems: 5, sets: BOSS, tags: ['c1', 'c1', 'c2', 'c4', 'c4'] }, // tags: 문항별 개념 (개인 결과 · 복습 추천)
+    boss: { title: '2차시 형성평가 · 숲의 수호자', sprite: 'new:6', items: 5, hpItems: 5, sets: BOSS, tags: ['c1', 'c1', 'c2', 'c4', 'c4'],
+      make(i, a, rng) { return BOSS_MAKE[i](i + 1, rng); } }, // make: 재도전 시도 1~3 의 새 문제 · tags: 문항별 개념 (개인 결과 · 복습 추천)
   });
 })();
