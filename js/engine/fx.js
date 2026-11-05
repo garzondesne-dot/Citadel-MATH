@@ -70,7 +70,7 @@ DS.FX = (function () {
   // 이펙트 한 번: 손에서 쏘는 것(tx)은 맞는 곳이 x 에 오도록 왼쪽으로, 바닥에 서는 것은 floor 에
   function play(box, kind, opt = {}) {
     if (!box) return Promise.resolve();
-    if (!KINDS.includes(kind)) kind = 'flame';
+    if (!KINDS.includes(kind) && !spec(kind)) kind = 'flame'; // 스킬 + 배치표에만 있는 연출(⛓ bind · bind2)
     const sp = spec(kind); if (!sp) return Promise.resolve();
     const r = box.getBoundingClientRect();
     if (getComputedStyle(box).position === 'static') box.style.position = 'relative';

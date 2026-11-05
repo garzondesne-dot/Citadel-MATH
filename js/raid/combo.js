@@ -17,7 +17,7 @@ DS.Combo = (function () {
   const PRAC_PER = 1, PRAC_MAX = 4;          // 연습 공격 묶기 (기존): 맞힌 소문제 1개 1초 · 학생 한 명 몬스터당 4초
   // ⛓ 묶기 상한: 「한 번 공격 사이 묶기 합계 ≤ 그 공격 주기의 절반」 = 실제 시간의 1/3 이하
   //   (주기 p 동안 묶기 b → 실제 간격 p + b, b ≤ (p + b)/3 ⇔ b ≤ p/2) → 단계 시작부터 30초 창마다 10초까지
-  const CAP_WIN = 30, CAP = 10;
+  const CAP_WIN = 30, CAP = 10, ULT_BIND = 15; // ULT_BIND = ⚡ 필살기 대묶기 (초)
   const BOSS_LOCK = [[67, 4], [34, 3], [0, 2]]; // 👑 보스 단계 멈춤: 체력 100~67% 4초 · 66~34% 3초 · 33~0% 2초
   const BAT = { min: 30, max: 90, dur: 20, need: 0.3, gem: 3, combo: 3, bind: 5, late: 5 * 60e3 };
   const CHEST = { p: 0.15, streakBonus: 0.10, day: 2, pity: 3, feathers: 5,
@@ -114,6 +114,9 @@ DS.Combo = (function () {
     const st = R.state || {}, t0 = st.stepAt || 0, win = {};
     an.binds.filter((b) => b.m === mid && b.at <= now).forEach((b) => { const w = Math.max(0, Math.floor((b.at - t0) / (CAP_WIN * 1000))); win[w] = (win[w] || 0) + b.sec; });
     let total = Object.values(win).reduce((a, s) => a + Math.min(CAP, s), 0);
+    // ⚡ 필살기 대묶기 (2026-11-06 사용자 「필살기는 파격적인 묶기」): 수업 필살기('!ult') · 형성평가 퍼펙트 필살기 1번마다 ULT_BIND 초 · 상한 밖
+    if (mid !== 'boss') Object.values(((R.heals || {})[mid]) || {}).forEach((byK) => Object.values(byK || {}).forEach((v) => { if (v === '!ult') total += ULT_BIND; }));
+    else if (DS.Attack && L.boss) Raid().activeIds(R).forEach((u) => { const p = (R.players || {})[u] || {}, f = Raid().bossFirst(L, R, u); if (f.length && f.every(Boolean) && DS.Attack.canUlt(p.fx, p.hero)) total += ULT_BIND; });
     if (mid !== 'boss' && L.monsters[mid]) { // 예전 기록 (hits 없음): 학생마다 기존 계산 그대로
       const hits = R.hits || {};
       Raid().activeIds(R).forEach((u) => { if (!keys(hits[u]).some((k) => k.startsWith(`m_${mid}_`))) total += Raid().bindOf(L, R, mid, u); });
@@ -237,6 +240,6 @@ DS.Combo = (function () {
   // 받을 조각: 1등 반 💎 +5 (그 차시를 한 반이 둘 이상일 때) · 지난 차시보다 +10% 이상 💎 +3
   const punchGems = (me, b) => (!me || me.ot ? [] : [me.rank === 1 && (!b || b.rows.filter((r) => !r.ot).length >= 2) ? ['first', 5, '🏁 반대항 1등'] : null, me.delta != null && me.delta >= 10 ? ['up', 3, `🏁 지난 차시보다 +${me.delta}%`] : null].filter(Boolean));
 
-  return { GAP, TIERS, TIER_BIND, PF_BIND, BOSS_PF_BIND, CAP_WIN, CAP, BOSS_LOCK, BAT, CHEST, PUNCH_W, PUNCH_NAMES,
+  return { GAP, TIERS, TIER_BIND, PF_BIND, BOSS_PF_BIND, CAP_WIN, CAP, ULT_BIND, BOSS_LOCK, BAT, CHEST, PUNCH_W, PUNCH_NAMES,
     pausedNow, activeNow, cpPatch, tierOf, events, analyze, comboNow, bindFor, bossPhase, batPlan, batQ, batDue, bat, hash, rnd, chestRoll, punch, overtime, board, punchGems };
 })();

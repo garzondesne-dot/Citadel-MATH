@@ -15,9 +15,18 @@ DS.Thrill = (function () {
     return `<i class="th-spr th-k-${kind} ${cls}" style="background-image:url('${url(a.src)}');background-size:${n * 100}% 100%;background-position:${n > 1 ? (f / (n - 1)) * 100 : 0}% 0"></i>`;
   }
   // ✨ PERFECT ×3 · ⛓ 4초 (폰 · 종합상황실 공통 배너)
+  // ⛓ 묶기 이펙트 (2026-11-06 사용자 「묶기 이모티콘이 안 예쁨 → 이펙트로」): 몬스터를 사슬이 감음 · big = 필살기 대묶기 (2겹 · 붉은 금빛)
+  function bindFx(mon, big) {
+    if (!mon || !DS.FX) return;
+    const box = mon.closest('.scene, #raid') || mon.parentElement; if (!box) return;
+    const a = mon.getBoundingClientRect(), b = box.getBoundingClientRect();
+    DS.FX.play(box, big ? 'bind2' : 'bind', { x: a.left - b.left + a.width / 2, y: a.top - b.top + a.height * 0.55, s: Math.max(1, Math.min(4, a.width / 110)) * (big ? 1.3 : 1) });
+    if (DS.Sound && DS.Sound.block) DS.Sound.block();
+  }
   function perfect(streak, bind, opt = {}) {
-    const n = el(`th-perfect${opt.big ? ' big' : ''}`, `<b>✨ PERFECT${streak > 1 ? ` ×${streak}` : ''}</b><span>⛓ ${bind}초 묶기</span>`, opt.parent);
+    const n = el(`th-perfect${opt.big ? ' big' : ''}`, `<b>✨ PERFECT${streak > 1 ? ` ×${streak}` : ''}</b><span>${bind}초 묶기</span>`, opt.parent);
     setTimeout(() => n.remove(), 1900);
+    if (!opt.parent) bindFx(document.querySelector('#st-body .enc-mon .art.monster') || document.querySelector('#st-body .enc-mon'));
   }
   // 🔥 콤보 배지 html (n < 2 이면 빈칸)
   function badge(c, opt = {}) {
@@ -87,7 +96,8 @@ DS.Thrill = (function () {
   // ⛓ 종합상황실: 몬스터에 쇠사슬 + 숫자
   function chain(mon, sec, why) {
     if (!mon || !sec) return;
-    const c = el(`th-chain${why === 'pf' ? ' pf' : ''}`, `<i></i><b>⛓ +${sec}초</b>`, mon); setTimeout(() => c.remove(), 1800);
+    const c = el(`th-chain${why === 'pf' ? ' pf' : ''}${why === 'ult' ? ' ult' : ''}`, `<b>+${sec}초 ${why === 'ult' ? '대묶기!' : '묶기'}</b>`, mon); setTimeout(() => c.remove(), 1800);
+    bindFx(mon, why === 'ult');
   }
-  return { sprite, perfect, badge, note, tierNote, phaseNote, chestOpen, batPhone, batShut, batHall, chain };
+  return { bindFx, sprite, perfect, badge, note, tierNote, phaseNote, chestOpen, batPhone, batShut, batHall, chain };
 })();

@@ -2100,3 +2100,4 @@ input.sv-no { width: 64px !important; display: inline-block; padding: 2px 4px; }
 #snd-pop button.on { background: #0f2a4a; border-color: #7cf; color: #fff; }
 #snd-pop button i { font-style: normal; color: #ffd25a; }
 .t-snd { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px; }
+.th-chain.ult b { font-size: 34px; color: #fff2c0; text-shadow: 0 0 8px #000, 0 0 18px #ff8a20, 0 0 30px #ff4a00; }

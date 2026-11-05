@@ -55,7 +55,7 @@ DS.Hall = (function () {
   function ulNext() {
     const u = ulQ.shift(); if (!u || !DS.Attack) { ulBusy = false; return; } ulBusy = true;
     const p = (R.players || {})[u] || {};
-    DS.Attack.cutin(p.hero || 0, p.fx || 'flame').then(() => { const arena = $('#raid'), m0 = $('#rm'); if (arena && m0) { const ar = arena.getBoundingClientRect(), mr = m0.getBoundingClientRect(); DS.FX.play(arena, p.fx || 'flame', { x: mr.left - ar.left + mr.width / 2, y: mr.top - ar.top + mr.height / 2, scale: Math.min(ar.width, ar.height) / 700, perfect: true }); } setTimeout(ulNext, 900); });
+    DS.Attack.cutin(p.hero || 0, p.fx || 'flame').then(() => { const arena = $('#raid'), m0 = $('#rm'); if (arena && m0) { const ar = arena.getBoundingClientRect(), mr = m0.getBoundingClientRect(); DS.FX.play(arena, p.fx || 'flame', { x: mr.left - ar.left + mr.width / 2, y: mr.top - ar.top + mr.height / 2, scale: Math.min(ar.width, ar.height) / 700, perfect: true }); setTimeout(() => { if (DS.Thrill) DS.Thrill.chain(m0, DS.Combo ? DS.Combo.ULT_BIND : 15, 'ult'); }, 500); } setTimeout(ulNext, 1400); }); // ⚡ 대묶기
   }
   function lvHall() {
     const v = R.lvup || {}, first = !lvSeen; if (first) lvSeen = {};
@@ -382,7 +382,7 @@ DS.Hall = (function () {
           const p = (R.players[a.u] || {}).fx || 'flame';
           DS.FX.play(arena, p, { x: mr.left - ar.left + mr.width / 2, y: mr.top - ar.top + mr.height / 2, scale: Math.min(ar.width, ar.height) / (perfect ? 900 : 1150), perfect });
           m0.classList.remove('flash'); void m0.offsetWidth; m0.classList.add('flash');
-          if (prac) { const t = document.createElement('span'); t.className = 'prac-tag'; t.textContent = '⛓ 몬스터 묶기!'; h.appendChild(t); setTimeout(() => t.remove(), 1600); }
+          if (prac) { const t = document.createElement('span'); t.className = 'prac-tag'; t.textContent = '몬스터 묶기!'; if (DS.Thrill) DS.Thrill.bindFx(m0); h.appendChild(t); setTimeout(() => t.remove(), 1600); }
           const fx = $('#rm-fx');
           if (fx && a.dmg) { const d = document.createElement('span'); d.className = `dmg${perfect ? ' big' : ''}`; d.textContent = `−${a.dmg}`; d.style.left = `${55 + Math.random() * 25}%`; fx.appendChild(d); setTimeout(() => d.remove(), 1300); }
           if (perfect) {
