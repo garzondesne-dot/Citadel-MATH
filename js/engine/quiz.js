@@ -37,10 +37,17 @@ DS.Quiz = (function () {
 
   // 문제를 띄우고 정답 여부를 Promise 로 돌려준다. 오답이면 해설을 보여 준 뒤 닫는다.
   // opt.tag: 머리말 (예: '✨ 연성 예제'), opt.teacher: 문제풀이모드 표시
+  let pending = null; // 지금 열린 문제를 닫는 함수 (close)
+  // ✕ 로 전투 창을 닫을 때: 열린 문제 창도 닫고 기다리던 쪽에 null 을 돌려줌 (2026-11-06 허수아비 ✕ 뒤 문제 창 남음 고침)
+  function close() { if (pending) pending.close(); }
   function ask(card, prob, opt = {}) {
     DS.Quiz.last = prob; // 자동 플레이 테스트용 (읽기 전용)
+    if (pending) pending.drop(); // 앞 문제가 열린 채 새 문제가 오면: 예전처럼 앞 문제는 답 없이 버림 (늦은 타이머가 새 창을 닫지 않게만)
     return new Promise((resolve) => {
       const root = $('#quiz');
+      let settled = false; // 한 번만 끝냄 · ✕ 로 닫은 뒤 늦게 온 타이머가 다음 문제를 닫지 않게
+      const fin = (v) => { if (settled) return; settled = true; pending = null; root.classList.add('hidden'); resolve(v); };
+      pending = { close: () => fin(null), drop: () => { settled = true; } };
       $('#quiz-card').textContent = (opt.tag ? opt.tag + ' · ' : '') + (card.name || '');
       $('#quiz-formula').innerHTML = pretty(card.formula || '');
       $('#quiz-q').innerHTML = (opt.ref ? `<span class="sheet-tag">📄 ${DS.UI.esc(opt.ref)}</span>` : '') + DS.UI.rich(prob.question);
@@ -63,7 +70,7 @@ DS.Quiz = (function () {
         if (ok) {
           DS.Sound.correct();
           root.classList.add('ok');
-          setTimeout(() => { root.classList.add('hidden'); resolve(true); }, 700);
+          setTimeout(() => fin(true), 700);
           return;
         }
         DS.Sound.wrong();
@@ -71,7 +78,7 @@ DS.Quiz = (function () {
         sol.innerHTML = (note ? `<b class="ng-note">${pretty(note)}</b><br>` : '') + `<b>해설</b> ${pretty(prob.solution)}`;
         sol.classList.remove('hidden');
         next.classList.remove('hidden');
-        next.onclick = () => { root.classList.add('hidden'); resolve(false); };
+        next.onclick = () => fin(false);
       };
       // 협동 전투: 채점·정답 공개 없이 학생 답만 모은다 (정답은 공동 공격 연출 뒤에 공개)
       const collect = (given) => {
@@ -80,7 +87,7 @@ DS.Quiz = (function () {
         done = true;
         box.querySelectorAll('button').forEach((b) => { b.disabled = true; });
         DS.Sound.clank();
-        setTimeout(() => { root.classList.add('hidden'); resolve({ given }); }, 250);
+        setTimeout(() => fin({ given }), 250);
         return true;
       };
       const submitBtn = (label, onClick) => {
@@ -267,5 +274,5 @@ DS.Quiz = (function () {
     });
   }
 
-  return { ask, grade, subsetsNote };
+  return { ask, close, grade, subsetsNote };
 })();

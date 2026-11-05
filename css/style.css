@@ -1317,7 +1317,7 @@ body:has(#test-bar) #ver-tag { bottom: calc(64px + env(safe-area-inset-bottom));
 #screen-camp .cs-v2 .picked .camp-label, .tc-stage.cs-v2 .picked .camp-label, #screen-camp .cs-v2 .camp-gate-z .camp-label, .tc-stage.cs-v2 .camp-gate-z .camp-label, #screen-camp .cs-v2 .tut-spot .camp-label { opacity: 1; }
 .cs-v2 .cs-zone .camp-label { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); white-space: nowrap; }
 .cs-v2 .camp-gate-z .camp-label { top: auto; bottom: -6%; left: auto; right: -4%; transform: none; font-size: 12px; max-width: none; }
-.cs-v2 .camp-gate-z.open .camp-label { color: #bfe8ff; border-color: #6fb8ff; box-shadow: 0 0 10px #3d8cff88; }
+#screen-camp .cs-v2 .camp-gate-z.open .camp-label, .tc-stage.cs-v2 .camp-gate-z.open .camp-label { color: #bfe8ff; }
 /* 오브젝트 배치 (그림 v2 · %) */
 #screen-camp .cs-v2 .camp-anvil { left: 6%; bottom: 8%; width: 19%; }
 #screen-camp .cs-v2 .camp-fire { left: 45%; bottom: 17%; width: 15%; transform: none; }
@@ -1356,7 +1356,8 @@ body:has(#test-bar) #ver-tag { bottom: calc(64px + env(safe-area-inset-bottom));
 .tc-stage.cs-v2 #tc-dummy { left: 67%; bottom: 19%; width: 11%; }
 .tc-stage.cs-v2 #tc-mail { left: 37%; bottom: 33%; width: 10%; }
 .tc-stage.cs-v2 .camp-gate-z { left: auto; right: auto; bottom: auto; }
-.cs-v2 .camp-gate-z .camp-label { background: #0b1e3ae6; border: 1px solid #6fb8ff; color: #dff1ff; padding: 1px 6px; border-radius: 3px; text-shadow: 1px 1px 0 #000; }
+/* 2026-11-06 사용자: 차시던전 이름표도 허수아비 · 우편함처럼 (테두리 상자 없음) · 화면 오른쪽 끝이라 오른쪽에 맞춤 · 아이콘 그림이 들어가도 글자가 상자 밖으로 안 나가게 */
+#screen-camp .cs-v2 .camp-gate-z .camp-label, .tc-stage.cs-v2 .camp-gate-z .camp-label { top: 100%; bottom: auto; left: auto; right: 0; transform: none; width: max-content; height: auto; line-height: 1.35; display: inline-flex; align-items: center; gap: 3px; background: #000b; border: 0; box-shadow: none; border-radius: 8px; padding: 1px 6px; color: #fff; font-size: clamp(10px, 2.8vw, 13px); }
 
 /* 🏕 쉼터 (2026-11-04): 대기실을 편안하게 — 따뜻한 불빛 톤 · 가운데 모닥불 · 타이머 */
 .lobby-scene.rest { position: relative; }
@@ -1767,7 +1768,7 @@ input.sv-no { width: 64px !important; display: inline-block; padding: 2px 4px; }
 .tu-msg { font-size: 18px; color: #ffd25a; }
 /* ⏳ 이어하기 포털: 차시 문이 주황빛 */
 .cs-v2.gate-rift .cs-gate-on { filter: hue-rotate(170deg) saturate(1.6) brightness(1.05); }
-.cs-v2 .camp-gate-z.rift .camp-label { color: #ffb45a; }
+#screen-camp .cs-v2 .camp-gate-z.rift .camp-label, .tc-stage.cs-v2 .camp-gate-z.rift .camp-label { color: #ffb45a; }
 .rift-head { margin: 8px 0; padding: 10px 12px; border-radius: 10px; border: 1px solid #ff9d3a; background: #2a1606cc; }
 .rift-head.done { border-color: #6fe3a5; background: #082a1ccc; }
 .rift-head p { margin: 0 0 4px; }

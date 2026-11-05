@@ -247,6 +247,7 @@ DS.Bonus = (function () {
     // 🎬 꼭대기 층(평가): 소문제마다 풀이 영상(q.video) · 한 번 틀린 뒤에 열림 (예제 영상 → 다른 숫자로 직접, 2026-11-03 사용자 확정)
     let cur = itemsOf(L, mid, seed, attempt), wrongSeen = !!rec.tries;
     const vidNow = () => { if (!L.eval) return vid0; const i = solved.findIndex((x) => !x); return i >= 0 && cur[i] ? cur[i].video || null : null; };
+    let drawN = 0;
     const draw = (cls = '', msg = '') => {
       const pips = Array.from({ length: TRIES }, (_, i) => `<i class="${i < left ? 'on' : ''}"></i>`).join('');
       const segs = solved.map((s) => `<i class="${s ? 'gone' : ''}"></i>`).join('');
@@ -258,7 +259,9 @@ DS.Bonus = (function () {
         <div class="bf-body">${msg}${mon.note ? `<p class="muted small">💡 ${esc(mon.note)}</p>` : ''}
           <div class="row">${img ? '<button class="btn small" id="bf-sheet">📄 학습지 보기</button>' : ''}${(() => { const v = vidNow(); if (!v || !DS.Video.ok(v)) return ''; if (L.eval && !wrongSeen) return '<span class="muted small">🔒🎬 풀이 영상은 한 번 틀리면 열려요 — 먼저 스스로!</span>'; return `<button class="btn small" id="bf-vid">🎬 ${L.eval ? '풀이 영상 (예제)' : '설명 보기'}</button>`; })()}</div>
           <div class="row" id="bf-act"></div></div>`;
-      el.querySelector('#bf-x').onclick = () => { el.remove(); render(); };
+      el.querySelector('#bf-x').onclick = () => { el.remove(); DS.Quiz.close(); render(); }; // ✕ = 열린 문제 창도 닫음
+      // 공격 · 빗나감 동작은 한 번만 → 끝나면 생각하는 자세로 (2026-11-06 사용자: 공격 모션이 계속 남음)
+      const dn = ++drawN; if (cls && !done) setTimeout(() => { const a = el.querySelector('.enc-hero .art'); if (a && dn === drawN && document.body.contains(el)) a.outerHTML = DS.Art.hero(me.hero || 0, 'think', 'huff'); }, 900);
       const sh = el.querySelector('#bf-sheet'); if (sh) sh.onclick = () => DS.Control.run(async () => { const src = (prep.img || {})[mid] || (await DS.Act.prepImg(L.id, mid)); if (src) sheet(src, mon.title); else DS.UI.toast('아직 이 칸의 학습지 이미지가 없어요.'); });
       const vb = el.querySelector('#bf-vid'); if (vb) vb.onclick = () => DS.Video.open(vidNow(), mon.title, { lesson: L.id, slot: vslot });
       return el.querySelector('#bf-act');
@@ -269,6 +272,7 @@ DS.Bonus = (function () {
       for (let i = 0; i < n; i++) {
         if (solved[i]) continue;
         const ok = await DS.Quiz.ask({ name: mon.title, formula: `${i + 1} / ${n}` }, items[i], { hint: mid !== 'boss' && !L.eval, tag: attempt ? (mid === 'boss' ? '🔄 세트가 바뀌었어요' : '🔄 숫자가 바뀌었어요') : castle ? '🏰 성채던전' : '🎯 복습' });
+        if (!document.body.contains(el)) return null; // ✕ 로 전투를 닫음 → 기록 · 데미지 없이 끝
         if (!ok && DS.Mis && DS.Quiz.lastGiven !== undefined) wrongs.push({ i, codes: DS.Mis.classify(items[i], DS.Quiz.lastGiven, mid === 'boss' ? DS.Mis.bossTag(L.id, attempt % 2 === 0 ? 1 : 2, i) : null) }); // 🔎 오개념 (중단원던전만 저장 · 재대결은 형성평가 꼬리표)
         if (ok) { solved[i] = true; DS.FX.play(el.querySelector('.scene'), me.fx || 'flame', { scale: 0.3 }); } else wrongSeen = true;
         draw(ok ? 'hit' : 'miss');
