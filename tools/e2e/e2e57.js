@@ -85,7 +85,7 @@ const RIGHT = `(p) => (p.type === 'blanks' ? p.items.map((i) => i.answer) : p.ty
   log.push(`👑 보스: 처음 「${ph1.slice(0, 22)}」 → 「${ph2.note.trim()}」 · 「${ph2.atk.slice(0, 22)}」`);
   // 마무리 → 수업 끝 → 🏁 반대항 경주
   await T.evaluate(async (code) => { const L = DS.Lessons.get('set-04'); let R = DS.Act.unpackRoom(await DS.Net.get(`rooms/${code}`)); await DS.Act.go(code, R, L, 1); R = DS.Act.unpackRoom(await DS.Net.get(`rooms/${code}`)); await DS.Act.go(code, R, L, 1); }, code);
-  await H.waitForTimeout(4200);
+  await H.waitForFunction(() => document.querySelector('.rc-lane'), null, { timeout: 20000 }).catch(() => {}); await H.waitForTimeout(1500); // 반대항 창이 뜰 때까지 (느린 기기 · 첫 실행)
   await H.screenshot({ path: `${OUT}/10-hall-race-run.png` });
   await H.waitForTimeout(7000);
   const pm = await H.evaluate(() => ({ lanes: document.querySelectorAll('.rc-lane').length, near: [...document.querySelectorAll('.rc-lane.near small')].map((e) => e.textContent).join(), badge: [...document.querySelectorAll('.rc-badge:not([hidden])')].map((e) => e.textContent).join(), after: (document.querySelector('.pm-after:not([hidden])') || {}).textContent || '' }));

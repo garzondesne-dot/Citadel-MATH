@@ -22,6 +22,9 @@
 | 다음 | 모의수업(11-02) 뒤: 작업 브랜치 0.5.0 을 main 에 합치고 **Firebase 규칙 다시 게시** → 실기기 확인. 그다음 `docs/PLAN.md` 4단계(사진 채점) · 4차시 |
 | 수업 일정 | **2026-11-02 모의수업** (2차시를 하는 반 대상). **11-01부터 main 푸시 금지** — 배포된 0.4.0 으로 진행. 0.4.1 은 `ccr-35c07d31-uces6k` 브랜치에 있음 (main 에 합쳐야 배포됨) |
 
+## 👑 형성평가 (2026-11-05 · v0.9.11.3)
+- 문항마다 4번: 시도 0 = `L.boss.sets[1][i]`(학습지) · 시도 1~3 = `L.boss.make(i, 시도, DS.Rng(코드|uid|boss|i|시도))` · 저장 `rooms/{코드}/bossTry/{uid}/{i}/{시도}` · 규칙 · 계산은 `DS.Raid.bossItem · bossTries · bossState · bossFirst · bossAnswered` (예전 bossAns 세트 1 · 2 도 시도 0 · 1 로 읽음) · 생성기 검산 = tests/lesson2 · lesson(3) · lesson4 · 5 · 6 · 화면 e2e59 · 생성기가 없는 차시(엑셀)는 재도전 = 세트2
+
 ## v0.9.11 보상 · 긴장감 (2026-11-05 · `js/raid/combo.js` 맨 위 표가 수치의 원본)
 | 기능 | 규칙 (코드) |
 |---|---|

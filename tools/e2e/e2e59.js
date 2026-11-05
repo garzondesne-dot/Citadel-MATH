@@ -26,7 +26,7 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   // 한 번 풀기: 0 = 틀린 답 · 1 = 맞는 답 (선다형은 보기 버튼 · 숫자는 다이얼 대신 DS.Quiz.last 로 맞는 값을 넣는다)
   async function solve(i, ok) {
     await S.click(`.bitem[data-i="${i}"]`); await S.waitForTimeout(500);
-    const info = await S.evaluate(() => ({ f: document.querySelector('#quiz-formula').textContent, q: document.querySelector('#quiz-q').textContent, type: DS.Quiz.last.type, ai: DS.Quiz.last.answerIndex, n: (DS.Quiz.last.choices || []).length }));
+    const info = await S.evaluate(() => ({ f: document.querySelector('#quiz-formula').textContent, q: document.querySelector('#quiz-q').textContent, type: DS.Quiz.last.type, ai: DS.Quiz.last.answerIndex, n: (DS.Quiz.last.choices || []).length, ch: (DS.Quiz.last.choices || []).join('|') }));
     if (info.type === 'choice') await S.click(`#quiz-choices button:nth-child(${(ok ? info.ai : (info.ai + 1) % info.n) + 1})`);
     else throw new Error('선다형만 시험');
     await S.waitForTimeout(1200);
@@ -37,7 +37,7 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   log.push(`1번: 첫 시도 「${a0.f}」 → 「${l0.trim()}」 · 재도전 「${a1.f}」 문제 바뀜 ${a0.q !== a1.q} → 「${l1.trim()}」`);
   await S.screenshot({ path: `${OUT}/1-boss-items.png` });
   const qs = [];
-  for (let k = 0; k < 4; k++) qs.push((await solve(1, false)).q);
+  for (let k = 0; k < 4; k++) { const x = await solve(1, false); qs.push(x.q + ' / ' + x.ch); }
   const l2 = await lab(1);
   await S.click('.bitem[data-i="1"]'); await S.waitForTimeout(400);
   const toast = await S.evaluate(() => (document.querySelector('#toast') || {}).textContent || '');
