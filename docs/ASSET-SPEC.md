@@ -1,4 +1,4 @@
-# 에셋 전면 교체 지침 — 「모두의 던전」 v2 그림 기준 (2026-11-02)
+# 에셋 전면 교체 지침 — 「모두의 던전」 v2 그림 기준 (2026-11-02 · 마지막 갱신 2026-11-05: 6-7 v0.9.11 묶음 · 용사 12줄 · 보스 목록 재배열)
 
 > 이 문서는 **그림 AI 에게 그대로 넘기는 지침**이다. 1~5장은 사람이 읽고, 6장 「프롬프트」를 그림 AI 에 붙여 넣는다.
 > 받은 그림은 Claude 가 격자 맞춤 · 팔레트 맞춤 · 배경 제거 · 프레임 정렬 · 압축 · 등록을 한다 (사용자는 뽑기만 한다).
@@ -26,7 +26,7 @@
 
 | 종류 | 원본 칸 | 화면 배율 | 프레임 (가로 한 줄씩) | 예상 용량 |
 |---|---|---|---|---|
-| 용사 | **64×64** (게임 칸 80×64) | ×1 ~ ×3 | **12줄 31프레임** (2026-11-02 확정 · 11-03 헉헉 추가 · 금발 검사 기준): 대기 4(숨쉬기 = `breathe.py` 가 구움) · 걷기 4 · 공격 4 · 피격 1 · 승리 2 · 쓰러짐 2 · 힐 쓰기 2 · 차원문 4(뒷모습으로 화면 안쪽) · 앉기 2 · 힐 받음 2 · 생각 중 2 · 헉헉 2(몬스터에게 맞은 뒤). 시트 2장(기본 7줄 + 추가 5줄)으로 뽑아 합친다. 추가 4줄이 없으면 게임이 대신 쓰기로 보여 줌 | 한 명 약 20KB |
+| 용사 | **64×64** (게임 칸 80×64) | ×1 ~ ×3 | **12줄 31프레임** (2026-11-02 확정 · 11-03 헉헉 추가 · 금발 검사 기준): 대기 4(숨쉬기 = `breathe.py` 가 구움) · 걷기 4 · 공격 4 · 피격 1 · 승리 2 · 쓰러짐 2 · 힐 쓰기 2 · 차원문 4(뒷모습으로 화면 안쪽) · 앉기 2 · 힐 받음 2 · 생각 중 2 · 헉헉 2(몬스터에게 맞은 뒤). 시트 2장(기본 7줄 + 추가 5줄)으로 뽑아 합친다. 추가 5줄이 없으면 게임이 대신 쓰기로 보여 줌 | 한 명 약 20KB |
 | 장신구 (모자 · 망토 · 무기) | 32×32 | 용사와 같이 | 1장 (프레임마다 위치는 Claude 가 기준점으로 붙임) | 1KB |
 | 일반 몬스터 | **96×96** | ×1 ~ ×3 | 대기 2 · 공격 3 · 피격 1 · 쓰러짐 2 = **8** | 한 마리 5KB |
 | 보스 | **192×192** | ×2 ~ ×3 | 대기 4 · 공격 4 · 피격 1 · 쓰러짐 3 = **12** (등장 · 분노는 코드) | 한 마리 30KB |
@@ -43,7 +43,7 @@
 |---|---|---|---|
 | **A (시험판)** | 용사 1 · 일반 몬스터 1 · 보스 1 · 던전 배경 1 · 허수아비 1 | 5 | **먼저 이것만 뽑아서 기준을 확정**한다 (Claude 가 게임에 넣어 보여 줌) |
 | B | 캠프 기본 소품: 훈련 허수아비 · 책장 · 우편함 · 모루 · 모닥불 · 캠프 배경 | 6 | 12월 기말 대비 기능에 바로 쓰임 |
-| B | 보스: 2 · 3 · 4 · 5차시 다시 + 6 ~ 10차시 · 중단원 · 대단원 새로 | 11 | 차시 진도에 맞춰 먼저 필요한 것부터 |
+| B | 보스: 2 · 3 · 4 · 5차시 다시 + 6차시(지금 = 그림자 드래곤 · 성채 드래곤 색 변형) + 명제 7 ~ 10차시 · 성채 1층(중단원) · 2층(대단원) 새로 | 11 | 2026-11-05 재배열: 6 = 드모르간 · 집합 중단원 마무리 · 명제 = 7 ~ 10 (11차시 없음) · 8차시 거울 광산(배경 · 몬스터 5 · 보스 대우의 거울 마왕)은 도착함 · 진도에 맞춰 7 → 9 → 10 순으로 |
 | C | 용사: 기본 7 · 선생님 1 · 추가 8 | 16 | 이름은 지금과 같게 (성기사 · 격투가 · 무희 · 음유시인 · 연금술사 · 해적 · 빙결 마법사 · 조련사 …) |
 | C | 일반 몬스터: 지금 쓰는 28 마리 + 6차시 이후 | 30 ~ 40 | 이름 · 콘셉트는 지금 것 유지 (수정 슬라임 · 바위 골렘 · 서리 늑대 …) |
 | D | 던전 배경 10 · 포털 10 · 특수 차원문 3 · 교사 캠프 · 공방 배경 | 25 | |
@@ -72,7 +72,7 @@ Deliver on a solid magenta #FF00FF background (except backgrounds), upscaled 8x 
 so every pixel is a crisp 8x8 block.
 ```
 
-### 6-1. 용사 (64×64, 11줄 29 프레임 — 2장으로 뽑음)
+### 6-1. 용사 (64×64, 12줄 31 프레임 — 2장으로 뽑음: 기본 7줄 + 추가 5줄)
 처리: 2장을 같은 키로 맞춰 합침 → `tools/sprite/sheet.py <합본> <폴더> <이름> 50 80 64` → `tools/sprite/breathe.py <시트.png> <폴더> <이름>` (대기 숨쉬기) → `assets/art/hero-*-v2.webp` · 배치표 `heroesV2.list`.
 ① 기본 7줄 (대기 줄은 1프레임만 써도 됨 — 숨쉬기는 도구가 만듦):
 ```
@@ -83,11 +83,11 @@ row1 idle 4 frames (breathing), row2 walk 4 frames, row3 attack 4 frames (wind-u
 row4 hit 1 frame, row5 victory 2 frames (jump, arm up), row6 fall 2 frames, row7 heal-cast 2 frames (arm raised, green glow).
 Keep the character exactly the same size, colors and proportions in every frame.
 ```
-② 추가 4줄 (①을 참고 그림으로 첨부):
+② 추가 5줄 (①을 참고 그림으로 첨부):
 ```
 [STYLE BIBLE above]
 Use the attached sprite sheet as the exact reference: SAME hero, same size, colors, outline and proportions.
-Magenta (#FF00FF) background. Native cell 64x64 px. 4 rows, left-aligned, same feet baseline in every cell:
+Magenta (#FF00FF) background. Native cell 64x64 px. 5 rows, left-aligned, same feet baseline in every cell:
 row1 portal-enter 4 frames, walking AWAY from the viewer into the screen: (1) turning from facing right to a 3/4 back view, (2) back view walking, left foot forward, (3) back view walking, right foot forward, (4) back view, one arm reaching forward to touch a door.
 row2 sit-rest 2 frames, facing RIGHT (sitting on the ground, weapon laid beside, gentle breathing),
 row3 receive-heal 2 frames, facing RIGHT (surrounded by small green sparkles: surprised, then happy),
