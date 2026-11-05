@@ -25,7 +25,7 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   await T.selectOption('#lesson', 'set-05'); await T.selectOption('#t-cls', '1-3'); await T.click('#t-new'); await T.waitForTimeout(1500);
   const code = await T.evaluate(() => DS.Teacher.code()), key = (await T.textContent('#t-key')).trim();
   const H = await mk('H'); await H.setViewportSize({ width: 1600, height: 900 }); await H.goto(`${U}&role=hall&code=${code}&key=${key}`); await H.waitForTimeout(2500);
-  console.log('tcamp portal anim:', await H.evaluate(() => { const p = document.querySelector('#screen-tcamp .camp-portal'); return p ? getComputedStyle(p).animationName : 'none'; }));
+  console.log('tcamp portal anim:', await H.evaluate(() => { const p = document.querySelector('#screen-camp .camp-portal'); return p ? getComputedStyle(p).animationName : 'none'; }));
   await H.screenshot({ path: `${OUT}/4-hall-tcamp.png` });
   await H.click('#tc-menu'); await H.waitForTimeout(1500); await H.screenshot({ path: `${OUT}/5-hall-lobby.png` });
   console.log('teacher speech font:', await H.evaluate(() => { const s = document.querySelector('.lb2-say.teacher'); return s ? getComputedStyle(s).fontSize : 'none'; }));

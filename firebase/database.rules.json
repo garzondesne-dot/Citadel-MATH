@@ -386,6 +386,15 @@
         }
       }
     },
+    "gcfg": {
+      ".read": "auth != null",
+      ".write": "auth != null && root.child('admins/'+auth.uid).val() === true",
+      "floorOpen": {
+        "$floor": {
+          ".validate": "newData.isBoolean() && $floor.matches(/^eval-[0-9]+$/)"
+        }
+      }
+    },
     "tcfg": {
       ".read": "auth != null && root.child('admins/'+auth.uid).val() === true",
       ".write": "auth != null && root.child('admins/'+auth.uid).val() === true",

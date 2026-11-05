@@ -22,11 +22,11 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   const code = await T.evaluate(() => DS.Teacher.code()), key = (await T.textContent('#t-key')).trim();
   const H = await mk('H'); await H.setViewportSize({ width: 1600, height: 900 });
   await H.goto(`${U}&role=hall&code=${code}&key=${key}`); await H.waitForTimeout(2500);
-  console.log('2 hall start:', await act(H), 'hallmode:', await H.evaluate(() => document.getElementById('screen-tcamp').classList.contains('tc-hallmode')));
+  console.log('2 hall start:', await act(H), 'hallmode:', await H.evaluate(() => !!document.querySelector('#screen-camp.active #tc-hallbar')));
   await H.screenshot({ path: `${OUT}/02-hall-tcamp.png` });
   await S1.waitForTimeout(500); await S1.click('#camp-gate'); await S1.waitForTimeout(2500);
   // 모루 미리 보기 열고 닫기 (종합상황실)
-  await H.click('#tc-anvil'); await H.waitForTimeout(1200); console.log('3 forge open:', await H.isVisible('#forge')); await H.click('#fg-x'); await H.waitForTimeout(400);
+  await H.click('#camp-anvil'); await H.waitForTimeout(1200); console.log('3 forge open:', await H.isVisible('#forge')); await H.click('#fg-x'); await H.waitForTimeout(400);
   const go = () => T.evaluate(async () => { const code = DS.Teacher.code(); const R = DS.Act.unpackRoom(await DS.Net.get(`rooms/${code}`)); await DS.Act.go(code, R, DS.Lessons.get(R.meta.lesson), 1); });
   await go(); await T.waitForTimeout(1500);
   console.log('4 hall after start:', await act(H));

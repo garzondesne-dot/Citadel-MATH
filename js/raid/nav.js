@@ -48,6 +48,8 @@ DS.Nav = (function () {
   const inPlace = (id) => {
     if (!DS.TCamp || !DS.TCamp.hallMode()) return false;
     if (id === 'screen-tcamp') { DS.TCamp.leave(); return true; }
+    if (id === 'screen-camp' && DS.Camp && DS.Camp.hallMode && DS.Camp.hallMode()) { DS.TCamp.hallGo(); return true; } // 2026-11-05 종합상황실 캠프 = 학생 캠프 화면
+    if (id === 'screen-bonus' && DS.Camp && DS.Camp.hallMode && DS.Camp.hallMode()) { DS.Camp.back(); return true; }
     if (id === 'screen-bonus' && document.querySelector('#bn-back') && /교사/.test(document.querySelector('#bn-back').textContent)) { DS.TCamp.back(); return true; }
     return false;
   };

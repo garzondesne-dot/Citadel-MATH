@@ -18,6 +18,7 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   await S.click('#s-go'); await S.waitForTimeout(2000);
   // 진도 6차시 · 4차시 기록: 문제 1 틀림(x) · 형성평가 일부
   await S.evaluate(async () => {
+    await DS.Net.set('gcfg/floorOpen/eval-3', true); // 2026-11-05: 2층(대단원)은 기본 잠김 → 이 시험은 열고 함 (잠금 자체는 e2e62)
     await DS.Net.update('xp/1-3/1/tut', { a: true, b: true }); await DS.Net.set('unlock/1-3', 6); await DS.Net.set('held/1-3', { 'set-04': true });
     await DS.Net.set('records/1-3/1/set-04', { at: 1, no: 4, mons: { r1: 'o', m1: 'x', m2: 'o', m3: 'f' }, bossM: 'ooxoo', boss: 4, bossN: 5, conc: {}, names: {} });
   });

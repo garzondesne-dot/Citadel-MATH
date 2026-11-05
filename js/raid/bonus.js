@@ -25,7 +25,13 @@ DS.Bonus = (function () {
   const fieldIds = (l) => l.steps.filter((st) => st.kind === 'monster' && l.monsters[st.id]).map((st) => st.id);
   // 옛 보강 · 옛 꼭대기 층 인장 (2026-11-05 전 규칙): 그 몬스터를 모두 처치했으면 인장 그대로
   const LEGACY = { 'set-04': ['b1', 'b2', 'b3'], 'set-05': ['b1', 'b2', 'b3'], 'set-06': ['b1'], 'eval-1': ['e1', 'e2', 'e3', 'e4', 'e5', 'e6', 'eb'] };
-  const FLOORS = [{ id: 'eval-1', floor: 1, title: '집합 중단원' }, { id: 'eval-3', floor: 2, title: '집합과 명제 대단원' }]; // 2층은 문제 확정 뒤 (변경 제안 PDF → 컨펌)
+  const FLOORS = [{ id: 'eval-1', floor: 1, title: '집합 중단원' }, { id: 'eval-3', floor: 2, title: '집합과 명제 대단원' }];
+  // 🔒 층 잠금 (2026-11-05 사용자 「대단원 평가는 잠그는 거 만들어줘 · 지금은 잠그는 게 좋아」): gcfg/floorOpen/{층} = true 면 학생에게 열림
+  //   기본 = 1층 열림 · 2층 잠김 (값이 없을 때) · 선생님은 늘 들어가 볼 수 있고 성채 화면에서 🔓 열기 / 🔒 잠그기 (교사 계정만 · 종합상황실 기기는 보기만)
+  const FLOOR_DEFAULT = { 'eval-1': true, 'eval-3': false };
+  let floorOpen = {}, isAdm = false;
+  const floorIsOpen = (id) => (floorOpen[id] != null ? !!floorOpen[id] : FLOOR_DEFAULT[id] !== false);
+  async function loadLocks() { floorOpen = (await N().get('gcfg/floorOpen').catch(() => null)) || {}; return floorOpen; } // 2층은 문제 확정 뒤 (변경 제안 PDF → 컨펌)
   const castleOf = (id) => DS.Lessons.get(id);
   const lessons = () => DS.Lessons.list.filter((l) => l.no && !l.eval && l.boss).sort((a, b) => a.no - b.no);
   const bossOf = (L) => (L.rooms || []).find((r) => r.boss);
@@ -59,7 +65,7 @@ DS.Bonus = (function () {
   const seenAdd = (m, id) => { try { const s = seenGet(m); s[id] = 1; localStorage.setItem(seenKey(m), JSON.stringify(s)); } catch (e) { /* 무시 */ } };
   function newRooms(m, data, upto) {
     const seen = m ? seenGet(m) : {};
-    return FLOORS.map((f) => castleOf(f.id)).filter(Boolean).flatMap((L) => { const S = roomsState(L, data, upto); return S.rooms.filter((r) => S.isOpen(r) && !seen[`${L.id}/${r.id}`] && !roomRec(data, L, r.id).tries && !roomRec(data, L, r.id).clear).map((r) => `${L.id}/${r.id}`); });
+    return FLOORS.filter((f) => floorIsOpen(f.id)).map((f) => castleOf(f.id)).filter(Boolean).flatMap((L) => { const S = roomsState(L, data, upto); return S.rooms.filter((r) => S.isOpen(r) && !seen[`${L.id}/${r.id}`] && !roomRec(data, L, r.id).tries && !roomRec(data, L, r.id).clear).map((r) => `${L.id}/${r.id}`); });
   }
   // 몬스터 · 소문제 (👑 형성평가 재대결 = 세트 1 · 2 를 번갈아, 체력 문항까지만)
   const isField = (L, mid) => L.steps.some((st) => st.kind === 'monster' && st.id === mid); // 📕 수업 문제 (오답노트 복습)
@@ -84,7 +90,8 @@ DS.Bonus = (function () {
     mine = preview ? {} : (await N().get(`bonus/${ck(m.c)}/${m.n}`).catch(() => null)) || {};
     recs = preview || (m && m.test) ? null : (await N().get(`records/${ck(m.c)}/${m.n}`).catch(() => null)) || {};
     heldM = recs ? (await N().get(`held/${ck(m.c)}`).catch(() => null)) || {} : {};
-    gemD = preview || !m || m.test || !DS.Gem ? null : await DS.Gem.mine(m).catch(() => null); // 📕 오답노트 (null = 미리 보기 · 테스트: 표시 안 함)
+    gemD = preview || !m || m.test || !DS.Gem ? null : await DS.Gem.mine(m).catch(() => null);
+    await loadLocks(); isAdm = all() && DS.Account ? await DS.Account.isAdmin().catch(() => false) : false; // 📕 오답노트 (null = 미리 보기 · 테스트: 표시 안 함)
     DS.UI.show('screen-bonus');
     render();
     if (opt.go) { const L = DS.Lessons.get(opt.go[0]); if (L) DS.Control.run(() => fight(L, opt.go[1])); }
@@ -120,6 +127,9 @@ DS.Bonus = (function () {
     const floor = (f) => {
       const L = castleOf(f.id);
       if (!L) return `<div class="panel framed cs-floor lock"><p class="bn-h"><b>🔒 ${f.floor}층 · ${esc(f.title)}</b></p><p class="muted small">문제를 준비하고 있어요. 그 차시 진도를 나가면 방이 하나씩 열려요.</p></div>`;
+      const fOpen = floorIsOpen(f.id);
+      if (!fOpen && !all()) return `<div class="panel framed cs-floor lock"><p class="bn-h"><b>🔒 ${f.floor}층 · ${esc(f.title)}</b></p><p class="muted small">선생님이 잠가 두었어요 — 단원 공부를 마치면 열려요.</p></div>`;
+      const lockBtn = isAdm ? `<button class="btn small cs-lockbtn" data-flock="${f.id}|${fOpen ? 0 : 1}">${fOpen ? '🔒 학생에게 잠그기' : '🔓 학생에게 열기'}</button>` : '';
       const S = roomsState(L, mine, no, all()), sealed = sl.includes(L.id);
       const tile = (r) => {
         const rr = roomRec(mine, L, r.id), open = S.isOpen(r), m = L.monsters[r.id], isNew = fresh.has(`${L.id}/${r.id}`);
@@ -129,7 +139,7 @@ DS.Bonus = (function () {
           ${isNew ? '<span class="cs-rnew">NEW</span>' : ''}${!open && r.boss && !sealed ? sealTag() : ''}<span class="cs-no">${r.id.slice(1)}</span>${open ? DS.Art.monster(m.sprite, rr.clear ? 'down' : 'idle') : '<i class="cs-lockic">🔒</i>'}
           <span class="cs-rt">${esc(r.title.replace(/^👑 /, '').replace(/^\d+ /, ''))}</span><span class="cs-rs">${sub}</span>${open && !rr.clear && !gLog(`room_${L.id}_${r.id}`) ? gTag((r.boss ? DS.Gem.G.roomBoss : DS.Gem.G.room) + (r.boss && !sealed ? DS.Gem.G.seal : 0)) : ''}${open && r.boss && !rr.clear && !sealed ? sealTag() : ''}</button>`;
       };
-      return `<div class="panel framed cs-floor${sealed ? ' sealed' : ''}"><p class="bn-h"><b>${f.floor}층 · ${esc(f.title)}</b><span class="muted small">처치 ${S.rooms.filter((r) => roomRec(mine, L, r.id).clear).length} / ${S.rooms.length} · 열린 방 ${S.rooms.filter((r) => S.isOpen(r)).length}</span>${sealed ? '<span class="bn-stamp">🟪 인장</span>' : ''}</p>
+      return `<div class="panel framed cs-floor${sealed ? ' sealed' : ''}"><p class="bn-h"><b>${f.floor}층 · ${esc(f.title)}</b><span class="muted small">처치 ${S.rooms.filter((r) => roomRec(mine, L, r.id).clear).length} / ${S.rooms.length} · 열린 방 ${S.rooms.filter((r) => S.isOpen(r)).length}</span>${sealed ? '<span class="bn-stamp">🟪 인장</span>' : ''}${all() ? (fOpen ? '<span class="cs-lk on">🔓 학생에게 열림</span>' : '<span class="cs-lk">🔒 학생에게 잠김</span>') : ''}${lockBtn}</p>
         <div class="cs-rooms">${S.rooms.map(tile).join('')}</div></div>`;
     };
     const nextFx = UNLOCK.findIndex((u) => sl.length < u);
@@ -140,6 +150,11 @@ DS.Bonus = (function () {
       ${FLOORS.map(floor).join('')}`;
     bindFight();
     document.querySelectorAll('[data-lockmsg]').forEach((b) => (b.onclick = () => { DS.Sound.squish(); DS.UI.toast(`🔒 ${b.dataset.lockmsg}`, 2600); }));
+    document.querySelectorAll('[data-flock]').forEach((b) => (b.onclick = () => DS.Control.run(async () => {
+      const [id, v] = b.dataset.flock.split('|'), f = FLOORS.find((x) => x.id === id) || {};
+      if (!window.confirm(v === '1' ? `🔓 ${f.floor}층 「${f.title}」을 모든 반 학생에게 열까요?` : `🔒 ${f.floor}층 「${f.title}」을 학생에게 잠글까요?\n(학생 기록은 그대로 남아요)`)) return;
+      await N().set(`gcfg/floorOpen/${id}`, v === '1'); await loadLocks(); render(); DS.UI.toast(v === '1' ? '🔓 열었어요' : '🔒 잠갔어요');
+    })));
   }
   // 📕 오답노트: 그 차시의 문제마다 상태 · 남은 문제
   const noteOf = (l) => (recs && DS.Note && (recs[l.id] || heldM[l.id]) ? DS.Note.lesson(l, recs[l.id], mine[l.id]) : { left: 0, none: true }); // 기록도 없고 반이 게임으로 수업도 안 한 차시 = 표시 안 함
@@ -304,5 +319,5 @@ DS.Bonus = (function () {
     el.querySelector('[data-x]').onclick = () => el.remove();
     document.body.appendChild(el);
   }
-  return { enter, seals, fxOpen, fxCond, UNLOCK, FLOORS, BOSS_PCT, LEGACY, roomsState, roomRec, newRooms };
+  return { enter, seals, fxOpen, fxCond, UNLOCK, FLOORS, BOSS_PCT, LEGACY, roomsState, roomRec, newRooms, loadLocks, floorIsOpen, FLOOR_DEFAULT };
 })();

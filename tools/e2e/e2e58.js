@@ -42,7 +42,7 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   await T.click('#bn-back'); await T.waitForTimeout(1500);
   const back = await T.evaluate(() => (document.querySelector('.screen.active') || {}).id);
   log.push(`교사 캠프: ${camp.scr} · 문 「${camp.gate}」 · 코드 버튼 ${camp.code} · 성채 칸 ${castle.cards} · 「n차시 수업 뒤」 ${castle.locked.length} · 뒤로 ${back}`);
-  const C = { 출석부없음: !att && !/출석부/.test(stuRow), 고정: pw === '2580' && r1.key === '2580' && r2.key === '2580', 찾기: /1-3반/.test(found.list) && found.code === r1.code, 입장: in1 === 'screen-tcamp' || in1 === 'screen-hall', 다음수업: hostOk,
+  const C = { 출석부없음: !att && !/출석부/.test(stuRow), 고정: pw === '2580' && r1.key === '2580' && r2.key === '2580', 찾기: /1-3반/.test(found.list) && found.code === r1.code, 입장: in1 === 'screen-camp' || in1 === 'screen-tcamp' || in1 === 'screen-hall', 다음수업: hostOk,
     교사캠프: camp.scr === 'screen-camp' && /수업 진행|새 수업/.test(camp.gate) && !camp.code, 모든방: castle.cards > 0 && castle.locked.length === 0, 뒤로: back === 'screen-camp' };
   const bad = Object.keys(C).filter((k) => !C[k]); if (bad.length) log.push('틀린 항목: ' + bad.join(', '));
   console.log(log.join('\n')); console.log(!bad.length ? '✅ 통과' : '❌ 기대와 다름'); console.log('errors', errs.length ? errs : 'none'); await b.close(); if (bad.length || errs.length) process.exit(1);
