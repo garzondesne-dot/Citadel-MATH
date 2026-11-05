@@ -2060,3 +2060,24 @@ input.sv-no { width: 64px !important; display: inline-block; padding: 2px 4px; }
 .sock .reso { color: #ffd25a; font-weight: 700; }
 .fx-fam.aff > b { color: #ffd25a; } .fx-fam.aff { background: #ffd25a14; border-radius: 6px; }
 .atk-reso .art { filter: drop-shadow(0 0 6px #ffd25a) drop-shadow(0 0 12px #ffb000); }
+/* ⚡ 필살기 컷인 (2026-11-06 · Ⅳ 결정석 + 퍼펙트 처치에서만): 어두워짐 → 비스듬한 띠 + 용사 눈빛 클로즈업 → 기술 이름 → 화면 찢김 */
+.ult { position: fixed; inset: 0; z-index: 90; pointer-events: none; overflow: hidden; }
+.ult .u-dim { position: absolute; inset: 0; background: radial-gradient(ellipse at center, #0008, #000d); animation: uDim 1.25s ease forwards; }
+@keyframes uDim { 0% { opacity: 0; } 10% { opacity: 1; } 80% { opacity: 1; } 100% { opacity: 0; } }
+.ult .u-band { position: absolute; left: -15%; right: -15%; top: 30%; height: 34%; transform: rotate(-9deg) translateX(110%); overflow: hidden; border-top: 4px solid #fff; border-bottom: 4px solid #fff; box-shadow: 0 0 30px var(--uc, #ffd25a); background: linear-gradient(90deg, #000 0%, var(--uc2, #3a2a00) 40%, #000 100%); animation: uBand 1.05s cubic-bezier(.2,.9,.2,1) forwards; }
+.ult .u-band::before { content: ''; position: absolute; inset: 0; background: repeating-linear-gradient(90deg, transparent 0 22px, #ffffff22 22px 24px, transparent 24px 60px); animation: uLines .25s linear infinite; }
+@keyframes uLines { from { background-position: 0 0; } to { background-position: -120px 0; } }
+@keyframes uBand { 0% { transform: rotate(-9deg) translateX(110%); } 22% { transform: rotate(-9deg) translateX(0); } 72% { transform: rotate(-9deg) translateX(-4%); } 100% { transform: rotate(-9deg) translateX(-120%); } }
+.ult .u-face { position: absolute; left: 50%; top: 50%; width: 560px; height: 560px; transform: translate(-58%, -50%); filter: drop-shadow(0 0 12px var(--uc, #ffd25a)); }
+.ult .u-face .art { width: 100% !important; height: 100% !important; }
+.ult .u-face .art b { animation-play-state: paused !important; }
+.ult .u-eye { position: absolute; top: 60%; width: 90px; height: 6px; border-radius: 3px; background: linear-gradient(90deg, transparent, #fff, transparent); box-shadow: 0 0 16px #fff, 0 0 30px var(--uc, #ffd25a); opacity: 0; animation: uEye .5s .3s ease-out forwards; }
+@keyframes uEye { 0% { opacity: 0; transform: scaleX(.2); } 40% { opacity: 1; transform: scaleX(1.4); } 100% { opacity: 0; transform: scaleX(2.2); } }
+.ult .u-name { position: absolute; left: 0; right: 0; top: 66%; text-align: center; font: 900 clamp(28px, 9vw, 64px) var(--pixel, sans-serif); color: #fff; -webkit-text-stroke: 2px var(--uc, #ffd25a); text-shadow: 0 0 18px var(--uc, #ffd25a), 4px 4px 0 #000; opacity: 0; animation: uName .7s .38s cubic-bezier(.2,1.6,.4,1) forwards; }
+@keyframes uName { 0% { opacity: 0; transform: scale(2.6); } 30% { opacity: 1; transform: scale(1); } 80% { opacity: 1; } 100% { opacity: 0; transform: scale(1.05); } }
+.ult .u-tear { position: absolute; inset: 0; opacity: 0; animation: uTear .45s 1s ease-out forwards; }
+.ult .u-tear svg { width: 100%; height: 100%; }
+@keyframes uTear { 0% { opacity: 0; } 15% { opacity: 1; } 100% { opacity: 0; } }
+.ult .u-flash { position: absolute; inset: 0; background: #fff; opacity: 0; animation: uFlash .35s 1s ease-out forwards; }
+@keyframes uFlash { 0% { opacity: 0; } 20% { opacity: .55; } 100% { opacity: 0; } }
+.ult-btn { margin: 0 0 6px; }

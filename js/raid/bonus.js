@@ -268,17 +268,19 @@ DS.Bonus = (function () {
       const vb = el.querySelector('#bf-vid'); if (vb) vb.onclick = () => DS.Video.open(vidNow(), mon.title, { lesson: L.id, slot: vslot });
       return el.querySelector('#bf-act');
     };
+    let roundNo = 0, anyWrong = false; // ⚡ 필살기: 첫 판 · 하나도 안 틀림 (퍼펙트)
     const wrongs = [], misBase = (DS.Mis && rec.mis) ? DS.Mis.merge({}, rec.mis) : {}; // 🔎 이 판에서 틀린 소문제 (판이 끝날 때마다 다시 계산 · 겹쳐 세지 않음)
     const round = async () => {
       const items = itemsOf(L, mid, seed, attempt); cur = items;
+      roundNo++;
       for (let i = 0; i < n; i++) {
         if (solved[i]) continue;
         const ok = await DS.Quiz.ask({ name: mon.title, formula: `${i + 1} / ${n}` }, items[i], { hint: mid !== 'boss' && !L.eval, tag: attempt ? (mid === 'boss' ? '🔄 세트가 바뀌었어요' : '🔄 숫자가 바뀌었어요') : castle ? '🏰 성채던전' : '🎯 복습' });
         if (!document.body.contains(el)) return null; // ✕ 로 전투를 닫음 → 기록 · 데미지 없이 끝
         if (!ok && DS.Mis && DS.Quiz.lastGiven !== undefined) wrongs.push({ i, codes: DS.Mis.classify(items[i], DS.Quiz.lastGiven, mid === 'boss' ? DS.Mis.bossTag(L.id, attempt % 2 === 0 ? 1 : 2, i) : null) }); // 🔎 오개념 (중단원던전만 저장 · 재대결은 형성평가 꼬리표)
-        if (ok) solved[i] = true; else wrongSeen = true;
+        if (ok) solved[i] = true; else { wrongSeen = true; anyWrong = true; }
         // ⚔ 공격 연출 (2026-11-06): 근접 = 돌진 · 원거리 = 탄 → 이펙트 · 멈칫 · 흔들림 · 밀림 (틀리면 튕겨냄 · 벌 없음) — 끝난 뒤 체력 칸을 그림
-        if (DS.Attack) { const sc = el.querySelector('.scene'); await DS.Attack.play(sc, { heroBox: sc && sc.querySelector('.enc-hero'), monBox: sc && sc.querySelector('.enc-mon'), hero: me.hero || 0, fx: me.fx || 'flame', miss: !ok, finish: ok && solved.every(Boolean), s: 1.2 }); }
+        if (DS.Attack) { const sc = el.querySelector('.scene'); await DS.Attack.play(sc, { heroBox: sc && sc.querySelector('.enc-hero'), monBox: sc && sc.querySelector('.enc-mon'), hero: me.hero || 0, fx: me.fx || 'flame', miss: !ok, finish: ok && solved.every(Boolean), ultimate: ok && solved.every(Boolean) && roundNo === 1 && !anyWrong && DS.Attack.canUlt(me.fx || 'flame'), s: 1.2 }); }
         else if (ok) DS.FX.play(el.querySelector('.scene'), me.fx || 'flame', { scale: 0.3 });
         if (!document.body.contains(el)) return null;
         draw(DS.Attack ? '' : ok ? 'hit' : 'miss');

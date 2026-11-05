@@ -76,11 +76,25 @@ DS.Attack = (function () {
       requestAnimationFrame(f);
     });
   }
+  // ⚡ 필살기 컷인 (2026-11-06 사용자 「난무만 안 하게 · 퍼펙트 뜰 때 · Ⅳ 해금」): 화면 전체 위에 1.2초 — Ⅳ 결정석 + 퍼펙트 처치에서만 부른다
+  const ULT_COLOR = { cut: ['#9fe0ff', '#0b2a40'], smash: ['#ffb070', '#3a1a06'], sweep: ['#a0ffd0', '#06301e'], fire: ['#ff7a3a', '#3a0d00'], spark: ['#fff27a', '#2a2a00'], frost: ['#b8f0ff', '#062a3a'], star: ['#ffe9a0', '#2a2206'], magic: ['#d8a0ff', '#24063a'] };
+  function cutin(hero, fx) {
+    if (reduce() || typeof document === 'undefined') return wait(0);
+    const fam = (DS.FX.famOf(fx) || { id: 'star' }).id, [c1, c2] = ULT_COLOR[fam] || ULT_COLOR.star;
+    const d = document.createElement('div'); d.className = 'ult'; d.style.setProperty('--uc', c1); d.style.setProperty('--uc2', c2);
+    const crack = Array.from({ length: 9 }, (_, i) => `${(i * 12.5).toFixed(1)},${(50 + (i % 2 ? -1 : 1) * (6 + Math.random() * 10) + (i - 4) * 4).toFixed(1)}`).join(' ');
+    d.innerHTML = `<i class="u-dim"></i><div class="u-band"><div class="u-face">${DS.Art.hero(hero, 'idle')}</div><i class="u-eye" style="left:44%"></i><i class="u-eye" style="left:56%"></i></div><b class="u-name">${String(DS.FX.NAMES[fx] || '').replace(/^\S+\s/, '').replace(/[<>&]/g, '')}!</b><i class="u-flash"></i><div class="u-tear"><svg viewBox="0 0 100 100" preserveAspectRatio="none"><polyline points="${crack}" fill="none" stroke="#fff" stroke-width="1.6" style="filter:drop-shadow(0 0 2px ${c1})"/><polyline points="${crack}" fill="none" stroke="${c1}" stroke-width="0.5"/></svg></div>`;
+    document.body.appendChild(d);
+    if (DS.Sound) { DS.Sound.sample && DS.Sound.sample('special', 0.9); setTimeout(() => DS.Sound.finish && DS.Sound.finish(), 1000); }
+    setTimeout(() => d.remove(), 1500);
+    return wait(1050);
+  }
   async function play(scene, o = {}) {
-    const { heroBox, monBox } = o, hero = Number(o.hero) || 0, fx = o.fx || 'flame', reso = DS.FX && DS.FX.resonates && DS.FX.resonates(hero, fx), s = (o.s || 1.2) * (reso ? 1.15 : 1);
+    const { heroBox, monBox } = o, hero = Number(o.hero) || 0, fx = o.fx || 'flame', reso = DS.FX && DS.FX.resonates && DS.FX.resonates(hero, fx), s = (o.s || 1.2) * (reso ? 1.15 : 1) * (o.ultimate ? 1.25 : 1);
     if (!scene || !heroBox || !monBox || !DS.FX) { if (DS.FX && !o.miss) DS.FX.play(scene, fx, { s }); return; }
     const H = rel(heroBox, scene), M = rel(monBox, scene), rest = o.rest || 'think';
     if (reso) { heroBox.classList.add('atk-reso'); setTimeout(() => heroBox.classList.remove('atk-reso'), 1400); } // ★ 공명: 친화 결정석
+    if (o.ultimate) await cutin(hero, fx);
     if (isRanged(hero)) {
       setPose(heroBox, hero, 'attack');
       await wait(200);
@@ -110,5 +124,7 @@ DS.Attack = (function () {
     setPose(heroBox, hero, rest, rest === 'think' ? 'huff' : '');
   }
   const preload = (hero, fx) => { if (!DS.FX) return; DS.FX.preload(fx); const p = projOf(hero); if (p) DS.FX.preload(p); };
-  return { projOf, isRanged, play, impact, fly, preload, shake, knock };
+  // 필살기 조건: Ⅳ 결정석 + 퍼펙트(그 전투 첫 판에 하나도 안 틀리고 모두 맞힘) + 처치 순간
+  const canUlt = (fx) => !!(DS.FX && DS.FX.tierOf(fx) === 3);
+  return { projOf, isRanged, play, impact, fly, preload, shake, knock, cutin, canUlt };
 })();
