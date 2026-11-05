@@ -14,6 +14,7 @@ DS.FX = (function () {
     { id: 'magic', name: '🔮 마법', ids: ['orb', 'crit', 'vortex', 'void'] },
   ];
   const TIER_NAMES = ['Ⅰ 기본', 'Ⅱ 숙련', 'Ⅲ 화려', 'Ⅳ 전설'];
+  const TIER_SCALE = [1, 1.15, 1.3, 1.5];                                    // Ⅰ → Ⅳ 크기 배율
   const BASE = FAMS.map((f) => f.ids[0]);                                     // Ⅰ 기본 (열림)
   const SKILL = FAMS.map((f) => f.ids[1]);                                    // Ⅱ 숙련 (💎)
   const FANCY = ['fire', 'lightning', 'ice', 'stars', 'slash', 'vortex'];    // Ⅲ 화려 — 순서 = 인장 1 · 2 · 4 · 6 · 8 · 10 (바꾸지 않음)
@@ -62,6 +63,7 @@ DS.FX = (function () {
     // 예전 scale(캔버스 배율, 0.18 ~ 1.5) → 도트 배율 (0.6 ~ 3)
     let s = opt.s || clamp((opt.scale || Math.min(r.width, r.height) / 520) / 0.3, 0.6, 3);
     if (opt.perfect) s *= 1.2;
+    if (!opt.flat) { const t = tierOf(kind); s *= t === 's' ? TIER_SCALE[3] : TIER_SCALE[t] || 1; } // 단계가 높을수록 크게 (2026-11-06 사용자)
     const floor = opt.floor ?? y + 22 * s, ground = !sp.tx && sp.py / sp.h > 0.7;
     const el = strip(box, sp, sp.tx ? x - sp.tx * s : x, sp.tx || ground ? floor : y, s, { z: 20 });
     return new Promise((res) => setTimeout(() => res(el), (sp.n / sp.fps) * 1000));
@@ -72,5 +74,5 @@ DS.FX = (function () {
     const drawIt = () => { g.clearRect(0, 0, cv.width, cv.height); g.imageSmoothingEnabled = false; const k = Math.min(cv.width / sp.w, cv.height / sp.h); g.drawImage(im, i * sp.w, 0, sp.w, sp.h, (cv.width - sp.w * k) / 2, (cv.height - sp.h * k) / 2, sp.w * k, sp.h * k); };
     if (im.complete && im.naturalWidth) drawIt(); else im.addEventListener('load', drawIt, { once: true });
   }
-  return { FAMS, TIER_NAMES, KINDS, BASE, SKILL, FANCY, LEGEND, ACHV, NAMES, BASE_OF, famOf, tierOf, usable, spec, strip, play, still, preload, load };
+  return { FAMS, TIER_NAMES, TIER_SCALE, KINDS, BASE, SKILL, FANCY, LEGEND, ACHV, NAMES, BASE_OF, famOf, tierOf, usable, spec, strip, play, still, preload, load };
 })();

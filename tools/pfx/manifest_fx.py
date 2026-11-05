@@ -16,7 +16,8 @@ for k, v in meta.items():
         return sum((0.3 * r + 0.59 * g + 0.11 * b) * a / 255 / 255 for r, g, b, a in c.get_flattened_data() if a > 40)
     e['pk'] = max(range(v['n']), key=glow)
     t = act.get('targets') or []
-    if t: e['tx'] = max(t) if k == 'fx-orb' else t[0]
+    # 손에서 쏘아 맞는 곳까지 가는 것만 tx (2026-11-06: 불꽃 고리 · 뇌명 · 서리 폭발은 시전자 중심 범위 → tx 없이 몬스터 가운데)
+    if t and k in ('fx-moon', 'fx-slash', 'fx-twin', 'fx-chain', 'fx-orb'): e['tx'] = max(t) if k == 'fx-orb' else t[0]
     if hits: h = hits[0]; e['hit'] = [round(h.get('t', 0), 3), round(h.get('freeze', 0), 3), round(h.get('shake', 0), 3), h.get('amp', 0)]
     if k.startswith('fx-'): fx[k[3:]] = e
     else: e['loop'] = True; proj[k[2:]] = e
