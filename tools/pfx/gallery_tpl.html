@@ -14,6 +14,8 @@ h1{font-size:20px;color:var(--gold);margin:0 0 4px}h2{font-size:17px;color:var(-
 .spr{position:absolute;image-rendering:pixelated;background-repeat:no-repeat;pointer-events:none}
 .mon{position:absolute;width:96px;height:96px;image-rendering:pixelated;background-size:100% 100%;filter:drop-shadow(0 4px 4px #000a)}
 .name{display:flex;flex-direction:column;justify-content:center;font-size:14px}.name small{color:var(--mu);font-size:12px}
+.row5{display:grid;grid-template-columns:90px repeat(4,1fr);gap:8px;margin:0 0 10px}.tile .cond{position:absolute;left:6px;bottom:4px;font-size:11px;color:#ffd25a;z-index:5;background:#000a;padding:1px 5px;border-radius:4px}
+@media (max-width:800px){.row5{grid-template-columns:1fr 1fr}.row5 .name{grid-column:1/-1}}
 .pick{position:absolute;right:6px;top:4px;font-size:11px;z-index:5;color:#7dffb0}
 @media (max-width:640px){.row3{grid-template-columns:1fr 1fr}.row3 .name{grid-column:1/-1}}
 </style></head><body>
@@ -24,9 +26,9 @@ h1{font-size:20px;color:var(--gold);margin:0 0 4px}h2{font-size:17px;color:var(-
 <div class="grid" id="ranged"></div>
 <h2>2. 근접 10명 — 다가가서 공격 → 제자리로 (예시 3명)</h2>
 <div class="grid" id="melee"></div>
-<h2>3. 공격 이펙트 13종 — 지금 이름 그대로 · 그림만 교체 (후보 1 · 후보 2)</h2>
-<p class="mu">고르실 때: 「베기 1 · 불꽃 2 …」처럼 알려 주세요. 둘 다 별로면 「다른 후보」</p>
-<div id="effects"></div>
+<h2>3. 이펙트 26종 정리안 — 계열 6 × 단계 4 (Ⅰ 기본 · Ⅱ 숙련 · Ⅲ 화려 · Ⅳ 전설) + 🪶 특별</h2>
+<p class="mu">학생 ⚙ 설정 「이펙트」 화면을 이 표처럼 보여 줌 · Ⅰ · Ⅲ 은 지금 이름 그대로(기록 유지) · Ⅱ · Ⅳ 는 새 이름 · 여는 법은 안 (아래 칸 글씨)</p>
+<div id="tiers"></div>
 <script>
 /*DATA*/
 ['p-witch', 'p-priest'].forEach((k) => { const f = D.FX[k]; if (f) { f.px = f.w / 2; f.py = f.h / 2; } }); // 떠 있는 구슬: 가운데 기준
@@ -71,16 +73,15 @@ D.MELEE.forEach(([k, nm]) => {
     setTimeout(loop, 2400); };
   setTimeout(loop, 400 + Math.random() * 600);
 });
-// 3. 이펙트 13종
-D.EFFECTS.forEach(([k, nm, cond]) => {
-  const r = document.createElement('div'); r.className = 'row3'; r.style.margin = '0 0 10px';
-  r.innerHTML = `<div class="name"><b>${nm}</b><small>${cond}</small></div>` + [1, 2].map((i) => `<div class="tile" data-k="${k}${i}"><span class="lab">후보 ${i} · ${D.FX[k + i].id}</span></div>`).join('');
-  document.getElementById('effects').appendChild(r);
-  r.querySelectorAll('.tile').forEach((t) => { const m = monster(t, 0, 60); const play = () => { const cx = t.clientWidth / 2, f = D.FX[t.dataset.k], sc = k === 'fire' || k === 'lightning' || k === 'stars' ? 1.2 : 1.6;
-      m.style.left = (cx - 48) + 'px';
-      const caster = ['cut1', 'slash1', 'slash2', 'spark2', 'orb1'].includes(t.dataset.k); // 휘두르는 사람 발 기준 → 몬스터 왼쪽에 둠
-      const ground = !caster && f.py / f.h > 0.7;
-      strip(t, t.dataset.k, caster ? cx - 70 : cx, caster || ground ? 156 : 108, { scale: sc }); knock(m); };
-    t.onclick = play; const loop = () => { play(); setTimeout(loop, 2600); }; setTimeout(loop, Math.random() * 1500); });
-});
+// 3. 계열 × 단계
+const TN = ['Ⅰ 기본', 'Ⅱ 숙련', 'Ⅲ 화려', 'Ⅳ 전설'];
+const tileOf = (key, name, cond, tier) => `<div class="tile" data-k="${key}"><span class="lab">${tier} · <b style="color:#fff">${name}</b></span><span class="cond">${cond}</span></div>`;
+const tb = document.getElementById('tiers');
+D.TIERS.forEach(([fam, list]) => { const r = document.createElement('div'); r.className = 'row5'; r.innerHTML = `<div class="name"><b>${fam}</b></div>` + list.map(([k, n, c], i) => tileOf(k, n, c, TN[i])).join(''); tb.appendChild(r); });
+{ const r = document.createElement('div'); r.className = 'row5'; r.innerHTML = '<div class="name"><b>🪶 특별</b><small>업적 보상</small></div>' + D.SPECIAL.map(([k, n, c]) => tileOf(k, n, c, '특별')).join(''); tb.appendChild(r); }
+tb.querySelectorAll('.tile').forEach((t) => { const m = monster(t, 0, 60); const key = t.dataset.k, big = ['fire1', 'lightning1', 'stars1', 'fire2'].includes(key);
+  const play = () => { const cx = t.clientWidth / 2 + 10, f = D.FX[key], sc = big ? 0.9 : 1.2; m.style.left = (cx - 48) + 'px';
+    const ground = !f.tx && f.py / f.h > 0.7;
+    strip(t, key, f.tx ? cx - f.tx * sc : cx, f.tx || ground ? 156 : 108, { scale: sc }); knock(m); };
+  t.onclick = play; const loop = () => { play(); setTimeout(loop, 2600); }; setTimeout(loop, Math.random() * 1500); });
 </script></body></html>
