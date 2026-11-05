@@ -54,6 +54,7 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
     if (r === 'boss') break;
   }
   await H.waitForTimeout(2500); await H.screenshot({ path: `${OUT}/04-hall-boss.png` });
+  for (const P of [S1, typeof S2 !== 'undefined' ? S2 : null].filter(Boolean)) await P.evaluate(() => document.querySelectorAll('.th-chest-ov, #th-bat').forEach((e) => e.remove())); // 🎁 상자 · 🦇 박쥐 창 닫기 (0.9.11~)
   await S1.waitForTimeout(1500); await S1.click('#st-lobby'); await S1.waitForTimeout(2500);
   const ok = await S1.$('#rs-ok'); if (ok) await ok.click(); await S1.waitForTimeout(1500);
   console.log('7 student klass btn:', !!(await S1.$('#st-klass')));
@@ -65,11 +66,12 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   await T.evaluate(async () => DS.Act.endClass(DS.Teacher.code())); await T.waitForTimeout(2000);
   console.log('9 teacher after end:', await act(T), 'tcamp btn:', !!(await T.$('#t-tcamp')), '| hall:', await act(H), 'h-tcamp:', !!(await H.$('#h-tcamp')));
   await T.screenshot({ path: `${OUT}/08-teacher-end.png`, fullPage: true }); await H.screenshot({ path: `${OUT}/09-hall-end.png` });
+  await H.waitForTimeout(2500); if (await H.$('.pm-x')) await H.click('.pm-x'); // 🏁 반대항 경주 창 닫기 (0.9.11~)
   await H.click('#h-tcamp'); await H.waitForTimeout(1500);
   console.log('10 hall camp again:', await act(H), 'news:', !!(await H.$('#tc-news')));
   await H.screenshot({ path: `${OUT}/10-hall-tcamp-closed.png` });
   await H.click('#tc-menu'); await H.waitForTimeout(800); console.log('11 back to hall:', await act(H));
-  await T.click('#t-tcamp'); await T.waitForTimeout(1500); console.log('12 teacher camp:', await act(T), 'news:', !!(await T.$('#tc-news')));
+  await T.click('#t-tcamp'); await T.waitForTimeout(1500); console.log('12 teacher camp (2026-11-05 학생 캠프 그대로):', await act(T), 'gate:', await T.evaluate(() => (document.querySelector('#camp-gate .camp-label') || {}).textContent || ''));
   await T.screenshot({ path: `${OUT}/11-teacher-tcamp.png`, fullPage: true });
   console.log('ERRORS', errs.length, errs.slice(0, 8)); await b.close();
 })();

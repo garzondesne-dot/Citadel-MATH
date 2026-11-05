@@ -48,21 +48,25 @@
         <div class="t-cls-row"><label>반 <select id="t-cls"></select></label></div>
         <p class="muted small">반을 고르면 그 반 학생들의 모닥불에 이 차시 차원문이 바로 나타나요.</p>
         <button id="t-new" class="btn primary big">✨ 새 수업 만들기</button>
+        <button id="t-camp" class="btn">🏕 내 캠프 (학생 캠프 그대로 · 모든 차시 열림 · 기록 저장 안 함)</button>
         <button id="t-resume" class="btn" hidden></button>
         <div id="t-live" class="t-live"></div>
         <div class="row2"><label>수업 코드로 이어서 <input id="t-code" name="class-code" inputmode="numeric" maxlength="6" autocomplete="off" data-1p-ignore data-lpignore="true"></label><button id="t-code-go" class="btn">↩ 이어서</button></div>
         <p class="muted small">수업 코드(학생용)와 종합상황실 키(PC용)가 만들어져요. 학생 정답·도움 요청은 교사 화면에만 보여요.</p>
+        <div class="row2 t-hallpw"><label>🖥 종합상황실 비밀번호 <input id="t-hallpw" class="masked" type="text" inputmode="numeric" maxlength="4" placeholder="비우면 수업마다 새로" autocomplete="off" data-1p-ignore data-lpignore="true"></label><button id="t-hallpw-save" class="btn">저장</button></div>
+        <p class="muted small">숫자 4자리를 넣고 저장하면 모든 수업이 그 비밀번호예요 (교실 PC 가 기억해서 다음부터 바로 입장). 비워 두고 저장하면 수업마다 무작위 4자리.</p>
         <p class="t-sec"><i class="menu-ic sm" data-ic="prep"></i><b>수업 준비</b> <span class="muted small">PC 권장</span></p>
         <div class="t-prep-row"><label>차시 <select id="p-lesson"></select></label><button id="x-go" class="btn primary" title="학생 계정 없이 학생 폰 화면으로 이 차시를 끝까지 · 가상 친구 4명 · 기록 저장 안 함">🧪 테스트</button></div>
         <button id="p-go" class="btn big">📋 수업 준비 열기</button>
         <p class="muted small">학습지 PDF · 단계별 이미지 · 설명 영상 · 몬스터 체력 기준% · 생각 시간 · 엑셀 차시 · 🧪 테스트는 기록을 저장하지 않아요 (실제 수업과 완전히 분리)</p>
         <p class="t-sec"><span class="t-ic">👥</span><b>학생 관리</b> <span class="muted small">대시보드는 교사만</span></p>
-        <div class="t-stu-row"><button id="s-go" class="btn big">📋 명단</button><button id="a-go" class="btn big">🗓 출석부</button><button id="d-go" class="btn big">📊 대시보드</button></div>
+        <div class="t-stu-row"><button id="s-go" class="btn big">📋 명단</button><button id="d-go" class="btn big">📊 대시보드</button></div>
         <p class="muted small">🧙 선생님 모습 · 이펙트 · 호칭은 <b>교사 캠프 ⚙ 설정</b>에서 바꿔요 (모두 열림).</p>
       </div>
     </div>
 
     <div id="f-hall" class="role-form panel framed" hidden>
+      <div id="h-find" class="h-find"></div>
       <div class="row2"><label>수업 코드 <input id="h-code" name="class-code" inputmode="numeric" maxlength="6" autocomplete="off" data-1p-ignore data-lpignore="true"></label><label>종합상황실 키 <input id="h-key" class="masked" type="text" name="hall-key" inputmode="numeric" maxlength="4" autocomplete="off" data-1p-ignore data-lpignore="true" placeholder="••••"></label></div>
       <button id="h-go" class="btn primary big">🖥 종합상황실 열기</button>
       <p class="muted small">교실 PC·TV 화면용. 키는 교사 폰 위쪽에 있어요.</p>

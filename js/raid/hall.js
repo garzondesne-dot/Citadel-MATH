@@ -129,7 +129,7 @@ DS.Hall = (function () {
     el.classList.toggle('focus-on', Raid().focusOn(R) && !Raid().isLobby(R));
     if (Raid().isClosed(R)) { built = 'closed'; el.innerHTML = `<div class="h-victory"><div class="trophy"><i class="trophy-img" style="background-image:url('${DS.ASSETS.base}${DS.ASSETS.trophy}')"></i></div>${(R.state || {}).timeUp ? '<h1>👑 보스가 문을 닫았다!</h1><p class="tu-msg">⏳ 남은 몬스터 · 형성평가는 <b>이어하기 포털</b>에서 7일 동안 마저 해요 (캠프의 차시 문)</p>' : '<h1>수업 끝!</h1>'}<p class="muted">모두 모닥불로 돌아갔어요. 게임 기록은 수학 성적이 아니에요.</p><div class="stamp-bar big">📮 반드시 학습지 확인도장 받아가세요.</div><div class="h-acts row">${klassBtn()}${punchBtn()}<button class="btn primary" id="h-tcamp">🏛 교사 캠프 가기</button></div></div>`; bindActs(); punchAuto(); return; }
     if (Raid().restOn(R) && !Raid().isLobby(R) && !Raid().isClosed(R)) { if (DS.Fun && DS.Fun.on(R)) { built = 'fun'; clearInterval(bubbleT); return DS.Fun.hall($('#h-arena'), R); } return restScene(); }
-    if (step && (step.kind === 'monster' || step.kind === 'boss')) { const key = `f${i}`; if (built !== key) buildFight(step, key); else updateFight(step); sheetOverlay(step); return; }
+    if (step && (step.kind === 'monster' || step.kind === 'boss')) { const key = `f${i}`; if (built !== key || !document.getElementById('rh-bar')) buildFight(step, key); else updateFight(step); /* 장면이 다른 것으로 바뀌어 있었으면 다시 그림 */ sheetOverlay(step); return; }
     clearInterval(bubbleT);
     if (Raid().isLobby(R) || Raid().isFinale(L, R)) return lobbyScene(Raid().isFinale(L, R));
     // v0.9.2: 개념 설명 = 왼쪽 개념 · 오른쪽 바로 이어지는 문제 (일반 문제 m 만 — ⭐ 스페셜 난입은 미리 보이지 않게). 문제 칸 이미지가 없으면 개념 하나만 크게

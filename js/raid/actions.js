@@ -52,11 +52,11 @@ DS.Act = (function () {
     if (cls) { try { const ot = await finishOvertime(cls); if (ot) room.meta.otShow = ot; } catch (e) { /* 연장전 결과는 다음에 */ } }
     room.meta.created = N().TS;
     room.state.stepAt = N().TS;
-    const hallKey = String(1000 + Math.floor(Math.random() * 9000));
+    let fixed = null; try { fixed = await N().get('tcfg/hallPw'); } catch (e) { /* 규칙 게시 전 · 권한 없음 → 무작위 */ }
+    const hallKey = /^\d{4}$/.test(String(fixed || '')) ? String(fixed) : String(1000 + Math.floor(Math.random() * 9000)); // 🖥 고정 비밀번호 (2026-11-05) · 없으면 무작위
     await N().set(P(code), room);
     await N().set(`secrets/${code}`, { hallKey }); // 학생은 읽을 수 없는 곳 (Firebase 규칙)
-    // 📖 수업 일지 한 줄 (교사만 · 예약 · 바로 연 수업 모두)
-    if (cls) { const L = DS.Lessons.get(lessonId); await N().set(`classlog/${ck(cls)}/${code}`, { lesson: lessonId, no: (L && L.no) || 0, at: N().TS, ...(opt.slot ? { sched: true, p: Number(opt.slot.p), from: Number(opt.slot.from), to: Number(opt.slot.to) } : {}) }).catch(() => {}); }
+    // 📖 수업 일지는 2026-11-05 사용자 결정으로 없앰 (출석부와 함께)
     if (cls && !opt.slot) {
       const L = DS.Lessons.get(lessonId);
       await N().set(`live/${ck(cls)}`, { code, lesson: lessonId, no: (L && L.no) || 0, theme: (L && L.theme) || '', open: true, at: N().TS });
@@ -189,6 +189,16 @@ DS.Act = (function () {
     await N().update(P(code), patch).catch(() => {});
     late.forEach((u) => { delete admitting[u]; });
   }
+  // 🖥 지금 열린 수업 찾기 (2026-11-05 · 종합상황실 입장 · 종합상황실 캠프): 바로 연 수업 live/* + 시간표 예약 slots/*(시작 10분 전부터) · 끝난 수업 빼고 · 최근 순
+  async function openRooms() {
+    const now = N().now(), cands = [];
+    const [live, slots] = await Promise.all([N().get('live').catch(() => null), N().get('slots').catch(() => null)]);
+    Object.entries(live || {}).forEach(([c, v]) => { if (v && v.code && Raid.liveOpen(v, Date.now())) cands.push({ code: v.code, cls: c, no: v.no, lesson: v.lesson, at: v.at || 0 }); });
+    Object.entries(slots || {}).forEach(([c, byCode]) => Object.entries(byCode || {}).forEach(([code, v]) => { if (v && v.from - 10 * 60e3 <= now && now < v.to) cands.push({ code, cls: c, no: v.no, lesson: v.lesson, at: v.from, sched: true }); }));
+    const out = [];
+    for (const x of cands.sort((a, b) => b.at - a.at)) { if (out.some((r) => r.code === x.code)) continue; const st = await N().get(P(x.code, 'state')).catch(() => null); if (st && !st.closed) out.push(x); }
+    return out;
+  }
   const clearHelp = (code, uid) => N().remove(P(code, `help/${uid}`));
 
   // ── 🏁 반대항 · 🔥 반 최고 콤보 저장 (v0.9.11 · 교사 · 종합상황실 기기) ─────────────
@@ -294,5 +304,5 @@ DS.Act = (function () {
     return out;
   }
 
-  return { savePunch, finishOvertime, setPunchOff, punchOff, batTick, batAnswer, hit, endClassAsk, timeUp, extendTime, openRift, cutShort, setRest, setRestMin, markBossWin, prepLite, prepImg, hasImg, setVideoFile, setVideoOn, endClass, admitLate, getPrep, setImage, setVideo, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, heal, bossAnswer, unpackRoom, P };
+  return { openRooms, savePunch, finishOvertime, setPunchOff, punchOff, batTick, batAnswer, hit, endClassAsk, timeUp, extendTime, openRift, cutShort, setRest, setRestMin, markBossWin, prepLite, prepImg, hasImg, setVideoFile, setVideoOn, endClass, admitLate, getPrep, setImage, setVideo, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, heal, bossAnswer, unpackRoom, P };
 })();

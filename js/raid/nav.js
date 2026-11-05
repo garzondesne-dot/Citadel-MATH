@@ -26,6 +26,7 @@ DS.Nav = (function () {
   const reopen = () => {
     leaving = true;
     let up = UP[current()]; const sc0 = DS.Scene.get() || {};
+    if (current() === 'screen-camp' && DS.Camp && DS.Camp.teacher && DS.Camp.teacher()) up = 'teacher'; // 🏛 교사 개인 캠프 → 교사 메뉴
     if (current() === 'screen-bonus' && DS.TCamp && DS.TCamp.code && document.querySelector('#bn-back') && /교사/.test(document.querySelector('#bn-back').textContent)) up = 'tcamp';
     DS.Scene.clear();
     if (up === 'camp') DS.Scene.save({ role: 'camp' });

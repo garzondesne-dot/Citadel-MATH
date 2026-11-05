@@ -28,9 +28,13 @@ DS.TCamp = (function () {
     DS.UI.show('screen-tcamp'); DS.UI.wake.on(); // 교사 캠프 · 종합상황실 캠프도 화면 켜 둠
     document.getElementById('screen-tcamp').classList.toggle('tc-hallmode', hall);
     if (!hall) DS.Scene.save({ role: 'tcamp', code, hallKey }); // 종합상황실 기기는 장면을 종합상황실로 둔다 (새로고침 → 종합상황실)
+    // 🏛 교사 개인 캠프 (2026-11-05 사용자 「학생들과 똑같이 · 차시 전부 해금」): 학생 캠프 화면 그대로 · 체험 계정(기록 저장 안 함) · 모든 차시 · 성채 방 열림
+    //   다른 점: 차원문 = 수업 진행(리모컨) / 새 수업 열기 · 우편함 = 📊 대시보드 · ⚙ = 선생님 모습 (종합상황실 캠프는 예전 그대로)
+    if (!hall) { const tl = DS.Art.teacherLook(); return DS.Camp.enter({ c: '교사', n: 1, name: '선생님', hero: tl.hero, fx: tl.fx, title: tl.title || 'none', test: true, teacher: { code, hallKey } }); }
     render();
     if (stop) stop(); stop = null;
     if (code) stop = DS.Net.watch(`rooms/${code}`, (v) => { if (!v) return; R = DS.Act.unpackRoom(v); L = DS.Lessons.get(R.meta.lesson); drawLive(); autoHall(); tHero(); });
+    if (hall) setTimeout(watchNext, 4000);
   }
   function render() {
     const base = DS.ASSETS.base, c = DS.ASSETS.camp;
@@ -113,6 +117,22 @@ DS.TCamp = (function () {
     wasLobby = lobby;
   }
   function toHall() { if (stop) stop(); stop = null; DS.UI.show('screen-hall'); }
+  // 🖥 종합상황실 캠프: 수업이 끝난 뒤 다음 수업이 열리면 저절로 그 수업으로 (같은 비밀번호면 입력 없이 · 2026-11-05 사용자)
+  let nextT = null, nextTried = '';
+  async function watchNext() {
+    clearTimeout(nextT); if (!hall || !document.getElementById('screen-tcamp').classList.contains('active')) return;
+    if (!code || (R && DS.Raid.isClosed(R))) {
+      const rooms = await DS.Act.openRooms().catch(() => []), nx = rooms.find((r) => r.code !== code);
+      if (nx && nextTried !== nx.code) {
+        nextTried = nx.code;
+        try { await DS.Hall.enter(nx.code, hallKey); return; } catch (e) {
+          const info = $('#tc-info'); if (info) info.innerHTML = `🔔 새 수업 <b class="gold">${esc(nx.cls)}반 ${nx.no ? `${nx.no}차시` : ''}</b> — <button class="btn small" id="tc-next">🖥 비밀번호 넣고 열기</button>`;
+          const b = $('#tc-next'); if (b) b.onclick = () => { const k = window.prompt('종합상황실 비밀번호 (교사 폰 위쪽 4자리)'); if (k) DS.Control.run(() => DS.Hall.enter(nx.code, k.trim())); };
+        }
+      }
+    }
+    nextT = setTimeout(watchNext, 15000);
+  }
   async function leave() {
     if (hall) return toHall();
     if (code && R && !DS.Raid.isClosed(R) && window.confirm('수업도 끝낼까요?\n\n[확인] 수업 끝내기 — 학생은 결과를 보고 모닥불로, 차원문은 꺼져요\n[취소] 잠깐 나가기 — 수업은 계속돼요 (교사 메뉴 「📋 만든 수업」에서 다시 들어오기)')) await DS.Act.endClassAsk(code).catch(() => {});

@@ -136,6 +136,7 @@ DS.Camp = (function () {
     DS.CampScene.gate(document.querySelector('#camp .camp-stage'), on || !!rf);
     el.classList.toggle('open', on); el.classList.toggle('rift', !!rf); document.querySelector('#camp .camp-stage').classList.toggle('gate-rift', !!rf);
     const lb = el.querySelector('.camp-label');
+    if (me && me.teacher) { const t = me.teacher; DS.CampScene.gate(document.querySelector('#camp .camp-stage'), !!t.code); el.classList.toggle('open', !!t.code); if (lb) lb.innerHTML = t.code ? '⚔ 수업 진행 · 리모컨' : '⚔ 새 수업 열기 (교사 메뉴)'; return; } // 🏛 교사 개인 캠프 (2026-11-05)
     if (lb) lb.innerHTML = on ? `⚔ ${live.no ? `${live.no}차시 ` : ''}입장!` : rf ? `⏳ ${rf.no}차시 이어하기 D-${Math.max(1, Math.ceil((rf.until - Date.now()) / 86400e3))}` : '🔒 차시 던전'; el.setAttribute('aria-label', on ? `${live.no ? `${live.no}차시 ` : ''}${name} 입장` : rf ? `${rf.no}차시 이어하기` : '차시 던전 (닫힘)');
   }
   // 그림 칸 하나 (배치표 시트에서 열·행)
@@ -163,6 +164,7 @@ DS.Camp = (function () {
     $('#camp-anvil').onclick = () => pick('#camp-anvil', () => (me.test ? DS.Forge.open(me, { preview: true, no: 99 }) : DS.Forge.open(me))); // 🧪 체험판: 모든 레시피
     $('#camp-castle').onclick = () => pick('#camp-castle', () => DS.Control.run(() => DS.Bonus.enter(me)));
     $('#camp-gate').onclick = () => {
+      if (me.teacher) { const t = me.teacher; return pick('#camp-gate', () => DS.Control.run(() => (t.code ? DS.Teacher.open(t.code, t.hallKey) : location.replace(`${location.pathname}?${DS.Net.mode === 'local' ? 'local&' : ''}role=teacher`))), 'portal'); }
       const rf = !(live && live.open) ? riftNow() : null;
       if (rf) return pick('#camp-gate', () => DS.Control.run(() => DS.Bonus.enter(me, { train: true, rift: rf })), 'portal');
       if (live && live.open) { if (tutMode === 'A') { tutMark('a'); tutClear(); } return pick('#camp-gate', () => DS.Control.run(() => enterCode(live.code)), 'portal'); }
@@ -173,10 +175,11 @@ DS.Camp = (function () {
     // v0.9.7.0: 이름표의 Lv 는 뺌 (사용자 — 캠프에서 이질적). 레벨은 아래 상태창에만
     newTitles();
     $('#camp-code').onclick = codeGate;
-    $('#camp-mail').onclick = () => pick('#camp-mail', () => { if (cues.mark) cues.mark('mail'); DS.Control.run(note); });
+    $('#camp-mail').onclick = () => pick('#camp-mail', () => { if (me.teacher) return DS.Control.run(() => DS.Dash.enter()); if (cues.mark) cues.mark('mail'); DS.Control.run(note); }); // 교사 = 📊 학급 대시보드
     $('#camp-tent').onclick = () => (DS.CampScene.objOn(document.querySelector('#camp .camp-stage'), 'tent', true), pick('#camp-tent', () => { if (cues.mark) cues.mark('tent'); DS.Control.run(shelf); setTimeout(() => DS.CampScene.objOn(document.querySelector('#camp .camp-stage'), 'tent', false), 1500); }));
     $('#camp-dummy').onclick = () => pick('#camp-dummy', () => DS.Control.run(() => DS.Bonus.enter(me, { train: true })));
-    $('#camp-set').onclick = settings;
+    $('#camp-set').onclick = () => (me.teacher ? settings({ teacher: true, onSave: async (v) => { me.hero = v.hero; me.fx = v.fx; me.title = v.title; const t = me.teacher; if (t.code) { try { const R0 = await DS.Net.get(`rooms/${t.code}/meta`); if (R0 && R0.teacher === DS.Net.uid()) await DS.Net.update(`rooms/${t.code}/players/${R0.teacher}`, { hero: v.hero, fx: v.fx }); } catch (e) { /* 다음 수업부터 */ } } render(); drawGate(); } }) : settings());
+    if (me.teacher) { const cb = $('#camp-code'); if (cb) cb.hidden = true; }
     drawGate();
     animateFire();
     document.querySelectorAll('#camp .camp-prop').forEach((e) => e.classList.add('cs-int'));
@@ -420,5 +423,5 @@ DS.Camp = (function () {
     draw(); document.body.appendChild(el);
   }
   const back = () => (me ? enter(me) : null);
-  return { enter, back, settings, shelf: (all) => shelf(all), refresh: () => { if (document.getElementById('camp-forge')) status(); }, stampToday, markStamp: () => { try { localStorage.setItem('citadel-stamp', today()); } catch (e) { /* 무시 */ } } };
+  return { teacher: () => !!(me && me.teacher), enter, back, settings, shelf: (all) => shelf(all), refresh: () => { if (document.getElementById('camp-forge')) status(); }, stampToday, markStamp: () => { try { localStorage.setItem('citadel-stamp', today()); } catch (e) { /* 무시 */ } } };
 })();
