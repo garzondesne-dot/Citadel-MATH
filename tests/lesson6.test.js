@@ -161,5 +161,127 @@ for (const set of [1, 2]) {
 }
 check(L.boss.tags.length === 6 && L.boss.sprite === '2@h250', '보스 태그 · 그림자 드래곤(성채 드래곤 색 변형)');
 
+// (6) 형성평가 재도전 생성기 L.boss.make(i, a, rng) (2026-11-05 · 문항마다 4번: 시도 0 = 세트1 그대로 · 1~3 = 같은 꼴 · 새 값)
+//   문제 글에서 식 · 수 · 문장을 읽어 따로 계산 (차시 파일의 정답 · 표를 쓰지 않음) · 식은 벤 다이어그램 칸(원소가 A · B 에 드는지)마다 진리표로 비교
+function parseDM(s) { // 'Aᶜ ∪ Bᶜ' · '(A ∩ B)ᶜ' · 'A ∪ Bᶜ' → (칸) => 그 칸이 식에 드는지
+  const t = s.replace(/\s+/g, ''); let p = 0;
+  const term = () => {
+    let f;
+    if (t[p] === '(') { p++; f = expr(); if (t[p++] !== ')') throw new Error('괄호 ' + s); }
+    else if (/[A-Z]/.test(t[p] || '')) { const c = t[p++]; f = (e) => e[c]; }
+    else throw new Error('모르는 식 ' + s);
+    while (t[p] === 'ᶜ') { p++; const g = f; f = (e) => !g(e); }
+    return f;
+  };
+  const expr = () => { let f = term(); while (t[p] === '∪' || t[p] === '∩') { const o = t[p++], g = term(), h = f; f = o === '∪' ? (e) => h(e) || g(e) : (e) => h(e) && g(e); } return f; };
+  const f = expr(); if (p !== t.length) throw new Error('남은 글자 ' + s); return f;
+}
+function sameSetExpr(s1, s2) { // 모든 칸에서 같으면 같은 집합
+  const ls = [...new Set((s1 + s2).match(/[A-Z]/g))], f = parseDM(s1), g = parseDM(s2);
+  for (let m = 0; m < 1 << ls.length; m++) { const e = {}; ls.forEach((c, k) => { e[c] = !!((m >> k) & 1); }); if (f(e) !== g(e)) return false; }
+  return true;
+}
+check(sameSetExpr('(A ∪ B)ᶜ', 'Aᶜ ∩ Bᶜ') && sameSetExpr('(A ∩ B)ᶜ', 'Aᶜ ∪ Bᶜ') && !sameSetExpr('(A ∪ B)ᶜ', 'Aᶜ ∪ Bᶜ') && !sameSetExpr('(A ∩ B)ᶜ', 'Aᶜ ∪ B'), '진리표 도구 (드모르간 · 틀린 꼴)');
+// 사각형 포함 사슬 (교과서 그대로 따로 적음): 정사각형 ⊂ 직사각형 ⊂ 평행사변형 ⊂ 사다리꼴 · 정사각형 ⊂ 마름모 ⊂ 평행사변형 → 참인 「X이면 Y」 9개, 나머지 11개 거짓
+const QUAD_TRUE = ['정사각형|직사각형', '정사각형|마름모', '정사각형|평행사변형', '정사각형|사다리꼴', '직사각형|평행사변형', '직사각형|사다리꼴', '마름모|평행사변형', '마름모|사다리꼴', '평행사변형|사다리꼴'];
+const QN = ['사다리꼴', '평행사변형', '직사각형', '마름모', '정사각형'];
+QN.forEach((x) => QN.forEach((y) => { if (x !== y) check(quadTruth(x, y) === QUAD_TRUE.includes(`${x}|${y}`), `사각형 사슬 ${x} → ${y}`); }));
+// 문장 묶음 하나하나: 따로 적은 참 · 거짓 표와 맞는지 (TRUE → 참 · FALSE → 거짓 · NONE2 → 명제 아님 · PROP_EXTRA 는 명제)
+const W = L.WORDS;
+W.TRUE.forEach((s) => check(TRUTH[s] === true, `참 묶음 ${s}`));
+W.FALSE.forEach((s) => check(TRUTH[s] === false, `거짓 묶음 ${s}`));
+W.NONE2.forEach((s) => check(s in TRUTH && TRUTH[s] === null, `명제 아님 묶음 ${s}`));
+W.PROP_EXTRA.forEach((s) => check(typeof TRUTH[s] === 'boolean', `명제 묶음 ${s}`));
+// 수 읽기 받침 (따로): 끝자리 영 · 일 · 이 · 삼 · 사 · 오 · 육 · 칠 · 팔 · 구, 10 의 배수는 십
+const readLast = (n) => (n % 10 === 0 ? '십' : '영일이삼사오육칠팔구'[n % 10]);
+const josa = (n) => ((readLast(n).charCodeAt(0) - 0xac00) % 28 ? '은' : '는');
+
+check(typeof L.boss.make === 'function', '형성평가 생성기 L.boss.make');
+const set1Snap = JSON.stringify(L.boss.sets[1]);
+for (let i = 0; i < 6; i++) check(L.boss.make(i, 0, DS.Rng('z')) === L.boss.sets[1][i], `시도 0 = 세트1 ${i + 1}번`);
+const bossTexts = Array.from({ length: 6 }, () => new Set()), bossFull = Array.from({ length: 6 }, () => new Set()), ansPos = Array.from({ length: 6 }, () => new Set());
+const tfCount = { 참: 0, 거짓: 0 }, same12 = [0, 0, 0, 0, 0, 0];
+let nb = 0;
+function verifyBoss(i, q, tag) {
+  const text = q.question;
+  check(q.check && typeof q.check === 'object', `${tag}: check 없음`);
+  check(text.startsWith(`${i + 1}. `), `${tag}: 번호 ${text}`);
+  const all = [text, q.solution, ...(q.choices || [])].join(' ');
+  check(!/위 /.test(all) && !/번의/.test(all), `${tag}: 혼자 읽히지 않는 글 ${text}`);
+  if (q.type === 'choice') {
+    check(new Set(q.choices).size === q.choices.length && q.choices[q.answerIndex] === q.answer && q.choices.filter((c) => c === q.answer).length === 1, `${tag}: 보기 중복 · 정답 위치`);
+    q.choices.forEach((c, k) => check(Q.grade(q, k) === (k === q.answerIndex), `${tag}: 보기 ${k + 1} 채점`));
+    ansPos[i].add(q.answerIndex);
+  } else {
+    check(Q.grade(q, q.answer) === true && Q.grade(q, q.answer + 1) === false && Q.grade(q, q.answer - 1) === false, `${tag}: 숫자 채점`);
+  }
+  if (i === 0) { // ( ) 에 각 보기를 넣어 두 식이 같은 집합인지 진리표로
+    const m = /^1\. (.+) = (.+) 의 \( \) 에 알맞은 것은\?$/.exec(text);
+    check(m && q.choices.length === 2 && q.choices.includes('∪') && q.choices.includes('∩'), `${tag}: 1번 꼴 ${text}`);
+    if (m) {
+      const ok = q.choices.filter((c) => sameSetExpr(m[1].replace('( )', c), m[2].replace('( )', c)));
+      check(ok.length === 1 && ok[0] === q.answer, `${tag}: ${text} → ${ok} ≠ ${q.answer}`);
+    }
+  } else if (i === 1) { // 보기 중 식과 같은 집합은 정확히 하나
+    const m = /^2\. (.+) 과 같은 것은\?$/.exec(text);
+    check(m && q.choices.length === 4, `${tag}: 2번 꼴 ${text}`);
+    if (m) {
+      const ok = q.choices.filter((c) => sameSetExpr(m[1], c));
+      check(ok.length === 1 && ok[0] === q.answer, `${tag}: ${m[1]} 과 같은 것 ${ok} ≠ ${q.answer}`);
+      // 틀린 보기에 「∪ ↔ ∩ 안 바꿈」이 늘 있다 (식의 ᶜ 자리는 정답과 같고 기호만 다름)
+      const flipOnly = q.answer.replace(/[∪∩]/, (o) => (o === '∪' ? '∩' : '∪'));
+      check(q.choices.includes(flipOnly), `${tag}: 틀린 보기 「기호 안 바꿈」 ${flipOnly}`);
+    }
+  } else if (i === 2) { // U 를 실제로 만들어 센다
+    const m = /^3\. n\(U\) = (\d+), n\(([A-Z])\) = (\d+) 일 때 n\(\2ᶜ\) = \?$/.exec(text);
+    check(m, `${tag}: 3번 꼴 ${text}`);
+    if (m) {
+      const U = Array.from({ length: Number(m[1]) }, (_, k) => k + 1), A = U.slice(0, Number(m[3]));
+      check(A.length === Number(m[3]) && A.length > 0 && A.length < U.length, `${tag}: 가능한 수`);
+      check(q.answer === U.filter((x) => !A.includes(x)).length, `${tag}: n(ᶜ) ${q.answer}`);
+    }
+  } else if (i === 3) {
+    check(JSON.stringify(q.choices) === JSON.stringify(['참', '거짓']), `${tag}: 참 · 거짓 보기`);
+    verify('m6', q, tag); // 사각형 성질로 따로 계산
+    tfCount[q.answer]++;
+  } else if (i === 4) { // 따로 적은 표: 명제 아님은 하나 · 참인 명제 하나 · 거짓인 명제 하나
+    check(q.choices.length === 3 && q.choices.every((s) => s in TRUTH), `${tag}: 표에 없는 문장 ${q.choices}`);
+    const none = q.choices.filter((s) => TRUTH[s] === null);
+    check(none.length === 1 && none[0] === q.answer, `${tag}: 명제 아닌 것 ${none} ≠ ${q.answer}`);
+    check(q.choices.filter((s) => TRUTH[s] === true).length === 1 && q.choices.filter((s) => TRUTH[s] === false).length === 1, `${tag}: 참 1 · 거짓 1 · 명제 아님 1`);
+  } else if (i === 5) { // 부정 규칙 · p 의 참 · 조사
+    const m = /^6\. “(.+)” 의 부정은\?$/.exec(text);
+    check(m, `${tag}: 6번 꼴 ${text}`);
+    if (m) {
+      const p = m[1], neg = negate(p);
+      check(q.answer === neg && q.choices.filter((c) => c === neg).length === 1 && q.choices.length === 3, `${tag}: 부정 ${q.answer} ≠ ${neg}`);
+      check(q.choices.includes(p.replace(/\.$/, '')), `${tag}: 틀린 보기 「p 그대로」`);
+      const k = /^(\d+)(은|는) (홀수|짝수|(\d+)의 배수)이다\.$/.exec(p);
+      check(k, `${tag}: p 꼴 ${p}`);
+      if (k) {
+        const n = Number(k[1]);
+        check(k[2] === josa(n), `${tag}: 조사 ${n}${k[2]}`);
+        const t = k[3] === '홀수' ? n % 2 === 1 : k[3] === '짝수' ? n % 2 === 0 : n % Number(k[4]) === 0 && n > Number(k[4]);
+        check(t, `${tag}: p 가 참 (${p})`);
+      }
+    }
+  }
+}
+for (let s = 0; s < 300; s++) for (let i = 0; i < 6; i++) {
+  const qs = [1, 2, 3].map((a) => L.boss.make(i, a, DS.Rng(`s${s}|boss|${i}|${a}`)));
+  qs.forEach((q, k) => { nb++; verifyBoss(i, q, `보스재도전${i + 1}#${s}.${k + 1}`); bossTexts[i].add(q.question); bossFull[i].add(`${q.question}|${(q.choices || []).slice().sort().join('/')}`); });
+  check(JSON.stringify(qs[0]) !== JSON.stringify(L.boss.sets[1][i]) && qs.every((q) => q.question !== L.boss.sets[1][i].question || i === 4), `보스재도전${i + 1}#${s}: 학습지와 같은 문제`);
+  if (JSON.stringify(qs[0]) === JSON.stringify(qs[1])) same12[i]++;
+}
+for (let i = 0; i < 6; i++) {
+  const want = i === 4 ? 3 : 5, got = i === 4 ? bossFull[i].size : bossTexts[i].size;
+  check(got >= want, `보스재도전 ${i + 1}번: 서로 다른 문제 ${got}개 (≥ ${want})`);
+  check(same12[i] < 300 * 0.15, `보스재도전 ${i + 1}번: 시도 1 · 2 가 같은 문제 ${same12[i]}/300`);
+  if (i !== 2 && i !== 3) check(ansPos[i].size >= 2, `보스재도전 ${i + 1}번: 정답 자리가 섞임`);
+}
+check(tfCount.참 > 300 && tfCount.거짓 > 300, `보스재도전 4번: 참 · 거짓 고루 (${tfCount.참} · ${tfCount.거짓})`);
+check(JSON.stringify(L.boss.make(1, 2, DS.Rng('x|boss|1|2'))) === JSON.stringify(L.boss.make(1, 2, DS.Rng('x|boss|1|2'))), '보스재도전: 같은 시드는 같은 문제');
+check(JSON.stringify(L.boss.sets[1]) === set1Snap, '보스재도전: 세트1(학습지) 그대로 · 생성기가 건드리지 않음');
+
 if (fail) { console.error(`\n${fail}건 실패 (${count}건 중)`); process.exit(1); }
-console.log(`OK: 6차시 레이드용 v2 — 순서 · 학습지 ★ 첫 시도 · 재도전 소문제 ${n}개 독립 검산 · 명제/부정/사각형 명제 · 형성평가 6문항 세트1·2 (${count}건) 통과`);
+console.log(`OK: 6차시 레이드용 v2 — 순서 · 학습지 ★ 첫 시도 · 재도전 소문제 ${n}개 독립 검산 · 명제/부정/사각형 명제 · 형성평가 6문항 세트1·2 · 재도전 생성기 ${nb}문항 독립 검산 (${count}건) 통과`);
