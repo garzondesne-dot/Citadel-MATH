@@ -34,6 +34,15 @@ const SHEETS = [
   { id: 'faces', title: '⚡ 필살기 컷인 · 용사 눈빛 클로즈업 18장', file: 'hero-faces-v1.png', w: 192, h: 72, k: 2, base: null, cols: 3,
     frames: ['0 검사', '1 마녀', '2 엘프 궁수', '3 닌자', '4 사제', '5 창술사', '6 드워프', '7 현자', '8 성기사', '9 격투가', '10 무희', '11 음유시인', '12 연금술사', '13 해적', '14 빙결 마법사', '15 조련사', '16 금발 검사', '17 수학자'],
     notes: ['칸마다 용사 한 명의 「이마 ~ 코」만 크게 · 두 눈이 칸 가운데(노랑 점선 높이)', '눈빛: 결의에 찬 표정 · 오른쪽(몬스터 쪽)을 노려봄 · 눈동자에 하이라이트 · 칸 밖으로 머리카락이 잘려도 됨', '용사 도트 시트와 같은 머리색 · 눈색 · 모자 · 장신구 (참고 그림으로 그 용사 시트를 첨부) · 글자 없음'] },
+  { id: 'faces1', title: '⚡ 필살기 눈빛 클로즈업 · 1회차 (0~5번)', file: 'hero-faces1-v1.png', w: 192, h: 72, k: 2, base: null, cols: 3, eye: true,
+    frames: ['1) 검사', '2) 마녀', '3) 엘프 궁수', '4) 닌자', '5) 사제', '6) 창술사'], refs: ['hero-sword-v3c.webp', 'hero-witch-v2c.webp', 'hero-elf-v2c.webp', 'hero-ninja-v2c.webp', 'hero-priest-v2c.webp', 'hero-lancer-v2c.webp'],
+    notes: ['칸마다 아래 용사 한 명의 이마 ~ 코만 크게 · 두 눈을 노랑 「눈높이」 선에', '오른쪽(몬스터 쪽)을 노려보는 결의에 찬 눈빛 · 눈동자 하이라이트 · 머리카락은 칸 밖으로 잘려도 됨', '칸 아래 작은 그림 = 그 용사 (머리색 · 눈색 · 모자 · 장신구를 그대로) · 글자 · 번호는 그리지 않음'] },
+  { id: 'faces2', title: '⚡ 필살기 눈빛 클로즈업 · 2회차 (6~11번)', file: 'hero-faces2-v1.png', w: 192, h: 72, k: 2, base: null, cols: 3, eye: true,
+    frames: ['1) 드워프', '2) 현자', '3) 성기사', '4) 격투가', '5) 무희', '6) 음유시인'], refs: ['hero-dwarf-v2c.webp', 'hero-sage-v2c.webp', 'hero-paladin-v2c.webp', 'hero-monk-v2c.webp', 'hero-dancer-v2c.webp', 'hero-bard-v2c.webp'],
+    notes: ['칸마다 아래 용사 한 명의 이마 ~ 코만 크게 · 두 눈을 노랑 「눈높이」 선에', '오른쪽(몬스터 쪽)을 노려보는 결의에 찬 눈빛 · 눈동자 하이라이트 · 머리카락은 칸 밖으로 잘려도 됨', '칸 아래 작은 그림 = 그 용사 (머리색 · 눈색 · 모자 · 장신구를 그대로) · 글자 · 번호는 그리지 않음'] },
+  { id: 'faces3', title: '⚡ 필살기 눈빛 클로즈업 · 3회차 (12~17번)', file: 'hero-faces3-v1.png', w: 192, h: 72, k: 2, base: null, cols: 3, eye: true,
+    frames: ['1) 연금술사', '2) 해적', '3) 빙결 마법사', '4) 조련사', '5) 금발 검사', '6) 수학자'], refs: ['hero-alchemist-v2c.webp', 'hero-pirate-v2c.webp', 'hero-frost-v2c.webp', 'hero-tamer-v2c.webp', 'hero-blond-v2-2c.webp', 'hero-math-v2c.webp'],
+    notes: ['칸마다 아래 용사 한 명의 이마 ~ 코만 크게 · 두 눈을 노랑 「눈높이」 선에', '오른쪽(몬스터 쪽)을 노려보는 결의에 찬 눈빛 · 눈동자 하이라이트 · 머리카락은 칸 밖으로 잘려도 됨', '칸 아래 작은 그림 = 그 용사 (머리색 · 눈색 · 모자 · 장신구를 그대로) · 글자 · 번호는 그리지 않음'] },
   { id: 'castle3', title: '🏰 성채 3층 몬스터 5마리 (대단원)', file: 'monsters-castle3-v1.png', w: 96, h: 96, k: 2, base: 90, cols: 3,
     frames: [1, 2, 3, 4, 5].flatMap((n, i) => [['진리집합 수정 골렘', '역 · 대우 사슬 망령', '귀류법 미로 거미', '절대부등식 탑 수호자', '필요충분 쌍둥이 열쇠 기사'][i]].flatMap((m) => [`${n}-대기 · ${m}`, `${n}-공격`, `${n}-쓰러짐`])),
     notes: ['한 줄 = 몬스터 한 마리 · 왼쪽부터 대기 | 공격 | 쓰러짐 (5줄 × 3칸)', '왼쪽(용사 쪽)을 봄 · 발은 하늘색 선 위 · 몸 가운데는 노랑 점선', '1 · 2층 성채 몬스터와 같은 크기 · 같은 화풍 (참고 그림으로 지금 성채 몬스터 시트를 함께 첨부)'] },
@@ -48,7 +57,7 @@ h1{margin:0 0 4px;font-size:24px;color:#ffd25a}.sub{margin:0 0 14px;font-size:14
 .cell i{position:absolute;pointer-events:none}.ctr{left:50%;top:0;bottom:0;border-left:2px dashed #ffe14a99}.mid{top:50%;left:0;right:0;border-top:2px dashed #ffe14a55}
 .safe{border:2px dashed #ffffffaa}.baseline{left:0;right:0;border-top:3px solid #4fe0ff}.lab{margin-top:8px;font-size:14px;text-align:center;word-break:keep-all}.dim{font-size:12px;color:#99a;text-align:center}
 ul{margin:14px 0 0;padding-left:18px;font-size:14px;line-height:1.6;color:#cfd2e6}.zone{position:absolute;border:3px solid #ff4a4a;background:#ff4a4a22;color:#ffb0b0;font-size:13px;display:flex;align-items:center;justify-content:center;text-align:center}
-.out{margin-top:10px;font-size:14px;color:#7dffb0}`;
+.out{margin-top:10px;font-size:14px;color:#7dffb0}.eyel{left:0;right:0;border-top:4px solid #ffe14a}.eyet{position:absolute;right:6px;font-size:13px;color:#ffe14a;font-weight:bold}.ref{display:flex;justify-content:center;margin-top:4px}.ref i{display:block;width:160px;height:128px;background-size:400% 1200%;background-position:0 0;image-rendering:pixelated;background-color:#2a2f45;border-radius:6px}`;
 function html(s) {
   const W = s.w * s.k, H = s.h * s.k, sf = 8 * s.k;
   const Z = (list) => list.map(([t, x, y, w, h]) => `<div class="zone" style="left:${x * W}px;top:${y * H}px;width:${w * W}px;height:${h * H}px">${t}</div>`).join('');
@@ -57,7 +66,11 @@ function html(s) {
     ['7세그 숫자판', 0.40, 0.04, 0.22, 0.17], ['게이지 (반 기록선)', 0.91, 0.08, 0.06, 0.70], ['펀치 기계', 0.47, 0.42, 0.15, 0.40], ['용사', 0.16, 0.55, 0.12, 0.27], ['반 이름', 0.02, 0.03, 0.14, 0.09], ['바닥 (아래 18%)', 0, 0.82, 1, 0.18]
   ].map(([t, x, y, w, h]) => `<div class="zone" style="left:${x * W}px;top:${y * H}px;width:${w * W}px;height:${h * H}px">${t}</div>`).join('') : '';
   const CW = Math.max(W, 130);
-  const cell = (lab) => `<div style="width:${CW}px"><div class="cell${s.bg ? ' bg' : ''}" style="width:${W}px;height:${H}px">${s.bg ? '' : `<i class="ctr"></i><i class="mid"></i><i class="safe" style="left:${sf}px;top:${sf}px;right:${sf}px;bottom:${sf}px"></i>`}${s.base != null ? `<i class="baseline" style="top:${s.base * s.k}px"></i>` : ''}${zones}</div><p class="lab">${lab}</p><p class="dim">원본 ${s.w}×${s.h}px</p></div>`;
+  const ART = path.join(__dirname, '..', '..', 'assets', 'art');
+  const ref = (i) => (s.refs && s.refs[i] ? `<div class="ref"><i style="background-image:url('file://${ART}/${s.refs[i]}')"></i></div>` : '');
+  const eye = s.eye ? `<i class="eyel" style="top:${H / 2 - 2}px"></i><b class="eyet" style="top:${H / 2 - 22}px">눈높이</b>` : '';
+  let ci = 0;
+  const cell = (lab) => { const i = ci++; return `<div style="width:${CW}px"><div class="cell${s.bg ? ' bg' : ''}" style="width:${W}px;height:${H}px">${s.bg ? '' : `<i class="ctr"></i><i class="mid"></i><i class="safe" style="left:${sf}px;top:${sf}px;right:${sf}px;bottom:${sf}px"></i>`}${s.base != null ? `<i class="baseline" style="top:${s.base * s.k}px"></i>` : ''}${zones}${eye}</div><p class="lab">${lab}</p>${ref(i)}<p class="dim">원본 ${s.w}×${s.h}px</p></div>`; };
   return `<!doctype html><meta charset="utf-8"><style>${css}</style><div class="sheet" id="s"><h1>${s.title} — 그림 템플릿</h1>
     <p class="sub">원본 칸 ${s.w}×${s.h}px ${s.frames.length > 1 ? (s.cols ? `· ${s.frames.length}칸 가로 ${s.cols} × 세로 ${Math.ceil(s.frames.length / s.cols)} ` : `· ${s.frames.length}칸 가로 한 줄 `) : ""}· 이 시트는 원본 1px = ${s.k}px 로 키운 것 ${s.bg ? '' : '· 마젠타 #FF00FF = 지울 배경 · 하늘색 = 발(바닥) 기준선 · 노랑 점선 = 가운데 · 흰 점선 = 안전 여백'}</p>
     <div class="row"${s.cols ? ` style="width:${s.cols * (CW + 18)}px"` : ''}>${s.frames.map(cell).join('')}</div><ul>${s.notes.map((n) => `<li>${n}</li>`).join('')}</ul>
