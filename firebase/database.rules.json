@@ -375,6 +375,13 @@
           ".validate": "newData.hasChildren(['s', 'm', 'at', 'code']) && newData.child('s').isNumber() && newData.child('s').val() >= 0 && newData.child('s').val() <= 1000"
         }
       }
+    },
+    "tcfg": {
+      ".read": "auth != null && root.child('admins/'+auth.uid).val() === true",
+      ".write": "auth != null && root.child('admins/'+auth.uid).val() === true",
+      "hallPw": {
+        ".validate": "newData.isString() && newData.val().matches(/^[0-9]{4}$/)"
+      }
     }
   }
 }
