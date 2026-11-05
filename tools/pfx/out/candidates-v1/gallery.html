@@ -1,0 +1,86 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>공격 이펙트 후보</title>
+<style>
+:root{--bg:#0d1120;--panel:#161c33;--line:#2c3760;--tx:#e8ecff;--mu:#9aa3c7;--gold:#ffd25a}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,"Noto Sans KR",sans-serif;padding:16px}
+h1{font-size:20px;color:var(--gold);margin:0 0 4px}h2{font-size:17px;color:var(--gold);margin:22px 0 8px}p.mu{color:var(--mu);font-size:13px;margin:2px 0 10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px}
+.card b{font-size:14px}.card small{color:var(--mu)}
+.lane{position:relative;height:150px;overflow:hidden;border-radius:8px;margin-top:6px;background:linear-gradient(#1b2142,#0f1328 70%,#232842 70%,#171b30)}
+.row3{display:grid;grid-template-columns:110px 1fr 1fr;gap:8px;align-items:stretch}
+.tile{position:relative;height:180px;overflow:hidden;border-radius:8px;background:linear-gradient(#1b2142,#0f1328 72%,#232842 72%,#171b30);cursor:pointer}
+.tile .lab{position:absolute;left:6px;top:4px;font-size:11px;color:var(--mu);z-index:5}
+.spr{position:absolute;image-rendering:pixelated;background-repeat:no-repeat;pointer-events:none}
+.mon{position:absolute;width:96px;height:96px;image-rendering:pixelated;background-size:100% 100%;filter:drop-shadow(0 4px 4px #000a)}
+.name{display:flex;flex-direction:column;justify-content:center;font-size:14px}.name small{color:var(--mu);font-size:12px}
+.pick{position:absolute;right:6px;top:4px;font-size:11px;z-index:5;color:#7dffb0}
+@media (max-width:640px){.row3{grid-template-columns:1fr 1fr}.row3 .name{grid-column:1/-1}}
+</style></head><body>
+<h1>⚔ 공격 이펙트 · 근접 / 원거리 후보 갤러리</h1>
+<p class="mu">pixelfx(MIT)로 구운 도트 이펙트 · 2배 크기 · 모두 반복 재생 · 타일을 누르면 다시 재생 · 15fps 미리보기 (실제는 더 부드럽게 가능)</p>
+<h2>1. 원거리 8명 — 제자리에서 탄 발사 → 몬스터에 맞음</h2>
+<p class="mu">탄 = 용사마다 고정 · 맞는 순간 이펙트 = 학생이 고른 것 (여기선 「베기 후보 2」로 통일)</p>
+<div class="grid" id="ranged"></div>
+<h2>2. 근접 10명 — 다가가서 공격 → 제자리로 (예시 3명)</h2>
+<div class="grid" id="melee"></div>
+<h2>3. 공격 이펙트 13종 — 지금 이름 그대로 · 그림만 교체 (후보 1 · 후보 2)</h2>
+<p class="mu">고르실 때: 「베기 1 · 불꽃 2 …」처럼 알려 주세요. 둘 다 별로면 「다른 후보」</p>
+<div id="effects"></div>
+<script>
+const D = {"REL": true, "FX": {"cut1": {"id": "melee/sword-slash", "w": 128, "h": 102, "n": 9, "fps": 15, "px": 44, "py": 91, "loop": false, "src": "fx/cut1.webp"}, "cut2": {"id": "impacts/hit-spark", "w": 119, "h": 71, "n": 7, "fps": 15, "px": 34, "py": 56, "loop": false, "src": "fx/cut2.webp"}, "flame1": {"id": "explosions/small-explosion", "w": 199, "h": 165, "n": 16, "fps": 15, "px": 103, "py": 122, "loop": false, "src": "fx/flame1.webp"}, "flame2": {"id": "fire/fire-ring", "w": 212, "h": 122, "n": 19, "fps": 15, "px": 106, "py": 87, "loop": false, "src": "fx/flame2.webp"}, "spark1": {"id": "lightning/zap-hit", "w": 129, "h": 104, "n": 14, "fps": 15, "px": 75, "py": 52, "loop": false, "src": "fx/spark1.webp"}, "frost1": {"id": "ice/snowflake-burst", "w": 126, "h": 115, "n": 19, "fps": 15, "px": 63, "py": 104, "loop": false, "src": "fx/frost1.webp"}, "frost2": {"id": "ice/ice-spikes", "w": 255, "h": 98, "n": 19, "fps": 15, "px": 18, "py": 83, "loop": false, "src": "fx/frost2.webp"}, "twinkle1": {"id": "arcane/mana-burst", "w": 170, "h": 146, "n": 19, "fps": 15, "px": 85, "py": 121, "loop": false, "src": "fx/twinkle1.webp"}, "twinkle2": {"id": "holy/sunburst", "w": 110, "h": 110, "n": 19, "fps": 15, "px": 55, "py": 55, "loop": true, "src": "fx/twinkle2.webp"}, "orb1": {"id": "arcane/arcane-missiles", "w": 221, "h": 113, "n": 22, "fps": 15, "px": 9, "py": 86, "loop": false, "src": "fx/orb1.webp"}, "orb2": {"id": "impacts/crit-hit", "w": 173, "h": 131, "n": 13, "fps": 15, "px": 77, "py": 102, "loop": false, "src": "fx/orb2.webp"}, "fire1": {"id": "explosions/big-explosion", "w": 298, "h": 225, "n": 25, "fps": 15, "px": 156, "py": 193, "loop": false, "src": "fx/fire1.webp"}, "fire2": {"id": "fire/flame-pillar", "w": 169, "h": 213, "n": 25, "fps": 15, "px": 84, "py": 190, "loop": false, "src": "fx/fire2.webp"}, "lightning1": {"id": "lightning/lightning-strike", "w": 231, "h": 262, "n": 25, "fps": 15, "px": 115, "py": 227, "loop": false, "src": "fx/lightning1.webp"}, "lightning2": {"id": "lightning/thunderclap", "w": 255, "h": 151, "n": 25, "fps": 15, "px": 129, "py": 120, "loop": false, "src": "fx/lightning2.webp"}, "ice1": {"id": "ice/ice-shatter", "w": 186, "h": 108, "n": 25, "fps": 15, "px": 58, "py": 87, "loop": false, "src": "fx/ice1.webp"}, "ice2": {"id": "ice/frost-nova", "w": 253, "h": 139, "n": 25, "fps": 15, "px": 124, "py": 98, "loop": false, "src": "fx/ice2.webp"}, "stars1": {"id": "explosions/firework-burst", "w": 198, "h": 211, "n": 25, "fps": 15, "px": 99, "py": 96, "loop": false, "src": "fx/stars1.webp"}, "stars2": {"id": "arcane/star-fall", "w": 175, "h": 157, "n": 25, "fps": 15, "px": 97, "py": 136, "loop": false, "src": "fx/stars2.webp"}, "slash1": {"id": "melee/dagger-flurry", "w": 107, "h": 86, "n": 14, "fps": 15, "px": 9, "py": 69, "loop": false, "src": "fx/slash1.webp"}, "slash2": {"id": "melee/double-slash", "w": 124, "h": 98, "n": 12, "fps": 15, "px": 13, "py": 83, "loop": false, "src": "fx/slash2.webp"}, "vortex1": {"id": "arcane/portal", "w": 150, "h": 114, "n": 25, "fps": 15, "px": 75, "py": 105, "loop": true, "src": "fx/vortex1.webp"}, "vortex2": {"id": "shadow/black-hole", "w": 168, "h": 130, "n": 25, "fps": 15, "px": 82, "py": 123, "loop": true, "src": "fx/vortex2.webp"}, "wings1": {"id": "holy/feather-burst", "w": 138, "h": 126, "n": 25, "fps": 15, "px": 65, "py": 50, "loop": false, "src": "fx/wings1.webp"}, "p-elf": {"id": "projectiles/arrow", "w": 94, "h": 18, "n": 18, "fps": 30, "px": 88, "py": 10, "loop": true, "src": "fx/p-elf.webp"}, "p-sage": {"id": "fire/fireball", "w": 117, "h": 54, "n": 36, "fps": 30, "px": 94, "py": 27, "loop": true, "src": "fx/p-sage.webp"}, "p-frost": {"id": "ice/ice-lance", "w": 142, "h": 50, "n": 24, "fps": 30, "px": 129, "py": 25, "loop": true, "src": "fx/p-frost.webp"}, "p-bard": {"id": "projectiles/note-bolt", "w": 79, "h": 41, "n": 18, "fps": 30, "px": 60, "py": 21, "loop": true, "src": "fx/p-bard.webp"}, "p-alch": {"id": "projectiles/potion-flask", "w": 74, "h": 40, "n": 18, "fps": 30, "px": 57, "py": 17, "loop": true, "src": "fx/p-alch.webp"}, "p-math": {"id": "projectiles/sigma-rune", "w": 88, "h": 46, "n": 18, "fps": 30, "px": 62, "py": 23, "loop": true, "src": "fx/p-math.webp"}, "wings2": {"id": "holy/smite", "w": 179, "h": 174, "n": 25, "fps": 15, "px": 90, "py": 146, "loop": false, "src": "fx/wings2.webp"}, "spark2": {"id": "lightning/chain-lightning", "w": 222, "h": 99, "n": 16, "fps": 15, "px": 22, "py": 78, "loop": false, "src": "fx/spark2.webp"}, "p-witch": {"id": "arcane/arcane-orb", "w": 106, "h": 108, "n": 25, "fps": 30, "px": 53, "py": 101, "loop": true, "src": "fx/p-witch.webp"}, "p-priest": {"id": "arcane/arcane-orb", "w": 108, "h": 108, "n": 25, "fps": 30, "px": 54, "py": 101, "loop": true, "src": "fx/p-priest.webp"}}, "H": {"sword": "../../../../assets/art/hero-sword-v3c.webp", "pirate": "../../../../assets/art/hero-pirate-v2c.webp", "tamer": "../../../../assets/art/hero-tamer-v2c.webp", "witch": "../../../../assets/art/hero-witch-v2c.webp", "elf": "../../../../assets/art/hero-elf-v2c.webp", "priest": "../../../../assets/art/hero-priest-v2c.webp", "sage": "../../../../assets/art/hero-sage-v2c.webp", "bard": "../../../../assets/art/hero-bard-v2c.webp", "alchemist": "../../../../assets/art/hero-alchemist-v2c.webp", "frost": "../../../../assets/art/hero-frost-v2c.webp", "math": "../../../../assets/art/hero-math-v2c.webp"}, "MON": "../../../../assets/art/monsters-castle2-v1.webp", "EFFECTS": [["cut", "⚔ 베기", "기본"], ["flame", "🔥 불꽃", "기본"], ["spark", "⚡ 번개", "기본"], ["frost", "❄ 얼음", "기본"], ["twinkle", "✨ 별", "기본"], ["orb", "🔮 마법탄", "기본"], ["fire", "🔥 화염 폭발", "인장 1"], ["lightning", "⚡ 천둥 낙뢰", "인장 2"], ["ice", "❄ 얼음 파쇄", "인장 4"], ["stars", "✨ 별빛 폭죽", "인장 6"], ["slash", "⚔ 삼연 참격", "인장 8"], ["vortex", "🌀 차원 소용돌이", "인장 10"], ["wings", "🪶 황금 날개", "깃털 5"]], "RANGED": [["elf", "p-elf", "🏹 화살"], ["witch", "p-witch", "🔮 마법 구슬"], ["sage", "p-sage", "🔥 화염구"], ["frost", "p-frost", "❄ 얼음 창"], ["priest", "p-priest", "☀ 빛의 구슬"], ["bard", "p-bard", "🎵 음표 (새로 만듦)"], ["alchemist", "p-alch", "🧪 물약 (새로 만듦)"], ["math", "p-math", "∑ 수식 룬 (새로 만듦)"]], "MELEE": [["sword", "검사"], ["pirate", "해적"], ["tamer", "조련사"]], "NAMES": {"sword": "검사", "pirate": "해적", "tamer": "조련사", "witch": "마녀", "elf": "엘프 궁수", "priest": "사제", "sage": "현자", "bard": "음유시인", "alchemist": "연금술사", "frost": "빙결 마법사", "math": "수학자"}};
+['p-witch', 'p-priest'].forEach((k) => { const f = D.FX[k]; if (f) { f.px = f.w / 2; f.py = f.h / 2; } }); // 떠 있는 구슬: 가운데 기준
+const SC = 2;
+function strip(box, key, x, y, opt = {}) { // 띠 그림 한 번 재생 (x,y = 맞는 점)
+  const f = D.FX[key]; if (!f) return;
+  const el = document.createElement('i'); el.className = 'spr';
+  const s = opt.scale || SC;
+  Object.assign(el.style, { width: f.w * s + 'px', height: f.h * s + 'px', left: (x - f.px * s) + 'px', top: (y - f.py * s) + 'px', backgroundImage: `url(${f.src})`, backgroundSize: `${f.w * f.n * s}px ${f.h * s}px`, zIndex: opt.z || 3 });
+  if (opt.flip) el.style.transform = 'scaleX(-1)';
+  box.appendChild(el); let i = 0;
+  const tick = () => { if (i >= f.n) { if (opt.loop) i = 0; else { el.remove(); opt.done && opt.done(); return; } } el.style.backgroundPosition = `${-i * f.w * s}px 0`; i++; el._t = setTimeout(tick, 1000 / f.fps); };
+  tick(); return el;
+}
+function hero(box, k, x, y) { // 80×64 칸 · 줄 0 대기 · 1 걷기 · 2 공격
+  const el = document.createElement('i'); el.className = 'spr';
+  Object.assign(el.style, { width: 80 * SC + 'px', height: 64 * SC + 'px', left: x + 'px', top: y + 'px', backgroundImage: `url(${D.H[k]})`, backgroundSize: `${320 * SC}px ${(D.REL ? 768 : 192) * SC}px`, zIndex: 4 });
+  box.appendChild(el); el.anim = (row, fps, loop, done) => { clearTimeout(el._t); let i = 0; const go = () => { if (i >= 4) { if (loop) i = 0; else return done && done(); } el.style.backgroundPosition = `${-i * 80 * SC}px ${-row * 64 * SC}px`; i++; el._t = setTimeout(go, 1000 / fps); }; go(); };
+  el.anim(0, 4, true); return el;
+}
+function monster(box, x, y) { const m = document.createElement('i'); m.className = 'mon'; m.style.left = x + 'px'; m.style.top = y + 'px'; m.style.backgroundImage = `url(${D.MON})`; if (D.REL) { m.style.backgroundSize = '288px 480px'; m.style.backgroundPosition = '0 0'; } box.appendChild(m); return m; }
+const shake = (box, amp = 3, ms = 180) => { const t0 = performance.now(); const f = (t) => { const k = 1 - (t - t0) / ms; if (k <= 0) { box.style.transform = ''; return; } box.style.transform = `translate(${(Math.random() - .5) * amp * 2 * k}px,${(Math.random() - .5) * amp * 2 * k}px)`; requestAnimationFrame(f); }; requestAnimationFrame(f); };
+const knock = (m) => { m.animate([{ transform: 'translateX(0)', filter: 'brightness(3)' }, { transform: 'translateX(10px)', filter: 'brightness(1)' }, { transform: 'translateX(0)' }], { duration: 320, easing: 'ease-out' }); };
+// 1. 원거리
+D.RANGED.forEach(([k, p, lab]) => {
+  const c = document.createElement('div'); c.className = 'card'; c.innerHTML = `<b>${D.NAMES[k]}</b> <small>${lab}</small><div class="lane"></div>`; document.getElementById('ranged').appendChild(c);
+  const lane = c.querySelector('.lane'), W = () => lane.clientWidth, h = hero(lane, k, -10, 20), m = monster(lane, 0, 36);
+  const loop = () => { const mx = W() - 110; m.style.left = mx + 'px'; h.anim(2, 9, false, () => h.anim(0, 4, true));
+    setTimeout(() => { const f = D.FX[p], sx = 110, ex = mx + 30, y = 74; const el = strip(lane, p, sx, y, { loop: true, scale: 1.5 }); const t0 = performance.now(), dur = 380;
+      const fly = (t) => { const u = Math.min(1, (t - t0) / dur); el.style.left = (sx + (ex - sx) * u - f.px * 1.5) + 'px'; if (u < 1) requestAnimationFrame(fly); else { clearTimeout(el._t); el.remove(); strip(lane, 'cut2', mx + 20, 92); knock(m); shake(lane, 2); } }; requestAnimationFrame(fly); }, 240);
+    setTimeout(loop, 2200); };
+  setTimeout(loop, 300 + Math.random() * 600);
+});
+// 2. 근접
+D.MELEE.forEach(([k, nm]) => {
+  const c = document.createElement('div'); c.className = 'card'; c.innerHTML = `<b>${nm}</b> <small>🗡 근접</small><div class="lane"></div>`; document.getElementById('melee').appendChild(c);
+  const lane = c.querySelector('.lane'), h = hero(lane, k, -10, 20), m = monster(lane, 0, 36);
+  const move = (from, to, ms, done) => { const t0 = performance.now(); const f = (t) => { const u = Math.min(1, (t - t0) / ms); h.style.left = (from + (to - from) * u) + 'px'; if (u < 1) requestAnimationFrame(f); else done && done(); }; requestAnimationFrame(f); };
+  const loop = () => { const mx = lane.clientWidth - 110; m.style.left = mx + 'px'; const near = mx - 120;
+    h.anim(1, 12, true); move(-10, near, 300, () => { h.anim(2, 9, false, () => { h.anim(1, 12, true); move(near, -10, 300, () => h.anim(0, 4, true)); });
+      setTimeout(() => { strip(lane, 'cut1', near + 70, 146); knock(m); shake(lane, 3); }, 200); });
+    setTimeout(loop, 2400); };
+  setTimeout(loop, 400 + Math.random() * 600);
+});
+// 3. 이펙트 13종
+D.EFFECTS.forEach(([k, nm, cond]) => {
+  const r = document.createElement('div'); r.className = 'row3'; r.style.margin = '0 0 10px';
+  r.innerHTML = `<div class="name"><b>${nm}</b><small>${cond}</small></div>` + [1, 2].map((i) => `<div class="tile" data-k="${k}${i}"><span class="lab">후보 ${i} · ${D.FX[k + i].id}</span></div>`).join('');
+  document.getElementById('effects').appendChild(r);
+  r.querySelectorAll('.tile').forEach((t) => { const m = monster(t, 0, 60); const play = () => { const cx = t.clientWidth / 2, f = D.FX[t.dataset.k], sc = k === 'fire' || k === 'lightning' || k === 'stars' ? 1.2 : 1.6;
+      m.style.left = (cx - 48) + 'px';
+      const caster = ['cut1', 'slash1', 'slash2', 'spark2', 'orb1'].includes(t.dataset.k); // 휘두르는 사람 발 기준 → 몬스터 왼쪽에 둠
+      const ground = !caster && f.py / f.h > 0.7;
+      strip(t, t.dataset.k, caster ? cx - 70 : cx, caster || ground ? 156 : 108, { scale: sc }); knock(m); };
+    t.onclick = play; const loop = () => { play(); setTimeout(loop, 2600); }; setTimeout(loop, Math.random() * 1500); });
+});
+</script></body></html>

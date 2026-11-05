@@ -43,11 +43,11 @@ function strip(box, key, x, y, opt = {}) { // 띠 그림 한 번 재생 (x,y = �
 }
 function hero(box, k, x, y) { // 80×64 칸 · 줄 0 대기 · 1 걷기 · 2 공격
   const el = document.createElement('i'); el.className = 'spr';
-  Object.assign(el.style, { width: 80 * SC + 'px', height: 64 * SC + 'px', left: x + 'px', top: y + 'px', backgroundImage: `url(${D.H[k]})`, backgroundSize: `${320 * SC}px ${192 * SC}px`, zIndex: 4 });
+  Object.assign(el.style, { width: 80 * SC + 'px', height: 64 * SC + 'px', left: x + 'px', top: y + 'px', backgroundImage: `url(${D.H[k]})`, backgroundSize: `${320 * SC}px ${(D.REL ? 768 : 192) * SC}px`, zIndex: 4 });
   box.appendChild(el); el.anim = (row, fps, loop, done) => { clearTimeout(el._t); let i = 0; const go = () => { if (i >= 4) { if (loop) i = 0; else return done && done(); } el.style.backgroundPosition = `${-i * 80 * SC}px ${-row * 64 * SC}px`; i++; el._t = setTimeout(go, 1000 / fps); }; go(); };
   el.anim(0, 4, true); return el;
 }
-function monster(box, x, y) { const m = document.createElement('i'); m.className = 'mon'; m.style.left = x + 'px'; m.style.top = y + 'px'; m.style.backgroundImage = `url(${D.MON})`; box.appendChild(m); return m; }
+function monster(box, x, y) { const m = document.createElement('i'); m.className = 'mon'; m.style.left = x + 'px'; m.style.top = y + 'px'; m.style.backgroundImage = `url(${D.MON})`; if (D.REL) { m.style.backgroundSize = '288px 480px'; m.style.backgroundPosition = '0 0'; } box.appendChild(m); return m; }
 const shake = (box, amp = 3, ms = 180) => { const t0 = performance.now(); const f = (t) => { const k = 1 - (t - t0) / ms; if (k <= 0) { box.style.transform = ''; return; } box.style.transform = `translate(${(Math.random() - .5) * amp * 2 * k}px,${(Math.random() - .5) * amp * 2 * k}px)`; requestAnimationFrame(f); }; requestAnimationFrame(f); };
 const knock = (m) => { m.animate([{ transform: 'translateX(0)', filter: 'brightness(3)' }, { transform: 'translateX(10px)', filter: 'brightness(1)' }, { transform: 'translateX(0)' }], { duration: 320, easing: 'ease-out' }); };
 // 1. 원거리
