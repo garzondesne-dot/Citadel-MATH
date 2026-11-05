@@ -69,6 +69,8 @@ DS.ASSETS = {
   medals: { rank: { src: 'medals-rank-v1.webp', cols: 5, rows: 2 }, dungeon: { src: 'medals-dungeon-v1.webp', cols: 5, rows: 2 } },
   // 교사 대기공간 배경 (v0.9.1 · 푸른 숲 성소, 사용자 제공)
   tcamp: { bg: 'tcamp-sanctuary-v1.webp' },
+  // ⚡ 필살기 컷인 · 용사 눈빛 클로즈업 18장 (2026-11-06 · 사용자 그림 3장 → 칸 512×256 · 3열 × 6줄 · 0~17 번호 순 · docs/ASSET-SPEC.md 6-9)
+  heroFaces: { src: 'hero-faces-v1.webp', cols: 3, rows: 6 },
   // v0.9.11 🦇 황금 박쥐 · 🎁 보물 상자 · 🪶 깃털 · 🥊 펀치 기계 · 경기장 (사용자 그림 · docs/ASSET-SPEC.md 6-9 템플릿)
   //   null = 그림 오기 전 → 이모지 + CSS. 들어오면 { src, frames } (가로 한 줄 시트 · 칸 크기 같게)
   //   bat 4칸(날갯짓 3 + 잡힘 1) · chest 3칸(닫힘 · 흔들림 · 열림) · punch 2칸(기본 · 맞은 순간) · feather 1 · arena 1 (배경 16:9)

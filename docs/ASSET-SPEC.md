@@ -260,7 +260,7 @@ Faces LEFT, feet on the cyan ground line, same position in all 3 cells.
 ```
 
 ### 6-9. ⚡ 필살기 컷인 · 용사 눈빛 클로즈업 18장 (2026-11-06 · 템플릿 `assets/templates/ultimate/tpl-faces.png` · 다시 만들기 `node tools/sprite/templates_v0911.js assets/templates/castle --only faces` 뒤 `ultimate/` 로 옮김)
-필살기 컷인(특화 Ⅳ + 퍼펙트)의 비스듬한 띠 안에 지나가는 얼굴. 지금은 용사 도트를 크게 확대한 임시판 → 이 그림이 오면 저절로 바뀜 (`assets/manifest.js` 에 `heroFaces` 한 줄만 넣으면 됨).
+필살기 컷인(특화  Verbatim Ⅳ + 퍼펙트)의 비스듬한 띠 안에 지나가는 얼굴. **✅ 넣음 (2026-11-06 · v0.9.11.25)**: 사용자 그림 3장(각 2172×724 · 3 × 2 · 마젠타) → 같은 간격으로 잘라 마젠타 지움 → 칸 512×256(2:1) · 3열 × 6줄 · `assets/art/hero-faces-v1.webp` · `heroFaces: { src, cols: 3, rows: 6 }`. 그림을 바꾸면 v2 로 (2:1 칸이면 아무 크기나 됨).
 **회차별 판 (2026-11-06 · 권장)**: `tpl-faces1.png`(0~5) · `tpl-faces2.png`(6~11) · `tpl-faces3.png`(12~17) — 6칸(3 × 2) · 칸 아래에 그 용사 도트 그림 · 노랑 「눈높이」 선 → 회차마다 판 1장만 첨부하고 회차 프롬프트를 붙임 (보낼 파일 `hero-faces1~3-v1.png` · 576×144).
 **한 장으로 뽑을 때 = 576×432 (칸 192×72 · 가로 3 × 세로 6 · 번호 순서 0~17)** · 칸마다 그 용사 도트 시트(`assets/art/hero-*.webp`)를 참고 그림으로 함께 첨부하면 머리색 · 장신구가 맞음. 한 번에 3~6명씩 나눠 뽑아도 됨 (순서만 지키면 Claude 가 이어 붙임).
 
