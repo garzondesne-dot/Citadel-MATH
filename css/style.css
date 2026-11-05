@@ -1032,12 +1032,13 @@ details.panel[open] > summary::before { content: '▾ '; }
 :fullscreen body, :-webkit-full-screen body { min-height: 100vh; }
 /* v0.9.3 🎮 종합상황실 시연 · 선생님 일격 · 소멸 */
 .demo-btn { border-color: #ffcf5a; }
-.h-demo-ov { position: fixed; inset: 0; z-index: 60; background: #050a14d9; display: flex; align-items: center; justify-content: center; padding: 3vh 3vw; }
-.demo-box { width: min(1500px, 96vw); max-height: 94vh; overflow-y: auto; background: #0e1730; padding: 16px 20px; }
+.h-demo-ov { position: fixed; inset: 0; z-index: 60; background: linear-gradient(180deg, transparent 0 35%, #050a1499 75%, #050a14cc 100%); display: flex; align-items: flex-end; justify-content: center; padding: 2vh 3vw 2.5vh; overflow: hidden; } /* 2026-11-06 사용자: 뒤 레이드가 보이게 · 아래쪽(용사 줄)에 붙이고 문제가 길면 위로 자라 레이드를 가림 · 화면은 스크롤 없음 */
+.demo-box { width: min(960px, 94vw); max-height: 95vh; margin: 0 auto; box-shadow: 0 -6px 30px #000a; /* 2026-11-06 사용자: 옆으로 쫙 벌어지지 않게 가운데 네모로 (예전 1500px) */ overflow-y: auto; background: #0e1730; padding: 16px 20px; }
 .demo-head { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; font-size: 22px; }
 .demo-head .btn.on { background: #2f5b9a; }
+.demo-head { flex-wrap: nowrap; } .demo-head > b { flex: 1 1 0; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .demo-head > .btn, .demo-head > .demo-tag { flex: none; white-space: nowrap; } /* 가운데 네모 상자에서 ✕ 가 둘째 줄로 떨어지지 않게 */
 .demo-tag { font-size: 14px; color: #ffcf5a; border: 1px solid #ffcf5a; padding: 2px 8px; border-radius: 10px; margin-right: auto; }
-.demo-items { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 10px; font-size: 1.15em; }
+.demo-items { display: grid; grid-template-columns: 1fr; gap: 10px; font-size: 1.15em; } /* 한 줄에 한 문제 · 가운데 상자 안에서 위아래로 */
 .demo-res { font-size: 28px; font-weight: 700; margin: 6px 0 10px; } .demo-res.ok { color: #4dffb0; } .demo-res.ng { color: #ff9a7a; }
 .demo-row { margin-top: 12px; justify-content: flex-end; }
 .teach-strike { position: absolute; left: 6%; bottom: 8%; z-index: 12; opacity: 0; transform: translate(-60px, 0) scale(1.1); transition: none; }
@@ -2081,6 +2082,11 @@ input.sv-no { width: 64px !important; display: inline-block; padding: 2px 4px; }
 .ult .u-flash { position: absolute; inset: 0; background: #fff; opacity: 0; animation: uFlash .35s 1s ease-out forwards; }
 @keyframes uFlash { 0% { opacity: 0; } 20% { opacity: .55; } 100% { opacity: 0; } }
 .ult-btn { margin: 0 0 6px; }
+.demo-strike { display: flex; flex-wrap: nowrap; justify-content: center; gap: 12px; margin: 4px 0 10px; } /* 🎮 시연 다 맞힘 → ⚔ 일반 · ⚡ 필살기 (2026-11-06) */
+.demo-strike .btn { flex: 1 1 0; width: auto; margin: 0; }
+.demo-strike .ult-go:not(:disabled) { border-image: none !important; border: 2px solid #fff3b0 !important; background-color: #ffb02e !important; background-image: linear-gradient(180deg, #ffe27a, #ff9a1f) !important; text-shadow: none; color: #2a1400 !important; border-color: #fff3b0 !important; box-shadow: 0 0 16px #ffb84a, inset 0 0 8px #fff8 !important; font-weight: 900; animation: ultGoGlow 1.2s ease-in-out infinite alternate; }
+.demo-strike .ult-go:disabled { opacity: .45; }
+@keyframes ultGoGlow { from { box-shadow: 0 0 10px #ffb84a; } to { box-shadow: 0 0 26px #ffd25a, 0 0 4px #fff; } }
 /* 💎 마정석 선물 (교사 리모컨 · 2026-11-06) */
 .gift-box { max-width: 460px; }
 .gift-amt { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 6px 0 8px; }
