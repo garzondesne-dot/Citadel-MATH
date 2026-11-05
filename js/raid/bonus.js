@@ -280,7 +280,7 @@ DS.Bonus = (function () {
         if (!ok && DS.Mis && DS.Quiz.lastGiven !== undefined) wrongs.push({ i, codes: DS.Mis.classify(items[i], DS.Quiz.lastGiven, mid === 'boss' ? DS.Mis.bossTag(L.id, attempt % 2 === 0 ? 1 : 2, i) : null) }); // 🔎 오개념 (중단원던전만 저장 · 재대결은 형성평가 꼬리표)
         if (ok) solved[i] = true; else { wrongSeen = true; anyWrong = true; }
         // ⚔ 공격 연출 (2026-11-06): 근접 = 돌진 · 원거리 = 탄 → 이펙트 · 멈칫 · 흔들림 · 밀림 (틀리면 튕겨냄 · 벌 없음) — 끝난 뒤 체력 칸을 그림
-        if (DS.Attack) { const sc = el.querySelector('.scene'); await DS.Attack.play(sc, { heroBox: sc && sc.querySelector('.enc-hero'), monBox: sc && sc.querySelector('.enc-mon'), hero: me.hero || 0, fx: me.fx || 'flame', miss: !ok, finish: ok && solved.every(Boolean), ultimate: ok && solved.every(Boolean) && roundNo === 1 && !anyWrong && DS.Attack.canUlt(me.fx || 'flame', me.hero || 0), s: 1.2 }); }
+        if (DS.Attack) { const sc = el.querySelector('.scene'); await DS.Attack.play(sc, { heroBox: sc && sc.querySelector('.enc-hero'), monBox: sc && sc.querySelector('.enc-mon'), hero: me.hero || 0, fx: me.fx || 'flame', miss: !ok, finish: ok && solved.every(Boolean), ultimate: ok && solved.every(Boolean) && roundNo === 1 && !anyWrong && DS.Attack.canUlt(me.fx || 'flame', me.hero || 0) /* 퍼펙트 완성 순간 (처치 여부와 무관 · 2026-11-06) */, s: 1.2 }); }
         else if (ok) DS.FX.play(el.querySelector('.scene'), me.fx || 'flame', { scale: 0.3 });
         if (!document.body.contains(el)) return null;
         draw(DS.Attack ? '' : ok ? 'hit' : 'miss');

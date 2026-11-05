@@ -124,7 +124,7 @@ DS.Attack = (function () {
     setPose(heroBox, hero, rest, rest === 'think' ? 'huff' : '');
   }
   const preload = (hero, fx) => { if (!DS.FX) return; DS.FX.preload(fx); const p = projOf(hero); if (p) DS.FX.preload(p); };
-  // 필살기 조건: Ⅳ 전설 · 특화 스킬 + 퍼펙트(그 전투 첫 판에 하나도 안 틀리고 모두 맞힘) + 처치 순간
+  // 필살기 조건: Ⅳ 전설 · 특화 스킬 + 퍼펙트(그 전투 첫 판에 하나도 안 틀리고 모두 맞힘) — 퍼펙트가 완성되는 공격에서 (2026-11-06: 「마지막 일격」 조건은 뺌)
   // 2026-11-06 사용자 「필살기 그리고 특화일 때만」: Ⅳ 전설 + 그 용사의 친화(특화) 계열 스킬일 때만
   const canUlt = (fx, hero) => !!(DS.FX && DS.FX.tierOf(fx) === 3 && DS.FX.resonates(hero, fx));
   return { projOf, isRanged, play, impact, fly, preload, shake, knock, cutin, canUlt };
