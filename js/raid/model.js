@@ -221,7 +221,7 @@ DS.Raid = (function () {
     return { p, strike: false };
   }
   // ⏳ 보스 타임바: 마감 = 교시 끝 (+5분 연장 한 번) · null = 제한 없음
-  const deadline = (R) => (R && R.meta && R.meta.deadline ? R.meta.deadline + (Number((R.state || {}).extend) || 0) * 60e3 : null);
+  const deadline = (R) => { const d = R && ((R.meta && R.meta.deadline) || (R.state && R.state.deadline)); return d ? d + (Number((R.state || {}).extend) || 0) * 60e3 : null; }; // state.deadline = 수업 시작 때 잡은 50분 (2026-11-06)
   const timeLeft = (R, now) => { const d = deadline(R); return d == null ? null : Math.max(0, d - now); };
   // 던전 진행: 지나온 단계 / 전체 (마무리 = 끝)
   const progress = (L, R) => { const i = (R.state || {}).step ?? -1, n = L.steps.length; return Math.max(0, Math.min(1, (i + (isEnd(L, R) || bossHp(L, R).won ? 1 : 0)) / n)); };

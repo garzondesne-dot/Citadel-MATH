@@ -42,6 +42,7 @@ DS.Act = (function () {
     // ⏳ 보스 타임바 (2026-11-05 사용자): 교시 끝 = 문 닫힘 (opt.noLimit = 시간 제한 끄기 · 시험 · 시연)
     const dl = opt.noLimit || !DS.Sched ? null : opt.slot ? DS.Sched.periodEnd(Number(opt.slot.from), Number(opt.slot.p)) : DS.Sched.periodEnd(N().now());
     if (dl) room.meta.deadline = dl;
+    if (opt.noLimit) room.meta.noLimit = true; // 2026-11-06: 시간 제한 끈 방 표시 (수업 시작 때 50분을 새로 잡지 않게)
     let think = null;
     try { think = await N().get(prepPath(lessonId, 'think')); } catch (e) { /* 기본 5초 */ }
     const Lp = DS.Lessons.get(lessonId);
@@ -82,6 +83,9 @@ DS.Act = (function () {
       const studs = Object.entries(R.players || {}).filter(([, p]) => !p.teacher).map(([u]) => u);
       if (!studs.length) fail('입장한 학생이 없어요.');
       const f0 = Raid.autoFocus(L.steps[0]), plan = DS.Combo ? DS.Combo.batPlan(L, Math.random(), Math.random()) : null;
+      // ⏳ 2026-11-06 사용자 「50분 제한이 안 보임」: 방을 교시 밖에서 열어 문 닫힘 시각이 없으면 → 수업 시작 때 그 교시 끝(없으면 지금 + 50분)
+      const dl0 = !R.meta.deadline && !R.meta.noLimit ? ((DS.Sched && DS.Sched.periodEnd(N().now())) || N().now() + 50 * 60e3) : null;
+      if (dl0) await N().set(P(code, 'state/deadline'), dl0).catch(() => {});
       await N().update(P(code), { active: Object.fromEntries(studs.map((u) => [u, true])), 'state/headcount': studs.length, 'state/step': 0, 'state/stepAt': N().TS, 'state/focus': f0, 'state/focusAt': f0 ? N().now() : null, 'state/pauseMs': null, 'state/batPlan': plan, 'state/cpAt': f0 ? N().now() : null, 'state/cpMs': 0 });
       const clss = [...new Set(studs.map((u) => (R.players[u] || {}).cls).filter(Boolean))];
       await unlockFor(L, clss);

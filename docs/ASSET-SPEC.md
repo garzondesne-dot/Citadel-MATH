@@ -259,6 +259,47 @@ Faces LEFT, feet on the cyan ground line, same position in all 3 cells.
 (3) defeated: on one knee, gavel dropped, scale tipped over, eyes dimmed. No text.
 ```
 
+### 6-9. ⚡ 필살기 컷인 · 용사 눈빛 클로즈업 18장 (2026-11-06 · 템플릿 `assets/templates/ultimate/tpl-faces.png` · 다시 만들기 `node tools/sprite/templates_v0911.js assets/templates/castle --only faces` 뒤 `ultimate/` 로 옮김)
+필살기 컷인(특화 Ⅳ + 퍼펙트)의 비스듬한 띠 안에 지나가는 얼굴. 지금은 용사 도트를 크게 확대한 임시판 → 이 그림이 오면 저절로 바뀜 (`assets/manifest.js` 에 `heroFaces` 한 줄만 넣으면 됨).
+**한 장 = 576×432 (칸 192×72 · 가로 3 × 세로 6 · 번호 순서 0~17)** · 칸마다 그 용사 도트 시트(`assets/art/hero-*.webp`)를 참고 그림으로 함께 첨부하면 머리색 · 장신구가 맞음. 한 번에 3~6명씩 나눠 뽑아도 됨 (순서만 지키면 Claude 가 이어 붙임).
+
+| 번호 | 용사 | 얼굴 특징 (도트 시트 기준) |
+|---|---|---|
+| 0 | 검사 | 갈색 삐죽머리 · 파란 눈 · 소년 |
+| 1 | 마녀 | 보라 머리 · 별 달린 보라 마녀 모자 챙 · 보라 눈 |
+| 2 | 엘프 궁수 | 갈색 머리 · 뾰족한 엘프 귀 · 초록 눈 |
+| 3 | 닌자 | 남색 머리 · 붉은 복면(코까지) · 날카로운 눈 |
+| 4 | 사제 | 연보라 머리 · 흰 두건 · 금빛 십자 장식 |
+| 5 | 창술사 | 파란 머리 + 금빛 머리띠 · 소녀 |
+| 6 | 드워프 | 주황 머리 · 짙은 눈썹 · 큰 주황 수염(코 아래 살짝) |
+| 7 | 현자 | 흰 머리 · 둥근 안경 · 주름 · 할아버지 |
+| 8 | 성기사 | 남색 머리 · 흰 · 금 투구 가장자리 |
+| 9 | 격투가 | 갈색 삐죽머리 · 붉은 머리띠 |
+| 10 | 무희 | 붉은 머리 · 꽃 머리장식 · 금빛 귀걸이 |
+| 11 | 음유시인 | 갈색 머리 · 깃털 꽂은 초록 모자 챙 |
+| 12 | 연금술사 | 주황 머리 · 이마에 고글 |
+| 13 | 해적 | 검은 머리 · 흰 깃털 단 붉은 삼각 모자 챙 · 안대 없음 |
+| 14 | 빙결 마법사 | 흰 · 하늘색 머리 · 눈꽃 장식 흰 두건 |
+| 15 | 조련사 | 갈색 머리 · 초록 깃털 꽂은 넓은 갈색 모자 챙 |
+| 16 | 금발 검사 | 금발 삐죽머리 · 파란 눈 |
+| 17 | 수학자 | 검은 머리 · 남색 깃 · 침착한 눈 |
+
+프롬프트 (6-0 머리말 먼저 · 3명씩 나눠 뽑을 때는 칸 수와 명단만 바꿈):
+```
+[STYLE BIBLE above]
+Use the attached template only for layout; do NOT draw guide lines, labels or numbers. Attached hero sprites are the reference for each face.
+Character close-up sheet for a fighting-game style "special move cut-in": native cell 192x72 px, 3 columns x 6 rows, no gaps, magenta #FF00FF background.
+Each cell = ONE hero's face cropped tight from forehead to nose, BOTH EYES on the horizontal centre line, face turned three-quarters to the RIGHT,
+eyes glaring right with fierce determination, bright eye highlights, dramatic rim light from the right, hair may be cropped by the cell edges. No mouth needed. No text.
+Order (left to right, top to bottom):
+0 swordsman boy: brown spiky hair, blue eyes | 1 witch girl: purple hair, purple witch-hat brim with a gold star | 2 elf archer: brown hair, pointed elf ears, green eyes
+3 ninja: navy hair, red cloth mask over the nose, sharp eyes | 4 priestess: lavender hair, white hood with gold cross | 5 lancer girl: blue hair with a gold headband
+6 dwarf: orange hair, thick brows, big orange beard just under the nose | 7 old sage: white hair, round glasses, wrinkles | 8 paladin: navy hair, white-and-gold helmet rim
+9 martial artist: brown spiky hair, red headband | 10 dancer: red hair with a flower ornament, gold earrings | 11 bard: brown hair, green feathered hat brim
+12 alchemist: orange hair, goggles on the forehead | 13 pirate: black hair, red tricorn hat brim with a white feather | 14 frost mage: white-and-sky-blue hair, white hood with a snowflake
+15 tamer: brown hair, wide brown hat brim with green feathers | 16 blond swordsman: blond spiky hair, blue eyes | 17 mathematician: black hair, navy collar, calm sharp eyes
+```
+
 ## 7. 넘기는 방법
 
 - 뽑은 그림은 드라이브 「학습지 > 공통수학2 > 07 에셋 원본」 에 올리고 Claude 에게 「에셋 도착」.

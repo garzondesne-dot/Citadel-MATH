@@ -163,7 +163,7 @@ DS.Student = (function () {
     if (Raid().isClosed(R)) return toCamp();
     if (!R.players || !R.players[me]) { $('#st-body').innerHTML = '<div class="panel"><p>입장 정보가 없어요. 처음 화면에서 다시 입장해 주세요.</p></div>'; return; }
     header();
-    { const tb = $('#st-tbar'); if (tb) { const sig = `${Raid().deadline(R)}|${Raid().isClosed(R)}|${Raid().bossHp(L, R).won}`; if (tb.dataset.sig !== sig) { tb.dataset.sig = sig; tb.innerHTML = test ? '' : DS.Control.tbarHtml(L, R, { mini: true, only: 10 }); } } }
+    { const tb = $('#st-tbar'); if (tb) { const sig = `${Raid().deadline(R)}|${Raid().isClosed(R)}|${Raid().bossHp(L, R).won}`; if (tb.dataset.sig !== sig) { tb.dataset.sig = sig; tb.innerHTML = test ? '' : DS.Control.tbarHtml(L, R, { mini: true, compact: true }); } } }
     focus(!test && Raid().focusOn(R) && !Raid().isLobby(R) && !Raid().restOn(R));
     if (test && test.onRender) test.onRender(L, R);
     const body = $('#st-body');

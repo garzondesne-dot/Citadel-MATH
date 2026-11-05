@@ -78,12 +78,18 @@ DS.Attack = (function () {
   }
   // ⚡ 필살기 컷인 (2026-11-06 사용자 「난무만 안 하게 · 퍼펙트 뜰 때 · Ⅳ 해금」): 화면 전체 위에 1.2초 — Ⅳ 결정석 + 퍼펙트 처치에서만 부른다
   const ULT_COLOR = { cut: ['#9fe0ff', '#0b2a40'], smash: ['#ffb070', '#3a1a06'], sweep: ['#a0ffd0', '#06301e'], fire: ['#ff7a3a', '#3a0d00'], spark: ['#fff27a', '#2a2a00'], frost: ['#b8f0ff', '#062a3a'], star: ['#ffe9a0', '#2a2206'], magic: ['#d8a0ff', '#24063a'] };
+  // 눈빛 클로즈업: assets/manifest.js heroFaces (576×432 · 칸 192×72 · 3 × 6 · 번호 = 용사 번호) 가 오면 그 그림 · 없으면 도트 확대 (2026-11-06)
+  function faceHtml(hero) {
+    const F = A().heroFaces, n = Number(hero) || 0;
+    if (F && F.src && n < F.cols * F.rows) { const c = n % F.cols, r = Math.floor(n / F.cols); return `<i class="u-facepic" style="background-image:url('${A().base}${F.src}');background-size:${F.cols * 100}% ${F.rows * 100}%;background-position:${F.cols > 1 ? (c / (F.cols - 1)) * 100 : 0}% ${F.rows > 1 ? (r / (F.rows - 1)) * 100 : 0}%"></i>`; }
+    return `<div class="u-face">${DS.Art.hero(hero, 'idle')}</div>`;
+  }
   function cutin(hero, fx) {
     if (reduce() || typeof document === 'undefined') return wait(0);
     const fam = (DS.FX.famOf(fx) || { id: 'star' }).id, [c1, c2] = ULT_COLOR[fam] || ULT_COLOR.star;
     const d = document.createElement('div'); d.className = 'ult'; d.style.setProperty('--uc', c1); d.style.setProperty('--uc2', c2);
     const crack = Array.from({ length: 9 }, (_, i) => `${(i * 12.5).toFixed(1)},${(50 + (i % 2 ? -1 : 1) * (6 + Math.random() * 10) + (i - 4) * 4).toFixed(1)}`).join(' ');
-    d.innerHTML = `<i class="u-dim"></i><div class="u-band"><div class="u-face">${DS.Art.hero(hero, 'idle')}</div><i class="u-eye" style="left:44%"></i><i class="u-eye" style="left:56%"></i></div><b class="u-name">${String(DS.FX.NAMES[fx] || '').replace(/^\S+\s/, '').replace(/[<>&]/g, '')}!</b><i class="u-flash"></i><div class="u-tear"><svg viewBox="0 0 100 100" preserveAspectRatio="none"><polyline points="${crack}" fill="none" stroke="#fff" stroke-width="1.6" style="filter:drop-shadow(0 0 2px ${c1})"/><polyline points="${crack}" fill="none" stroke="${c1}" stroke-width="0.5"/></svg></div>`;
+    d.innerHTML = `<i class="u-dim"></i><div class="u-band">${faceHtml(hero)}<i class="u-eye" style="left:44%"></i><i class="u-eye" style="left:56%"></i></div><b class="u-name">${String(DS.FX.NAMES[fx] || '').replace(/^\S+\s/, '').replace(/[<>&]/g, '')}!</b><i class="u-flash"></i><div class="u-tear"><svg viewBox="0 0 100 100" preserveAspectRatio="none"><polyline points="${crack}" fill="none" stroke="#fff" stroke-width="1.6" style="filter:drop-shadow(0 0 2px ${c1})"/><polyline points="${crack}" fill="none" stroke="${c1}" stroke-width="0.5"/></svg></div>`;
     document.body.appendChild(d);
     if (DS.Sound) { DS.Sound.sample && DS.Sound.sample('special', 0.9); setTimeout(() => DS.Sound.finish && DS.Sound.finish(), 1000); }
     setTimeout(() => d.remove(), 1500);

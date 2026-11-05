@@ -132,7 +132,7 @@ DS.Control = (function () {
   function tbarHtml(L, R, opt = {}) {
     const d = Raid().deadline(R); if (!d || Raid().isClosed(R) || Raid().isLobby(R)) return '';
     const prog = Raid().progress(L, R), ext = Number((R.state || {}).extend) || 0, won = Raid().bossHp(L, R).won || Raid().isEnd(L, R);
-    return `<div class="tb${opt.mini ? ' mini' : ''}${won ? ' won' : ''}" data-dl="${d}" data-total="${TB_TOTAL + ext * 60e3}" data-prog="${prog}"${opt.only ? ` data-only="${opt.only}"` : ''}>
+    return `<div class="tb${opt.mini ? ' mini' : ''}${opt.compact ? ' compact' : ''}${won ? ' won' : ''}" data-dl="${d}" data-total="${TB_TOTAL + ext * 60e3}" data-prog="${prog}"${opt.only ? ` data-only="${opt.only}"` : ''}>
       <div class="tb-row"><span class="tb-t">${won ? '⏰ 시간 안에 클리어!' : `⏳ <b>${hm(d)}</b> 👑 보스가 문을 닫아요`} · 남은 <b class="tb-left">--:--</b></span>${opt.ext && !ext && !won ? '<button class="btn small tb-ext" data-extend>⏰ +5분</button>' : ext ? '<span class="muted small">(+5분 연장)</span>' : ''}</div>
       <div class="tb-bar"><i class="tb-door">🚪</i><div class="tb-fill"></div><i class="tb-boss">👑</i></div>
       ${opt.prog ? `<div class="tb-prog"><div class="tb-pf" style="width:${(prog * 100).toFixed(1)}%"></div><span>⚔ 던전 진행 ${Math.round(prog * 100)}%</span></div>` : ''}</div>`;
@@ -148,9 +148,23 @@ DS.Control = (function () {
       const f = e.querySelector('.tb-fill'); if (f) f.style.width = `${(frac * 100).toFixed(2)}%`;
       const b = e.querySelector('.tb-boss'); if (b) b.style.left = `calc(${(frac * 100).toFixed(2)}% - 10px)`;
       e.classList.toggle('warn', left <= 10 * 60e3); e.classList.toggle('hot', left <= 5 * 60e3); e.classList.toggle('last', left <= 60e3 && left > 0);
+      // ⏰ 10 · 5 · 1분 남음 알림 (2026-11-06 사용자 「시간 제한 연출이 없음」): 그 순간 한 번 · 종합실 = 큰 알림 · 폰 = 작은 알림 · 마지막 1분 = 화면 테두리 붉게
+      if (!e.classList.contains('won')) {
+        const ms = left <= 0 ? 0 : left <= 60e3 ? 1 : left <= 5 * 60e3 ? 5 : left <= 10 * 60e3 ? 10 : 99, was = e.dataset.ms ? Number(e.dataset.ms) : null; e.dataset.ms = ms;
+        if (was != null && ms < was && ms > 0) tbAlert(ms, e);
+        document.body.classList.toggle('tb-last-min', ms === 1 && !!document.querySelector('.screen.active .tb[data-dl]'));
+      }
       const pf = e.querySelector('.tb-pf'); if (pf) pf.parentElement.classList.toggle('behind', Number(e.dataset.prog) + 0.02 < 1 - frac);
     });
     Object.values(timeUpFns).forEach((fn) => { try { fn(now); } catch (err) { console.error(err); } });
+  }
+  function tbAlert(min, e) {
+    const big = !!e.closest('#screen-hall');
+    const txt = min === 1 ? '⏰ 1분 남았어요! 👑 보스가 문을 닫아요!' : `⏳ ${min}분 남았어요 — 👑 보스가 문을 닫으려 해요`;
+    if (DS.Sound && DS.Sound.warn) DS.Sound.warn();
+    if (big && DS.Thrill && DS.Thrill.note) DS.Thrill.note(`<p>${min === 1 ? '⏰' : '⏳'} ${min}분 남음!</p><b>${min === 1 ? '👑 보스가 문을 닫아요 — 마지막 공격!' : '👑 보스가 문을 닫으려 해요'}</b>`, `tb-note tb-note-${min}`, 3200);
+    else if (DS.UI && DS.UI.toast) DS.UI.toast(txt, 3200);
+    e.classList.remove('ping'); void e.offsetWidth; e.classList.add('ping');
   }
   if (typeof document !== 'undefined') setInterval(tbTick, 1000);
   const bindExtend = (el, code, R) => el.querySelectorAll('[data-extend]').forEach((b) => (b.onclick = () => run(async () => { if (!confirm('⏰ 문 닫히는 시각을 5분 늦출까요? (한 번만)')) return; await Act().extendTime(code, R); DS.UI.toast('⏰ 5분 늘렸어요'); })));
