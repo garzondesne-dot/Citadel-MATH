@@ -166,7 +166,7 @@ DS.Fun = (function () {
   const heroOf = (R, u) => DS.Art.hero((R.players[u] || {}).hero || 0, 'idle', 'small');
   // 무대 그림: 종류마다 (rev = 침대 숙소 그림이 오기 전엔 CSS · ox = 다리 그림을 얼음빛으로)
   const bgOf = (kind) => (kind === 'rev' ? A().bgRev : kind === 'ox' || kind === 'quiz' ? A().bgOx || A().bg : A().bg) || null;
-  const platStyle = () => (A().plat ? ` style="background-image:url('${DS.ASSETS.base}${A().plat}')"` : '');
+  const platStyle = () => (A().plat ? ` style="background-image:url('${DS.ASSETS.base}${A().plat}')${A().platFrames > 1 ? `;background-size:${A().platFrames * 100}% auto;background-position:0 0` : ''}"` : ''); // 발판 그림 2칸 = 멀쩡 · 금 감 (2026-11-05)
   const left = (f) => Math.max(0, Math.round((f.to - N().now()) / 1000));
   if (typeof document !== 'undefined') setInterval(() => document.querySelectorAll('[data-fun-end]').forEach((e) => { e.textContent = Math.max(0, Math.round((Number(e.dataset.funEnd) - N().now()) / 1000)); }), 250);
   // 자리: 무리 안에서 i 번째 (가로 cols 칸)
@@ -216,17 +216,17 @@ DS.Fun = (function () {
     }, 1900);
     // 💥 바닥 꺼짐 (2026-11-05 사용자): 금이 감 → 발판이 조각조각 무너짐 → 용사가 빙글 떨어짐 · 먼지 · 흔들림 (폰은 내 쪽이면 진동)
     if (res.lose && f.kind !== 'quiz') setTimeout(() => {
-      const plat = root.querySelector(`.fa-plat.${res.lose}`); if (plat) { const c = document.createElement('i'); c.className = 'fa-crack'; plat.appendChild(c); }
+      const plat = root.querySelector(`.fa-plat.${res.lose}`); if (plat) { const c = document.createElement('i'); c.className = 'fa-crack'; plat.appendChild(c); if (A().platFrames > 1) plat.style.backgroundPosition = '100% 0'; } // 그림이 있으면 금 간 칸으로
       if (DS.Sound && DS.Sound.clank) DS.Sound.clank();
     }, 2000);
     if (res.lose && f.kind !== 'quiz') setTimeout(() => {
       const plat = root.querySelector(`.fa-plat.${res.lose}`);
       if (plat) {
-        const n = 6, bg = getComputedStyle(plat).backgroundImage;
+        const n = 6, bg = getComputedStyle(plat).backgroundImage, F = A().platFrames > 1 ? A().platFrames : 1; // 조각도 금 간 칸(마지막 칸)에서 자름
         plat.classList.add('broken');
         for (let i = 0; i < n; i++) {
           const pc = document.createElement('i'); pc.className = 'fa-piece';
-          pc.style.cssText = `left:${(i * 100) / n}%;width:${100 / n + 0.6}%;background-image:${bg};background-size:${n * 100}% 100%;background-position:${(i / (n - 1)) * 100}% 0;--r:${(i % 2 ? 1 : -1) * (12 + ((i * 37) % 30))}deg;--dx:${(i - n / 2) * 6}px;animation-delay:${(Math.abs(i - (n - 1) / 2) * 0.09).toFixed(2)}s`;
+          pc.style.cssText = `left:${(i * 100) / n}%;width:${100 / n + 0.6}%;background-image:${bg};background-size:${n * F * 100}% ${F > 1 ? 'auto' : '100%'};background-position:${F > 1 ? (((F - 1) * n + i) / (F * n - 1)) * 100 : (i / (n - 1)) * 100}% 0;--r:${(i % 2 ? 1 : -1) * (12 + ((i * 37) % 30))}deg;--dx:${(i - n / 2) * 6}px;animation-delay:${(Math.abs(i - (n - 1) / 2) * 0.09).toFixed(2)}s`;
           plat.appendChild(pc);
         }
         const dust = document.createElement('i'); dust.className = 'fa-dust'; plat.appendChild(dust);

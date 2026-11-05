@@ -593,6 +593,18 @@ i.shadow { display: block; position: absolute; left: 50%; bottom: -4px; width: 7
 .mc-plate { display: flex; align-items: center; justify-content: center; }
 .mc-plate b { font-size: 28px; color: #ffe7a8; text-shadow: 0 2px 0 #000; white-space: nowrap; }
 .mc-plate b.long { font-size: 22px; }
+/* 카드 v2 틀 (2026-11-05): 그림 컬러 그대로 · 수식 = 가운데 띠 · 뜻 = 위 창 아래쪽 · 이름판 = 밝은 양피지 */
+.mcard.v2 .mc-art { filter: none; background-repeat: no-repeat; image-rendering: pixelated; }
+.mcard.v2.unknown .mc-art { filter: grayscale(1) brightness(.3); }
+.mcard.v2 .mc-top { display: flex; justify-content: space-between; align-items: center; }
+.mcard.v2 .mc-tag { position: static; font-size: 15px; padding: 0 6px; }
+.mcard.v2 .mc-page { position: static; font-size: 14px; }
+.mc-desc2 { display: flex; align-items: center; justify-content: center; text-align: center; overflow: hidden; color: #d6e2fb; font-size: 17px; line-height: 1.25; }
+.mc-desc2 .mc-hint { font-size: 15px; padding: 0; }
+.mc-fm2 { display: flex; align-items: center; justify-content: center; text-align: center; overflow: hidden; color: #fff; }
+.mcard.v2 .mc-fm { font-size: 34px; line-height: 1.1; } .mcard.v2 .mc-fm.mid { font-size: 26px; } .mcard.v2 .mc-fm.long { font-size: 18px; }
+.mcard.v2 .mc-q { font-size: 40px; color: #6b7a99; }
+.mcard.v2 .mc-plate b { color: #4a2c0a; text-shadow: 0 1px 0 #fff5d6; font-size: 26px; } .mcard.v2 .mc-plate b.long { font-size: 19px; }
 .mcard.g1 { --gc: #f0f4ff; } .mcard.g2 { --gc: #6ab6ff; } .mcard.g3 { --gc: #c38cff; }
 .mcard.g2 .mcard-in, .mcard.g3 .mcard-in { filter: drop-shadow(0 0 10px var(--gc)); }
 /* 모루 연성창 */
@@ -1870,7 +1882,7 @@ input.sv-no { width: 64px !important; display: inline-block; padding: 2px 4px; }
 /* 📱 교사 리모컨 아이콘 4칸 (2026-11-05) */
 .rg { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 10px 0 4px; }
 .rg-b { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 10px 2px 8px; border-radius: 12px; background: #1a2342; border: 2px solid #c9a24a; color: #f2e6c8; font: inherit; cursor: pointer; }
-.rg-b i { font-style: normal; font-size: 26px; line-height: 1; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; }
+.rg-b i { font-style: normal; font-size: 26px; line-height: 1; }
 .rg-b span { font-size: 13px; white-space: nowrap; }
 .rg-b.on { background: #c9a24a; color: #1a1408; }
 .rg-b:disabled { opacity: .35; cursor: default; }
@@ -1920,7 +1932,8 @@ input.sv-no { width: 64px !important; display: inline-block; padding: 2px 4px; }
 @keyframes faTumble { to { transform: rotate(540deg) scale(.7); } }
 .fa-arena.fa-quake { animation: shake .1s linear 6; }
 /* 이모지 글꼴 (교실 TV · 안드로이드 보드): 기본 글꼴(Galmuri)이 일부 이모지를 빈칸으로 그려서 이모지 자리엔 시스템 이모지 글꼴 먼저 */
-.th-emo, .th-combo b, .th-note p, .th-perfect b, .th-bat-t, .th-chest-t, .pm-head b, .rg-b i { font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Galmuri11", sans-serif; }
+/* 이모지는 도트 아이콘으로 바뀜(ui.emoji · 2026-11-05) → 이모지 글꼴을 앞에 두면 숫자가 회색 이모지 숫자로 벌어져 보여서 뺌 */
+.th-emo, .th-combo b, .th-note p, .th-perfect b, .th-bat-t, .th-chest-t, .pm-head b, .rg-b i { font-family: "Galmuri11", sans-serif; }
 .th-bat .th-spr { width: 128px; height: 128px; }
 .th-bat-card .th-spr { width: 96px; height: 96px; }
 .th-chest-box .th-spr { width: 128px; height: 128px; }
@@ -1934,3 +1947,21 @@ input.sv-no { width: 64px !important; display: inline-block; padding: 2px 4px; }
 .t-now .fun-ctl.pick > span { grid-column: 1 / -1; }
 .t-now .fun-ctl.pick .btn { width: 100%; margin: 0; padding: 8px 2px; font-size: 13px; }
 .bitem.spent { opacity: .6; border-style: dashed; } /* 👑 형성평가 기회를 다 쓴 문항 (2026-11-05) */
+
+/* 2026-11-05 사용자 그림: 🔥 콤보 창 4단계 (가운데 어두운 칸에 숫자) */
+.th-combo.fr { width: 112px; height: 58px; min-width: 0; padding: 25px 0 0; border: 0; border-radius: 0; box-shadow: none; background: transparent no-repeat; background-size: 400% 100%; image-rendering: pixelated; overflow: visible; }
+.th-combo.fr b { font-size: 16px; line-height: 1; color: #fff3c4 !important; background: none !important; -webkit-text-fill-color: currentColor; text-shadow: 0 0 6px #ff9a3a, 0 2px 0 #000; font-family: inherit; letter-spacing: 0; } .th-combo.fr span { font-size: 7px; display: block; line-height: 1.1; letter-spacing: 1px; }
+.th-combo.fr i { left: 22%; bottom: 8px; max-width: 56%; height: 2px; }
+.th-combo.fr.tier-none { filter: saturate(.5) brightness(.85); }
+.th-combo.fr.big { width: 224px; height: 116px; padding-top: 50px; } .th-combo.fr.big b { font-size: 31px; } .th-combo.fr.big span { font-size: 12px; } .th-combo.fr.big i { bottom: 18px; height: 4px; }
+.th-combo.fr.tier-crown { animation: none; filter: drop-shadow(0 0 10px #ffd70088); }
+/* 🏁 경주 트랙 그림 (종합상황실 큰 화면): 그림의 왼쪽 판 = 반 이름 · 출발선 · 결승선 · 달리는 칸 위치에 맞춤 */
+.rc-ov .rc-track.img, .rc-ov.big .rc-track.img { aspect-ratio: 16 / 9; width: min(100%, calc(78vh * 16 / 9)); margin: 0 auto; background-size: 100% 100%; image-rendering: pixelated; display: flex; flex-direction: column; padding: 10.7% 3.6% 9.4% 2.9%; box-sizing: border-box; }
+.rc-track.img .rc-start, .rc-track.img .rc-goal { display: none; }
+.rc-track.img .rc-lane { flex: 1; height: auto !important; min-height: 0; border-bottom: 0; grid-template-columns: 16.4% 1fr !important; }
+.rc-track.img .rc-name { text-align: center; }
+.rc-track.img .rc-run { margin-left: 4.6%; margin-right: 1%; }
+.rc-track.img .rc-hero .art { transform: scale(1.1); }
+/* ⚖ 발판 그림 2칸 (멀쩡 · 금 감): 금 그림은 그림 칸이 대신 */
+.fa-arena.pimg .fa-plat, .fa-arena.img.pimg .fa-plat { background-repeat: repeat-y !important; image-rendering: pixelated; } /* 발판 그림을 세로로 쌓아 층층 발판 (용사 줄마다 한 층) */
+.fa-arena.pimg .fa-crack { display: none; }

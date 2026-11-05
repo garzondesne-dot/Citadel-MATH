@@ -2,7 +2,7 @@
 //   점수 = 참여 25 · 고침 25 · 콤보 20 · 첫 시도 20 · 돕기 10 (DS.Combo.punch · 0~1000) · 같은 차시를 한 반끼리
 //   다른 반이 이 차시를 아직 안 했으면 그 반의 가장 가까운 차시 기록으로 함께 달림 (레인에 「n차시 기록」 표시)
 //   연출: 반마다 레인 하나 · 그 반 용사가 왼쪽에서 출발 · 지나간 자리에 게이지가 늘어남 · 모두 같은 속도라 점수 자리에서 멈춤 → 1등 🏆 · 꼴찌 대신 「도전 중」
-//   이모지는 교실 TV 에서 안 보일 수 있어 글자 · CSS 로 (그림이 오면 assets/manifest.js thrill.track)
+//   경주 트랙 그림(thrill.track · 2026-11-05 사용자)은 종합상황실 큰 화면(opt.big)에서만 — 폰은 칸이 좁아 CSS 트랙 그대로
 window.DS = window.DS || {};
 
 DS.Punch = (function () {
@@ -41,7 +41,7 @@ DS.Punch = (function () {
     const o = document.createElement('div'); o.className = `pm-ov rc-ov${opt.big ? ' big' : ''}`;
     o.innerHTML = `<div class="pm rc">
       <div class="pm-head"><b>🏁 반대항 경주</b><span>${L.no ? `${L.no}차시 ` : ''}${esc(L.title)}${opt.overtime ? ' · ⏳ 연장전 결과' : ''}</span><button class="btn small pm-x">닫기</button></div>
-      <div class="rc-track"${A.track ? ` style="background-image:url('${DS.ASSETS.base}${A.track.src}')"` : ''}>
+      <div class="rc-track${A.track && opt.big ? ' img' : ''}"${A.track && opt.big ? ` style="background-image:url('${DS.ASSETS.base}${A.track.src}')"` : ''}>
         <i class="rc-start"></i><i class="rc-goal"></i>
         ${lanes.map((r, i) => `<div class="rc-lane${me && r === me ? ' me' : ''}${r.near ? ' near' : ''}" data-i="${i}">
           <div class="rc-name"><b>${esc(r.cls)}반</b>${r.near ? `<small>${noOf(r.near)}차시 기록</small>` : r.ot ? '<small>연장전 중</small>' : ''}</div>

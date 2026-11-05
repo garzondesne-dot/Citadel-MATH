@@ -139,7 +139,7 @@ DS.App = (function () {
       hero = m.hero;
       box.innerHTML = `<div class="acc-card"><b>${esc(m.c)} · ${m.n}번 ${esc(m.name)}</b><span class="muted small">로그인됨</span></div>
         <div class="me-hero">${DS.Art.hero(m.hero, 'idle', 'big huff')}<div><p class="gold">내 용사 · ${DS.FX.NAMES[m.fx] || ''}</p><p class="muted small">모닥불 ⚙ 설정에서 바꿀 수 있어요</p></div></div>
-        <button id="s-go" class="btn primary big">🔥 모닥불로 가기</button>
+        <button id="s-go" class="btn primary big">🪵 모닥불로 가기</button>
         <button id="s-out" class="btn small">다른 사람으로 로그인</button>`;
       $('#s-go').onclick = go(() => DS.Camp.enter(m, q.get('code')));
       $('#s-out').onclick = go(async () => { await A().logout(); studentAuth(); });

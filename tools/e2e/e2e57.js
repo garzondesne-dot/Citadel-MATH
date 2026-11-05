@@ -66,7 +66,7 @@ const RIGHT = `(p) => (p.type === 'blanks' ? p.items.map((i) => i.answer) : p.ty
       await DS.Net.set(`rooms/${code}/subs/r1/${u}/0`, DS.Net.pack(DS.Raid.itemsFor(L, R, 'r1', u, 0).map(right)));
       await DS.Net.set(`rooms/${code}/hits/${u}/m_r1_0`, { at: DS.Net.TS, ac: DS.Combo.activeNow(R, DS.Net.now()) }); await new Promise((r) => setTimeout(r, 120)); } }, { code, RIGHT });
   await H.waitForTimeout(900);
-  const hc = await H.evaluate(() => ({ combo: (document.querySelector('#h-combo') || {}).textContent || '', note: (document.querySelector('.th-note') || {}).textContent || '', atk: (document.querySelector('#rh-atk span') || {}).textContent || '' }));
+  const hc = await H.evaluate(() => { const T = (e) => (e ? [...e.childNodes].map((n) => (n.nodeType === 3 ? n.nodeValue : n.dataset && n.dataset.ic === 'chain' ? '⛓' : n.textContent)).join('') : ''); return { combo: (document.querySelector('#h-combo') || {}).textContent || '', note: (document.querySelector('.th-note') || {}).textContent || '', atk: T(document.querySelector('#rh-atk span')) }; });
   await H.screenshot({ path: `${OUT}/7-hall-combo.png` });
   const sc = await S.evaluate(() => (document.querySelector('#st-combo') || {}).textContent || '');
   await S.screenshot({ path: `${OUT}/8-phone-combo.png` });
