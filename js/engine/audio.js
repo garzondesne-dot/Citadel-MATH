@@ -3,7 +3,11 @@
 window.DS = window.DS || {};
 
 DS.Sound = (function () {
-  let ctx = null, master = null, noiseBuf = null, muted = false;
+  // 🔇 2026-11-06: 효과음 · 배경음을 따로 끔 (이 기기에 기억) · 종합실은 교사 리모컨이 덮어씀(remote)
+  const LS = (k, v) => { try { if (v === undefined) return localStorage.getItem(k) === '1'; localStorage.setItem(k, v ? '1' : '0'); } catch (e) { /* 저장 못 하면 이번만 */ } return false; };
+  let ctx = null, master = null, noiseBuf = null, sfxOff = typeof localStorage !== 'undefined' && LS('ds-sfx-off'), bgmOff = typeof localStorage !== 'undefined' && LS('ds-bgm-off');
+  const listeners = [];
+  const changed = () => listeners.forEach((f) => { try { f({ sfx: !sfxOff, bgm: !bgmOff }); } catch (e) { /* 무시 */ } });
 
   function ensure() {
     if (!ctx) {
@@ -20,7 +24,7 @@ DS.Sound = (function () {
 
   function tone({ type = 'sine', f0, f1 = f0, dur = 0.2, vol = 0.3, delay = 0 }) {
     const c = ensure();
-    if (!c || muted) return;
+    if (!c || sfxOff) return;
     const t = c.currentTime + delay;
     const o = c.createOscillator(), g = c.createGain();
     o.type = type;
@@ -35,7 +39,7 @@ DS.Sound = (function () {
 
   function noise({ dur = 0.2, vol = 0.3, freq = 2000, sweepTo, q = 1, type = 'bandpass', delay = 0 }) {
     const c = ensure();
-    if (!c || muted) return;
+    if (!c || sfxOff) return;
     if (!noiseBuf) {
       noiseBuf = c.createBuffer(1, c.sampleRate, c.sampleRate);
       const d = noiseBuf.getChannelData(0);
@@ -67,7 +71,7 @@ DS.Sound = (function () {
     loading[k] = fetch(u).then((r) => r.arrayBuffer()).then((a) => new Promise((res, rej) => c.decodeAudioData(a, res, rej))).then((b) => { buf[k] = b; }).catch(() => {}).finally(() => { delete loading[k]; });
   }
   function sample(k, vol = 0.9, fb) {
-    if (muted) return true;
+    if (sfxOff) return true;
     const c = ensure(); if (!c) return false;
     if (buf[k]) { const s = c.createBufferSource(), g = c.createGain(); s.buffer = buf[k]; g.gain.value = vol; s.connect(g).connect(master); s.start(); return true; }
     load(k); if (fb) fb(); return false;
@@ -77,21 +81,27 @@ DS.Sound = (function () {
   let bgmEl = null, bgmKey = null;
   function bgm(k) {
     if (typeof Audio === 'undefined') return;
-    if (bgmKey === k && bgmEl) { if (!muted && bgmEl.paused && !document.hidden) bgmEl.play().catch(() => {}); return; }
+    if (bgmKey === k && bgmEl) { if (!bgmOff && bgmEl.paused && !document.hidden) bgmEl.play().catch(() => {}); return; }
     if (bgmEl) { bgmEl.pause(); bgmEl = null; } bgmKey = k || null;
     const u = k && sfxUrl(k); if (!u) return;
     bgmEl = new Audio(u); bgmEl.loop = true; bgmEl.volume = 0.22;
-    if (!muted && !document.hidden) bgmEl.play().catch(() => {});
+    if (!bgmOff && !document.hidden) bgmEl.play().catch(() => {});
   }
   // 첫 터치 때 소리 장치를 깨우고 녹음 소리를 미리 받음 (0.5MB 안쪽 · 배경음은 성채 · 허수아비에서만)
   if (typeof document !== 'undefined') document.addEventListener('pointerdown', () => { ensure(); preload(); }, { once: true, capture: true });
-  if (typeof document !== 'undefined') document.addEventListener('visibilitychange', () => { if (!bgmEl) return; if (document.hidden) bgmEl.pause(); else if (!muted) bgmEl.play().catch(() => {}); });
+  if (typeof document !== 'undefined') document.addEventListener('visibilitychange', () => { if (!bgmEl) return; if (document.hidden) bgmEl.pause(); else if (!bgmOff) bgmEl.play().catch(() => {}); });
   // 공격 계열 → 맞는 소리
   const FAM_SFX = { cut: 'cut', smash: 'smash', sweep: 'sweep', wind: 'wind', fire: 'fire', spark: 'spark', frost: 'frost', star: 'star', magic: 'magic' };
 
   return {
     unlock() { const c = ensure(); preload(); return c; },
-    toggle() { muted = !muted; if (bgmEl) { if (muted) bgmEl.pause(); else bgmEl.play().catch(() => {}); } return muted; },
+    toggle() { const off = !(sfxOff && bgmOff); this.setSfx(!off); this.setBgm(!off); return off; },
+    // 🔇 효과음 · 배경음 따로 (on = 켜기) · keep = false 면 이 기기에 저장 안 함 (교사 리모컨이 종합실을 바꿀 때)
+    setSfx(on, keep = true) { sfxOff = !on; if (keep) LS('ds-sfx-off', sfxOff); changed(); },
+    setBgm(on, keep = true) { bgmOff = !on; if (keep) LS('ds-bgm-off', bgmOff); if (bgmEl) { if (bgmOff) bgmEl.pause(); else if (!document.hidden) bgmEl.play().catch(() => {}); } changed(); },
+    get sfxOn() { return !sfxOff; },
+    get bgmOn() { return !bgmOff; },
+    onChange(f) { listeners.push(f); },
     sample, preload, bgm,
     // ⚔ 공격 소리 (attack.js): 휘두름 · 발사 · 맞음(이펙트 계열) · 막힘 · 처치
     swing() { sample('swing', 0.6, () => noise({ dur: 0.25, vol: 0.25, freq: 600, sweepTo: 3500, q: 0.8 })); },
@@ -100,7 +110,7 @@ DS.Sound = (function () {
     finish() { sample('finish', 0.95, () => { noise({ dur: 0.45, vol: 0.5, freq: 4500, sweepTo: 400 }); tone({ type: 'sine', f0: 75, f1: 30, dur: 0.45, vol: 0.6 }); }); },
     coin() { sample('coin', 0.7, () => tone({ type: 'square', f0: 1320, f1: 1980, dur: 0.12, vol: 0.08 })); },
     levelup() { sample('levelup', 0.85, () => [523, 659, 784, 1047].forEach((f, i) => tone({ type: 'triangle', f0: f, dur: 0.45, vol: 0.18, delay: i * 0.12 }))); },
-    get muted() { return muted; },
+    get muted() { return sfxOff && bgmOff; },
 
     card() { noise({ dur: 0.06, vol: 0.15, freq: 5000 }); },
     tick() { tone({ type: 'square', f0: 1300, f1: 1250, dur: 0.025, vol: 0.05 }); }, // 🥊 펀치 기계 숫자 돌기 (v0.9.11)

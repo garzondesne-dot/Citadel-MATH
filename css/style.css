@@ -2090,3 +2090,13 @@ input.sv-no { width: 64px !important; display: inline-block; padding: 2px 4px; }
 .gift-st.on { border-color: #7cf; background: #0f2a4a; box-shadow: 0 0 8px #7cf8; }
 .gift-st b { color: #ffd25a; }
 .gift-go { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+/* 🔇 소리 버튼 (2026-11-06): 왼쪽 가장자리 작은 탭 · 어느 화면에서나 */
+#snd-tab { position: fixed; left: 0; top: 42%; z-index: 95; width: 30px; height: 34px; padding: 0; border: 1px solid #4a5a8a; border-left: 0; border-radius: 0 8px 8px 0; background: #0b1630cc; color: #fff; font-size: 16px; line-height: 32px; cursor: pointer; opacity: .75; }
+#snd-tab:hover, #snd-tab:focus-visible { opacity: 1; }
+#snd-tab.off { background: #3a1010cc; }
+#snd-pop { position: fixed; left: 34px; top: calc(42% - 30px); z-index: 96; display: grid; gap: 6px; padding: 8px; border: 2px solid var(--gold, #ffd25a); border-radius: 8px; background: #0b1630f2; box-shadow: 0 4px 16px #000a; font: 13px var(--pixel, sans-serif); color: #fff; }
+#snd-pop b { color: var(--gold, #ffd25a); font-size: 12px; }
+#snd-pop button { display: flex; justify-content: space-between; gap: 12px; min-width: 150px; padding: 8px 10px; border: 2px solid #4a5a8a; border-radius: 6px; background: #1a1418; color: #aaa; font: inherit; cursor: pointer; }
+#snd-pop button.on { background: #0f2a4a; border-color: #7cf; color: #fff; }
+#snd-pop button i { font-style: normal; color: #ffd25a; }
+.t-snd { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px; }

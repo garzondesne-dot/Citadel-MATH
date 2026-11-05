@@ -112,6 +112,7 @@ DS.Act = (function () {
   const setThink = (lessonId, sec) => N().set(prepPath(lessonId, 'think'), Number(sec));
   // 📄 문제 화면: 종합상황실에 지금 문제의 학습지 이미지를 크게 (교사 해설용, 레이드는 뒤에서 계속)
   const setSheet = (code, on) => N().set(P(code, 'state/sheet'), on ? true : null);
+  const setSound = (code, v) => N().set(P(code, 'state/sound'), { sfx: !!v.sfx, bgm: !!v.bgm }); // 🔇 2026-11-06: 교사 리모컨 → 종합실 효과음 · 배경음
   async function setVideoOn(code, stepId) { // 🎬 큰 화면에 설명 영상 (null = 닫기) · 🔥 콤보 시계 멈춤 (v0.9.11)
     const st = (await N().get(P(code, 'state'))) || {};
     await N().update(P(code, 'state'), { video: stepId || null, ...cp(st, { video: stepId || null }) });
@@ -315,5 +316,5 @@ DS.Act = (function () {
     return out;
   }
 
-  return { bossTry, openRooms, savePunch, finishOvertime, setPunchOff, punchOff, batTick, batAnswer, hit, endClassAsk, timeUp, extendTime, openRift, cutShort, setRest, setRestMin, markBossWin, prepLite, prepImg, hasImg, setVideoFile, setVideoOn, endClass, admitLate, getPrep, setImage, setVideo, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, heal, bossAnswer, unpackRoom, P };
+  return { setSound, bossTry, openRooms, savePunch, finishOvertime, setPunchOff, punchOff, batTick, batAnswer, hit, endClassAsk, timeUp, extendTime, openRift, cutShort, setRest, setRestMin, markBossWin, prepLite, prepImg, hasImg, setVideoFile, setVideoOn, endClass, admitLate, getPrep, setImage, setVideo, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, heal, bossAnswer, unpackRoom, P };
 })();

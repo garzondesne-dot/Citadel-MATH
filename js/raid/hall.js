@@ -27,6 +27,7 @@ DS.Hall = (function () {
       if (DS.Act.isHost(R)) { DS.Act.admitLate(code, R, L); DS.Act.markBossWin(code, R, L); }
       if (first) { if (stopPrep) stopPrep(); stopPrep = DS.Net.watch(`prep/${L.id}`, (p) => { prep = p || {}; built = ''; if (R) render(); }); }
       xpHall(); lvHall(); ulHall();
+      { const sd = (R.state || {}).sound, key = sd ? `${sd.sfx}|${sd.bgm}` : ''; if (key && key !== sndKey && DS.Sound) { sndKey = key; DS.Sound.setSfx(sd.sfx !== false, false); DS.Sound.setBgm(sd.bgm !== false, false); } } // 🔇 교사 리모컨 → 종합실 소리
       render();
       thrillHall();
       // v0.9.2: 종합상황실은 교사 캠프(학생 입장 QR · 모루 · 보강던전)에서 시작 — 수업이 시작되면 저절로 이 화면으로
@@ -34,7 +35,7 @@ DS.Hall = (function () {
     });
   }
   // 🆙 몬스터가 쓰러질 때 공격한 용사들 머리 위 +EXP · 🎉 레벨업 알림 (2026-11-05 · 좋은 순간만 크게 · 레벨 목록 · 순위는 안 보임)
-  let hxSeen = null, lvSeen = null, lvQ = [], lvBusy = false, ulSeen = null, ulQ = [], ulBusy = false;
+  let hxSeen = null, lvSeen = null, lvQ = [], lvBusy = false, ulSeen = null, ulQ = [], ulBusy = false, sndKey = '';
   function xpHall() {
     if (!L || !R) return;
     const ids = L.steps.filter((s) => s.kind === 'monster' && L.monsters[s.id]).map((s) => s.id), first = !hxSeen;
