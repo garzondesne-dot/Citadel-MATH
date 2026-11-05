@@ -13,7 +13,7 @@
 const fs = require('fs'), path = require('path');
 const { driveToken } = require('./google');
 const API = 'https://www.googleapis.com/drive/v3', UP = 'https://www.googleapis.com/upload/drive/v3';
-const MIME = { '.pdf': 'application/pdf', '.mp4': 'video/mp4', '.png': 'image/png', '.webp': 'image/webp', '.json': 'application/json', '.gif': 'image/gif', '.zip': 'application/zip' };
+const MIME = { '.pdf': 'application/pdf', '.mp4': 'video/mp4', '.png': 'image/png', '.webp': 'image/webp', '.json': 'application/json', '.gif': 'image/gif', '.zip': 'application/zip', '.pptx': 'application/vnd.openxmlformats-officedocument.presentationml.presentation' };
 async function call(url, opt = {}) {
   const r = await fetch(url, { ...opt, headers: { Authorization: `Bearer ${await driveToken()}`, ...(opt.headers || {}) } });
   if (!r.ok) throw new Error(`드라이브 ${r.status}: ${(await r.text()).slice(0, 300)}`);

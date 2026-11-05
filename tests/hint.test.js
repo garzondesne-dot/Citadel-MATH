@@ -3,12 +3,12 @@ const load = require('./load');
 const DS = load(['assets/manifest.js', 'js/engine/ui.js', 'js/engine/setgen.js', 'js/engine/quiz.js', 'js/engine/hint.js', 'js/engine/lessons.js', 'lessons/set-05.js', 'lessons/set-06.js']);
 let fail = 0, count = 0, figs = 0;
 const check = (c, m) => { count++; if (!c) { fail++; if (fail <= 20) console.error('FAIL:', m); } };
-const want = { 'set-05': { m1: 1, m2: 1, m3: 1, m5: 1 }, 'set-06': { m1: 1, m2: 1, m3: 1, m6: 1, b1: 1, m4: 0, m42: 0, m5: 0 } };
+const want = { 'set-05': { m1: 1, m2: 1, m3: 1, m5: 1 }, 'set-06': { m1: 1, m2: 1, m3: 1, m6: 1, b1: 1, m4: 0, m42: 0, m5: 0, u4: 0, u5: 0, u6: 0, u7: 0 } };
 for (const [lid, mons] of Object.entries(want)) {
   const L = DS.Lessons.get(lid);
   for (const [mid, has] of Object.entries(mons)) for (let s = 0; s < 60; s++) for (const a of [0, 1, 2]) L.items(mid, `h${s}`, a).forEach((q, i) => {
     const tag = `${lid} ${mid}#${s}.${a}.${i}`, svg = DS.Hint.svg(q);
-    if (!has) { check(svg === null, `${tag}: 명제 문제에 그림이 나옴`); return; }
+    if (!has) { check(svg === null, `${tag}: 그림 없는 문제(명제 · 중단원)에 그림이 나옴`); return; }
     if (q.type === 'choice' && q.check && q.check.eq) return; // 5차시 m2 「같은 집합?」 고르기는 그림 없어도 됨
     check(typeof svg === 'string' && svg.startsWith('<svg'), `${tag}: 그림 없음`); if (svg) figs++;
     const k = q.check || {};

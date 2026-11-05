@@ -19,7 +19,7 @@ DS.Note = (function () {
     if (!rec) { mons = ids.map(() => 'a'); boss = Array.from({ length: nb }, (_, i) => (i < hp ? 'a' : '')); }
     else {
       const miss = Array.isArray(rec.miss) ? rec.miss : Object.values(rec.miss || {}); // DB 는 배열을 객체로 줄 때가 있음
-      mons = ids.map((id) => (rec.mons && rec.mons[id]) || (miss.includes(id) ? 'x' : 'o')); // 옛 기록(문제별 칸 없음): 못 맞힌 몬스터만 x
+      mons = ids.map((id) => (rec.mons ? rec.mons[id] || 'n' : miss.includes(id) ? 'x' : 'o')); // 옛 기록(문제별 칸 없음): 못 맞힌 몬스터만 x · 칸은 있는데 그 몬스터가 없음 = 차시가 바뀐 뒤 새로 생긴 문제 → 안 풂(n) (2026-11-05 · 6차시 v3)
       const bm = rec.bossM || (() => { const k = Math.min(Number(rec.boss) || 0, hp); return Array.from({ length: hp }, (_, i) => (i < k ? 'o' : rec.boss ? 'x' : '-')).join(''); })();
       boss = Array.from({ length: nb }, (_, i) => bm[i] || (i < hp ? '-' : ''));
     }

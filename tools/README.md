@@ -22,9 +22,11 @@
 
 | 파일 | 하는 일 |
 |---|---|
-| `gen_ws5.py` | 5차시 레이드용 v3 생성기 (`style.css.txt` 양식). 새 차시 = 복사해서 내용만 바꾼다. `python3 tools/worksheet/gen_ws5.py` → `ws5-raid-v3.html` |
+| `gen_ws6v3.py` | ⭐ **기준 양식 (2026-11-05 · 사용자 PDF)** 6차시 레이드용 v3 · wslib 조판. **새 차시 = 이 파일을 복사해서 내용만 바꾼다.** `bash tools/worksheet/setup_wslib.sh` 뒤 `PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers python3 tools/worksheet/gen_ws6v3.py <출력.pdf>` (단 아래끝 mm 출력) |
+| `crops_pdf.py` | 완성 PDF 에서 칸 위치(crops) 재기 (글자 위치 · 같은 단 다음 칸 / ✏ 메모 / 🏰 까지): `python3 tools/worksheet/crops_pdf.py <pdf> '{"c1":"STEP 1","m1":"문제 1)","boss":"6차시 형성평가"}' --png <확인 폴더>` → 빨간 상자 그림으로 확인 뒤 차시 파일 `crops` 에 |
+| `gen_ws5.py` 등 | 옛 양식(`style.css.txt`) 생성기 — 지난 차시 기록용 · 새 차시에는 쓰지 않음 |
 | `pdf.js` | HTML → A4 PDF + 칸마다 남는 공간(음수 = 넘침) 출력: `node tools/worksheet/pdf.js <html 절대경로> <pdf 경로>` |
-| `measure_crops.js` | 개념 · 문제 칸 위치(crops) 재기: `node tools/worksheet/measure_crops.js <html> '{"c1":"STEP 1 ...","m1":"문제 1)"}'` → 차시 파일 `crops` 에 붙인다 |
+| `measure_crops.js` | (옛 양식 HTML 용) 개념 · 문제 칸 위치(crops) 재기: `node tools/worksheet/measure_crops.js <html> '{"c1":"STEP 1 ...","m1":"문제 1)"}'` → 차시 파일 `crops` 에 붙인다 |
 
 - 꼬리표: `게임: 몬스터 n` · `게임: 보강던전 ①` · `게임: 보스` · 보강은 보라 상자 · 형성평가는 문항마다 풀이 공간 (사진용 답 칸 없음, 사용자 결정)
 - 완성본은 드라이브 「학습지 > 공통수학2 > 02 레이드학습지」에 「(0n차시) 레이드용_vN.pdf」 이름으로 사용자가 올린다

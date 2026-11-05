@@ -5,3 +5,4 @@ tools/worksheet/*.pdf
 tools/qr/*.pdf
 _demo-record.html
 __pycache__/
+tools/worksheet/ws*.html
