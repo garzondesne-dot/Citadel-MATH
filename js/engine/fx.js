@@ -9,6 +9,7 @@ DS.FX = (function () {
     { id: 'cut', name: '⚔ 베기', ids: ['cut', 'moon', 'slash', 'twin'] },
     { id: 'smash', name: '🔨 강타', ids: ['bash', 'upper', 'hammer', 'quake'] },   // 2026-11-06 근접 계열 추가 (사용자)
     { id: 'sweep', name: '🌪 연격', ids: ['thrust', 'sweep', 'spin', 'reap'] },
+    { id: 'wind', name: '🌬 바람', ids: ['wblade', 'gale', 'leaf', 'cyclone'] },  // 2026-11-06 엘프 궁수 특화 (사용자)
     { id: 'fire', name: '🔥 불', ids: ['flame', 'ring', 'fire', 'pillar'] },
     { id: 'spark', name: '⚡ 번개', ids: ['spark', 'chain', 'lightning', 'thunder'] },
     { id: 'frost', name: '❄ 얼음', ids: ['frost', 'spikes', 'ice', 'nova'] },
@@ -28,6 +29,7 @@ DS.FX = (function () {
     cut: '⚔ 베기', moon: '⚔ 달빛 베기', slash: '⚔ 삼연 참격', twin: '⚔ 쌍월 참',
     bash: '🔨 강타', upper: '🔨 올려치기', hammer: '🔨 망치 내려치기', quake: '🔨 대지 분쇄',
     thrust: '🌪 찌르기', sweep: '🌪 휩쓸기', spin: '🌪 회전 베기', reap: '🌪 사신의 낫',
+    wblade: '🌬 바람 칼날', gale: '🌬 질풍', leaf: '🌬 나뭇잎 폭풍', cyclone: '🌬 대선풍',
     flame: '🔥 불꽃', ring: '🔥 불꽃 고리', fire: '🔥 화염 폭발', pillar: '🔥 화염 기둥',
     spark: '⚡ 번개', chain: '⚡ 연쇄 번개', lightning: '⚡ 천둥 낙뢰', thunder: '⚡ 뇌명',
     frost: '❄ 얼음', spikes: '❄ 얼음 가시', ice: '❄ 얼음 파쇄', nova: '❄ 서리 폭발',
@@ -38,8 +40,9 @@ DS.FX = (function () {
   const famOf = (k) => FAMS.find((f) => f.ids.includes(k)) || null;
   // 💎 결정석 (2026-11-06 사용자 확정 C): 용사마다 결정석 1칸 · 같은 결정석을 여러 용사에 동시에 · 빼면 보관함으로 (회수, 비용 0)
   //   친화 계열 ★ = 용사마다 1개 — 친화 결정석을 끼우면 「공명」(이펙트 조금 크게 + 용사 빛) · 연출만, 데미지 · 보상 같음
+  //   2026-11-06 🌬 바람 = 엘프 궁수 · 닌자 (질풍 닌자)
   //   2026-11-06 (근접 계열 2개 추가): 근접 용사는 근접 계열로 다시 짝지음 — 드워프 · 격투가 = 🔨 강타 · 창술사 · 무희 · 해적 = 🌪 연격 · 연금술사 = 🔥 불 · 성기사 = ✨ 별
-  const AFFINITY = { 0: 'cut', 16: 'cut', 3: 'cut', 6: 'smash', 9: 'smash', 5: 'sweep', 10: 'sweep', 13: 'sweep', 7: 'fire', 12: 'fire', 11: 'spark', 14: 'frost', 2: 'frost', 15: 'frost', 4: 'star', 8: 'star', 1: 'magic', 17: 'magic' };
+  const AFFINITY = { 0: 'cut', 16: 'cut', 3: 'wind', 6: 'smash', 9: 'smash', 5: 'sweep', 10: 'sweep', 13: 'sweep', 2: 'wind', 7: 'fire', 12: 'fire', 11: 'spark', 14: 'frost', 15: 'frost', 4: 'star', 8: 'star', 1: 'magic', 17: 'magic' };
   const affOf = (hero) => FAMS.find((f) => f.id === AFFINITY[Number(hero)]) || FAMS[0];
   const crystalOf = (hero, socket) => { const k = (socket || {})[Number(hero)]; return KINDS.includes(k) ? k : affOf(hero).ids[0]; }; // 빈 칸 = 친화 계열 Ⅰ
   const resonates = (hero, k) => { const f = famOf(k); return !!f && f.id === AFFINITY[Number(hero)]; };

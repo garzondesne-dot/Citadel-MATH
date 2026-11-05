@@ -87,7 +87,7 @@ DS.Sound = (function () {
   if (typeof document !== 'undefined') document.addEventListener('pointerdown', () => { ensure(); preload(); }, { once: true, capture: true });
   if (typeof document !== 'undefined') document.addEventListener('visibilitychange', () => { if (!bgmEl) return; if (document.hidden) bgmEl.pause(); else if (!muted) bgmEl.play().catch(() => {}); });
   // 공격 계열 → 맞는 소리
-  const FAM_SFX = { cut: 'cut', smash: 'smash', sweep: 'sweep', fire: 'fire', spark: 'spark', frost: 'frost', star: 'star', magic: 'magic' };
+  const FAM_SFX = { cut: 'cut', smash: 'smash', sweep: 'sweep', wind: 'wind', fire: 'fire', spark: 'spark', frost: 'frost', star: 'star', magic: 'magic' };
 
   return {
     unlock() { const c = ensure(); preload(); return c; },

@@ -38,7 +38,8 @@ DS.Gem = (function () {
     fx: { fire: 40, lightning: 40, ice: 40, stars: 60, slash: 60, vortex: 80, // Ⅲ 화려 (인장으로도)
       moon: 20, ring: 20, chain: 20, spikes: 20, mana: 20, crit: 20, // Ⅱ 숙련 (2026-11-06)
       twin: 120, pillar: 120, thunder: 120, nova: 120, meteor: 120, void: 120, // Ⅳ 전설 = 같은 계열 Ⅲ 이 있어야 (account.js need)
-      upper: 20, sweep: 20, hammer: 60, spin: 60, quake: 120, reap: 120 }, // 🔨 강타 · 🌪 연격 (2026-11-06 · Ⅲ 은 인장 없이 💎60)
+      upper: 20, sweep: 20, hammer: 60, spin: 60, quake: 120, reap: 120,
+      gale: 20, leaf: 60, cyclone: 120 }, // 🌬 바람 (2026-11-06) // 🔨 강타 · 🌪 연격 (2026-11-06 · Ⅲ 은 인장 없이 💎60)
   };
   const itemKey = (kind, id) => `${kind}_${id}`;
   const price = (kind, id) => (SHOP[kind] || {})[id] ?? null;
