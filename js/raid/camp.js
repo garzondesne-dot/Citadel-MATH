@@ -136,7 +136,6 @@ DS.Camp = (function () {
     DS.CampScene.gate(document.querySelector('#camp .camp-stage'), on || !!rf);
     el.classList.toggle('open', on); el.classList.toggle('rift', !!rf); document.querySelector('#camp .camp-stage').classList.toggle('gate-rift', !!rf);
     const lb = el.querySelector('.camp-label');
-    if (me && me.teacher && me.teacher.hall && DS.TCamp) { const g = DS.TCamp.hallGate(); DS.CampScene.gate(document.querySelector('#camp .camp-stage'), g.on); el.classList.toggle('open', g.on); if (lb) lb.innerHTML = g.label; return; } // 🖥 종합상황실 캠프 (2026-11-05 · 학생 캠프와 같은 화면)
     if (me && me.teacher) { const t = me.teacher; DS.CampScene.gate(document.querySelector('#camp .camp-stage'), !!t.code); el.classList.toggle('open', !!t.code); if (lb) lb.innerHTML = t.code ? '⚔ 수업 진행 · 리모컨' : '⚔ 새 수업 열기 (교사 메뉴)'; return; } // 🏛 교사 개인 캠프 (2026-11-05)
     if (lb) lb.innerHTML = on ? `⚔ ${live.no ? `${live.no}차시 ` : ''}입장!` : rf ? `⏳ ${rf.no}차시 이어하기 D-${Math.max(1, Math.ceil((rf.until - Date.now()) / 86400e3))}` : '🔒 차시 던전'; el.setAttribute('aria-label', on ? `${live.no ? `${live.no}차시 ` : ''}${name} 입장` : rf ? `${rf.no}차시 이어하기` : '차시 던전 (닫힘)');
   }
@@ -148,7 +147,7 @@ DS.Camp = (function () {
   }
   function render() {
     const c = C(), S = DS.CampScene;
-    $('#camp').innerHTML = `<div class="camp-top"><button class="btn small camp-set" id="camp-set">⚙ 설정</button></div>${me.teacher && me.teacher.hall ? '<div class="tc-hallbar" id="tc-hallbar"></div>' : ''}
+    $('#camp').innerHTML = `<div class="camp-top"><button class="btn small camp-set" id="camp-set">⚙ 설정</button></div>
       ${stampToday() ? '<div class="stamp-bar">📮 반드시 학습지 확인도장 받아가세요.</div>' : ''}
       <div class="camp-stage cs-v2" style="background-image:url('${base()}${c.bg}');aspect-ratio:${c.size[0]} / ${c.size[1]}">
         ${S.layers()}
@@ -165,7 +164,6 @@ DS.Camp = (function () {
     $('#camp-anvil').onclick = () => pick('#camp-anvil', () => (me.test ? DS.Forge.open(me, { preview: true, no: 99 }) : DS.Forge.open(me))); // 🧪 체험판: 모든 레시피
     $('#camp-castle').onclick = () => pick('#camp-castle', () => DS.Control.run(() => DS.Bonus.enter(me)));
     $('#camp-gate').onclick = () => {
-      if (me.teacher && me.teacher.hall && DS.TCamp) return pick('#camp-gate', () => DS.TCamp.hallGo(), 'portal');
       if (me.teacher) { const t = me.teacher; return pick('#camp-gate', () => DS.Control.run(() => (t.code ? DS.Teacher.open(t.code, t.hallKey) : location.replace(`${location.pathname}?${DS.Net.mode === 'local' ? 'local&' : ''}role=teacher`))), 'portal'); }
       const rf = !(live && live.open) ? riftNow() : null;
       if (rf) return pick('#camp-gate', () => DS.Control.run(() => DS.Bonus.enter(me, { train: true, rift: rf })), 'portal');
@@ -177,12 +175,11 @@ DS.Camp = (function () {
     // v0.9.7.0: 이름표의 Lv 는 뺌 (사용자 — 캠프에서 이질적). 레벨은 아래 상태창에만
     newTitles();
     $('#camp-code').onclick = codeGate;
-    $('#camp-mail').onclick = () => pick('#camp-mail', () => { if (me.teacher && me.teacher.hall && DS.TCamp) return DS.Control.run(() => DS.TCamp.hallMail()); if (me.teacher) return DS.Control.run(() => DS.Dash.enter()); if (cues.mark) cues.mark('mail'); DS.Control.run(note); }); // 교사 = 📊 학급 대시보드
+    $('#camp-mail').onclick = () => pick('#camp-mail', () => { if (me.teacher) return DS.Control.run(() => DS.Dash.enter()); if (cues.mark) cues.mark('mail'); DS.Control.run(note); }); // 교사 = 📊 학급 대시보드
     $('#camp-tent').onclick = () => (DS.CampScene.objOn(document.querySelector('#camp .camp-stage'), 'tent', true), pick('#camp-tent', () => { if (cues.mark) cues.mark('tent'); DS.Control.run(shelf); setTimeout(() => DS.CampScene.objOn(document.querySelector('#camp .camp-stage'), 'tent', false), 1500); }));
     $('#camp-dummy').onclick = () => pick('#camp-dummy', () => DS.Control.run(() => DS.Bonus.enter(me, { train: true })));
-    $('#camp-set').onclick = () => (me.teacher ? settings({ teacher: true, onSave: async (v) => { me.hero = v.hero; me.fx = v.fx; me.title = v.title; const t = me.teacher; if (t.code) { try { const R0 = await DS.Net.get(`rooms/${t.code}/meta`); if (R0 && R0.teacher === DS.Net.uid()) await DS.Net.update(`rooms/${t.code}/players/${R0.teacher}`, { hero: v.hero, fx: v.fx }); } catch (e) { /* 다음 수업부터 */ } } render(); drawGate(); } }) : settings());
+    $('#camp-set').onclick = () => (me.teacher ? settings({ teacher: true, onSave: async (v) => { me.hero = v.hero; me.fx = v.fx; me.title = v.title; const t = me.teacher; if (t.code) { try { await DS.Net.set(`rooms/${t.code}/state/tlook`, { hero: v.hero, fx: v.fx, at: DS.Net.TS }).catch(() => {}); /* 2026-11-06: 종합상황실도 쓸 수 있는 칸 → 수업 화면이 이 모습을 먼저 씀 */ const R0 = await DS.Net.get(`rooms/${t.code}/meta`); if (R0 && R0.teacher === DS.Net.uid()) await DS.Net.update(`rooms/${t.code}/players/${R0.teacher}`, { hero: v.hero, fx: v.fx }); } catch (e) { /* 다음 수업부터 */ } } render(); drawGate(); } }) : settings());
     if (me.teacher) { const cb = $('#camp-code'); if (cb) cb.hidden = true; }
-    if (me.teacher && me.teacher.hall && DS.TCamp) DS.TCamp.hallBar();
     drawGate();
     animateFire();
     document.querySelectorAll('#camp .camp-prop').forEach((e) => e.classList.add('cs-int'));
@@ -368,6 +365,27 @@ DS.Camp = (function () {
     el.querySelector('#nt-bonus').onclick = () => { el.remove(); pick('#camp-dummy', () => DS.Control.run(() => DS.Bonus.enter(me, { train: true }))); };
     el.querySelectorAll('[data-go]').forEach((b) => (b.onclick = () => { el.remove(); pick('#camp-dummy', () => DS.Control.run(() => DS.Bonus.enter(me, { train: true, go: b.dataset.go.split('|') }))); }));
   }
+  // 📕 오답노트 예시 (2026-11-06 · 종합상황실 우편함 = 학생과 같은 창으로 기능 설명): 최근 두 차시에 틀림 · 고침 · 안 풂 예시를 넣어 보여 줌 (기록은 저장 안 함)
+  function noteDemo(o = {}) {
+    if (!DS.Note) return;
+    const ls = DS.Lessons.list.filter((l) => l.no && !l.eval && l.boss).sort((a, b) => a.no - b.no), pick2 = ls.slice(-2);
+    const rec = {}; pick2.forEach((L, k) => { const ids = L.steps.filter((s) => s.kind === 'monster' && L.monsters[s.id]).map((s) => s.id), hp = L.boss.hpItems || L.boss.items;
+      rec[L.id] = { at: 1, no: L.no, mons: Object.fromEntries(ids.map((id, i) => [id, i === 0 ? 'x' : i === 1 ? 'f' : i === 2 && k ? '-' : 'o'])), bossM: Array.from({ length: hp }, (_, i) => (i === 1 ? 'x' : i === 3 && k ? '-' : 'o')).join(''), boss: hp - 1, bossN: hp }; });
+    const nt = DS.Note.all(rec, {}, 99, Object.fromEntries(pick2.map((L) => [L.id, true])));
+    const el = document.createElement('div'); el.className = 'modal camp-modal';
+    el.innerHTML = `<div class="quiz-box framed rs-box"><h2>📮 우편함 · 복습 노트 <span class="muted small">(예시 화면)</span></h2>
+      <div class="nt-box open"><p class="nt-h">${DS.Note.icon('book')} <b>오답노트</b> <span class="nt-cnt">❗ 남은 문제 ${nt.left}</span></p>
+        ${nt.list.slice().reverse().map((x) => { const todo = x.ids.map((id, i) => ({ id, st: x.mons[i] })).filter((q) => DS.Note.OPEN[q.st] || q.st === 'a'), bossTodo = x.boss.slice(0, x.hp).some((st) => DS.Note.OPEN[st] || st === 'a');
+          const title = (id) => (x.L.steps.find((s) => s.id === id) || {}).title || id;
+          return `<div class="nt-les open"><b>${x.L.no}차시</b>${DS.Note.rows(x)}<div class="nt-go-list">${todo.map((q) => `<button class="btn small primary" data-go="${x.L.id}|${q.id}">🎯 바로 풀기 · ${esc(title(q.id))}</button>`).join('')}${bossTodo ? `<button class="btn small primary" data-go="${x.L.id}|boss">👑 형성평가 재대결</button>` : ''}</div></div>`; }).join('')}
+        <p class="muted small">${DS.Note.icon('x')} 틀림 · ${DS.Note.icon('-')} 안 풂 → 「🎯 바로 풀기」로 허수아비에서 풀면 ${DS.Note.icon('p')} 복습 완료</p></div>
+      <p class="muted small">학생은 자기 기록으로 이 창을 봐요. 성적이 아니라 다음에 볼 것을 모아 둔 노트예요.</p>
+      <div class="row"><button class="btn" id="nt-x">닫기</button><button class="btn primary" id="nt-bonus">🎯 복습 허수아비로</button></div></div>`;
+    document.body.appendChild(el);
+    el.querySelector('#nt-x').onclick = () => el.remove();
+    el.querySelector('#nt-bonus').onclick = () => { el.remove(); if (o.train) o.train(); };
+    el.querySelectorAll('[data-go]').forEach((b) => (b.onclick = () => { el.remove(); if (o.go) o.go(...b.dataset.go.split('|')); }));
+  }
   // 코드로 입장 (QR · 만약을 위해)
   function codeGate() {
     let last = ''; try { last = (JSON.parse(localStorage.getItem('citadel-student')) || {}).code || ''; } catch (e) { /* 무시 */ }
@@ -427,5 +445,5 @@ DS.Camp = (function () {
     draw(); document.body.appendChild(el);
   }
   const back = () => (me ? enter(me) : null);
-  return { teacher: () => !!(me && me.teacher), hallMode: () => !!(me && me.teacher && me.teacher.hall), drawGate: () => drawGate(), enter, back, settings, shelf: (all) => shelf(all), refresh: () => { if (document.getElementById('camp-forge')) status(); }, stampToday, markStamp: () => { try { localStorage.setItem('citadel-stamp', today()); } catch (e) { /* 무시 */ } } };
+  return { teacher: () => !!(me && me.teacher), noteDemo, enter, back, settings, shelf: (all) => shelf(all), refresh: () => { if (document.getElementById('camp-forge')) status(); }, stampToday, markStamp: () => { try { localStorage.setItem('citadel-stamp', today()); } catch (e) { /* 무시 */ } } };
 })();

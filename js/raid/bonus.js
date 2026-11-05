@@ -31,6 +31,10 @@ DS.Bonus = (function () {
   const FLOOR_DEFAULT = { 'eval-1': true, 'eval-3': false };
   let floorOpen = {}, isAdm = false;
   const floorIsOpen = (id) => (floorOpen[id] != null ? !!floorOpen[id] : FLOOR_DEFAULT[id] !== false);
+  // 고른 층 (이 기기 기억 · 없으면 학생에게 열린 층 중 마지막 = 진도에 가까운 층 · 잠긴 층은 학생이 못 고름 → 열린 층으로)
+  const FKEY = 'citadel-floor';
+  const selFloor = () => { let v = ''; try { v = localStorage.getItem(FKEY) || ''; } catch (e) { /* 무시 */ } const ok = (id) => FLOORS.some((f) => f.id === id) && (all() || floorIsOpen(id)); return ok(v) ? v : ((FLOORS.filter((f) => ok(f.id)).pop() || FLOORS[0]).id); };
+  const setFloor = (id) => { try { localStorage.setItem(FKEY, id); } catch (e) { /* 무시 */ } };
   async function loadLocks() { floorOpen = (await N().get('gcfg/floorOpen').catch(() => null)) || {}; return floorOpen; } // 2층은 문제 확정 뒤 (변경 제안 PDF → 컨펌)
   const castleOf = (id) => DS.Lessons.get(id);
   const lessons = () => DS.Lessons.list.filter((l) => l.no && !l.eval && l.boss).sort((a, b) => a.no - b.no);
@@ -142,13 +146,22 @@ DS.Bonus = (function () {
       return `<div class="panel framed cs-floor${sealed ? ' sealed' : ''}"><p class="bn-h"><b>${f.floor}층 · ${esc(f.title)}</b><span class="muted small">처치 ${S.rooms.filter((r) => roomRec(mine, L, r.id).clear).length} / ${S.rooms.length} · 열린 방 ${S.rooms.filter((r) => S.isOpen(r)).length}</span>${sealed ? '<span class="bn-stamp">🟪 인장</span>' : ''}${all() ? (fOpen ? '<span class="cs-lk on">🔓 학생에게 열림</span>' : '<span class="cs-lk">🔒 학생에게 잠김</span>') : ''}${lockBtn}</p>
         <div class="cs-rooms">${S.rooms.map(tile).join('')}</div></div>`;
     };
+    // 🌀 층 고르기 (2026-11-06 사용자 「중단원 · 대단원을 쭉 나열하지 말고 맨 위 포털 메뉴 → 그 층 몬스터만」)
+    const portal = (f) => {
+      const L = castleOf(f.id), on = selFloor() === f.id, lk = !floorIsOpen(f.id) && !all();
+      const S = L ? roomsState(L, mine, no, all()) : null, done = S ? S.rooms.filter((r) => roomRec(mine, L, r.id).clear).length : 0;
+      const nNew = L && !lk ? S.rooms.filter((r) => fresh.has(`${L.id}/${r.id}`)).length : 0;
+      return `<button class="cs-portal${on ? ' on' : ''}${lk || !L ? ' lock' : ''}${sl.includes(f.id) ? ' sealed' : ''}" data-floor="${f.id}"><i class="cs-pt-ic">${lk || !L ? '🔒' : '🌀'}</i><b>${f.floor}층</b><span>${esc(f.title)}</span><em>${!L ? '준비 중' : lk ? '잠김' : `처치 ${done} / ${S.rooms.length}`}${sl.includes(f.id) ? ' · 🟪' : ''}</em>${nNew ? `<span class="cs-rnew">NEW ${nNew}</span>` : ''}</button>`;
+    };
     const nextFx = UNLOCK.findIndex((u) => sl.length < u);
     $('#bonus').innerHTML = `<div class="bn-top"><button class="btn small" id="bn-back">≪ ${preview ? '교사 캠프' : '모닥불'}</button><b>🏰 성채던전</b><span class="bn-seal">🟪 인장 ${sl.length}개</span></div>
       <div class="cs-hero" style="background-image:url('${A.base}${(A.citadel || {}).boss || ''}')"><p>교과서 단원 평가를 숫자만 바꾼 문제 · <b>방 하나에 몬스터 한 마리</b><br><span class="small">순서 없이 아무 방이나 · 그 차시 진도를 나가면 방이 열려요 · 👑 보스 방은 열린 방의 ${BOSS_PCT}%를 처치하면!</span></p></div>
       <p class="bn-fx">✨ 화려한 이펙트: ${nextFx < 0 ? '모두 열렸어요!' : `인장 <b>${UNLOCK[nextFx]}개</b>가 되면 「${esc(DS.FX.NAMES[DS.FX.FANCY[nextFx]])}」이 열려요 (지금 ${sl.length}개 · 🎯 허수아비에서 형성평가 재대결 · 🏰 보스 방을 처치하면 인장)`}</p>
       ${gemD ? `<p class="gm-line">💎 방을 처음 처치하면 <b>+${DS.Gem.G.room}</b> · 👑 보스 방 <b>+${DS.Gem.G.roomBoss}</b> + 🟪 인장 <b>+${DS.Gem.G.seal}</b>${gLog('firstcastle') ? '' : ` · 🎁 첫 방은 <b>+${DS.Gem.G.first}</b> 더!`}${gDayFull() ? ' <span class="muted small">(오늘 한도 30 이 찼어요 — 인장 💎 은 한도 밖)</span>' : ''}</p>` : ''}
-      ${FLOORS.map(floor).join('')}`;
+      <div class="cs-portals">${FLOORS.map(portal).join('')}</div>
+      ${floor(FLOORS.find((f) => f.id === selFloor()) || FLOORS[0])}`;
     bindFight();
+    document.querySelectorAll('[data-floor]').forEach((b) => (b.onclick = () => { const id = b.dataset.floor; if (!all() && !floorIsOpen(id)) { DS.Sound.squish(); DS.UI.toast('🔒 선생님이 잠가 두었어요 — 단원 공부를 마치면 열려요', 2600); return; } DS.Sound.clank(); setFloor(id); render(); }));
     document.querySelectorAll('[data-lockmsg]').forEach((b) => (b.onclick = () => { DS.Sound.squish(); DS.UI.toast(`🔒 ${b.dataset.lockmsg}`, 2600); }));
     document.querySelectorAll('[data-flock]').forEach((b) => (b.onclick = () => DS.Control.run(async () => {
       const [id, v] = b.dataset.flock.split('|'), f = FLOORS.find((x) => x.id === id) || {};

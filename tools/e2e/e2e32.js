@@ -17,6 +17,8 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   await T.click('#camp-mail'); await T.waitForTimeout(1500); log.push('우편함(교사 폰) → 대시보드: ' + (await T.evaluate(() => document.getElementById('screen-dash').classList.contains('active'))));
   const H = await mk('H'); await H.setViewportSize({ width: 1600, height: 900 }); await H.goto(`${U}&role=hall&code=${code}&key=${hallKey}`); await H.waitForTimeout(2500);
   await H.screenshot({ path: `${OUT}/h-camp.png` });
-  await H.click('#camp-mail'); await H.waitForTimeout(1200); log.push('우편함(종합상황실) → 대시보드 안 열림: ' + (await H.evaluate(() => !document.getElementById('screen-dash').classList.contains('active'))));
+  await H.click('#tc-mail'); await H.waitForTimeout(1500); log.push('우편함(종합상황실) → 대시보드 안 열림: ' + (await H.evaluate(() => !document.getElementById('screen-dash').classList.contains('active'))) + ' · 오답노트 예시 ' + (await H.evaluate(() => { const m = document.querySelector('.modal .nt-box'); return m ? `${m.querySelectorAll('[data-go]').length}개 바로 풀기` : '없음'; })));
+  await H.screenshot({ path: `${OUT}/h-note.png` });
+  const go1 = await H.$('.modal [data-go]'); if (go1) { await go1.click(); await H.waitForTimeout(2200); log.push('예시 「바로 풀기」 → 허수아비 전투 ' + !!(await H.$('.bn-fight'))); }
   console.log(log.join('\n')); console.log('errors:', errs.length ? errs : 'none'); await b.close();
 })();

@@ -2002,12 +2002,13 @@ input.sv-no { width: 64px !important; display: inline-block; padding: 2px 4px; }
 .fa-pick.rps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
 .fa-pick.rps .btn { font-size: 18px; padding: 10px 0; }
 .fa-pick .fa-c { border-color: #6bd16b; } .fa-pick .fa-c.on { background: #1f5a2a; }
-/* 🖥 종합상황실 캠프 = 학생 캠프 + 위 줄 (학생 입장 QR · 수업 소식 · 버튼) · 2026-11-05 */
-.tc-hallbar { display: flex; gap: 14px; align-items: center; margin: 0 auto 8px; max-width: 1100px; padding: 8px 12px; border-radius: 12px; background: #0b1430e6; border: 2px solid #c9a24a; }
-.tc-hallbar .tc-qr { flex: none; width: 172px; height: 172px; box-sizing: border-box; overflow: hidden; background: #fff; padding: 6px; border-radius: 8px; line-height: 0; }
-.tc-hallbar .tc-qr img, .tc-hallbar .tc-qr canvas { width: 160px !important; height: 160px !important; }
-.tc-hallbar .tc-qr canvas + img, .tc-hallbar .tc-qr img + canvas { display: none !important; }
-.tc-hb-r { flex: 1; min-width: 0; } .tc-hb-t { margin: 0 0 4px; font-size: 22px; } .tc-hallbar .tc-info { margin: 0 0 6px; font-size: 16px; }
-.tc-hallbar .tc-bar { display: flex; flex-wrap: wrap; gap: 6px; }
 .cs-lk { margin-left: 6px; padding: 0 6px; border-radius: 8px; font-size: 11px; background: #4a1414; color: #ffb3b3; } .cs-lk.on { background: #143a24; color: #a8f0c4; }
 .cs-lockbtn { margin-left: auto; }
+/* 🌀 성채 층 포털 메뉴 (2026-11-06) */
+.cs-portals { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; margin: 8px 0 10px; }
+.cs-portal { position: relative; display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 8px 6px; border-radius: 12px; border: 2px solid #4a3a7a; background: radial-gradient(circle at 50% 30%, #3a2a6a, #120c26); color: #e8e0ff; font: inherit; cursor: pointer; }
+.cs-portal .cs-pt-ic { font-style: normal; font-size: 26px; line-height: 1.1; } .cs-portal b { font-size: 16px; color: #ffd98a; } .cs-portal span { font-size: 12px; } .cs-portal em { font-style: normal; font-size: 11px; color: #b9c4e6; }
+.cs-portal.on { border-color: #ffd35a; box-shadow: 0 0 14px #c58aff99; background: radial-gradient(circle at 50% 30%, #5a3aa8, #1a1040); }
+.cs-portal.on .cs-pt-ic { animation: rpsSpin 1.6s ease-in-out infinite; }
+.cs-portal.lock { filter: grayscale(.7); opacity: .75; }
+.cs-portal .cs-rnew { position: absolute; right: 6px; top: 4px; }

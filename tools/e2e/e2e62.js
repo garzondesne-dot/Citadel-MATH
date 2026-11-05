@@ -24,13 +24,19 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
 
   const P = (m) => log.push(m);
   const stu = async () => { await S.evaluate(() => DS.Camp.back()); await S.waitForTimeout(1500); await S.click('#camp-castle', { force: true }); await S.waitForTimeout(1800);
-    return S.evaluate(() => { const fl = [...document.querySelectorAll('.cs-floor')]; return fl.map((f) => ({ t: (f.querySelector('.bn-h b') || {}).textContent || '', rooms: f.querySelectorAll('[data-fight]').length, lock: f.classList.contains('lock') })); }); };
+    const one = () => S.evaluate(() => { const f = document.querySelector('.cs-floor'); return { t: (f.querySelector('.bn-h b') || {}).textContent || '', rooms: f.querySelectorAll('[data-fight]').length, lock: f.classList.contains('lock') }; });
+    // 2026-11-06 포털 메뉴: 1층 누르고 보기 · 2층 포털 = 잠기면 회색 + 눌러도 1층 그대로 / 열리면 2층 방
+    await S.click('.cs-portal[data-floor="eval-1"]'); await S.waitForTimeout(400); const a = await one();
+    const p2lock = await S.evaluate(() => document.querySelector('.cs-portal[data-floor="eval-3"]').classList.contains('lock'));
+    await S.click('.cs-portal[data-floor="eval-3"]'); await S.waitForTimeout(500); const b2 = await one();
+    return [a, p2lock ? { t: '2층 · 집합과 명제 대단원', rooms: 0, lock: true } : b2]; };
   const s1 = await stu(); P('학생 처음: ' + JSON.stringify(s1));
   await S.screenshot({ path: `${OUT}/1-student-locked.png`, fullPage: true });
   // 교사 개인 캠프 → 성채
   await T.evaluate(() => DS.Scene.clear()); await T.goto(U + '&role=teacher'); await T.waitForTimeout(2500); if (await T.isVisible('#splash')) { await T.click('#splash'); await T.waitForTimeout(800); }
   await T.click('#t-camp'); await T.waitForTimeout(2500); await T.click('#camp-castle', { force: true }); await T.waitForTimeout(2500);
-  const t1 = await T.evaluate(() => ({ btn: (document.querySelector('.cs-lockbtn[data-flock^="eval-3"]') || {}).textContent || '', lk: [...document.querySelectorAll('.cs-lk')].map((e) => e.textContent).join(' / '), rooms2: (document.querySelectorAll('.cs-floor')[1] || document.body).querySelectorAll('[data-fight]').length }));
+  await T.click('.cs-portal[data-floor="eval-3"]'); await T.waitForTimeout(500);
+  const t1 = await T.evaluate(() => ({ btn: (document.querySelector('.cs-lockbtn[data-flock^="eval-3"]') || {}).textContent || '', lk: [...document.querySelectorAll('.cs-lk')].map((e) => e.textContent).join(' / '), rooms2: document.querySelector('.cs-floor').querySelectorAll('[data-fight]').length }));
   P('교사 성채: ' + JSON.stringify(t1));
   await T.screenshot({ path: `${OUT}/2-teacher-castle.png`, fullPage: true });
   const open2 = await T.$('.cs-lockbtn[data-flock="eval-3|1"]'); if (open2) { await open2.click(); await T.waitForTimeout(1500); }

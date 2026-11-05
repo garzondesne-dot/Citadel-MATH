@@ -31,11 +31,13 @@ DS.Art = (function () {
   // 선생님 모습 (2026-11-03): 수업 방의 선생님 용사 → 없으면 이 기기에서 고른 모습(교사 메뉴) → 기본 7 현자
   const TKEY = 'citadel-thero';
   function teacherHero(R) {
+    const tl = R && R.state && R.state.tlook; if (tl && tl.hero != null && Number.isFinite(Number(tl.hero))) return Number(tl.hero); // 2026-11-06: 수업 중 바꾼 모습 (교사 폰 · 종합상황실 ⚙ → state/tlook · 종합상황실도 쓸 수 있는 칸)
     const t = R && R.meta && R.players && R.players[R.meta.teacher];
     if (t && t.hero != null) return Number(t.hero);
     try { const raw = localStorage.getItem(TKEY), v = Number(raw); if (raw !== null && raw !== '' && A().heroesV2 && A().heroesV2.list[v]) return v; } catch (e) { /* 무시 */ } // 2026-11-04: 교사는 모든 용사
     return A().heroes.teacher;
   }
+  const teacherFx = (R) => ((R && R.state && R.state.tlook && R.state.tlook.fx) || (R && R.meta && R.players && (R.players[R.meta.teacher] || {}).fx) || 'twinkle');
   const setTeacherHero = (n) => { try { localStorage.setItem(TKEY, String(n)); } catch (e) { /* 무시 */ } };
   // 선생님 이펙트 · 호칭 (2026-11-04 · 교사 캠프 ⚙ 설정 · 모두 열림 · 이 기기에 저장)
   const TLOOK = 'citadel-tlook';
@@ -166,5 +168,5 @@ ${a.ui.home ? `.home-props{display:contents}.home-props img{position:fixed;z-ind
     const prev = L.no ? DS.Lessons.list.find((l) => l.no === L.no - 1) : null;
     setTimeout(() => trim([L, prev]), 5000);
   }
-  return { emojify, cell, hero, isV2, monster, card, install, pos, lessonFiles, prefetch, trim, lessonEnter, teacherHero, setTeacherHero, teacherLook, setTeacherLook };
+  return { emojify, cell, hero, isV2, monster, card, install, pos, lessonFiles, prefetch, trim, lessonEnter, teacherHero, teacherFx, setTeacherHero, teacherLook, setTeacherLook };
 })();

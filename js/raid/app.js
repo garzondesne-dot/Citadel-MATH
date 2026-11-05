@@ -31,7 +31,7 @@ DS.App = (function () {
     splash(!role && !DS.Scene.get() && !inFrame());
     if (role === 'hall' && q.get('code')) $('#h-code').value = q.get('code');
     const h = read('citadel-hall');
-    if (h) { $('#h-code').value = $('#h-code').value || h.code; $('#h-key').value = h.key; }
+    if (h) { $('#h-code').value = $('#h-code').value || h.code; if (h.key) { try { localStorage.setItem('citadel-hall', JSON.stringify({ code: h.code })); } catch (e) { /* 무시 */ } } } // 2026-11-06: 옛 판이 저장한 비밀번호는 지움 · 칸에 채우지 않음
     if (q.get('key')) $('#h-key').value = q.get('key');
     const t = read('citadel-teacher');
     // 바로 열기 (체험판·북마크): ?role=teacher&resume · ?role=hall&code=…&key=…
@@ -62,7 +62,7 @@ DS.App = (function () {
         const m = await A().me(); if (!m) return;
         if (sc.role === 'student' && sc.code) await DS.Student.enter(sc.code, info(m)); else await DS.Camp.enter(m);
       } else if (sc.role === 'teacher' && sc.code && (await A().isAdmin())) await DS.Teacher.open(sc.code, sc.hallKey);
-      else if (sc.role === 'hall' && sc.code) await DS.Hall.enter(sc.code, sc.key);
+      else if (sc.role === 'hall' && sc.code) { DS.Scene.clear(); form('hall'); $('#h-code').value = sc.code; DS.UI.toast('🖥 종합상황실 비밀번호를 다시 넣어 주세요', 3000); setTimeout(() => { const k = $('#h-key'); if (k) k.focus(); }, 300); } // 2026-11-06: 다시 접속 · 새로고침 = 비밀번호 다시
       else if (sc.role === 'prep' && sc.lesson && (await A().isAdmin())) await DS.Prep.enter(sc.lesson);
       else if (sc.role === 'students' && (await A().isAdmin())) await DS.Students.enter();
       else if (sc.role === 'dash' && (await A().isAdmin())) await DS.Dash.enter();
@@ -113,7 +113,7 @@ DS.App = (function () {
     box.querySelectorAll('[data-hc]').forEach((b) => (b.onclick = () => { pickCode(b.dataset.hc); $('#h-key').focus(); }));
     if (rooms.length) {
       pickCode(rooms[0].code);
-      const saved = read('citadel-hall'), key = $('#h-key').value.trim() || (saved && saved.key) || '';
+      const key = $('#h-key').value.trim(); // 이번에 직접 넣은 비밀번호만 (저장된 비밀번호로 저절로 들어가지 않음)
       if (auto && /^\d{4}$/.test(key) && autoTried !== rooms[0].code && onHome()) { autoTried = rooms[0].code; $('#h-key').value = key; hallEntering = true; try { await DS.Hall.enter(rooms[0].code, key); return; } catch (e) { hallEntering = false; DS.UI.toast('기억한 비밀번호가 달라요 — 교사 폰의 종합상황실 키를 넣어 주세요', 3200); } }
     }
     findT = setTimeout(() => hallFind(true), rooms.length ? 30000 : 8000);

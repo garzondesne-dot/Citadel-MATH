@@ -15,9 +15,9 @@ DS.Hall = (function () {
     await DS.Act.joinHall(c, key);
     code = c; hallKey = String(key); camped = false; L = null; R = null; built = '';
     if (!atkT) atkT = setInterval(hallAtk, 200);
-    try { localStorage.setItem('citadel-hall', JSON.stringify({ code: c, key: String(key) })); } catch (e) { /* 무시 */ }
+    try { localStorage.setItem('citadel-hall', JSON.stringify({ code: c })); } catch (e) { /* 무시 */ } // 2026-11-06 사용자: 비밀번호는 기억하지 않음 (메뉴로 가거나 다시 접속하면 다시 입력)
     DS.UI.show('screen-hall');
-    DS.Scene.save({ role: 'hall', code: c, key: String(key) });
+    DS.Scene.save({ role: 'hall', code: c }); // 새로고침 · 다시 접속 → 코드만 채워 두고 비밀번호는 다시
     if (stop) stop();
     stop = DS.Net.watch(`rooms/${code}`, (v) => {
       if (!v) return;
@@ -501,7 +501,7 @@ DS.Hall = (function () {
     requestAnimationFrame(() => t.classList.add('go'));
     setTimeout(() => {
       DS.Sound.hit(); setTimeout(() => DS.Sound.correct(), 140);
-      DS.FX.play(arena, DS.FX.usable(((R.players || {})[(R.meta || {}).teacher] || {}).fx || 'twinkle', Object.fromEntries(DS.FX.FANCY.map((k) => [k, true]))), { x: mr.left - ar.left + mr.width / 2, y: mr.top - ar.top + mr.height / 2, scale: Math.min(ar.width, ar.height) / 700, perfect: true });
+      DS.FX.play(arena, DS.FX.usable(DS.Art.teacherFx(R), Object.fromEntries(DS.FX.FANCY.map((k) => [k, true]))), { x: mr.left - ar.left + mr.width / 2, y: mr.top - ar.top + mr.height / 2, scale: Math.min(ar.width, ar.height) / 700, perfect: true });
       arena.classList.remove('shake'); void arena.offsetWidth; arena.classList.add('shake');
       const tag = document.createElement('div'); tag.className = `perfect ${kill ? 'vanish-txt' : 'demo-txt'}`; tag.textContent = kill ? '💥 소멸!' : '시연 · 데미지 없음'; arena.appendChild(tag); setTimeout(() => tag.remove(), 1600);
       if (kill) {
