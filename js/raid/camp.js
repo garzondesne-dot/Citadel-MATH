@@ -424,34 +424,52 @@ DS.Camp = (function () {
       if (!confirm(`💎 ${it.shop.price}개로 해금할까요? (남는 조각 ${L.gem - it.shop.price}개)`)) return true;
       await DS.Gem.buy(me, it.shop.kind, it.shop.id); DS.Sound.correct(); DS.UI.toast('🎉 해금했어요!'); L = await DS.Account.looks(me); draw(); return true;
     };
-    let hero = T ? tl.hero : me.hero, fx = T ? tl.fx : me.fx || 'flame', title = T ? tl.title : me.title || 'none';
+    // 2026-11-06 설정 v2: 탭 3개 (🧙 용사 · 💎 결정석 · 🏅 호칭) · 결정석 = 용사마다 1칸 (동시 사용 · 빼기 = 회수) · 친화 ★ = 공명
+    let hero = T ? tl.hero : me.hero, title = T ? tl.title : me.title || 'none';
+    const sock = Object.assign({}, (T ? tl.socket : me.socket) || {});
+    if (sock[hero] == null && (T ? tl.fx : me.fx) && DS.FX.KINDS.includes(T ? tl.fx : me.fx) && (T ? tl.fx : me.fx) !== DS.FX.affOf(hero).ids[0]) sock[hero] = T ? tl.fx : me.fx; // 예전 계정: 쓰던 이펙트를 지금 용사 칸에
+    const fxNow = () => DS.FX.crystalOf(hero, sock);
+    let tab = (() => { try { return localStorage.getItem('citadel-settab') || 'hero'; } catch (e) { return 'hero'; } })();
     const TD = !T && DS.Titles ? await DS.Titles.data(me).catch(() => ({})) : {}, got = DS.Titles ? (T || me.test ? DS.Titles.all().map((t) => t.id) : DS.Titles.earned(TD).map((t) => t.id)) : []; // 🧪 체험판 · 교사: 호칭 모두
-    const fxCell = (id) => { const f = L.fx.find((x) => x.id === id) || { id, open: false, cond: '' }, t = DS.FX.tierOf(id), nm = (DS.FX.NAMES[id] || id).replace(/^\S+\s/, '');
-      return `<button class="fxpick${id === fx ? ' on' : ''}${f.open ? '' : ' lock'}" data-fx="${id}"><i class="tier">${t === 's' ? '★' : ['Ⅰ', 'Ⅱ', 'Ⅲ', 'Ⅳ'][t] || ''}</i><canvas width="120" height="70" data-still="${id}"></canvas><span>${f.open ? '' : '🔒 '}${esc(nm)}</span>${f.open ? '' : `<small>${esc(f.cond || '추후 공개')}</small>`}</button>`; };
-    let demoN = 0; // ⚔ 미리보기: 고른 용사가 고른 이펙트로 공격 (근접 = 돌진 · 원거리 = 탄)
-    const demo = () => { const ap = el.querySelector('#ap'); if (!ap || !DS.Attack) return; const n = ++demoN; DS.Attack.preload(hero, fx); setTimeout(() => { if (n === demoN && ap.isConnected) DS.Attack.play(ap, { heroBox: ap.querySelector('.ap-hero'), monBox: ap.querySelector('.ap-mon'), hero, fx, s: 0.85, ps: 1, rest: 'idle' }); }, 120); };
+    const nmOf = (id) => (DS.FX.NAMES[id] || id).replace(/^\S+\s/, ''), tierTag = (id) => { const t = DS.FX.tierOf(id); return t === 's' ? '★' : ['Ⅰ', 'Ⅱ', 'Ⅲ', 'Ⅳ'][t] || ''; };
+    const heroName = (h) => esc(((DS.ASSETS.heroesV2.list[h] || {}).name) || '');
+    const fxCell = (id) => { const f = L.fx.find((x) => x.id === id) || { id, open: false, cond: '' };
+      return `<button class="fxpick${id === fxNow() ? ' on' : ''}${f.open ? '' : ' lock'}" data-fx="${id}"><i class="tier">${tierTag(id)}</i><canvas width="120" height="70" data-still="${id}"></canvas><span>${f.open ? '' : '🔒 '}${esc(nmOf(id))}</span>${f.open ? '' : `<small>${esc(f.cond || '추후 공개')}</small>`}</button>`; };
+    let demoN = 0; // ⚔ 미리보기: 고른 용사가 낀 결정석으로 공격 (근접 = 돌진 · 원거리 = 탄)
+    const demo = () => { const ap = el.querySelector('#ap'); if (!ap || !DS.Attack) return; const n = ++demoN, fx = fxNow(); DS.Attack.preload(hero, fx); setTimeout(() => { if (n === demoN && ap.isConnected) DS.Attack.play(ap, { heroBox: ap.querySelector('.ap-hero'), monBox: ap.querySelector('.ap-mon'), hero, fx, s: 0.85, ps: 1, rest: 'idle' }); }, 120); };
     const el = document.createElement('div'); el.className = 'modal camp-modal';
+    const preview = () => { const fx = fxNow(), aff = DS.FX.affOf(hero), reso = DS.FX.resonates(hero, fx);
+      return `<div class="atk-prev" id="ap"><span class="ap-cap">${DS.Attack && DS.Attack.isRanged(hero) ? '🏹 원거리' : '🗡 근접'} · ${heroName(hero)} · 친화 ${aff.name} · 💎 ${esc(nmOf(fx))} ${tierTag(fx)}${reso ? ' <b class="gold">★ 공명</b>' : ''} <span class="muted">(누르면 다시)</span></span><div class="ap-hero">${DS.Art.hero(hero, 'idle')}</div><div class="ap-mon">${DS.Art.monster('castle2:0', 'idle', 'float')}</div></div>`; };
+    const heroTab = () => `<div class="heroes set-grid">${L.heroes.map((h) => { const r = DS.Attack && DS.Attack.isRanged(h.id), af = DS.FX.affOf(h.id); return `<button class="hpick${h.id === hero ? ' on' : ''}${h.open ? '' : ' lock'}" data-h="${h.id}" title="${esc(h.cond || '')}"><b class="atk-badge${r ? ' r' : ''}">${r ? '🏹' : '🗡'}</b>${sock[h.id] ? '<i class="gemdot" title="결정석 낌"></i>' : ''}<b class="aff" title="친화 계열">${af.name.split(' ')[0]}</b>${DS.Art.hero(h.id, h.id === hero ? 'attack' : 'idle')}${h.open ? '' : '<b class="lk">🔒</b>'}</button>`; }).join('')}</div>
+        <p class="muted small">🗡 근접 = 다가가서 · 🏹 원거리 = 탄을 날려서 · 오른쪽 아래 = 친화 계열 (같은 계열 결정석을 끼우면 ★ 공명) · 파란 점 = 결정석 낌 · 데미지 · 보상은 모두 같아요</p>
+        ${T ? '' : `<p class="muted small">✨ 업적 용사: ① 1~3차시 도감 <b>${L.got} / ${L.need}</b>장 · ② 🎁 첫 레이드 · ③ 4~6차시 도감 · ④ 7~10차시 도감 · 금발 검사 = 🟪 인장 3개 / 💎 상점 용사 = 조각으로</p>`}`;
+    const gemTab = () => { const fx = fxNow(), aff = DS.FX.affOf(hero), reso = DS.FX.resonates(hero, fx), set = sock[hero] != null;
+      return `<div class="sock"><canvas width="128" height="80" data-still="${fx}"></canvas><div><small>${heroName(hero)}의 결정석 칸 · 친화 ${aff.name}</small><b>💎 ${esc(DS.FX.NAMES[fx] || '')} ${tierTag(fx)}${reso ? ' <span class="reso">★ 공명</span>' : ''}</b><small>${set ? '아래 표에서 누르면 바꿔 끼워요' : '빈 칸 → 친화 계열 Ⅰ 이 기본으로 나가요'}</small></div>${set ? '<button class="btn small" id="sock-out">빼기<br><small>회수</small></button>' : '<span></span>'}</div>
+        <p class="muted small">💎 결정석은 한 번 열면 <b>여러 용사에 동시에</b> 낄 수 있고, 빼도 사라지지 않아요 (회수 무료). ${T ? '' : '잠긴 결정석은 누르면 💎 조각 · 🟪 인장으로 열어요.'}</p>
+        <div class="fx-fams">${DS.FX.FAMS.map((fam) => `<div class="fx-fam${fam.id === aff.id ? ' aff' : ''}"><b>${fam.name}${fam.id === aff.id ? ' ★' : ''}</b>${fam.ids.map(fxCell).join('')}</div>`).join('')}<div class="fx-fam sp"><b>🪶 특별</b>${DS.FX.ACHV.map(fxCell).join('')}<span></span></div></div>`; };
+    const ttlTab = () => `<p class="muted small">얻은 ${got.length}개 · 고른 호칭이 이름 앞에 붙어요</p><div class="ttl-grid">${[{ id: 'none', name: '달지 않기', tier: 'w', cond: '' }, ...DS.Titles.all()].map((t) => { const has = t.id === 'none' || got.includes(t.id); return `<button class="ttl-pick ${DS.Titles.TIER[t.tier].cls}${t.id === title ? ' on' : ''}${has ? '' : ' lock'}" data-ttl="${t.id}" title="${esc(t.cond || '')}">${has ? DS.Titles.medal(t, 22) : '🔒'}<span>${esc(t.name)}</span>${has ? '' : `<small>${esc(t.cond)}</small>`}</button>`; }).join('')}</div>`;
     const draw = () => { const sb = el.querySelector('.set-box'), keep = sb ? sb.scrollTop : 0;
-      el.innerHTML = `<div class="quiz-box framed set-box"><div class="set-head"><h2>⚙ 설정</h2><button class="btn" id="set-x">닫기</button><button class="btn primary" id="set-ok">저장</button></div>
-        ${T ? '' : `<div class="gem-bar">💎 <b>${L.gem}</b> 조각 <span class="muted small">· 🟪 인장 ${L.seals || 0} · 🎖 메달 ${Object.values(L.medal || {}).reduce((a, b) => a + (Number(b) || 0), 0)} · 잠긴 용사 · 이펙트를 누르면 조각으로 해금</span></div>`}<p class="shelf-title">${T ? '🧙 선생님 모습 <span class="muted small">모두 열림 · 종합상황실 · 교사 캠프 · 시연에 나와요</span>' : '내 용사'} <span class="muted small">🗡 근접 = 다가가서 · 🏹 원거리 = 탄을 날려서 (데미지 · 보상은 같아요)</span></p>
-        <div class="atk-prev" id="ap"><span class="ap-cap">${DS.Attack && DS.Attack.isRanged(hero) ? '🏹 원거리' : '🗡 근접'} · ${esc(((DS.ASSETS.heroesV2.list[hero] || {}).name) || '')} · ${esc(DS.FX.NAMES[fx] || '')} <span class="muted">(누르면 다시)</span></span><div class="ap-hero">${DS.Art.hero(hero, 'idle')}</div><div class="ap-mon">${DS.Art.monster('castle2:0', 'idle', 'float')}</div></div>
-        <div class="heroes set-grid">${L.heroes.map((h) => { const r = DS.Attack && DS.Attack.isRanged(h.id); return `<button class="hpick${h.id === hero ? ' on' : ''}${h.open ? '' : ' lock'}" data-h="${h.id}" title="${esc(h.cond || '')}"><b class="atk-badge${r ? ' r' : ''}">${r ? '🏹' : '🗡'}</b>${DS.Art.hero(h.id, h.id === hero ? 'attack' : 'idle')}${h.open ? '' : '<b class="lk">🔒</b>'}</button>`; }).join('')}</div>
-        ${T ? '' : `<p class="muted small">✨ 업적 용사: ① 1~3차시 도감 <b>${L.got} / ${L.need}</b>장 · ② 🎁 첫 레이드 · ③ 4~6차시 도감 · ④ 7~10차시 도감 · 금발 검사 = 🟪 인장 3개 / 💎 상점 용사 = 조각으로</p>`}
-        <p class="shelf-title">🏅 호칭 <span class="muted small">얻은 ${got.length}개 · 고른 호칭이 이름 앞에 붙어요</span></p>
-        <div class="ttl-grid">${[{ id: 'none', name: '달지 않기', tier: 'w', cond: '' }, ...DS.Titles.all()].map((t) => { const has = t.id === 'none' || got.includes(t.id); return `<button class="ttl-pick ${DS.Titles.TIER[t.tier].cls}${t.id === title ? ' on' : ''}${has ? '' : ' lock'}" data-ttl="${t.id}" title="${esc(t.cond || '')}">${has ? DS.Titles.medal(t, 22) : '🔒'}<span>${esc(t.name)}</span>${has ? '' : `<small>${esc(t.cond)}</small>`}</button>`; }).join('')}</div>
-        <p class="shelf-title">⚔ 공격 이펙트 <span class="muted small">${T ? '모두 열림 · 선생님 시연 공격에 나와요' : '맞는 순간 터지는 그림 · Ⅰ 기본 → Ⅱ 숙련 → Ⅲ 화려 → Ⅳ 전설'}</span></p>
-        <div class="fx-fams">${DS.FX.FAMS.map((fam) => `<div class="fx-fam"><b>${fam.name}</b>${fam.ids.map(fxCell).join('')}</div>`).join('')}<div class="fx-fam sp"><b>🪶 특별</b>${DS.FX.ACHV.map(fxCell).join('')}<span></span></div></div>
+      el.innerHTML = `<div class="quiz-box framed set-box"><div class="set-head"><h2>⚙ ${T ? '선생님 모습' : '내 용사'}</h2><button class="btn" id="set-x">닫기</button><button class="btn primary" id="set-ok">저장</button></div>
+        ${T ? '' : `<div class="gem-bar">💎 <b>${L.gem}</b> 조각 <span class="muted small">· 🟪 인장 ${L.seals || 0} · 🎖 메달 ${Object.values(L.medal || {}).reduce((a, b) => a + (Number(b) || 0), 0)}</span></div>`}
+        <div class="set-tabs">${[['hero', '🧙 용사'], ['gem', '💎 결정석'], ['ttl', `🏅 호칭 <small>${got.length}</small>`]].map(([k, n]) => `<button data-tab="${k}" class="${tab === k ? 'on' : ''}">${n}</button>`).join('')}</div>
+        ${tab === 'ttl' ? '' : preview()}
+        ${tab === 'hero' ? heroTab() : tab === 'gem' ? gemTab() : ttlTab()}
       </div>`; // v0.9.3: 닫기 · 저장은 맨 위 (사용자 요청)
       { const sb2 = el.querySelector('.set-box'); if (sb2) sb2.scrollTop = keep; }
       el.querySelectorAll('canvas[data-still]').forEach((c) => DS.FX.still(c, c.dataset.still));
       { const ap = el.querySelector('#ap'); if (ap) ap.onclick = demo; }
+      el.querySelectorAll('[data-tab]').forEach((b) => (b.onclick = () => { tab = b.dataset.tab; try { localStorage.setItem('citadel-settab', tab); } catch (e) { /* 이 기기에만 */ } DS.Sound.clank(); const sb3 = el.querySelector('.set-box'); if (sb3) sb3.scrollTop = 0; draw(); if (tab !== 'ttl') demo(); }));
       el.querySelectorAll('[data-h]').forEach((b) => (b.onclick = () => { const h = L.heroes.find((x) => x.id === Number(b.dataset.h)); if (!h.open) { if (h.shop) { DS.Control.run(() => shopBuy(h)); return; } DS.UI.toast(`🔒 ${h.cond}`); return; } hero = h.id; DS.Sound.clank(); draw(); demo(); }));
-      el.querySelectorAll('[data-fx]').forEach((b) => (b.onclick = () => { const f = L.fx.find((x) => x.id === b.dataset.fx); if (!f) return; if (!f.open) { if (f.locked) { DS.UI.toast(`🔒 ${f.locked} 열어야 살 수 있어요`, 3200); return; } if (f.shop) { DS.Control.run(() => shopBuy(f)); return; } DS.UI.toast(`🔒 ${f.cond || '해금 조건은 추후 공개'}`, 3200); return; } fx = f.id; draw(); demo(); DS.Sound.clank(); }));
+      el.querySelectorAll('[data-fx]').forEach((b) => (b.onclick = () => { const f = L.fx.find((x) => x.id === b.dataset.fx); if (!f) return; if (!f.open) { if (f.locked) { DS.UI.toast(`🔒 ${f.locked} 열어야 살 수 있어요`, 3200); return; } if (f.shop) { DS.Control.run(() => shopBuy(f)); return; } DS.UI.toast(`🔒 ${f.cond || '해금 조건은 추후 공개'}`, 3200); return; } sock[hero] = f.id; draw(); demo(); DS.Sound.clank(); }));
+      { const out = el.querySelector('#sock-out'); if (out) out.onclick = () => { delete sock[hero]; DS.Sound.clank(); DS.UI.toast('💎 결정석을 뺐어요 (보관함으로 · 언제든 다시 낄 수 있어요)', 2600); draw(); demo(); }; }
       el.querySelectorAll('[data-ttl]').forEach((b) => (b.onclick = () => { if (b.classList.contains('lock')) { DS.UI.toast(`🔒 ${b.title}`, 2600); return; } title = b.dataset.ttl; DS.Sound.clank(); draw(); }));
       el.querySelector('#set-x').onclick = () => el.remove();
-      el.querySelector('#set-ok').onclick = () => DS.Control.run(async () => { if (T) { DS.Art.setTeacherLook({ hero, fx, title }); el.remove(); DS.UI.toast('선생님 모습을 바꿨어요!'); if (opt.onSave) await opt.onSave({ hero, fx, title }); return; } if (me.test) DS.Test.setLook(hero, fx); else { await DS.Account.setLook(hero, fx); if (title !== (me.title || 'none')) await DS.Account.setTitle(title); } me.title = title; me.hero = hero; me.fx = fx; el.remove(); DS.UI.toast('저장했어요! 다음 입장부터 적용돼요.'); render(); });
+      el.querySelector('#set-ok').onclick = () => DS.Control.run(async () => { const fx = fxNow();
+        if (T) { DS.Art.setTeacherLook({ hero, fx, title, socket: sock }); el.remove(); DS.UI.toast('선생님 모습을 바꿨어요!'); if (opt.onSave) await opt.onSave({ hero, fx, title }); return; }
+        if (me.test) DS.Test.setLook(hero, fx); else { await DS.Account.setLook(hero, fx); await DS.Account.setSocket(sock); if (title !== (me.title || 'none')) await DS.Account.setTitle(title); }
+        me.title = title; me.hero = hero; me.fx = fx; me.socket = sock; el.remove(); DS.UI.toast('저장했어요! 다음 입장부터 적용돼요.'); render(); });
     };
-    draw(); document.body.appendChild(el); demo();
+    draw(); document.body.appendChild(el); if (tab !== 'ttl') demo();
   }
   const back = () => (me ? enter(me) : null);
   return { teacher: () => !!(me && me.teacher), noteDemo, enter, back, settings, shelf: (all) => shelf(all), refresh: () => { if (document.getElementById('camp-forge')) status(); }, stampToday, markStamp: () => { try { localStorage.setItem('citadel-stamp', today()); } catch (e) { /* 무시 */ } } };

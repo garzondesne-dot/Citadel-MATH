@@ -108,7 +108,7 @@ DS.Account = (function () {
     for (const [c, byN] of Object.entries(all)) for (const [n, a] of Object.entries(byN || {})) {
       if (a && a.uid === uid) {
         // 2026-11-03 (저녁): 0번 = 갈색머리 검사 v3 · 16번 = 금발 검사(추가 용사, 중단원던전 인장 3개) — 예전 「16 → 0 옮김」은 없앰
-        const name = await N().get(`roster/${c}/${n}`); cache = { uid, c, n: Number(n), name: name || '', title: a.title || 'none', hero: a.hero || 0, fx: DS.FX ? (DS.FX.KINDS.includes(a.fx) ? a.fx : 'flame') : a.fx || 'flame' }; return cache; }
+        const name = await N().get(`roster/${c}/${n}`); cache = { uid, c, n: Number(n), name: name || '', title: a.title || 'none', hero: a.hero || 0, fx: DS.FX ? (DS.FX.KINDS.includes(a.fx) ? a.fx : 'flame') : a.fx || 'flame', socket: a.socket || {} }; return cache; }
     }
     return null;
   }
@@ -123,6 +123,13 @@ DS.Account = (function () {
     await N().update(`accounts/${m.c}/${m.n}`, { hero: Number(hero), fx: String(fx) }); m.hero = Number(hero); m.fx = String(fx);
   }
   // 🏅 호칭 고르기 (v0.9.1): 얻은 호칭만 · 'none' = 달지 않음
+  // 💎 결정석 칸 저장 (2026-11-06): socket = { 용사 번호: 이펙트 } · 열린 결정석만 · 빈 칸은 지움(회수)
+  async function setSocket(sock) {
+    const m = await me(); if (!m) return;
+    const L = await looks(m), out = {};
+    Object.entries(sock || {}).forEach(([h, k]) => { if (k && L.fx.find((f) => f.id === k && f.open)) out[Number(h)] = String(k); });
+    await N().set(`accounts/${m.c}/${m.n}/socket`, Object.keys(out).length ? out : null); m.socket = out;
+  }
   async function setTitle(id) {
     const m = await me(); if (!m) return;
     if (id !== 'none') { const d = await DS.Titles.data(m); if (!DS.Titles.earned(d).some((t) => t.id === id)) fail('아직 얻지 못한 호칭이에요.'); }
@@ -202,5 +209,5 @@ DS.Account = (function () {
     tsess(true);
   }
 
-  return { classKey, email, teacherEmail, pw, validPin, mask, parseRoster, uploadRoster, removeStudent, resetAccount, masks, accountOf, signUp, login, me, setHero, setFx, setLook, setTitle, looks, logout, adminExists, isAdmin, teacherCreate, teacherLogin, endStaleTeacher };
+  return { classKey, email, teacherEmail, pw, validPin, mask, parseRoster, uploadRoster, removeStudent, resetAccount, masks, accountOf, signUp, login, me, setHero, setFx, setLook, setSocket, setTitle, looks, logout, adminExists, isAdmin, teacherCreate, teacherLogin, endStaleTeacher };
 })();

@@ -31,6 +31,12 @@ DS.FX = (function () {
     wings: '🪶 황금 날개', smite: '☀ 심판의 빛',
   };
   const famOf = (k) => FAMS.find((f) => f.ids.includes(k)) || null;
+  // 💎 결정석 (2026-11-06 사용자 확정 C): 용사마다 결정석 1칸 · 같은 결정석을 여러 용사에 동시에 · 빼면 보관함으로 (회수, 비용 0)
+  //   친화 계열 ★ = 용사마다 1개 — 친화 결정석을 끼우면 「공명」(이펙트 조금 크게 + 용사 빛) · 연출만, 데미지 · 보상 같음
+  const AFFINITY = { 0: 'cut', 16: 'cut', 3: 'cut', 7: 'fire', 6: 'fire', 13: 'fire', 5: 'spark', 9: 'spark', 11: 'spark', 14: 'frost', 2: 'frost', 15: 'frost', 4: 'star', 8: 'star', 10: 'star', 1: 'magic', 12: 'magic', 17: 'magic' };
+  const affOf = (hero) => FAMS.find((f) => f.id === AFFINITY[Number(hero)]) || FAMS[0];
+  const crystalOf = (hero, socket) => { const k = (socket || {})[Number(hero)]; return KINDS.includes(k) ? k : affOf(hero).ids[0]; }; // 빈 칸 = 친화 계열 Ⅰ
+  const resonates = (hero, k) => { const f = famOf(k); return !!f && f.id === AFFINITY[Number(hero)]; };
   const tierOf = (k) => { const f = famOf(k); return f ? f.ids.indexOf(k) : ACHV.includes(k) ? 's' : -1; };
   // 잠긴 이펙트를 가진 계정은 같은 계열 Ⅰ 로 (해금되면 그대로 씀)
   const BASE_OF = Object.fromEntries(KINDS.map((k) => [k, (famOf(k) || { ids: ['twinkle'] }).ids[0]]));
@@ -74,5 +80,5 @@ DS.FX = (function () {
     const drawIt = () => { g.clearRect(0, 0, cv.width, cv.height); g.imageSmoothingEnabled = false; const k = Math.min(cv.width / sp.w, cv.height / sp.h); g.drawImage(im, i * sp.w, 0, sp.w, sp.h, (cv.width - sp.w * k) / 2, (cv.height - sp.h * k) / 2, sp.w * k, sp.h * k); };
     if (im.complete && im.naturalWidth) drawIt(); else im.addEventListener('load', drawIt, { once: true });
   }
-  return { FAMS, TIER_NAMES, TIER_SCALE, KINDS, BASE, SKILL, FANCY, LEGEND, ACHV, NAMES, BASE_OF, famOf, tierOf, usable, spec, strip, play, still, preload, load };
+  return { FAMS, TIER_NAMES, TIER_SCALE, AFFINITY, affOf, crystalOf, resonates, KINDS, BASE, SKILL, FANCY, LEGEND, ACHV, NAMES, BASE_OF, famOf, tierOf, usable, spec, strip, play, still, preload, load };
 })();

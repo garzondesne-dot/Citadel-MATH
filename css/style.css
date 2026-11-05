@@ -2047,3 +2047,16 @@ input.sv-no { width: 64px !important; display: inline-block; padding: 2px 4px; }
 .fx-fam .fxpick.lock small { display: block; font-size: 10px; color: #ffd25a; }
 .fx-fam .fxpick.lock { filter: saturate(.7) brightness(.78); } /* 잠겨도 그림은 보이게 (꼬드기기) */
 @media (max-width: 420px) { .fx-fam { grid-template-columns: 46px repeat(4, 1fr); } .fx-fam.sp { grid-template-columns: 46px repeat(2, 1fr) 1fr; } .fx-fam > b { font-size: 11px; } }
+/* ⚙ 설정 v2 (2026-11-06): 탭 · 결정석 칸 · 공명 */
+.set-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin: 2px 0 8px; position: sticky; top: 40px; z-index: 2; background: inherit; padding-bottom: 4px; }
+.set-tabs button { font: 13px var(--pixel); color: var(--text); background: #0b1630; border: 2px solid var(--line); border-radius: 6px; padding: 7px 2px; cursor: pointer; }
+.set-tabs button.on { border-color: var(--gold); color: var(--gold); box-shadow: 0 0 8px #ffd25a55; }
+.set-tabs small { color: #9fb0e0; font-size: 11px; }
+.hpick .aff { position: absolute; right: 2px; bottom: 2px; font-size: 11px; line-height: 1; padding: 1px 2px; border-radius: 4px; background: #000b; z-index: 2; }
+.hpick .gemdot { position: absolute; right: 2px; top: 2px; width: 9px; height: 9px; border-radius: 50%; background: #7cf; box-shadow: 0 0 6px #7cf; z-index: 2; }
+.sock { display: grid; grid-template-columns: 64px 1fr auto; gap: 8px; align-items: center; margin: 0 0 6px; padding: 6px 8px; border: 2px solid #3a5aa8; border-radius: 8px; background: #0a1430; }
+.sock canvas { width: 64px; height: 40px; image-rendering: pixelated; background: #050a18; border-radius: 4px; }
+.sock b { display: block; font-size: 13px; color: #fff; } .sock small { color: #9fb0e0; font-size: 11px; }
+.sock .reso { color: #ffd25a; font-weight: 700; }
+.fx-fam.aff > b { color: #ffd25a; } .fx-fam.aff { background: #ffd25a14; border-radius: 6px; }
+.atk-reso .art { filter: drop-shadow(0 0 6px #ffd25a) drop-shadow(0 0 12px #ffb000); }

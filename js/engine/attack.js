@@ -77,9 +77,10 @@ DS.Attack = (function () {
     });
   }
   async function play(scene, o = {}) {
-    const { heroBox, monBox } = o, hero = Number(o.hero) || 0, fx = o.fx || 'flame', s = o.s || 1.2;
+    const { heroBox, monBox } = o, hero = Number(o.hero) || 0, fx = o.fx || 'flame', reso = DS.FX && DS.FX.resonates && DS.FX.resonates(hero, fx), s = (o.s || 1.2) * (reso ? 1.15 : 1);
     if (!scene || !heroBox || !monBox || !DS.FX) { if (DS.FX && !o.miss) DS.FX.play(scene, fx, { s }); return; }
     const H = rel(heroBox, scene), M = rel(monBox, scene), rest = o.rest || 'think';
+    if (reso) { heroBox.classList.add('atk-reso'); setTimeout(() => heroBox.classList.remove('atk-reso'), 1400); } // ★ 공명: 친화 결정석
     if (isRanged(hero)) {
       setPose(heroBox, hero, 'attack');
       await wait(200);

@@ -32,12 +32,12 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   await T.evaluate(async (code) => { const R = DS.Act.unpackRoom(await DS.Net.get(`rooms/${code}`)); await DS.Act.go(code, R, DS.Lessons.get('set-04'), 1); }, code);
   await H.waitForTimeout(2000);
   await S.evaluate(async () => { await DS.Net.set('xp/1-3/1/total', 35); await DS.Grow.add({ c: '1-3', n: 1 }, { join: 1 }, 'e2e-lv'); });
-  await S.waitForTimeout(400); const full = !!(await S.$('.lvup-full'));
+  await S.waitForTimeout(400); const full = !!(await S.$('.lvup-full, .lvup-mini')); // 2026-11-05 A: 수업 중 레벨업 = 작은 띠(lvup-mini)
   await S.screenshot({ path: `${OUT}/2-phone-lvup.png` });
   await H.waitForTimeout(1200); const hl = await H.evaluate(() => (document.querySelector('.h-lvup') || {}).textContent || '');
   await H.screenshot({ path: `${OUT}/3-hall-lvup.png` });
   log.push(`레벨업: 폰 축하 ${full} · 종합상황실 「${hl.replace(/\s+/g, ' ').trim()}」`);
   const g = await S.evaluate(() => DS.Gem.mine({ c: '1-3', n: 1 }));
-  const ok = /💎 50/.test(bar0) && /💎 20/.test(bar1) && open12 && full && /LEVEL UP/.test(hl) && /김민준/.test(hl) && /Lv\.2/.test(hl) && g.buy && g.buy.hero_12;
+  const ok = /50 조각/.test(bar0) && /20 조각/.test(bar1) && open12 && full && /LEVEL UP/.test(hl) && /김민준/.test(hl) && /Lv\.2/.test(hl) && g.buy && g.buy.hero_12;
   console.log(log.join('\n')); console.log(ok ? '✅ 통과' : '❌ 기대와 다름'); console.log('errors', errs.length ? errs : 'none'); await b.close(); if (!ok || errs.length) process.exit(1);
 })();
