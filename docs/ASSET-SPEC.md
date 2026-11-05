@@ -223,6 +223,8 @@ where 6–8 tiny heroes will stand. (1) intact, (2) the same platform with glowi
 2층 보스 = 「진리의 심판관」 · 3층 일반 방 = 새 몬스터 5 로 바꾼다 (3층 보스 「대단원의 군주」는 그대로).
 지금 성채 몬스터 시트(`assets/art/monsters-castle2-v1.webp` · `monsters-castleboss-v1.webp`)를 **참고 그림으로 같이 첨부**하면 화풍이 이어진다.
 
+**✅ 2026-11-06 도착 · 넣음 (v0.9.11.7)**: `demagenta.py` → `cut_grid.py` (칸 192 · 보스 384) → `monsters-castle3-v1.webp` · `monsters-castleboss2-v1.webp` · manifest `monstersCastle3` · `monstersCastleBoss2` · 3층 방 1~16 = `castle3:0~4`(색 바꿈 @h) · 2층 11번 = `castleboss2:0`.
+
 | 그림 | 템플릿 | 원본 칸 | 칸 | 보낼 파일 | 쓰는 곳 |
 |---|---|---|---|---|---|
 | 🏰 3층 몬스터 5 | `tpl-castle3.png` | 96×96 | 3 (대기 · 공격 · 쓰러짐) × 5줄 | `monsters-castle3-v1.png` (288×480) | 3층 방 1~16 |

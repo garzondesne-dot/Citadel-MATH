@@ -53,6 +53,9 @@ DS.ASSETS = {
   monstersCastle1: { src: 'monsters-castle1-v1.webp', cols: 3, rows: 5, poses: { idle: 0, attack: 1, down: 2 }, names: ['집합 방패 기사', '원소 촛대 정령', '포함 가고일', '벤 다이어그램 미믹 상자', '공집합 갑옷 유령'] },
   monstersCastle2: { src: 'monsters-castle2-v1.webp', cols: 3, rows: 5, poses: { idle: 0, attack: 1, down: 2 }, names: ['참 · 거짓 쌍두 까마귀', '화살표 뱀', '대우 거울 기사', '저울 골렘', '증명 두루마리'] },
   monstersCastleBoss: { src: 'monsters-castleboss-v1.webp', cols: 3, rows: 2, poses: { idle: 0, attack: 1, down: 2 }, names: ['집합의 성주', '대단원의 군주'] },
+  // 성채 3층(대단원) 새 몬스터 · 2층(명제 중단원) 보스 (2026-11-06 · 사용자 생성 · demagenta + cut_grid · 칸 192 · 보스 384): 'castle3:번호' · 'castleboss2:0'
+  monstersCastle3: { src: 'monsters-castle3-v1.webp', cols: 3, rows: 5, poses: { idle: 0, attack: 1, down: 2 }, names: ['진리집합 수정 골렘', '역 · 대우 사슬 망령', '귀류법 미로 거미', '절대부등식 탑 수호자', '필요충분 쌍둥이 열쇠 기사'] },
+  monstersCastleBoss2: { src: 'monsters-castleboss2-v1.webp', cols: 3, rows: 1, poses: { idle: 0, attack: 1, down: 2 }, names: ['진리의 심판관'] },
   monstersMirrorBoss: { src: 'monsters-mirrorboss-v2.webp', cols: 3, rows: 1, poses: { idle: 0, attack: 1, down: 2 }, names: ['대우의 거울 마왕'] },
   monstersCrown: { src: 'monsters-crown-v1.webp', cols: 3, rows: 10, poses: { idle: 0, attack: 1, down: 2 },
     names: ['에메랄드 왕관 슬라임', '루비 박쥐', '사파이어 뿔벌레', '자수정 뼈뱀', '버섯 전사', '자수정 눈알 문어', '이끼 골렘', '서리 왕관 늑대', '덩굴 미믹', '청록 수정룡'] },

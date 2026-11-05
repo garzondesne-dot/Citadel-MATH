@@ -190,7 +190,7 @@
     R('q08', 9, '08 충분조건이 되는 a', 'castle2:3@h240', m08),
     R('q09', 8, '09 항상 참인 명제', 'castle2:1@h240', m09),
     R('q10', 9, '10 두 명제가 거짓 (서술형)', 'castle2:4@h240', m10, { photo: true }),
-    R('q11', 10, '👑 11 절대부등식 최솟값', 'castleboss:1@h140', m11, { boss: true }),
+    R('q11', 10, '👑 11 절대부등식 최솟값', 'castleboss2:0', m11, { boss: true }),
   ];
   const MONSTERS = Object.fromEntries(ROOMS.map((r) => [r.id, r]));
 
