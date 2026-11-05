@@ -1,9 +1,11 @@
-// v0.9.11 그림 템플릿 (사용자가 그림 AI 로 뽑을 때 붙이는 안내 시트) — node tools/sprite/templates_v0911.js [출력 폴더]
+// v0.9.11 그림 템플릿 (사용자가 그림 AI 로 뽑을 때 붙이는 안내 시트) — node tools/sprite/templates_v0911.js [출력 폴더] [--only id,id]
+//   성채 2 · 3층 몬스터 (2026-11-06): node tools/sprite/templates_v0911.js assets/templates/castle --only castle3,castleboss2
 //   칸 = 마젠타 #FF00FF · 원본 1px = 시트에서 4px (배경은 2px) · 하늘색 = 발 기준선 · 노랑 점선 = 가운데 · 흰 점선 = 안전 여백(8px)
 //   만든 그림은 가로 한 줄로 이어 붙여 보내 주면 Claude 가 격자 · 팔레트 · 배경 제거 · 압축 · assets/manifest.js thrill 등록을 한다
 const { chromium } = require('playwright');
 const path = require('path'), fs = require('fs');
-const OUT = process.argv[2] || path.join(__dirname, '..', '..', 'assets', 'templates', 'v0911');
+const ARGS = process.argv.slice(2), oi = ARGS.indexOf('--only'), ONLY = oi >= 0 ? ARGS[oi + 1].split(',') : null;
+const OUT = (ARGS[0] && !ARGS[0].startsWith('--') && path.resolve(ARGS[0])) || path.join(__dirname, '..', '..', 'assets', 'templates', 'v0911');
 const FONT = path.join(__dirname, '..', '..', 'assets', 'fonts');
 const SHEETS = [
   { id: 'bat', title: '🦇 황금 박쥐', file: 'thrill-bat-v1.png', w: 64, h: 64, k: 4, base: null,
@@ -27,6 +29,13 @@ const SHEETS = [
     notes: ['32×32 그림 16개 · 가로 8 × 세로 2 · 소단원마다 하나 (같은 소단원 카드는 같은 그림)', '수학 기호를 빛나는 룬처럼 넣은 물건 그림 (검 · 수정 · 열쇠 · 저울 …) · 글자 없음', '카드 틀 위쪽 그림 자리에 들어감'] },
   { id: 'plat', title: '⚖ 밸런스 게임 발판', file: 'fun-plat-v2.png', w: 160, h: 120, k: 3, base: 12,
     frames: ['① 멀쩡한 발판', '② 금 간 발판'], notes: ['허공에 뜬 돌 · 나무 발판 · 위에 용사 6~8명이 설 자리 (하늘색 선 = 발 딛는 면)', '무너질 때는 게임이 그림을 세로로 6조각 내서 떨어뜨림', '배경 마젠타 · 글자 없음'] },
+  // 🏰 성채 3층 「집합과 명제 대단원」 새 몬스터 5 · 2층 「명제 중단원」 새 보스 1 (2026-11-06)
+  { id: 'castle3', title: '🏰 성채 3층 몬스터 5마리 (대단원)', file: 'monsters-castle3-v1.png', w: 96, h: 96, k: 2, base: 90, cols: 3,
+    frames: [1, 2, 3, 4, 5].flatMap((n, i) => [['진리집합 수정 골렘', '역 · 대우 사슬 망령', '귀류법 미로 거미', '절대부등식 탑 수호자', '필요충분 쌍둥이 열쇠 기사'][i]].flatMap((m) => [`${n}-대기 · ${m}`, `${n}-공격`, `${n}-쓰러짐`])),
+    notes: ['한 줄 = 몬스터 한 마리 · 왼쪽부터 대기 | 공격 | 쓰러짐 (5줄 × 3칸)', '왼쪽(용사 쪽)을 봄 · 발은 하늘색 선 위 · 몸 가운데는 노랑 점선', '1 · 2층 성채 몬스터와 같은 크기 · 같은 화풍 (참고 그림으로 지금 성채 몬스터 시트를 함께 첨부)'] },
+  { id: 'castleboss2', title: '👑 성채 2층 보스 「진리의 심판관」', file: 'monsters-castleboss2-v1.png', w: 192, h: 192, k: 2, base: 184,
+    frames: ['① 대기', '② 공격 (판결 망치 내려침)', '③ 쓰러짐'],
+    notes: ['명제 중단원 보스 · 이기면 호칭 「논리의 탐정」', '왼쪽(용사 쪽)을 봄 · 발은 하늘색 선 · 세 칸 위치 같게', '1층 성주 · 3층 군주와 같은 크기 (보스 칸 192 · 일반 몬스터의 2배)'] }
 ];
 const css = `@font-face{font-family:G;src:url('file://${FONT}/Galmuri11.woff2')}@font-face{font-family:G;font-weight:bold;src:url('file://${FONT}/Galmuri11-Bold.woff2')}
 body{margin:0;background:#1b1d2a;font-family:G,sans-serif;color:#e8e8f0}.sheet{display:inline-block;padding:22px 26px 18px;background:#1b1d2a}
@@ -53,7 +62,7 @@ function html(s) {
 (async () => {
   fs.mkdirSync(OUT, { recursive: true });
   const b = await chromium.launch(); const p = await b.newPage({ deviceScaleFactor: 1 });
-  for (const s of SHEETS) {
+  for (const s of SHEETS.filter((x) => !ONLY || ONLY.includes(x.id))) {
     const f = path.join(OUT, `tpl-${s.id}.html`); fs.writeFileSync(f, html(s));
     await p.goto('file://' + f); await p.waitForTimeout(300);
     await (await p.$('#s')).screenshot({ path: path.join(OUT, `tpl-${s.id}.png`) });

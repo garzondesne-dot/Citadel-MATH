@@ -22,7 +22,8 @@ DS.Titles = (function () {
     { id: 'grit', name: '끈기의 용사', tier: 'p', medal: ['rank', 6], cond: '재도전으로 고친 문제 모두 10개', test: (d) => recs(d).reduce((a, r) => a + (Number(r.fixed) || 0), 0) >= 10 },
     { id: 'sage', name: '도감 수집가', tier: 'o', medal: ['rank', 8], cond: '1~3차시 연성 도감 15장 완성', test: (d) => { const need = DS.Unit ? DS.Unit.CARDS.filter((c) => c.no <= 3) : []; return need.length > 0 && need.every((c) => (d.cards || {})[c.id]); } },
     { id: 'king', name: '집합의 지배자', tier: 'o', medal: ['rank', 9], cond: '🏰 성채던전 1층 👑 보스 방 처치', test: (d) => { const e = (d.bonus || {})['eval-1'] || {}; return !!((e.q12 || {}).clear || (e.eb || {}).clear); } }, // 2026-11-05: 12번 보스 방 (옛 eb 기록도) · 2026-11-03 변경 제안 v1
-    { id: 'sovereign', name: '명제의 군주', tier: 'o', medal: ['rank', 9], cond: '🏰 성채던전 2층 👑 보스 방(17번) 처치', test: (d) => !!((((d.bonus || {})['eval-3'] || {}).q17 || {}).clear) }, // 2026-11-05 대단원 컨펌
+    { id: 'detective', name: '논리의 탐정', tier: 'o', medal: ['rank', 9], cond: '🏰 성채던전 2층 👑 보스 방(11번) 처치', test: (d) => !!((((d.bonus || {})['eval-2'] || {}).q11 || {}).clear) }, // 2026-11-06 명제 중단원
+    { id: 'sovereign', name: '명제의 군주', tier: 'o', medal: ['rank', 9], cond: '🏰 성채던전 3층 👑 보스 방(17번) 처치', test: (d) => !!((((d.bonus || {})['eval-3'] || {}).q17 || {}).clear) }, // 2026-11-05 대단원 컨펌
     // 🎖 놀이 메달 · 🔁 연속 참여 (2026-11-05): gem/{반}/{번호}.medal · log
     { id: 'gambler', name: '쉼터의 승부사', tier: 'b', medal: ['rank', 4], cond: '🎖 쉼터 놀이 우승 메달 3개', test: (d) => Object.values(((d.gem || {}).medal) || {}).reduce((a, b) => a + (Number(b) || 0), 0) >= 3 },
     { id: 'oxsurv', name: 'OX 서바이버', tier: 'p', medal: ['rank', 6], cond: '🎖 수학 OX 우승 메달 3개', test: (d) => (Number((((d.gem || {}).medal) || {}).ox) || 0) >= 3 },

@@ -278,7 +278,7 @@ DS.Camp = (function () {
     }
     // 🏰 성채던전 NEW (2026-11-05): 진도를 나가 새로 열린 방 수 → 파란 배지 · 늘었으면 한 번 안내
     if (DS.Bonus && !me.test) {
-      if (DS.Bonus.loadLocks) await DS.Bonus.loadLocks(); // 🔒 잠긴 층(2층 대단원) 방은 NEW 에 안 셈
+      if (DS.Bonus.loadLocks) await DS.Bonus.loadLocks(); // 🔒 잠긴 층(3층 대단원) 방은 NEW 에 안 셈
       const fresh = DS.Bonus.newRooms(me, bonus || {}, Number(no) || 0).length, z = document.getElementById('camp-castle');
       if (z) { const old = z.querySelector('.cs-newb'); if (old) old.remove(); if (fresh) z.insertAdjacentHTML('beforeend', `<span class="cs-newb">NEW ${fresh}</span>`); }
       const nk = `citadel-castle-new-${k}-${me.n}`; let was = 0; try { was = Number(localStorage.getItem(nk)) || 0; localStorage.setItem(nk, String(fresh)); } catch (e) { /* 무시 */ }

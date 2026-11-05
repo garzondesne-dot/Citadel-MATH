@@ -104,6 +104,7 @@ check(T.get('dg-set-04').name === '빙결 동굴 정복' && T.get('dg-set-04').m
 check(ids({ ...d1, records: { a: { fixed: 6 }, b: { fixed: 4 } } }).includes('grit'), '끈기의 용사 = 고친 문제 누적 10');
 check(!T.earned({ ...d1, xp: 1e6 }).some((t) => t.id === 'king'), '집합의 지배자: 레벨로는 안 열림');
 check(T.earned({ ...d1, bonus: { 'eval-1': { eb: { clear: true, tries: 1 } } } }).some((t) => t.id === 'king') && !T.earned({ ...d1, bonus: { 'eval-1': { e1: { clear: true, tries: 1 } } } }).some((t) => t.id === 'king'), '집합의 지배자 = 꼭대기 층 발전 보스 처치');
+check(T.earned({ ...d1, bonus: { 'eval-2': { q11: { clear: true, tries: 1 } } } }).some((t) => t.id === 'detective') && !T.earned({ ...d1, bonus: { 'eval-2': { q10: { clear: true } } } }).some((t) => t.id === 'detective'), '🕵 논리의 탐정 = 성채 2층 11번 보스 처치 (2026-11-06)');
 check(T.all().every((t) => T.TIER[t.tier]), '모든 호칭에 등급');
 
 if (fail) { console.error(`\n${fail}건 실패`); process.exit(1); }

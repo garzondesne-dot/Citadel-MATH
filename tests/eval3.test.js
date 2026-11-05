@@ -7,7 +7,7 @@ const check = (c, m) => { count++; if (!c) { fail++; if (fail < 30) console.erro
 const L = DS.Lessons.get('eval-3');
 const R = (a, b) => Array.from({ length: b - a + 1 }, (_, i) => a + i);
 const divs = (n) => R(1, n).filter((d) => n % d === 0);
-check(L && L.eval && L.floor === 2 && L.rooms.length === 17 && L.rooms.filter((r) => r.boss).map((r) => r.id).join() === 'q17', '17방 · 17번 보스');
+check(L && L.eval && L.floor === 3 && L.rooms.length === 17 && L.rooms.filter((r) => r.boss).map((r) => r.id).join() === 'q17', '3층 (2026-11-06 옮김) · 17방 · 17번 보스');
 check(L.rooms.filter((r) => r.photo).map((r) => r.id).join() === 'q15,q16,q17', '서술형 = 15 · 16 · 17 (사진 분석 전 잠금)');
 check(L.rooms.map((r) => r.no).join() === '2,3,3,3,3,5,5,7,7,8,9,9,9,10,4,10,10', '해금 차시 (2026-11-05 재배열: 명제 7~10차시)');
 const got = (q) => (q.type === 'choice' ? q.answer : q.type === 'multi' ? q.answer.map((i) => q.options[i]).join(',') : q.answer);
@@ -54,4 +54,4 @@ for (const r of L.rooms) {
   check(JSON.stringify(L.items(r.id, 'k', 2)) === JSON.stringify(L.items(r.id, 'k', 2)), `${r.id}: 같은 시드 → 같은 문제`);
 }
 if (fail) { console.error(`\n${fail}건 실패 / ${count}건`); process.exit(1); }
-console.log(`OK: 🏰 성채던전 2층 17방 — 제안서 정답 · 교과서 숫자 안 씀 · 재도전 300×3 독립 검산 ${count}건 통과`);
+console.log(`OK: 🏰 성채던전 3층(대단원) 17방 — 제안서 정답 · 교과서 숫자 안 씀 · 재도전 300×3 독립 검산 ${count}건 통과`);

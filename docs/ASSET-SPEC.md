@@ -218,6 +218,45 @@ Native cell 160x120 px, 2 cells in one row: a floating stone-and-wood platform h
 where 6–8 tiny heroes will stand. (1) intact, (2) the same platform with glowing cracks across it. No characters, no text.
 ```
 
+### 6-8. 🏰 성채 2 · 3층 새 몬스터 (2026-11-06 · 템플릿 `assets/templates/castle/tpl-*.png` · 다시 만들기 `node tools/sprite/templates_v0911.js assets/templates/castle --only castle3,castleboss2`)
+성채가 3층이 됨: 1층 집합 중단원 · **2층 명제 중단원(새)** · 3층 집합과 명제 대단원(옮김). 지금 2층 방은 성채 2 몬스터 시트(`castle2`)를, 2층 보스 방은 「대단원의 군주」를 **임시로** 씀 → 이 묶음이 오면
+2층 보스 = 「진리의 심판관」 · 3층 일반 방 = 새 몬스터 5 로 바꾼다 (3층 보스 「대단원의 군주」는 그대로).
+지금 성채 몬스터 시트(`assets/art/monsters-castle2-v1.webp` · `monsters-castleboss-v1.webp`)를 **참고 그림으로 같이 첨부**하면 화풍이 이어진다.
+
+| 그림 | 템플릿 | 원본 칸 | 칸 | 보낼 파일 | 쓰는 곳 |
+|---|---|---|---|---|---|
+| 🏰 3층 몬스터 5 | `tpl-castle3.png` | 96×96 | 3 (대기 · 공격 · 쓰러짐) × 5줄 | `monsters-castle3-v1.png` (288×480) | 3층 방 1~16 |
+| 👑 2층 보스 | `tpl-castleboss2.png` | 192×192 | 3 (대기 · 공격 · 쓰러짐) | `monsters-castleboss2-v1.png` (576×192) | 2층 11번 보스 방 |
+
+① 3층 몬스터 5마리
+```
+[STYLE BIBLE above]
+Use the attached template only for layout; do NOT draw guide lines or labels. Match the attached castle monster sheets in size and style.
+Monster sprite sheet, native cell 96x96 px, 3 columns x 5 rows, no gaps. Each ROW is ONE monster; columns = (1) idle, (2) attack, (3) defeated/collapsed.
+Every monster faces LEFT, feet on the cyan ground line, body centered on the yellow dashed line. Theme: a haunted gothic castle of LOGIC, final hall.
+row1: Truth-Set Crystal Golem — a stocky golem made of glowing teal crystal blocks; a circular crystal "set" ring floats in its chest holding a few glowing dots.
+      attack: slams both fists, crystal shards burst. defeated: crumbles into a pile of dim crystal cubes.
+row2: Converse & Contrapositive Chain Wraith — a pale purple ghost wrapped in two crossing iron chains, each chain ending in an arrow-shaped weight pointing opposite ways.
+      attack: whips the arrow chains forward. defeated: chains drop, the ghost fades into wisps.
+row3: Proof-by-Contradiction Maze Spider — a dark bronze mechanical spider whose round back is a tiny glowing labyrinth with a red X at the center.
+      attack: rears up and shoots a sticky silver thread. defeated: flipped on its back, legs curled, maze light off.
+row4: Inequality Tower Guardian — a small living stone watchtower on two legs, a golden ≥ rune shining on its door, a balance scale on its roof.
+      attack: the roof scale tips and fires a golden beam. defeated: tower leans and cracks, rune dark.
+row5: Necessary-Sufficient Twin Key Knight — one armored knight body with two helmet heads (silver and gold), holding a giant key in one hand and a padlock shield in the other.
+      attack: thrusts the key forward like a lance. defeated: kneels, key and shield on the floor.
+```
+② 2층 보스 「진리의 심판관」
+```
+[STYLE BIBLE above]
+Use the attached template only for layout; do NOT draw guide lines or labels. Match the attached castle boss sheet in size and style.
+Boss sprite sheet, native cell 192x192 px, 3 cells in one row, no gaps: (1) idle, (2) attack, (3) defeated.
+"Judge of Truth" — a tall hooded magistrate of a gothic castle court, deep navy robe with gold trim, a glowing white T rune and a dark F rune on the two sleeves,
+face hidden in shadow with two bright eyes, a large judge's gavel, and a floating balance scale (one pan glowing, one pan dark) beside the head.
+Faces LEFT, feet on the cyan ground line, same position in all 3 cells.
+(1) idle: gavel resting on the shoulder, scale swaying. (2) attack: brings the gavel down hard, a shockwave of light from the impact.
+(3) defeated: on one knee, gavel dropped, scale tipped over, eyes dimmed. No text.
+```
+
 ## 7. 넘기는 방법
 
 - 뽑은 그림은 드라이브 「학습지 > 공통수학2 > 07 에셋 원본」 에 올리고 Claude 에게 「에셋 도착」.
