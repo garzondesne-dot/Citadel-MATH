@@ -1965,3 +1965,25 @@ input.sv-no { width: 64px !important; display: inline-block; padding: 2px 4px; }
 /* ⚖ 발판 그림 2칸 (멀쩡 · 금 감): 금 그림은 그림 칸이 대신 */
 .fa-arena.pimg .fa-plat, .fa-arena.img.pimg .fa-plat { background-repeat: repeat-y !important; image-rendering: pixelated; } /* 발판 그림을 세로로 쌓아 층층 발판 (용사 줄마다 한 층) */
 .fa-arena.pimg .fa-crack { display: none; }
+
+/* 💎 받을 수 있는 마정석 꼬리표 (성채 방 · 허수아비 줄 · 2026-11-05 「꼬드겨야지」) */
+.gm-tag { display: inline-block; flex: none; padding: 1px 6px; border-radius: 9px; background: linear-gradient(#3a7bff, #1f4fc8); color: #fff; font-size: 11px; font-weight: 700; line-height: 1.4; white-space: nowrap; box-shadow: 0 0 8px #5aa0ff99; animation: gmPulse 1.6s ease-in-out infinite; }
+.gm-tag.full { background: #3a4060; box-shadow: none; animation: none; opacity: .7; }
+.cs-room .gm-tag { position: static; margin-top: 3px; }
+.cs-room.boss .gm-tag { background: linear-gradient(#c58aff, #7a3fd0); box-shadow: 0 0 10px #c58aff; }
+.bn-row .gm-tag, .bn-h .gm-tag { flex: none; margin-right: 2px; }
+.bn-h .gm-tag { margin-left: 6px; font-size: 10px; }
+.gm-line { margin: 4px 0 8px; padding: 6px 10px; border-radius: 8px; background: #13234a; border: 1px solid #3a6bd8; font-size: 13px; color: #dfe9ff; }
+.gm-line b { color: #8fd0ff; }
+@keyframes gmPulse { 50% { transform: scale(1.08); box-shadow: 0 0 14px #8fc4ff; } }
+.gm-tag.seal { background: linear-gradient(#a45cff, #6a2fc0); box-shadow: 0 0 10px #c58aff; white-space: normal; text-align: center; }
+.cs-room .gm-tag.seal { position: static; margin-top: 2px; font-size: 10px; max-width: 100%; }
+.gm-wrap { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; font-style: normal; }
+.bn-row .gm-tag.seal { font-size: 10px; }
+/* 🎁 처치 보상 = 내 용사 머리 위 줄줄이 (8초 · 팝업 위) */
+.hd-rw { position: absolute; left: 50%; bottom: calc(100% + 18px); transform: translateX(-50%); z-index: 60; display: flex; flex-direction: column-reverse; align-items: center; gap: 3px; pointer-events: none; }
+.hd-rw-i { white-space: nowrap; padding: 2px 8px; border-radius: 10px; background: #0d1426e6; border: 1px solid #ffffff33; font: 700 14px var(--pixel); color: #fff; text-shadow: 0 1px 0 #000; opacity: 0; animation: hdIn .45s ease-out both, hdOut .6s ease-in forwards; }
+.hd-rw-i.xp { color: #b8ff7a; border-color: #6bd16b88; } .hd-rw-i.gem { color: #9fd4ff; border-color: #5aa0ff99; box-shadow: 0 0 8px #3a7bff66; }
+.hd-rw-i.seal { color: #ffe27a; background: #3a1d5ce6; border-color: #c58aff; box-shadow: 0 0 10px #c58aff88; }
+@keyframes hdIn { from { opacity: 0; transform: translateY(14px) scale(.8); } to { opacity: 1; transform: none; } }
+@keyframes hdOut { to { opacity: 0; transform: translateY(-12px); } }
