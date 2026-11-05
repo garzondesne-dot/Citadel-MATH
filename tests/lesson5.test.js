@@ -5,6 +5,7 @@
 // (4) 보강 ①·② · 형성평가 3번: A, B, C 에 {1,2,3} 의 모든 부분집합을 대입해 항등식인지 확인 (정답 보기만 항등식)
 // (5) 보강 ③ 그림: 네 칸(A만 · B만 · 겹침 · 바깥)으로 식을 계산해 색칠 영역과 맞춘다
 // (6) 형성평가 세트1·2 (6문항 · v4 에서 도전 7·8 뺌)
+// (7) 형성평가 재도전 생성기 L.boss.make (2026-11-05 · 문항마다 4번): 시드 300 × 시도 1~3 · check 로 따로 다시 계산 · 보기 겹침 · 「위 · n번의」 없음 · 문제 글 가짓수
 const load = require('./load');
 const DS = load(['assets/manifest.js', 'js/engine/ui.js', 'js/engine/setgen.js', 'js/engine/quiz.js', 'js/engine/lessons.js', 'lessons/set-05.js']);
 const L = DS.Lessons.get('set-05'), Q = DS.Quiz;
@@ -190,6 +191,84 @@ const want1 = ['교환법칙', '{1, 2, 3, 4}', 'A ∩ C', '{1, 3, 5}', '{1, 3}',
 check(L.boss.sets[1].map((q) => q.answer).join('|') === want1.join('|'), `세트1 학습지 정답 ${L.boss.sets[1].map((q) => q.answer)}`);
 check(/A = \{1, 2, 3, 4\}, B = \{2, 4, 6\}/.test(L.boss.sets[1][5].question), '6번은 5번의 A, B 를 그대로 보여 준다 (원본 「위 2번」 오타 고침)');
 check(L.boss.sets[1].filter((q) => q.answerIndex === 0).length <= 2, '세트1 정답이 첫 보기에 몰리지 않음');
+
+// ── 6. 형성평가 재도전 생성기 L.boss.make(i, a, rng) (2026-11-05: 문항마다 4번 · 시도 1~3 = 같은 유형의 새 문제) ──
+//   check 정보(sets · U · expr · law · dist)에서 따로 만든 계산기(evalExpr · identity)로 정답을 다시 구하고, 문제 글과 check 가 맞는지도 본다
+check(typeof L.boss.make === 'function', '형성평가 재도전 생성기 L.boss.make 있음');
+const set1Snap = JSON.stringify(L.boss.sets[1]);
+const LAW_NAMES = ['교환법칙', '결합법칙', '분배법칙'];
+const lawOf = (expr) => { // 식 모양으로 법칙 판정: 연산 기호가 한쪽에 하나 → 교환, 두 개가 같은 기호 → 결합, ∪ · ∩ 섞임 → 분배
+  const [l, r] = expr.split(' = '), ops = (s) => s.replace(/[^∪∩]/g, '');
+  if (ops(l).length === 1 && ops(r).length === 1 && l.replace(/\s/g, '') !== r.replace(/\s/g, '')) return '교환법칙';
+  if (ops(l).length === 2 && new Set(ops(l + r)).size === 1 && l.replace(/\s/g, '') !== r.replace(/\s/g, '')) return '결합법칙';
+  if (new Set(ops(l)).size === 2 && new Set(ops(r)).size === 2) return '분배법칙';
+  return null;
+};
+const SEEDS = 300, texts = upto(6).map(() => new Set()), ansPos = upto(6).map(() => new Set());
+let sameAcross = upto(6).map(() => 0);
+for (let i = 0; i < 6; i++) {
+  check(L.boss.make(i, 0, DS.Rng('z')) === L.boss.sets[1][i], `형성평가 ${i + 1}번: 시도 0 = 학습지 문항 그대로`);
+  for (let k = 0; k < SEEDS; k++) {
+    const qs = [1, 2, 3].map((a) => L.boss.make(i, a, DS.Rng(`s${k}|boss|${i}|${a}`)));
+    if (new Set(qs.map((q) => q.question)).size < 3) sameAcross[i]++;
+    qs.forEach((q, ai) => {
+      const a = ai + 1, tag = `형성평가 재도전 ${i + 1}번 s${k}/${a}`, c = q.check || {};
+      texts[i].add(q.question); ansPos[i].add(q.answerIndex);
+      check(q.type === 'choice' && q.choices.length === 4 - (i === 0 ? 1 : 0), `${tag}: 보기 개수`);
+      check(new Set(q.choices).size === q.choices.length, `${tag}: 보기 겹침 없음 ${q.choices}`);
+      check(q.choices.filter((x) => x === q.answer).length === 1 && q.choices[q.answerIndex] === q.answer, `${tag}: 정답 보기 하나 · answerIndex`);
+      check(Q.grade(q, q.answerIndex) === true, `${tag}: 정답 채점`);
+      q.choices.forEach((_, j) => { if (j !== q.answerIndex) check(Q.grade(q, j) === false, `${tag}: 오답 ${j} 이 정답 처리됨`); });
+      check(!/위 |번의/.test(q.question + q.solution), `${tag}: 다른 문항을 가리키는 글 (위 · n번의) ${q.question}`);
+      check(q.question.startsWith(`${i + 1}. `) && q.question !== L.boss.sets[1][i].question, `${tag}: 문항 번호 · 학습지와 다른 문제`);
+      check(typeof q.solution === 'string' && q.solution.length > 5, `${tag}: 해설`);
+      check(JSON.stringify(L.boss.make(i, a, DS.Rng(`s${k}|boss|${i}|${a}`))) === JSON.stringify(q), `${tag}: 같은 시드 → 같은 문제`);
+      if (i === 0) { // 법칙 이름
+        check(Array.isArray(c.law) && q.question === `1. ${c.law[0]} 는 어떤 법칙인가?`, `${tag}: check.law 와 문제 글`);
+        const [l, r] = c.law[0].split(' = ');
+        check(identity(l, r), `${tag}: ${c.law[0]} 가 항등식`);
+        check(q.answer === lawOf(c.law[0]), `${tag}: ${c.law[0]} → ${lawOf(c.law[0])} 인데 ${q.answer}`);
+        check(q.choices.slice().sort().join() === LAW_NAMES.slice().sort().join(), `${tag}: 보기 = 세 법칙`);
+        check(q.solution.includes(q.answer), `${tag}: 해설에 법칙 이름`);
+        return;
+      }
+      if (i === 2) { // 분배법칙 빈칸: 보기마다 □ 에 넣어 모든 부분집합 대입 → 항등식은 정답 하나
+        check(Array.isArray(c.dist) && q.question === `3. ${c.dist[0]} 의 (   ) 에 알맞은 것은?` && c.dist[1].join() === q.choices.join(), `${tag}: check.dist 와 문제 글 · 보기`);
+        const [l, r] = c.dist[0].split(' = '), tpl = r.replace('(   )', '□');
+        const ok = q.choices.map((x) => identity(l, tpl.replace('□', `(${x})`)));
+        check(ok[q.answerIndex] && ok.filter(Boolean).length === 1, `${tag}: ${c.dist[0]} 항등식 보기 ${q.choices.filter((_, j) => ok[j])}, 정답 ${q.answer}`);
+        check(/[∪∩]/.test(l) && new Set(l.replace(/[^∪∩]/g, '')).size === 2, `${tag}: 분배법칙 모양 (∪ · ∩ 섞임)`);
+        check(q.solution.includes(q.answer), `${tag}: 해설에 정답`);
+        return;
+      }
+      // 2 · 4 · 5 · 6번: check 의 집합으로 식 다시 계산 + 문제 글에서 읽은 집합이 check 와 같은지
+      check(c.sets && c.expr, `${tag}: check(sets · expr) 있음`); if (!c.sets || !c.expr) return;
+      const env = Object.assign({}, c.sets, c.U ? { U: c.U } : {}), fromText = readEnv(q.question);
+      check(Object.keys(env).every((key) => fromText[key] && eq(fromText[key], env[key])), `${tag}: 문제 글의 집합 = check ${q.question}`);
+      check(q.question.endsWith(`일 때 ${c.expr} 는?`), `${tag}: 식 ${c.expr} 이 문제 글에 (집합을 다시 적고 「일 때」)`);
+      if (c.U) check(Object.values(c.sets).every((S) => S.every((x) => c.U.includes(x))), `${tag}: U 밖의 원소`);
+      const want = evalExpr(c.expr, env), hit = q.choices.map((x) => eq(parseSet(x), want));
+      check(want.length > 0 && hit[q.answerIndex] && hit.filter(Boolean).length === 1, `${tag}: ${c.expr} = ${JSON.stringify(want)} 인 보기가 정답 하나 ${q.choices}`);
+      check(q.solution.includes(q.answer), `${tag}: 해설에 정답 값 ${q.answer}`);
+      // 같은 난이도 · 그럴듯한 함정 (학습지와 같은 꼴)
+      if (i === 1) check(['A', 'B', 'C'].every((key) => c.sets[key].length === 2) && evalExpr('A ∩ B', env).length === 1 && evalExpr('B ∩ C', env).length === 1 && !evalExpr('A ∩ C', env).length, `${tag}: 원소 2개씩 사슬로 겹친 세 집합`);
+      if (i === 3) {
+        check(c.U.length >= 5 && c.U.length <= 7 && eq(c.U, upto(c.U.length)) && c.sets.A.length >= 2 && c.sets.A.length <= 3, `${tag}: U = {1, …, 5~7}, A 원소 2~3개`);
+        check([c.sets.A, c.U, []].every((S) => q.choices.some((x) => eq(parseSet(x), S))), `${tag}: 함정 보기 A · U · ∅`);
+      }
+      if (i === 4 || i === 5) {
+        const other = evalExpr(i === 4 ? 'B − A' : 'A − B', env);
+        check(['A ∩ B', 'A − B', 'B − A'].every((x) => evalExpr(x, env).length) && c.sets.A.length >= 4 && c.sets.B.length === 3, `${tag}: A ∩ B · A − B · B − A 모두 공집합 아님`);
+        check(q.choices.some((x) => eq(parseSet(x), other)), `${tag}: 함정 보기 = 반대 차집합`);
+      }
+    });
+  }
+  check(texts[i].size >= (i === 0 ? 3 : 5), `형성평가 ${i + 1}번: 재도전 문제 글 ${texts[i].size}가지`);
+  check(ansPos[i].size === L.boss.sets[1][i].choices.length, `형성평가 ${i + 1}번: 정답 자리가 섞임 ${[...ansPos[i]]}`);
+  // 법칙 이름(1번) · 분배법칙 빈칸(3번)은 식 모양이 19 · 11가지뿐이라 세 시도 중 두 번이 같은 글일 수 있음 (보기 · 순서는 다름)
+  check(sameAcross[i] <= SEEDS * (i === 0 || i === 2 ? 0.15 : 0.05), `형성평가 ${i + 1}번: 시도 1~3 문제가 대개 서로 다름 (겹친 시드 ${sameAcross[i]}/${SEEDS})`);
+}
+check(JSON.stringify(L.boss.sets[1]) === set1Snap, '생성기를 돌려도 학습지 세트1 은 그대로');
 
 if (fail) { console.error(`\n${fail}건 실패 / ${count}건`); process.exit(1); }
 console.log(`OK: 5차시 — 순서(도입·복습 없음)·학습지 정답·재도전 300×4·식 계산기·항등식·그림 영역·형성평가 ${count}건 통과`);

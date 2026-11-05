@@ -144,9 +144,9 @@
   // ── 형성평가 (보스) — 세트1: 학습지 그대로, 세트2: 숫자를 바꾼 재도전 · 6번(보강·도전)은 보너스 ──
   const ch = (question, choices, ans, solution, check) => ({ type: 'choice', question, choices, answerIndex: ans, answer: choices[ans], solution, check });
   const pairTxt = (A, B) => `A ∩ B = ${st(inter(A, B))}, A ∪ B = ${st(union(A, B))}`;
+  const wrongPairs = (A, B) => [`A ∩ B = ${st(union(A, B))}, A ∪ B = ${st(inter(A, B))}`, `A ∩ B = ${st(inter(A, B))}, A ∪ B = ${st(sorted([...A, ...B].filter((x) => !inter(A, B).includes(x))))}`, `A ∩ B = ∅, A ∪ B = ${st(union(A, B))}`];
   function bossSet(A, B, disj, disjAns, nA, nB, nI, item4, item5, six) {
-    const wrong1 = [`A ∩ B = ${st(union(A, B))}, A ∪ B = ${st(inter(A, B))}`, `A ∩ B = ${st(inter(A, B))}, A ∪ B = ${st(sorted([...A, ...B].filter((x) => !inter(A, B).includes(x))))}`, `A ∩ B = ∅, A ∪ B = ${st(union(A, B))}`];
-    const c1 = [pairTxt(A, B), ...wrong1];
+    const c1 = [pairTxt(A, B), ...wrongPairs(A, B)];
     return [
       ch(`1. A = ${st(A)}, B = ${st(B)} 일 때 A ∩ B 와 A ∪ B 를 바르게 구한 것은?`, c1, 0, `둘 다 있는 것 → ${st(inter(A, B))}, 모두 모으기 → ${st(union(A, B))}`, { a: A, b: B, pair: true }),
       ch('2. 서로소인 것은?', disj.map((p, i) => `${'①②③'[i]} ${p[0]}, ${p[1]}`), disjAns, '공통인 원소가 하나도 없는 두 집합 → 서로소', { disj }),
@@ -165,6 +165,69 @@
   // 보기 순서는 고정 (같은 시드 → 같은 문제). 1번은 정답이 맨 앞이 되지 않게 돌려 둔다
   [1, 2].forEach((k) => { const q = BOSS[k][0], rot = k === 1 ? 2 : 1; q.choices = [...q.choices.slice(rot), ...q.choices.slice(0, rot)]; q.answerIndex = (q.choices.length - rot) % q.choices.length; q.answer = q.choices[q.answerIndex]; });
   [1, 2].forEach((k) => { const q = BOSS[k][5], rot = k === 1 ? 1 : 3; q.choices = [...q.choices.slice(rot), ...q.choices.slice(0, rot)]; q.answerIndex = (q.choices.length - rot) % q.choices.length; q.answer = q.choices[q.answerIndex]; });
+
+  // ── 형성평가 재도전 (2026-11-05 · 문항마다 4번: 시도 0 = 학습지 그대로, 시도 1~3 = 같은 유형 · 같은 난이도의 새 숫자 · 새 집합) ──
+  // boss.make(i, a, rng) → 문항 하나. 문제 글은 혼자 읽어도 되게 집합을 다시 적는다. 보기는 시도마다 섞는다. check 로 tests/lesson4.test.js 가 독립 검산
+  const shuffledCh = (r, question, choices, ans, solution, check) => { const cs = r.shuffle(choices); return ch(question, cs, cs.indexOf(ans), solution, check); };
+  const NAMES = [['A', 'B'], ['P', 'Q'], ['X', 'Y'], ['S', 'T']];
+  const iga = (n) => ('2459'.includes(String(n).slice(-1)) ? '가' : '이'); // 받침: 2 이 · 4 사 · 5 오 · 9 구 → 가
+  const elSort = (a) => a.slice().sort((x, y) => (typeof x === 'number' ? x - y : x < y ? -1 : 1));
+  const elStr = (a) => `{${elSort(a).join(', ')}}`;
+  // 1번: 원소 3개짜리 두 집합 (겹침 1~2개) → ∩ · ∪ 한 쌍. 오답 = ∩ ↔ ∪ 바꿈 · 겹친 원소를 뺀 ∪ · 서로소로 착각(∅)
+  function bm1(r) {
+    let A, B;
+    do { A = sorted(r.shuffle(range(1, 10)).slice(0, 3)); B = sorted(r.shuffle(range(1, 10)).slice(0, 3)); } while (inter(A, B).length < 1 || inter(A, B).length > 2);
+    return shuffledCh(r, `1. A = ${st(A)}, B = ${st(B)} 일 때 A ∩ B 와 A ∪ B 를 바르게 구한 것은?`, [pairTxt(A, B), ...wrongPairs(A, B)], pairTxt(A, B),
+      `둘 다 있는 것 → ${st(inter(A, B))}, 모두 모으기 → ${st(union(A, B))}`, { a: A, b: B, pair: true });
+  }
+  // 2번: 세 쌍 중 서로소는 하나 — 하나 겹침 ({1, 2}, {2, 3}) · 포함 ({a}, {a, b}) · 서로소. 수 · 문자 섞기
+  function bm2(r) {
+    const pool = (lt) => (lt ? LET : range(1, 9));
+    const lts = r.shuffle([true, false, r() < 0.5]);
+    const overlap = (lt) => { const v = r.shuffle(pool(lt)).slice(0, 3); return [[v[0], v[1]], [v[1], v[2]]]; };
+    const subset = (lt) => { const v = r.shuffle(pool(lt)).slice(0, r.int(2, 3)), p = [v.slice(0, -1), v]; return r() < 0.5 ? p : [p[1], p[0]]; };
+    const disjoint = (lt) => { const v = r.shuffle(pool(lt)).slice(0, r.int(3, 4)), k = v.length === 4 ? 2 : r.int(1, 2); return [v.slice(0, k), v.slice(k)]; };
+    const pairs = [overlap(lts[0]), subset(lts[1]), disjoint(lts[2])].map(([x, y]) => [elStr(x), elStr(y)]);
+    const order = r.shuffle([0, 1, 2]), disj = order.map((k) => pairs[k]), ans = order.indexOf(2);
+    return ch('2. 서로소인 것은?', disj.map((p, k) => `${'①②③'[k]} ${p[0]}, ${p[1]}`), ans,
+      `${'①②③'[ans]} ${disj[ans][0]}, ${disj[ans][1]} → 공통인 원소가 하나도 없다 (교집합 = ∅) → 서로소. 나머지 두 쌍은 겹치는 원소가 있다`, { disj });
+  }
+  // 3번: n(A ∪ B) = n(A) + n(B) − n(A ∩ B) (n(A ∩ B) 는 둘보다 작게)
+  function bm3(r) {
+    const nA = r.int(4, 10), nB = r.int(3, 10), nI = r.int(1, Math.min(nA, nB) - 1);
+    return S.number(`3. n(A) = ${nA}, n(B) = ${nB}, n(A ∩ B) = ${nI} 일 때 n(A ∪ B) = ?`, nA + nB - nI, `n(A ∪ B) = ${nA} + ${nB} − ${nI} = ${nA + nB - nI}`, { nA, nB, nI });
+  }
+  // 4번: 조건제시법의 「그리고 · 또는」 — 빈칸 넣기 또는 거꾸로 (조건 → 기호) · 집합 이름도 바꾼다
+  function bm4(r) {
+    const op = r.pick(['∩', '∪']), [X, Y] = r.pick(NAMES), w = op === '∪' ? '또는' : '그리고';
+    const sol = `교집합 → 그리고 (둘 다), 합집합 → 또는 (하나라도) → ${X} ${op} ${Y} = {x | x ∈ ${X} ${w} x ∈ ${Y}}`;
+    if (r() < 0.5) return shuffledCh(r, `4. ${X} ${op} ${Y} = {x | x ∈ ${X} (   ) x ∈ ${Y}} 에 알맞은 말은?`, ['그리고', '또는'], w, sol, { word: op, names: [X, Y], form: 'blank' });
+    return shuffledCh(r, `4. {x | x ∈ ${X} ${w} x ∈ ${Y}} 와 같은 집합은?`, [`${X} ∩ ${Y}`, `${X} ∪ ${Y}`], `${X} ${op} ${Y}`, sol, { word: op, names: [X, Y], form: 'set' });
+  }
+  // 5번: 작은 집합 ⊂ 큰 집합 일 때 ∩ = 작은 쪽, ∪ = 큰 쪽 (오답 ∅ = 서로소 착각). 이름 · 포함 방향 · 연산을 바꾼다
+  function bm5(r) {
+    const op = r.pick(['∩', '∪']), [X, Y] = r.pick(NAMES), [small, big] = r() < 0.5 ? [X, Y] : [Y, X], ans = op === '∩' ? small : big;
+    return shuffledCh(r, `5. ${small} ⊂ ${big} 일 때, ${X} ${op} ${Y} 와 같은 집합은?`, [X, Y, '∅'], ans,
+      `${small} ⊂ ${big} 이면 ${small} ∩ ${big} = ${small}, ${small} ∪ ${big} = ${big} → ${X} ${op} ${Y} = ${ans}`, { sub: op, names: [X, Y], small, big });
+  }
+  // 6번 [보강·도전]: A = {p, q, a + k}, B = {q, a, r}, A ∩ B = {q, r} → a + k = r → a = r − k → A ∪ B = {p, q, r, a}
+  //   오답 = A 만 · B 만 · a = r 로 착각해 a + k 까지 넣은 것 (학습지 보기 모양 그대로)
+  function bm6(r) {
+    let p, q, rr, k, a;
+    do { [p, q, rr] = r.shuffle(range(1, 9)).slice(0, 3); if (p > q) [p, q] = [q, p]; k = r.int(1, 4); a = rr - k; } while (a < 1 || [p, q, rr].includes(a) || [p, q].includes(rr + k));
+    const A = sorted([p, q, rr]), B = sorted([q, a, rr]), U = sorted([p, q, rr, a]), I = sorted([q, rr]);
+    return shuffledCh(r, `6. [보강·도전] 두 집합 A = {${p}, ${q}, a + ${k}}, B = {${q}, a, ${rr}} 에 대하여 A ∩ B = ${st(I)} 일 때, 집합 A ∪ B 는?`,
+      [st(U), st(A), st(B), st(sorted([...U, rr + k]))], st(U),
+      `A ∩ B 에 ${rr} ${iga(rr)} 있으니 a + ${k} = ${rr} → a = ${a} → A = ${st(A)}, B = ${st(B)} → A ∪ B = ${st(U)}`, { six: { p, q, k, r: rr, I } });
+  }
+  const BOSS_GEN = [bm1, bm2, bm3, bm4, bm5, bm6];
+  const sameItem = (x, y) => x.question === y.question && (x.choices || []).slice().sort().join('|') === (y.choices || []).slice().sort().join('|');
+  // 학습지 문항과 똑같이 나오면 다시 뽑는다 (재도전은 늘 새 문제)
+  function bossMake(i, a, r) {
+    let q;
+    for (let t = 0; t < 30; t++) { q = BOSS_GEN[i](r); if (!sameItem(q, BOSS[1][i])) break; }
+    return q;
+  }
 
   const STEPS = [
     { kind: 'intro', id: 'intro', title: '도입 · 생각 열기', say: '선생님 폰 vs 너희 폰 — 둘 다 쓰는 앱은? 한 명이라도 쓰는 앱은 모두 몇 개?' },
@@ -203,6 +266,7 @@
     items(id, seed, attempt) { return MONSTERS[id].make(attempt, DS.Rng(`${seed}|${id}|${attempt}`)); },
     WORDS,
     next: { title: '5차시 · 여집합과 차집합', ask: '우리 반 전체에서 안경 쓴 친구를 빼면, 남은 친구들은 어떤 집합일까?', link: '오늘 배운 교집합(∩)으로 차집합을 A − B = A ∩ Bᶜ 처럼 나타낼 수 있어요.' }, // 다음 수업 (초안)
-    boss: { title: '4차시 형성평가 · 서리 늑대', sprite: 'crown:7', items: 6, hpItems: 5, sets: BOSS, tags: ['c1', 'c2', 'c3', 'c1', 'c3', 'c1'] },
+    boss: { title: '4차시 형성평가 · 서리 늑대', sprite: 'crown:7', items: 6, hpItems: 5, sets: BOSS, tags: ['c1', 'c2', 'c3', 'c1', 'c3', 'c1'],
+      make(i, a, rng) { return bossMake(i, a, rng); } }, // 재도전 시도 1~3: 같은 유형의 새 문제 (시도 0 = sets[1])
   });
 })();

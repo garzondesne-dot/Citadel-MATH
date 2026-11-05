@@ -187,18 +187,27 @@
 
   // ── 형성평가 (보스) — 세트1: 학습지 그대로(6번은 「위 5번에서」 원본 오타를 고친 v3 기준), 세트2: 숫자를 바꾼 재도전 · v4: 7·8번(도전)은 뺌 (bossSet 은 8문항을 만들고 6문항만 씀) ──
   const LAWS = ['교환법칙', '결합법칙', '분배법칙'];
+  // 문항 1~6 만드는 틀 (학습지 세트 · 재도전 생성기 make 가 함께 쓴다) · sol 이 없으면 학습지 해설 그대로
+  //   6번: lead = '5번의 ' (학습지 세트) / 재도전은 lead 없이 「A = …, B = … 일 때」 로 집합을 다시 적는다 (문항 하나만 보아도 풀 수 있게)
+  const BI = {
+    law: (law, choices) => ch(`1. ${law[0]} 는 어떤 법칙인가?`, choices, law[1], law[2], { law }),
+    union3: (A, B, C, choices, sol) => ch(`2. A = ${st(A)}, B = ${st(B)}, C = ${st(C)} 일 때 A ∪ B ∪ C 는?`, choices.map(st), st(union(union(A, B), C)), sol || '셋을 모두 모으기 (괄호 없이 써도 된다 · 결합법칙)', { sets: { A, B, C }, expr: 'A ∪ B ∪ C' }),
+    dist: (dist, sol) => ch(`3. ${dist[0]} 의 (   ) 에 알맞은 것은?`, dist[1], dist[2], sol || '분배법칙: A ∩ (B ∪ C) = (A ∩ B) ∪ (A ∩ C), A ∪ (B ∩ C) = (A ∪ B) ∩ (A ∪ C)', { dist }),
+    comp: (U, A, choices, sol) => ch(`4. U = ${st(U)}, A = ${st(A)} 일 때 Aᶜ 는?`, choices.map(st), st(comp(U, A)), sol || 'U 의 원소 중 A 에 속하지 않는 것', { U, sets: { A }, expr: 'Aᶜ' }),
+    diffAB: (A, B, choices, sol) => ch(`5. A = ${st(A)}, B = ${st(B)} 일 때 A − B 는?`, choices.map(st), st(minus(A, B)), sol || 'A 에서 B 에 있는 것 빼기', { sets: { A, B }, expr: 'A − B' }),
+    diffBA: (A, B, choices, lead, sol) => ch(lead ? `6. ${lead}A = ${st(A)}, B = ${st(B)} 에서 B − A 는?` : `6. A = ${st(A)}, B = ${st(B)} 일 때 B − A 는?`, choices.map(st), st(minus(B, A)), sol || 'B 에서 A 에 있는 것 빼기 (A − B 와 다르다!)', { sets: { A, B }, expr: 'B − A' }),
+  };
   function bossSet(o) {
     const { A2, B2, C2, U4, A4, A5, B5, A7, B7, C7, U8, cA8, cB8 } = o;
-    const ABC = union(union(A2, B2), C2), Ac = comp(U4, A4), d1 = minus(A5, B5), d2 = minus(B5, A5);
     const r7 = union(A7, inter(B7, C7));
     const A8 = U8.filter(COND[cA8][1]), B8 = U8.filter(COND[cB8][1]), r8 = inter(comp(U8, A8), B8);
     return [
-      ch(`1. ${o.law[0]} 는 어떤 법칙인가?`, LAWS, o.law[1], o.law[2], { law: o.law }),
-      ch(`2. A = ${st(A2)}, B = ${st(B2)}, C = ${st(C2)} 일 때 A ∪ B ∪ C 는?`, o.c2.map(st), st(ABC), '셋을 모두 모으기 (괄호 없이 써도 된다 · 결합법칙)', { sets: { A: A2, B: B2, C: C2 }, expr: 'A ∪ B ∪ C' }),
-      ch(`3. ${o.dist[0]} 의 (   ) 에 알맞은 것은?`, o.dist[1], o.dist[2], '분배법칙: A ∩ (B ∪ C) = (A ∩ B) ∪ (A ∩ C), A ∪ (B ∩ C) = (A ∪ B) ∩ (A ∪ C)', { dist: o.dist }),
-      ch(`4. U = ${st(U4)}, A = ${st(A4)} 일 때 Aᶜ 는?`, o.c4.map(st), st(Ac), 'U 의 원소 중 A 에 속하지 않는 것', { U: U4, sets: { A: A4 }, expr: 'Aᶜ' }),
-      ch(`5. A = ${st(A5)}, B = ${st(B5)} 일 때 A − B 는?`, o.c5.map(st), st(d1), 'A 에서 B 에 있는 것 빼기', { sets: { A: A5, B: B5 }, expr: 'A − B' }),
-      ch(`6. 5번의 A = ${st(A5)}, B = ${st(B5)} 에서 B − A 는?`, o.c6.map(st), st(d2), 'B 에서 A 에 있는 것 빼기 (A − B 와 다르다!)', { sets: { A: A5, B: B5 }, expr: 'B − A' }),
+      BI.law(o.law, LAWS),
+      BI.union3(A2, B2, C2, o.c2),
+      BI.dist(o.dist),
+      BI.comp(U4, A4, o.c4),
+      BI.diffAB(A5, B5, o.c5),
+      BI.diffBA(A5, B5, o.c6, '5번의 '),
       ch(`7. [도전] A = ${st(A7)}, B = ${st(B7)}, C = ${st(C7)} 일 때 (A ∪ B) ∩ (A ∪ C) = A ∪ (   ) 이다. 빈칸과 계산 결과를 바르게 짝지은 것은?`, o.c7, `B ∩ C, ${st(r7)}`,
         `분배법칙 → (A ∪ B) ∩ (A ∪ C) = A ∪ (B ∩ C) = A ∪ ${st(inter(B7, C7))} = ${st(r7)}`, { sets: { A: A7, B: B7, C: C7 }, pair: true }),
       ch(`8. [도전] U = {x | x는 ${U8.length} 이하의 자연수}, A = {x | x는 ${COND[cA8][0]}}, B = {x | x는 ${COND[cB8][0]}} 일 때 Aᶜ ∩ B 는?`, o.c8.map(st), st(r8),
@@ -222,6 +231,65 @@
       A7: [1, 2, 3], B7: [3, 4, 5], C7: [4, 5, 6], c7: ['B ∩ C, {4, 5}', 'B ∪ C, {1, 2, 3, 4, 5, 6}', 'B ∩ C, {1, 2, 3, 4, 5}', 'B ∪ C, {3, 4, 5, 6}'],
       U8: range(1, 10), cA8: 'm4', cB8: 'even', c8: [[4, 8], [2, 6, 10], [2, 4, 6, 8, 10], [1, 3, 5, 7, 9]] })),
   };
+
+  // ── 형성평가 재도전 생성기 (2026-11-05 사용자 결정: 문항마다 4번 · 시도 0 = 학습지 · 시도 1~3 = 같은 유형 · 같은 난이도의 새 문제) ──
+  //   make(i, a, rng) → 문항 i 하나 · 보기는 시도마다 섞음 · 검산 정보(check)는 학습지 세트와 같은 모양 (tests/lesson5.test.js 가 따로 계산)
+  const LAW_FORMS = [ // [식, 법칙] — 같은 법칙의 여러 모양 (교과서 표기)
+    ...[['A', 'B'], ['B', 'A'], ['B', 'C'], ['C', 'B'], ['A', 'C'], ['C', 'A']].flatMap(([x, y]) => ['∪', '∩'].map((op) => [`${x} ${op} ${y} = ${y} ${op} ${x}`, '교환법칙'])),
+    ...['∪', '∩'].flatMap((op) => [[`(A ${op} B) ${op} C = A ${op} (B ${op} C)`, '결합법칙'], [`A ${op} (B ${op} C) = (A ${op} B) ${op} C`, '결합법칙']]),
+    ['A ∩ (B ∪ C) = (A ∩ B) ∪ (A ∩ C)', '분배법칙'], ['A ∪ (B ∩ C) = (A ∪ B) ∩ (A ∪ C)', '분배법칙'],
+    ['(A ∩ B) ∪ (A ∩ C) = A ∩ (B ∪ C)', '분배법칙'], ['(A ∪ B) ∩ (A ∪ C) = A ∪ (B ∩ C)', '분배법칙'],
+  ];
+  const LAW_SOL = { 교환법칙: '순서를 바꾸어도 결과가 같다 → 교환법칙', 결합법칙: '어느 두 개를 먼저 계산해도 결과가 같다 → 결합법칙', 분배법칙: '∩ 와 ∪ 가 섞여 있고, 한 집합을 괄호 안의 두 집합에 각각 나누어 계산한다 (거꾸로 묶어도 같다) → 분배법칙' };
+  const pairStr = (x, op, y) => (x < y ? `${x} ${op} ${y}` : `${y} ${op} ${x}`); // 보기는 글자 순서로 (A ∩ C, B ∪ C …)
+  const flip = (op) => (op === '∩' ? '∪' : '∩');
+  const BOSS_GEN = [
+    // 1. 법칙 이름: 법칙을 먼저 고르고(세 법칙이 고르게) 그 법칙의 모양 하나
+    (r) => { const name = r.pick(LAWS), [expr] = r.pick(LAW_FORMS.filter((f) => f[1] === name)); return BI.law([expr, name, LAW_SOL[name]], LAWS); },
+    // 2. A ∪ B ∪ C: 학습지처럼 원소 2개씩 사슬로 겹친 세 집합 (A = {p, q}, B = {q, s}, C = {s, t})
+    (r) => {
+      const [p, q, s, t] = r.shuffle(range(1, 9)).slice(0, 4), A = sorted([p, q]), B = sorted([q, s]), C = sorted([s, t]), AB = union(A, B), all = union(AB, C);
+      const wrong = r.shuffle([sorted([q, s]), sorted([p, t]), AB, union(B, C)]).slice(0, 3); // 겹친 원소만 · 한 번만 나온 원소만 · 두 집합만 모음
+      return BI.union3(A, B, C, [all, ...wrong], `A ∪ B = ${st(AB)} 에 C 를 모으기 → ${st(all)} (괄호 없이 써도 된다 · 결합법칙)`);
+    },
+    // 3. 분배법칙 빈칸: 모양 6가지 × (B, C 자리 바꾸기) · 보기 = 두 글자 식 (정답의 ∩ ↔ ∪ 바꾼 것은 늘 넣음)
+    (r) => {
+      const [Y, Z] = r.shuffle(['B', 'C']), o = r.pick(['∩', '∪']), p = flip(o), X = 'A';
+      const form = r.pick([
+        [`${X} ${o} (${Y} ${p} ${Z}) = (${X} ${o} ${Y}) ${p} (   )`, [X, o, Z]],
+        [`${X} ${o} (${Y} ${p} ${Z}) = (   ) ${p} (${X} ${o} ${Z})`, [X, o, Y]],
+        [`(${X} ${o} ${Y}) ${p} (${X} ${o} ${Z}) = ${X} ${o} (   )`, [Y, p, Z]],
+      ]);
+      const [a1, op, a2] = form[1], ans = pairStr(a1, op, a2);
+      const others = [['A', 'B'], ['A', 'C'], ['B', 'C']].flatMap(([x, y]) => ['∩', '∪'].map((w) => pairStr(x, w, y))).filter((c) => c !== ans && c !== pairStr(a1, flip(op), a2));
+      const full = form[0].replace('(   )', `(${a1} ${op} ${a2})`);
+      return BI.dist([form[0], [ans, pairStr(a1, flip(op), a2), ...r.shuffle(others).slice(0, 2)], ans], `분배법칙: ${full} → (   ) = ${ans}`);
+    },
+    // 4. 여집합: U = {1, …, n} (n = 5~7), A 는 원소 2~3개 · 보기 = Aᶜ · A · U · ∅ (학습지와 같은 함정)
+    (r) => {
+      const U = range(1, r.int(5, 7)), A = sorted(r.shuffle(U).slice(0, r.int(2, 3))), Ac = comp(U, A);
+      return BI.comp(U, A, [Ac, A, U, []], `U 의 원소 중 A 에 속하지 않는 것 → Aᶜ = ${st(Ac)}`);
+    },
+    // 5 · 6. 차집합: A 원소 4~5개, B 원소 3개 (1~9) · A ∩ B, A − B, B − A 모두 공집합이 아님
+    //   보기 = 정답 · 반대 차집합(B − A ↔ A − B) · A ∩ B / 한쪽에만 있는 것 / A ∪ B 중 2개
+    (r) => { const [A, B] = diffSets(r); return BI.diffAB(A, B, [minus(A, B), minus(B, A), ...diffWrong(r, A, B)], `A 에서 B 에도 있는 ${st(inter(A, B))} 빼기 → A − B = ${st(minus(A, B))}`); },
+    (r) => { const [A, B] = diffSets(r); return BI.diffBA(A, B, [minus(B, A), minus(A, B), ...diffWrong(r, A, B)], '', `B 에서 A 에도 있는 ${st(inter(A, B))} 빼기 → B − A = ${st(minus(B, A))} (A − B 와 다르다!)`); },
+  ];
+  function diffSets(r) {
+    for (;;) {
+      const A = sorted(r.shuffle(range(1, 9)).slice(0, r.int(4, 5))), B = sorted(r.shuffle(range(1, 9)).slice(0, 3));
+      if (inter(A, B).length && minus(A, B).length && minus(B, A).length) return [A, B];
+    }
+  }
+  const diffWrong = (r, A, B) => r.shuffle([inter(A, B), union(minus(A, B), minus(B, A)), union(A, B)]).slice(0, 2);
+  function bossMake(i, a, r) {
+    if (!a) return BOSS[1][i]; // 시도 0 = 학습지 그대로 (게임도 시도 0 은 sets[1] 을 씀)
+    let q = BOSS_GEN[i](r);
+    for (let k = 0; k < 20 && q.question === BOSS[1][i].question; k++) q = BOSS_GEN[i](r); // 학습지 문항과 똑같이 나오면 다시 (재도전은 새 문제)
+    const c = r.shuffle(q.choices);
+    if (q.check.dist) q.check.dist = [q.check.dist[0], c, q.answer];
+    return Object.assign(q, { choices: c, answerIndex: c.indexOf(q.answer) });
+  }
 
   const STEPS = [
     { kind: 'concept', id: 'c1', title: '개념 1 · 교환법칙 · 결합법칙', say: '(먼저 지난 시간 복습: A ∩ B, A ∪ B, n(A ∪ B)) 순서를 바꾸어도 같다 → 교환법칙 A ∪ B = B ∪ A · 어느 두 개를 먼저 계산해도 같다 → 결합법칙 (A ∪ B) ∪ C = A ∪ (B ∪ C)' },
@@ -266,6 +334,7 @@
     items(id, seed, attempt) { return MONSTERS[id].make(attempt, DS.Rng(`${seed}|${id}|${attempt}`)); },
     COND,
     next: { title: '6차시 · 드모르간의 법칙', ask: '(A ∪ B)ᶜ 는 Aᶜ ∪ Bᶜ 일까, Aᶜ ∩ Bᶜ 일까?', link: '오늘 배운 여집합(ᶜ)과 분배법칙으로 「괄호 밖 ᶜ」를 안으로 넣는 방법을 알아봐요.' }, // 다음 수업 (초안)
-    boss: { title: '5차시 형성평가 · 흑요석 미노타우로스', sprite: 'extra:9', items: 6, hpItems: 6, sets: BOSS, tags: ['c1', 'c1', 'c2', 'c3', 'c4', 'c4'] },
+    boss: { title: '5차시 형성평가 · 흑요석 미노타우로스', sprite: 'extra:9', items: 6, hpItems: 6, sets: BOSS, tags: ['c1', 'c1', 'c2', 'c3', 'c4', 'c4'],
+      make(i, a, rng) { return bossMake(i, a, rng); } }, // 재도전 1~3 = 같은 유형의 새 문제 (위 BOSS_GEN)
   });
 })();

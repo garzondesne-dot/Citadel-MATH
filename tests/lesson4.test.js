@@ -3,6 +3,7 @@
 // (2) 첫 시도 = 학습지 정답 · 재도전 시드 300개 × 2번 — 원소를 직접 모으고 조건을 직접 계산해 검산 (차시 파일의 계산 결과를 쓰지 않는다)
 // (3) 서로소 낱말 문장 묶음: 수 조건은 1~200 에서 직접 확인, 도형은 아래 따로 쓴 참값표로 확인
 // (4) 형성평가 세트1·2 (6번 보너스는 a 를 직접 찾아 확인)
+// (5) 형성평가 재도전 생성기 boss.make(i, a, rng): 6문항 × 시도 1~3 × 시드 300개 — check 만으로 정답을 따로 계산 · 보기 · 채점 · 혼자 읽히는 글 · 다양성
 const load = require('./load');
 const DS = load(['js/engine/ui.js', 'js/engine/setgen.js', 'js/engine/quiz.js', 'js/engine/lessons.js', 'lessons/set-04.js']);
 const L = DS.Lessons.get('set-04'), Q = DS.Quiz;
@@ -137,5 +138,89 @@ for (const set of [1, 2]) {
 check(B[1][2].answer === 8 && B[1][3].choices[B[1][3].answerIndex] === '또는' && B[1][4].choices[B[1][4].answerIndex] === 'A', '세트1 학습지 정답 3·4·5번 = 8, 또는, A');
 check(B[1][1].answerIndex === 1, '세트1 2번 = ②');
 
+// ── 5. 형성평가 재도전 생성기 boss.make(i, a, rng) — 시도 1~3 · 시드 300개 · 정답은 check 만으로 따로 계산 ──
+check(typeof L.boss.make === 'function', '형성평가 재도전 생성기 boss.make 있음');
+const B1snap = JSON.stringify(B[1]);
+const toks = (s) => s.replace(/[{}]/g, '').split(',').map((t) => t.trim()).filter(Boolean);
+const NAMEPAIRS = ['A|B', 'P|Q', 'X|Y', 'S|T'];
+let bossCount = 0;
+for (let i = 0; i < L.boss.items; i++) {
+  const texts = new Set(), keys = new Set();
+  for (let k = 0; k < 300; k++) for (const a of [1, 2, 3]) {
+    const seed = `s${k}|boss|${i}|${a}`, q = L.boss.make(i, a, DS.Rng(seed)), c = q.check || {}, lab = `형성평가 ${i + 1}번 ${seed}`;
+    bossCount++;
+    check(q.type === B[1][i].type, `${lab}: 형식 ${q.type}`);
+    check(JSON.stringify(q) === JSON.stringify(L.boss.make(i, a, DS.Rng(seed))), `${lab}: 같은 시드 → 같은 문제`);
+    check(q.question.startsWith(`${i + 1}. `) && !/위 |번의/.test(q.question + (q.choices || []).join() + q.solution), `${lab}: 혼자 읽히는 문제 글 ${q.question}`);
+    const same = q.question === B[1][i].question && (q.choices || []).slice().sort().join('|') === (B[1][i].choices || []).slice().sort().join('|');
+    check(!same, `${lab}: 학습지 문항과 다름`);
+    texts.add(q.question); keys.add(q.question + '‖' + (q.choices || []).join('|'));
+    let want; // 독립 계산한 정답 (choice → 보기 글자, number → 수)
+    if (i === 0) {
+      const { a: A, b: Bs } = c, I = andSet(A, Bs);
+      check(A.length === 3 && Bs.length === 3 && I.length >= 1 && I.length <= 2, `${lab}: 원소 3개 · 겹침 1~2개`);
+      check(q.question.includes(`A = {${A.join(', ')}}, B = {${Bs.join(', ')}}`), `${lab}: 문제 글의 집합`);
+      want = `A ∩ B = {${I.join(', ')}}, A ∪ B = {${orSet(A, Bs).join(', ')}}`;
+      check(q.choices.length === 4, `${lab}: 보기 4개`);
+    } else if (i === 1) {
+      const dj = c.disj.map(([x, y]) => !toks(x).some((t) => toks(y).includes(t)));
+      check(c.disj.length === 3 && dj.filter(Boolean).length === 1, `${lab}: 서로소는 하나 ${dj}`);
+      c.disj.forEach(([x, y], k2) => check(q.choices[k2] === `${'①②③'[k2]} ${x}, ${y}`, `${lab}: 보기 ${k2 + 1} 번호 · 글`));
+      check(c.disj.every(([x, y]) => toks(x).length && toks(y).length && toks(x).join() !== toks(y).join()), `${lab}: 빈 집합 · 같은 집합 쌍 없음`);
+      want = q.choices[dj.indexOf(true)];
+    } else if (i === 2) {
+      check(c.nI >= 1 && c.nI < Math.min(c.nA, c.nB), `${lab}: n(A ∩ B) 가 가능한 값`);
+      check(q.question.includes(`n(A) = ${c.nA}, n(B) = ${c.nB}, n(A ∩ B) = ${c.nI}`), `${lab}: 문제 글의 수`);
+      // 원소를 직접 만들어 센다: A = 1..nA, B = (nA − nI + 1)..(nA − nI + nB)
+      const A = upto(c.nA), Bs = upto(c.nB).map((x) => x + c.nA - c.nI);
+      check(andSet(A, Bs).length === c.nI, `${lab}: 겹침 ${c.nI}`);
+      want = orSet(A, Bs).length;
+    } else if (i === 3) {
+      const [X, Y] = c.names;
+      check(NAMEPAIRS.includes(`${X}|${Y}`), `${lab}: 집합 이름`);
+      if (c.form === 'blank') { check(q.question.includes(`${X} ${c.word} ${Y} = {x | x ∈ ${X} (   ) x ∈ ${Y}}`), `${lab}: 빈칸 글`); want = c.word === '∪' ? '또는' : '그리고'; check(q.choices.slice().sort().join() === ['그리고', '또는'].sort().join(), `${lab}: 보기`); }
+      else { const w = c.word === '∪' ? '또는' : '그리고'; check(q.question.includes(`{x | x ∈ ${X} ${w} x ∈ ${Y}}`), `${lab}: 조건 글`); want = `${X} ${c.word} ${Y}`; check(q.choices.length === 2 && q.choices.includes(`${X} ∩ ${Y}`) && q.choices.includes(`${X} ∪ ${Y}`), `${lab}: 보기`); }
+    } else if (i === 4) {
+      const [X, Y] = c.names;
+      check(NAMEPAIRS.includes(`${X}|${Y}`) && [X, Y].includes(c.small) && [X, Y].includes(c.big) && c.small !== c.big, `${lab}: 이름`);
+      check(q.question.includes(`${c.small} ⊂ ${c.big} 일 때, ${X} ${c.sub} ${Y}`), `${lab}: 문제 글`);
+      // 작은 집합 {1} ⊂ 큰 집합 {1, 2} 로 직접 계산해 같은 집합의 이름을 찾는다
+      const sets = { [c.small]: [1], [c.big]: [1, 2] }, res = c.sub === '∩' ? andSet(sets[X], sets[Y]) : orSet(sets[X], sets[Y]);
+      want = eq(res, sets[X]) ? X : eq(res, sets[Y]) ? Y : '?';
+      check(q.choices.length === 3 && q.choices.includes('∅') && q.choices.includes(X) && q.choices.includes(Y), `${lab}: 보기 ${X}, ${Y}, ∅`);
+    } else if (i === 5) {
+      const { p, q: qq, k: kk, r, I } = c.six, sols = [];
+      check(q.question.includes(`A = {${p}, ${qq}, a + ${kk}}, B = {${qq}, a, ${r}}`) && q.question.includes(`A ∩ B = {${I.join(', ')}}`), `${lab}: 문제 글`);
+      for (let x = -20; x <= 20; x++) { const A = [p, qq, x + kk], Bs = [qq, x, r]; if (new Set(A).size === 3 && new Set(Bs).size === 3 && eq(andSet(A, Bs), I)) sols.push({ x, U: orSet(A, Bs) }); }
+      check(sols.length === 1 && sols[0].x >= 1, `${lab}: 자연수 a 가 하나 (${sols.length})`);
+      want = sols.length ? `{${sols[0].U.join(', ')}}` : '?';
+      check(q.choices.length === 4, `${lab}: 보기 4개`);
+      if (sols.length) check(q.solution.includes(`a = ${sols[0].x}`), `${lab}: 풀이의 a`);
+    }
+    if (q.type === 'number') {
+      check(q.answer === want, `${lab}: ${q.question} = ${q.answer} (독립 계산 ${want})`);
+      check(Q.grade(q, want) && !Q.grade(q, want + 1) && !Q.grade(q, want - 1), `${lab}: 채점`);
+    } else {
+      check(q.choices.filter((x) => x === want).length === 1 && q.choices[q.answerIndex] === want && q.answer === want, `${lab}: 정답 ${want} (보기 ${q.choices.join(' / ')})`);
+      check(new Set(q.choices).size === q.choices.length, `${lab}: 보기가 서로 다름`);
+      check(Q.grade(q, q.choices.indexOf(want)), `${lab}: 정답 인정`);
+      q.choices.forEach((x, k2) => { if (x !== want) check(!Q.grade(q, k2), `${lab}: 오답 ${k2 + 1} 거부`); });
+    }
+    check(typeof q.solution === 'string' && q.solution.length > 5, `${lab}: 풀이`);
+  }
+  // 문제 글 다양성 (2번은 문제 글이 학습지처럼 고정 → 보기까지 묶어서 셈)
+  check((i === 1 ? keys.size : texts.size) >= 5, `형성평가 ${i + 1}번: 서로 다른 문제 ${i === 1 ? keys.size : texts.size}가지`);
+  // 같은 학생의 시도 1 · 2 · 3 이 대개 서로 다름
+  let diff = 0;
+  for (let k = 0; k < 100; k++) { const qs = [1, 2, 3].map((a) => JSON.stringify(L.boss.make(i, a, DS.Rng(`d${k}|boss|${i}|${a}`)))); if (new Set(qs).size === 3) diff++; }
+  check(diff >= (i >= 3 ? 40 : 80), `형성평가 ${i + 1}번: 시도 1~3 이 모두 다른 시드 ${diff}/100`);
+}
+// 정답 위치 · 4번 두 형식 · 2번 정답 번호가 한쪽으로 쏠리지 않음
+const pos = {}, forms = { blank: 0, set: 0 };
+for (let k = 0; k < 300; k++) { const q2 = L.boss.make(1, 1, DS.Rng(`p${k}`)); pos[q2.answerIndex] = (pos[q2.answerIndex] || 0) + 1; forms[L.boss.make(3, 1, DS.Rng(`f${k}`)).check.form]++; }
+check([0, 1, 2].every((k) => pos[k] > 60), `2번 정답 번호 분포 ${JSON.stringify(pos)}`);
+check(forms.blank > 100 && forms.set > 100, `4번 형식 분포 ${JSON.stringify(forms)}`);
+check(JSON.stringify(B[1]) === B1snap, '시도 0 = 학습지 세트1 그대로 (생성기가 건드리지 않음)');
+
 if (fail) { console.error(`\n${fail}건 실패`); process.exit(1); }
-console.log(`OK: 4차시 레이드용 v2 — 순서 · 보강던전 3마리 · 학습지 첫 시도 · 재도전 소문제 ${count}개 독립 검산 · 문장 묶음 ${L.WORDS.length}가지 · 형성평가 세트1·2 통과`);
+console.log(`OK: 4차시 레이드용 v2 — 순서 · 보강던전 3마리 · 학습지 첫 시도 · 재도전 소문제 ${count}개 독립 검산 · 문장 묶음 ${L.WORDS.length}가지 · 형성평가 세트1·2 · 재도전 생성기 ${bossCount}문항 독립 검산 통과`);
