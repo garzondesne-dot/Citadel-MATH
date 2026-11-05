@@ -217,6 +217,7 @@ DS.Bonus = (function () {
     const solved = new Array(n).fill(false);
     const el = document.createElement('div'); el.className = 'bn-fight';
     document.body.appendChild(el);
+    if (DS.Attack) DS.Attack.preload(me.hero || 0, me.fx || 'flame'); // 탄 · 이펙트 그림 미리 받기
     // 👾 몬스터 공격 (중단원던전 · 사용자 확정 2026-11-03): 혼자 하는 곳이라 이 폰에서만 45초마다 1초 잠금. 🎯 허수아비 연습은 공격 없음
     //   학습지 · 영상을 보는 동안 · 화면 꺼짐 동안은 멈춤. 기회 · 경험치는 줄지 않음
     let gT = 0, gLast = Date.now();
@@ -274,8 +275,12 @@ DS.Bonus = (function () {
         const ok = await DS.Quiz.ask({ name: mon.title, formula: `${i + 1} / ${n}` }, items[i], { hint: mid !== 'boss' && !L.eval, tag: attempt ? (mid === 'boss' ? '🔄 세트가 바뀌었어요' : '🔄 숫자가 바뀌었어요') : castle ? '🏰 성채던전' : '🎯 복습' });
         if (!document.body.contains(el)) return null; // ✕ 로 전투를 닫음 → 기록 · 데미지 없이 끝
         if (!ok && DS.Mis && DS.Quiz.lastGiven !== undefined) wrongs.push({ i, codes: DS.Mis.classify(items[i], DS.Quiz.lastGiven, mid === 'boss' ? DS.Mis.bossTag(L.id, attempt % 2 === 0 ? 1 : 2, i) : null) }); // 🔎 오개념 (중단원던전만 저장 · 재대결은 형성평가 꼬리표)
-        if (ok) { solved[i] = true; DS.FX.play(el.querySelector('.scene'), me.fx || 'flame', { scale: 0.3 }); } else wrongSeen = true;
-        draw(ok ? 'hit' : 'miss');
+        if (ok) solved[i] = true; else wrongSeen = true;
+        // ⚔ 공격 연출 (2026-11-06): 근접 = 돌진 · 원거리 = 탄 → 이펙트 · 멈칫 · 흔들림 · 밀림 (틀리면 튕겨냄 · 벌 없음) — 끝난 뒤 체력 칸을 그림
+        if (DS.Attack) { const sc = el.querySelector('.scene'); await DS.Attack.play(sc, { heroBox: sc && sc.querySelector('.enc-hero'), monBox: sc && sc.querySelector('.enc-mon'), hero: me.hero || 0, fx: me.fx || 'flame', miss: !ok, finish: ok && solved.every(Boolean), s: 1.2 }); }
+        else if (ok) DS.FX.play(el.querySelector('.scene'), me.fx || 'flame', { scale: 0.3 });
+        if (!document.body.contains(el)) return null;
+        draw(DS.Attack ? '' : ok ? 'hit' : 'miss');
       }
       left--;
       const cleared = solved.every(Boolean);

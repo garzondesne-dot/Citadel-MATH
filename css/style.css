@@ -2017,3 +2017,33 @@ input.sv-no { width: 64px !important; display: inline-block; padding: 2px 4px; }
 .cs-portal.on .cs-pt-ic { animation: rpsSpin 1.6s ease-in-out infinite; }
 .cs-portal.lock { filter: grayscale(.7); opacity: .75; }
 .cs-portal .cs-rnew { position: absolute; right: 6px; top: 4px; }
+/* ⚔ 공격 이펙트 v2 (2026-11-06): 도트 띠 그림 재생 · 멈칫(hitstop) · 흔들림 · 밀림 · 잔상 · 탄 · 데미지 숫자 */
+.fx-spr { position: absolute; pointer-events: none; image-rendering: pixelated; background-repeat: no-repeat; background-position: 0 0; animation-name: fxStrip; animation-fill-mode: forwards; z-index: 20; }
+.fx-spr.loop { animation-iteration-count: infinite; animation-fill-mode: none; }
+@keyframes fxStrip { from { background-position: 0 0; } to { background-position: var(--fx-end) 0; } }
+.hitstop .fx-spr, .hitstop .art, .hitstop .art b, .hitstop .atk-proj { animation-play-state: paused !important; }
+.atk-proj { position: absolute; pointer-events: none; z-index: 21; transform-origin: 0 0; }
+.atk-ghost { position: absolute; pointer-events: none; z-index: 1; opacity: .45; filter: brightness(1.8) saturate(.4) drop-shadow(0 0 4px #9cf); transition: opacity .28s linear; }
+.atk-dmg { position: absolute; pointer-events: none; z-index: 22; font: 700 20px var(--pixel, monospace); color: #ff5a4a; text-shadow: 2px 2px 0 #2a0508, -1px -1px 0 #2a0508; animation: atkDmg .9s ease-out forwards; }
+@keyframes atkDmg { 0% { transform: translate(-50%, 0) scale(1.6); color: #fff; } 15% { transform: translate(-50%, -14px) scale(1); color: #ff5a4a; } 100% { transform: translate(-30%, -46px); opacity: 0; } }
+.atk-wave { position: absolute; pointer-events: none; z-index: 19; border: 3px solid #fff6c8; border-radius: 50%; box-shadow: 0 0 12px #ffd25a, inset 0 0 10px #ffd25a; transform: translate(-50%, -50%) scaleY(.32); animation: atkWave .6s ease-out forwards; }
+@keyframes atkWave { from { width: 10px; height: 10px; opacity: 1; } to { width: 260px; height: 260px; opacity: 0; } }
+/* ⚙ 설정: 용사 근접 · 원거리 표 · 이펙트 계열 × 단계 표 · 미리보기 */
+.hpick .atk-badge { position: absolute; left: 2px; top: 2px; font-size: 11px; line-height: 1; padding: 2px 3px; border-radius: 4px; background: #000b; color: #fff; z-index: 2; }
+.hpick .atk-badge.r { color: #9fe0ff; }
+.atk-prev { position: relative; height: 150px; margin: 4px 0 8px; border: 2px solid var(--line); border-radius: 6px; overflow: hidden; background: linear-gradient(#1b2142, #0f1328 70%, #232842 70%, #171b30); }
+.atk-prev .ap-hero { position: absolute; left: 6%; bottom: 8px; width: 96px; height: 96px; }
+.atk-prev .ap-hero .art { width: 96px; height: 96px; }
+.atk-prev .ap-mon { position: absolute; right: 8%; bottom: 10px; width: 96px; height: 96px; }
+.atk-prev .ap-mon .art.monster { width: 96px; height: 96px; margin: 0; }
+.atk-prev .ap-cap { position: absolute; left: 8px; top: 6px; font-size: 12px; color: #cfd6ff; z-index: 3; text-shadow: 1px 1px 0 #000; }
+.fx-fams { display: grid; gap: 6px; margin-bottom: 8px; }
+.fx-fam { display: grid; grid-template-columns: 62px repeat(4, 1fr); gap: 4px; align-items: stretch; }
+.fx-fam.sp { grid-template-columns: 62px repeat(2, 1fr) 2fr; }
+.fx-fam > b { display: flex; align-items: center; font-size: 12px; color: #ffe7a8; word-break: keep-all; }
+.fx-fam .fxpick canvas { height: 46px; }
+.fx-fam .fxpick span { font-size: 11px; line-height: 1.25; padding: 0 2px; text-align: center; word-break: keep-all; }
+.fx-fam .fxpick i.tier { position: absolute; left: 2px; top: 1px; font-style: normal; font-size: 10px; color: #ffd25a; text-shadow: 1px 1px 0 #000; z-index: 2; }
+.fx-fam .fxpick.lock small { display: block; font-size: 10px; color: #ffd25a; }
+.fx-fam .fxpick.lock { filter: saturate(.7) brightness(.78); } /* 잠겨도 그림은 보이게 (꼬드기기) */
+@media (max-width: 420px) { .fx-fam { grid-template-columns: 46px repeat(4, 1fr); } .fx-fam.sp { grid-template-columns: 46px repeat(2, 1fr) 1fr; } .fx-fam > b { font-size: 11px; } }

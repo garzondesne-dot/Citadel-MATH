@@ -35,7 +35,9 @@ DS.Gem = (function () {
   // 상점 (조각으로 해금) · 업적 전용(도감 · 첫 레이드 · 인장 3개 · 놀이 메달)은 여기 없음
   const SHOP = {
     hero: { 12: 30, 13: 30, 14: 60, 15: 60 },
-    fx: { fire: 40, lightning: 40, ice: 40, stars: 60, slash: 60, vortex: 80 },
+    fx: { fire: 40, lightning: 40, ice: 40, stars: 60, slash: 60, vortex: 80, // Ⅲ 화려 (인장으로도)
+      moon: 20, ring: 20, chain: 20, spikes: 20, mana: 20, crit: 20, // Ⅱ 숙련 (2026-11-06)
+      twin: 120, pillar: 120, thunder: 120, nova: 120, meteor: 120, void: 120 }, // Ⅳ 전설 = 같은 계열 Ⅲ 이 있어야 (account.js need)
   };
   const itemKey = (kind, id) => `${kind}_${id}`;
   const price = (kind, id) => (SHOP[kind] || {})[id] ?? null;

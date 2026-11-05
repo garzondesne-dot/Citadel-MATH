@@ -501,7 +501,7 @@ DS.Hall = (function () {
     requestAnimationFrame(() => t.classList.add('go'));
     setTimeout(() => {
       DS.Sound.hit(); setTimeout(() => DS.Sound.correct(), 140);
-      DS.FX.play(arena, DS.FX.usable(DS.Art.teacherFx(R), Object.fromEntries(DS.FX.FANCY.map((k) => [k, true]))), { x: mr.left - ar.left + mr.width / 2, y: mr.top - ar.top + mr.height / 2, scale: Math.min(ar.width, ar.height) / 700, perfect: true });
+      DS.FX.play(arena, DS.FX.usable(DS.Art.teacherFx(R), Object.fromEntries(DS.FX.KINDS.map((k) => [k, true]))), { x: mr.left - ar.left + mr.width / 2, y: mr.top - ar.top + mr.height / 2, scale: Math.min(ar.width, ar.height) / 700, perfect: true });
       arena.classList.remove('shake'); void arena.offsetWidth; arena.classList.add('shake');
       const tag = document.createElement('div'); tag.className = `perfect ${kill ? 'vanish-txt' : 'demo-txt'}`; tag.textContent = kill ? '💥 소멸!' : '시연 · 데미지 없음'; arena.appendChild(tag); setTimeout(() => tag.remove(), 1600);
       if (kill) {
