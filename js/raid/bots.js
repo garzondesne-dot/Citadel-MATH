@@ -56,9 +56,10 @@ DS.Bots = (function () {
         });
       }
       if (st.kind === 'boss') {
-        const set1 = L.boss.sets[1].map((q) => given(q, Math.random() < acc.boss));
-        later(`boss1|${u}`, rand(6000, 20000), () => N().set(P(`bossAns/${u}/1`), N().pack(set1)));
-        later(`boss2|${u}`, rand(24000, 40000), () => N().set(P(`bossAns/${u}/2`), N().pack(L.boss.sets[2].map((q) => given(q, true)))));
+        // 2026-11-05: 문항 · 시도별 (첫 시도 → 틀린 문항은 숫자 바뀐 재도전에서 맞힘)
+        L.boss.sets[1].forEach((q, i) => { const ok0 = Math.random() < acc.boss;
+          later(`boss0|${u}|${i}`, rand(6000, 20000), () => N().set(P(`bossTry/${u}/${i}/0`), N().pack(given(q, ok0))));
+          if (!ok0) later(`boss1|${u}|${i}`, rand(24000, 40000), () => N().set(P(`bossTry/${u}/${i}/1`), N().pack(given(DS.Raid.bossItem(L, R, u, i, 1), true)))); });
       }
     });
   }

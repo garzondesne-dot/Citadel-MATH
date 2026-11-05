@@ -64,7 +64,8 @@ DS.Bonus = (function () {
   // 몬스터 · 소문제 (👑 형성평가 재대결 = 세트 1 · 2 를 번갈아, 체력 문항까지만)
   const isField = (L, mid) => L.steps.some((st) => st.kind === 'monster' && st.id === mid); // 📕 수업 문제 (오답노트 복습)
   const monOf = (L, mid) => (mid === 'boss' ? { title: `👑 ${L.no}차시 형성평가 재대결`, sprite: L.boss.sprite, note: '' } : isField(L, mid) ? { ...L.monsters[mid], title: (L.steps.find((st) => st.id === mid) || {}).title || L.monsters[mid].title || mid } : L.monsters[mid]);
-  const itemsOf = (L, mid, seed, attempt) => (mid === 'boss' ? (L.boss.sets[attempt % 2 === 0 ? 1 : 2] || L.boss.sets[1]).slice(0, L.boss.hpItems || L.boss.items) : L.items(mid, seed, attempt));
+  // 👑 형성평가 재대결 (2026-11-05): 첫 판 = 학습지 그대로 · 다음 판부터 문항마다 숫자가 바뀐 새 문제 (L.boss.make · 없으면 세트 1 ↔ 2)
+  const itemsOf = (L, mid, seed, attempt) => (mid === 'boss' ? Array.from({ length: L.boss.hpItems || L.boss.items }, (_, i) => (!attempt ? L.boss.sets[1][i] : L.boss.make ? L.boss.make(i, attempt, DS.Rng(`${seed}|boss|${i}|${attempt}`)) : (L.boss.sets[attempt % 2 === 0 ? 1 : 2] || L.boss.sets[1])[i])) : L.items(mid, seed, attempt));
   // 화려한 이펙트 열림 { fire: true, … }
   function fxOpen(data) {
     const n = seals(data).length, out = {};

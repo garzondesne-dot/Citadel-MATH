@@ -45,14 +45,14 @@ DS.Result = (function () {
       const st = rec.submitted ? (everOk.every(Boolean) ? (firstOk.every(Boolean) ? 'o' : 'f') : 'x') : X.activeIds(R).some((u) => u !== uid && X.record(L, R, s.id, u).submitted) ? '-' : 'n';
       return { id: s.id, title: s.title, concept: map[s.id], n, tried: rec.submitted, first: firstOk.filter(Boolean).length, fixed: fx, miss: everOk.filter((ok) => !ok).length, st };
     });
-    const ans = ((R.bossAns || {})[uid]) || {}, tags = L.boss.tags || [];
-    const set1 = Array.from({ length: L.boss.items }, (_, i) => { const g = (ans[1] || [])[i]; return g != null && g !== '' && DS.Quiz.grade(L.boss.sets[1][i], g); });
-    const mast = X.mastery(L, R, uid), bossTried = !!ans[1];
+    const tags = L.boss.tags || [], BS = X.bossState(L, R, uid), tries = X.bossTries(L, R, uid); // 2026-11-05: 문항 · 시도별 (예전 세트 1 · 2 도 시도 0 · 1 로)
+    const set1 = BS.map((s) => s.first); // 첫 시도 맞힘
+    const mast = X.mastery(L, R, uid), bossTried = BS.some((s) => s.firstTried);
     if (bossTried) set1.forEach((ok, i) => bump(tags[i] || 'boss', ok));
     const bossFixed = mast.filter((ok, i) => ok && !set1[i]).length;
-    if (M) [1, 2].forEach((k) => (ans[k] || []).forEach((g, i) => { const q = L.boss.sets[k] && L.boss.sets[k][i]; if (!q || g == null || g === '' || DS.Quiz.grade(q, g)) return; M.add(mis, M.classify(q, g, M.bossTag(L.id, k, i)), !!mast[i]); }));
-    const anyBoss = X.activeIds(R).some((u) => ((R.bossAns || {})[u] || {})[1]);
-    const bossM = mast.map((ok, i) => (ok ? 'o' : [1, 2].some((k) => { const g = (ans[k] || [])[i]; return g != null && g !== ''; }) ? 'x' : anyBoss ? '-' : 'n')).join(''); // 문항마다 (⭐ 도전 문항 포함)
+    if (M) tries.forEach((t) => { if (t.ok || !t.q) return; const k = t.a === 0 ? 1 : t.legacy ? 2 : 0; M.add(mis, M.classify(t.q, t.given, k ? M.bossTag(L.id, k, t.i) : undefined), !!mast[t.i]); });
+    const anyBoss = X.activeIds(R).some((u) => X.bossAnswered(R, u) > 0);
+    const bossM = mast.map((ok, i) => (ok ? 'o' : BS[i].n ? 'x' : anyBoss ? '-' : 'n')).join(''); // 문항마다 (⭐ 도전 문항 포함)
     const perfect = X.fullMarks(L, R, uid), bossWin = X.bossHp(L, R).won && bossTried;
     const words = !!((R.words || {})[uid] || {}).t;
     const oxm = Object.values(R.oxq || {}).map((q) => String(((q || {}).marks || {})[uid] || '')).join(''), ox = oxm ? [(oxm.match(/o/g) || []).length, oxm.length] : null; // ⭕ OX 타임 (v0.9.8.1)

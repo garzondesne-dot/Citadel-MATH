@@ -112,14 +112,33 @@ DS.Raid = (function () {
   const cleared = (L, R, mid) => { const h = monsterHp(L, R, mid); return h.max > 0 && h.left <= 0; };
 
   // ── 보스 (형성평가) ───────────────────────────────────────
-  // 문항별로 세트1·세트2 중 한 번이라도 맞히면 도달. 체력 = ⌊인원 × hpItems(6) × 기준%⌋, 7번(보너스)도 맞히면 1 데미지
-  function mastery(L, R, uid) {
-    const ans = ((R.bossAns || {})[uid]) || {};
-    return Array.from({ length: L.boss.items }, (_, i) => [1, 2].some((set) => {
-      const given = (ans[set] || [])[i];
-      return given != null && given !== '' && DS.Quiz.grade(L.boss.sets[set][i], given);
-    }));
+  // 2026-11-05 사용자 결정 (나): 문항마다 첫 시도(학습지 그대로) + 재도전 3번 = 4번 · 재도전은 숫자 · 문자가 바뀐 새 문제 (L.boss.make)
+  //   저장 bossTry/{uid}/{문항}/{시도} = 답(JSON) · 예전 수업 bossAns/{uid}/{1|2} = [답 …] 은 시도 0 · 1 로 읽음
+  //   문항을 한 번이라도 맞히면 도달 · 체력 = ⌊인원 × hpItems × 기준%⌋ · 보너스 문항도 맞히면 1 데미지
+  const BOSS_TRIES = 4;
+  function bossItem(L, R, uid, i, a) {
+    if (!a) return L.boss.sets[1][i];
+    if (L.boss.make) return L.boss.make(i, a, DS.Rng(`${seedOf(R, uid)}|boss|${i}|${a}`));
+    return (L.boss.sets[2] || L.boss.sets[1])[i]; // 생성기가 없는 차시(엑셀 차시 등): 세트2 고정
   }
+  // 그 학생의 시도 목록 [{ i, a, given, q, ok }] (문항 · 시도 순)
+  function bossTries(L, R, uid) {
+    const out = [], t = ((R.bossTry || {})[uid]) || {}, old = ((R.bossAns || {})[uid]) || {};
+    Object.entries(t).forEach(([i, byA]) => Object.entries(byA || {}).forEach(([a, given]) => { if (given == null || given === '') return; const q = bossItem(L, R, uid, Number(i), Number(a)); out.push({ i: Number(i), a: Number(a), given, q, ok: !!q && DS.Quiz.grade(q, given) }); }));
+    [1, 2].forEach((set) => (old[set] || []).forEach((given, i) => { if (given == null || given === '' || !L.boss.sets[set] || !L.boss.sets[set][i]) return; const q = L.boss.sets[set][i]; out.push({ i, a: set - 1, given, q, ok: DS.Quiz.grade(q, given), legacy: true }); }));
+    return out.sort((x, y) => x.i - y.i || x.a - y.a);
+  }
+  // 문항별 [시도 수, 맞힘, 첫 시도 맞힘, 남은 기회]
+  function bossState(L, R, uid) {
+    const tr = bossTries(L, R, uid);
+    return Array.from({ length: L.boss.items }, (_, i) => {
+      const mine = tr.filter((t) => t.i === i), ok = mine.some((t) => t.ok), first = mine.find((t) => t.a === 0);
+      return { n: mine.length, ok, first: !!(first && first.ok), firstTried: !!first, left: ok ? 0 : Math.max(0, BOSS_TRIES - mine.length), next: mine.length ? Math.max(...mine.map((t) => t.a)) + 1 : 0 };
+    });
+  }
+  const mastery = (L, R, uid) => bossState(L, R, uid).map((s) => s.ok);
+  const bossFirst = (L, R, uid) => bossState(L, R, uid).map((s) => s.first);
+  const bossAnswered = (R, uid) => keys(((R.bossTry || {})[uid]) || {}).length + keys(((R.bossAns || {})[uid]) || {}).length;
   function bossHp(L, R) {
     const pct = pctOf(L, R, 'boss');
     const max = Math.floor((headcount(R) * L.boss.hpItems * pct) / 100);
@@ -201,5 +220,5 @@ DS.Raid = (function () {
   const timeLeft = (R, now) => { const d = deadline(R); return d == null ? null : Math.max(0, d - now); };
   // 던전 진행: 지나온 단계 / 전체 (마무리 = 끝)
   const progress = (L, R) => { const i = (R.state || {}).step ?? -1, n = L.steps.length; return Math.max(0, Math.min(1, (i + (isEnd(L, R) || bossHp(L, R).won ? 1 : 0)) / n)); };
-  return { skipped, deadline, timeLeft, progress, ATK, soloAtk, BIND_PER, BIND_MAX, bindOf, bindTotal, atkClock, atkTrack, RETRIES, HEAL_MAX, healsOf, healsGiven, healsTo, healsReceived, healTarget, LIVE_MS, lateIds, liveOpen, roomDone, inClass, activeIds, teacherUid, num, newRoom, stepOf, isLobby, isEnd, isFinale, isClosed, focusOn, restOn, sheetOn, videoOn, autoFocus, fullMarks, canLobby, online, seedOf, itemsFor, attemptsOf, gradeAttempt, record, resultLabel, headcount, pctOf, monsterHp, waiting, allSubmitted, cleared, mastery, bossHp, helpList };
+  return { BOSS_TRIES, bossItem, bossTries, bossState, bossFirst, bossAnswered, skipped, deadline, timeLeft, progress, ATK, soloAtk, BIND_PER, BIND_MAX, bindOf, bindTotal, atkClock, atkTrack, RETRIES, HEAL_MAX, healsOf, healsGiven, healsTo, healsReceived, healTarget, LIVE_MS, lateIds, liveOpen, roomDone, inClass, activeIds, teacherUid, num, newRoom, stepOf, isLobby, isEnd, isFinale, isClosed, focusOn, restOn, sheetOn, videoOn, autoFocus, fullMarks, canLobby, online, seedOf, itemsFor, attemptsOf, gradeAttempt, record, resultLabel, headcount, pctOf, monsterHp, waiting, allSubmitted, cleared, mastery, bossHp, helpList };
 })();

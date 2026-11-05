@@ -185,7 +185,7 @@ DS.Combo = (function () {
     // 🙋 참여: 몬스터마다 (낸 학생 / 빠지지 않은 학생) 평균 (+ 보스: 한 문항이라도 낸 학생)
     const parts = mons.map((mid) => { const sk = Raid().skipped(R, mid), pool = ids.filter((u) => !sk[u]); return pool.length ? pool.filter((u) => Raid().record(L, R, mid, u).submitted).length / pool.length : null; }).filter((x) => x != null);
     const bossIdx = L.steps.findIndex((s) => s.kind === 'boss');
-    if (bossIdx >= 0 && (closed || cur >= bossIdx) && ids.length) parts.push(ids.filter((u) => keys(((R.bossAns || {})[u]) || {}).length).length / ids.length);
+    if (bossIdx >= 0 && (closed || cur >= bossIdx) && ids.length) parts.push(ids.filter((u) => Raid().bossAnswered(R, u) > 0).length / ids.length);
     const join = parts.length ? parts.reduce((a, b) => a + b, 0) / parts.length : 0;
     // 🔁 고침 · 🎯 첫 시도 · 💚 돕기
     let need = 0, fixed = 0, c0 = 0, t0 = 0; const stuck = new Set(), healed = new Set(), who = new Set();
@@ -194,7 +194,7 @@ DS.Combo = (function () {
       const f = rec.tries[0]; c0 += f.correct; t0 += f.total;
       if (f.correct < f.total) { need++; stuck.add(u); if (rec.perfect) fixed++; if (rec.healed > 0) healed.add(u); }
     }));
-    ids.forEach((u) => { if (keys(((R.bossAns || {})[u]) || {}).length) who.add(u); });
+    ids.forEach((u) => { if (Raid().bossAnswered(R, u) > 0) who.add(u); });
     const fix = need ? fixed / need : 1, first = t0 ? c0 / t0 : 0, heal = stuck.size ? healed.size / stuck.size : 1;
     const combo = Math.min(1, an.best / Math.max(1, who.size));
     const m = { join, fix, combo, first, heal };

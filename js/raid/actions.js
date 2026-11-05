@@ -294,15 +294,21 @@ DS.Act = (function () {
     await N().set(P(code, `heals/${mid}/${me}/${Raid.healsGiven(R, mid, me)}`), to || '_');
     return to;
   }
-  const bossAnswer = (code, set, answers) => N().set(P(code, `bossAns/${N().uid()}/${set}`), N().pack(answers));
+  const bossAnswer = (code, set, answers) => N().set(P(code, `bossAns/${N().uid()}/${set}`), N().pack(answers)); // (예전 방식 · 지난 수업 호환)
+  // 👑 형성평가 시도 (2026-11-05): bossTry/{나}/{문항}/{시도 0~3} · 한 번 쓴 칸은 못 고침
+  async function bossTry(code, i, a, given) {
+    if (a < 0 || a >= Raid.BOSS_TRIES) fail('이 문항의 기회를 모두 썼어요.');
+    await N().set(P(code, `bossTry/${N().uid()}/${i}/${a}`), N().pack(given));
+  }
 
   // 저장 모양(JSON 문자열) → 규칙 함수가 쓰는 모양
   function unpackRoom(R) {
     const out = JSON.parse(JSON.stringify(R || {}));
     Object.values(out.subs || {}).forEach((byU) => Object.values(byU).forEach((byA) => Object.keys(byA).forEach((k) => { if (typeof byA[k] === 'string') byA[k] = N().unpack(byA[k]); })));
+    Object.values(out.bossTry || {}).forEach((byI) => Object.values(byI || {}).forEach((byA) => Object.keys(byA || {}).forEach((k) => { if (typeof byA[k] === 'string') byA[k] = N().unpack(byA[k]); })));
     Object.values(out.bossAns || {}).forEach((bySet) => Object.keys(bySet).forEach((k) => { if (typeof bySet[k] === 'string') bySet[k] = N().unpack(bySet[k]); }));
     return out;
   }
 
-  return { openRooms, savePunch, finishOvertime, setPunchOff, punchOff, batTick, batAnswer, hit, endClassAsk, timeUp, extendTime, openRift, cutShort, setRest, setRestMin, markBossWin, prepLite, prepImg, hasImg, setVideoFile, setVideoOn, endClass, admitLate, getPrep, setImage, setVideo, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, heal, bossAnswer, unpackRoom, P };
+  return { bossTry, openRooms, savePunch, finishOvertime, setPunchOff, punchOff, batTick, batAnswer, hit, endClassAsk, timeUp, extendTime, openRift, cutShort, setRest, setRestMin, markBossWin, prepLite, prepImg, hasImg, setVideoFile, setVideoOn, endClass, admitLate, getPrep, setImage, setVideo, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, heal, bossAnswer, unpackRoom, P };
 })();

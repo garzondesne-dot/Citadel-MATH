@@ -115,6 +115,16 @@
             ".write": "auth != null && auth.uid === $uid && !data.exists() && root.child('rooms/'+$code+'/active/'+$uid).val() === true && root.child('rooms/'+$code+'/state/bat/at').isNumber() && now <= root.child('rooms/'+$code+'/state/bat/at').val() + 21500",
             ".validate": "newData.val() === 'o' || newData.val() === 'x'"
           }
+        },
+        "bossTry": {
+          "$uid": {
+            "$i": {
+              "$a": {
+                ".write": "auth != null && auth.uid === $uid && !data.exists() && root.child('rooms/'+$code+'/active/'+$uid).val() === true && $i.matches(/^[0-9]$/) && ($a === '0' || $a === '1' || $a === '2' || $a === '3')",
+                ".validate": "newData.isString() && newData.val().length < 20000"
+              }
+            }
+          }
         }
       }
     },

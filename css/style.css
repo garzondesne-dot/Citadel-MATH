@@ -1933,3 +1933,4 @@ input.sv-no { width: 64px !important; display: inline-block; padding: 2px 4px; }
 .t-now .fun-ctl.pick { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 8px; }
 .t-now .fun-ctl.pick > span { grid-column: 1 / -1; }
 .t-now .fun-ctl.pick .btn { width: 100%; margin: 0; padding: 8px 2px; font-size: 13px; }
+.bitem.spent { opacity: .6; border-style: dashed; } /* 👑 형성평가 기회를 다 쓴 문항 (2026-11-05) */

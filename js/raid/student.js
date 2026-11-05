@@ -102,7 +102,7 @@ DS.Student = (function () {
     const ids = L.steps.filter((s) => s.kind === 'monster' && L.monsters[s.id]).map((s) => s.id), first = !xpSeen;
     if (first) xpSeen = {};
     ids.forEach((mid) => { if (!Raid().cleared(L, R, mid) || xpSeen[mid]) return; xpSeen[mid] = true; const x = DS.Control.xpOf(Raid().record(L, R, mid, me)); if (!first && x) setTimeout(() => DS.Control.xpFloat(document.querySelector('#st-body .enc-hero') || document.querySelector('#st-body'), `+${x} EXP`), 400); });
-    if (Raid().bossHp(L, R).won && !xpSeen.boss) { xpSeen.boss = true; if (!first && ((R.bossAns || {})[me])) setTimeout(() => DS.Control.xpFloat(document.querySelector('#st-body .enc-hero') || document.querySelector('#st-body'), '+10 EXP 보스 처치!', 'big'), 500); }
+    if (Raid().bossHp(L, R).won && !xpSeen.boss) { xpSeen.boss = true; if (!first && Raid().bossAnswered(R, me)) setTimeout(() => DS.Control.xpFloat(document.querySelector('#st-body .enc-hero') || document.querySelector('#st-body'), '+10 EXP 보스 처치!', 'big'), 500); }
   }
   // 🎉 레벨업 (모두가 봄 · 2026-11-05): 폰 축하 + 수업 중이면 종합상황실에 알림 (rooms/{코드}/lvup/{uid})
   if (typeof window !== 'undefined') window.addEventListener('ds-levelup', (e) => {
@@ -501,37 +501,36 @@ DS.Student = (function () {
       <div class="dial"><div class="wheel"><button data-dial="${i}|10">▲</button><b>${t}</b><button data-dial="${i}|-10">▼</button></div><div class="wheel"><button data-dial="${i}|1">▲</button><b>${o}</b><button data-dial="${i}|-1">▼</button></div><span class="dial-val">= ${v}</span></div></div>`;
   }
 
-  // ── 보스: 형성평가 1~7번 (세트1 → 틀린 문항은 세트2) ──────────────
+  // ── 보스: 형성평가 1~7번 (2026-11-05 사용자 (나): 문항마다 첫 시도 = 학습지 그대로 · 재도전 3번은 숫자 · 문자가 바뀐 새 문제) ──
   function bossView(body) {
-    const m = Raid().mastery(L, R, me), ans = ((R.bossAns || {})[me]) || {};
-    const hp = Raid().bossHp(L, R);
-    const items = L.boss.sets[bossSet];
-    const mine = (ans[bossSet] || []).slice();
+    const S = Raid().bossState(L, R, me), hp = Raid().bossHp(L, R), N0 = Raid().BOSS_TRIES;
+    const lab = (s) => (s.ok ? '✔ 도달' : !s.n ? '풀기' : s.left ? `✘ 다시 · 기회 ${s.left}` : '해설 보기');
     body.innerHTML = `<div class="panel framed">
       <div class="scene enc bg-scene th-${L.theme || ''} boss${hp.won ? '' : ' quake-once'}"><div class="scene-bar"><div><b>👑 ${esc(L.boss.title)}</b><br><span class="muted small">보스 체력 ${hp.left} / ${hp.max}</span></div></div>
         <div class="enc-hero">${heroNow(hp.won ? pose2(true, '') : 'think', hp.won ? 'pairhop' : 'huff')}<i class="shadow"></i></div>
         <div class="enc-mon">${DS.Art.monster(L.boss.sprite, hp.won ? 'down' : 'idle', hp.won ? '' : 'float')}<div class="hpbar"><i style="width:${hp.max ? (100 * hp.left) / hp.max : 0}%"></i></div>${hp.won ? '' : GAUGE}</div></div>
       ${hp.won ? '<h2 class="okc center">🎉 보스 격파! 모두 함께 이겼어요!</h2>' : ''}
-      <div class="tabs"><button class="tab${bossSet === 1 ? ' on' : ''}" data-s="1">세트 1</button><button class="tab${bossSet === 2 ? ' on' : ''}" data-s="2">세트 2 (재도전)</button></div>
-      <div class="boss-items">${items.map((p, i) => `<button class="bitem${m[i] ? ' ok' : mine[i] != null ? ' tried' : ''}${i >= L.boss.hpItems ? ' bonus' : ''}" data-i="${i}"><b>${i + 1}번${i >= L.boss.hpItems ? ' ⭐' : ''}</b> ${m[i] ? '✔ 도달' : mine[i] != null ? '✘ 다시' : '풀기'}</button>`).join('')}</div>
-      <p class="muted small">세트1 = 학습지 형성평가와 같은 문제 · 세트2 = 숫자가 바뀐 문제. 맞힌 문항마다 보스에게 1 데미지!${L.boss.items > L.boss.hpItems ? ` ⭐ ${L.boss.hpItems + 1}번부터는 보너스.` : ''}</p>
+      <div class="boss-items">${S.map((s, i) => `<button class="bitem${s.ok ? ' ok' : s.n ? (s.left ? ' tried' : ' spent') : ''}${i >= L.boss.hpItems ? ' bonus' : ''}" data-i="${i}"><b>${i + 1}번${i >= L.boss.hpItems ? ' ⭐' : ''}</b> ${lab(s)}</button>`).join('')}</div>
+      <p class="muted small">처음엔 학습지 형성평가와 같은 문제 · 틀리면 숫자가 바뀐 새 문제로 ${N0 - 1}번 더 (문항마다 기회 ${N0}번). 맞힌 문항마다 보스에게 1 데미지!${L.boss.items > L.boss.hpItems ? ` ⭐ ${L.boss.hpItems + 1}번부터는 보너스.` : ''}</p>
       ${Raid().canLobby(L, R, me) ? `<div class="stamp-bar">📮 반드시 학습지 확인도장 받아가세요.</div>${lobbyBtn()}` : ''}</div>`;
     bindLobby();
-    body.querySelectorAll('.tab').forEach((b) => b.addEventListener('click', () => { bossSet = Number(b.dataset.s); render(); }));
     body.querySelectorAll('.bitem').forEach((b) => b.addEventListener('click', async () => {
-      const i = Number(b.dataset.i);
-      if (m[i]) { DS.UI.toast('이미 도달한 문항이에요.'); return; }
+      const i = Number(b.dataset.i), st = Raid().bossState(L, R, me)[i];
+      if (st.ok) { DS.UI.toast('이미 도달한 문항이에요.'); return; }
+      if (!st.left) { // 기회를 다 씀 → 마지막 문제의 풀이
+        const last = Raid().bossTries(L, R, me).filter((t) => t.i === i).pop();
+        DS.UI.toast(`📖 ${i + 1}번 기회를 모두 썼어요 — ${last && last.q && last.q.solution ? String(last.q.solution).replace(/<[^>]+>/g, '') : '해설을 보며 학습지에 정리해요'}`, 5200); return;
+      }
       const wait = Math.ceil((bossThink - Date.now()) / 1000);
       if (wait > 0) { DS.UI.toast(`🤔 생각 시간 ${wait}초 — 방금 틀린 문항을 학습지에서 다시 살펴봐요`); return; }
-      const r = await DS.Quiz.ask({ name: `형성평가 ${i + 1}번`, formula: bossSet === 1 ? '세트 1' : '세트 2 · 🔄 숫자가 바뀌었어요' }, items[i], { collect: true, tag: '👑 보스', ref: bossSet === 1 ? `학습지 형성평가 ${i + 1}번` : '' });
-      const next = (ans[bossSet] || Array(L.boss.items).fill(null)).slice();
-      while (next.length < L.boss.items) next.push(null);
-      next[i] = r.given;
-      await DS.Act.bossAnswer(code, bossSet, next); saveSoon(10000);
-      const ok = DS.Quiz.grade(items[i], r.given);
-      { const hk = Object.keys(((R.hits || {})[me]) || {}).filter((k) => k.startsWith(`b${bossSet}_${i}_`)).length; DS.Act.hit(code, raw, `b${bossSet}_${i}_${hk}`, { ok }); } // ✨ 보스 문항 퍼펙트 · 🔥 콤보 (v0.9.11)
+      const a = st.next, q = Raid().bossItem(L, R, me, i, a);
+      const r = await DS.Quiz.ask({ name: `형성평가 ${i + 1}번`, formula: a === 0 ? '첫 시도' : `🔄 숫자가 바뀌었어요 · 재도전 ${a} / ${N0 - 1}` }, q, { collect: true, tag: '👑 보스', ref: a === 0 ? `학습지 형성평가 ${i + 1}번` : '' });
+      try { await DS.Act.bossTry(code, i, a, r.given); } catch (e) { DS.UI.toast(e.message || '저장하지 못했어요'); return; }
+      saveSoon(10000);
+      const ok = DS.Quiz.grade(q, r.given);
+      DS.Act.hit(code, raw, `b1_${i}_${a}`, { ok }); // ✨ 보스 문항 퍼펙트(첫 시도) · 🔥 콤보
       if (!ok && thinkSec() > 0) bossThink = Date.now() + thinkSec() * 1000;
-      DS.UI.toast(ok ? `✔ ${i + 1}번 도달! 보스에게 데미지` : `✘ ${i + 1}번은 아직… 🤔 ${thinkSec()}초 생각하고 ${bossSet === 1 ? '세트 2 로' : '다시'} 도전!`, 2600);
+      DS.UI.toast(ok ? `✔ ${i + 1}번 도달! 보스에게 데미지` : st.left - 1 > 0 ? `✘ ${i + 1}번은 아직… 🤔 ${thinkSec()}초 생각하고 숫자가 바뀐 문제로 다시! (기회 ${st.left - 1})` : `✘ ${i + 1}번 기회를 모두 썼어요 — 해설을 보며 학습지에 정리해요`, 2800);
       if (ok) { DS.Sound.slash(); setTimeout(() => DS.Sound.hit(), 160); const sc = document.querySelector('#st-body .scene'); if (sc) DS.FX.play(sc, myP().fx || 'flame', { scale: 0.32 }); } else DS.Sound.squish();
     }));
   }

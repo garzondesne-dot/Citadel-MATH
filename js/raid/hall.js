@@ -41,7 +41,7 @@ DS.Hall = (function () {
     if (first) hxSeen = {};
     ids.forEach((mid) => { if (!Raid().cleared(L, R, mid) || hxSeen[mid]) return; hxSeen[mid] = true; if (first) return;
       setTimeout(() => Raid().activeIds(R).forEach((u, k) => { const x = C().xpOf(Raid().record(L, R, mid, u)); if (x) setTimeout(() => C().xpFloat(document.getElementById(`fh-${u}`), `+${x} EXP`), (k % 6) * 120); }), 600); });
-    if (Raid().bossHp(L, R).won && !hxSeen.boss) { hxSeen.boss = true; if (!first) setTimeout(() => Object.keys(R.bossAns || {}).forEach((u, k) => setTimeout(() => C().xpFloat(document.getElementById(`fh-${u}`), '+10 EXP', 'big'), (k % 6) * 120)), 900); }
+    if (Raid().bossHp(L, R).won && !hxSeen.boss) { hxSeen.boss = true; if (!first) setTimeout(() => Raid().activeIds(R).filter((u) => Raid().bossAnswered(R, u) > 0).forEach((u, k) => setTimeout(() => C().xpFloat(document.getElementById(`fh-${u}`), '+10 EXP', 'big'), (k % 6) * 120)), 900); }
   }
   function lvHall() {
     const v = R.lvup || {}, first = !lvSeen; if (first) lvSeen = {};
@@ -161,7 +161,7 @@ DS.Hall = (function () {
       if (fin || p.lobby) return (R.words || {})[u] ? '<span class="st ok">💬 남김</span>' : '<span class="st">대기실</span>';
       if (Raid().focusOn(R)) return '<span class="st">👀 집중</span>';
       if (step && step.kind === 'monster') return Raid().record(L, R, step.id, u).submitted ? '<span class="st ok">제출 ✔</span>' : '<span class="st">풀이 중…</span>';
-      if (step && step.kind === 'boss') return Object.keys(((R.bossAns || {})[u]) || {}).length ? '<span class="st ok">제출 ✔</span>' : '<span class="st">풀이 중…</span>';
+      if (step && step.kind === 'boss') return Raid().bossAnswered(R, u) ? '<span class="st ok">제출 ✔</span>' : '<span class="st">풀이 중…</span>';
       return '<span class="st">수업 중</span>';
     };
     const on = list.filter(([u]) => Raid().online(R, u)).length;
@@ -240,7 +240,7 @@ DS.Hall = (function () {
   function attacks(step) {
     const out = {};
     Raid().activeIds(R).forEach((u) => {
-      if (step.kind === 'boss') { const m = Raid().mastery(L, R, u).filter(Boolean).length; const n = Object.values(((R.bossAns || {})[u]) || {}).reduce((a, s) => a + (s || []).filter((x) => x != null).length, 0); out[u] = { n, dmg: m }; }
+      if (step.kind === 'boss') { const m = Raid().mastery(L, R, u).filter(Boolean).length; const n = Raid().bossTries(L, R, u).length; out[u] = { n, dmg: m }; }
       else { const rec = Raid().record(L, R, step.id, u); out[u] = { n: rec.tries.length, dmg: rec.best, label: Raid().resultLabel(rec.last), prac: rec.practice, h: Raid().healsGiven(R, step.id, u) }; }
     });
     return out;

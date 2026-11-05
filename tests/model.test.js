@@ -177,6 +177,29 @@ check(X.online(R2, 'a') && !X.online(R2, 'b'), '접속 표시');
     Q.state = st0; }
   Q.state.step = -1; check(X.atkClock(L, Q, 70000) === null, '대기실에서는 공격 없음');
 }
+// 👑 형성평가 4번 (2026-11-05 사용자 (나)): 첫 시도 = 학습지 그대로 · 재도전 3번 = 숫자 바뀐 문제 · 문항마다 · 예전 bossAns 도 읽음
+{
+  const Q = X.newRoom('555555', 'set-03', 'T', 0);
+  ['a', 'b'].forEach((u, i) => { Q.players[u] = { num: i + 1, nick: u, hero: 0, at: 0 }; });
+  Q.active = { a: true, b: true }; Q.state.headcount = 2;
+  check(X.BOSS_TRIES === 4, '기회 4번');
+  check(X.bossItem(L, Q, 'a', 0, 0) === L.boss.sets[1][0], '첫 시도 = 학습지 그대로');
+  const q1 = X.bossItem(L, Q, 'a', 0, 1);
+  check(q1 && JSON.stringify(q1) === JSON.stringify(X.bossItem(L, Q, 'a', 0, 1)), '재도전 문제는 같은 학생 · 같은 시도면 늘 같음 (새로 고쳐도)');
+  // a: 1번 첫 시도 틀림 → 재도전 1 맞힘 · 2번 첫 시도 맞힘 · 3번 4번 모두 틀림
+  Q.bossTry = { a: { 0: { 0: wrong(X.bossItem(L, Q, 'a', 0, 0)), 1: right(X.bossItem(L, Q, 'a', 0, 1)) }, 1: { 0: right(X.bossItem(L, Q, 'a', 1, 0)) }, 2: { 0: wrong(X.bossItem(L, Q, 'a', 2, 0)), 1: wrong(X.bossItem(L, Q, 'a', 2, 1)), 2: wrong(X.bossItem(L, Q, 'a', 2, 2)), 3: wrong(X.bossItem(L, Q, 'a', 2, 3)) } } };
+  const S = X.bossState(L, Q, 'a');
+  check(S[0].ok && !S[0].first && S[0].n === 2 && S[0].left === 0, `1번: 재도전으로 도달 · 첫 시도는 틀림 ${JSON.stringify(S[0])}`);
+  check(S[1].ok && S[1].first, '2번: 첫 시도 맞힘');
+  check(!S[2].ok && S[2].n === 4 && S[2].left === 0, '3번: 4번 모두 틀림 → 기회 0');
+  check(!S[3].ok && S[3].n === 0 && S[3].left === 4 && S[3].next === 0, '4번: 아직 → 기회 4 · 다음 시도 0');
+  check(X.mastery(L, Q, 'a').filter(Boolean).length === 2 && X.bossFirst(L, Q, 'a').filter(Boolean).length === 1, '도달 2 · 첫 시도 맞힘 1');
+  check(X.bossHp(L, Q).dmg === 2 && X.bossAnswered(Q, 'a') === 3 && X.bossAnswered(Q, 'b') === 0, '데미지 = 도달 문항 수 · 낸 문항 수');
+  // 예전 방식 (세트 1 · 2 배열) 도 그대로 읽힘
+  Q.bossAns = { b: { 1: L.boss.sets[1].map((q, i) => (i === 0 ? right(q) : wrong(q))), 2: L.boss.sets[2].map((q, i) => (i === 1 ? right(q) : null)) } };
+  const Sb = X.bossState(L, Q, 'b');
+  check(Sb[0].ok && Sb[0].first && Sb[1].ok && !Sb[1].first && !Sb[2].ok, `예전 세트 1 · 2 기록 = 시도 0 · 1 ${JSON.stringify(Sb.slice(0, 3))}`);
+}
 if (fail) { console.error(`\n${fail}건 실패`); process.exit(1); }
 // 🟪 중단원던전 공격 = 45초마다 1초 멈춤 (2026-11-04: 「20초마다 45초 멈춤」 버그 다시 나오지 않게)
 { const sa = X.soloAtk(); if (!(sa.per === 45 && sa.lock === 1)) { console.error('FAIL: 중단원던전 공격', sa); process.exit(1); }
