@@ -205,7 +205,7 @@ DS.Photo = (function () {
   // ── 교사: 대시보드 「📷 서술형」 ──────────────────────────
   async function all() {
     const v = (await N().get('photo').catch(() => null)) || {}, out = [];
-    Object.entries(v).forEach(([c, byN]) => Object.entries(byN || {}).forEach(([n, byK]) => Object.entries(byK || {}).forEach(([k, byId]) => Object.entries(byId || {}).forEach(([id, x]) => { if (x && x.status) out.push({ ...x, c, n: Number(n), k, id }); }))));
+    Object.entries(v).forEach(([c, byN]) => Object.entries(byN || {}).forEach(([n, byK]) => Object.entries(byK || {}).forEach(([k, byId]) => Object.entries(byId || {}).forEach(([id, x]) => { if (x && x.status) out.push({ ...x, steps: Object.values(x.steps || {}), flags: Object.values(x.flags || {}), c, n: Number(n), k, id }); }))));
     return out.sort((a, b) => (Number(b.at) || 0) - (Number(a.at) || 0));
   }
   const needs = (x) => x.ok == null && (x.status === 'check' || !!x.appeal);
