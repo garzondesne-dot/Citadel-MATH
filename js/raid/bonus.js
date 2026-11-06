@@ -49,7 +49,7 @@ DS.Bonus = (function () {
   // 열린 방 · 👑 보스 방 조건 (upto = 우리 반이 연 마지막 차시)
   function roomsState(L, data, upto, all) {
     const rooms = L.rooms || [], boss = bossOf(L);
-    const usable = (r) => !r.photo || PHOTO_READY();
+    const usable = (r) => !r.photo || (PHOTO_READY() && DS.Photo.ready(L.id, r.id)); // 📷 기준표를 켠 방만 (시범 = 1층 07 · 11)
     const open = rooms.filter((r) => usable(r) && (all || r.no <= upto)), plain = open.filter((r) => !r.boss);
     const cleared = plain.filter((r) => roomRec(data, L, r.id).clear).length, need = Math.ceil((plain.length * BOSS_PCT) / 100);
     const bossOpen = !!boss && usable(boss) && (all || boss.no <= upto) && cleared >= need && plain.length > 0;
@@ -95,11 +95,32 @@ DS.Bonus = (function () {
     recs = preview || (m && m.test) ? null : (await N().get(`records/${ck(m.c)}/${m.n}`).catch(() => null)) || {};
     heldM = recs ? (await N().get(`held/${ck(m.c)}`).catch(() => null)) || {} : {};
     gemD = preview || !m || m.test || !DS.Gem ? null : await DS.Gem.mine(m).catch(() => null);
+    if (DS.Photo) await DS.Photo.load(true).catch(() => null); // 📷 gcfg/photo · photo_rubric
+    if (!preview && me && !me.test) await photoSync().catch(() => {}); // ⏳ 선생님 확인 결과 → 처치 / 다시
     await loadLocks(); isAdm = all() && DS.Account ? await DS.Account.isAdmin().catch(() => false) : false; // 📕 오답노트 (null = 미리 보기 · 테스트: 표시 안 함)
     DS.UI.show('screen-bonus');
     if (DS.Sound && DS.Sound.bgm) DS.Sound.bgm(train || rift ? 'bgm-dummy' : 'bgm-castle'); // 🎵 2026-11-06: 성채 · 허수아비 배경음 (작게)
     render();
     if (opt.go) { const L = DS.Lessons.get(opt.go[0]); if (L) DS.Control.run(() => fight(L, opt.go[1])); }
+  }
+  // 📷 기다리던 선생님 확인 (bonus/…/pend = 결과 id) → ✔ 인정이면 처치 + 보상 · ✖ 이면 기다림을 지우고 다시 사진
+  async function photoSync() {
+    if (!DS.Photo) return;
+    for (const f of FLOORS) {
+      const L = castleOf(f.id); if (!L) continue;
+      for (const r of (L.rooms || []).filter((x) => x.photo)) {
+        const rr = (mine[L.id] || {})[r.id]; if (!rr || rr.clear || !rr.pend) continue;
+        const st = await DS.Photo.pendState(me, L.id, r.id, rr.pend); if (st === 'wait') continue;
+        const p = `bonus/${ck(me.c)}/${me.n}/${L.id}/${r.id}`;
+        if (st === 'no') { await N().update(p, { pend: null, tries: rr.tries || 1 }).catch(() => {}); delete rr.pend; DS.UI.toast(`✏ ${r.title} — 선생님이 풀이를 다시 보고 싶대요. 고쳐서 다시 찍어요!`, 3600); continue; }
+        const sealedBefore = seals(mine).includes(L.id);
+        await N().update(p, { clear: true, pend: null, tries: rr.tries || 1, at: N().TS }).catch(() => {}); rr.clear = true; delete rr.pend;
+        const sealed = !sealedBefore && seals(mine).includes(L.id);
+        if (DS.Grow) DS.Grow.add(me, { bonusClear: 1, seal: sealed ? 1 : 0 }).catch(() => {});
+        if (DS.Gem) { const G = DS.Gem.G; await DS.Gem.add(me, r.boss ? G.roomBoss : G.room, `room_${L.id}_${r.id}`, '성채 방 처치').catch(() => 0); if (sealed) await DS.Gem.add(me, G.seal, `seal_${L.id}`, '🟪 인장', { free: true }).catch(() => 0); }
+        DS.Sound.correct(); DS.UI.toast(`✔ 선생님이 「${r.title}」 풀이를 인정했어요 — 처치!${sealed ? ' 🟪 인장도!' : ''}`, 4000);
+      }
+    }
   }
   async function prepOf(id) {
     if (DS.Test && DS.Test.active() && DS.Test.prep(id)) return DS.Test.prep(id);
@@ -139,8 +160,8 @@ DS.Bonus = (function () {
       const tile = (r) => {
         const rr = roomRec(mine, L, r.id), open = S.isOpen(r), m = L.monsters[r.id], isNew = fresh.has(`${L.id}/${r.id}`);
         const st = !open ? 'lock' : rr.clear ? 'clear' : rr.tries ? 'drop' : 'ready';
-        const sub = !open ? (!S.usable(r) ? '📷 사진 분석 준비 중' : r.boss && (all() || r.no <= no) ? `${S.cleared} / ${S.need} 처치하면 열려요` : `${r.no}차시 수업 뒤`) : rr.clear ? '✔ 처치' : rr.tries ? `💧 ${rr.tries}번 도전` : '⚔ 도전';
-        return `<button class="cs-room ${st}${r.boss ? ' boss' : ''}"${open ? ` data-fight="${L.id}|${r.id}"` : ` data-lockmsg="${esc(!S.usable(r) ? '서술형 방이에요. 📷 사진으로 풀이를 올리는 기능이 생기면 열려요' : r.boss ? `👑 보스 방은 열린 방 ${S.need}개를 처치하면 열려요 (지금 ${S.cleared}개)` : `${r.no}차시 수업을 하면 열려요`)}"`}>
+        const sub = open && !rr.clear && rr.pend ? '⏳ 선생님 확인 중' : open && !rr.clear && rr.ans && r.photo ? '📷 풀이 사진 올리기' : !open ? (!S.usable(r) ? '📷 사진 채점 준비 중' : r.boss && (all() || r.no <= no) ? `${S.cleared} / ${S.need} 처치하면 열려요` : `${r.no}차시 수업 뒤`) : rr.clear ? '✔ 처치' : rr.tries ? `💧 ${rr.tries}번 도전` : '⚔ 도전';
+        return `<button class="cs-room ${st}${r.boss ? ' boss' : ''}"${open ? ` data-fight="${L.id}|${r.id}"` : ` data-lockmsg="${esc(!S.usable(r) ? '서술형 방이에요. 선생님이 📷 사진 채점을 켜면 열려요' : r.boss ? `👑 보스 방은 열린 방 ${S.need}개를 처치하면 열려요 (지금 ${S.cleared}개)` : `${r.no}차시 수업을 하면 열려요`)}"`}>
           ${isNew ? '<span class="cs-rnew">NEW</span>' : ''}${!open && r.boss && !sealed ? sealTag() : ''}<span class="cs-no">${r.id.slice(1)}</span>${open ? DS.Art.monster(m.sprite, rr.clear ? 'down' : 'idle') : '<i class="cs-lockic">🔒</i>'}
           <span class="cs-rt">${esc(r.title.replace(/^👑 /, '').replace(/^\d+ /, ''))}</span><span class="cs-rs">${sub}</span>${open && !rr.clear && !gLog(`room_${L.id}_${r.id}`) ? gTag((r.boss ? DS.Gem.G.roomBoss : DS.Gem.G.room) + (r.boss && !sealed ? DS.Gem.G.seal : 0)) : ''}${open && r.boss && !rr.clear && !sealed ? sealTag() : ''}</button>`;
       };
@@ -208,7 +229,7 @@ DS.Bonus = (function () {
 
   // ── 1:1 전투 ───────────────────────────────────────────
   async function fight(L, mid) {
-    const mon = monOf(L, mid), castle = !!L.rooms, rec = Object.assign({}, castle ? roomRec(mine, L, mid) : (mine[L.id] || {})[mid] || {}), prep = await prepOf(L.id);
+    const mon = monOf(L, mid), castle = !!L.rooms, photoRoom = castle && !!((L.rooms || []).find((r) => r.id === mid) || {}).photo, rec = Object.assign({}, castle ? roomRec(mine, L, mid) : (mine[L.id] || {})[mid] || {}), prep = await prepOf(L.id);
     if (castle && me && !all()) seenAdd(me, `${L.id}/${mid}`); // NEW 끔
     const first = !rec.tries && !rec.clear, clearedBefore = !!rec.clear, sealedBefore = seals(mine).includes(L.id);
     const wasOpen = (() => { const x = !castle && isField(L, mid) ? noteOf(L) : null; const st = x && !x.none ? x.mons[x.ids.indexOf(mid)] : null; return !!(st && (DS.Note.OPEN[st] || st === 'a')); })(); // 📕 틀림 · 안 풂이었던 문제
@@ -290,13 +311,15 @@ DS.Bonus = (function () {
       const tries = Number(rec.tries || 0) + 1;
       rec.tries = tries;
       const patch = { tries, at: N().TS };
-      if (cleared) patch.clear = true;
+      if (cleared && !photoRoom) patch.clear = true;
+      if (cleared && photoRoom) patch.ans = { seed, attempt }; // 📷 서술형: 답을 맞히면 그 숫자 그대로 사진 단계 (다시 들어와도 같은 숫자)
       if (!preview && DS.Usage) DS.Usage.bump(me, castle ? 'c' : 'r'); // 📈 수업 밖 풀이 (2026-11-06)
       if (DS.Mis && wrongs.length) { // 오개념: 이번 판에서 틀린 소문제 → 그 소문제를 결국 맞혔으면 「바로잡음」
         const acc = DS.Mis.merge({}, misBase); wrongs.forEach((w) => DS.Mis.add(acc, w.codes, !!solved[w.i])); if (Object.keys(acc).length) patch.mis = acc;
       }
       if (!preview) await N().update(`bonus/${ck(me.c)}/${me.n}/${L.id}/${mid}`, patch).catch(() => {});
-      mine[L.id] = mine[L.id] || {}, mine[L.id][mid] = Object.assign({}, mine[L.id][mid], { tries, clear: cleared || (mine[L.id][mid] || {}).clear }, patch.mis ? { mis: patch.mis } : {});
+      mine[L.id] = mine[L.id] || {}, mine[L.id][mid] = Object.assign({}, mine[L.id][mid], { tries, clear: (cleared && !photoRoom) || (mine[L.id][mid] || {}).clear }, patch.mis ? { mis: patch.mis } : {}, patch.ans ? { ans: patch.ans } : {});
+      if (cleared && photoRoom) return photoStage(items, true);
       if (cleared) return win();
       if (left <= 0) {
         const act = draw('miss', '<p class="gold">기회를 모두 썼어요. 해설을 다시 보고 다음에 새 문제로 도전해요! (벌은 없어요)</p>');
@@ -307,6 +330,23 @@ DS.Bonus = (function () {
       const act = draw('', `<p>맞힌 소문제 <b>${solved.filter(Boolean).length} / ${n}</b> — 틀린 것만 새 숫자로 다시!</p>`);
       act.innerHTML = '<button class="btn primary" id="bf-again">🔄 다시 도전</button>';
       act.querySelector('#bf-again').onclick = () => { attempt++; round(); };
+      return null;
+    };
+    // 📷 서술형 사진 단계 (2026-11-06 결정 1): 숫자 답을 맞힘 → 풀이 사진 통과 = 처치 · ⏳ 선생님 확인 · 이의 신청
+    const photoStage = (items, fresh) => {
+      const r0 = mine[L.id] && mine[L.id][mid] ? mine[L.id][mid] : rec, pend = r0.pend;
+      const act = draw('', pend ? '<p class="gold">⏳ 선생님이 풀이를 확인하고 있어요. 확인되면 성채에 들어올 때 처치로 바뀌어요. 더 또렷한 사진을 다시 보내도 돼요.</p>' : `<p class="okc">${fresh ? '✔ <b>답을 맞혔어요!</b> ' : ''}이제 <b>종이에 쓴 풀이</b>를 📷 찍어 올리면 처치예요. <span class="muted small">(이 숫자 그대로 · 하루 3장)</span></p>`);
+      act.innerHTML = `<button class="btn primary big" id="bf-photo">📷 풀이 사진 올리기</button>${all() ? '<button class="btn" id="bf-pv">미리 보기: 통과로 보기</button>' : ''}<button class="btn" id="bf-later">나중에</button>`;
+      act.querySelector('#bf-later').onclick = () => { el.remove(); render(); };
+      const pv = act.querySelector('#bf-pv'); if (pv) pv.onclick = () => win();
+      act.querySelector('#bf-photo').onclick = () => DS.Control.run(async () => {
+        if (all()) { DS.UI.toast('미리 보기 · 테스트에서는 사진을 보내지 않아요 — 학생 계정으로 해 보세요.', 3000); return; }
+        const res = await DS.Photo.grade(me, { lesson: L.id, room: mid, title: mon.title, items });
+        if (!document.body.contains(el) || !res) return;
+        const p = `bonus/${ck(me.c)}/${me.n}/${L.id}/${mid}`, cur = mine[L.id][mid] = mine[L.id][mid] || {};
+        if (res.status === 'pass') { await N().update(p, { clear: true, pend: null, ph: res.id, tries: cur.tries || 1, at: N().TS }).catch(() => {}); Object.assign(cur, { clear: true }); delete cur.pend; return win(); }
+        if (res.status === 'check' || res.status === 'appeal') { await N().update(p, { pend: res.id, tries: cur.tries || 1 }).catch(() => {}); cur.pend = res.id; photoStage(items, false); }
+      });
       return null;
     };
     const win = async () => {
@@ -336,6 +376,7 @@ DS.Bonus = (function () {
       if (fx) show(`✨ ${DS.FX.NAMES[fx]} 열림`, 'seal');
       if (sealed && seals(mine).length === 3) show('🧑 용사 금발 검사 열림', 'seal');
     };
+    if (photoRoom && rec.ans && !rec.clear && rec.ans.seed) { cur = itemsOf(L, mid, rec.ans.seed, rec.ans.attempt || 0); solved.fill(true); return photoStage(cur, false); } // 📷 답은 이미 맞힘 → 같은 숫자로 사진 단계
     const act = draw('', `<p>${castle ? (first ? '교과서 단원 평가를 숫자만 바꾼 문제예요. 서술형은 풀이를 학습지에 써요.' : '다시 들어오면 새 숫자로 나와요.') : mid === 'boss' ? (first ? '수업 때 형성평가 문제 그대로예요. 처치하면 🟪 인장!' : '세트를 바꿔 다시 도전해요.') : '📕 수업 때 문제를 숫자만 바꿨어요. 모두 맞히면 오답노트에 복습 완료!'} 기회 ${TRIES}번 — 틀린 소문제만 다시 풀어요.</p>`);
     act.innerHTML = '<button class="btn primary big" id="bf-go">⚔ 전투 시작</button>';
     act.querySelector('#bf-go').onclick = () => round();

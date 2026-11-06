@@ -76,11 +76,11 @@ DS.Dash = (function () {
   function render() {
     const el = $('#dash-body'); if (!el) return;
     const classes = Object.keys(roster).sort();
-    const TABS = [['table', '① 한눈에 표'], ['rank', '② 랭킹'], ['watch', '③ 주의 학생'], ['weak', '④ 개념별 약점'], ['std', '⑤ 성취기준'], ['mis', '⑥ 오개념'], ['memo', '⑦ 세특 메모'], ['sv', '📝 설문'], ['use', '📈 활용 추이']];
+    const TABS = [['table', '① 한눈에 표'], ['rank', '② 랭킹'], ['watch', '③ 주의 학생'], ['weak', '④ 개념별 약점'], ['std', '⑤ 성취기준'], ['mis', '⑥ 오개념'], ['memo', '⑦ 세특 메모'], ['sv', '📝 설문'], ['use', '📈 활용 추이'], ['photo', '📷 서술형']];
     el.innerHTML = `<div class="panel framed"><h2>📊 학급 대시보드 <span class="muted small">교사만 · 학생 화면과 종합상황실에는 나오지 않아요</span></h2>
         <div class="tabs st-cls">${classes.length > 1 ? `<button class="tab${isAll() ? ' on' : ''}" data-cls="${ALL}">🏫 전체</button>` : ''}${classes.map((c) => `<button class="tab${c === cls ? ' on' : ''}" data-cls="${esc(c)}">${esc(c)}</button>`).join('') || '<span class="muted">명단이 없어요 — 학생 관리에서 먼저 올려 주세요</span>'}</div>
         <div class="tabs dash-tabs">${TABS.map(([k, t]) => `<button class="tab${k === tab ? ' on' : ''}" data-tab="${k}">${t}</button>`).join('')}</div></div>
-      <div class="panel framed dash-main">${!cls ? '' : !data ? '<p class="muted">불러오는 중…</p>' : !data.held.length && tab !== 'sv' && tab !== 'use' ? '<p class="muted">아직 저장된 수업 기록이 없어요. (학생이 수업 끝 결과를 보면 저장돼요)</p>' : VIEW[tab]()}</div>`;
+      <div class="panel framed dash-main">${!cls ? '' : !data ? '<p class="muted">불러오는 중…</p>' : !data.held.length && tab !== 'sv' && tab !== 'use' && tab !== 'photo' ? '<p class="muted">아직 저장된 수업 기록이 없어요. (학생이 수업 끝 결과를 보면 저장돼요)</p>' : VIEW[tab]()}</div>`;
     el.querySelectorAll('[data-cls]').forEach((b) => (b.onclick = () => { cls = b.dataset.cls; words = null; useData = null; useFor = ''; load(); }));
     el.querySelectorAll('[data-tab]').forEach((b) => (b.onclick = () => { tab = b.dataset.tab; render(); }));
     el.querySelectorAll('[data-sort]').forEach((b) => (b.onclick = () => { const k = b.dataset.sort; sortDir = sortKey === k ? -sortDir : (k === 'n' || k === 'name' ? 1 : -1); sortKey = k; render(); }));
@@ -88,6 +88,7 @@ DS.Dash = (function () {
     const csv = el.querySelector('#dash-csv'); if (csv) csv.onclick = downloadCsv;
     if (tab === 'sv') svBind(el);
     if (tab === 'use') useBind(el);
+    if (tab === 'photo') { const h = el.querySelector('#ph-board'); if (h && DS.Photo) DS.Photo.board(h, { cls: isAll() ? '' : cls, roster }).catch((e) => { h.textContent = e.message || '불러오지 못했어요'; }); }
     el.querySelectorAll('[data-copy]').forEach((b) => (b.onclick = () => copy(b.dataset.copy === 'all' ? data.studs.map((s) => `${who(s)}: ${memo(s)}`).join('\n\n') : memo(data.studs.find((s) => s.key === b.dataset.copy)))));
   }
   const who = (s) => `${isAll() ? `${s.cls}반 ` : ''}${s.n}번 ${s.name}`;
@@ -125,6 +126,7 @@ DS.Dash = (function () {
     };
   }
   const VIEW = {
+    photo() { return '<div id="ph-board"><p class="muted">📷 서술형 결과를 불러오는 중…</p></div>'; }, // 2026-11-06 사진 채점 (DS.Photo.board)
     use() {
       if (!useData) return '<p class="muted">활동 기록을 모으는 중…</p>';
       const W = DS.Usage.weekly(useData.days, 8), now = W[W.length - 1], prev = W[W.length - 2] || { solves: 0, active: 0 }, T = useData.total || 1;

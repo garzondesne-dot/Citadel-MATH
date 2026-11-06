@@ -393,6 +393,9 @@
         "$floor": {
           ".validate": "newData.isBoolean() && $floor.matches(/^eval-[0-9]+$/)"
         }
+      },
+      "photo": {
+        ".validate": "newData.hasChildren(['on']) && newData.child('on').isBoolean() && (!newData.child('url').exists() || (newData.child('url').isString() && newData.child('url').val().length <= 300))"
       }
     },
     "tcfg": {
@@ -420,6 +423,35 @@
           "$n": {
             ".write": "auth != null && (root.child('accounts/'+$c+'/'+$n+'/uid').val() === auth.uid || root.child('admins/'+auth.uid).val() === true)"
           }
+        }
+      }
+    },
+    "photo_rubric": {
+      ".read": "auth != null",
+      ".write": "auth != null && root.child('admins/'+auth.uid).val() === true"
+    },
+    "photo": {
+      ".read": "auth != null && root.child('admins/'+auth.uid).val() === true",
+      "$c": {
+        "$n": {
+          ".read": "auth != null && (root.child('accounts/'+$c+'/'+$n+'/uid').val() === auth.uid || root.child('admins/'+auth.uid).val() === true)",
+          ".write": "auth != null && root.child('admins/'+auth.uid).val() === true",
+          "$key": {
+            "$id": {
+              "appeal": {
+                ".write": "auth != null && root.child('accounts/'+$c+'/'+$n+'/uid').val() === auth.uid && !data.exists()",
+                ".validate": "newData.hasChildren(['t', 'at']) && newData.child('t').isString() && newData.child('t').val().length <= 300"
+              }
+            }
+          }
+        }
+      }
+    },
+    "photo_q": {
+      ".read": "auth != null && root.child('admins/'+auth.uid).val() === true",
+      "$c": {
+        "$n": {
+          ".read": "auth != null && root.child('accounts/'+$c+'/'+$n+'/uid').val() === auth.uid"
         }
       }
     }

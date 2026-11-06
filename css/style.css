@@ -2201,3 +2201,19 @@ body.tb-last-min::after { content: ''; position: fixed; inset: 0; z-index: 88; p
 .sc-it { display: inline-flex; align-items: center; gap: 4px; padding: 2px 6px; border-radius: 8px; background: #13203a; font-size: 13px; } .sc-it.ex { background: #22183c; } .sc-it .btn { padding: 0 6px; font-size: 11px; }
 .sc-ex { display: flex; flex-wrap: wrap; gap: 10px; margin: 8px 0; }
 
+
+/* 📷 서술형 사진 채점 (v0.9.12 · 2026-11-06) */
+.ph-box { max-width: 560px; } .ph-box h2 { margin: 0; }
+.ph-q { background: #0b1426; border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; font-size: 15px; line-height: 1.5; }
+.ph-tips { margin: 8px 0; padding-left: 18px; font-size: 14px; line-height: 1.7; }
+.ph-pick { justify-content: center; gap: 10px; margin: 10px 0; }
+.ph-stage { width: 100%; display: flex; justify-content: center; margin: 8px 0; } .ph-stage canvas { max-width: 100%; touch-action: none; border-radius: 6px; background: #000; }
+.ph-wait { height: 8px; border-radius: 4px; background: #1b2740; overflow: hidden; margin: 14px 0; } .ph-wait i { display: block; height: 100%; width: 40%; background: linear-gradient(90deg, #ffd25a, #ff9f43); animation: ph-run 1.2s ease-in-out infinite; }
+@keyframes ph-run { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+.ph-score { display: flex; align-items: baseline; justify-content: center; gap: 6px; font-size: 22px; margin: 10px 0; } .ph-score b { font-size: 44px; } .ph-score span { font-size: 14px; color: #b9c6e8; margin-left: 8px; }
+.ph-score.pass b { color: #7dffa8; } .ph-score.retry b { color: #ffd25a; }
+.ph-fb { background: #10213a; border-left: 3px solid #ffd25a; padding: 8px 10px; border-radius: 6px; line-height: 1.55; }
+.ph-err { color: #ff8a95; font-weight: 700; }
+.ph-set label { display: block; margin: 6px 0; } .ph-set input[type=url] { width: 100%; font-size: 15px; padding: 6px 8px; border-radius: 8px; background: #08101e; color: var(--text, #eef2ff); border: 1px solid var(--line); }
+.ph-rub { width: 100%; border-collapse: collapse; font-size: 14px; margin: 6px 0; } .ph-rub td, .ph-rub th { border-bottom: 1px solid var(--line); padding: 4px 6px; text-align: left; }
+.ph-cost { margin-left: auto; align-self: center; }
