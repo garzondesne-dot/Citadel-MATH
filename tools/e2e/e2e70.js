@@ -141,7 +141,7 @@ const jpegSize = (buf) => { let i = 2; while (i < buf.length) { if (buf[i] !== 0
     설정저장: set.cfg && set.cfg.on && set.cfg.url === URL_GS && set.on.join(',') === 'eval-1/q07,eval-1/q11' && set.rows === 7,
     시범방만열림: t07 && t07.open && t11 && t11.open && t2_07 && !t2_07.open && /사진 채점/.test(t2_07.lock),
     숫자뒤사진단계: st07 && !rec07.clear && !!rec07.ans,
-    재도전창: res07 && res07.steps.length === 2 && /^no:.*B ∪ X/.test(res07.steps[0]) && /^ok:.*16/.test(res07.steps[1]) && /1/.test(res07.score) && res07.app && res07.again && res07.cool && res07.cool[0] === true && /초 뒤/.test(res07.cool[1]) && /X ⊂ B/.test(res07.fb),
+    재도전창: res07 && res07.steps.length === 2 && /^no( stamped)?:.*B ∪ X/.test(res07.steps[0]) && /^ok( stamped)?:.*16/.test(res07.steps[1]) && /1/.test(res07.score) && res07.app && res07.again && res07.cool && res07.cool[0] === true && /초 뒤/.test(res07.cool[1]) && /X ⊂ B/.test(res07.fb),
     이의신청: after07.pend === 'r1' && after07.appeal && /X ⊂ B/.test(after07.appeal.t) && /선생님 확인 중/.test(t07b.sub),
     대시보드: board.items.length === 1 && /이의 신청/.test(board.items[0]) && /확인할 것 1/.test(board.need) && /원/.test(board.cost),
     인정뒤처치: okv === true && rec07b.clear && !rec07b.pend && /처치/.test(t07c.sub),
