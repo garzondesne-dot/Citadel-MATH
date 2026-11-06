@@ -31,6 +31,18 @@ DS.Act = (function () {
   const ck = (c) => String(c).replace(/[.#$/[\]]/g, '_');
   // cls: 이 수업을 여는 반 → 그 반 학생들의 모닥불에 이 차시 차원문이 실시간으로 나타난다 (live/{반})
   // opt.slot (v0.9.7.0 시간표 예약 수업): { key, p, from, to } → 차원문(live) · 해금은 지금 안 함 (학생 캠프는 slots 로 시각에 맞춰 켬 · 해금은 수업 시작 때)
+  // 🔄 차시 바꾸기: 대기실(수업 시작 전)에서만 · 같은 코드 그대로 학생 폰 · 종합실이 새 차시로 (교사 리모컨 · 종합실)
+  async function switchLesson(code, R, lessonId) {
+    const L = DS.Lessons.get(lessonId); if (!L) fail('없는 차시예요.');
+    if (!Raid.isLobby(R)) fail('수업을 시작한 뒤에는 차시를 바꿀 수 없어요. 새 수업을 열어 주세요.');
+    if (R.meta && R.meta.lesson === lessonId) return;
+    let pct = null, think = null;
+    try { pct = await N().get(prepPath(lessonId, 'pct')); } catch (e) { /* 준비 안 했으면 차시 기본값 */ }
+    try { think = await N().get(prepPath(lessonId, 'think')); } catch (e) { /* 기본 */ }
+    await N().update(P(code, 'state'), { lesson: lessonId, lpct: pct != null ? Number(pct) : null, lthink: think != null ? Number(think) : L.think != null ? L.think : 5, lessonAt: N().TS });
+    const cls = R.meta && R.meta.cls; // 학생 캠프 문 꼬리표 (교사만 쓸 수 있는 칸 · 종합실이면 넘어감)
+    if (cls) { try { const lv = await N().get(`live/${ck(cls)}`); if (lv && lv.code === code) await N().update(`live/${ck(cls)}`, { lesson: lessonId, no: L.no || 0, theme: L.theme || '' }); } catch (e) { /* 권한 없음 */ } }
+  }
   async function createRoom(lessonId, cls, opt = {}) {
     let code;
     for (let i = 0; i < 20; i++) { code = String(100000 + Math.floor(Math.random() * 900000)); if (!(await N().get(P(code, 'meta')))) break; }
@@ -315,11 +327,13 @@ DS.Act = (function () {
   // 저장 모양(JSON 문자열) → 규칙 함수가 쓰는 모양
   function unpackRoom(R) {
     const out = JSON.parse(JSON.stringify(R || {}));
+    // 🔄 차시 바꾸기 (2026-11-06 사용자 「차시 변경을 빠르게」): 수업 시작 전에 고른 차시는 state.lesson (meta 는 처음 만들 때만 쓸 수 있는 규칙) → 모든 화면이 이 값을 차시로 씀
+    if (out.state && out.state.lesson && out.meta && DS.Lessons && DS.Lessons.get(out.state.lesson)) { out.meta.lesson = out.state.lesson; if ('lpct' in out.state) { if (out.state.lpct) out.meta.pct = out.state.lpct; else delete out.meta.pct; } if (out.state.lthink != null) out.meta.think = out.state.lthink; }
     Object.values(out.subs || {}).forEach((byU) => Object.values(byU).forEach((byA) => Object.keys(byA).forEach((k) => { if (typeof byA[k] === 'string') byA[k] = N().unpack(byA[k]); })));
     Object.values(out.bossTry || {}).forEach((byI) => Object.values(byI || {}).forEach((byA) => Object.keys(byA || {}).forEach((k) => { if (typeof byA[k] === 'string') byA[k] = N().unpack(byA[k]); })));
     Object.values(out.bossAns || {}).forEach((bySet) => Object.keys(bySet).forEach((k) => { if (typeof bySet[k] === 'string') bySet[k] = N().unpack(bySet[k]); }));
     return out;
   }
 
-  return { setSound, bossTry, openRooms, savePunch, finishOvertime, setPunchOff, punchOff, batTick, batAnswer, hit, endClassAsk, timeUp, extendTime, openRift, cutShort, setRest, setRestMin, markBossWin, prepLite, prepImg, hasImg, setVideoFile, setVideoOn, endClass, admitLate, getPrep, setImage, setVideo, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, heal, bossAnswer, unpackRoom, P };
+  return { switchLesson, setSound, bossTry, openRooms, savePunch, finishOvertime, setPunchOff, punchOff, batTick, batAnswer, hit, endClassAsk, timeUp, extendTime, openRift, cutShort, setRest, setRestMin, markBossWin, prepLite, prepImg, hasImg, setVideoFile, setVideoOn, endClass, admitLate, getPrep, setImage, setVideo, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, heal, bossAnswer, unpackRoom, P };
 })();

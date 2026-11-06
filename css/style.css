@@ -2127,3 +2127,11 @@ body.tb-last-min::after { content: ''; position: fixed; inset: 0; z-index: 88; p
 .ult .u-facepic { position: absolute; left: 50%; top: 50%; height: 100%; aspect-ratio: 2 / 1; transform: translate(-50%, -50%); background-repeat: no-repeat; filter: drop-shadow(0 0 12px var(--uc, #ffd25a)); animation: uFacePic 1.05s ease-out forwards; } /* 눈빛 클로즈업 그림 (heroFaces · 2:1 · 2026-11-06) */
 .ult .u-facepic ~ .u-eye { display: none; } /* 그림 얼굴은 눈 위치가 저마다 달라 가짜 눈빛 줄 대신 그림 전체를 번쩍 */
 @keyframes uFacePic { 0% { transform: translate(-50%, -50%) scale(1.25); filter: brightness(1.8) drop-shadow(0 0 12px var(--uc, #ffd25a)); } 35% { transform: translate(-50%, -50%) scale(1); filter: brightness(1) drop-shadow(0 0 12px var(--uc, #ffd25a)); } 55% { filter: brightness(1.6) drop-shadow(0 0 22px #fff); } 100% { transform: translate(-50%, -50%) scale(1.04); filter: brightness(1) drop-shadow(0 0 12px var(--uc, #ffd25a)); } }
+/* 🔄 차시 바꾸기 (2026-11-06) */
+.ls-btn { margin-left: 8px; font-size: 14px; padding: 4px 10px; vertical-align: middle; }
+.ls-box { max-width: 560px; }
+.ls-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin-top: 8px; }
+.ls-grid .btn { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; padding: 10px; }
+.ls-grid .btn small { font-size: 12px; opacity: .85; }
+.ls-grid .btn.on { border-color: var(--teal); }
+.t-lhint { margin: 2px 0 6px; color: #9fe0ff; }

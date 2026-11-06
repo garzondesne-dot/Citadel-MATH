@@ -9,7 +9,7 @@ DS.Hall = (function () {
   const { esc, pretty } = DS.UI;
   const C = () => DS.Control, Raid = () => DS.Raid;
   let code = null, L = null, R = null, raw = null, stop = null, stopPrep = null, prep = {};
-  let lastHit = '', built = '', seen = {}, queue = [], playing = false, wonFx = '', bubbleT = 0, bubbleK = 0, hallKey = '', camped = false, zoom = '', zoomStep = -9, vanished = '', demo = null;
+  let prepFor = '', lastHit = '', built = '', seen = {}, queue = [], playing = false, wonFx = '', bubbleT = 0, bubbleK = 0, hallKey = '', camped = false, zoom = '', zoomStep = -9, vanished = '', demo = null;
 
   async function enter(c, key) {
     await DS.Act.joinHall(c, key);
@@ -26,7 +26,7 @@ DS.Hall = (function () {
       const first = !L;
       L = DS.Lessons.get(R.meta.lesson); if (L && L.id !== DS.Art._entered) { DS.Art._entered = L.id; DS.Art.lessonEnter(L); } // v0.9.6 차시별 다운로드
       if (DS.Act.isHost(R)) { DS.Act.admitLate(code, R, L); DS.Act.markBossWin(code, R, L); }
-      if (first) { if (stopPrep) stopPrep(); stopPrep = DS.Net.watch(`prep/${L.id}`, (p) => { prep = p || {}; built = ''; if (R) render(); }); }
+      if (first || L.id !== prepFor) { prepFor = L.id; built = ''; if (stopPrep) stopPrep(); stopPrep = DS.Net.watch(`prep/${L.id}`, (p) => { prep = p || {}; built = ''; if (R) render(); }); } // 🔄 차시 바꾸기: 새 차시의 개념 그림 · 영상
       xpHall(); lvHall(); ulHall();
       { const sd = (R.state || {}).sound, key = sd ? `${sd.sfx}|${sd.bgm}` : ''; if (key && key !== sndKey && DS.Sound) { sndKey = key; DS.Sound.setSfx(sd.sfx !== false, false); DS.Sound.setBgm(sd.bgm !== false, false); } } // 🔇 교사 리모컨 → 종합실 소리
       render();
@@ -439,9 +439,9 @@ DS.Hall = (function () {
       ${Raid().isEnd(L, R) ? `<div class="h-words">${C().wordsHtml(R)}</div>` : ''}`;
     C().bindWords($('#h-side'), code, R);
     const el = $('#h-ctrl'), live = !Raid().isLobby(R) && !Raid().isClosed(R);
-    el.innerHTML = `${C().pctHtml(L, R)}<p class="muted small">다음 ▶ ${esc(C().nextName(L, R))}</p><div class="row"><button class="btn" id="h-back"${i < 0 ? ' disabled' : ''}>◀ 뒤로</button><button class="btn primary" id="h-fwd"${Raid().isClosed(R) ? ' disabled' : ''}>${Raid().isFinale(L, R) ? '수업 끝 ▶' : '앞으로 ▶'}</button></div>${live ? C().iconBar(L, R, prep.video, true) : ''}`;
+    el.innerHTML = `${C().lessonBtn(R)}${C().pctHtml(L, R)}<p class="muted small">다음 ▶ ${esc(C().nextName(L, R))}</p><div class="row"><button class="btn" id="h-back"${i < 0 ? ' disabled' : ''}>◀ 뒤로</button><button class="btn primary" id="h-fwd"${Raid().isClosed(R) ? ' disabled' : ''}>${Raid().isFinale(L, R) ? '수업 끝 ▶' : '앞으로 ▶'}</button></div>${live ? C().iconBar(L, R, prep.video, true) : ''}`;
     const db = $('#h-demo'); if (db) db.onclick = () => demoOpen(Raid().stepOf(L, R));
-    C().bindRest(el, code, R); C().bindPct(el, code, R, L); C().bindFocus(el, code, R); C().bindSheet(el, code, R); C().bindVideo(el, code, R);
+    C().bindRest(el, code, R); C().bindLesson(el, code, R); C().bindPct(el, code, R, L); C().bindFocus(el, code, R); C().bindSheet(el, code, R); C().bindVideo(el, code, R);
     $('#h-fwd').onclick = () => C().run(() => C().forward(code, R, L));
     $('#h-back').onclick = () => C().run(() => C().back(code, R, L));
   }

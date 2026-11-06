@@ -138,6 +138,19 @@ DS.Control = (function () {
       <div class="tb-bar"><i class="tb-door">🚪</i><div class="tb-fill" style="width:${f0}%"></div><i class="tb-boss" style="left:calc(${f0}% - 10px)">👑</i></div>
       ${opt.prog ? `<div class="tb-prog"><div class="tb-pf" style="width:${(prog * 100).toFixed(1)}%"></div><span>⚔ 던전 진행 ${Math.round(prog * 100)}%</span></div>` : ''}</div>`;
   }
+  // 🔄 차시 바꾸기 (2026-11-06 사용자 「차시 변경을 빠르게」): 수업 시작 전(대기실)만 · 같은 코드 그대로 학생 폰 · 종합실이 바로 새 차시로
+  const lessonBtn = (R) => (Raid().isLobby(R) && !Raid().isClosed(R) ? '<button class="btn ls-btn" data-lswitch>🔄 차시 바꾸기</button>' : '');
+  function lessonPick(code, R) {
+    const cur = (R.meta || {}).lesson, list = DS.Lessons.list.filter((x) => /^set-/.test(x.id)).sort((a, b) => (a.no || 0) - (b.no || 0));
+    const ov = document.createElement('div'); ov.className = 'modal'; document.body.appendChild(ov);
+    ov.innerHTML = `<div class="quiz-box framed ls-box"><div class="set-head"><h2>🔄 차시 바꾸기</h2><button class="btn" data-lsx>닫기</button></div>
+      <p class="muted small">같은 수업 코드 그대로 — 들어와 있는 학생 폰과 종합실이 바로 새 차시로 바뀌어요. (수업 시작 전에만)</p>
+      <div class="ls-grid">${list.map((x) => `<button class="btn${x.id === cur ? ' on' : ''}" data-ls="${x.id}"${x.id === cur ? ' disabled' : ''}><b>${x.no}차시</b>${x.id === cur ? ' · 지금' : ''}<small>${esc(x.title)}</small></button>`).join('')}</div></div>`;
+    const close = () => ov.remove();
+    ov.querySelector('[data-lsx]').onclick = close; ov.addEventListener('click', (e) => { if (e.target === ov) close(); });
+    ov.querySelectorAll('[data-ls]').forEach((b) => (b.onclick = () => run(async () => { await Act().switchLesson(code, R, b.dataset.ls); close(); const L2 = DS.Lessons.get(b.dataset.ls); DS.UI.toast(`🔄 ${L2.no}차시로 바꿨어요 — 학생들은 그대로 기다리면 돼요`); })));
+  }
+  const bindLesson = (el, code, R) => el.querySelectorAll('[data-lswitch]').forEach((b) => (b.onclick = () => lessonPick(code, R)));
   const timeUpFns = {};
   const onTimeUp = (key, fn) => { if (fn) timeUpFns[key] = fn; else delete timeUpFns[key]; };
   const tbSeen = {}; // 마감 시각별 마지막 단계 (2026-11-06 검증: 막대를 새로 그려도 알림을 놓치지 않게 · 같은 시각 막대가 여러 개여도 한 번만)
@@ -178,5 +191,5 @@ DS.Control = (function () {
     host.appendChild(e); setTimeout(() => e.remove(), 2400);
   }
   const xpOf = (rec) => (rec && rec.tries ? rec.tries.length * 2 + (Number(rec.best) || 0) * 2 : 0); // 제출 2 + 맞힌 소문제 2 (EXP 표와 같게)
-  return { remoteGrid, xpFloat, xpOf, tbarHtml, onTimeUp, bindExtend, hm, iconBar, restBtn, bindRest, restLeft, restEnd, mmss, name, run, wordsHtml, bindWords, stepName, nextName, stepTitles, FINALE, forward, back, pctHtml, bindPct, focusBtn, bindFocus, sheetBtn, bindSheet, videoBtn, bindVideo, esc };
+  return { lessonBtn, bindLesson, remoteGrid, xpFloat, xpOf, tbarHtml, onTimeUp, bindExtend, hm, iconBar, restBtn, bindRest, restLeft, restEnd, mmss, name, run, wordsHtml, bindWords, stepName, nextName, stepTitles, FINALE, forward, back, pctHtml, bindPct, focusBtn, bindFocus, sheetBtn, bindSheet, videoBtn, bindVideo, esc };
 })();

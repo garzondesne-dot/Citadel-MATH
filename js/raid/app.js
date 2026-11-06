@@ -239,6 +239,7 @@ DS.App = (function () {
       document.querySelectorAll('.t-out').forEach((b) => (b.onclick = go(async () => { await A().logout(); await teacherAuth(); await studentAuth(); })));
       const cs = Object.keys((await A().masks()) || {}).sort();
       $('#t-cls').innerHTML = cs.length ? cs.map((c) => `<option>${esc(c)}</option>`).join('') : '<option value="">(명단 없음 — 수업 준비에서 올려요)</option>';
+      $('#t-cls').onchange = () => suggestLesson().catch(() => {}); suggestLesson().catch(() => {}); // 🔄 2026-11-06: 반을 고르면 그 반의 다음 차시로
       const t = read('citadel-teacher');
       $('#t-resume').hidden = true; // 「📋 만든 수업」 목록으로 합침 (v0.8.4)
       liveList(cs);
@@ -259,6 +260,18 @@ DS.App = (function () {
     })));
   }
 
+  // 📚 다음 차시 자동 선택 (2026-11-06 사용자 「차시 변경을 빠르게」 · 수업에서 4차시를 잘못 열어 다시 들어온 일): 그 반이 게임으로 한 차시(held) 다음 차시를 골라 둠
+  const heldCk = (c) => String(c).replace(/[.#$/[\]]/g, '_');
+  async function heldOf(cls) { return cls ? (await DS.Net.get(`held/${heldCk(cls)}`).catch(() => null)) || {} : {}; }
+  async function suggestLesson() {
+    const cls = ($('#t-cls') || {}).value, sel = $('#lesson'); if (!cls || !sel) return;
+    const held = await heldOf(cls), codeL = DS.Lessons.list.filter((x) => /^set-/.test(x.id)).sort((a, b) => (a.no || 0) - (b.no || 0));
+    const next = codeL.find((x) => !held[x.id] && [...sel.options].some((o) => o.value === x.id));
+    let hint = document.getElementById('t-lhint'); if (!hint) { hint = document.createElement('p'); hint.id = 't-lhint'; hint.className = 'muted small t-lhint'; sel.closest('label').after(hint); }
+    const done = codeL.filter((x) => held[x.id]).map((x) => x.no);
+    if (next) sel.value = next.id;
+    hint.textContent = `📚 ${cls}반 · ${done.length ? `${done.join(' · ')}차시 함 → ` : ''}${next ? `${next.no}차시 차례라 골라 두었어요` : '차시를 골라 주세요'}`;
+  }
   function bind() {
     document.querySelectorAll('.role').forEach((b) => (b.onclick = () => form(b.dataset.role)));
     $('#t-new').onclick = go(async () => {
@@ -269,7 +282,9 @@ DS.App = (function () {
       }
       const cls = $('#t-cls').value;
       if (!cls) throw Object.assign(new Error('수업을 여는 반을 골라 주세요. (명단에 있는 반)'), { user: true });
-      await DS.Teacher.create($('#lesson').value, cls);
+      const lid = $('#lesson').value, held = await heldOf(cls), Lx = DS.Lessons.get(lid);
+      if (held[lid] && !confirm(`${cls}반은 ${Lx ? `${Lx.no}차시` : '이 차시'}를 이미 게임으로 수업했어요.\n그래도 이 차시로 열까요?`)) return; // 2026-11-06: 잘못 여는 것 막기
+      await DS.Teacher.create(lid, cls);
     });
     $('#t-resume').onclick = go(() => { const t = read('citadel-teacher'); return DS.Teacher.open(t.code, t.hallKey); });
     $('#t-code-go').onclick = go(async () => {

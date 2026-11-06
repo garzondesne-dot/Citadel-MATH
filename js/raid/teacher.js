@@ -54,7 +54,7 @@ DS.Teacher = (function () {
       <p class="t-next muted small">다음 ▶ <b>${esc(C().nextName(L, R))}</b></p>
       <div class="t-pad"><button class="btn t-back" id="t-back"${i < 0 ? ' disabled' : ''}>◀<br>뒤로</button><button class="btn primary t-fwd" id="t-fwd"${Raid().isClosed(R) ? ' disabled' : ''}>▶<br>${Raid().isFinale(L, R) ? '수업 끝' : '앞으로'}</button></div>`;
     if (Raid().isLobby(R)) drawQR();
-    C().bindRest(body, code, R); C().bindPct(body, code, R, L); C().bindFocus(body, code, R); C().bindSheet(body, code, R); C().bindVideo(body, code, R); C().bindWords(body, code, R);
+    C().bindRest(body, code, R); C().bindPct(body, code, R, L); C().bindFocus(body, code, R); C().bindSheet(body, code, R); C().bindVideo(body, code, R); C().bindWords(body, code, R); C().bindLesson(body, code, R);
     if (DS.Survey) DS.Survey.bindCtl(body, R, L);
     const nb = $('#t-news'); if (nb) nb.onclick = () => C().run(() => DS.ShareCard.klassOpen(L, R, { praise: true }));
     const pb = $('#t-punch'); if (pb) pb.onclick = () => C().run(async () => { const off = !DS.Act.punchOff(R); await DS.Act.setPunchOff(code, off); DS.UI.toast(off ? '🏁 반대항 경주를 껐어요 (다음 수업도 꺼짐)' : '🏁 반대항 경주를 켰어요'); });
@@ -105,7 +105,7 @@ DS.Teacher = (function () {
   }
   function lobby() {
     const studs = Object.entries(R.players || {}).filter(([, p]) => !p.teacher).sort((a, b) => a[1].num - b[1].num);
-    return `<div class="panel framed"><p class="stage-name">학생 입장</p><div class="qr-row"><div id="t-qr" class="qr"></div><div><p>수업 코드 <b class="big-code">${code}</b></p><p class="muted small break">${esc(studentUrl())}</p><p class="muted small">종합상황실(PC): 첫 화면 → 종합상황실 → 코드 ${code} · 키는 위쪽 [보기]</p></div></div>
+    return `<div class="panel framed"><p class="stage-name">학생 입장 ${C().lessonBtn(R)}</p><div class="qr-row"><div id="t-qr" class="qr"></div><div><p>수업 코드 <b class="big-code">${code}</b></p><p class="muted small break">${esc(studentUrl())}</p><p class="muted small">종합상황실(PC): 첫 화면 → 종합상황실 → 코드 ${code} · 키는 위쪽 [보기]</p></div></div>
       <div class="chips">${studs.map(([, p]) => `<span class="chip">${DS.Titles.nameHtml(p, { beon: true, size: 14, short: true })}</span>`).join('') || '<span class="muted">아직 아무도 없어요</span>'}</div></div>`;
   }
   function drawQR() {

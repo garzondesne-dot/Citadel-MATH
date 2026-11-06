@@ -100,7 +100,7 @@ DS.TCamp = (function () {
     if (lb) lb.innerHTML = !code ? '⚔ 새 수업 열기 (교사 메뉴)' : !theme ? '⚔ 던전 불러오는 중…' : closed ? `🔒 수업 끝 · ${hall ? '종합상황실로' : '교사 화면 보기'}` : `⚔ ${L && L.no ? `${L.no}차시 ` : ''}${hall ? (R && DS.Raid.isLobby(R) ? '던전 입장' : '수업 중 · 종합상황실로') : '수업 진행'}`;
     drawLamps();
     const info = $('#tc-info');
-    if (info && R) { const studs = Object.values(R.players || {}).filter((p) => !p.teacher).length; info.innerHTML = `${R.meta.cls ? `${esc(R.meta.cls)}반 · ` : ''}${L ? esc(L.title) : ''} · <b class="gold">입장 ${studs}명</b>${DS.Raid.isLobby(R) ? ' · 대기 중' : closed ? ' · 끝' : ' · 진행 중'}`; }
+    if (info && R) { const studs = Object.values(R.players || {}).filter((p) => !p.teacher).length; info.innerHTML = `${R.meta.cls ? `${esc(R.meta.cls)}반 · ` : ''}${L ? esc(L.title) : ''} · <b class="gold">입장 ${studs}명</b>${DS.Raid.isLobby(R) ? ' · 대기 중' : closed ? ' · 끝' : ' · 진행 중'}`; if (code && DS.Control) { info.insertAdjacentHTML('beforeend', DS.Control.lessonBtn(R)); DS.Control.bindLesson(info, code, R); } /* 🔄 차시 바꾸기 (대기 중만) */ }
     const bar = $('#tc-bar');
     if (bar) {
       bar.innerHTML = `${hall ? `<button class="btn small" id="tc-menu">🖥 종합상황실로</button>${DS.UI.fs.btn('tc-fs')}` : `${code ? `<button class="btn small" id="tc-hall">🖥 종합상황실 키 ${esc(hallKey || '—')}</button>` : ''}`}${DS.ShareCard.klassReady(L, R) ? '<button class="btn small sc-btn" id="tc-news">🏫 학급 결과</button>' : ''}${DS.ShareCard.klassReady(L, R) && DS.Punch && R.meta.cls && L.no && !L.eval && !DS.Act.punchOff(R) ? '<button class="btn small" id="tc-punch">🏁 반대항</button>' : ''}`;
