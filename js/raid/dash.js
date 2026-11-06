@@ -76,17 +76,18 @@ DS.Dash = (function () {
   function render() {
     const el = $('#dash-body'); if (!el) return;
     const classes = Object.keys(roster).sort();
-    const TABS = [['table', '① 한눈에 표'], ['rank', '② 랭킹'], ['watch', '③ 주의 학생'], ['weak', '④ 개념별 약점'], ['std', '⑤ 성취기준'], ['mis', '⑥ 오개념'], ['memo', '⑦ 세특 메모'], ['sv', '📝 설문']];
+    const TABS = [['table', '① 한눈에 표'], ['rank', '② 랭킹'], ['watch', '③ 주의 학생'], ['weak', '④ 개념별 약점'], ['std', '⑤ 성취기준'], ['mis', '⑥ 오개념'], ['memo', '⑦ 세특 메모'], ['sv', '📝 설문'], ['use', '📈 활용 추이']];
     el.innerHTML = `<div class="panel framed"><h2>📊 학급 대시보드 <span class="muted small">교사만 · 학생 화면과 종합상황실에는 나오지 않아요</span></h2>
         <div class="tabs st-cls">${classes.length > 1 ? `<button class="tab${isAll() ? ' on' : ''}" data-cls="${ALL}">🏫 전체</button>` : ''}${classes.map((c) => `<button class="tab${c === cls ? ' on' : ''}" data-cls="${esc(c)}">${esc(c)}</button>`).join('') || '<span class="muted">명단이 없어요 — 학생 관리에서 먼저 올려 주세요</span>'}</div>
         <div class="tabs dash-tabs">${TABS.map(([k, t]) => `<button class="tab${k === tab ? ' on' : ''}" data-tab="${k}">${t}</button>`).join('')}</div></div>
-      <div class="panel framed dash-main">${!cls ? '' : !data ? '<p class="muted">불러오는 중…</p>' : !data.held.length && tab !== 'sv' ? '<p class="muted">아직 저장된 수업 기록이 없어요. (학생이 수업 끝 결과를 보면 저장돼요)</p>' : VIEW[tab]()}</div>`;
-    el.querySelectorAll('[data-cls]').forEach((b) => (b.onclick = () => { cls = b.dataset.cls; words = null; load(); }));
+      <div class="panel framed dash-main">${!cls ? '' : !data ? '<p class="muted">불러오는 중…</p>' : !data.held.length && tab !== 'sv' && tab !== 'use' ? '<p class="muted">아직 저장된 수업 기록이 없어요. (학생이 수업 끝 결과를 보면 저장돼요)</p>' : VIEW[tab]()}</div>`;
+    el.querySelectorAll('[data-cls]').forEach((b) => (b.onclick = () => { cls = b.dataset.cls; words = null; useData = null; useFor = ''; load(); }));
     el.querySelectorAll('[data-tab]').forEach((b) => (b.onclick = () => { tab = b.dataset.tab; render(); }));
     el.querySelectorAll('[data-sort]').forEach((b) => (b.onclick = () => { const k = b.dataset.sort; sortDir = sortKey === k ? -sortDir : (k === 'n' || k === 'name' ? 1 : -1); sortKey = k; render(); }));
     el.querySelectorAll('[data-who]').forEach((b) => (b.onclick = () => detail(b.dataset.who)));
     const csv = el.querySelector('#dash-csv'); if (csv) csv.onclick = downloadCsv;
     if (tab === 'sv') svBind(el);
+    if (tab === 'use') useBind(el);
     el.querySelectorAll('[data-copy]').forEach((b) => (b.onclick = () => copy(b.dataset.copy === 'all' ? data.studs.map((s) => `${who(s)}: ${memo(s)}`).join('\n\n') : memo(data.studs.find((s) => s.key === b.dataset.copy)))));
   }
   const who = (s) => `${isAll() ? `${s.cls}반 ` : ''}${s.n}번 ${s.name}`;
@@ -97,7 +98,52 @@ DS.Dash = (function () {
     if (sortKey === 'n') return data.studs.slice().sort((a, b) => base(a, b) * sortDir);
     return data.studs.slice().sort((a, b) => (typeof v(a) === 'string' ? String(v(a)).localeCompare(String(v(b))) : v(a) - v(b)) * sortDir || base(a, b));
   }
+  // 📈 활용 추이 (2026-11-06 사용자 「웹앱 접근량이 얼마나 늘고 있는지 · 복습 · 문제 풀이 접근 추적」): act/{반}/{날짜}/{번호} (DS.Usage) · 기록 전은 ≈ 추정
+  let useData = null, useFor = '';
+  async function loadUse() {
+    const cs = isAll() ? Object.keys(roster).sort() : [cls], key = cs.join(',');
+    if (useFor === key && useData) return; useFor = key; useData = null;
+    const parts = await Promise.all(cs.map((c) => DS.Usage.load(c, { estimate: true }).then((u) => ({ c, u }))));
+    const days = {}; let since = null;
+    parts.forEach(({ c, u }) => { if (u.since && (!since || u.since < since)) since = u.since; Object.entries(u.days).forEach(([d, byN]) => { days[d] = days[d] || {}; Object.entries(byN || {}).forEach(([n, x]) => { days[d][cs.length > 1 ? `${c}|${n}` : n] = x; }); }); });
+    const names = {}; cs.forEach((c) => Object.entries(roster[c] || {}).forEach(([n, nm]) => { names[cs.length > 1 ? `${c}|${n}` : n] = { c, n: Number(n), name: typeof nm === 'string' ? nm : (nm && nm.name) || '' }; }));
+    useData = { days, since, names, total: Object.keys(names).length };
+    if (tab === 'use') render();
+  }
+  const ymd = (d) => `${+d.slice(4, 6)}/${+d.slice(6, 8)}`;
+  function useBars(weeks, k, title, unit) {
+    const max = Math.max(1, ...weeks.map((w) => w[k])), last = weeks[weeks.length - 1];
+    return `<div class="use-chart"><p class="use-h">${title}</p><div class="use-bars">${weeks.map((w, i) => `<div class="use-col${w.est ? ' est' : ''}" title="${ymd(w.week)} 주 · ${w[k]}${unit}${w.est ? ' (≈ 기록 전 추정)' : ''}" data-tip="${ymd(w.week)} 주 · ${w[k]}${unit}${w.est ? ' ≈추정' : ''}"><i style="height:${((w[k] / max) * 100).toFixed(1)}%"></i>${i === weeks.length - 1 ? `<b>${w[k]}</b>` : ''}<span>${ymd(w.week)}</span></div>`).join('')}</div>
+      <p class="muted small">이번 주 ${last[k]}${unit}</p></div>`;
+  }
+  function useBind(el) {
+    if (!useData) loadUse().catch((e) => DS.UI.toast(e.message || '불러오지 못했어요'));
+    const b = el.querySelector('#use-csv'); if (b) b.onclick = () => {
+      const ps = DS.Usage.perStudent(useData.days), rows = [['반', '번호', '이름', '최근7일 수업밖 풀이', '그전7일', '증감', '마지막 활동']];
+      Object.entries(useData.names).sort((a, b) => String(a[1].c).localeCompare(String(b[1].c)) || a[1].n - b[1].n).forEach(([k, s]) => { const p = ps[k] || { now: 0, prev: 0, last: '' }; rows.push([s.c, s.n, s.name, p.now, p.prev, p.now - p.prev, p.last ? ymd(p.last) : '']); });
+      const blob = new Blob(['\ufeff' + rows.map((r) => r.map((x) => `"${String(x).replace(/"/g, '""')}"`).join(',')).join('\n')], { type: 'text/csv' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `활용추이_${isAll() ? '전체' : cls}_${DS.Usage.day()}.csv`; a.click();
+    };
+  }
   const VIEW = {
+    use() {
+      if (!useData) return '<p class="muted">활동 기록을 모으는 중…</p>';
+      const W = DS.Usage.weekly(useData.days, 8), now = W[W.length - 1], prev = W[W.length - 2] || { solves: 0, active: 0 }, T = useData.total || 1;
+      const ps = DS.Usage.perStudent(useData.days), vals = Object.values(ps), r7 = vals.reduce((a, x) => a + x.now, 0), p7 = vals.reduce((a, x) => a + x.prev, 0), act7 = vals.filter((x) => x.now > 0).length, actP = vals.filter((x) => x.prev > 0).length; // 숫자 칸 = 최근 7일 vs 그 전 7일 (주 중간에도 공정하게)
+      const dPct = p7 ? Math.round(((r7 - p7) / p7) * 100) : r7 ? 100 : 0, seen7 = Object.values(ps).filter((x) => x.last && x.last >= DS.Usage.addDays(DS.Usage.day(), -6)).length;
+      const rows = Object.entries(useData.names).map(([k, s]) => ({ ...s, ...(ps[k] || { now: 0, prev: 0, last: '' }) })).sort((a, b) => b.now - a.now || (b.last > a.last ? 1 : -1) || a.n - b.n);
+      const today = DS.Usage.day(), idle = (l) => !l || l < DS.Usage.addDays(today, -13);
+      return `<p class="muted small">수업 밖에서 스스로 한 활동 (🎯 허수아비 복습 · 🏰 성채 · 📕 오답 고침) 과 접속을 주마다 셉니다 · 성적이 아니라 활용도 참고 자료 · ${useData.since ? `기록 시작 ${ymd(useData.since)} — 그 전 주는 ≈ 추정(줄무늬)` : '아직 새 기록이 없어 ≈ 추정만 보여요 (학생이 새 판으로 들어오면 쌓여요)'}</p>
+        <div class="use-tiles">
+          <div class="use-tile"><span>최근 7일 수업 밖 활동 학생</span><b>${act7}<small> / ${T}명</small></b><em class="${act7 >= actP ? 'up' : 'dn'}">${Math.round((act7 / T) * 100)}% · 그 전 7일 ${actP}명</em></div>
+          <div class="use-tile"><span>최근 7일 수업 밖 풀이</span><b>${r7}<small>회</small></b><em class="${dPct >= 0 ? 'up' : 'dn'}">${dPct >= 0 ? '▲' : '▼'} ${Math.abs(dPct)}% <small>그 전 7일 ${p7}</small></em></div>
+          <div class="use-tile"><span>1인당 풀이 (최근 7일)</span><b>${(r7 / T).toFixed(1)}<small>회</small></b><em>이번 주 오답 고침 ${now.fixes}회</em></div>
+          <div class="use-tile"><span>최근 7일 접속 학생</span><b>${seen7}<small> / ${T}명</small></b><em>이번 주 수업 참여 ${now.joins}회</em></div>
+        </div>
+        <div class="use-grid">${useBars(W, 'active', '🧑‍🎓 수업 밖 활동 학생 수', '명')}${useBars(W, 'solves', '🎯 수업 밖 문제 풀이 수', '회')}${useBars(W, 'visits', '🚪 접속 학생 수', '명')}</div>
+        <div class="row"><h3 class="use-h">학생별 (최근 7일 수업 밖 풀이 순)</h3><button class="btn small" id="use-csv">⬇ CSV</button></div>
+        <div class="tbl-wrap"><table class="dash-table use-table"><thead><tr><th>번호</th><th>이름</th><th>최근 7일</th><th>그 전 7일</th><th>증감</th><th>마지막 활동</th></tr></thead><tbody>
+        ${rows.map((r) => `<tr class="${idle(r.last) ? 'use-idle' : ''}"><td>${isAll() ? `${esc(r.c)}-` : ''}${r.n}</td><td>${esc(r.name)}</td><td><b>${r.now}</b></td><td>${r.prev}</td><td class="${r.now - r.prev > 0 ? 'up' : r.now - r.prev < 0 ? 'dn' : ''}">${r.now - r.prev > 0 ? '▲' : r.now - r.prev < 0 ? '▼' : '·'} ${Math.abs(r.now - r.prev)}</td><td>${r.last ? ymd(r.last) : '<span class="muted">-</span>'}${idle(r.last) ? ' <span class="use-tag">2주 넘게 없음</span>' : ''}</td></tr>`).join('')}</tbody></table></div>`;
+    },
     table() {
       const arrow = (k) => (sortKey === k ? (sortDir > 0 ? ' ▲' : ' ▼') : '');
       // 차시 칸: 형성평가 기본 문항 맞힌 수 / 문항 (+ ⭐ 도전 문항) · 🟪 = 중단원던전 👑 재대결로 보충 (v0.9.7.9)

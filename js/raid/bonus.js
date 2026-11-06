@@ -291,6 +291,7 @@ DS.Bonus = (function () {
       rec.tries = tries;
       const patch = { tries, at: N().TS };
       if (cleared) patch.clear = true;
+      if (!preview && DS.Usage) DS.Usage.bump(me, castle ? 'c' : 'r'); // 📈 수업 밖 풀이 (2026-11-06)
       if (DS.Mis && wrongs.length) { // 오개념: 이번 판에서 틀린 소문제 → 그 소문제를 결국 맞혔으면 「바로잡음」
         const acc = DS.Mis.merge({}, misBase); wrongs.forEach((w) => DS.Mis.add(acc, w.codes, !!solved[w.i])); if (Object.keys(acc).length) patch.mis = acc;
       }
@@ -326,6 +327,7 @@ DS.Bonus = (function () {
           if (castle) { await gm((L.rooms.find((r) => r.id === mid) || {}).boss ? G.roomBoss : G.room, `room_${L.id}_${mid}`, '성채 방 처치'); await gm(G.first, 'firstcastle', '성채 첫 방'); }
           else { if (mid === 'boss') await gm(G.bossRe, `bossre_${L.id}`, '형성평가 재대결'); await gm(G.first, 'firstreview', '첫 복습'); }
         }
+        if (!castle && mid !== 'boss' && wasOpen && DS.Usage) DS.Usage.bump(me, 'f'); // 📈 오답 고침
         if (!castle && mid !== 'boss' && wasOpen) { const g = await DS.Gem.addDaily(me, G.review, 'review', G.reviewDay, '복습으로 해결').catch(() => 0); if (g) show(`💎 +${g} 복습으로 해결`, 'gem'); }
         if (sealed) await gm(G.seal, `seal_${L.id}`, '🟪 인장', { free: true });
         if (!castle) { const x = noteOf(L); if (!x.none && x.left === 0) await gm(G.note, `note_${L.id}`, '오답노트 완성'); }

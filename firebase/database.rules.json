@@ -412,6 +412,16 @@
           }
         }
       }
+    },
+    "act": {
+      ".read": "auth != null && root.child('admins/'+auth.uid).val() === true",
+      "$c": {
+        "$day": {
+          "$n": {
+            ".write": "auth != null && (root.child('accounts/'+$c+'/'+$n+'/uid').val() === auth.uid || root.child('admins/'+auth.uid).val() === true)"
+          }
+        }
+      }
     }
   }
 }

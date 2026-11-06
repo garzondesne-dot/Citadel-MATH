@@ -25,7 +25,8 @@ DS.Student = (function () {
     an = null; thSeen = null; phaseWas = 0; chestDone = {}; chestQ = []; chestBusy = false; batPaid = ''; endPaid = ''; // v0.9.11
     await DS.Act.join(c, info);
     if (DS.Attack && DS.Attack.preloadFaces && DS.Attack.canUlt(info.fx, info.hero)) DS.Attack.preloadFaces(); // ⚡ 필살기 조건이면 얼굴 그림 미리
-    if (DS.Gem && DS.Gem.watchGifts && !test) DS.Gem.watchGifts({ c: info.cls, n: info.num }); // 🎁 던전 · 대기실에서도 선물 알림
+    if (DS.Gem && DS.Gem.watchGifts && !test) DS.Gem.watchGifts({ c: info.cls, n: info.num });
+    if (DS.Usage && !test) { const um = { c: info.cls, n: info.num }; DS.Usage.visit(um); DS.Usage.join(um, c); } // 📈 접속 · 수업 참여 // 🎁 던전 · 대기실에서도 선물 알림
     code = c; info0 = info; lastStep = null; lastOx = null; dirty = false; clearTimeout(saveT);
     me = DS.Net.uid();
     if (!test) { try { localStorage.setItem('citadel-student', JSON.stringify({ code: c, ...info })); } catch (e) { /* 무시 */ } }
