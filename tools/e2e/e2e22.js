@@ -17,7 +17,7 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   const go = () => T.evaluate(async () => { const code = DS.Teacher.code(); const R = DS.Act.unpackRoom(await DS.Net.get(`rooms/${code}`)); await DS.Act.go(code, R, DS.Lessons.get(R.meta.lesson), 1); });
   await go(); await T.waitForTimeout(600);
   await T.evaluate(async (c) => { for (let h = 0; h <= 16; h++) if (h !== 7) await DS.Net.set(`rooms/${c}/active/v${h}`, true); }, code);
-  for (let k = 0; k < 2; k++) { await go(); await T.waitForTimeout(700); } // 개념1 → 문제1
+  for (let k = 0; k < 1; k++) { await go(); await T.waitForTimeout(700); } // 개념1 → 문제1 (6차시 v3 = 도입 없음 · 2026-11-06)
   const H = await mk('H'); await H.setViewportSize({ width: 1600, height: 900 }); await H.goto(`${U}&role=hall&code=${code}&key=${key}`); await H.waitForTimeout(3000);
   await H.screenshot({ path: `${OUT}/1-hall-16.png` });
   await H.evaluate(() => { window.DS_ATK = { monster: [3, 1], boss: [3, 2] }; });

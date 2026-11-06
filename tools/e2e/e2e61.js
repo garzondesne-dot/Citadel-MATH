@@ -38,6 +38,7 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   }
   const heads = () => S.evaluate(() => [...document.querySelectorAll('.hd-rw-i')].map((e) => e.textContent));
   await S.click('#camp-castle', { force: true }); await S.waitForTimeout(1500);
+  await S.click('.cs-portal[data-floor="eval-1"]').catch(() => {}); await S.waitForTimeout(400); // 2026-11-06: 🏰 포털 메뉴 → 1층
   const tags = await S.evaluate(() => ({ room: (document.querySelector('[data-fight="eval-1|q04"] .gm-tag') || {}).textContent || '', boss: (document.querySelector('.cs-room.boss .gm-tag.seal') || {}).textContent || '', line: (document.querySelector('.gm-line') || {}).textContent || '' }));
   log.push('성채 꼬리표: ' + JSON.stringify(tags));
   await S.click('[data-fight="eval-1|q04"]'); await S.waitForTimeout(800); await S.click('#bf-go'); await S.waitForTimeout(900);
