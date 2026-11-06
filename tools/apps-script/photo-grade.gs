@@ -9,6 +9,8 @@
 //     DB_URL             = https://citadel-math-default-rtdb.asia-southeast1.firebasedatabase.app
 //     ENABLED            = 1   (0 이면 바로 멈춤 — 비상 스위치)
 //     DAILY_MAX          = 6   (학생 1명 · 하루 장 수 · 게임 교사 설정 gcfg/photo.daily 가 있으면 그것)
+//     ROOM_MAX           = 2   (방 하나 · 하루 장 수 · gcfg/photo.room 이 있으면 그것)
+//     COOL_SEC           = 30  (결과를 받고 다음 사진까지 쉬는 초 · gcfg/photo.cool)
 //     GLOBAL_MAX         = 300 (모든 학생 합계 · 하루 장 수 — 비용 안전판 · gcfg/photo.global 이 있으면 그것)
 //     MODEL              = claude-haiku-5-5
 //     EFFORT             = medium
@@ -62,12 +64,12 @@ function handle_(q) {
   const steps = (Array.isArray(rub.steps) ? rub.steps : Object.values(rub.steps)).filter(Boolean);
   // ④ 하루 장 수 (먼저 1 올리고 · Claude 가 실패하면 되돌림)
   const day = Utilities.formatDate(new Date(), 'Asia/Seoul', 'yyyyMMdd');
-  const left = take_(c, n, day);
-  if (left < 0) return { ok: false, err: left === -2 ? 'busy' : 'quota' };
+  const rk = `${q.lesson}_${q.room}`.replace(/[.#$/[\]]/g, '_'), tk = take_(c, n, day, rk);
+  if (tk.err) return { ok: false, err: tk.err, sec: tk.sec || 0 };
   // ⑤ Claude
   let g;
   try { g = grade_(q, rub, steps, media); }
-  catch (err) { give_(c, n, day, true); return { ok: false, err: 'api', msg: String((err && err.message) || err).slice(0, 200) }; }
+  catch (err) { give_(c, n, day, rk, true); return { ok: false, err: 'api', msg: String((err && err.message) || err).slice(0, 200) }; }
   // ⑥ 점수는 여기서 다시 계산 (모델이 적은 합계를 믿지 않음 · 단계 점수는 0 ~ 배점으로 자름)
   const by = {}; (g.steps || []).forEach((x) => { if (x && x.id) by[x.id] = x; });
   const rows = steps.map((st) => { const x = by[st.id] || {}; const e = Math.max(0, Math.min(Number(st.pts) || 0, Math.round(Number(x.earned) || 0))); return { id: st.id, pts: Number(st.pts) || 0, earned: e, note: String(x.note || '').slice(0, 160) }; });
@@ -76,12 +78,12 @@ function handle_(q) {
   const flags = (g.flags || []).filter((f) => typeof f === 'string');
   const doubt = g.refused || !g.readable || g.confidence === 'low' || flags.some((f) => f !== 'copied_answer_only');
   const status = doubt ? 'check' : score >= pass ? 'pass' : 'retry';
-  let leftNow = left;
-  if (status === 'check') { const l2 = give_(c, n, day, false); if (l2 != null) leftNow = l2; } // 결정 2: 선생님 확인은 장 수를 안 깎음
+  let now = tk;
+  if (status === 'check') { const l2 = give_(c, n, day, rk, false); if (l2) now = l2; } // 결정 2: 선생님 확인은 장 수를 안 깎음
   const rec = { at: { '.sv': 'timestamp' }, status, score, total, pass, steps: rows, ans: String(g.final_answer || '').slice(0, 80), conf: g.confidence || 'low', flags, fb: String(g.feedback || '').slice(0, 300), ask: String(q.ask || '').slice(0, 400), right: String(q.answer == null ? '' : q.answer).slice(0, 80), model: cfg('MODEL', 'claude-haiku-5-5'), tok: g.usage || null };
   const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
   db_('put', `photo/${c}/${n}/${q.lesson}_${q.room}/${id}`, rec); // 사진(q.image)은 저장하지 않음
-  return { ok: true, id, status, score, total, pass, steps: rows, feedback: rec.fb, left: leftNow };
+  return { ok: true, id, status, score, total, pass, steps: rows, feedback: rec.fb, left: now.left, roomLeft: now.roomLeft, cool: lim_().cool };
 }
 
 // ── Firebase 로그인 토큰 확인 (identitytoolkit accounts:lookup) ─────────────
@@ -110,29 +112,36 @@ let LIM = null;
 function lim_() {
   if (LIM) return LIM;
   let g = {}; try { g = db_('get', 'gcfg/photo') || {}; } catch (e) { /* 속성 값으로 */ }
-  LIM = { daily: Number(g.daily) || Number(cfg('DAILY_MAX', '6')), global: Number(g.global) || Number(cfg('GLOBAL_MAX', '300')), guide: typeof g.guide === 'string' ? g.guide.slice(0, 1500) : '' };
+  LIM = { daily: Number(g.daily) || Number(cfg('DAILY_MAX', '6')), room: Number(g.room) || Number(cfg('ROOM_MAX', '2')), cool: g.cool != null && g.cool !== '' ? Number(g.cool) : Number(cfg('COOL_SEC', '30')), global: Number(g.global) || Number(cfg('GLOBAL_MAX', '300')), guide: typeof g.guide === 'string' ? g.guide.slice(0, 1500) : '' };
   return LIM;
 }
-function take_(c, n, day) {
+// 2026-11-06 사용자 「A + D + F」: 방마다 하루 room 장 · 학생 하루 daily 장 · 결과를 받고 cool 초 뒤에 다음 사진
+//   photo_q/{반}/{번호}/{날짜} = { n: 센 장 수, raw: 실제 부른 수, r: { 방: 센 장 수 }, last: 마지막으로 받은 시각(ms) }
+//   돌려주는 값: { left, roomLeft } · { err: 'quota' | 'roomquota' | 'busy' | 'wait', sec }
+function take_(c, n, day, rk) {
   const lock = LockService.getScriptLock();
-  if (!lock.tryLock(15000)) return -2;
+  if (!lock.tryLock(15000)) return { err: 'busy' };
   try {
-    const max = lim_().daily, q = db_('get', `photo_q/${c}/${n}/${day}`) || {}, all = Number(db_('get', `photo_q/_all/${day}`)) || 0;
-    const me = Number(q.n) || 0, raw = Number(q.raw) || 0;
-    if (me >= max || raw >= max * 2 || all >= lim_().global) return -1;
-    db_('put', `photo_q/${c}/${n}/${day}`, { n: me + 1, raw: raw + 1 }); db_('put', `photo_q/_all/${day}`, all + 1);
-    return max - me - 1;
+    const L = lim_(), q = db_('get', `photo_q/${c}/${n}/${day}`) || {}, all = Number(db_('get', `photo_q/_all/${day}`)) || 0;
+    const me = Number(q.n) || 0, raw = Number(q.raw) || 0, r = q.r || {}, mine = Number(r[rk]) || 0, wait = Math.ceil((Number(q.last) || 0) + L.cool * 1000 - Date.now()) / 1000;
+    if (L.cool > 0 && wait > 0) return { err: 'wait', sec: Math.ceil(wait) };
+    if (me >= L.daily || raw >= L.daily * 2 || all >= L.global) return { err: 'quota' };
+    if (mine >= L.room) return { err: 'roomquota' };
+    r[rk] = mine + 1;
+    db_('put', `photo_q/${c}/${n}/${day}`, { n: me + 1, raw: raw + 1, r, last: Date.now() }); db_('put', `photo_q/_all/${day}`, all + 1);
+    return { left: L.daily - me - 1, roomLeft: L.room - mine - 1 };
   } finally { lock.releaseLock(); }
 }
-// full = Claude 가 실패함 (전부 되돌림) · 아니면 check (센 장 수만 되돌림) → 남은 장 수
-function give_(c, n, day, full) {
-  const lock = LockService.getScriptLock(), max = lim_().daily;
+// full = Claude 가 실패함 (전부 되돌림 · 쉬는 시간도 없앰) · 아니면 check (센 장 수 · 방 장 수만 되돌림) → { left, roomLeft }
+function give_(c, n, day, rk, full) {
+  const lock = LockService.getScriptLock(), L = lim_();
   if (!lock.tryLock(15000)) return null;
   try {
-    const q = db_('get', `photo_q/${c}/${n}/${day}`) || {}, me = Math.max(0, (Number(q.n) || 0) - 1), raw = Math.max(0, (Number(q.raw) || 0) - (full ? 1 : 0));
-    db_('put', `photo_q/${c}/${n}/${day}`, { n: me, raw });
+    const q = db_('get', `photo_q/${c}/${n}/${day}`) || {}, me = Math.max(0, (Number(q.n) || 0) - 1), raw = Math.max(0, (Number(q.raw) || 0) - (full ? 1 : 0)), r = q.r || {};
+    r[rk] = Math.max(0, (Number(r[rk]) || 0) - 1);
+    db_('put', `photo_q/${c}/${n}/${day}`, { n: me, raw, r, last: full ? 0 : Number(q.last) || 0 });
     if (full) { const all = Number(db_('get', `photo_q/_all/${day}`)) || 0; if (all > 0) db_('put', `photo_q/_all/${day}`, all - 1); }
-    return max - me;
+    return { left: L.daily - me, roomLeft: L.room - r[rk] };
   } finally { lock.releaseLock(); }
 }
 

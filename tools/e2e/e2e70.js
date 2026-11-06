@@ -85,11 +85,11 @@ const jpegSize = (buf) => { let i = 2; while (i < buf.length) { if (buf[i] !== 0
   const st07 = await solve(); const rec07 = await S.evaluate(() => DS.Net.get('bonus/1-3/1/eval-1/q07'));
   P(`07 숫자 답 뒤: 사진 단추 ${st07} · 기록 ${JSON.stringify({ clear: !!rec07.clear, ans: !!rec07.ans })}`);
   await S.screenshot({ path: `${OUT}/70-3-photo-stage.png` });
-  queue.push({ ok: true, id: 'r1', status: 'retry', score: 1, total: 4, pass: 3, steps: [{ id: 's1', pts: 1, earned: 0, note: 'B ∪ X = B 가 무슨 뜻인지 써 봐요.' }, { id: 's2', pts: 1, earned: 0, note: '' }, { id: 's3', pts: 1, earned: 0, note: '' }, { id: 's4', pts: 1, earned: 1, note: '2⁴ = 16 을 정확히 구했어요 👍' }], feedback: 'B − A 를 바르게 구했어요. X ⊂ B 인 이유를 적어 봐요.', left: 2 });
+  queue.push({ ok: true, id: 'r1', status: 'retry', cool: 30, roomLeft: 1, score: 1, total: 4, pass: 3, steps: [{ id: 's1', pts: 1, earned: 0, note: 'B ∪ X = B 가 무슨 뜻인지 써 봐요.' }, { id: 's2', pts: 1, earned: 0, note: '' }, { id: 's3', pts: 1, earned: 0, note: '' }, { id: 's4', pts: 1, earned: 1, note: '2⁴ = 16 을 정확히 구했어요 👍' }], feedback: 'B − A 를 바르게 구했어요. X ⊂ B 인 이유를 적어 봐요.', left: 2 });
   await shoot(); await S.screenshot({ path: `${OUT}/70-4-crop.png` });
   await S.click('#ph-send'); await S.waitForTimeout(1500);
   await S.evaluate(() => DS.Net.set('photo/1-3/1/eval-1_q07/r1', { at: Date.now(), status: 'retry', score: 1, total: 4, pass: 3, steps: [{ id: 's1', pts: 1, earned: 0 }, { id: 's2', pts: 1, earned: 0 }, { id: 's3', pts: 1, earned: 0 }, { id: 's4', pts: 1, earned: 1 }], ans: '16', conf: 'high', flags: [], fb: 'B − A 를 바르게 구했어요.', ask: '07 …', right: '16', tok: { in: 3200, out: 800 } })); // 중계소가 쓰는 결과 (가짜)
-  const res07 = await S.evaluate(() => { const m = document.querySelector('.ph-modal'); return m ? { steps: [...m.querySelectorAll('.ph-steps li')].map((e) => e.className + ':' + e.textContent.trim()), score: (m.querySelector('.ph-score') || {}).textContent || '', fb: (m.querySelector('.ph-fb') || {}).textContent || '', app: !!m.querySelector('#ph-app'), again: !!m.querySelector('#ph-again') } : null; });
+  const res07 = await S.evaluate(() => { const m = document.querySelector('.ph-modal'); return m ? { steps: [...m.querySelectorAll('.ph-steps li')].map((e) => e.className + ':' + e.textContent.trim()), score: (m.querySelector('.ph-score') || {}).textContent || '', fb: (m.querySelector('.ph-fb') || {}).textContent || '', app: !!m.querySelector('#ph-app'), again: !!m.querySelector('#ph-again'), cool: m.querySelector('#ph-again') ? [m.querySelector('#ph-again').disabled, m.querySelector('#ph-again').textContent] : null } : null; });
   P('07 결과 창: ' + JSON.stringify(res07));
   await S.screenshot({ path: `${OUT}/70-5-retry.png` });
   await S.click('#ph-app'); await S.waitForTimeout(400); await S.fill('#ph-at', '2번째 줄에 X ⊂ B 라고 썼어요'); await S.click('#ph-as'); await S.waitForTimeout(1200);
@@ -133,20 +133,20 @@ const jpegSize = (buf) => { let i = 2; while (i < buf.length) { if (buf[i] !== 0
   const warn = await T.evaluate(() => ({ box: (document.querySelector('.ph-use') || {}).className || '', txt: (document.querySelector('.ph-use') || {}).textContent || '', daily: (document.querySelector('#ph-daily') || {}).value }));
   await T.fill('#ph-daily', '4'); await T.click('#ph-save'); await T.waitForTimeout(800); const saved = await T.evaluate(() => DS.Net.get('gcfg/photo'));
   await T.screenshot({ path: `${OUT}/70-9-warn.png` });
-  P(`경고: 단추 「${btnWarn}」 · ${JSON.stringify(warn)} · 저장 ${JSON.stringify({ daily: saved.daily, warnDay: saved.warnDay, url: !!saved.url, on: saved.on })}`);
+  P(`경고: 단추 「${btnWarn}」 · ${JSON.stringify(warn)} · 저장 ${JSON.stringify({ room: saved.room, cool: saved.cool, daily: saved.daily, warnDay: saved.warnDay, url: !!saved.url, on: saved.on })}`);
   // 보낸 요청 확인
   P('요청: ' + JSON.stringify(got.map((g) => ({ c: g.c, n: g.n, room: `${g.lesson}/${g.room}`, tok: !!g.idToken, img: g.image, size: g.size, ask: String(g.ask).slice(0, 40), answer: g.answer, params: g.params, ctype: g.ctype }))));
   const C = {
     설정저장: set.cfg && set.cfg.on && set.cfg.url === URL_GS && set.on.join(',') === 'eval-1/q07,eval-1/q11' && set.rows === 7,
     시범방만열림: t07 && t07.open && t11 && t11.open && t2_07 && !t2_07.open && /사진 채점/.test(t2_07.lock),
     숫자뒤사진단계: st07 && !rec07.clear && !!rec07.ans,
-    재도전창: res07 && res07.steps.length === 2 && /^no:.*B ∪ X/.test(res07.steps[0]) && /^ok:.*16/.test(res07.steps[1]) && /1/.test(res07.score) && res07.app && res07.again && /X ⊂ B/.test(res07.fb),
+    재도전창: res07 && res07.steps.length === 2 && /^no:.*B ∪ X/.test(res07.steps[0]) && /^ok:.*16/.test(res07.steps[1]) && /1/.test(res07.score) && res07.app && res07.again && res07.cool && res07.cool[0] === true && /초 뒤/.test(res07.cool[1]) && /X ⊂ B/.test(res07.fb),
     이의신청: after07.pend === 'r1' && after07.appeal && /X ⊂ B/.test(after07.appeal.t) && /선생님 확인 중/.test(t07b.sub),
     대시보드: board.items.length === 1 && /이의 신청/.test(board.items[0]) && /확인할 것 1/.test(board.need) && /원/.test(board.cost),
     인정뒤처치: okv === true && rec07b.clear && !rec07b.pend && /처치/.test(t07c.sub),
     하루다씀안내: /다 썼어요/.test(q11err),
     통과처치: st11 && rec11.clear && rec11.ph === 'p1' && /처치/.test(win11),
-    경고: /⚠/.test(btnWarn) && /warn/.test(warn.box) && /200/.test(warn.txt) && warn.daily === '6' && saved.daily === 4 && saved.warnDay === 150 && saved.url === URL_GS && saved.on === true,
+    경고: /⚠/.test(btnWarn) && /warn/.test(warn.box) && /200/.test(warn.txt) && warn.daily === '6' && saved.daily === 4 && saved.room === 2 && saved.cool === 30 && saved.warnDay === 150 && saved.url === URL_GS && saved.on === true,
     사진크기: got.length === 3 && got.every((g) => g.size && Math.max(g.size.w, g.size.h) <= 1024 && g.idToken && g.c === '1-3' && g.n === 1 && !/json/.test(g.ctype || '')),
     문제숫자: got[0] && got[0].room === 'q07' && got[0].params && got[0].params.N && got[2] && got[2].params && got[2].params.T != null && /최댓값/.test(got[2].ask) && /\//.test(String(got[2].answer)),
   };

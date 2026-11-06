@@ -18,8 +18,10 @@ DS.Photo = (function () {
     cfg = c || {}; rub = r || {}; return cfg;
   }
   // ready() = 켜짐 · 주소 있음 / ready(차시, 방) = 그 방 기준표도 켜짐 (결정 5: 시범 방만 열림)
-  const DAILY0 = 6, WARN_DAY0 = 150, WARN_MONTH0 = 3000, WON = 1.2; // 학생 하루 장 수 · 경고 기준(학교 전체 하루 · 이번 달) · 1장 ≈ 1.2원 (실측)
+  const ROOM0 = 2, COOL0 = 30, DAILY0 = 6, WARN_DAY0 = 150, WARN_MONTH0 = 3000, WON = 1.2; // 학생 하루 장 수 · 경고 기준(학교 전체 하루 · 이번 달) · 1장 ≈ 1.2원 (실측)
   const daily = () => Number((cfg || {}).daily) || DAILY0;
+  const roomMax = () => Number((cfg || {}).room) || ROOM0; // A: 방 하나 하루 장 수
+  const coolSec = () => ((cfg || {}).cool != null && (cfg || {}).cool !== '' ? Number(cfg.cool) : COOL0); // D: 결과 뒤 쉬는 초
   const ready = (lid, rid) => !!(cfg && cfg.on && cfg.url) && (!lid || !!(((rub || {})[lid] || {})[rid] || {}).on);
   const keyOf = (lid, rid) => `${lid}_${rid}`;
 
@@ -28,6 +30,7 @@ DS.Photo = (function () {
     const clean = (t) => String(t || '').replace(/\s*\(풀이는 학습지에\)\s*/g, ' ').replace(/^\d+\s+/, '').replace(/^\(이어서\)\s*/, '').trim();
     return { ask: items.map((q) => clean(q.question)).join(' / ').slice(0, 600), answer: items.map((q) => String(q.answer)).join(' / ').slice(0, 80), ref: items.map((q) => q.solution || '').join(' / ').slice(0, 600), params: Object.assign({}, ...items.map((q) => q.check || {})) };
   }
+  const errMsg = (res) => (res && res.err === 'roomquota' ? `이 방은 오늘 ${roomMax()}번 다 해 봤어요 — 다른 방을 풀거나 내일 다시 도전해요!` : res && res.err === 'wait' ? `📷 ${Number(res.sec) || coolSec()}초 뒤에 다시 보낼 수 있어요 — 그동안 풀이를 고쳐 써요` : ERR[(res && res.err) || 'net'] || ERR.net);
   const ERR = { off: '선생님이 사진 채점을 잠깐 꺼 두었어요.', auth: '로그인이 풀렸어요. 다시 로그인해 주세요.', who: '이 기기의 로그인과 계정이 달라요. 다시 로그인해 주세요.', rubric: '이 문항은 아직 사진 채점을 준비 중이에요.', quota: '오늘 사진 채점을 다 썼어요 — 내일 또 해요!', busy: '지금 친구들이 한꺼번에 보내고 있어요. 30초 뒤 다시 보내 주세요.', api: '채점 서버가 잠깐 바빠요. 조금 뒤 다시 보내 주세요 (장 수는 그대로예요).', bad: '사진을 보내지 못했어요. 다시 찍어 주세요.', net: '인터넷이 끊겼거나 너무 오래 걸렸어요. 다시 보내 주세요.' };
 
   // ── 사진 고르기 · 돌리기 · 자르기 · 줄이기 ─────────────────────
@@ -60,14 +63,16 @@ DS.Photo = (function () {
     try { const r = await fetch(cfg.url, { method: 'POST', body: JSON.stringify(body), redirect: 'follow', signal: ctl ? ctl.signal : undefined }); return await r.json(); } // text/plain = CORS 사전 요청 없음
     catch (e) { return { ok: false, err: 'net' }; } finally { clearTimeout(t); }
   }
-  async function leftToday(m) { const q = await N().get(`photo_q/${ck(m.c)}/${m.n}/${day()}`).catch(() => null); return Math.max(0, daily() - (Number((q || {}).n) || 0)); }
+  async function leftToday(m, rk) { const q = (await N().get(`photo_q/${ck(m.c)}/${m.n}/${day()}`).catch(() => null)) || {}; return { left: Math.max(0, daily() - (Number(q.n) || 0)), roomLeft: Math.max(0, roomMax() - (Number((q.r || {})[rk]) || 0)), wait: Math.max(0, Math.ceil(((Number(q.last) || 0) + coolSec() * 1000 - Date.now()) / 1000)) }; }
 
   // ── 학생: 채점 창 · ctx = { lesson, room, title, items } → Promise<{ status, id } | null> ─────────
   function grade(m, ctx) {
     return new Promise((done) => {
       const P = pack(ctx.items), r0 = ((rub || {})[ctx.lesson] || {})[ctx.room] || {};
       const el = document.createElement('div'); el.className = 'modal camp-modal ph-modal'; document.body.appendChild(el);
-      let left = null, finished = false;
+      let left = null, roomLeft = null, finished = false, coolUntil = 0; const rk = keyOf(ctx.lesson, ctx.room).replace(/[.#$/[\]]/g, '_');
+      // D: 쉬는 시간 — 단추에 남은 초를 보여 주고 0 이 되면 누를 수 있게
+      const coolBtn = (b, label) => { if (!b) return; const tick = () => { if (!document.body.contains(b)) return; const w = Math.ceil((coolUntil - Date.now()) / 1000); if (w > 0) { b.disabled = true; b.textContent = `${label} (${w}초 뒤)`; setTimeout(tick, 500); } else { b.disabled = false; b.textContent = label; } }; tick(); };
       const close = (v) => { if (finished) return; finished = true; el.remove(); done(v || null); };
       const head = (t) => `<div class="set-head"><h2>${t}</h2><button class="btn" data-x>닫기</button></div>`;
       const bindX = () => el.querySelectorAll('[data-x]').forEach((b) => (b.onclick = () => close(null)));
@@ -75,10 +80,11 @@ DS.Photo = (function () {
         el.innerHTML = `<div class="quiz-box framed ph-box">${head('📷 풀이 사진 올리기')}
           <p class="ph-q"><b>${esc(ctx.title || '')}</b><br>${esc(P.ask)}</p>
           ${msg}
-          <ul class="ph-tips"><li>📄 <b>이 숫자 그대로</b> 종이에 풀이를 처음부터 끝까지 써요</li><li>💡 밝은 곳 · 위에서 똑바로 · 종이 한 장만 보이게</li><li>🙈 이름 · 얼굴은 찍히지 않게 (사진은 저장되지 않아요)</li><li>✅ 통과 = ${r0.total || 4}점 중 <b>${r0.pass || 3}점</b> 이상 · 하루 ${daily()}장${left != null ? ` (오늘 <b>${left}</b>장 남음)` : ''}</li></ul>
+          <ul class="ph-tips"><li>📄 <b>이 숫자 그대로</b> 종이에 풀이를 처음부터 끝까지 써요</li><li>💡 밝은 곳 · 위에서 똑바로 · 종이 한 장만 보이게</li><li>🙈 이름 · 얼굴은 찍히지 않게 (사진은 저장되지 않아요)</li><li>✅ 통과 = ${r0.total || 4}점 중 <b>${r0.pass || 3}점</b> 이상 · 하루 ${daily()}장 · 이 방은 하루 ${roomMax()}장${left != null ? ` (오늘 <b>${left}</b>장 · 이 방 <b>${roomLeft}</b>장 남음)` : ''}</li></ul>
           <div class="row ph-pick"><button class="btn primary big" id="ph-cam">📷 찍기</button><button class="btn" id="ph-alb">🖼 앨범에서</button></div>
           <p class="muted small">AI 가 기준표대로 먼저 채점하고, 애매하면 선생님이 직접 확인해요. 성적에는 쓰지 않아요.</p></div>`;
         bindX();
+        coolBtn(el.querySelector('#ph-cam'), '📷 찍기'); coolBtn(el.querySelector('#ph-alb'), '🖼 앨범에서');
         el.querySelector('#ph-cam').onclick = () => choose(true);
         el.querySelector('#ph-alb').onclick = () => choose(false);
       };
@@ -122,8 +128,8 @@ DS.Photo = (function () {
         const tok = await N().idToken().catch(() => null);
         const res = await post({ idToken: tok, c: m.c, n: m.n, lesson: ctx.lesson, room: ctx.room, ask: P.ask, answer: P.answer, ref: P.ref, params: P.params, image, media: 'image/jpeg' });
         if (finished) return;
-        if (!res || !res.ok) { if (res && res.err === 'quota') left = 0; intro(`<p class="ph-err">⚠ ${esc(ERR[(res && res.err) || 'net'] || ERR.net)}</p>`); return; }
-        left = res.left != null ? res.left : left;
+        if (!res || !res.ok) { if (res && res.err === 'quota') left = 0; if (res && res.err === 'roomquota') roomLeft = 0; if (res && res.err === 'wait') coolUntil = Date.now() + (Number(res.sec) || coolSec()) * 1000; intro(`<p class="ph-err">⚠ ${esc(errMsg(res))}</p>`); return; }
+        left = res.left != null ? res.left : left; roomLeft = res.roomLeft != null ? res.roomLeft : roomLeft; coolUntil = Date.now() + (res.cool != null ? Number(res.cool) : coolSec()) * 1000;
         result(res);
       };
       const result = (res) => {
@@ -137,16 +143,16 @@ DS.Photo = (function () {
           return;
         }
         if (res.status === 'check') {
-          el.innerHTML = `<div class="quiz-box framed ph-box">${head('⏳ 선생님이 직접 볼게요')}<p>사진이 흐리거나 AI 가 확신하지 못했어요. <b>선생님이 확인하면 처치</b>로 바뀌어요. 이번 장은 세지 않았어요${left != null ? ` (오늘 ${left}장 남음)` : ''}.</p>${fb}<div class="row"><button class="btn primary" id="ph-ok">알겠어요</button>${left ? '<button class="btn" id="ph-again">📷 더 또렷하게 다시 찍기</button>' : ''}</div></div>`;
+          el.innerHTML = `<div class="quiz-box framed ph-box">${head('⏳ 선생님이 직접 볼게요')}<p>사진이 흐리거나 AI 가 확신하지 못했어요. <b>선생님이 확인하면 처치</b>로 바뀌어요. 이번 장은 세지 않았어요${left != null ? ` (오늘 ${left}장 남음)` : ''}.</p>${fb}<div class="row"><button class="btn primary" id="ph-ok">알겠어요</button>${left && roomLeft !== 0 ? '<button class="btn" id="ph-again">📷 더 또렷하게 다시 찍기</button>' : ''}</div></div>`;
           bindX(); el.querySelector('#ph-ok').onclick = () => close({ status: 'check', id: res.id });
           el.querySelector('[data-x]').onclick = () => close({ status: 'check', id: res.id });
-          const ag = el.querySelector('#ph-again'); if (ag) ag.onclick = () => intro();
+          const ag = el.querySelector('#ph-again'); if (ag) { ag.onclick = () => intro(); coolBtn(ag, '📷 더 또렷하게 다시 찍기'); }
           return;
         }
-        el.innerHTML = `<div class="quiz-box framed ph-box">${head('✏ 조금만 더!')}${sc}${fb}<p class="muted small">빠진 단계를 채워 다시 찍어요 · 오늘 ${left != null ? left : '?'}장 남음 · 점수가 이상하면 🙋 이의 신청 (선생님이 확인)</p>
-          <div class="row">${left ? '<button class="btn primary" id="ph-again">📷 고쳐서 다시 찍기</button>' : ''}<button class="btn" id="ph-app">🙋 이의 신청</button><button class="btn" data-x>나중에</button></div></div>`;
+        el.innerHTML = `<div class="quiz-box framed ph-box">${head('✏ 조금만 더!')}${sc}${fb}<p class="muted small">빠진 단계를 채워 다시 찍어요 · 이 방 ${roomLeft != null ? roomLeft : '?'}장 · 오늘 ${left != null ? left : '?'}장 남음 · 점수가 이상하면 🙋 이의 신청 (선생님이 확인)</p>
+          <div class="row">${left && roomLeft !== 0 ? '<button class="btn primary" id="ph-again">📷 고쳐서 다시 찍기</button>' : ''}<button class="btn" id="ph-app">🙋 이의 신청</button><button class="btn" data-x>나중에</button></div></div>`;
         bindX();
-        const ag = el.querySelector('#ph-again'); if (ag) ag.onclick = () => intro();
+        const ag = el.querySelector('#ph-again'); if (ag) { ag.onclick = () => intro(); coolBtn(ag, '📷 고쳐서 다시 찍기'); }
         el.querySelector('#ph-app').onclick = () => appeal(res);
       };
       const appeal = (res) => {
@@ -160,7 +166,7 @@ DS.Photo = (function () {
         });
       };
       intro();
-      leftToday(m).then((v) => { left = v; if (!finished && el.querySelector('#ph-cam')) intro(); }).catch(() => {});
+      leftToday(m, rk).then((v) => { left = v.left; roomLeft = v.roomLeft; if (v.wait) coolUntil = Date.now() + v.wait * 1000; if (!finished && el.querySelector('#ph-cam')) intro(); }).catch(() => {});
     });
   }
   // 학생: 기다리던 확인 결과 → 'ok' (처치 인정) · 'no' (그대로) · 'wait'
@@ -181,7 +187,7 @@ DS.Photo = (function () {
         <p class="muted small">설치 · 결정은 docs/PHOTO-PREP.md · API 키는 Apps Script 스크립트 속성에만 (여기 넣지 않아요) · 사진은 저장되지 않아요</p>
         <div class="ph-set"><label>웹 앱 주소 <input id="ph-url" type="url" placeholder="https://script.google.com/macros/s/…/exec" value="${esc(cfg.url || '')}"></label>
           <label class="ph-on"><input type="checkbox" id="ph-on"${cfg.on ? ' checked' : ''}> 학생에게 켜기 (끄면 서술형 방이 다시 잠겨요)</label>
-          <div class="ph-lim"><label>학생 하루 <input id="ph-daily" type="number" min="1" max="20" value="${daily()}"> 장</label><label>⚠ 경고: 학교 전체 하루 <input id="ph-wd" type="number" min="10" max="1000" value="${Number(cfg.warnDay) || WARN_DAY0}"> 장 · 이번 달 <input id="ph-wm" type="number" min="100" max="50000" value="${Number(cfg.warnMonth) || WARN_MONTH0}"> 장 넘으면</label></div>
+          <div class="ph-lim"><label>학생 하루 <input id="ph-daily" type="number" min="1" max="20" value="${daily()}"> 장 · 방 하나 하루 <input id="ph-room" type="number" min="1" max="10" value="${roomMax()}"> 장 · 다음 사진까지 <input id="ph-cool" type="number" min="0" max="600" value="${coolSec()}"> 초</label><label>⚠ 경고: 학교 전체 하루 <input id="ph-wd" type="number" min="10" max="1000" value="${Number(cfg.warnDay) || WARN_DAY0}"> 장 · 이번 달 <input id="ph-wm" type="number" min="100" max="50000" value="${Number(cfg.warnMonth) || WARN_MONTH0}"> 장 넘으면</label></div>
           <div class="row"><button class="btn primary" id="ph-save">💾 저장</button><button class="btn" id="ph-ping">🔌 연결 확인</button></div></div>
         ${useHtml(U)}
         <h3>채점 기준표 <small class="muted">올림 ${up} / ${q.length} · 켠 방만 학생에게 열려요 (시범 = 1층 07 · 11)</small></h3>
@@ -193,7 +199,7 @@ DS.Photo = (function () {
         if (url && !/^https:\/\/script\.google(usercontent)?\.com\//.test(url)) { DS.UI.toast('Apps Script 웹 앱 주소(https://script.google.com/…/exec)를 넣어 주세요.'); return; }
         if (on && !url) { DS.UI.toast('주소를 먼저 넣어 주세요.'); return; }
         const num = (id, lo, hi, d) => Math.max(lo, Math.min(hi, Math.round(Number(el.querySelector(id).value) || d)));
-        await N().update('gcfg/photo', { url, on, daily: num('#ph-daily', 1, 20, DAILY0), warnDay: num('#ph-wd', 10, 1000, WARN_DAY0), warnMonth: num('#ph-wm', 100, 50000, WARN_MONTH0) }); await load(true); U = await usage().catch(() => U); draw(); DS.UI.toast(on ? '📷 켰어요 — 기준표를 켠 방이 학생에게 열려요' : '💾 저장했어요');
+        await N().update('gcfg/photo', { url, on, daily: num('#ph-daily', 1, 20, DAILY0), room: num('#ph-room', 1, 10, ROOM0), cool: Math.max(0, Math.min(600, Math.round(Number(el.querySelector('#ph-cool').value)))), warnDay: num('#ph-wd', 10, 1000, WARN_DAY0), warnMonth: num('#ph-wm', 100, 50000, WARN_MONTH0) }); await load(true); U = await usage().catch(() => U); draw(); DS.UI.toast(on ? '📷 켰어요 — 기준표를 켠 방이 학생에게 열려요' : '💾 저장했어요');
       });
       el.querySelector('#ph-ping').onclick = () => DS.Control.run(async () => {
         const url = el.querySelector('#ph-url').value.trim(); if (!url) { DS.UI.toast('주소를 먼저 넣어 주세요.'); return; }

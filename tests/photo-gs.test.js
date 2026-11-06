@@ -5,7 +5,7 @@ const SRC = fs.readFileSync(path.join(__dirname, '../tools/apps-script/photo-gra
 global.window = global; global.DS = global.DS || {}; require(path.join(__dirname, '../lessons/rubrics.js')); const RUB = DS.Rubrics;
 
 function world(opt = {}) {
-  const props = Object.assign({ API_KEY: 'k-test', FIREBASE_WEB_KEY: 'w', DB_URL: 'https://db.test', ENABLED: '1', DAILY_MAX: '3', GLOBAL_MAX: '300' }, opt.props || {});
+  const props = Object.assign({ API_KEY: 'k-test', FIREBASE_WEB_KEY: 'w', DB_URL: 'https://db.test', ENABLED: '1', DAILY_MAX: '3', ROOM_MAX: '99', COOL_SEC: '0', GLOBAL_MAX: '300' }, opt.props || {});
   const rub = JSON.parse(JSON.stringify(RUB['eval-1'].q07));
   const db = { accounts: { '1-3': { 7: { uid: 'U7' } } }, photo_rubric: { 'eval-1': { q07: rub } }, photo_q: {}, photo: {} };
   const calls = { claude: [], put: [] };
@@ -44,6 +44,7 @@ function world(opt = {}) {
   return { post, db, calls, ctx };
 }
 const REQ = { idToken: 'good', c: '1-3', n: 7, lesson: 'eval-1', room: 'q07', ask: '07 …', answer: 8, ref: 'X ⊂ {3, 9, 12} → 2³ = 8', params: { p: 6, q: 3, N: 18 }, image: 'AAAA', media: 'image/jpeg' };
+const nr = (q) => ({ n: q.n, raw: q.raw });
 let ok = 0; const t = (name, fn) => { fn(); ok++; console.log('✔', name); };
 
 t('만점 → pass · 사진은 저장 안 함 · 점수는 서버 계산', () => {
@@ -74,10 +75,19 @@ t('한도 · 지침은 Firebase gcfg/photo 가 먼저 (교사 설정에서 바�
   for (let i = 0; i < 6; i++) assert.strictEqual(w.post(REQ).ok, true);
   assert.strictEqual(w.post(REQ).err, 'quota'); assert.ok(/선생님 추가 지침: 집합 기호/.test(w.calls.claude[0].b.system));
 });
+t('A · D: 방마다 하루 2장 · 다음 사진은 30초 뒤 (교사 설정)', () => {
+  const w = world({ props: { DAILY_MAX: '6', ROOM_MAX: '2', COOL_SEC: '0' } });
+  const r1 = w.post(REQ); assert.strictEqual(r1.roomLeft, 1); assert.strictEqual(r1.left, 5); w.post(REQ);
+  assert.strictEqual(w.post(REQ).err, 'roomquota', '같은 방 3번째');
+  w.db.photo_rubric['eval-1'].q11 = w.db.photo_rubric['eval-1'].q07; assert.strictEqual(w.post({ ...REQ, room: 'q11' }).ok, true, '다른 방은 됨');
+  const c = world({ props: { COOL_SEC: '30', ROOM_MAX: '9' } }); c.post(REQ); const r = c.post(REQ);
+  assert.strictEqual(r.err, 'wait'); assert.ok(r.sec > 25 && r.sec <= 30, '남은 초');
+  const f = world({ props: { COOL_SEC: '30' }, http: 529 }); f.post(REQ); assert.notStrictEqual(f.post(REQ).err, 'wait', 'AI 실패면 쉬는 시간 없음');
+});
 t('선생님 확인(check)은 장 수를 돌려줌 · 그래도 하루 6번(raw)까지만', () => {
   const w = world({ claude: { readable: false, final_answer: '', steps: [], confidence: 'low', feedback: '', flags: ['unclear'] } });
   for (let i = 0; i < 6; i++) { const r = w.post(REQ); assert.strictEqual(r.status, 'check'); assert.strictEqual(r.left, 3); }
-  assert.strictEqual(w.post(REQ).err, 'quota'); assert.deepStrictEqual(w.db.photo_q['1-3'][7]['20261107'], { n: 0, raw: 6 }); assert.strictEqual(w.db.photo_q._all['20261107'], 6);
+  assert.strictEqual(w.post(REQ).err, 'quota'); assert.deepStrictEqual(nr(w.db.photo_q['1-3'][7]['20261107']), { n: 0, raw: 6 }); assert.strictEqual(w.db.photo_q._all['20261107'], 6);
 });
 t('답만 쓴 풀이 → retry (선생님 확인까지는 아님)', () => {
   const r = world({ claude: { readable: true, final_answer: '8', steps: [{ id: 's4', earned: 1, note: '' }], confidence: 'high', feedback: '', flags: ['copied_answer_only'] } }).post(REQ);
@@ -94,14 +104,14 @@ t('로그인 토큰 · 다른 학생 · 기준표 없음 · 꺼짐 · 모양', (
 });
 t('하루 3장 · 전체 한도 · 붐빔', () => {
   const w = world(); [1, 2, 3].forEach(() => assert.strictEqual(w.post(REQ).ok, true));
-  assert.strictEqual(w.post(REQ).err, 'quota'); assert.strictEqual(w.calls.claude.length, 3); assert.deepStrictEqual(w.db.photo_q['1-3'][7]['20261107'], { n: 3, raw: 3 });
+  assert.strictEqual(w.post(REQ).err, 'quota'); assert.strictEqual(w.calls.claude.length, 3); assert.deepStrictEqual(nr(w.db.photo_q['1-3'][7]['20261107']), { n: 3, raw: 3 });
   assert.strictEqual(world({ props: { GLOBAL_MAX: '0' } }).post(REQ).err, 'quota');
   assert.strictEqual(world({ lock: false }).post(REQ).err, 'busy');
 });
 t('Claude 실패 → 장 수 되돌림 · 붐빔은 3번까지 다시', () => {
   const w = world({ http: 529 }), r = w.post(REQ);
-  assert.strictEqual(r.err, 'api'); assert.strictEqual(w.calls.claude.length, 3); assert.deepStrictEqual(w.db.photo_q['1-3'][7]['20261107'], { n: 0, raw: 0 }); assert.strictEqual(w.db.photo_q._all['20261107'], 0);
-  const m = world({ stop: 'max_tokens' }); assert.strictEqual(m.post(REQ).err, 'api'); assert.deepStrictEqual(m.db.photo_q['1-3'][7]['20261107'], { n: 0, raw: 0 });
+  assert.strictEqual(r.err, 'api'); assert.strictEqual(w.calls.claude.length, 3); assert.deepStrictEqual(nr(w.db.photo_q['1-3'][7]['20261107']), { n: 0, raw: 0 }); assert.strictEqual(w.db.photo_q._all['20261107'], 0);
+  const m = world({ stop: 'max_tokens' }); assert.strictEqual(m.post(REQ).err, 'api'); assert.deepStrictEqual(nr(m.db.photo_q['1-3'][7]['20261107']), { n: 0, raw: 0 });
 });
 t('기준표: 7문항 · 배점 합 = total · pass ≤ total', () => {
   const all = Object.entries(RUB).flatMap(([l, rs]) => Object.entries(rs).map(([id, r]) => [l + '/' + id, r]));
