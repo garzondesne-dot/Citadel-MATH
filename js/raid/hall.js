@@ -294,7 +294,7 @@ DS.Hall = (function () {
     if (f.done) {
       clr.hidden = false; clr.className = 'raid-clear'; clr.innerHTML = step.kind === 'boss' ? '🎉 보스 격파! 모두 함께 이겼다!' : '⚔ 몬스터 격파!';
       if (wonFx !== built) { const fin = lastHit; setTimeout(() => finisher(fin, step), 350 * (queue.length + 1) + 300); }
-      if (wonFx !== built) { wonFx = built; setTimeout(() => { const m = $('#rm'); if (m && vanished !== built) m.innerHTML = DS.Art.monster(f.sprite, 'down'); DS.Sound.correct(); document.querySelectorAll('.fh2').forEach((h, k) => { const a = h.querySelector('.art'); if (!a) return; a.parentElement.classList.toggle('face-l', k % 2 === 1); a.classList.add('pairhop'); a.style.animationDelay = `${(k % 2) * 0.22}s`; }); }, 600); }
+      if (wonFx !== built) { wonFx = built; setTimeout(() => { const m = $('#rm'); if (m && vanished !== built) { const art = m.querySelector('.art.monster'); if (art) art.outerHTML = DS.Art.monster(f.sprite, 'down'); else m.insertAdjacentHTML('beforeend', DS.Art.monster(f.sprite, 'down')); } /* 2026-11-06 검증: 예전엔 m.innerHTML 로 머리 위 체력 막대(#rh-bar)까지 지워 → 다음 갱신마다 장면을 새로 그려 쓰러진 뒤의 공격(몬스터 묶기 · 힐) 연출이 사라지고 「마무리 일격」이 되풀이됨 */ DS.Sound.correct(); document.querySelectorAll('.fh2').forEach((h, k) => { const a = h.querySelector('.art'); if (!a) return; a.parentElement.classList.toggle('face-l', k % 2 === 1); a.classList.add('pairhop'); a.style.animationDelay = `${(k % 2) * 0.22}s`; }); }, 600); }
     } else if (step.kind === 'monster' && !wait.length && f.hp.left > 0) {
       clr.hidden = false; clr.className = 'raid-clear note'; clr.innerHTML = `모두 공격했다! 남은 체력 ${f.hp.left} — 재도전으로 더 공격하자`;
     } else clr.hidden = true;
