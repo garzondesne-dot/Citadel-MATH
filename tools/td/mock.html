@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><title>타워 디펜스 시안</title>
+<style>
+  body { margin: 0; background: #0b1020; color: #eef2ff; font-family: 'Noto Sans CJK KR', 'Noto Sans KR', sans-serif; }
+  .card { width: 1920px; height: 1180px; position: relative; overflow: hidden; background: #0b1020; } .card svg { position: absolute; left: 0; top: 100px; } .bar { position: absolute; left: 0; right: 0; top: 0; height: 100px; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; box-sizing: border-box; background: #0b1020; border-bottom: 3px solid #ffd25a; }
+  .cap { font-size: 36px; font-weight: 900; }
+  .cap small { display: block; font-size: 22px; font-weight: 500; color: #dfe7f5; }
+  .tile { font-size: 24px; color: #dfe7f5; text-align: right; }
+  .hud { position: absolute; left: 50%; top: 118px; transform: translateX(-50%); background: #000b; padding: 8px 22px; border-radius: 14px; font-size: 30px; font-weight: 800; border: 2px solid #fff3; white-space: nowrap; }
+  .phone { width: 390px; height: 844px; position: relative; overflow: hidden; background: #0b1426; border-radius: 0; }
+</style></head>
+<body>
+<script src="../../js/raid/td-maps.js"></script>
+<script>
+const M = DS.TDMaps, U = 120;
+const svgMap = (m, opt = {}) => {
+  const W = M.W * U, H = M.H * U, th = m.theme, sl = M.slots(m), rnd = (i) => { let x = Math.sin(i * 99.13 + m.id.length) * 10000; return x - Math.floor(x); };
+  let s = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="g${m.id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${th.bg[0]}"/><stop offset="1" stop-color="${th.bg[1]}"/></linearGradient>
+    <pattern id="p${m.id}" width="24" height="24" patternUnits="userSpaceOnUse"><rect width="24" height="24" fill="${th.path}"/><rect x="2" y="2" width="6" height="6" fill="#0002"/><rect x="14" y="12" width="5" height="5" fill="#fff2"/></pattern></defs>
+    <rect width="${W}" height="${H}" fill="url(#g${m.id})"/>`;
+  // 장식 (길에서 떨어진 곳)
+  for (let i = 0; i < 70; i++) { const x = rnd(i) * M.W, y = rnd(i + 500) * M.H; if (M.dPath(m, x, y) < 1.4 || sl.some((p) => Math.hypot(p.x - x, p.y - y) < 0.8)) continue; s += `<text x="${x * U}" y="${y * U}" font-size="${40 + rnd(i + 900) * 30}" text-anchor="middle" opacity="0.85">${i % 3 ? th.deco : th.deco2}</text>`; }
+  // 길
+  m.paths.forEach((p) => { const pts = p.map(([x, y]) => `${x * U},${y * U}`).join(' '); s += `<polyline points="${pts}" fill="none" stroke="${th.edge}" stroke-width="${U * 0.86}" stroke-linejoin="round" stroke-linecap="round"/><polyline points="${pts}" fill="none" stroke="url(#p${m.id})" stroke-width="${U * 0.7}" stroke-linejoin="round" stroke-linecap="round"/>`; });
+  // 길 방향 화살표
+  m.paths.forEach((p) => p.slice(1).forEach((b, i) => { const a = p[i], mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2, ang = Math.atan2(b[1] - a[1], b[0] - a[0]) * 180 / Math.PI; s += `<text x="${mx * U}" y="${my * U + 12}" font-size="38" text-anchor="middle" fill="#0007" transform="rotate(${ang} ${mx * U} ${my * U})">➜</text>`; }));
+  // 입구 · 성
+  M.starts(m).forEach(([x, y]) => { s += `<circle cx="${Math.max(0.5, Math.min(M.W - 0.5, x)) * U}" cy="${Math.max(0.5, Math.min(M.H - 0.5, y)) * U}" r="58" fill="#000" stroke="#a020f0" stroke-width="8" opacity="0.9"/><text x="${Math.max(0.5, Math.min(M.W - 0.5, x)) * U}" y="${Math.max(0.5, Math.min(M.H - 0.5, y)) * U + 20}" font-size="56" text-anchor="middle">🌀</text>`; });
+  const [ex, ey] = M.end(m); s += `<text x="${ex * U}" y="${ey * U + 40}" font-size="${m.id === 'ice' ? 120 : 130}" text-anchor="middle">🏰</text>`;
+  // 자리
+  if (!opt.noSlots) sl.forEach((p) => { const t = opt.towers && opt.towers[p.no]; s += `<circle cx="${p.x * U}" cy="${p.y * U}" r="${p.star ? 44 : 38}" fill="${t ? '#1b2a48' : '#0009'}" stroke="${p.star ? '#ffd25a' : '#ffffffaa'}" stroke-width="${p.star ? 7 : 4}" ${p.star ? 'filter="drop-shadow(0 0 8px #ffd25a)"' : ''}/>`
+    + (t ? `<text x="${p.x * U}" y="${p.y * U + 16}" font-size="46" text-anchor="middle">${t.e}</text><text x="${p.x * U}" y="${p.y * U + 74}" font-size="22" text-anchor="middle" fill="#fff" stroke="#000" stroke-width="4" paint-order="stroke" font-weight="800">${t.n}${t.enh ? ` +${t.enh}` : ''}</text>`
+      : `<text x="${p.x * U}" y="${p.y * U + 12}" font-size="${p.star ? 32 : 30}" text-anchor="middle" fill="${p.star ? '#ffd25a' : '#fff'}" font-weight="900">${p.star ? '★' : p.no}</text>`); });
+  // 몬스터 (게임 장면 시안)
+  (opt.mons || []).forEach(([x, y, e, hp]) => { s += `<text x="${x * U}" y="${y * U + 20}" font-size="60" text-anchor="middle">${e}</text><rect x="${x * U - 34}" y="${y * U - 44}" width="68" height="9" fill="#300"/><rect x="${x * U - 34}" y="${y * U - 44}" width="${68 * hp}" height="9" fill="#ff4d5e"/>`; });
+  (opt.shots || []).forEach(([x1, y1, x2, y2, c]) => { s += `<line x1="${x1 * U}" y1="${y1 * U}" x2="${x2 * U}" y2="${y2 * U}" stroke="${c}" stroke-width="7" stroke-linecap="round" opacity="0.9"/><circle cx="${x2 * U}" cy="${y2 * U}" r="18" fill="${c}" opacity="0.6"/>`; });
+  return s + '</svg>';
+};
+const TILE = { wind: '🌬 바람', fire: '🔥 불', frost: '❄ 얼음', spark: '⚡ 번개', magic: '🔮 마법' };
+const cards = M.MAPS.map((m, i) => `<div class="card" id="map-${m.id}"><div class="bar"><div class="cap">${i + 1}. ${m.name}<small>${m.desc}</small></div><div class="tile">지형 보너스: ${TILE[m.tile]} 타워 특기 +20%<br>★ 명당 ${M.STARS}칸 · 자리 ${M.SLOTS}칸 · 🌀 입구 ${M.starts(m).length}곳</div></div>${svgMap(m)}</div>`).join('');
+// 게임 장면 (숲 · 웨이브 3)
+const f = M.get('forest'), fs = M.slots(f), heroes = ['🧙', '🗡', '🏹', '🔥', '❄', '⚡', '🌪', '🔨', '✨', '🔮'], names = ['민준', '서연', '지호', '하은', '도윤', '서준', '지우', '예린', '시우', '유나', '건우', '수아', '현우', '채원', '은우', '지민', '선생님'];
+const towers = {}; fs.slice(0, 17).forEach((p, i) => { towers[p.no] = { e: i === 16 ? '🧙' : heroes[i % heroes.length], n: names[i], enh: [0, 3, 7, 0, 5, 10, 0, 1, 2, 0, 4, 0, 8, 0, 0, 6, 0][i] }; });
+const mons = [[6, 1.5, '👾', 0.8], [8.5, 1.5, '👾', 0.4], [10.6, 1.5, '🦇', 1], [12.5, 2.6, '🐗', 0.6], [11, 4.5, '👾', 0.9], [8, 4.5, '🗿', 0.5], [5.2, 4.5, '👾', 0.3]];
+const near = (t) => mons.map((m) => [Math.hypot(m[0] - t.x, m[1] - t.y), m]).sort((a, b) => a[0] - b[0])[0][1];
+const shots = [[fs[1], '#ff7a1a'], [fs[4], '#7fd3ff'], [fs[9], '#ffe14a'], [fs[12], '#c08aff']].map(([t, c]) => { const m = near(t); return [t.x, t.y, m[0], m[1], c]; });
+const scene = `<div class="card" id="scene"><div class="bar"><div class="cap">6. 게임 장면 시안 (교실 TV) · 1번 숲길 · 웨이브 3<small>타워 = 학생 용사 · 이름 옆 +N = 🔨 강화 · 노란 원 = ★ 명당 · 실제 게임에서는 용사 · 몬스터 도트 그림</small></div></div>${svgMap(f, { towers, mons, shots })}<div class="hud">🌊 웨이브 3 / 5 · 🏰 생명 17 / 20 · 남은 몬스터 9</div></div>`;
+// 폰: 자리 고르기
+const v = M.get('volcano'), vs = M.slots(v), took = { 3: '서연', 7: '민준', 12: '지호', 18: '하은' };
+const mini = svgMap(v, { towers: Object.fromEntries(Object.entries(took).map(([k, n]) => [k, { e: '🙂', n }])) }).replace('<svg width="1920" height="1080"', '<svg width="370" height="208"');
+const phone = `<div class="phone" id="phone"><div style="padding:14px"><p style="font-size:20px;font-weight:900;margin:0 0 4px">🏰 자리 고르기 <span style="color:#ffd25a">27초</span></p><p style="font-size:14px;color:#b9c6e8;margin:0 0 10px">${v.name} · 선착순 · 한 번 고르면 끝 · ★ 명당 (길 두 곳을 때림)</p>
+  <div style="border:2px solid #ffd25a;border-radius:10px;overflow:hidden;line-height:0">${mini}</div>
+  <div style="margin-top:12px;padding:10px;border-radius:10px;background:#162447;border:1px solid #fff3;font-size:15px;line-height:1.7">🗡 <b>내 타워</b> · 근접 (사거리 1.6칸)<br>공격력 <b>20</b> (Lv5) · 속도 <b>1.04</b>/초 (🔨 +3)<br>🔥 불 Ⅲ — 2초 동안 불탐 25% · <b style="color:#ff9a5a">지형 보너스 +20%</b></div>
+  <p style="font-size:14px;color:#b9c6e8">💡 근접은 길에 가까운 칸 · 원거리는 어디든 OK</p>
+  <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px">${vs.map((p) => `<div style="height:44px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;${took[p.no] ? 'background:#333;color:#888' : p.star ? 'background:#5a4510;color:#ffd25a;border:2px solid #ffd25a' : 'background:#1b2a48;border:1px solid #fff4'}">${took[p.no] ? '✖' : p.star ? '★' + p.no : p.no}</div>`).join('')}</div></div></div>`;
+document.body.innerHTML = cards + scene + phone;
+</script>
+</body></html>
