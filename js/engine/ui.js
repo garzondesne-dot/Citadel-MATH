@@ -145,8 +145,21 @@ DS.UI.frame = function (modal) {
   if (prim && !foot) { const f = document.createElement('div'); f.className = 'row ui-foot'; box.appendChild(f); f.appendChild(prim); }
   if (!modal.dataset.uiFrame) { modal.dataset.uiFrame = '1'; modal.addEventListener('click', (e) => { if (e.target === modal) { const xx = modal.querySelector('.ui-x'); if (xx) xx.click(); } }); }
 };
+// 🖥 가운데 본 화면에 맞추기 (2026-11-06 사용자 「종합실 설정 · 시연 창이 너무 커 · 메인 가운데 화면에 맞춰」): 큰 화면(가로 1000px 이상)의
+//   종합실 레이드 칸(#h-arena) · 교사 캠프 무대(.tc-stage) 자리에 창을 딱 맞춤 (폰은 그대로)
+DS.UI.centerRect = function () {
+  if (typeof window === 'undefined' || window.innerWidth < 1000) return null;
+  const s = document.querySelector('.screen.active'); const el = s && s.querySelector('#h-arena, .tc-hallmode .tc-stage, .tc-stage');
+  if (!el) return null; const r = el.getBoundingClientRect(); return r.width > 300 && r.height > 300 ? r : null;
+};
+DS.UI.fitCenter = function (ov) {
+  const r = DS.UI.centerRect(); if (!ov || !r) return false;
+  ov.style.padding = `${Math.max(0, r.top)}px ${Math.max(0, window.innerWidth - r.right)}px ${Math.max(0, window.innerHeight - r.bottom)}px ${Math.max(0, r.left)}px`;
+  ov.classList.add('fit-center'); return true;
+};
+if (typeof window !== 'undefined') window.addEventListener('resize', () => document.querySelectorAll('.fit-center').forEach((o) => DS.UI.fitCenter(o)));
 if (typeof document !== 'undefined' && typeof MutationObserver !== 'undefined') {
-  const scan = (n) => { if (n.nodeType !== 1) return; const m = n.classList.contains('modal') ? n : n.closest && n.closest('.modal'); if (m) DS.UI.frame(m); n.querySelectorAll && n.querySelectorAll('.modal').forEach((mm) => DS.UI.frame(mm)); };
+  const scan = (n) => { if (n.nodeType !== 1) return; const m = n.classList.contains('modal') ? n : n.closest && n.closest('.modal'); if (m) { DS.UI.frame(m); if (m.classList.contains('camp-modal') && !m.classList.contains('fit-center')) DS.UI.fitCenter(m); } n.querySelectorAll && n.querySelectorAll('.modal').forEach((mm) => DS.UI.frame(mm)); };
   const start = () => new MutationObserver((ms) => ms.forEach((m) => m.addedNodes.forEach(scan))).observe(document.body, { childList: true, subtree: true });
   if (document.body) start(); else document.addEventListener('DOMContentLoaded', start);
 }

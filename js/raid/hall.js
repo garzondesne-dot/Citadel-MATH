@@ -134,7 +134,8 @@ DS.Hall = (function () {
   C().onTimeUp('hall', (now) => { if (!R || !L || !DS.Act.isHost(R) || !document.getElementById('screen-hall').classList.contains('active')) return; const d = Raid().deadline(R); if (d && now >= d && !Raid().isClosed(R)) DS.Act.timeUp(code, R, L).catch(() => {}); });
   function render() {
     const i = R.state.step ?? -1;
-    $('#h-top').innerHTML = `<b>${esc(L.unit)} · ${esc(L.title)}</b><span>${esc(C().stepName(L, R))}</span><span class="muted">수업 코드 <b>${code}</b></span>${DS.UI.fs.btn('h-fs')}`;
+    $('#h-top').innerHTML = `<b>${esc(L.unit)} · ${esc(L.title)}</b><span>${esc(C().stepName(L, R))}</span><span class="muted">수업 코드 <b>${code}</b></span><button class="btn small" id="h-set">⚙ 설정</button>${DS.UI.fs.btn('h-fs')}`; // ⚙ 던전 안에서도 선생님 모습 · 스킬 (2026-11-06)
+    { const hs = $('#h-set'); if (hs) hs.onclick = () => C().run(() => DS.Camp.settings({ teacher: true, onSave: async (v) => { await DS.Net.set(`rooms/${code}/state/tlook`, { hero: v.hero, fx: v.fx, at: DS.Net.TS }).catch(() => {}); built = ''; if (R) render(); } })); }
     const tb = $('#h-tbar'); if (tb) { const sig = `${Raid().deadline(R)}|${Raid().progress(L, R)}|${Raid().isClosed(R)}|${Raid().bossHp(L, R).won}|${Raid().isLobby(R)}`; if (tb.dataset.sig !== sig) { tb.dataset.sig = sig; tb.innerHTML = C().tbarHtml(L, R, { prog: true }); } }
     goalAndClear(i);
     DS.UI.fs.bind('h-fs');
@@ -473,6 +474,7 @@ DS.Hall = (function () {
   function demoDraw() {
     let ov = document.getElementById('h-demo-ov');
     if (!ov) { ov = document.createElement('div'); ov.id = 'h-demo-ov'; ov.className = 'h-demo-ov'; document.getElementById('screen-hall').appendChild(ov); }
+    DS.UI.fitCenter(ov); // 2026-11-06: 레이드 칸(가운데)에 딱 맞춤
     const d = demo, S = DS.Student, need = d.items.slice(0, d.hp), ready = need.every((q, i) => filled(q, d.given[i]));
     const win = d.shown || (d.marks && d.marks.slice(0, d.hp).every(Boolean)), title = d.boss ? L.boss.title : d.step.title;
     const bonusTag = (i) => (d.boss && i >= d.hp ? '<span class="demo-bonus">⭐ 보너스</span>' : '');

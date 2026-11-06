@@ -2135,3 +2135,10 @@ body.tb-last-min::after { content: ''; position: fixed; inset: 0; z-index: 88; p
 .ls-grid .btn small { font-size: 12px; opacity: .85; }
 .ls-grid .btn.on { border-color: var(--teal); }
 .t-lhint { margin: 2px 0 6px; color: #9fe0ff; }
+/* 🖥 가운데 본 화면에 맞춤 (2026-11-06) */
+.modal.fit-center > .quiz-box, .modal.fit-center > .framed { width: 100%; max-width: 100%; max-height: 100%; }
+.h-demo-ov.fit-center { background: linear-gradient(180deg, transparent 0 35%, #050a1466 75%, #050a1499 100%); }
+.h-demo-ov.fit-center .demo-box, .h-demo-ov.fit-center .demo-box.boss { width: 100%; max-width: 100%; max-height: 100%; }
+.st-set { margin-left: 6px; padding: 4px 10px; font-size: 16px; } .st-set:disabled { opacity: .4; } /* ⚙ 던전 안 설정 (2026-11-06) */
+
+.modal.fit-center .set-grid { grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); }

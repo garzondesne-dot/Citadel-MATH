@@ -153,8 +153,12 @@ DS.Student = (function () {
     const p = myP(), step = Raid().stepOf(L, R);
     $('#st-head').innerHTML = `${DS.Art.hero(p.hero || 0, 'idle', 'me')}
       <div><b>${DS.Titles ? DS.Titles.nameHtml(p, { beon: true }) : `${p.num}번 ${esc(p.nick || '')}`}</b><br><span class="muted small">${esc(L.unit)} · ${esc(L.title)}</span></div>
-      <div class="st-badge">${Raid().isLobby(R) || myP().lobby ? '대기실' : Raid().isEnd(L, R) ? '마무리' : step.kind === 'boss' ? '보스' : step.kind === 'monster' ? (step.special ? '스페셜' : '전투') : '설명'}</div>`;
+      <div class="st-badge">${Raid().isLobby(R) || myP().lobby ? '대기실' : Raid().isEnd(L, R) ? '마무리' : step.kind === 'boss' ? '보스' : step.kind === 'monster' ? (step.special ? '스페셜' : '전투') : '설명'}</div>${test ? '' : `<button class="btn small st-set" id="st-set"${focusLock() ? ' disabled title="집중모드에는 설정을 바꿀 수 없어요"' : ''}>⚙</button>`}`;
+    const sb = $('#st-set'); if (sb) sb.onclick = () => (focusLock() ? DS.UI.toast('👀 집중모드에는 설정을 바꿀 수 없어요') : DS.Control.run(() => DS.Camp.settings({ me: { c: info0.cls, n: info0.num, name: info0.nick, hero: myP().hero, fx: myP().fx, title: myP().title, socket: info0.socket }, onSave: async (v) => { // ⚙ 던전 안 설정 (2026-11-06 사용자): 수업 방의 내 용사 · 스킬 · 호칭도 바로
+      await DS.Net.update(`rooms/${code}/players/${me}`, { hero: v.hero, fx: v.fx, title: v.title || 'none' }).catch(() => {}); info0.hero = v.hero; info0.fx = v.fx; info0.title = v.title; drawn = ''; render();
+    } })));
   }
+  const focusLock = () => !!(R && Raid().focusOn(R) && !Raid().isLobby(R)); // 👀 집중모드: 학생 설정 잠금 (2026-11-06 사용자)
   // v0.9.3 긴급 (사용자 요청): 🙋 도움 요청 버튼 없앰 — 수업 중에는 학생이 직접 손을 든다. 교사 폰의 「재도전까지 못 맞힘 · 2분째 미제출」 알림은 그대로
   const helpBtn = () => '';
   function bindHelp() {}

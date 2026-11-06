@@ -417,6 +417,7 @@ DS.Camp = (function () {
   // ⚙ 설정: 용사 · 공격 이펙트 (잠긴 것은 🔒 + 조건)
   // ⚙ 설정 — opt.teacher (2026-11-04): 교사 캠프에서 선생님 모습 고르기 = 용사 18명 · 이펙트 · 호칭 모두 열림 · 이 기기에 저장 (수업 중이면 그 방 선생님 용사도 바로)
   async function settings(opt = {}) {
+    if (opt.me && !opt.teacher) me = Object.assign({}, me || {}, opt.me); // 🏰 던전 안에서 열 때 (2026-11-06): 수업 화면의 내 정보
     const T = !!opt.teacher, tl = T ? DS.Art.teacherLook() : null;
     let L = T ? { heroes: Object.keys(DS.ASSETS.heroesV2.list).map((i) => ({ id: Number(i), open: true })), fx: DS.FX.KINDS.map((k) => ({ id: k, open: true })), seals: 0 } : await DS.Account.looks(me);
     // 💎 상점: 잠긴 것을 누르면 조각으로 해금 (확인 한 번)
@@ -471,7 +472,9 @@ DS.Camp = (function () {
       el.querySelector('#set-ok').onclick = () => DS.Control.run(async () => { const fx = fxNow();
         if (T) { DS.Art.setTeacherLook({ hero, fx, title, socket: sock }); el.remove(); DS.UI.toast('선생님 모습을 바꿨어요!'); if (opt.onSave) await opt.onSave({ hero, fx, title }); return; }
         if (me.test) DS.Test.setLook(hero, fx); else { await DS.Account.setLook(hero, fx); await DS.Account.setSocket(sock); if (title !== (me.title || 'none')) await DS.Account.setTitle(title); }
-        me.title = title; me.hero = hero; me.fx = fx; me.socket = sock; el.remove(); DS.UI.toast('저장했어요! 다음 입장부터 적용돼요.'); render(); });
+        me.title = title; me.hero = hero; me.fx = fx; me.socket = sock; el.remove();
+        if (opt.onSave) { await opt.onSave({ hero, fx, title }); DS.UI.toast('저장했어요! 지금 던전에도 바로 적용돼요.'); return; } // 던전 안: 수업 방의 내 용사 · 스킬도 바로
+        DS.UI.toast('저장했어요! 다음 입장부터 적용돼요.'); render(); });
     };
     draw(); document.body.appendChild(el); if (tab !== 'ttl') demo();
   }
