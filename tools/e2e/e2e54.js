@@ -29,7 +29,7 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   // 🏰 성채던전
   await S.click('#camp-castle', { force: true }); await S.waitForTimeout(1500);
   // 2026-11-06: 층은 맨 위 🌀 포털로 고름 → 1층 · 2층을 차례로 눌러 셈
-  const floorOf = () => S.evaluate(() => { const f = document.querySelector('.cs-floor'); const q = (sel) => f.querySelectorAll(sel).length; return { all: q('.cs-room'), ready: q('.cs-room.ready'), lock: q('.cs-room.lock'), photo: [...f.querySelectorAll('.cs-room.lock')].filter((e) => /사진 분석/.test(e.textContent)).length, boss: (f.querySelector('.cs-room.boss') || {}).className, news: q('.cs-rnew') }; });
+  const floorOf = () => S.evaluate(() => { const f = document.querySelector('.cs-floor'); const q = (sel) => f.querySelectorAll(sel).length; return { all: q('.cs-room'), ready: q('.cs-room.ready'), lock: q('.cs-room.lock'), photo: [...f.querySelectorAll('.cs-room.lock')].filter((e) => /사진 (분석|채점)/.test(e.textContent)).length, boss: (f.querySelector('.cs-room.boss') || {}).className, news: q('.cs-rnew') }; });
   const portals = await S.evaluate(() => [...document.querySelectorAll('.cs-portal')].map((b) => b.textContent.replace(/\s+/g, ' ').trim()));
   await S.click('.cs-portal[data-floor="eval-1"]'); await S.waitForTimeout(500); const f1 = await floorOf();
   await S.click('.cs-portal[data-floor="eval-3"]'); await S.waitForTimeout(500); const f2 = await floorOf();
