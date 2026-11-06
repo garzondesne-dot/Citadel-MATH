@@ -32,12 +32,10 @@ const OUT = process.argv[2] || '.', U = 'http://localhost:8765/index.html?local'
   await solve(); out.push(['🪶 심판의 빛', await state()]); await H.click('#demo-x'); await H.waitForTimeout(300);
   // ④ 형성평가 시연: 체력 문항을 다 맞히면 단추 2개 (입력 창은 정답으로 바꿔 둠)
   await T.evaluate(async (c) => { const L = DS.Lessons.get('set-05'); await DS.Net.update(`rooms/${c}/state`, { step: L.steps.findIndex((s) => s.kind === 'boss') }); }, code); await H.waitForTimeout(1500);
-  await H.evaluate(() => { DS.Quiz.ask = async () => ({ given: 0 }); DS.Quiz.grade = () => true; });
-  await H.click('#h-demo'); await H.waitForTimeout(400);
-  const hp = await H.evaluate(() => DS.Lessons.get('set-05').boss.hpItems);
-  out.push(['형성평가 1번만', (await state()).normal]);
-  for (let i = 0; i < hp; i++) { await H.click(`[data-di="${i}"]`); await H.waitForTimeout(250); }
-  out.push(['형성평가 다 맞힘', await state()]); await H.screenshot({ path: `${OUT}/63-3-boss.png` });
+  await H.click('#h-demo'); await H.waitForTimeout(400); // 2026-11-06: 형성평가도 한 화면 · 💡 정답 펼치기
+  out.push(['형성평가 펼치기 전', (await state()).normal]);
+  await H.click('#demo-reveal'); await H.waitForTimeout(300);
+  out.push(['형성평가 정답 펼침', await state()]); await H.screenshot({ path: `${OUT}/63-3-boss.png` });
   out.push(['형성평가 필살기 컷인?', await cut('[data-strike="1"]')]);
   out.forEach(([k, v]) => console.log(k.padEnd(16), JSON.stringify(v)));
   console.log('ERRORS', errs.length, errs.slice(0, 5)); await b.close();

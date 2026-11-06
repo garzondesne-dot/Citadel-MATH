@@ -20,8 +20,8 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
     const btn = await H.textContent('#h-demo').catch(() => 'none');
     const res = [];
     for (const set of [0, 1]) {
-      await H.click('#h-demo'); await H.waitForTimeout(400); if (set) { await H.click('[data-ds="2"]'); await H.waitForTimeout(300); }
-      const n = await H.$$eval('#h-demo-ov .bitem', (x) => x.length);
+      await H.click('#h-demo'); await H.waitForTimeout(400); if (set) { await H.click('#h-demo-ov [data-da="1"]'); await H.waitForTimeout(300); }
+      const n = await H.$$eval('#h-demo-ov .demo-items > .item, #h-demo-ov .demo-items > .demo-bwrap', (x) => x.length); // 2026-11-06: 한 화면 시연
       // 정답 채우기 (화면 칸으로 직접)
       const ok = await H.evaluate(async ([lid, set]) => {
         const L = DS.Lessons.get(lid), items = L.boss.sets[set ? 2 : 1];
@@ -33,22 +33,14 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
     }
     console.log(lid, '버튼:', btn, '|', res.join(' · '));
   }
-  // 마지막 차시(6차시)에서 실제로 눌러 풀기: 1~6번을 정답으로 → 선생님의 일격
+  // 2026-11-06: 형성평가 시연 = 한 화면 · 「부분집합 모두 쓰기」 문항만 학생과 같은 입력 창 (3차시 4번) → 입력 창이 시연 창 위에 뜨는지
   {
-    const quizRight = async (i) => {
-      await H.click(`[data-di="${i}"]`); await H.waitForTimeout(400);
-      const q = await H.evaluate((i) => { const it = DS.Lessons.get('set-06').boss.sets[1][i]; return { type: it.type, ans: it.type === 'choice' ? it.answerIndex : it.answer }; }, i);
-      if (q.type === 'choice') await H.click(`.modal .choice >> nth=${q.ans}`).catch(async () => { await H.click(`.modal [data-i="${q.ans}"]`).catch(() => {}); });
-      else { const inp = await H.$('.modal input'); if (inp) await inp.fill(String(q.ans)); }
-      await H.waitForTimeout(200);
-      const sub = await H.$('.modal .btn.primary'); if (sub) await sub.click();
-      await H.waitForTimeout(700);
-      const m = await H.$('.modal'); if (m) { const c = await H.$('.modal .btn'); if (c) await c.click(); await H.waitForTimeout(300); }
-    };
+    const { code, hallKey: key } = await T.evaluate(() => DS.Act.createRoom('set-03', '1-3'));
+    await T.evaluate(async (c) => { await DS.Net.set(`rooms/${c}/players/v1`, { num: 1, nick: '용사', hero: 0, at: Date.now() }); const R = DS.Act.unpackRoom(await DS.Net.get(`rooms/${c}`)); const L = DS.Lessons.get(R.meta.lesson); await DS.Act.go(c, R, L, 1); await DS.Net.update(`rooms/${c}/state`, { step: L.steps.findIndex((s) => s.kind === 'boss'), focus: false }); }, code);
+    await H.goto(`${U}&role=hall&code=${code}&key=${key}`); await H.waitForTimeout(2000);
     await H.click('#h-demo'); await H.waitForTimeout(400);
-    console.log('시연 창 위 입력 창 보임 테스트 →');
-    await H.click('[data-di="0"]'); await H.waitForTimeout(400);
-    console.log('  modal z:', await H.evaluate(() => { const m = document.querySelector('.modal'); return m ? getComputedStyle(m).zIndex : 'none'; }), '· 보기 버튼 수:', await H.$$eval('.modal .choice, .modal button', (x) => x.length));
+    await H.click('#h-demo-ov [data-ask]'); await H.waitForTimeout(400);
+    console.log('부분집합 입력 창 z:', await H.evaluate(() => { const q = document.getElementById('quiz'); return q && !q.classList.contains('hidden') ? getComputedStyle(q).zIndex : 'none'; }), '· 시연 창 z:', await H.evaluate(() => getComputedStyle(document.getElementById('h-demo-ov')).zIndex));
     await H.screenshot({ path: `${OUT}/boss-demo-quiz.png` });
   }
   console.log('errors:', errs.length ? errs : 'none');

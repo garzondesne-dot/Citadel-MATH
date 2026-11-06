@@ -1041,6 +1041,10 @@ details.panel[open] > summary::before { content: '▾ '; }
 .demo-items { display: grid; grid-template-columns: 1fr; gap: 10px; font-size: 1.15em; } /* 한 줄에 한 문제 · 가운데 상자 안에서 위아래로 */
 .demo-res { font-size: 28px; font-weight: 700; margin: 6px 0 10px; } .demo-res.ok { color: #4dffb0; } .demo-res.ng { color: #ff9a7a; }
 .demo-row { margin-top: 12px; justify-content: flex-end; }
+.demo-go-row { display: flex; gap: 12px; margin-top: 10px; position: sticky; bottom: -16px; padding: 10px 0 12px; background: linear-gradient(transparent, #0e1730 30%); z-index: 2; }
+.demo-box.boss { width: min(1240px, 96vw); } .demo-items.two { grid-template-columns: 1fr 1fr; font-size: 1em; } .demo-items.two .item-opts.col { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; } /* 형성평가 시연 = 2열 · 보기도 2열 → 한 화면에 */ .demo-go-row .btn { flex: 1 1 0; margin: 0; } /* 💡 정답 펼치기 · ⚔ 공격 (2026-11-06) */
+.demo-bonus { display: inline-block; margin-left: 6px; padding: 0 6px; border-radius: 8px; background: #3a2a0c; color: #ffd25a; font-size: .8em; } .demo-bwrap > .demo-bonus { margin: 0 0 4px; }
+.mark .sol-line { color: #ffe9a8; }
 .teach-strike { position: absolute; left: 6%; bottom: 8%; z-index: 12; opacity: 0; transform: translate(-60px, 0) scale(1.1); transition: none; }
 .teach-strike .art { width: clamp(110px, 16vh, 170px); height: clamp(110px, 16vh, 170px); filter: drop-shadow(0 0 18px #ffe7a8); }
 .teach-strike.go { animation: teachStrike 1.45s cubic-bezier(.3, 1.2, .5, 1) forwards; }
