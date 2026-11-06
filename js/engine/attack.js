@@ -79,9 +79,14 @@ DS.Attack = (function () {
   // ⚡ 필살기 컷인 (2026-11-06 사용자 「난무만 안 하게 · 퍼펙트 뜰 때 · Ⅳ 해금」): 화면 전체 위에 1.2초 — Ⅳ 결정석 + 퍼펙트 처치에서만 부른다
   const ULT_COLOR = { wind: ['#9affd8', '#05301f'], cut: ['#9fe0ff', '#0b2a40'], smash: ['#ffb070', '#3a1a06'], sweep: ['#a0ffd0', '#06301e'], fire: ['#ff7a3a', '#3a0d00'], spark: ['#fff27a', '#2a2a00'], frost: ['#b8f0ff', '#062a3a'], star: ['#ffe9a0', '#2a2206'], magic: ['#d8a0ff', '#24063a'] };
   // 눈빛 클로즈업: assets/manifest.js heroFaces (576×432 · 칸 192×72 · 3 × 6 · 번호 = 용사 번호) 가 오면 그 그림 · 없으면 도트 확대 (2026-11-06)
+  // 🖼 얼굴 그림 미리 받기 (2026-11-06 사용자 「선생님 필살기 때 얼굴 클로즈업이 안 됐어」: 종합실 · 수업 폰에서 미리 받지 않아 1초 컷인 안에 못 받음)
+  let faceImg = null;
+  function preloadFaces() { const F = A().heroFaces; if (!F || !F.src || faceImg || typeof Image === 'undefined') return; faceImg = new Image(); faceImg.src = A().base + F.src; }
+  const faceReady = () => !!(faceImg && faceImg.complete && faceImg.naturalWidth);
   function faceHtml(hero) {
     const F = A().heroFaces, n = Number(hero) || 0;
-    if (F && F.src && n < F.cols * F.rows) { const c = n % F.cols, r = Math.floor(n / F.cols); return `<i class="u-facepic" style="background-image:url('${A().base}${F.src}');background-size:${F.cols * 100}% ${F.rows * 100}%;background-position:${F.cols > 1 ? (c / (F.cols - 1)) * 100 : 0}% ${F.rows > 1 ? (r / (F.rows - 1)) * 100 : 0}%"></i>`; }
+    preloadFaces(); // 아직 못 받았으면 아래 확대 도트 얼굴로 (빈 띠 대신)
+    if (F && F.src && n < F.cols * F.rows && faceReady()) { const c = n % F.cols, r = Math.floor(n / F.cols); return `<i class="u-facepic" style="background-image:url('${A().base}${F.src}');background-size:${F.cols * 100}% ${F.rows * 100}%;background-position:${F.cols > 1 ? (c / (F.cols - 1)) * 100 : 0}% ${F.rows > 1 ? (r / (F.rows - 1)) * 100 : 0}%"></i>`; }
     return `<div class="u-face">${DS.Art.hero(hero, 'idle')}</div>`;
   }
   function cutin(hero, fx) {
@@ -148,9 +153,9 @@ DS.Attack = (function () {
     }
     setPose(heroBox, hero, rest, rest === 'think' ? 'huff' : '');
   }
-  const preload = (hero, fx) => { if (!DS.FX) return; DS.FX.preload(fx); const p = projOf(hero); if (p) DS.FX.preload(p); const F = A().heroFaces; if (F && F.src && canUlt(fx, hero) && !preload.face) { preload.face = new Image(); preload.face.src = A().base + F.src; } }; // 필살기 쓸 수 있으면 얼굴 그림도 미리
+  const preload = (hero, fx) => { if (!DS.FX) return; DS.FX.preload(fx); const p = projOf(hero); if (p) DS.FX.preload(p); if (canUlt(fx, hero)) preloadFaces(); }; // 필살기 쓸 수 있으면 얼굴 그림도 미리
   // 필살기 조건: Ⅳ 전설 · 특화 스킬 + 퍼펙트(그 전투 첫 판에 하나도 안 틀리고 모두 맞힘) — 퍼펙트가 완성되는 공격에서 (2026-11-06: 「마지막 일격」 조건은 뺌)
   // 2026-11-06 사용자 「필살기 그리고 특화일 때만」: Ⅳ 전설 + 그 용사의 친화(특화) 계열 스킬일 때만
   const canUlt = (fx, hero) => !!(DS.FX && DS.FX.tierOf(fx) === 3 && DS.FX.resonates(hero, fx));
-  return { projOf, isRanged, play, impact, fly, preload, shake, knock, cutin, canUlt, ultBlast };
+  return { projOf, isRanged, play, impact, fly, preload, preloadFaces, shake, knock, cutin, canUlt, ultBlast };
 })();

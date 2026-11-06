@@ -16,6 +16,7 @@ DS.Hall = (function () {
     if (code !== c) { hxSeen = lvSeen = ulSeen = hthSeen = null; lvQ = []; ulQ = []; sndKey = ''; try { if (DS.Sound) { DS.Sound.setSfx(localStorage.getItem('ds-sfx-off') !== '1', false); DS.Sound.setBgm(localStorage.getItem('ds-bgm-off') !== '1', false); } } catch (e) { /* 무시 */ } } // 2026-11-06 검증: 다음 수업으로 넘어가면 「본 것」 기록 · 리모컨 소리 설정을 새로 (+EXP · 필살기 컷인이 안 나오거나 음소거가 이어지던 것)
     code = c; hallKey = String(key); camped = false; L = null; R = null; built = '';
     if (!atkT) atkT = setInterval(hallAtk, 200);
+    if (DS.Attack && DS.Attack.preloadFaces) DS.Attack.preloadFaces(); // ⚡ 필살기 컷인 얼굴 (선생님 · 학생) 미리
     try { localStorage.setItem('citadel-hall', JSON.stringify({ code: c })); } catch (e) { /* 무시 */ } // 2026-11-06 사용자: 비밀번호는 기억하지 않음 (메뉴로 가거나 다시 접속하면 다시 입력)
     DS.UI.show('screen-hall');
     DS.Scene.save({ role: 'hall', code: c }); // 새로고침 · 다시 접속 → 코드만 채워 두고 비밀번호는 다시
