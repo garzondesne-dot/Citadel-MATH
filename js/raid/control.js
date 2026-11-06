@@ -132,9 +132,10 @@ DS.Control = (function () {
   function tbarHtml(L, R, opt = {}) {
     const d = Raid().deadline(R); if (!d || Raid().isClosed(R) || Raid().isLobby(R)) return '';
     const prog = Raid().progress(L, R), ext = Number((R.state || {}).extend) || 0, won = Raid().bossHp(L, R).won || Raid().isEnd(L, R);
+    const total0 = TB_TOTAL + ext * 60e3, left0 = Math.max(0, d - DS.Net.now()), f0 = (Math.max(0, Math.min(1, left0 / total0)) * 100).toFixed(2), s0 = Math.ceil(left0 / 1000); // 처음 그릴 때부터 제자리 (0 에서 늘어나는 깜빡임 없음)
     return `<div class="tb${opt.mini ? ' mini' : ''}${opt.compact ? ' compact' : ''}${won ? ' won' : ''}" data-dl="${d}" data-total="${TB_TOTAL + ext * 60e3}" data-prog="${prog}"${opt.only ? ` data-only="${opt.only}"` : ''}>
-      <div class="tb-row"><span class="tb-t">${won ? '⏰ 시간 안에 클리어!' : `⏳ <b>${hm(d)}</b> 👑 보스가 문을 닫아요`} · 남은 <b class="tb-left">--:--</b></span>${opt.ext && !ext && !won ? '<button class="btn small tb-ext" data-extend>⏰ +5분</button>' : ext ? '<span class="muted small">(+5분 연장)</span>' : ''}</div>
-      <div class="tb-bar"><i class="tb-door">🚪</i><div class="tb-fill"></div><i class="tb-boss">👑</i></div>
+      <div class="tb-row"><span class="tb-t">${won ? '⏰ 시간 안에 클리어!' : `⏳ <b>${hm(d)}</b> 👑 보스가 문을 닫아요`} · 남은 <b class="tb-left">${Math.floor(s0 / 60)}:${String(s0 % 60).padStart(2, '0')}</b></span>${opt.ext && !ext && !won ? '<button class="btn small tb-ext" data-extend>⏰ +5분</button>' : ext ? '<span class="muted small">(+5분 연장)</span>' : ''}</div>
+      <div class="tb-bar"><i class="tb-door">🚪</i><div class="tb-fill" style="width:${f0}%"></div><i class="tb-boss" style="left:calc(${f0}% - 10px)">👑</i></div>
       ${opt.prog ? `<div class="tb-prog"><div class="tb-pf" style="width:${(prog * 100).toFixed(1)}%"></div><span>⚔ 던전 진행 ${Math.round(prog * 100)}%</span></div>` : ''}</div>`;
   }
   const timeUpFns = {};
