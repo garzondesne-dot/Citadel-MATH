@@ -32,7 +32,7 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   log.push('반대로 머리말: ' + (await H.textContent('.fa-head')).replace(/\s+/g, ' ').trim());
   await H.screenshot({ path: `${OUT}/1-rev-pick.png` });
   await S.click('.fa-pick .fa-a'); await vote('r1', { bot1: 'a', bot2: 'b', bot3: 'b', bot4: 'b', bot5: 'b' });
-  await H.waitForFunction(() => document.querySelector('.k-rev .fa-plat.fall'), null, { timeout: 12000 }); await H.waitForTimeout(700);
+  await H.waitForFunction(() => document.querySelector('.k-rev .fa-plat.broken'), null, { timeout: 12000 }); /* 2026-11-06: 바닥 꺼짐 연출 = .broken (조각 · 먼지) */ await H.waitForTimeout(700);
   await H.screenshot({ path: `${OUT}/2-rev-boing.png` });
   log.push('반대로 공개: ' + (await H.textContent('.fa-foot')).trim());
   await S.screenshot({ path: `${OUT}/3-rev-phone.png` }); log.push('학생: ' + (await S.textContent('.fa-me')).trim());

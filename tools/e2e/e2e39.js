@@ -21,7 +21,7 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   await p.click('#camp-mail'); await p.waitForTimeout(1200); await shot('04-mail'); await xCheck('우편함');
   await p.mouse.click(5, 775); await p.waitForTimeout(500); log.push('바깥 눌러 닫힘: ' + ((await p.locator('.modal.camp-modal').count()) === 0)); await close();
   await p.click('#camp-castle'); await p.waitForTimeout(1500); await shot('05-dungeon');
-  await p.evaluate(() => document.querySelector('[data-fight]').click()); await shot('06-dungeon-fight'); await close();
+  await p.evaluate(() => { const pt = document.querySelector('.cs-portal[data-floor="eval-1"]'); if (pt) pt.click(); }); await p.waitForTimeout(400); /* 2026-11-06: 🏰 성채 포털 메뉴 → 1층 */ await p.evaluate(() => document.querySelector('[data-fight]').click()); await shot('06-dungeon-fight'); await close();
   await p.evaluate((m) => DS.Bonus.enter(m, { train: true }), me); await shot('07-dummy');
   await p.evaluate((m) => DS.Camp.enter(m), me); await p.waitForTimeout(800);
   await p.click('#camp-anvil'); await p.waitForTimeout(1500); await shot('08-forge'); await close();

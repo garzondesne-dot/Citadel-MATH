@@ -12,7 +12,7 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   const me = { c: '1-1', n: 3, name: '박도윤', hero: 3, fx: 'flame' };
   await p.evaluate(() => { window.DS_ATK = { monster: [1, 3, 1], boss: [1, 3, 1] }; }); // 시험: 3초마다 1초
   await p.evaluate((m) => DS.Bonus.enter(m), me); await p.waitForTimeout(900);
-  await p.evaluate(() => document.querySelector('[data-fight^="set-05|b"], [data-fight^="set-04|b"], [data-fight]').click()); await p.waitForTimeout(600);
+  await p.evaluate(() => { const pt = document.querySelector('.cs-portal[data-floor="eval-1"]'); if (pt) pt.click(); }); await p.waitForTimeout(500); /* 2026-11-06: 보강 → 🏰 성채 1층 */ await p.evaluate(() => document.querySelector('[data-fight]').click()); await p.waitForTimeout(600);
   await p.click('#bf-go'); await p.waitForTimeout(500);
   let txt = '', seen = 0, gone = 0;
   for (let k = 0; k < 60; k++) { await p.waitForTimeout(100); const t = await p.evaluate(() => { const s = document.querySelector('.stun'); return s ? s.textContent : ''; }); if (t && !seen) { seen = k; txt = t; } if (seen && !t && !gone) { gone = k; break; } }

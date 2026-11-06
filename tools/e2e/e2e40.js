@@ -17,7 +17,7 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   await p.click('#camp-tent'); await p.waitForTimeout(800); await shot('04-shelf'); await close();
   await p.click('#camp-mail'); await p.waitForTimeout(800); await shot('05-mail'); await close();
   await p.click('#camp-castle'); await p.waitForTimeout(1200); await shot('06-dungeon');
-  await p.evaluate(() => document.querySelector('[data-fight]').click()); await shot('07-fight'); await close();
+  await p.evaluate(() => { const pt = document.querySelector('.cs-portal[data-floor="eval-1"]'); if (pt) pt.click(); }); await p.waitForTimeout(400); /* 2026-11-06: 🏰 성채 포털 메뉴 → 1층 */ await p.evaluate(() => document.querySelector('[data-fight]').click()); await shot('07-fight'); await close();
   await p.evaluate((m) => DS.Camp.enter(m), me); await p.waitForTimeout(800);
   await p.click('#camp-anvil'); await p.waitForTimeout(1300); await shot('08-forge'); await close();
   await p.goto(U + '&role=teacher'); await p.waitForTimeout(1200);

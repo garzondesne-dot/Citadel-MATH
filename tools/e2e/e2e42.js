@@ -16,7 +16,7 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   const st = await T.evaluate(() => ({ h: document.querySelectorAll('.set-grid .hpick').length, hl: document.querySelectorAll('.set-grid .hpick.lock').length, fx: document.querySelectorAll('.fxpick').length, fl: document.querySelectorAll('.fxpick.lock').length, tl: document.querySelectorAll('.ttl-pick.lock').length }));
   log.push(`설정 창: 용사 ${st.h}(잠김 ${st.hl}) · 이펙트 ${st.fx}(잠김 ${st.fl}) · 호칭 잠김 ${st.tl}`);
   await T.screenshot({ path: `${OUT}/2-settings.png` });
-  await T.click('.set-grid .hpick[data-h="3"]'); await T.click('.fxpick >> nth=-1'); await T.click('.ttl-pick:not([data-ttl=none]) >> nth=0'); await T.waitForTimeout(300);
+  await T.click('.set-grid .hpick[data-h="3"]'); await T.click('.set-tabs [data-tab="gem"]'); await T.click('.fxpick >> nth=-1'); await T.click('.set-tabs [data-tab="ttl"]'); await T.click('.ttl-pick:not([data-ttl=none]) >> nth=0'); /* 2026-11-06: 설정 탭 3개 */ await T.waitForTimeout(300);
   await T.click('.modal .ui-foot #set-ok, .modal #set-ok'); await T.waitForTimeout(1200);
   const after = await T.evaluate(async (c) => ({ room: await DS.Net.get(`rooms/${c}/players/${DS.Net.uid()}`), look: DS.Art.teacherLook(), hero: document.querySelector('.camp-hero .art') && document.querySelector('.camp-hero .art').outerHTML.slice(0, 120), plate: (document.querySelector('.camp-hero .camp-plate') || {}).textContent }), code);
   log.push(`저장 뒤: 방 선생님 용사 ${after.room.hero} · 이펙트 ${after.room.fx} · 이 기기 ${JSON.stringify(after.look)} · 이름표 「${(after.plate || '').trim()}」`);
