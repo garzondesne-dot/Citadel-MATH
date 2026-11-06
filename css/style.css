@@ -2217,3 +2217,7 @@ body.tb-last-min::after { content: ''; position: fixed; inset: 0; z-index: 88; p
 .ph-set label { display: block; margin: 6px 0; } .ph-set input[type=url] { width: 100%; font-size: 15px; padding: 6px 8px; border-radius: 8px; background: #08101e; color: var(--text, #eef2ff); border: 1px solid var(--line); }
 .ph-rub { width: 100%; border-collapse: collapse; font-size: 14px; margin: 6px 0; } .ph-rub td, .ph-rub th { border-bottom: 1px solid var(--line); padding: 4px 6px; text-align: left; }
 .ph-cost { margin-left: auto; align-self: center; }
+.ph-steps { list-style: none; padding: 0; margin: 8px 0; display: flex; flex-direction: column; gap: 6px; font-size: 14px; line-height: 1.5; }
+.ph-steps li { display: flex; gap: 6px; padding: 6px 8px; border-radius: 8px; background: #0b1426; border: 1px solid var(--line); } .ph-steps li.ok { border-color: #3c8a5a; } .ph-steps li.no { border-color: #8a7a3c; }
+.ph-lim { margin: 6px 0; font-size: 14px; } .ph-lim label { display: block; margin: 4px 0; } .ph-lim input { width: 64px; padding: 2px 4px; border-radius: 6px; background: #08101e; color: var(--text, #eef2ff); border: 1px solid var(--line); }
+.ph-use { margin: 8px 0; padding: 8px 10px; border-radius: 8px; background: #0b1426; border: 1px solid var(--line); font-size: 14px; line-height: 1.6; } .ph-use.warn { border-color: #ff4d5e; background: #2a1016; } .ph-use.warn b:first-child { color: #ff8a95; }

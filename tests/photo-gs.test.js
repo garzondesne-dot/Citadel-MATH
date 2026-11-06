@@ -56,6 +56,8 @@ t('만점 → pass · 사진은 저장 안 함 · 점수는 서버 계산', () =
   assert.strictEqual(b.model, 'claude-haiku-5-5'); assert.strictEqual(h.Authorization, 'Bearer k-test'); assert.ok(!h['x-api-key'], 'BAZE 는 Bearer'); assert.ok(h['anthropic-version']);
   assert.strictEqual(b.output_config.format.type, 'json_schema'); assert.ok(!('temperature' in b) && !('thinking' in b));
   assert.strictEqual(b.messages[0].content[0].type, 'image');
+  assert.ok(b.messages[0].content[1].text.includes('[인정하는 다른 풀이]'), '다른 풀이 목록이 들어감');
+  assert.ok(/학생에게 유리하게/.test(b.system) && /칭찬/.test(b.system), '너그러운 채점 · 칭찬 지침');
   assert.ok(b.messages[0].content[1].text.includes('x는 6의 약수') && b.messages[0].content[1].text.includes('18 이하의 3의 배수'), 'ask 의 {p} {N} {q} 가 채워짐');
 });
 t('부분 점수 → retry · 배점보다 큰 점수는 잘림', () => {
@@ -66,6 +68,11 @@ t('확신 낮음 · 사진 속 지시 → check (선생님 확인)', () => {
   assert.strictEqual(world({ claude: { readable: true, final_answer: '', steps: [], confidence: 'low', feedback: '', flags: [] } }).post(REQ).status, 'check');
   assert.strictEqual(world({ claude: { readable: true, final_answer: '8', steps: [{ id: 's1', earned: 1, note: '' }, { id: 's2', earned: 1, note: '' }, { id: 's3', earned: 1, note: '' }, { id: 's4', earned: 1, note: '' }], confidence: 'high', feedback: '', flags: ['instructions_in_image'] } }).post(REQ).status, 'check');
   assert.strictEqual(world({ stop: 'refusal' }).post(REQ).status, 'check');
+});
+t('한도 · 지침은 Firebase gcfg/photo 가 먼저 (교사 설정에서 바꿈)', () => {
+  const w = world({ props: { DAILY_MAX: '3' } }); w.db.gcfg = { photo: { on: true, url: 'x', daily: 6, guide: '집합 기호를 말로 써도 인정' } };
+  for (let i = 0; i < 6; i++) assert.strictEqual(w.post(REQ).ok, true);
+  assert.strictEqual(w.post(REQ).err, 'quota'); assert.ok(/선생님 추가 지침: 집합 기호/.test(w.calls.claude[0].b.system));
 });
 t('선생님 확인(check)은 장 수를 돌려줌 · 그래도 하루 6번(raw)까지만', () => {
   const w = world({ claude: { readable: false, final_answer: '', steps: [], confidence: 'low', feedback: '', flags: ['unclear'] } });
