@@ -239,7 +239,7 @@ DS.App = (function () {
       document.querySelectorAll('.t-out').forEach((b) => (b.onclick = go(async () => { await A().logout(); await teacherAuth(); await studentAuth(); })));
       const cs = Object.keys((await A().masks()) || {}).sort();
       $('#t-cls').innerHTML = cs.length ? cs.map((c) => `<option>${esc(c)}</option>`).join('') : '<option value="">(명단 없음 — 수업 준비에서 올려요)</option>';
-      $('#t-cls').onchange = () => suggestLesson().catch(() => {}); suggestLesson().catch(() => {}); // 🔄 2026-11-06: 반을 고르면 그 반의 다음 차시로
+      $('#t-cls').onchange = () => suggestLesson().catch(() => {}); $('#lesson').onchange = () => resumeHint().catch(() => {}); suggestLesson().catch(() => {}); // 🔄 2026-11-06: 반을 고르면 그 반의 다음 차시로
       const t = read('citadel-teacher');
       $('#t-resume').hidden = true; // 「📋 만든 수업」 목록으로 합침 (v0.8.4)
       liveList(cs);
@@ -271,7 +271,20 @@ DS.App = (function () {
     const done = codeL.filter((x) => held[x.id]).map((x) => x.no);
     if (next) sel.value = next.id;
     hint.textContent = `📚 ${cls}반 · ${done.length ? `${done.join(' · ')}차시 함 → ` : ''}${next ? `${next.no}차시 차례라 골라 두었어요` : '차시를 골라 주세요'}`;
+    resumeHint().catch(() => {});
   }
+  // ▶ 지난 수업 이어서 (2026-11-06): 같은 반 · 같은 차시에 「⏸ 수업 끝 (저장)」 지점이 있으면 단추
+  async function resumeHint() {
+    const cls = ($('#t-cls') || {}).value, lid = ($('#lesson') || {}).value; let b = document.getElementById('t-resume2');
+    if (!b) { b = document.createElement('button'); b.id = 't-resume2'; b.className = 'btn big t-resume2'; b.hidden = true; $('#t-new').after(b); }
+    b.hidden = true; if (!cls || !lid) return;
+    let codes = []; try { codes = (JSON.parse(localStorage.getItem('citadel-rooms')) || []).filter((r) => r.cls === cls && r.lesson === lid).map((r) => r.code).slice(0, 5); } catch (e) { /* 없음 */ }
+    const r = await DS.Act.resumeInfo(lid, cls, codes); if (!r) return;
+    const Lx = DS.Lessons.get(lid);
+    b.innerHTML = `▶ 지난 수업 이어서 <small>${Lx.no}차시 · 「${esc(r.title)}」부터</small>`; b.hidden = false;
+    b.onclick = go(async () => { await DS.Teacher.create(lid, cls, { resume: r.stop, resumeOf: r.code }); });
+  }
+
   function bind() {
     document.querySelectorAll('.role').forEach((b) => (b.onclick = () => form(b.dataset.role)));
     $('#t-new').onclick = go(async () => {

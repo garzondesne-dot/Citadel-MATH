@@ -32,7 +32,8 @@ DS.Prep = (function () {
       <div class="panel framed"><h2>${esc(L.unit)} ${esc(L.title)}</h2>
         <p class="muted small">학습지: ${esc(L.sheet || '')} · 이미지는 종합상황실 화면 절반에 떠요.</p>
         <div class="pct-row"><span>몬스터 체력 기준% 기본값</span><input id="p-pct" type="number" min="10" max="100" step="5" value="${data.pct || L.defaultPct || 90}"><button class="btn" id="p-pct-save">저장</button><span class="muted small">수업 중에는 교사 폰에서 몬스터마다 바꿔요</span></div>
-        <div class="pct-row"><span>🤔 생각 시간 (틀린 뒤 재도전까지)</span><select id="p-think">${[0, 5, 10, 15].map((v) => `<option value="${v}"${(data.think != null ? Number(data.think) : 5) === v ? ' selected' : ''}>${v ? `${v}초` : '끄기'}</option>`).join('')}</select><span class="muted small">해설은 읽을 수 있고 「다시 도전」만 잠깐 잠겨요 · 새로 만드는 수업부터</span></div></div>
+        <div class="pct-row"><span>🤔 생각 시간 (틀린 뒤 재도전까지)</span><select id="p-think">${[0, 5, 10, 15].map((v) => `<option value="${v}"${(data.think != null ? Number(data.think) : 5) === v ? ' selected' : ''}>${v ? `${v}초` : '끄기'}</option>`).join('')}</select><span class="muted small">해설은 읽을 수 있고 「다시 도전」만 잠깐 잠겨요 · 새로 만드는 수업부터</span></div>
+        <div class="pct-row"><span>📝 풀이 시간 (중단원 평가 문항 · 입력 잠금)</span><select id="p-solve">${[0, 30, 60, 90, 120, 180].map((v) => `<option value="${v}"${(data.solve != null ? Number(data.solve) : 60) === v ? ' selected' : ''}>${v ? `${v}초` : '끄기'}</option>`).join('')}</select><span class="muted small">문제가 열리면 ❄ 꽁꽁 묶기 — 학습지에 먼저 풀고 입력 · 수업 중에도 리모컨에서 켜고 끄기 · 새로 만드는 수업부터</span></div></div>
       ${pdfPanel()}
       <div class="panel framed p-slots-top"><h2>🖼 단계별 이미지 <span class="muted small">${slots.filter((s) => (data.img || {})[s.id]).length} / ${slots.length}칸</span></h2>
         <div class="row"><button class="btn small" id="p-open-all">모두 펼치기</button><button class="btn small" id="p-close-all">모두 접기</button></div></div>
@@ -44,6 +45,7 @@ DS.Prep = (function () {
     bindSheet();
     $('#p-open-all').onclick = () => { slots.forEach((s) => opened.add(s.id)); render(); };
     $('#p-close-all').onclick = () => { opened = new Set(); editing = null; render(); };
+    $('#p-solve').onchange = () => DS.Control.run(async () => { await DS.Net.set(`prep/${L.id}/solve`, Number($('#p-solve').value)); DS.UI.toast('풀이 시간을 저장했어요.'); }); // 📝 2026-11-06
     $('#p-think').onchange = () => DS.Control.run(async () => { await DS.Act.setThink(L.id, Number($('#p-think').value)); DS.UI.toast('생각 시간을 저장했어요.'); });
     $('#p-pct-save').onclick = () => DS.Control.run(async () => { await DS.Act.setDefaultPct(L.id, Math.max(10, Math.min(100, Number($('#p-pct').value) || 90))); DS.UI.toast('기준% 기본값을 저장했어요. 새로 만드는 수업부터 적용돼요.'); });
     bindSlots();
@@ -299,7 +301,7 @@ DS.Prep = (function () {
     if (dl) dl.onclick = () => DS.Control.run(async () => {
       if (!tidy.backedUp || !confirm(`${L.title}\n수업 방 ${tidy.rooms.length}개 · 학습지 이미지 · 올린 영상을 서버에서 지울까요?\n(백업 파일로만 되살릴 수 있어요)`)) return;
       for (const c of tidy.rooms) { await DS.Net.remove(`rooms/${c}`).catch(() => {}); await DS.Net.remove(`secrets/${c}`).catch(() => {}); }
-      const keep = { pct: data.pct ?? null, think: data.think ?? null };
+      const keep = { pct: data.pct ?? null, think: data.think ?? null, solve: data.solve ?? null };
       await DS.Net.remove(`prepVideo/${L.id}`).catch(() => {});
       await DS.Net.remove(`prep/${L.id}`).catch(() => {});
       for (const [k, v] of Object.entries(keep)) if (v != null) await DS.Net.set(`prep/${L.id}/${k}`, v).catch(() => {});

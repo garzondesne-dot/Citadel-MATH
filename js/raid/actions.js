@@ -39,7 +39,8 @@ DS.Act = (function () {
     let pct = null, think = null;
     try { pct = await N().get(prepPath(lessonId, 'pct')); } catch (e) { /* 준비 안 했으면 차시 기본값 */ }
     try { think = await N().get(prepPath(lessonId, 'think')); } catch (e) { /* 기본 */ }
-    await N().update(P(code, 'state'), { lesson: lessonId, lpct: pct != null ? Number(pct) : null, lthink: think != null ? Number(think) : L.think != null ? L.think : 5, lessonAt: N().TS });
+    let solve = null; try { solve = await N().get(prepPath(lessonId, 'solve')); } catch (e) { /* 기본 60 */ }
+    await N().update(P(code, 'state'), { lsolve: solve != null ? Number(solve) : 60, lesson: lessonId, lpct: pct != null ? Number(pct) : null, lthink: think != null ? Number(think) : L.think != null ? L.think : 5, lessonAt: N().TS });
     const cls = R.meta && R.meta.cls; // 학생 캠프 문 꼬리표 (교사만 쓸 수 있는 칸 · 종합실이면 넘어감)
     if (cls) { try { const lv = await N().get(`live/${ck(cls)}`); if (lv && lv.code === code) await N().update(`live/${ck(cls)}`, { lesson: lessonId, no: L.no || 0, theme: L.theme || '' }); } catch (e) { /* 권한 없음 */ } }
   }
@@ -54,11 +55,13 @@ DS.Act = (function () {
     // ⏳ 보스 타임바 (2026-11-05 사용자): 교시 끝 = 문 닫힘 (opt.noLimit = 시간 제한 끄기 · 시험 · 시연)
     const dl = opt.noLimit || !DS.Sched ? null : opt.slot ? DS.Sched.periodEnd(Number(opt.slot.from), Number(opt.slot.p)) : DS.Sched.periodEnd(N().now());
     if (dl) room.meta.deadline = dl;
+    if (opt.resume != null) { room.meta.resumeFrom = Number(opt.resume); if (opt.resumeOf) room.meta.resumeOf = String(opt.resumeOf); } // ▶ 지난 수업 이어서 (2026-11-06)
     if (opt.noLimit) room.meta.noLimit = true; // 2026-11-06: 시간 제한 끈 방 표시 (수업 시작 때 50분을 새로 잡지 않게)
     let think = null;
     try { think = await N().get(prepPath(lessonId, 'think')); } catch (e) { /* 기본 5초 */ }
     const Lp = DS.Lessons.get(lessonId);
     room.meta.think = think != null ? Number(think) : Lp && Lp.think != null ? Lp.think : 5;
+    { let sv = null; try { sv = await N().get(prepPath(lessonId, 'solve')); } catch (e) { /* 기본 60 */ } room.meta.solve = sv != null ? Number(sv) : 60; } // 📝 풀이 시간 (중단원 평가 문항 기본 · 2026-11-06)
     // 🔥 반 최고 콤보 · 🏁 반대항 끄기 (v0.9.11)
     if (cls) { try { const cb = await N().get(`combo/${ck(cls)}`); room.meta.comboBest = Number((cb || {}).best) || 0; } catch (e) { room.meta.comboBest = 0; } }
     try { if ((await N().get(prepPath('_cfg', 'punchOff'))) === true) room.meta.punchOff = true; } catch (e) { /* 기본 켬 */ }
@@ -94,14 +97,15 @@ DS.Act = (function () {
     if (dir > 0 && i < 0) {
       const studs = Object.entries(R.players || {}).filter(([, p]) => !p.teacher).map(([u]) => u);
       if (!studs.length) fail('입장한 학생이 없어요.');
-      const f0 = Raid.autoFocus(L.steps[0]), plan = DS.Combo ? DS.Combo.batPlan(L, Math.random(), Math.random()) : null;
+      const s0 = Math.max(0, Math.min(L.steps.length - 1, Number(R.meta.resumeFrom) || 0)), f0 = Raid.autoFocus(L.steps[s0]), plan = DS.Combo ? DS.Combo.batPlan(L, Math.random(), Math.random()) : null;
       // ⏳ 2026-11-06 사용자 「50분 제한이 안 보임」: 방을 교시 밖에서 열어 문 닫힘 시각이 없으면 → 수업 시작 때 그 교시 끝(없으면 지금 + 50분)
       const dl0 = (!R.meta.deadline || R.meta.deadline < N().now() + 5 * 60e3) && !R.meta.noLimit ? ((DS.Sched && DS.Sched.periodEnd(N().now())) || N().now() + 50 * 60e3) : null;
       if (dl0) await N().set(P(code, 'state/deadline'), dl0).catch(() => {}); // 2026-11-06 검증: 지난 교시 끝에 방을 만들어 둔 경우(마감이 이미 지났거나 5분 안)도 수업 시작 시각 기준으로 다시 잡음 (바로 「문을 닫았다」 방지)
-      await N().update(P(code), { active: Object.fromEntries(studs.map((u) => [u, true])), 'state/headcount': studs.length, 'state/step': 0, 'state/stepAt': N().TS, 'state/focus': f0, 'state/focusAt': f0 ? N().now() : null, 'state/pauseMs': null, 'state/batPlan': plan, 'state/cpAt': f0 ? N().now() : null, 'state/cpMs': 0 });
+      await N().update(P(code), { active: Object.fromEntries(studs.map((u) => [u, true])), 'state/headcount': studs.length, 'state/step': s0, 'state/stepAt': N().TS, 'state/focus': f0, 'state/focusAt': f0 ? N().now() : null, 'state/pauseMs': null, 'state/batPlan': plan, 'state/cpAt': f0 ? N().now() : null, 'state/cpMs': 0 });
       const clss = [...new Set(studs.map((u) => (R.players[u] || {}).cls).filter(Boolean))];
       await unlockFor(L, clss);
-      clss.forEach((c) => N().set(`held/${ck(c)}/${L.id}`, true).catch(() => {})); // 📕 그 반이 게임으로 수업한 차시 (오답노트 「불참」 판단 · v0.9.7.9)
+      clss.forEach((c) => N().set(`held/${ck(c)}/${L.id}`, true).catch(() => {}));
+      if (R.meta.resumeFrom != null && R.meta.cls) N().set(`${prepPath(L.id, 'resume')}/${ck(R.meta.cls)}`, null).catch(() => {}); // 이어서 시작 = 저장 지점 지움 // 📕 그 반이 게임으로 수업한 차시 (오답노트 「불참」 판단 · v0.9.7.9)
       return;
     }
     if (dir > 0 && i >= L.steps.length) { // 마무리 → 수업 끝 (학생은 모닥불로 · 차원문은 꺼진 채 남음)
@@ -162,6 +166,34 @@ DS.Act = (function () {
     const cls = R.meta.cls;
     if (cls) { const lv = await N().get(`live/${ck(cls)}`).catch(() => null); if (lv && lv.code === code) await N().set(`live/${ck(cls)}/open`, false); }
     if (opt.rift && cls) await openRift(code, unpackRoom(R), opt.days || 7);
+  }
+  // ⏸ 수업 끝 (저장) (2026-11-06 사용자 「세이브 기능처럼 선생님이 수업 중간에 끝내는 기능 · 수업 끝 상시 배치」): 지금 단계를 저장하고 끝냄
+  //   → 다음에 같은 반 · 같은 차시를 열면 교사 메뉴에 「▶ 지난 수업 이어서」 · 저장 = 방 state.savedStop (종합실도) + prep/{차시}/resume/{반} (교사)
+  // 📝 풀이 시간 조절 (교사 리모컨 · 종합실): sec = 기본 초(중단원 문항) · on = 지금 단계 켜기/끄기 · now = 지금 풀기(잠금 해제)
+  async function setSolve(code, R, L, o = {}) {
+    const st = Raid.stepOf(L, R), id = st ? (st.kind === 'boss' ? 'boss' : st.id) : null, patch = {};
+    if (o.sec != null) patch.solve = Math.max(0, Math.min(300, Math.round(Number(o.sec))));
+    if (id && o.on === true) patch[`solveOn/${id}`] = { sec: Math.max(10, Number(o.onSec) || Number(patch.solve ?? (R.state || {}).solve ?? (R.meta || {}).solve ?? 60)), at: N().TS };
+    if (id && o.on === false) patch[`solveOn/${id}`] = 0;
+    if (id && o.now) patch[`solveEnd/${id}`] = N().TS;
+    if (id && o.add) { const lk = Raid.solveLock(L, R, N().now()); if (lk && lk.on) patch[`solveOn/${id}`] = { sec: Math.round((lk.end - lk.t0) / 1000 + Number(o.add)), at: lk.t0 }; }
+    if (Object.keys(patch).length) await N().update(P(code, 'state'), patch);
+  }
+  async function saveEnd(code) {
+    const raw = await N().get(P(code)); if (!raw || !raw.meta) return;
+    const R = unpackRoom(raw), L = DS.Lessons.get(R.meta.lesson), i = (R.state || {}).step ?? -1;
+    if (!L || i < 0 || Raid.isClosed(R)) fail('진행 중인 수업이 아니에요.');
+    const stop = Math.min(i, L.steps.length - 1);
+    await N().update(P(code, 'state'), { savedStop: stop });
+    const cls = R.meta.cls; if (cls) await N().set(`${prepPath(L.id, 'resume')}/${ck(cls)}`, { stop, code, at: N().TS }).catch(() => {}); // 교사만 (종합실이면 방 기록만)
+    return endClass(code, { saved: true });
+  }
+  async function resumeInfo(lessonId, cls, codes = []) { // 이어서 할 곳 { stop, code, title } | null
+    const L = DS.Lessons.get(lessonId); if (!L || !cls) return null;
+    let r = await N().get(`${prepPath(lessonId, 'resume')}/${ck(cls)}`).catch(() => null);
+    if (!r) for (const c of codes) { const st = await N().get(P(c, 'state')).catch(() => null); if (st && st.savedStop != null) { r = { stop: st.savedStop, code: c }; break; } }
+    if (!r || r.stop == null || r.stop < 1 || r.stop >= L.steps.length) return null;
+    return { ...r, title: L.steps[r.stop].title || (L.monsters[L.steps[r.stop].id] || {}).title || (L.steps[r.stop].kind === 'boss' ? L.boss.title : '') };
   }
   // ⏳ 수업을 끝낼 때: 남은 단계(몬스터 · 형성평가)가 있으면 이어하기 포털을 열지 묻는다 (2026-11-05)
   const cutShort = (L, R) => !!(L && R && !Raid.isClosed(R) && !Raid.isLobby(R) && !Raid.isEnd(L, R) && !Raid.bossHp(L, R).won);
@@ -328,12 +360,12 @@ DS.Act = (function () {
   function unpackRoom(R) {
     const out = JSON.parse(JSON.stringify(R || {}));
     // 🔄 차시 바꾸기 (2026-11-06 사용자 「차시 변경을 빠르게」): 수업 시작 전에 고른 차시는 state.lesson (meta 는 처음 만들 때만 쓸 수 있는 규칙) → 모든 화면이 이 값을 차시로 씀
-    if (out.state && out.state.lesson && out.meta && DS.Lessons && DS.Lessons.get(out.state.lesson)) { out.meta.lesson = out.state.lesson; if ('lpct' in out.state) { if (out.state.lpct) out.meta.pct = out.state.lpct; else delete out.meta.pct; } if (out.state.lthink != null) out.meta.think = out.state.lthink; }
+    if (out.state && out.state.lesson && out.meta && DS.Lessons && DS.Lessons.get(out.state.lesson)) { out.meta.lesson = out.state.lesson; if ('lpct' in out.state) { if (out.state.lpct) out.meta.pct = out.state.lpct; else delete out.meta.pct; } if (out.state.lthink != null) out.meta.think = out.state.lthink; if (out.state.lsolve != null) out.meta.solve = out.state.lsolve; }
     Object.values(out.subs || {}).forEach((byU) => Object.values(byU).forEach((byA) => Object.keys(byA).forEach((k) => { if (typeof byA[k] === 'string') byA[k] = N().unpack(byA[k]); })));
     Object.values(out.bossTry || {}).forEach((byI) => Object.values(byI || {}).forEach((byA) => Object.keys(byA || {}).forEach((k) => { if (typeof byA[k] === 'string') byA[k] = N().unpack(byA[k]); })));
     Object.values(out.bossAns || {}).forEach((bySet) => Object.keys(bySet).forEach((k) => { if (typeof bySet[k] === 'string') bySet[k] = N().unpack(bySet[k]); }));
     return out;
   }
 
-  return { switchLesson, setSound, bossTry, openRooms, savePunch, finishOvertime, setPunchOff, punchOff, batTick, batAnswer, hit, endClassAsk, timeUp, extendTime, openRift, cutShort, setRest, setRestMin, markBossWin, prepLite, prepImg, hasImg, setVideoFile, setVideoOn, endClass, admitLate, getPrep, setImage, setVideo, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, heal, bossAnswer, unpackRoom, P };
+  return { setSolve, saveEnd, resumeInfo, switchLesson, setSound, bossTry, openRooms, savePunch, finishOvertime, setPunchOff, punchOff, batTick, batAnswer, hit, endClassAsk, timeUp, extendTime, openRift, cutShort, setRest, setRestMin, markBossWin, prepLite, prepImg, hasImg, setVideoFile, setVideoOn, endClass, admitLate, getPrep, setImage, setVideo, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, heal, bossAnswer, unpackRoom, P };
 })();

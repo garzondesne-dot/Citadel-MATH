@@ -12,8 +12,8 @@ DS.Teacher = (function () {
   // 교사 폰에서는 종합상황실 키를 바로 보여 준다 (종합상황실 입력칸만 **** 로 가림 — 사용자 결정 v0.5.0)
   const keyHtml = () => `<b>${esc($('#t-key').textContent) || '—'}</b>`;
 
-  async function create(lessonId, cls) {
-    const r = await DS.Act.createRoom(lessonId, cls);
+  async function create(lessonId, cls, opt = {}) {
+    const r = await DS.Act.createRoom(lessonId, cls, opt);
     try { localStorage.setItem('citadel-teacher', JSON.stringify({ code: r.code, hallKey: r.hallKey, uid: DS.Net.uid() })); } catch (e) { /* 무시 */ }
     try { const a = JSON.parse(localStorage.getItem('citadel-rooms')) || []; a.unshift({ code: r.code, cls: cls || '', lesson: lessonId, uid: DS.Net.uid(), at: Date.now() }); localStorage.setItem('citadel-rooms', JSON.stringify(a.slice(0, 30))); } catch (e) { /* 무시 */ } // 📋 만든 수업 목록
     return open(r.code, r.hallKey); // v0.9.2: 교사 폰은 리모컨에서 바로 시작 (교사 캠프는 종합상황실 첫 화면 · 수업 끝 뒤 버튼)
@@ -49,12 +49,12 @@ DS.Teacher = (function () {
     const tb = $('#t-tbar'); if (tb) { const sig = `${Raid().deadline(R)}|${Raid().isClosed(R)}|${Raid().bossHp(L, R).won}|${Raid().isLobby(R)}|${(R.state || {}).extend || 0}`; if (tb.dataset.sig !== sig) { tb.dataset.sig = sig; tb.innerHTML = C().tbarHtml(L, R, { mini: true, ext: true }); } C().bindExtend(tb, code, R); } // 2026-11-06 사용자 「교사 폰 타이머가 0으로 줄었다 늘었다」: 방이 바뀔 때마다 막대를 새로 그려 폭 0 → 제자리로 다시 늘어나던 것 → 마감 · 연장 · 승리가 바뀔 때만 다시 그림
     const body = $('#t-body');
     const live = !Raid().isLobby(R) && !Raid().isClosed(R);
-    body.innerHTML = `<div class="panel framed t-now">${now()}${C().pctHtml(L, R)}${live ? C().remoteGrid(L, R, videos) : ''}${DS.ShareCard.klassReady(L, R) ? '<button class="btn sc-btn" id="t-news">🏫 학급 결과 · 우리 반 수업 소식</button>' : ''}${DS.Punch && R.meta.cls && L.no && !L.eval && (Raid().isEnd(L, R) || Raid().isClosed(R)) ? `<button class="btn small" id="t-punch">🏁 반대항 경주 ${DS.Act.punchOff(R) ? '꺼짐 → 켜기' : '켜짐 → 끄기'}</button>` : ''}${DS.Gem && R.meta.cls ? '<button class="btn small" id="t-gift">💎 마정석 선물</button>' : ''}${(() => { const sd = (R.state || {}).sound || { sfx: true, bgm: true }; return `<div class="t-snd"><button class="btn small" id="t-sfx">🖥 종합실 효과음 ${sd.sfx === false ? '🔇 꺼짐' : '🔊 켜짐'}</button><button class="btn small" id="t-bgm">🖥 종합실 배경음 ${sd.bgm === false ? '🔇 꺼짐' : '🎵 켜짐'}</button></div>`; })()}${Raid().isClosed(R) ? '<button class="btn primary" id="t-tcamp">🏛 교사 캠프 가기</button>' : ''}</div>
+    body.innerHTML = `<div class="panel framed t-now">${now()}${C().pctHtml(L, R)}${live ? C().solveHtml(L, R) : ''}${live ? C().remoteGrid(L, R, videos) : ''}${DS.ShareCard.klassReady(L, R) ? '<button class="btn sc-btn" id="t-news">🏫 학급 결과 · 우리 반 수업 소식</button>' : ''}${DS.Punch && R.meta.cls && L.no && !L.eval && (Raid().isEnd(L, R) || Raid().isClosed(R)) ? `<button class="btn small" id="t-punch">🏁 반대항 경주 ${DS.Act.punchOff(R) ? '꺼짐 → 켜기' : '켜짐 → 끄기'}</button>` : ''}${DS.Gem && R.meta.cls ? '<button class="btn small" id="t-gift">💎 마정석 선물</button>' : ''}${(() => { const sd = (R.state || {}).sound || { sfx: true, bgm: true }; return `<div class="t-snd"><button class="btn small" id="t-sfx">🖥 종합실 효과음 ${sd.sfx === false ? '🔇 꺼짐' : '🔊 켜짐'}</button><button class="btn small" id="t-bgm">🖥 종합실 배경음 ${sd.bgm === false ? '🔇 꺼짐' : '🎵 켜짐'}</button></div>`; })()}${Raid().isClosed(R) ? '<button class="btn primary" id="t-tcamp">🏛 교사 캠프 가기</button>' : ''}</div>
       ${Raid().isLobby(R) ? lobby() : Raid().isEnd(L, R) ? `<div class="panel framed">${DS.Survey ? DS.Survey.ctlHtml(R, svSt) : ''}${C().wordsHtml(R)}</div>` : helpPanel()}
       <p class="t-next muted small">다음 ▶ <b>${esc(C().nextName(L, R))}</b></p>
-      <div class="t-pad"><button class="btn t-back" id="t-back"${i < 0 ? ' disabled' : ''}>◀<br>뒤로</button><button class="btn primary t-fwd" id="t-fwd"${Raid().isClosed(R) ? ' disabled' : ''}>▶<br>${Raid().isFinale(L, R) ? '수업 끝' : '앞으로'}</button></div>`;
+      <div class="t-pad"><button class="btn t-back" id="t-back"${i < 0 ? ' disabled' : ''}>◀<br>뒤로</button><button class="btn primary t-fwd" id="t-fwd"${Raid().isClosed(R) ? ' disabled' : ''}>▶<br>${Raid().isFinale(L, R) ? '수업 끝' : '앞으로'}</button></div>${C().saveBtn(R)}`;
     if (Raid().isLobby(R)) drawQR();
-    C().bindRest(body, code, R); C().bindPct(body, code, R, L); C().bindFocus(body, code, R); C().bindSheet(body, code, R); C().bindVideo(body, code, R); C().bindWords(body, code, R); C().bindLesson(body, code, R);
+    C().bindRest(body, code, R); C().bindPct(body, code, R, L); C().bindFocus(body, code, R); C().bindSheet(body, code, R); C().bindVideo(body, code, R); C().bindWords(body, code, R); C().bindLesson(body, code, R); C().bindSave(body, code, R, L); C().bindSolve(body, code, R, L);
     if (DS.Survey) DS.Survey.bindCtl(body, R, L);
     const nb = $('#t-news'); if (nb) nb.onclick = () => C().run(() => DS.ShareCard.klassOpen(L, R, { praise: true }));
     const pb = $('#t-punch'); if (pb) pb.onclick = () => C().run(async () => { const off = !DS.Act.punchOff(R); await DS.Act.setPunchOff(code, off); DS.UI.toast(off ? '🏁 반대항 경주를 껐어요 (다음 수업도 꺼짐)' : '🏁 반대항 경주를 켰어요'); });

@@ -70,6 +70,23 @@ DS.Gem = (function () {
   }
   // 아직 안 본 선물 합계 (학생 캠프 알림용 · seen = 마지막으로 본 시각)
   const giftsSince = (d, seen) => Object.values((d || {}).log || {}).filter((x) => x && x.gift && Number(x.at) > (Number(seen) || 0)).reduce((a, x) => ({ g: a.g + (Number(x.g) || 0), at: Math.max(a.at, Number(x.at) || 0) }), { g: 0, at: 0 });
+  // 🎁 선물 알림 어디서나 (2026-11-06 사용자 A: 「선물 줬지? → 안 줬어요 · 우편함에 뭐가?」): 학생 계정 하나당 한 번 지켜봄 → 캠프 · 대기실 · 던전 어디서든 바로 큰 알림
+  let giftStop = null, giftFor = '';
+  function watchGifts(m) {
+    if (!m || m.c == null || !m.n || m.test || m.teacher || typeof localStorage === 'undefined') return;
+    const who = `${m.c}-${m.n}`; if (giftFor === who) return; giftFor = who; if (giftStop) giftStop();
+    const K = `citadel-giftseen-${who}`;
+    giftStop = N().watch(path(m), (d) => {
+      let seen = 0; try { seen = Number(localStorage.getItem(K)) || 0; } catch (e) { /* 이 기기만 */ }
+      const r = giftsSince(d || {}, seen); if (!(r.g > 0)) return;
+      try { localStorage.setItem(K, String(r.at)); } catch (e) { /* 다음에 또 */ }
+      if (typeof document === 'undefined') return;
+      const e = document.createElement('div'); e.className = 'gift-note'; e.innerHTML = `<b>🎁 선생님 선물!</b><span>💎 +${r.g}</span><small>📮 우편함에 기록돼요</small>`;
+      document.body.appendChild(e); setTimeout(() => e.remove(), 4200); if (window.DS && DS.Sound && DS.Sound.coin) DS.Sound.coin();
+    });
+  }
+  // 📮 우편함: 받은 선물 목록 (최근 순)
+  const giftList = (d) => Object.values((d || {}).log || {}).filter((x) => x && x.gift).sort((a, b) => (Number(b.at) || 0) - (Number(a.at) || 0));
   // 하루 n 번까지만 (허수아비 복습처럼)
   async function addDaily(m, n, base, limit, why) {
     const d = await mine(m), day = today(), keys = Object.keys(d.log || {}).filter((k) => k.startsWith(`${kk(base)}_${day}_`));
@@ -90,6 +107,16 @@ DS.Gem = (function () {
     return true;
   }
   const owns = (d, kind, id) => !!((d || {}).buy || {})[itemKey(kind, id)];
+  // 💰 되팔기 (2026-11-06 사용자 「회수 = (나) 조각 일부 환불 + 약간의 패널티」): 산 값의 70% 를 돌려받고 다시 잠김 · 상점에서 산 스킬만
+  const REFUND = 0.7;
+  const refundOf = (kind, id) => { const p = price(kind, id); return p == null ? 0 : Math.floor(p * REFUND); };
+  async function sell(m, kind, id) {
+    const p = price(kind, id), d = await mine(m), key = itemKey(kind, id);
+    if (p == null || !(d.buy || {})[key]) throw Object.assign(new Error('상점에서 산 것만 되팔 수 있어요.'), { user: true });
+    const back = refundOf(kind, id);
+    await N().update(path(m), { total: (Number(d.total) || 0) + back, [`buy/${key}`]: null, [`log/sell_${key}_${Date.now()}`]: { g: back, at: N().TS, why: '되팔기 (70%)' } });
+    return back;
+  }
   // 화면: 받는 순간 오른쪽 위에 「💎 +3」
   function pop(g, why) {
     if (typeof document === 'undefined' || !g) return;
@@ -122,5 +149,5 @@ DS.Gem = (function () {
     return r ? { ...r, pity, feathers: (Number(d.feather) || 0) + (r.feather || 0) } : null;
   }
   const feathers = (d) => Number((d || {}).feather) || 0;
-  return { chest, feathers, G, SHOP, DAY_CAP, price, mine, add, gift, giftsSince, addDaily, medal, buy, owns, itemKey, streak, today };
+  return { watchGifts, giftList, chest, feathers, G, SHOP, DAY_CAP, price, mine, add, gift, giftsSince, addDaily, medal, buy, sell, refundOf, REFUND, owns, itemKey, streak, today };
 })();

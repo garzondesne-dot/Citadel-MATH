@@ -135,7 +135,8 @@ DS.Hall = (function () {
   C().onTimeUp('hall', (now) => { if (!R || !L || !DS.Act.isHost(R) || !document.getElementById('screen-hall').classList.contains('active')) return; const d = Raid().deadline(R); if (d && now >= d && !Raid().isClosed(R)) DS.Act.timeUp(code, R, L).catch(() => {}); });
   function render() {
     const i = R.state.step ?? -1;
-    $('#h-top').innerHTML = `<b>${esc(L.unit)} · ${esc(L.title)}</b><span>${esc(C().stepName(L, R))}</span><span class="muted">수업 코드 <b>${code}</b></span><button class="btn small" id="h-set">⚙ 설정</button>${DS.UI.fs.btn('h-fs')}`; // ⚙ 던전 안에서도 선생님 모습 · 스킬 (2026-11-06)
+    $('#h-top').innerHTML = `<b>${esc(L.unit)} · ${esc(L.title)}</b><span>${esc(C().stepName(L, R))}</span><span class="muted">수업 코드 <b>${code}</b></span><button class="btn small" id="h-set">⚙ 설정</button>${!Raid().isClosed(R) && !Raid().isLobby(R) ? '<button class="btn small" id="h-camp">🏕 캠프 보기</button>' : ''}${DS.UI.fs.btn('h-fs')}`; // ⚙ 던전 안에서도 선생님 모습 · 스킬 (2026-11-06)
+    { const hc = $('#h-camp'); if (hc) hc.onclick = toCamp; } // 🏕 수업 중에도 캠프 보기 (2026-11-06 사용자 C · 「교사도 캠프로 가야 되는데」) → 캠프의 「⚔ 레이드로 돌아가기」로 복귀
     { const hs = $('#h-set'); if (hs) hs.onclick = () => C().run(() => DS.Camp.settings({ teacher: true, onSave: async (v) => { await DS.Net.set(`rooms/${code}/state/tlook`, { hero: v.hero, fx: v.fx, at: DS.Net.TS }).catch(() => {}); built = ''; if (R) render(); } })); }
     const tb = $('#h-tbar'); if (tb) { const sig = `${Raid().deadline(R)}|${Raid().progress(L, R)}|${Raid().isClosed(R)}|${Raid().bossHp(L, R).won}|${Raid().isLobby(R)}`; if (tb.dataset.sig !== sig) { tb.dataset.sig = sig; tb.innerHTML = C().tbarHtml(L, R, { prog: true }); } }
     goalAndClear(i);
@@ -264,7 +265,7 @@ DS.Hall = (function () {
     return out;
   }
   function buildFight(step, key) {
-    built = key; queue = []; wonFx = ''; vanished = ''; lastHit = ''; if (demo && demo.step !== step) demoClose();
+    built = key; queue = []; wonFx = ''; vanished = ''; lastHit = ''; slKey = ''; if (demo && demo.step !== step) demoClose();
     const f = fightOf(step);
     const hs = studs().filter(([u]) => (R.active || {})[u]);
     const n = hs.length, row0 = Math.ceil(n / 2);
@@ -327,8 +328,27 @@ DS.Hall = (function () {
   }
   // 👾 몬스터 공격 (학생 폰과 같은 시계 DS.Raid.atkClock): 체력바 바로 밑 게이지 → 다 차면 큰 공격 연출 + 용사 전원 피격 · 헉헉
   let atkT = null, atkMemo = {};
+  // ❄ 📝 풀이 시간 (2026-11-06): 종합실 = 몬스터의 「꽁꽁 묶기」 → 용사 모두 얼어붙음 + 남은 초 · 끝나면 얼음이 깨짐
+  let slKey = '';
+  function hallSolve() {
+    const arena = $('#raid'); if (!arena || !L || !R) return;
+    const lk = Raid().solveLock(L, R, DS.Net.now()), on = !!(lk && lk.on), key = on ? `${lk.id}|${lk.t0}|${lk.end}` : '';
+    if (key === slKey) return;
+    const was = slKey; slKey = key;
+    let ban = arena.querySelector('.h-solve');
+    if (on) {
+      arena.querySelectorAll('.fh2').forEach((h) => h.classList.add('frozen'));
+      if (!ban) { ban = document.createElement('div'); ban.className = 'h-solve'; arena.appendChild(ban); }
+      ban.innerHTML = `❄ 꽁꽁 묶기! <b class="sl-left" data-sl-end="${lk.end}">${Math.ceil(lk.left / 1000)}초</b><small>학습지에 먼저 다 풀어요 — 얼음이 깨지면 공격!</small>`;
+      if (!was || was.split('|')[0] !== lk.id) { const m0 = $('#rm'), ar = arena.getBoundingClientRect(); if (DS.FX) DS.FX.play(arena, 'nova', { x: ar.width / 2, y: ar.height * 0.72, scale: Math.min(ar.width, ar.height) / 420, perfect: true }); if (m0 && DS.Attack) DS.Attack.knock(m0, -10); [...arena.querySelectorAll('.fh2')].slice(0, 6).forEach((h, k) => setTimeout(() => DS.Thrill && DS.Thrill.bindFx(h.querySelector('.art') || h), 250 + k * 90)); if (DS.Sound && DS.Sound.fxHit) DS.Sound.fxHit('nova'); }
+    } else {
+      if (ban) ban.remove();
+      const fz = [...arena.querySelectorAll('.fh2.frozen')]; fz.forEach((h) => h.classList.remove('frozen'));
+      if (was && fz.length && DS.FX) { const ar = arena.getBoundingClientRect(); fz.slice(0, 8).forEach((h, k) => setTimeout(() => { const r = h.getBoundingClientRect(); DS.FX.play(arena, 'ice', { x: r.left - ar.left + r.width / 2, y: r.top - ar.top + r.height / 2, scale: 0.45 }); }, k * 70)); if (DS.Sound && DS.Sound.correct) DS.Sound.correct(); }
+    }
+  }
   function hallAtk() {
-    comboHall();
+    comboHall(); hallSolve();
     const g = document.getElementById('rh-atk'); if (!g || !L || !R) return;
     const c = Raid().atkClock(L, R, DS.Net.now(), window.DS_ATK || null);
     const bar = g.querySelector('i'), txt = g.querySelector('span');
@@ -441,9 +461,9 @@ DS.Hall = (function () {
       ${Raid().isEnd(L, R) ? `<div class="h-words">${C().wordsHtml(R)}</div>` : ''}`;
     C().bindWords($('#h-side'), code, R);
     const el = $('#h-ctrl'), live = !Raid().isLobby(R) && !Raid().isClosed(R);
-    el.innerHTML = `${C().lessonBtn(R)}${C().pctHtml(L, R)}<p class="muted small">다음 ▶ ${esc(C().nextName(L, R))}</p><div class="row"><button class="btn" id="h-back"${i < 0 ? ' disabled' : ''}>◀ 뒤로</button><button class="btn primary" id="h-fwd"${Raid().isClosed(R) ? ' disabled' : ''}>${Raid().isFinale(L, R) ? '수업 끝 ▶' : '앞으로 ▶'}</button></div>${live ? C().iconBar(L, R, prep.video, true) : ''}`;
+    el.innerHTML = `${C().lessonBtn(R)}${C().pctHtml(L, R)}${live ? C().solveHtml(L, R) : ''}<p class="muted small">다음 ▶ ${esc(C().nextName(L, R))}</p><div class="row"><button class="btn" id="h-back"${i < 0 ? ' disabled' : ''}>◀ 뒤로</button><button class="btn primary" id="h-fwd"${Raid().isClosed(R) ? ' disabled' : ''}>${Raid().isFinale(L, R) ? '수업 끝 ▶' : '앞으로 ▶'}</button></div>${live ? C().iconBar(L, R, prep.video, true) : ''}${C().saveBtn(R)}`;
     const db = $('#h-demo'); if (db) db.onclick = () => demoOpen(Raid().stepOf(L, R));
-    C().bindRest(el, code, R); C().bindLesson(el, code, R); C().bindPct(el, code, R, L); C().bindFocus(el, code, R); C().bindSheet(el, code, R); C().bindVideo(el, code, R);
+    C().bindRest(el, code, R); C().bindLesson(el, code, R); C().bindSave(el, code, R, L); C().bindSolve(el, code, R, L); C().bindPct(el, code, R, L); C().bindFocus(el, code, R); C().bindSheet(el, code, R); C().bindVideo(el, code, R);
     $('#h-fwd').onclick = () => C().run(() => C().forward(code, R, L));
     $('#h-back').onclick = () => C().run(() => C().back(code, R, L));
   }

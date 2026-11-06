@@ -150,6 +150,27 @@ DS.Control = (function () {
     ov.querySelector('[data-lsx]').onclick = close; ov.addEventListener('click', (e) => { if (e.target === ov) close(); });
     ov.querySelectorAll('[data-ls]').forEach((b) => (b.onclick = () => run(async () => { await Act().switchLesson(code, R, b.dataset.ls); close(); const L2 = DS.Lessons.get(b.dataset.ls); DS.UI.toast(`🔄 ${L2.no}차시로 바꿨어요 — 학생들은 그대로 기다리면 돼요`); })));
   }
+  // 📝 풀이 시간 조절 칸 (2026-11-06): 몬스터 · 형성평가 단계에서 · 켜져 있으면 남은 시간 + 지금 풀기 · +30초 / 꺼져 있으면 켜기 + 기본 초
+  function solveHtml(L, R) {
+    const st = Raid().stepOf(L, R); if (!st || !['monster', 'boss'].includes(st.kind) || Raid().isClosed(R)) return '';
+    const lk = Raid().solveLock(L, R, DS.Net.now()), base = (R.state || {}).solve != null ? Number(R.state.solve) : (R.meta || {}).solve != null ? Number(R.meta.solve) : 60;
+    return `<div class="sl-row">${lk && lk.on ? `<span>📝 풀이 시간 ❄ <b class="sl-left" data-sl-end="${lk.end}">${Math.ceil(lk.left / 1000)}초</b></span><button class="btn small primary" data-sl="now">▶ 지금 풀기</button><button class="btn small" data-sl="add">+30초</button>`
+      : `<span>📝 풀이 시간</span><button class="btn small" data-sl="on">❄ 켜기 (${base}초)</button><span class="muted small">중단원 문항 기본</span><button class="btn small" data-sl="dn">−30</button><b>${base}초</b><button class="btn small" data-sl="up">+30</button>`}</div>`;
+  }
+  const bindSolve = (el, code, R, L) => el.querySelectorAll('[data-sl]').forEach((b) => (b.onclick = () => run(async () => {
+    const k = b.dataset.sl, base = (R.state || {}).solve != null ? Number(R.state.solve) : (R.meta || {}).solve != null ? Number(R.meta.solve) : 60;
+    if (k === 'now') await Act().setSolve(code, R, L, { now: true });
+    else if (k === 'add') await Act().setSolve(code, R, L, { add: 30 });
+    else if (k === 'on') await Act().setSolve(code, R, L, { on: true, onSec: base || 60 });
+    else await Act().setSolve(code, R, L, { sec: Math.max(0, base + (k === 'up' ? 30 : -30)) });
+  })));
+  // ⏸ 수업 끝 (저장) — 진행 중이면 늘 (교사 리모컨 · 종합실)
+  const saveBtn = (R) => (!Raid().isLobby(R) && !Raid().isClosed(R) ? '<button class="btn t-save" data-saveend>⏸ 수업 끝 (저장)</button>' : '');
+  const bindSave = (el, code, R, L) => el.querySelectorAll('[data-saveend]').forEach((b) => (b.onclick = () => run(async () => {
+    const st = L.steps[(R.state || {}).step] || {}, nm = st.title || (L.monsters[st.id] || {}).title || (st.kind === 'boss' ? L.boss.title : '');
+    if (!confirm(`⏸ 지금 「${nm}」에서 저장하고 수업을 끝낼까요?\n\n다음에 같은 반 · 같은 차시를 열면 교사 메뉴에 「▶ 지난 수업 이어서」가 생겨 여기부터 다시 시작해요.\n(학생 기록 · 경험치는 그대로 저장돼요)`)) return;
+    await Act().saveEnd(code); DS.UI.toast('⏸ 저장하고 수업을 끝냈어요 — 다음 시간에 이어서!', 3600);
+  })));
   const bindLesson = (el, code, R) => el.querySelectorAll('[data-lswitch]').forEach((b) => (b.onclick = () => lessonPick(code, R)));
   const timeUpFns = {};
   const onTimeUp = (key, fn) => { if (fn) timeUpFns[key] = fn; else delete timeUpFns[key]; };
@@ -171,6 +192,7 @@ DS.Control = (function () {
       }
       const pf = e.querySelector('.tb-pf'); if (pf) pf.parentElement.classList.toggle('behind', Number(e.dataset.prog) + 0.02 < 1 - frac);
     });
+    document.querySelectorAll('[data-sl-end]').forEach((e) => { const l = Math.max(0, Number(e.dataset.slEnd) - now); e.textContent = `${Math.ceil(l / 1000)}초`; }); // 📝 풀이 시간 남은 초
     document.body.classList.toggle('tb-last-min', lastMin); // 이긴 뒤 · 수업 끝 · 화면 바뀜이면 붉은 테두리 끔
     Object.values(timeUpFns).forEach((fn) => { try { fn(now); } catch (err) { console.error(err); } });
   }
@@ -191,5 +213,5 @@ DS.Control = (function () {
     host.appendChild(e); setTimeout(() => e.remove(), 2400);
   }
   const xpOf = (rec) => (rec && rec.tries ? rec.tries.length * 2 + (Number(rec.best) || 0) * 2 : 0); // 제출 2 + 맞힌 소문제 2 (EXP 표와 같게)
-  return { lessonBtn, bindLesson, remoteGrid, xpFloat, xpOf, tbarHtml, onTimeUp, bindExtend, hm, iconBar, restBtn, bindRest, restLeft, restEnd, mmss, name, run, wordsHtml, bindWords, stepName, nextName, stepTitles, FINALE, forward, back, pctHtml, bindPct, focusBtn, bindFocus, sheetBtn, bindSheet, videoBtn, bindVideo, esc };
+  return { solveHtml, bindSolve, saveBtn, bindSave, lessonBtn, bindLesson, remoteGrid, xpFloat, xpOf, tbarHtml, onTimeUp, bindExtend, hm, iconBar, restBtn, bindRest, restLeft, restEnd, mmss, name, run, wordsHtml, bindWords, stepName, nextName, stepTitles, FINALE, forward, back, pctHtml, bindPct, focusBtn, bindFocus, sheetBtn, bindSheet, videoBtn, bindVideo, esc };
 })();

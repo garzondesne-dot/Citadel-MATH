@@ -25,6 +25,7 @@ DS.Student = (function () {
     an = null; thSeen = null; phaseWas = 0; chestDone = {}; chestQ = []; chestBusy = false; batPaid = ''; endPaid = ''; // v0.9.11
     await DS.Act.join(c, info);
     if (DS.Attack && DS.Attack.preloadFaces && DS.Attack.canUlt(info.fx, info.hero)) DS.Attack.preloadFaces(); // ⚡ 필살기 조건이면 얼굴 그림 미리
+    if (DS.Gem && DS.Gem.watchGifts && !test) DS.Gem.watchGifts({ c: info.cls, n: info.num }); // 🎁 던전 · 대기실에서도 선물 알림
     code = c; info0 = info; lastStep = null; lastOx = null; dirty = false; clearTimeout(saveT);
     me = DS.Net.uid();
     if (!test) { try { localStorage.setItem('citadel-student', JSON.stringify({ code: c, ...info })); } catch (e) { /* 무시 */ } }
@@ -371,8 +372,21 @@ DS.Student = (function () {
       heroFx = { pose: 'healed', until: Date.now() + 1800 }; setTimeout(() => heroFlash('healed', 1600), 60);
     });
   }
+  // ❄ 📝 풀이 시간 (2026-11-06 사용자 「60초간 큰 기술을 써서 학생들이 꽁꽁 묶이는 이펙트」): 아직 안 낸 학생은 시간이 끝날 때까지 입력 잠금 → 학습지에 먼저
+  let solveT = null, solveCast = '';
+  function frozenView(body, step, lk) {
+    const sig = `solve|${lk.id}|${lk.end}`; if (drawn === sig && body.querySelector('.sl-scene')) return; drawn = sig;
+    const spr = step.kind === 'boss' ? L.boss.sprite : L.monsters[step.id].sprite, title = step.kind === 'boss' ? `👑 ${L.boss.title}` : step.title;
+    body.innerHTML = `<div class="panel framed"><div class="scene enc bg-scene th-${L.theme || ''} sl-scene"><div class="scene-bar"><div><b>${esc(title)}</b><br><span class="muted small">📝 풀이 시간</span></div></div>
+        <div class="enc-hero frozen">${heroNow('idle', '')}<i class="shadow"></i><i class="sl-ice"></i></div><div class="enc-mon">${DS.Art.monster(spr, 'attack', '')}</div><i class="sl-frost"></i></div>
+      <div class="sl-box"><b>❄ 꽁꽁 묶기!</b><p>몬스터가 얼음 마법을 썼어요 — <b>학습지에 먼저 다 풀어요</b></p><p class="sl-time">얼음이 깨지기까지 <b class="sl-left" data-sl-end="${lk.end}">${Math.ceil(lk.left / 1000)}초</b></p><small>시간이 끝나면 얼음이 깨지고 답을 넣을 수 있어요 · 다 푼 답을 그대로 옮겨 적으면 한 번에 퍼펙트!</small></div></div>`;
+    const sc = body.querySelector('.sl-scene'), hb = body.querySelector('.enc-hero');
+    if (solveCast !== sig) { solveCast = sig; setTimeout(() => { if (!sc.isConnected) return; if (DS.FX) DS.FX.play(sc, 'nova', { scale: 0.7, perfect: true }); if (DS.Thrill) DS.Thrill.bindFx(hb, true); if (DS.Sound && DS.Sound.fxHit) DS.Sound.fxHit('nova'); }, 200); }
+    clearTimeout(solveT); solveT = setTimeout(() => { drawn = ''; render(); const sc2 = document.querySelector('#st-body .scene'), h2 = sc2 && sc2.querySelector('.enc-hero'); if (sc2 && DS.FX && h2) { const a = h2.getBoundingClientRect(), b = sc2.getBoundingClientRect(); DS.FX.play(sc2, 'ice', { x: a.left - b.left + a.width / 2, y: a.top - b.top + a.height / 2, scale: 0.5 }); } if (DS.Sound && DS.Sound.correct) DS.Sound.correct(); DS.UI.toast('❄ 얼음이 깨졌어요 — 이제 답을 넣어요!'); }, lk.left + 250);
+  }
   function monsterView(body, step) {
     const mid = step.id, rec = Raid().record(L, R, mid, me), hp = Raid().monsterHp(L, R, mid);
+    { const lk = Raid().solveLock(L, R, DS.Net.now()); if (lk && lk.on && !rec.submitted) return frozenView(body, step, lk); }
     healNotice(mid);
     const wantRetry = retrying === `${mid}|${rec.nextAttempt}` && rec.canRetry;
     if (!rec.submitted || wantRetry) return fightForm(body, step, rec, hp);
@@ -531,6 +545,7 @@ DS.Student = (function () {
 
   // ── 보스: 형성평가 1~7번 (2026-11-05 사용자 (나): 문항마다 첫 시도 = 학습지 그대로 · 재도전 3번은 숫자 · 문자가 바뀐 새 문제) ──
   function bossView(body) {
+    { const lk = Raid().solveLock(L, R, DS.Net.now()); if (lk && lk.on && !Raid().bossAnswered(R, me)) return frozenView(body, Raid().stepOf(L, R), lk); } // ❄ 형성평가도 선생님이 켜면
     const S = Raid().bossState(L, R, me), hp = Raid().bossHp(L, R), N0 = Raid().BOSS_TRIES;
     const lab = (s) => (s.ok ? '✔ 도달' : !s.n ? '풀기' : s.left ? `✘ 다시 · 기회 ${s.left}` : '해설 보기');
     body.innerHTML = `<div class="panel framed">

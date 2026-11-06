@@ -242,10 +242,10 @@
     m2: { title: '문제 2', sprite: 'extra:6', make: (a, r) => keep('m2', a === 0 ? m2Make(30, 12, 15, 5) : m2Retry(r)) },
     m3: { title: '문제 3', sprite: 'extra:7', make: (a, r) => keep('m3', a === 0 ? m3Make(40, 18, 12, 5, CLUBS[0]) : m3Retry(r)) },
     // v3 중단원 마무리 (교과서 78~79쪽)
-    u4: { title: '문제 4 · 조건을 만족하는 X', sprite: 'crown:6', make: (a, r) => (a === 0 ? u4Make(8, 4, 20) : u4Retry(r)) },
-    u5: { title: '문제 5 · 미지수 x', sprite: 'crown:9', note: 'B 의 원소가 모두 A 에 있어야 해요 — x 가 A 의 어느 원소와 같을 수 있을까? (B 의 두 원소는 서로 달라야 해요)', make: (a, r) => (a === 0 ? u5Make(2, 4, 6, DS.Rng('s6|u5')) : u5Retry(r)) },
-    u6: { title: '문제 6 · 겹침의 최대 · 최소', sprite: 'extra:6@h300', make: (a, r) => (a === 0 ? u6Make(40, 28, 21) : u6Retry(r)) },
-    u7: { title: '문제 7 · 「~이 아니거나」', sprite: 'crown:6@h120', make: (a, r) => (a === 0 ? u7Make(100, 7, 5, 3) : u7Retry(r)) },
+    u4: { evalQ: true, title: '문제 4 · 조건을 만족하는 X', sprite: 'crown:6', make: (a, r) => (a === 0 ? u4Make(8, 4, 20) : u4Retry(r)) },
+    u5: { evalQ: true, title: '문제 5 · 미지수 x', sprite: 'crown:9', note: 'B 의 원소가 모두 A 에 있어야 해요 — x 가 A 의 어느 원소와 같을 수 있을까? (B 의 두 원소는 서로 달라야 해요)', make: (a, r) => (a === 0 ? u5Make(2, 4, 6, DS.Rng('s6|u5')) : u5Retry(r)) },
+    u6: { evalQ: true, title: '문제 6 · 겹침의 최대 · 최소', sprite: 'extra:6@h300', make: (a, r) => (a === 0 ? u6Make(40, 28, 21) : u6Retry(r)) },
+    u7: { evalQ: true, title: '문제 7 · 「~이 아니거나」', sprite: 'crown:6@h120', make: (a, r) => (a === 0 ? u7Make(100, 7, 5, 3) : u7Retry(r)) },
     // v2 명제 몬스터 · 보강 ① (단계에 없음 — 1-6반 v2 기록 · 오답노트용)
     m4: { title: '문제 4 (v2 명제)', legacy: true, sprite: 'crown:6', make: (a, r) => (a === 0 ? m4Make(['5 + 4 = 10', '축구는 재미있다.', '2는 소수이다.', '부산은 큰 도시이다.']) : m4Retry(r)) },
     m42: { title: '문제 4-2 · 삼단논법 · 명제 고르기 (v2)', legacy: true, sprite: 'crown:6@h120', make: (a, r) => (a === 0 ? [sylQ(SYL[0]), propPick(PICK6)] : b3Retry(r)) },

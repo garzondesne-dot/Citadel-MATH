@@ -98,12 +98,18 @@ DS.Result = (function () {
     if (opt.cache) mm.prev = prev;
     const mineNow = prev[L.id] && prev[L.id].code === String(code) ? prev[L.id] : null;
     const others = Object.keys(prev).filter((k) => k !== L.id);
-    const first = mineNow ? !!mineNow.firstXp : !others.length;
+    const first = mineNow ? !!mineNow.firstXp : !others.length && !prev[L.id];
     if (first && DS.Grow) {
       if (mineNow && mineNow.firstXp) r.parts.first = mineNow.firstXp;
       else { const cur = await DS.Grow.mine(m).catch(() => DS.Grow.level(0)), base = DS.Grow.sum(r.parts); r.parts.first = Math.max(40, cur.next - cur.into - base + 1); }
     }
-    const rec = summary(r, code); if (first && r.parts.first) rec.firstXp = r.parts.first; if (at) rec.at = at; // at: 결과 모으기 = 그 수업 시각
+    const rec = summary(r, code); if (first && r.parts.first) rec.firstXp = r.parts.first; if (at) rec.at = at;
+    if (R.meta && R.meta.resumeFrom != null && prev[L.id] && prev[L.id].code !== String(code)) { // ▶ 이어서 한 수업: 앞 수업에서 푼 몬스터 기록을 지우지 않고 합침 (2026-11-06)
+      const pm = prev[L.id].mons || {}, cut = Number(R.meta.resumeFrom) || 0, before = new Set(L.steps.slice(0, cut).map((s) => s.id));
+      rec.mons = Object.fromEntries(Object.keys({ ...pm, ...rec.mons }).map((k) => [k, before.has(k) && pm[k] != null ? pm[k] : rec.mons[k] != null ? rec.mons[k] : pm[k]]));
+      rec.miss = [...new Set([...(prev[L.id].miss || []).filter((k) => before.has(k)), ...(rec.miss || []).filter((k) => !before.has(k))])];
+      rec.resumeOf = prev[L.id].code || '';
+    } // at: 결과 모으기 = 그 수업 시각
     const sig = JSON.stringify({ ...rec, at: 0 });
     if (!opt.cache || mm.sig !== sig) {
       try { await DS.Net.set(`records/${ck(m.c)}/${m.n}/${L.id}`, rec); mm.sig = sig; prev[L.id] = { ...rec }; } catch (e) { /* 저장 실패해도 결과는 보여 준다 */ }

@@ -197,6 +197,17 @@ DS.Raid = (function () {
     return Math.min(BIND_MAX, r.tries.slice(r.perfectAt + 1).reduce((a, t) => a + t.correct, 0) * BIND_PER);
   }
   const bindTotal = (L, R, mid) => activeIds(R).reduce((a, u) => a + bindOf(L, R, mid, u), 0);
+  // 📝 풀이 시간 (2026-11-06 사용자 「다 풀고 입력 · 60초 기본 · 내가 조절 · 어려운 문제 = 중단원 평가 기준」): 단계가 시작되면 sec 초 동안 입력 잠금 (학습지에 먼저)
+  //   기본 = 중단원 평가 문항(monsters[id].evalQ)만 meta.solve(준비 · 기본 60초) · 교사가 state.solve(초) · state.solveOn[id] = { sec, at } 로 켜고 끄고 · state.solveEnd[id] = 지금 풀기
+  function solveLock(L, R, now) {
+    const st = R.state || {}, step = stepOf(L, R); if (!step || st.closed || !L || !['monster', 'boss'].includes(step.kind)) return null;
+    const id = step.kind === 'boss' ? 'boss' : step.id, mon = step.kind === 'boss' ? L.boss || {} : (L.monsters || {})[id] || {};
+    const man = (st.solveOn || {})[id], base = st.solve != null ? Number(st.solve) : (R.meta || {}).solve != null ? Number(R.meta.solve) : 60;
+    const sec = man ? Number(man.sec) : man === 0 ? 0 : mon.evalQ ? base : 0;
+    if (!(sec > 0)) return null;
+    const t0 = man && man.at ? Number(man.at) : st.stepAt != null ? Number(st.stepAt) : now, end = Math.min(t0 + sec * 1000, Number((st.solveEnd || {})[id]) || Infinity);
+    return { id, sec, t0, end, left: Math.max(0, end - now), on: now < end };
+  }
   function atkClock(L, R, now, cfg) {
     const st = R.state || {}, step = stepOf(L, R); if (!step || st.closed) return null;
     const kind = step.kind === 'monster' && L.monsters[step.id] && !cleared(L, R, step.id) ? 'monster' : step.kind === 'boss' && !bossHp(L, R).won ? 'boss' : null;
@@ -207,8 +218,9 @@ DS.Raid = (function () {
     const per = a.length >= 3 ? a[0] + (a[1] - a[0]) * (1 - ratio) : a[0];
     // 👑 보스 단계 멈춤 (v0.9.11): 체력 100~67% 4초 · 66~34% 3초 · 33~0% 2초 (시험용 cfg 를 주면 그 값 그대로)
     const phase = kind === 'boss' && !cfg && DS.Combo ? DS.Combo.bossPhase(ratio) : null, lock = phase ? phase.lock : a[a.length - 1];
-    const rest = st.rest && st.rest.at != null ? st.rest : null, paused = !!st.focus || !!rest, start = st.stepAt != null ? st.stepAt : now;
-    const held = (st.focus ? now - (st.focusAt != null ? st.focusAt : now) : 0) + (rest ? Math.max(0, now - rest.at) : 0);
+    const sl = solveLock(L, R, now), slHeld = sl ? Math.max(0, Math.min(now, sl.end) - sl.t0) : 0; // 📝 풀이 시간 동안 몬스터도 꽁꽁 (공격 시계 멈춤)
+    const rest = st.rest && st.rest.at != null ? st.rest : null, paused = !!st.focus || !!rest || !!(sl && sl.on), start = st.stepAt != null ? st.stepAt : now;
+    const held = (st.focus ? now - (st.focusAt != null ? st.focusAt : now) : 0) + (rest ? Math.max(0, now - rest.at) : 0) + slHeld;
     const t = Math.max(0, (now - start - (st.pauseMs || 0) - held) / 1000 - bind);
     return { kind, mid: step.id || 'boss', per, lock, phase: phase ? phase.phase : 0, bind, paused, ratio, t, k: Math.floor(t / per), p: (t % per) / per };
   }
@@ -226,5 +238,5 @@ DS.Raid = (function () {
   const timeLeft = (R, now) => { const d = deadline(R); return d == null ? null : Math.max(0, d - now); };
   // 던전 진행: 지나온 단계 / 전체 (마무리 = 끝)
   const progress = (L, R) => { const i = (R.state || {}).step ?? -1, n = L.steps.length; return Math.max(0, Math.min(1, (i + (isEnd(L, R) || bossHp(L, R).won ? 1 : 0)) / n)); };
-  return { BOSS_TRIES, bossItem, bossTries, bossState, bossFirst, bossAnswered, skipped, deadline, timeLeft, progress, ATK, soloAtk, BIND_PER, BIND_MAX, bindOf, bindTotal, atkClock, atkTrack, RETRIES, HEAL_MAX, healsOf, healsGiven, healsTo, healsReceived, healTarget, ultUsed, perfStreak, LIVE_MS, lateIds, liveOpen, roomDone, inClass, activeIds, teacherUid, num, newRoom, stepOf, isLobby, isEnd, isFinale, isClosed, focusOn, restOn, sheetOn, videoOn, autoFocus, fullMarks, canLobby, online, seedOf, itemsFor, attemptsOf, gradeAttempt, record, resultLabel, headcount, pctOf, monsterHp, waiting, allSubmitted, cleared, mastery, bossHp, helpList };
+  return { solveLock, BOSS_TRIES, bossItem, bossTries, bossState, bossFirst, bossAnswered, skipped, deadline, timeLeft, progress, ATK, soloAtk, BIND_PER, BIND_MAX, bindOf, bindTotal, atkClock, atkTrack, RETRIES, HEAL_MAX, healsOf, healsGiven, healsTo, healsReceived, healTarget, ultUsed, perfStreak, LIVE_MS, lateIds, liveOpen, roomDone, inClass, activeIds, teacherUid, num, newRoom, stepOf, isLobby, isEnd, isFinale, isClosed, focusOn, restOn, sheetOn, videoOn, autoFocus, fullMarks, canLobby, online, seedOf, itemsFor, attemptsOf, gradeAttempt, record, resultLabel, headcount, pctOf, monsterHp, waiting, allSubmitted, cleared, mastery, bossHp, helpList };
 })();

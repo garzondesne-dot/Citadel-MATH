@@ -2142,3 +2142,27 @@ body.tb-last-min::after { content: ''; position: fixed; inset: 0; z-index: 88; p
 .st-set { margin-left: 6px; padding: 4px 10px; font-size: 16px; } .st-set:disabled { opacity: .4; } /* ⚙ 던전 안 설정 (2026-11-06) */
 
 .modal.fit-center .set-grid { grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); }
+.sock-btns { display: flex; flex-direction: column; gap: 4px; } .sock-sell { border-color: #e8b04a; color: #ffe27a; } /* 💰 되팔기 (2026-11-06) */
+/* 🎁 선물 알림 어디서나 · 우편함 기록 (2026-11-06) */
+.gift-note { position: fixed; left: 50%; top: 18%; transform: translateX(-50%); z-index: 9500; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 14px 26px; border: 3px solid #ffd25a; border-radius: 14px; background: linear-gradient(180deg, #3a2a0c, #1a1206); box-shadow: 0 0 30px #ffb84a; color: #fff3c4; animation: giftIn .5s cubic-bezier(.2,1.6,.4,1), giftOut .5s 3.7s forwards; pointer-events: none; }
+.gift-note b { font: 900 22px var(--pixel, sans-serif); } .gift-note span { font: 900 34px var(--pixel, sans-serif); color: #9fe0ff; } .gift-note small { color: #e8d9a8; }
+@keyframes giftIn { from { transform: translate(-50%, -30px) scale(.6); opacity: 0; } } @keyframes giftOut { to { opacity: 0; transform: translate(-50%, -20px); } }
+.gift-box2 { border: 1px solid #e8b04a66; border-radius: 10px; padding: 6px 10px; margin: 6px 0; background: #2a200c55; } .gift-row { display: flex; justify-content: space-between; padding: 2px 0; } .gift-row b { color: #9fe0ff; }
+.t-save { display: block; width: 100%; margin-top: 8px; border-color: #e8b04a; color: #ffe27a; } /* ⏸ 수업 끝 (저장) (2026-11-06) */
+.t-resume2 { display: flex; flex-direction: column; align-items: center; width: 100%; margin-top: 8px; border-color: #5be39a; color: #b8ffd9; } .t-resume2 small { font-size: 13px; opacity: .9; }
+/* ❄ 📝 풀이 시간 · 꽁꽁 묶기 (2026-11-06) */
+.frozen .art { filter: saturate(.35) brightness(1.2) hue-rotate(170deg) drop-shadow(0 0 6px #9fe0ff); animation-play-state: paused !important; }
+.frozen .art b { animation-play-state: paused !important; }
+.sl-ice { position: absolute; inset: 8% 14% 4%; border-radius: 10px; background: linear-gradient(160deg, #e8fbff88, #9fe0ff44 45%, #ffffff66 55%, #7fd8ff33); border: 2px solid #d8f6ffcc; box-shadow: inset 0 0 14px #ffffffaa, 0 0 14px #7fd8ff; pointer-events: none; animation: slIce .5s ease-out; }
+@keyframes slIce { from { transform: scale(.3); opacity: 0; } }
+.sl-frost { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse at center, transparent 55%, #bff0ff55 100%); animation: slFrost 2.4s ease-in-out infinite alternate; }
+@keyframes slFrost { from { opacity: .5; } to { opacity: 1; } }
+.sl-box { margin-top: 10px; padding: 12px; text-align: center; border: 2px solid #7fd8ff; border-radius: 12px; background: #0b2238; color: #dff6ff; }
+.sl-box > b { font: 900 26px var(--pixel, sans-serif); color: #bff0ff; text-shadow: 0 0 10px #7fd8ff; }
+.sl-time b { font: 900 30px var(--pixel, sans-serif); color: #fff; }
+.sl-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 6px 0; padding: 6px 8px; border: 1px solid #7fd8ff66; border-radius: 10px; background: #0b223888; }
+.sl-row .sl-left { color: #bff0ff; font-size: 1.15em; }
+.fh2.frozen .art { filter: saturate(.35) brightness(1.2) hue-rotate(170deg) drop-shadow(0 0 6px #9fe0ff); }
+.h-solve { position: absolute; left: 50%; top: 14%; transform: translateX(-50%); z-index: 15; padding: 8px 18px; border: 2px solid #9fe0ff; border-radius: 12px; background: #0b2238dd; color: #e8fbff; font: 900 22px var(--pixel, sans-serif); text-align: center; box-shadow: 0 0 20px #7fd8ff; pointer-events: none; }
+.h-solve small { display: block; font-size: 14px; font-weight: 400; opacity: .9; }
+

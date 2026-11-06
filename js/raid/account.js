@@ -170,7 +170,18 @@ DS.Account = (function () {
     if (DS.Gem) {
       heroes.forEach((h) => { const p = DS.Gem.price('hero', h.id); if (p == null) return; h.shop = { kind: 'hero', id: h.id, price: p }; h.open = h.open || DS.Gem.owns(gem, 'hero', h.id); h.cond = `💎 ${p} 조각으로 해금`; });
       fx.forEach((f) => { const p = DS.Gem.price('fx', f.id); if (p == null) return; f.shop = { kind: 'fx', id: f.id, price: p }; f.open = f.open || DS.Gem.owns(gem, 'fx', f.id); f.cond = f.tier === 2 && DS.FX.FANCY.includes(f.id) ? `🟪${DS.Bonus ? DS.Bonus.UNLOCK[DS.FX.FANCY.indexOf(f.id)] : ''} · 💎${p}` : `💎${p}`; });
-      fx.forEach((f) => { if (!f.need || f.open) return; const nd = fx.find((x) => x.id === f.need); if (nd && !nd.open) { f.locked = `먼저 Ⅲ 「${DS.FX.NAMES[f.need].replace(/^\S+\s/, '')}」`; f.cond = `💎${f.shop ? f.shop.price : 120} · Ⅲ먼저`; } });
+      fx.forEach((f) => { f.bought = DS.Gem.owns(gem, 'fx', f.id); }); // 💰 되팔기 가능 (상점에서 산 것만)
+      // 🔗 단계 순서 (2026-11-06 사용자 「2단계 해금해야 3단계 열리는 거 맞지? · 2단계 잠겨 있는데 3단계가 열려」): Ⅱ → Ⅲ → Ⅳ
+      //   상점에서 이미 산 것은 그대로 (산 것을 빼앗지 않음) · 🟪 인장으로 받은 Ⅲ 은 같은 계열 Ⅱ 를 열어야 씀
+      const TN = ['Ⅰ', 'Ⅱ', 'Ⅲ', 'Ⅳ'];
+      fx.forEach((f) => { if (typeof f.tier !== 'number' || f.tier < 2) return; f.need = DS.FX.FAMS.find((x) => x.id === f.fam).ids[f.tier - 1]; });
+      [2, 3].forEach((t) => fx.filter((f) => f.tier === t).forEach((f) => {
+        const nd = fx.find((x) => x.id === f.need); if (!nd || nd.open) return;
+        if (f.open && f.bought) return; // 예전에 산 것
+        const sealGot = f.open && !f.bought; f.open = false;
+        f.locked = `먼저 ${TN[t - 1]} 「${DS.FX.NAMES[f.need].replace(/^\S+\s/, '')}」`;
+        f.cond = sealGot ? `🟪 받음 · ${TN[t - 1]}먼저` : `💎${f.shop ? f.shop.price : ''} · ${TN[t - 1]}먼저`;
+      }));
     }
     // 🪶 황금 날개 (v0.9.11 업적 전용): 🎁 보물 상자에서 황금 깃털 5개
     const fe = DS.Gem ? DS.Gem.feathers(gem) : 0;

@@ -18,7 +18,7 @@ DS.Camp = (function () {
 
   async function enter(m, code) {
     if (DS.Sound && DS.Sound.bgm) DS.Sound.bgm(null); // 🎵 캠프로 오면 성채 · 허수아비 배경음 끔
-    if (m && !m.teacher && !m.test && DS.Gem && DS.Gem.giftsSince) DS.Gem.mine(m).then((d) => { const K = `citadel-giftseen-${m.c}-${m.n}`; let seen = 0; try { seen = Number(localStorage.getItem(K)) || 0; } catch (e) { /* 이 기기만 */ } const r = DS.Gem.giftsSince(d, seen); if (r.g > 0) { setTimeout(() => { DS.UI.toast(`🎁 선생님이 💎 ${r.g}개를 선물했어요!`, 4200); if (DS.Sound.coin) DS.Sound.coin(); }, 3200); /* 다른 캠프 알림과 겹치지 않게 */ try { localStorage.setItem(K, String(r.at)); } catch (e) { /* 다음에 또 */ } } }).catch(() => {}); // 💎 2026-11-06 선생님 선물 알림
+    if (m && DS.Gem && DS.Gem.watchGifts) DS.Gem.watchGifts(m); // 🎁 선물 알림 = 어디서나 (2026-11-06 · gem.js watchGifts)
     me = m; code0 = code || '';
     DS.UI.show('screen-camp');
     if (!m.test) DS.Scene.save({ role: 'camp' });
@@ -358,8 +358,10 @@ DS.Camp = (function () {
             ${todo.length || bossTodo ? `<div class="nt-go-list">${todo.map((o) => `<button class="btn small primary" data-go="${x.L.id}|${o.id}">🎯 바로 풀기 · ${esc(title(o.id))}</button>`).join('')}${bossTodo ? `<button class="btn small primary" data-go="${x.L.id}|boss">🎯 바로 풀기 · 👑 형성평가</button>` : ''}</div>` : ''}</div>`; }).join('')}
         <p class="muted small">${DS.Note.icon('x')} 틀림 · ${DS.Note.icon('-')} 안 풂 → 「🎯 바로 풀기」로 허수아비에서 풀면 ${DS.Note.icon('p')} 복습 완료</p></div>`;
     }
+    let giftHtml = ''; // 🎁 받은 선물 기록 (2026-11-06)
+    if (DS.Gem && DS.Gem.giftList && !me.test) { const gl = DS.Gem.giftList(await DS.Gem.mine(me).catch(() => ({}))); if (gl.length) { const md = (t) => { const x = new Date(Number(t) + 9 * 3600e3); return `${x.getUTCMonth() + 1}/${x.getUTCDate()}`; }; giftHtml = `<div class="gift-box2"><p class="nt-h">🎁 <b>선생님 선물</b> <span class="muted small">모두 ${gl.reduce((a, x) => a + (Number(x.g) || 0), 0)}개</span></p>${gl.slice(0, 6).map((x) => `<div class="gift-row"><span>${md(x.at)}</span><b>💎 +${Number(x.g) || 0}</b></div>`).join('')}</div>`; } }
     const el = document.createElement('div'); el.className = 'modal camp-modal';
-    el.innerHTML = `<div class="quiz-box framed rs-box"><h2>📮 우편함 · 복습 노트</h2>${ntHtml}${g ? `<div class="rs-lv"><b>Lv.${g.lv} ${esc(g.title)}</b> <span class="muted small">EXP ${g.total}</span><div class="rs-bar"><i style="width:${Math.round((100 * g.into) / g.next)}%"></i><span>${g.into} / ${g.next}</span></div></div>` : ''}
+    el.innerHTML = `<div class="quiz-box framed rs-box"><h2>📮 우편함 · 복습 노트</h2>${giftHtml}${ntHtml}${g ? `<div class="rs-lv"><b>Lv.${g.lv} ${esc(g.title)}</b> <span class="muted small">EXP ${g.total}</span><div class="rs-bar"><i style="width:${Math.round((100 * g.into) / g.next)}%"></i><span>${g.into} / ${g.next}</span></div></div>` : ''}
       <p class="muted small">성적이 아니라 다음에 볼 것을 모아 둔 노트예요. 📌 복습 추천 개념은 🎯 복습 허수아비에서 그 차시를 골라 연습할 수 있어요.</p>${DS.Result.history(rec)}
       <div class="row"><button class="btn" id="nt-x">닫기</button><button class="btn primary" id="nt-bonus">🎯 복습 허수아비로</button></div></div>`;
     document.body.appendChild(el);
@@ -447,7 +449,7 @@ DS.Camp = (function () {
         <p class="muted small">🗡 근접 = 다가가서 · 🏹 원거리 = 탄을 날려서 · 오른쪽 아래 = 친화 계열 (같은 계열 스킬을 고르면 ★ 공명) · 파란 점 = 스킬 고름 · 데미지 · 보상은 모두 같아요</p>
         ${T ? '' : `<p class="muted small">✨ 업적 용사: ① 1~3차시 도감 <b>${L.got} / ${L.need}</b>장 · ② 🎁 첫 레이드 · ③ 4~6차시 도감 · ④ 7~10차시 도감 · 금발 검사 = 🟪 인장 3개 / 💎 상점 용사 = 조각으로</p>`}`;
     const gemTab = () => { const fx = fxNow(), aff = DS.FX.affOf(hero), reso = DS.FX.resonates(hero, fx), set = sock[hero] != null;
-      return `<div class="sock"><canvas width="128" height="80" data-still="${fx}"></canvas><div><small>${heroName(hero)}의 스킬 · 친화 ${aff.name}</small><b>${esc(DS.FX.NAMES[fx] || '')} ${tierTag(fx)}${reso ? ' <span class="reso">★ 공명</span>' : ''}</b><small>${set ? '아래 표에서 누르면 바로 바뀌어요' : '고른 스킬 없음 → 친화 계열 Ⅰ 이 기본으로 나가요'}</small></div>${set ? '<button class="btn small" id="sock-out">빼기<br><small>기본으로</small></button>' : '<span></span>'}</div>
+      return `<div class="sock"><canvas width="128" height="80" data-still="${fx}"></canvas><div><small>${heroName(hero)}의 스킬 · 친화 ${aff.name}</small><b>${esc(DS.FX.NAMES[fx] || '')} ${tierTag(fx)}${reso ? ' <span class="reso">★ 공명</span>' : ''}</b><small>${set ? '아래 표에서 누르면 바로 바뀌어요' : '고른 스킬 없음 → 친화 계열 Ⅰ 이 기본으로 나가요'}</small></div><div class="sock-btns">${set ? '<button class="btn small" id="sock-out">🔄 기본으로<br><small>스킬은 계속 가짐</small></button>' : ''}${!T && (L.fx.find((x) => x.id === fx) || {}).bought ? `<button class="btn small sock-sell" id="sock-sell">💰 되팔기<br><small>💎 +${DS.Gem.refundOf('fx', fx)} · 다시 잠김</small></button>` : ''}</div></div>
         ${T ? ([3, 's'].includes(DS.FX.tierOf(fx)) ? '<button class="btn small ult-btn" id="ult-demo">⚡ 필살기 미리보기 <small>(선생님: 시연을 다 맞힌 뒤 ⚔ 일반 · ⚡ 필살기 중 골라요)</small></button>' : '<p class="muted small">⚡ 선생님 필살기는 Ⅳ 전설(9개 모두) · 🪶 특별 스킬일 때 시연 뒤 고를 수 있어요</p>') : DS.Attack && DS.Attack.canUlt(fx, hero) ? '<button class="btn small ult-btn" id="ult-demo">⚡ 필살기 미리보기 <small>(특화 계열 Ⅳ 전설 스킬 + 퍼펙트일 때)</small></button>' : DS.FX.tierOf(fx) === 3 ? `<p class="muted small">⚡ 필살기는 이 용사의 특화(친화 ${DS.FX.affOf(hero).name}) Ⅳ 전설 스킬일 때만 나가요</p>` : ''}
         <p class="muted small">⚔ 한 번 연 스킬은 <b>여러 용사가 동시에</b> 쓸 수 있고, 빼도 사라지지 않아요. ${T ? '' : '잠긴 스킬은 누르면 💎 조각 · 🟪 인장으로 열어요.'}</p>
         <div class="fx-fams">${DS.FX.FAMS.map((fam) => `<div class="fx-fam${fam.id === aff.id ? ' aff' : ''}"><b>${fam.name}${fam.id === aff.id ? ' ★' : ''}</b>${fam.ids.map(fxCell).join('')}</div>`).join('')}<div class="fx-fam sp"><b>🪶 특별</b>${DS.FX.ACHV.map(fxCell).join('')}<span></span></div></div>`; };
@@ -466,6 +468,14 @@ DS.Camp = (function () {
       el.querySelectorAll('[data-h]').forEach((b) => (b.onclick = () => { const h = L.heroes.find((x) => x.id === Number(b.dataset.h)); if (!h.open) { if (h.shop) { DS.Control.run(() => shopBuy(h)); return; } DS.UI.toast(`🔒 ${h.cond}`); return; } hero = h.id; DS.Sound.clank(); draw(); demo(); }));
       el.querySelectorAll('[data-fx]').forEach((b) => (b.onclick = () => { const f = L.fx.find((x) => x.id === b.dataset.fx); if (!f) return; if (!f.open) { if (f.locked) { DS.UI.toast(`🔒 ${f.locked} 열어야 살 수 있어요`, 3200); return; } if (f.shop) { DS.Control.run(() => shopBuy(f)); return; } DS.UI.toast(`🔒 ${f.cond || '해금 조건은 추후 공개'}`, 3200); return; } sock[hero] = f.id; draw(); demo(); DS.Sound.clank(); }));
       { const ub = el.querySelector('#ult-demo'); if (ub) ub.onclick = () => { const ap = el.querySelector('#ap'); if (ap && DS.Attack) { ap.scrollIntoView({ block: 'nearest' }); DS.Attack.play(ap, { heroBox: ap.querySelector('.ap-hero'), monBox: ap.querySelector('.ap-mon'), hero, fx: fxNow(), s: 0.85, ps: 1, rest: 'idle', finish: true, ultimate: true }); } }; }
+      { const sl = el.querySelector('#sock-sell'); if (sl) sl.onclick = () => DS.Control.run(async () => { // 💰 되팔기 (2026-11-06): 70% 환불 · 다시 잠김 · 다음 단계를 산 경우는 그것부터
+        const id = fxNow(), f = L.fx.find((x) => x.id === id), up = L.fx.find((x) => x.need === id && x.bought);
+        if (!f || !f.bought) return; if (up) { DS.UI.toast(`먼저 윗 단계 「${nmOf(up.id)}」을 되팔아야 해요`, 3200); return; }
+        const p = DS.Gem.price('fx', id), back = DS.Gem.refundOf('fx', id);
+        if (!confirm(`「${nmOf(id)}」을 되팔까요?\n💎 ${back}개를 돌려받아요 (산 값 ${p}개의 70% · 30% 는 수수료).\n이 스킬은 다시 잠기고, 끼워 둔 용사는 기본 스킬로 돌아가요.`)) return;
+        await DS.Gem.sell(me, 'fx', id); Object.keys(sock).forEach((h) => { if (sock[h] === id) delete sock[h]; });
+        await DS.Account.setSocket(sock).catch(() => {}); me.socket = sock; L = await DS.Account.looks(me); DS.Sound.coin && DS.Sound.coin(); DS.UI.toast(`💰 되팔았어요 · 💎 +${back}`); draw();
+      }); }
       { const out = el.querySelector('#sock-out'); if (out) out.onclick = () => { delete sock[hero]; DS.Sound.clank(); DS.UI.toast('스킬을 뺐어요 (기본 스킬로 · 언제든 다시 고를 수 있어요)', 2600); draw(); demo(); }; }
       el.querySelectorAll('[data-ttl]').forEach((b) => (b.onclick = () => { if (b.classList.contains('lock')) { DS.UI.toast(`🔒 ${b.title}`, 2600); return; } title = b.dataset.ttl; DS.Sound.clank(); draw(); }));
       el.querySelector('#set-x').onclick = () => el.remove();

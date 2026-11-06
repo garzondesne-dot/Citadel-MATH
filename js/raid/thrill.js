@@ -19,8 +19,9 @@ DS.Thrill = (function () {
   function bindFx(mon, big) {
     if (!mon || !DS.FX) return;
     const box = mon.closest('.scene, #raid') || mon.parentElement; if (!box) return;
-    const a = mon.getBoundingClientRect(), b = box.getBoundingClientRect();
-    DS.FX.play(box, big ? 'bind2' : 'bind', { x: a.left - b.left + a.width / 2, y: a.top - b.top + a.height * 0.55, s: Math.max(1, Math.min(4, a.width / 110)) * (big ? 1.3 : 1) });
+    const art = (mon.matches && mon.matches('.art')) ? mon : (mon.querySelector && mon.querySelector('.art.monster, .art.hero')) || mon; // 2026-11-06 사용자 「보스 묶기가 정중앙이 아니라 살짝 위」: 체력 막대까지 든 칸 말고 몬스터 그림 기준
+    const a = art.getBoundingClientRect(), b = box.getBoundingClientRect();
+    DS.FX.play(box, big ? 'bind2' : 'bind', { x: a.left - b.left + a.width / 2, y: a.top - b.top + a.height * 0.6, s: Math.max(1, Math.min(4, a.width / 110)) * (big ? 1.3 : 1) });
     if (DS.Sound && DS.Sound.block) DS.Sound.block();
   }
   function perfect(streak, bind, opt = {}) {
