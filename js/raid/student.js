@@ -414,7 +414,7 @@ DS.Student = (function () {
     const ub = $('#st-ult');
     if (ub) ub.onclick = () => DS.Control.run(async () => {
       ub.disabled = true; await DS.Act.heal(code, raw, mid, { ult: true }); drawn = '';
-      if (DS.Attack) { const sc = body.querySelector('.scene'); await DS.Attack.cutin(myP().hero || 0, myP().fx); if (sc) { const mon = sc.querySelector('.enc-mon .art.monster') || sc.querySelector('.enc-mon'); DS.Attack.ultBlast(sc, mon, myP().fx); setTimeout(() => { if (DS.Thrill) DS.Thrill.chain(mon, DS.Combo ? DS.Combo.ULT_BIND : 15, 'ult'); }, 500); } } // ⚡ 필살기 대묶기
+      if (DS.Attack) { await DS.Attack.cutin(myP().hero || 0, myP().fx); const sc = document.querySelector('#st-body .scene') || body.querySelector('.scene'); /* 2026-11-06 검증: 컷인 동안 화면이 새로 그려질 수 있어 컷인 뒤에 장면을 찾음 */ if (sc) { const mon = sc.querySelector('.enc-mon .art.monster') || sc.querySelector('.enc-mon'); DS.Attack.ultBlast(sc, mon, myP().fx); setTimeout(() => { if (DS.Thrill) DS.Thrill.chain(mon, DS.Combo ? DS.Combo.ULT_BIND : 15, 'ult'); }, 500); } } // ⚡ 필살기 대묶기
       if (DS.Grow && !test) DS.Grow.add(acc(), { heal: 1 }, `ult_${code}_${mid}`).catch(() => {});
     });
     const pb2 = $('#st-party');

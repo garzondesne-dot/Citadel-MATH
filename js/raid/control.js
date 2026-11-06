@@ -139,8 +139,9 @@ DS.Control = (function () {
   }
   const timeUpFns = {};
   const onTimeUp = (key, fn) => { if (fn) timeUpFns[key] = fn; else delete timeUpFns[key]; };
+  const tbSeen = {}; // 마감 시각별 마지막 단계 (2026-11-06 검증: 막대를 새로 그려도 알림을 놓치지 않게 · 같은 시각 막대가 여러 개여도 한 번만)
   function tbTick() {
-    const now = DS.Net.now();
+    const now = DS.Net.now(); let lastMin = false;
     document.querySelectorAll('.tb[data-dl]').forEach((e) => {
       const dl = Number(e.dataset.dl), total = Number(e.dataset.total) || TB_TOTAL, left = Math.max(0, dl - now), frac = Math.max(0, Math.min(1, left / total));
       const only = Number(e.dataset.only || 0); e.hidden = !!only && left > only * 60e3 && !e.classList.contains('won');
@@ -149,13 +150,14 @@ DS.Control = (function () {
       const b = e.querySelector('.tb-boss'); if (b) b.style.left = `calc(${(frac * 100).toFixed(2)}% - 10px)`;
       e.classList.toggle('warn', left <= 10 * 60e3); e.classList.toggle('hot', left <= 5 * 60e3); e.classList.toggle('last', left <= 60e3 && left > 0);
       // ⏰ 10 · 5 · 1분 남음 알림 (2026-11-06 사용자 「시간 제한 연출이 없음」): 그 순간 한 번 · 종합실 = 큰 알림 · 폰 = 작은 알림 · 마지막 1분 = 화면 테두리 붉게
-      if (!e.classList.contains('won')) {
-        const ms = left <= 0 ? 0 : left <= 60e3 ? 1 : left <= 5 * 60e3 ? 5 : left <= 10 * 60e3 ? 10 : 99, was = e.dataset.ms ? Number(e.dataset.ms) : null; e.dataset.ms = ms;
+      if (!e.classList.contains('won') && e.closest('.screen.active')) { // 2026-11-06 검증: 지금 보이는 화면의 막대만 (수업 끝난 뒤 캠프에 남은 옛 막대가 울리지 않게)
+        const ms = left <= 0 ? 0 : left <= 60e3 ? 1 : left <= 5 * 60e3 ? 5 : left <= 10 * 60e3 ? 10 : 99, was = tbSeen[dl] != null ? tbSeen[dl] : null; tbSeen[dl] = ms;
         if (was != null && ms < was && ms > 0) tbAlert(ms, e);
-        document.body.classList.toggle('tb-last-min', ms === 1 && !!document.querySelector('.screen.active .tb[data-dl]'));
+        if (ms === 1) lastMin = true;
       }
       const pf = e.querySelector('.tb-pf'); if (pf) pf.parentElement.classList.toggle('behind', Number(e.dataset.prog) + 0.02 < 1 - frac);
     });
+    document.body.classList.toggle('tb-last-min', lastMin); // 이긴 뒤 · 수업 끝 · 화면 바뀜이면 붉은 테두리 끔
     Object.values(timeUpFns).forEach((fn) => { try { fn(now); } catch (err) { console.error(err); } });
   }
   function tbAlert(min, e) {

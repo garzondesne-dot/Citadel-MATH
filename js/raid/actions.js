@@ -84,8 +84,8 @@ DS.Act = (function () {
       if (!studs.length) fail('입장한 학생이 없어요.');
       const f0 = Raid.autoFocus(L.steps[0]), plan = DS.Combo ? DS.Combo.batPlan(L, Math.random(), Math.random()) : null;
       // ⏳ 2026-11-06 사용자 「50분 제한이 안 보임」: 방을 교시 밖에서 열어 문 닫힘 시각이 없으면 → 수업 시작 때 그 교시 끝(없으면 지금 + 50분)
-      const dl0 = !R.meta.deadline && !R.meta.noLimit ? ((DS.Sched && DS.Sched.periodEnd(N().now())) || N().now() + 50 * 60e3) : null;
-      if (dl0) await N().set(P(code, 'state/deadline'), dl0).catch(() => {});
+      const dl0 = (!R.meta.deadline || R.meta.deadline < N().now() + 5 * 60e3) && !R.meta.noLimit ? ((DS.Sched && DS.Sched.periodEnd(N().now())) || N().now() + 50 * 60e3) : null;
+      if (dl0) await N().set(P(code, 'state/deadline'), dl0).catch(() => {}); // 2026-11-06 검증: 지난 교시 끝에 방을 만들어 둔 경우(마감이 이미 지났거나 5분 안)도 수업 시작 시각 기준으로 다시 잡음 (바로 「문을 닫았다」 방지)
       await N().update(P(code), { active: Object.fromEntries(studs.map((u) => [u, true])), 'state/headcount': studs.length, 'state/step': 0, 'state/stepAt': N().TS, 'state/focus': f0, 'state/focusAt': f0 ? N().now() : null, 'state/pauseMs': null, 'state/batPlan': plan, 'state/cpAt': f0 ? N().now() : null, 'state/cpMs': 0 });
       const clss = [...new Set(studs.map((u) => (R.players[u] || {}).cls).filter(Boolean))];
       await unlockFor(L, clss);
@@ -297,6 +297,7 @@ DS.Act = (function () {
     if (!rec.canHeal) fail('힐은 몬스터를 다 맞힌 뒤 남은 기회로 할 수 있어요.');
     if (opt.party || opt.ult) { // ⚡ 3연속 퍼펙트 (2026-11-06): 필살기 또는 💚 파티 힐 — 둘 중 하나 (마지막 기회)
       if (Raid.perfStreak(rec) < 3 || Raid.ultUsed(R, mid, me)) fail('3연속 퍼펙트일 때만 쓸 수 있어요.');
+      if (opt.ult && DS.Attack) { const p = (R.players || {})[me] || {}; if (!DS.Attack.canUlt(p.fx, p.hero)) fail('필살기는 특화 계열 Ⅳ 전설 스킬을 끼웠을 때만 쓸 수 있어요.'); } // 2026-11-06 검증: 화면 단추만이 아니라 여기서도 확인
       await N().set(P(code, `heals/${mid}/${me}/${Raid.healsGiven(R, mid, me)}`), opt.ult ? '!ult' : '*');
       return opt.ult ? '!ult' : '*';
     }

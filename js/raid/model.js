@@ -121,9 +121,10 @@ DS.Raid = (function () {
   //   저장 bossTry/{uid}/{문항}/{시도} = 답(JSON) · 예전 수업 bossAns/{uid}/{1|2} = [답 …] 은 시도 0 · 1 로 읽음
   //   문항을 한 번이라도 맞히면 도달 · 체력 = ⌊인원 × hpItems × 기준%⌋ · 보너스 문항도 맞히면 1 데미지
   const BOSS_TRIES = 4;
+  const bossMade = new Map(); // 재도전 문항은 (차시 · 방 · 학생 · 문항 · 시도)로 정해짐 → 한 번 만든 것은 다시 씀 (2026-11-06 검증: 25명 형성평가 단계에서 0.2초마다 다시 만들어 TV · 폰이 버벅이던 것)
   function bossItem(L, R, uid, i, a) {
     if (!a) return L.boss.sets[1][i];
-    if (L.boss.make) return L.boss.make(i, a, DS.Rng(`${seedOf(R, uid)}|boss|${i}|${a}`));
+    if (L.boss.make) { const k = `${L.id}|${seedOf(R, uid)}|${i}|${a}`; let q = bossMade.get(k); if (!q) { if (bossMade.size > 4000) bossMade.clear(); q = L.boss.make(i, a, DS.Rng(`${seedOf(R, uid)}|boss|${i}|${a}`)); bossMade.set(k, q); } return q; }
     return (L.boss.sets[2] || L.boss.sets[1])[i]; // 생성기가 없는 차시(엑셀 차시 등): 세트2 고정
   }
   // 그 학생의 시도 목록 [{ i, a, given, q, ok }] (문항 · 시도 순)
@@ -221,7 +222,7 @@ DS.Raid = (function () {
     return { p, strike: false };
   }
   // ⏳ 보스 타임바: 마감 = 교시 끝 (+5분 연장 한 번) · null = 제한 없음
-  const deadline = (R) => { const d = R && ((R.meta && R.meta.deadline) || (R.state && R.state.deadline)); return d ? d + (Number((R.state || {}).extend) || 0) * 60e3 : null; }; // state.deadline = 수업 시작 때 잡은 50분 (2026-11-06)
+  const deadline = (R) => { const d = R && ((R.state && R.state.deadline) || (R.meta && R.meta.deadline)); return d ? d + (Number((R.state || {}).extend) || 0) * 60e3 : null; }; // state.deadline = 수업 시작 때 잡은 50분 (2026-11-06)
   const timeLeft = (R, now) => { const d = deadline(R); return d == null ? null : Math.max(0, d - now); };
   // 던전 진행: 지나온 단계 / 전체 (마무리 = 끝)
   const progress = (L, R) => { const i = (R.state || {}).step ?? -1, n = L.steps.length; return Math.max(0, Math.min(1, (i + (isEnd(L, R) || bossHp(L, R).won ? 1 : 0)) / n)); };

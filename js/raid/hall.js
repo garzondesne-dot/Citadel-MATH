@@ -13,6 +13,7 @@ DS.Hall = (function () {
 
   async function enter(c, key) {
     await DS.Act.joinHall(c, key);
+    if (code !== c) { hxSeen = lvSeen = ulSeen = hthSeen = null; lvQ = []; ulQ = []; sndKey = ''; try { if (DS.Sound) { DS.Sound.setSfx(localStorage.getItem('ds-sfx-off') !== '1', false); DS.Sound.setBgm(localStorage.getItem('ds-bgm-off') !== '1', false); } } catch (e) { /* 무시 */ } } // 2026-11-06 검증: 다음 수업으로 넘어가면 「본 것」 기록 · 리모컨 소리 설정을 새로 (+EXP · 필살기 컷인이 안 나오거나 음소거가 이어지던 것)
     code = c; hallKey = String(key); camped = false; L = null; R = null; built = '';
     if (!atkT) atkT = setInterval(hallAtk, 200);
     try { localStorage.setItem('citadel-hall', JSON.stringify({ code: c })); } catch (e) { /* 무시 */ } // 2026-11-06 사용자: 비밀번호는 기억하지 않음 (메뉴로 가거나 다시 접속하면 다시 입력)
@@ -55,7 +56,7 @@ DS.Hall = (function () {
   function ulNext() {
     const u = ulQ.shift(); if (!u || !DS.Attack) { ulBusy = false; return; } ulBusy = true;
     const p = (R.players || {})[u] || {};
-    DS.Attack.cutin(p.hero || 0, p.fx || 'flame').then(() => { const arena = $('#raid'), m0 = $('#rm'); if (arena && m0) { const ar = arena.getBoundingClientRect(), mr = m0.getBoundingClientRect(); DS.Attack.ultBlast(arena, m0, p.fx || 'flame'); setTimeout(() => { if (DS.Thrill) DS.Thrill.chain(m0, DS.Combo ? DS.Combo.ULT_BIND : 15, 'ult'); }, 500); } setTimeout(ulNext, 1400); }); // ⚡ 대묶기
+    DS.Attack.cutin(p.hero || 0, p.fx || 'flame').then(() => { try { const arena = $('#raid'), m0 = $('#rm'); if (arena && m0) { const ar = arena.getBoundingClientRect(), mr = m0.getBoundingClientRect(); DS.Attack.ultBlast(arena, m0, p.fx || 'flame'); setTimeout(() => { if (DS.Thrill) DS.Thrill.chain(m0, DS.Combo ? DS.Combo.ULT_BIND : 15, 'ult'); }, 500); } } catch (e) { console.error(e); } }).catch(() => {}).finally(() => setTimeout(ulNext, 1400)); // ⚡ 대묶기 · 2026-11-06 검증: 중간에 오류가 나도 다음 필살기가 막히지 않게
   }
   function lvHall() {
     const v = R.lvup || {}, first = !lvSeen; if (first) lvSeen = {};
@@ -256,7 +257,7 @@ DS.Hall = (function () {
     const out = {};
     Raid().activeIds(R).forEach((u) => {
       if (step.kind === 'boss') { const m = Raid().mastery(L, R, u).filter(Boolean).length; const n = Raid().bossTries(L, R, u).length; out[u] = { n, dmg: m }; }
-      else { const rec = Raid().record(L, R, step.id, u); out[u] = { n: rec.tries.length, dmg: rec.best, label: Raid().resultLabel(rec.last), prac: rec.practice, h: Raid().healsGiven(R, step.id, u) }; }
+      else { const rec = Raid().record(L, R, step.id, u); out[u] = { n: rec.tries.length, dmg: rec.best, label: Raid().resultLabel(rec.last), prac: rec.practice, h: Object.values(Raid().healsOf(R, step.id)[u] || {}).filter((v) => v !== '!ult').length }; /* 2026-11-06 검증: ⚡ 필살기 칸은 「💚 응원」으로 세지 않음 (필살기 컷인만) */ }
     });
     return out;
   }
