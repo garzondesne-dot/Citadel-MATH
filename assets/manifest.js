@@ -80,6 +80,9 @@ DS.ASSETS = {
   trophy: 'trophy-v1.webp', // 클리어 · 수업 끝 트로피 (사용자 제공, 투명 배경)
   note: { src: 'note-icons-v1.webp', cell: 128, names: ['x', 'none', 'ok', 'fill', 'star', 'badge', 'done', 'book'] }, // 📕 오답노트 아이콘 (v0.9.7.9 · 사용자 생성): 틀림 · 안 풂 · 맞힘 · 보충 · 도전 별 · 알림 배지(숫자는 코드) · 노트 완성 · 오답노트 책
   fun: { bg: 'fun-arena-v1.webp', plat: 'fun-plat-v2.webp', platFrames: 2, bgRev: 'fun-dorm-v1.webp', bgOx: null }, // bgRev = 🔄 반대로 「침대 숙소」(그림 오기 전엔 CSS) · bgOx = ⭕ OX 전용(없으면 bg 를 얼음빛으로) // ⚖ 밸런스 게임 「무너지는 두 갈래 다리」 (v0.9.7.7): bg = 배경 1920×1080 · plat = 발판(투명) — 그림이 오기 전엔 null → CSS 로 그림
+  // 🏰 타워 디펜스 지도 배경 (2026-11-06 사용자 그림 · 1672×941 · 템플릿 assets/templates/td · docs/ASSET-SPEC.md 6-11): 지도 id → 그림. 없으면 코드가 단색 + 이모지로 그림
+  //   그림 위 가운데 어두운 상자(가로 4~12칸 · 세로 0~0.75칸) = 종합실 글자 자리 (css .td-art .td-top) · 그 둘레와 성 둘레엔 자리를 안 만듦 (td-maps.js blocked)
+  td: { forest: 'td-forest-v1.webp', volcano: 'td-volcano-v1.webp', ice: 'td-ice-v1.webp', desert: 'td-desert-v1.webp', crypt: 'td-crypt-v1.webp' },
   dportals: { bonus: 'dportal-bonus-v1.webp', mid: 'dportal-mid-v1.webp', big: 'dportal-big-v1.webp' },
   citadel: { room: 'citadel-room-v1.webp', boss: 'citadel-boss-v1.webp' }, // 🏰 성채던전 안 전투 배경 (2026-11-05 사용자 제공): room = 일반 방 · boss = 보스 방 (중단원 12번 · 대단원 17번) — 성채던전 개편(묶음 A) 때 연결
   fields: { forest: 'field-forest-v1.webp', lava: 'field-lava-v1.webp', ice: 'field-ice-v1.webp' }, // 전투 배경 (달빛 숲 유적 · 화산 대장간 · 빙결 신전)

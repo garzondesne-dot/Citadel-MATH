@@ -2264,6 +2264,9 @@ body.tb-last-min::after { content: ''; position: fixed; inset: 0; z-index: 88; p
 .td-top { display: inline-flex; gap: 14px; align-items: center; margin-top: 6px; padding: 6px 16px; border-radius: 12px; background: #000b; border: 2px solid #fff3; font-size: clamp(14px, 1.6vw, 26px); font-weight: 800; color: #fff; }
 .td-top .td-sec { color: #ffd25a; font-size: 1.3em; } .td-life b { color: #ff8a95; } .td-cheer { color: #ffd25a; } .td-tile { color: #ffd25a; font-size: 0.85em; }
 .td-desc { display: inline-block; margin: 4px 0 0; padding: 2px 10px; border-radius: 8px; background: #0008; color: #dfe7f5; font-size: clamp(12px, 1.1vw, 18px); }
+/* 🏰 지도 그림이 있을 때 (2026-11-06): 글자를 그림 안 어두운 상자(가로 4~12칸 · 세로 0~0.75칸)에 넣음 · --u = 1칸 px */
+.td-art .td-top { position: absolute; left: calc(var(--u) * 4); width: calc(var(--u) * 8); top: 0; height: calc(var(--u) * 0.75); margin: 0; box-sizing: border-box; padding: 0 calc(var(--u) * 0.15); justify-content: center; flex-wrap: wrap; gap: 0 calc(var(--u) * 0.18); background: none; border: 0; border-radius: 0; font-size: calc(var(--u) * 0.19); line-height: 1.25; }
+.td-art .td-desc { margin-top: calc(var(--u) * 0.8); font-size: calc(var(--u) * 0.15); }
 .td-pk, .td-tw { position: absolute; transform: translate(-50%, -62%); display: flex; flex-direction: column; align-items: center; pointer-events: none; }
 .td-pk b, .td-tw b { font-size: clamp(10px, 0.95vw, 16px); color: #fff; text-shadow: 0 0 3px #000, 0 0 3px #000; white-space: nowrap; }
 .td-tw .art, .td-pk .art { transform: scale(0.8); }

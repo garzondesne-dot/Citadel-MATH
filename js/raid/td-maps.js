@@ -7,7 +7,7 @@ window.DS = window.DS || {};
 DS.TDMaps = (function () {
   const MAPS = [
     { id: 'forest', name: '🌲 초록 숲길', desc: '기본 S자 길 · 꺾인 곳 명당이 고르게', theme: { bg: ['#1f4a2a', '#2f6b3a'], path: '#b08a52', edge: '#6b4f2a', deco: '🌲', deco2: '🍄' }, tile: 'wind',
-      paths: [[[0, 1.5], [12.5, 1.5], [12.5, 4.5], [3.5, 4.5], [3.5, 7.5], [15.2, 7.5]]] },
+      paths: [[[0, 1.5], [12.43, 1.5], [12.43, 4.41], [3.26, 4.41], [3.26, 7.37], [15.2, 7.37]]] }, // 2026-11-06 그림(td-forest-v1)의 길 가운데에 맞춤
     { id: 'volcano', name: '🌋 용암 두 갈래', desc: '가운데서 길이 둘로 갈라졌다 다시 만남 · 나눠 지켜야 함', theme: { bg: ['#3a1410', '#5a2014'], path: '#3a2a26', edge: '#ff6a1a', deco: '🔥', deco2: '🪨' }, tile: 'fire',
       paths: [[[0, 4.5], [4, 4.5], [5.5, 1.6], [10.5, 1.6], [12, 4.5], [15.2, 4.5]], [[0, 4.5], [4, 4.5], [5.5, 7.4], [10.5, 7.4], [12, 4.5], [15.2, 4.5]]] },
     { id: 'ice', name: '❄ 얼음 소용돌이', desc: '나선을 따라 가운데 성으로 · 가운데 칸은 여러 바퀴를 때림', theme: { bg: ['#14304a', '#1f4a6b'], path: '#cfe8f7', edge: '#7fb8e0', deco: '❄', deco2: '🧊' }, tile: 'frost',
@@ -23,11 +23,16 @@ DS.TDMaps = (function () {
   const dPath = (m, x, y) => Math.min(...segs(m).map((s) => dSeg(x, y, s)));
   // 사거리 안에 들어오는 길 길이 (0.1칸 단위로 샘)
   function cover(m, x, y, r = RANGE) { let n = 0; segs(m).forEach(([a, b]) => { const L = Math.hypot(b[0] - a[0], b[1] - a[1]), k = Math.max(1, Math.round(L / 0.1)); for (let i = 0; i <= k; i++) { const t = i / k; if (Math.hypot(x - (a[0] + t * (b[0] - a[0])), y - (a[1] + t * (b[1] - a[1]))) <= r) n++; } }); return n / 10; }
+  // 자리로 못 쓰는 곳 (2026-11-06 지도 그림): 가운데 위 글자 상자(HUD · 가로 3.6~12.4칸 · 세로 1.1칸 위) · 성 그림 둘레 · 입구(🌀) 그림 둘레
+  const HUD = [3.6, 12.4, 1.1];
+  const blocked = (x, y, ex, ey, st) => (x > HUD[0] && x < HUD[1] && y < HUD[2]) || (Math.abs(x - ex) < 1.1 && y > ey - 1.6 && y < ey + 0.9)
+    || st.some(([sx, sy]) => Math.abs(x - Math.max(0.5, Math.min(W - 0.5, sx))) < 1.0 && Math.abs(y - Math.max(0.5, Math.min(H - 0.5, sy))) < 1.15);
   // 자리 뽑기: 0.5칸 격자 중 길에서 0.75~1.25칸 · 서로 1칸 이상 · 길을 많이 덮는 곳부터
   function slots(m) {
     if (m._slots) return m._slots;
     const cand = [];
-    for (let x = 0.5; x <= W - 0.5; x += 0.5) for (let y = 0.5; y <= H - 0.5; y += 0.5) { const d = dPath(m, x, y); if (d >= 0.75 && d <= 1.25) cand.push({ x, y, c: cover(m, x, y) }); }
+    const [ex, ey] = end(m), st = starts(m);
+    for (let x = 0.5; x <= W - 0.5; x += 0.5) for (let y = 0.5; y <= H - 0.5; y += 0.5) { const d = dPath(m, x, y); if (d >= 0.75 && d <= 1.25 && !blocked(x, y, ex, ey, st)) cand.push({ x, y, c: cover(m, x, y) }); }
     cand.sort((a, b) => b.c - a.c || a.x - b.x || a.y - b.y);
     const out = [];
     // 고르게 퍼지도록: 먼저 덮는 양이 많은 순으로 뽑되 서로 1.1칸 이상

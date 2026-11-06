@@ -58,7 +58,8 @@ const OUT = process.argv[2] || '.', U = 'http://localhost:8765/index.html?local'
   for (let k = 0; k < 150; k++) { await H.waitForTimeout(1000); f = await H.evaluate(async (c) => DS.Net.get(`rooms/${c}/fun`), code); if (f && f.phase === 'end') break; }
   const live = await H.evaluate(async ([c, g]) => DS.Net.get(`rooms/${c}/tdl/${g}`), [code, f.g]);
   await H.waitForTimeout(1200); await H.screenshot({ path: `${OUT}/73-5-tv-end.png` });
-  await S1.waitForTimeout(6000); await S1.screenshot({ path: `${OUT}/73-6-phone-end.png` });
+  await S1.waitForTimeout(3000); await S1.screenshot({ path: `${OUT}/73-6-phone-end.png` });
+  for (let k = 0; k < 30; k++) { const ok = await S1.evaluate(async () => { const d = (await DS.Gem.mine({ c: '1-3', n: 1 })) || {}; return Object.keys(d.log || {}).some((x) => x.startsWith('td_')); }); if (ok) break; await S1.waitForTimeout(1000); } // 체험 모드 DB 는 페이지끼리 덮어쓸 수 있어 폰이 다시 쓰기를 기다림
   await S1.evaluate(() => { window.__con = []; }); 
   const gem = await S1.evaluate(async () => { const d = (await DS.Gem.mine({ c: '1-3', n: 1 })) || {}; return Object.entries(d.log || {}).filter(([k]) => k.startsWith('td_')).map(([, v]) => v.g); });
   P('💎 기록 열쇠: ' + JSON.stringify(await S1.evaluate(async () => { const d = (await DS.Gem.mine({ c: '1-3', n: 1 })) || {}; return { keys: Object.keys(d.log || {}), total: d.total, endView: !!document.querySelector('.td-ph.td-end'), me: DS.Net.uid() }; })));

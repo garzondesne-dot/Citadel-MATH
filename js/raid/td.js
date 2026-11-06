@@ -171,21 +171,36 @@ DS.TD = (function () {
     const map = mapOf(f);
     el.innerHTML = `<div class="td-wrap"><div class="td-stage"><canvas class="td-bg"></canvas><div class="td-dom"></div><canvas class="td-fx"></canvas><div class="td-hud"></div><div class="td-big"></div></div></div>`;
     const h = { g: f.g, root: el.querySelector('.td-wrap'), map, el, R, f, mons: new Map(), tw: new Map(), cut: [], cutBusy: false };
-    h.stage = h.root.querySelector('.td-stage'); h.bg = h.root.querySelector('.td-bg'); h.fx = h.root.querySelector('.td-fx'); h.dom = h.root.querySelector('.td-dom'); h.hud = h.root.querySelector('.td-hud'); h.big = h.root.querySelector('.td-big');
-    const fit = () => { const W = el.clientWidth || 1280, Hh = el.clientHeight || 720, w = Math.min(W, Hh * 16 / 9); h.U = w / 16; h.stage.style.width = `${w}px`; h.stage.style.height = `${w * 9 / 16}px`; [h.bg, h.fx].forEach((c) => { c.width = Math.round(w); c.height = Math.round(w * 9 / 16); }); drawMap(h); h.tw.clear(); h.dom.innerHTML = ''; h.mons.clear(); };
+    h.stage = h.root.querySelector('.td-stage'); if (artOf(map)) h.stage.classList.add('td-art'); h.bg = h.root.querySelector('.td-bg'); h.fx = h.root.querySelector('.td-fx'); h.dom = h.root.querySelector('.td-dom'); h.hud = h.root.querySelector('.td-hud'); h.big = h.root.querySelector('.td-big');
+    const fit = () => { const W = el.clientWidth || 1280, Hh = el.clientHeight || 720, w = Math.min(W, Hh * 16 / 9); h.U = w / 16; h.stage.style.setProperty('--u', `${h.U}px`); h.stage.style.width = `${w}px`; h.stage.style.height = `${w * 9 / 16}px`; [h.bg, h.fx].forEach((c) => { c.width = Math.round(w); c.height = Math.round(w * 9 / 16); }); drawMap(h); h.tw.clear(); h.dom.innerHTML = ''; h.mons.clear(); };
     h.fit = fit; fit(); window.addEventListener('resize', () => { if (H === h) fit(); });
     return h;
   }
-  function drawMap(h, slotsOn = true) {
+  // 지도 그림 (2026-11-06 · assets/manifest.js td): 있으면 그림 위에 자리만 · 없으면 단색 + 이모지
+  const artOf = (m) => { const A = (typeof DS !== 'undefined' && DS.ASSETS) || {}, src = (A.td || {})[m.id]; return src ? (A.base || '') + src : null; };
+  const IMG = {};
+  function artImg(m, onload) {
+    const u = artOf(m); if (!u || typeof Image === 'undefined') return null;
+    let im = IMG[u]; if (!im) { im = IMG[u] = new Image(); im.src = u; }
+    if (!im.complete || !im.naturalWidth) { im.addEventListener('load', onload, { once: true }); return null; }
+    return im;
+  }
+  function drawMap(h, slotsOn = h.slotsOn != null ? h.slotsOn : true) {
+    h.slotsOn = slotsOn;
     const g = h.bg.getContext('2d'), U = h.U, m = h.map, th = m.theme, W = h.bg.width, Hh = h.bg.height;
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    const im = artImg(m, () => { if (H === h) drawMap(h, h.slotsOn); });
+    if (im) { g.imageSmoothingEnabled = true; g.drawImage(im, 0, 0, W, Hh); } else drawPlain(h, g, U, m, th, W, Hh);
+    if (slotsOn) M().slots(m).forEach((p) => { g.beginPath(); g.arc(p.x * U, p.y * U, U * (p.star ? 0.36 : 0.3), 0, 7); g.fillStyle = '#0008'; g.fill(); g.strokeStyle = p.star ? '#ffd25a' : '#ffffff88'; g.lineWidth = U * (p.star ? 0.06 : 0.035); g.stroke(); g.fillStyle = p.star ? '#ffd25a' : '#fff'; g.font = `bold ${U * 0.26}px sans-serif`; g.fillText(p.star ? `★${p.no}` : p.no, p.x * U, p.y * U + 1); });
+  }
+  function drawPlain(h, g, U, m, th, W, Hh) {
     const gr = g.createLinearGradient(0, 0, W, Hh); gr.addColorStop(0, th.bg[0]); gr.addColorStop(1, th.bg[1]); g.fillStyle = gr; g.fillRect(0, 0, W, Hh);
-    const R = rng(m.id); g.textAlign = 'center'; g.textBaseline = 'middle';
+    const R = rng(m.id);
     for (let i = 0; i < 60; i++) { const x = R() * 16, y = R() * 9; if (M().dPath(m, x, y) < 1.4 || M().slots(m).some((p) => Math.hypot(p.x - x, p.y - y) < 0.8)) continue; g.font = `${U * (0.35 + R() * 0.25)}px serif`; g.globalAlpha = 0.8; g.fillText(i % 3 ? th.deco : th.deco2, x * U, y * U); }
     g.globalAlpha = 1; g.lineJoin = 'round'; g.lineCap = 'round';
     m.paths.forEach((p) => { g.beginPath(); p.forEach(([x, y], i) => (i ? g.lineTo(x * U, y * U) : g.moveTo(x * U, y * U))); g.strokeStyle = th.edge; g.lineWidth = U * 0.86; g.stroke(); g.strokeStyle = th.path; g.lineWidth = U * 0.7; g.stroke(); });
     M().starts(m).forEach(([x, y]) => { const cx = Math.max(0.5, Math.min(15.5, x)) * U, cy = Math.max(0.5, Math.min(8.5, y)) * U; g.fillStyle = '#000c'; g.beginPath(); g.arc(cx, cy, U * 0.45, 0, 7); g.fill(); g.strokeStyle = '#a020f0'; g.lineWidth = U * 0.07; g.stroke(); g.font = `${U * 0.5}px serif`; g.fillText('🌀', cx, cy); });
     const [ex, ey] = M().end(m); g.font = `${U * 1.05}px serif`; g.fillText('🏰', ex * U, ey * U - U * 0.15);
-    if (slotsOn) M().slots(m).forEach((p) => { g.beginPath(); g.arc(p.x * U, p.y * U, U * (p.star ? 0.36 : 0.3), 0, 7); g.fillStyle = '#0008'; g.fill(); g.strokeStyle = p.star ? '#ffd25a' : '#ffffff88'; g.lineWidth = U * (p.star ? 0.06 : 0.035); g.stroke(); g.fillStyle = p.star ? '#ffd25a' : '#fff'; g.font = `bold ${U * 0.26}px sans-serif`; g.fillText(p.star ? `★${p.no}` : p.no, p.x * U, p.y * U + 1); });
   }
   const pos = (h, x, y) => `left:${x * h.U}px;top:${y * h.U}px`;
   function pickHall() {
@@ -288,8 +303,9 @@ DS.TD = (function () {
   let PH = null;
   function miniMap(map, picks, R, me, mine) {
     const sl = M().slots(map), u = 22, W = 16 * u, Hh = 9 * u;
-    return `<svg viewBox="0 0 ${W} ${Hh}" class="td-mini"><rect width="${W}" height="${Hh}" fill="${map.theme.bg[0]}"/>${map.paths.map((p) => `<polyline points="${p.map(([x, y]) => `${x * u},${y * u}`).join(' ')}" fill="none" stroke="${map.theme.path}" stroke-width="${u * 0.7}" stroke-linejoin="round" stroke-linecap="round"/>`).join('')}
-      <text x="${M().end(map)[0] * u}" y="${M().end(map)[1] * u + 6}" font-size="20" text-anchor="middle">🏰</text>
+    const art = artOf(map);
+    return `<svg viewBox="0 0 ${W} ${Hh}" class="td-mini"><rect width="${W}" height="${Hh}" fill="${map.theme.bg[0]}"/>${art ? `<image href="${esc(art)}" x="0" y="0" width="${W}" height="${Hh}" preserveAspectRatio="none"/>` : `${map.paths.map((p) => `<polyline points="${p.map(([x, y]) => `${x * u},${y * u}`).join(' ')}" fill="none" stroke="${map.theme.path}" stroke-width="${u * 0.7}" stroke-linejoin="round" stroke-linecap="round"/>`).join('')}
+      <text x="${M().end(map)[0] * u}" y="${M().end(map)[1] * u + 6}" font-size="20" text-anchor="middle">🏰</text>`}
       ${sl.map((p) => { const who = picks[p.no], isMe = who === me; return `<g data-slot="${p.no}" class="${who ? 'taken' : 'free'}${isMe ? ' me' : ''}"><circle cx="${p.x * u}" cy="${p.y * u}" r="${p.star ? 10 : 8.5}" fill="${isMe ? '#3c8a5a' : who ? '#444' : '#000a'}" stroke="${p.star ? '#ffd25a' : '#fff9'}" stroke-width="${p.star ? 2.5 : 1.4}"/><text x="${p.x * u}" y="${p.y * u + 3.5}" font-size="9" text-anchor="middle" fill="${p.star ? '#ffd25a' : '#fff'}" font-weight="700">${isMe ? '나' : who ? '✖' : p.no}</text></g>`; }).join('')}</svg>`;
   }
   async function myStats(R, me) { const p = (R.players || {})[me] || {}; let lv = 3; if (DS.Grow && p.cls != null && p.num) { const g = await DS.Grow.mine({ c: p.cls, n: p.num }).catch(() => null); if (g && g.lv) lv = g.lv; } return { lv, enh: Number(p.enh) || 0, hero: Number(p.hero) || 0, fx: p.fx || 'flame' }; }
@@ -338,7 +354,9 @@ DS.TD = (function () {
   const paid = {};
   function phoneEnd(body, R, me, code, f) {
     const r = f.res || {}, L = ((R.tdl || {})[f.g]) || {}, inIt = twOf(f).some((t) => t.u === me), p = (R.players || {})[me] || {};
-    if (inIt && DS.Gem && !paid[f.g] && p.cls != null && p.num) { paid[f.g] = true; const m = { c: p.cls, n: p.num }, key = `td_${kst()}`; let k = 0; const pay = () => DS.Gem.add(m, r.win ? 3 : 1, key, '🏰 타워 디펜스', { free: true }).catch(() => 0).then(async () => { const d = await DS.Gem.mine(m).catch(() => ({})); if (!((d.log || {})[key]) && ++k < 3) setTimeout(pay, 2000); }); pay(); } // 하루 첫 판만 (같은 날 키) · 저장됐는지 다시 읽어 확인
+    if (f.phase !== 'end' || typeof r.win !== 'boolean') { body.innerHTML = '<div class="panel framed td-ph"><p class="td-ph-h">🏰 결과 계산 중…</p></div>'; return; } // 결과(res)가 오기 전엔 보상 · 화면 미룸
+    const gem = r.win ? 3 : 1;
+    if (inIt && DS.Gem && !paid[f.g] && p.cls != null && p.num) { paid[f.g] = true; const m = { c: p.cls, n: p.num }, key = `td_${kst()}`; let k = 0; const pay = () => DS.Gem.add(m, gem, key, '🏰 타워 디펜스', { free: true, upsert: true }).catch(() => 0).then(async () => { const d = await DS.Gem.mine(m).catch(() => ({})); const ok = (((d.log || {})[key] || {}).g || 0) >= gem; if (++k < 6) setTimeout(ok ? check : pay, 1500 * k); }); const check = () => DS.Gem.mine(m).catch(() => ({})).then((d) => { if ((((d.log || {})[key] || {}).g || 0) < gem) pay(); else if (++k < 6) setTimeout(check, 1500 * k); }); pay(); } // 하루 💎 최대 3 (같은 날 키 · 진 뒤 이긴 판은 3 까지 채움) · 저장됐는지 30초 동안 다시 읽어 확인 (없으면 다시 씀)
     body.innerHTML = `<div class="panel framed td-ph td-end ${r.win ? 'win' : 'lose'}"><h2>${r.win ? '🏆 승리! 성을 지켰어요' : '💥 아쉽게 졌어요'}</h2>${inIt ? `<p>내 처치 <b>${(L.kills || {})[me] || 0}</b>마리 · ⭐ ${(L.stars || {})[me] || 0}</p>` : ''}
       <p class="td-top3">${arr(r.top).map((x, i) => `<span>${['🥇', '🥈', '🥉'][i]} ${esc(((R.players || {})[x[0]] || {}).nick || '')} ${x[1]}</span>`).join(' ')}</p><p class="muted small">💎 ${r.win ? 3 : 1} (오늘 첫 판만) · 키운 레벨 · 강화 · 스킬이 곧 타워의 힘!</p></div>`;
   }

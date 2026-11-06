@@ -328,6 +328,7 @@ Order (left to right, top to bottom):
 | 장식 | 길과 자리에서 떨어진 빈 곳에만 (지도마다 아래 소재) |
 | 금지 | 글자 · 숫자 · 격자 · 점선 원 · 화살표 · 사람 · 몬스터 · 탑 |
 | 보낼 파일 | `td-forest.png` · `td-volcano.png` · `td-ice.png` · `td-desert.png` · `td-crypt.png` → 드라이브 「07 에셋 원본」 → Claude 에게 「에셋 도착」 |
+| **✅ 2026-11-06 도착 · 넣음 (v0.9.14.1)** | 5장 `td-*-v1.webp` (1672×941). 겹쳐 보기로 길 확인 → 숲길만 아래쪽 길이 0.1~0.24칸 어긋나 길 좌표를 그림에 맞춤. 그림 속 어두운 상자 = 종합실 글자 자리 (css `.td-art .td-top`). 글자 상자 · 성 · 입구 둘레엔 자리를 안 만듦 (`td-maps.js` blocked) → 템플릿도 새 자리로 다시 만듦 |
 
 ```
 [STYLE BIBLE above — backgrounds: no outline, dithering allowed]
