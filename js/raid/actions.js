@@ -51,7 +51,7 @@ DS.Act = (function () {
     try { pct = await N().get(prepPath(lessonId, 'pct')); } catch (e) { /* 준비 안 했으면 차시 기본값 */ }
     const room = Raid.newRoom(code, lessonId, N().uid(), N().now(), pct, DS.Art ? DS.Art.teacherHero() : 7, DS.Art && DS.Art.teacherLook ? DS.Art.teacherLook().fx : undefined);
     if (cls) room.meta.cls = String(cls);
-    if (opt.slot) room.meta.slot = { key: String(opt.slot.key), p: Number(opt.slot.p), from: Number(opt.slot.from), to: Number(opt.slot.to) };
+    if (opt.slot) room.meta.slot = { key: String(opt.slot.key), p: Number(opt.slot.p), from: Number(opt.slot.from), to: Number(opt.slot.to), ...(opt.slot.extra ? { extra: true } : {}) };
     // ⏳ 보스 타임바 (2026-11-05 사용자): 교시 끝 = 문 닫힘 (opt.noLimit = 시간 제한 끄기 · 시험 · 시연)
     const dl = opt.noLimit || !DS.Sched ? null : opt.slot ? DS.Sched.periodEnd(Number(opt.slot.from), Number(opt.slot.p)) : DS.Sched.periodEnd(N().now());
     if (dl) room.meta.deadline = dl;
@@ -162,8 +162,12 @@ DS.Act = (function () {
   async function endClass(code, opt = {}) {
     const R = await N().get(P(code)); if (!R || !R.meta) return;
     { const U = unpackRoom(R), Lx = DS.Lessons.get(R.meta.lesson); if (Lx) await savePunch(code, U, Lx, { final: true, ot: !!(opt.rift && R.meta.cls) }).catch(() => {}); }
-    await N().update(P(code, 'state'), { closed: true, focus: false, stepAt: N().TS, ...(opt.timeUp ? { timeUp: N().TS } : {}) });
+    const Ue = unpackRoom(R), Le = DS.Lessons.get(Ue.meta.lesson); // 📅 진도: 마무리까지 가서 「수업 끝」= 그 차시를 끝냄 (⏸ 저장 · 시간 초과 · 중간에 끝내기 = 그대로 · 2026-11-06 사용자)
+    const done = !!(Le && !opt.saved && !Raid.isLobby(Ue) && Raid.isEnd(Le, Ue)); // 마무리(마지막 한마디)까지 갔으면 = 진도를 나감 (종이 쳐서 닫혀도) · ⏸ 저장은 그대로
+    await N().update(P(code, 'state'), { closed: true, focus: false, stepAt: N().TS, ...(opt.timeUp ? { timeUp: N().TS } : {}), ...(done ? { progDone: Le.id, progDoneAt: N().TS } : {}) });
     const cls = R.meta.cls;
+    if (done && cls && DS.Sched && DS.Sched.advance) await DS.Sched.advance(cls, Le.id).catch(() => {}); // 교사만 (종합실이면 교사 기기가 나중에 채움)
+    if (R.meta.slot && R.meta.slot.extra && R.meta.slot.key) await N().remove(`sched/extra/${R.meta.slot.key}`).catch(() => {}); // ➕ 보충 칸 = 수업이 끝나면 사라짐
     if (cls) { const lv = await N().get(`live/${ck(cls)}`).catch(() => null); if (lv && lv.code === code) await N().set(`live/${ck(cls)}/open`, false); }
     if (opt.rift && cls) await openRift(code, unpackRoom(R), opt.days || 7);
   }

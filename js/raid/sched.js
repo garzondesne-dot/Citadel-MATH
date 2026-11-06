@@ -84,35 +84,19 @@ DS.Sched = (function () {
   let busy = null;
   function ensure() { if (!busy) busy = run().finally(() => { busy = null; }); return busy; }
   async function run() {
+    // 📅 2026-11-06 사용자 확정 「진도 예정표 · 방을 미리 만들지 않음」: 예전처럼 7일 치 방을 만들지 않고, 남아 있는 앞날 예약 방(아직 시작 안 함)은 정리
     if (!(await DS.Account.isAdmin())) return { made: 0 };
-    const now = N().now(), [{ week }, off] = await Promise.all([effective(), getOff()]);
-    const want = upcoming(week, off, now), made = (await N().get('sched/made').catch(() => null)) || {};
-    let n = 0;
-    const plan = {};
-    for (const s of want) { if (!plan[s.cls]) plan[s.cls] = await nextLesson(s.cls); }
-    for (const s of want) {
-      const L = plan[s.cls]; if (!L) continue;
-      const code = made[s.key];
-      if (code) {
-        const meta = await N().get(`rooms/${code}/meta`).catch(() => null), st = await N().get(`rooms/${code}/state`).catch(() => null);
-        const started = st && (st.step ?? -1) >= 0;
-        if (meta && (meta.cls === s.cls && (meta.lesson === L.id || started))) continue; // 그대로 · 시작한 수업은 건드리지 않음
-        if (meta && !started) await drop(code, meta.cls);
-      }
-      await make(s, L); n++;
-    }
-    // 시간표에서 빠진 미래 칸 · 지난 칸 정리
-    const keep = new Set(want.map((s) => s.key));
+    const now = N().now(), made = (await N().get('sched/made').catch(() => null)) || {};
     for (const [key, code] of Object.entries(made)) {
-      if (keep.has(key)) continue;
       const meta = await N().get(`rooms/${code}/meta`).catch(() => null), st = await N().get(`rooms/${code}/state`).catch(() => null);
-      const past = meta && meta.slot && meta.slot.to <= now;
-      if (meta && !past && !(st && (st.step ?? -1) >= 0)) await drop(code, meta.cls); // 아직 안 한 미래 수업 → 지움
-      else if (meta && meta.cls) await N().remove(`slots/${ck(meta.cls)}/${code}`).catch(() => {});
+      const started = st && (st.step ?? -1) >= 0;
+      if (meta && !started && !(st && st.closed)) await drop(code, meta.cls); else if (meta && meta.cls) await N().remove(`slots/${ck(meta.cls)}/${code}`).catch(() => {});
       await N().remove(`sched/made/${key}`).catch(() => {});
     }
-    await syncKeys().catch(() => {}); // 🖥 고정 비밀번호를 미리 만든 방에도
-    return { made: n };
+    const ex = await getExtra(); // 지난 보충 칸 (끝난 지 6시간 넘음) 정리
+    for (const [key, v] of Object.entries(ex)) { const t = slotTimes(key); if (!v || !t || t[1] < now - 6 * 3600e3) await N().remove(`sched/extra/${key}`).catch(() => {}); }
+    await syncKeys().catch(() => {});
+    return { made: 0 };
   }
   // 🖥 예약 방 비밀번호 맞추기 (2026-11-06 사용자 「자동으로 만들어진 차시 던전은 비밀번호가 무작위」): 예약 방은 며칠 전에 만들어져 그때 비밀번호를 받음
   //   → 고정 비밀번호(tcfg/hallPw)를 저장하거나 시간표를 다시 채울 때, 아직 시작 안 한 예약 방도 고정 비밀번호로 바꿈 · 돌려주는 값 = 바꾼 방 수
@@ -138,6 +122,87 @@ DS.Sched = (function () {
     if (cls) { await N().remove(`slots/${ck(cls)}/${code}`).catch(() => {}); await N().remove(`classlog/${ck(cls)}/${code}`).catch(() => {}); }
   }
 
+  // ── 📅 진도 예정표 (2026-11-06 사용자 확정) ───────────────────────────
+  //   정규 시간표(매주) + ➕ 보충(sched/extra/{날짜_교시} = { cls } · 한 번 · 그 수업이 끝나면 사라짐) − 🚫 이번만 쉼(sched/off)
+  //   진도 = sched/prog/{반} = { next: 다음에 할 차시, at } — 마무리까지 가서 「수업 끝」을 눌렀을 때만 다음 차시로 (⏸ 저장 · 시간 초과 · 안 함 = 그대로)
+  //   예정표 = 그 반의 앞으로의 칸을 시간순으로 → 첫 칸 = next, 그다음 = +1 … (번호를 저장하지 않고 매번 계산 → 추가 · 삭제 · 정체가 바로 반영)
+  const getExtra = async () => (await N().get('sched/extra').catch(() => null)) || {};
+  const getProg = async () => (await N().get('sched/prog').catch(() => null)) || {};
+  const slotTimes = (key) => { const [date, p] = String(key).split('_'); return times(date, Number(p)); };
+  function slotsAhead(week, off, extra, now, days = 14) {
+    const out = [], seen = new Set();
+    for (let i = 0; i < days; i++) {
+      const { date, dow } = kst(now + i * DAY);
+      (PERIODS[dow] || []).forEach((p) => {
+        const key = keyOf(date, p), ex = extra[key], cls = ex ? ex.cls : week[`${dow}-${p}`];
+        if (!cls || (!ex && (!usable(dow, p) || off[key]))) return;
+        const [from, to] = times(date, p); if (to <= now) return;
+        seen.add(key); out.push({ key, date, dow, p, cls: String(cls), from, to, extra: !!ex });
+      });
+    }
+    Object.entries(extra).forEach(([key, v]) => { if (seen.has(key) || !v) return; const t = slotTimes(key); if (!t || t[1] <= now || t[0] > now + days * DAY) return; const [date, p] = key.split('_'); out.push({ key, date, dow: kst(t[0]).dow, p: Number(p), cls: String(v.cls), from: t[0], to: t[1], extra: true }); });
+    return out.sort((a, b) => a.from - b.from);
+  }
+  // 그 반의 「다음 차시」: sched/prog → 없으면 게임으로 한 차시(held) 중 마지막 · 그 차시 보스를 이긴 기록이 있으면 그다음
+  async function pointer(cls, prog) {
+    const L = ordered(); if (!L.length) return null;
+    const pv = (prog || (await getProg()))[ck(cls)]; if (pv && DS.Lessons.get(pv.next)) return DS.Lessons.get(pv.next);
+    const held = (await N().get(`held/${ck(cls)}`).catch(() => null)) || {}, done = L.filter((l) => held[l.id]);
+    if (!done.length) return L[0];
+    const last = done[done.length - 1], recs = (await N().get(`records/${ck(cls)}`).catch(() => null)) || {};
+    const won = Object.values(recs).some((r) => r && r[last.id] && r[last.id].won);
+    return won ? L.find((l) => l.no > last.no) || last : last;
+  }
+  async function advance(cls, lessonId) { // 「수업 끝」 = 그 차시를 끝냄 → 다음 차시 (이미 더 앞이면 그대로)
+    if (!cls) return; const L = ordered(), i = L.findIndex((l) => l.id === lessonId); if (i < 0) return;
+    const nx = L[i + 1] || L[i], cur = await pointer(cls).catch(() => null);
+    if (!cur || nx.no > cur.no || cur.id === lessonId) await N().set(`sched/prog/${ck(cls)}`, { next: nx.id, at: N().TS });
+  }
+  const setNext = (cls, lessonId) => N().set(`sched/prog/${ck(cls)}`, { next: lessonId, at: N().TS });
+  const addExtra = (date, p, cls) => N().set(`sched/extra/${keyOf(date, Number(p))}`, { cls: String(cls), at: N().TS });
+  const removeExtra = (key) => N().remove(`sched/extra/${key}`);
+  // 종합실에서 끝낸 수업 (교사만 쓸 수 있는 진도에 못 씀) → 교사 기기가 열 때 방 기록(state.progDone)으로 채움
+  async function reconcile(prog) {
+    let codes = []; try { codes = (JSON.parse(localStorage.getItem('citadel-rooms')) || []).map((r) => r.code).slice(0, 12); } catch (e) { /* 없음 */ }
+    const opened = (await N().get('sched/open').catch(() => null)) || {}; codes = [...new Set([...codes, ...Object.values(opened)])];
+    let changed = false;
+    for (const code of codes) {
+      const st = await N().get(`rooms/${code}/state`).catch(() => null), meta = st && st.progDone ? await N().get(`rooms/${code}/meta`).catch(() => null) : null;
+      if (!st || !st.progDone || !meta || !meta.cls) continue;
+      const pv = prog[ck(meta.cls)]; if (pv && Number(pv.at) >= Number(st.progDoneAt || 0)) continue;
+      await advance(meta.cls, st.progDone).catch(() => {}); changed = true;
+    }
+    return changed;
+  }
+  // 예정표: [{ key, date, p, cls, from, to, extra, lesson, no, title, resume, code(열었으면), state }]
+  async function plan(opt = {}) {
+    const now = N().now();
+    let prog = await getProg(); if (opt.reconcile !== false && (await reconcile(prog).catch(() => false))) prog = await getProg();
+    const [{ week }, off, extra, opened] = await Promise.all([opt.week ? effective(opt.week) : effective(), getOff(), getExtra(), N().get('sched/open').catch(() => null)]);
+    const slots = slotsAhead(week, off, extra, now - (opt.past ? 12 * 3600e3 : 0), opt.days || 14), L = ordered(), base = {};
+    for (const c of [...new Set(slots.map((x) => x.cls))]) base[c] = await pointer(c, prog);
+    const k = {};
+    for (const x of slots) {
+      const code0 = (opened || {})[x.key];
+      if (code0 || x.to <= now) { // 이미 연 칸(진행 중 · 끝) · 오늘 지난 칸 = 번호를 새로 쓰지 않음 (연 방의 차시를 그대로)
+        x.past = x.to <= now; x.title = x.past ? '시간표 수업 (열지 않음)' : '';
+        if (code0) { const [mt, st] = await Promise.all([N().get(`rooms/${code0}/meta`).catch(() => null), N().get(`rooms/${code0}/state`).catch(() => null)]); const L0 = mt && DS.Lessons.get(mt.lesson); if (L0) { x.lesson = L0.id; x.no = L0.no; x.title = L0.title; } x.code = code0; x.closed = !st || !!st.closed; x.started = !!(st && (st.step ?? -1) >= 0); x.saved = !!(st && st.savedStop != null); x.doneL = !!(st && st.progDone); }
+        if (x.code || x.past) continue;
+      }
+      const b = base[x.cls], i = b ? L.findIndex((l) => l.id === b.id) + (k[x.cls] || 0) : -1, Ls = L[i] || null;
+      k[x.cls] = (k[x.cls] || 0) + 1;
+      x.lesson = Ls ? Ls.id : null; x.no = Ls ? Ls.no : null; x.title = Ls ? Ls.title : '단원 끝 (다음 차시 없음)';
+      if (Ls && k[x.cls] === 1) { const rz = await N().get(`prep/${Ls.id}/resume/${ck(x.cls)}`).catch(() => null); if (rz) x.resume = rz; }
+    }
+    return slots;
+  }
+  // 칸에서 수업 열기 → 그 반 · 그 차시(저장 지점이 있으면 이어서) · 보충 칸은 끝나면 사라짐
+  async function openSlot(x) {
+    if (!x.lesson) throw Object.assign(new Error('이 반은 다음 차시가 없어요 (진도 맞추기에서 골라 주세요).'), { user: true });
+    const slot = { key: x.key, p: x.p, from: x.from, to: x.to, ...(x.extra ? { extra: true } : {}) };
+    await DS.Teacher.create(x.lesson, x.cls, { slot, ...(x.resume ? { resume: x.resume.stop, resumeOf: x.resume.code } : {}) });
+    await N().set(`sched/open/${x.key}`, DS.Teacher.code()).catch(() => {});
+  }
   // ── 학생 캠프: 지금 열린 예약 수업 (slots/{반} → 시각 안이면 live 와 같은 모양) ──
   const active = (slots, now) => {
     const s = Object.entries(slots || {}).map(([code, v]) => ({ code, ...v })).filter((v) => v.from <= now && now < v.to).sort((a, b) => a.from - b.from)[0];
@@ -210,5 +275,5 @@ DS.Sched = (function () {
   const setHide = (cls, code, on) => N().set(`classlog/${ck(cls)}/${code}/hide`, on ? true : null);
   const when = (g) => { const k = kst(g.from || g.at || 0); return { date: k.date, dow: DOW[k.dow], hm: k.hm }; };
 
-  return { syncKeys, periodEnd, BELLS, PERIODS, SKIP, DOW, AFTER, LATE, ST, CYCLE, kst, times, usable, skipped, upcoming, nextLesson, ensure, active, today, skipSlot, relesson, logs, sheet, judge, setAtt, setMemo, setHide, when, label, getWeek, effective, comci, ck };
+  return { plan, openSlot, pointer, advance, setNext, addExtra, removeExtra, slotsAhead, getProg, syncKeys, periodEnd, BELLS, PERIODS, SKIP, DOW, AFTER, LATE, ST, CYCLE, kst, times, usable, skipped, upcoming, nextLesson, ensure, active, today, skipSlot, relesson, logs, sheet, judge, setAtt, setMemo, setHide, when, label, getWeek, effective, comci, ck };
 })();

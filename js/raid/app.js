@@ -266,7 +266,8 @@ DS.App = (function () {
   async function suggestLesson() {
     const cls = ($('#t-cls') || {}).value, sel = $('#lesson'); if (!cls || !sel) return;
     const held = await heldOf(cls), codeL = DS.Lessons.list.filter((x) => /^set-/.test(x.id)).sort((a, b) => (a.no || 0) - (b.no || 0));
-    const next = codeL.find((x) => !held[x.id] && [...sel.options].some((o) => o.value === x.id));
+    let next = codeL.find((x) => !held[x.id] && [...sel.options].some((o) => o.value === x.id));
+    if (DS.Sched && DS.Sched.pointer) { const pt = await DS.Sched.pointer(cls).catch(() => null); if (pt && [...sel.options].some((o) => o.value === pt.id)) next = pt; } // 📅 진도 예정표와 같은 「다음 차시」 (수업 끝을 눌러야 넘어감)
     let hint = document.getElementById('t-lhint'); if (!hint) { hint = document.createElement('p'); hint.id = 't-lhint'; hint.className = 'muted small t-lhint'; sel.closest('label').after(hint); }
     const done = codeL.filter((x) => held[x.id]).map((x) => x.no);
     if (next) sel.value = next.id;

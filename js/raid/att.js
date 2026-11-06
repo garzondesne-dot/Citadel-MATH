@@ -10,66 +10,86 @@ DS.Att = (function () {
   const run = (fn) => DS.Control.run(fn);
   const classes = async () => Object.keys((await DS.Net.get('roster').catch(() => null)) || {}).sort();
 
-  // ── 📅 오늘 수업 (교사 메뉴) ────────────────────────────────
+  // ── 📅 오늘 수업 (교사 메뉴) — 2026-11-06 진도 예정표: 칸마다 「반 · n차시」 · 눌러서 열기 (방을 미리 만들지 않음) ──
+  const md = (date) => { const [, m, d] = date.split('-'); return `${+m}/${+d}`; };
+  const tag = (x) => `${x.extra ? '<span class="sc-tag ex">➕ 보충</span>' : ''}${x.resume ? '<span class="sc-tag rz">⏸ 이어서</span>' : ''}`;
   async function today(el) {
     if (!el) return;
     el.innerHTML = '<p class="muted small">📅 오늘 수업 불러오는 중…</p>';
-    let made = { made: 0 };
-    try { made = await S().ensure(); } catch (e) { /* 오프라인 · 권한 → 목록만 */ }
-    const [list, eff] = await Promise.all([S().today().catch(() => []), S().effective()]), week = eff.week;
-    // 컴시간 연동 상태: 켜져 있는데 실패했거나 2일 넘게 안 받아짐 → 경고 (지난 시간표로 운영)
-    const c = eff.comci, warn = eff.on && (!c || !c.ok || DS.Net.now() - (c.at || 0) > 2 * 86400e3) ? `<p class="ngc small">⚠ 컴시간 연동 실패 — 지난 시간표로 운영 중${c && c.err ? ` (${esc(c.err)})` : ''}</p>` : eff.on ? '<p class="muted small">🔄 컴시간 연동 중 · 수동으로 고친 칸이 우선</p>' : '';
-    if (!Object.keys(week).length) { el.innerHTML = `<div class="td-empty"><span>📅 시간표를 넣으면 그 시각에 던전이 저절로 열려요 · 학생은 코드 없이 입장</span><button class="btn small" data-sc>📅 시간표 넣기</button></div>`; bindSc(el); return; }
-    const row = (t) => `<div class="td-row${t.now ? ' now' : ''}${t.done ? ' done' : ''}">
-        <span class="td-p"><b>${t.p}교시</b><small>${esc(S().BELLS[t.p][0])}</small></span>
-        <span class="td-c"><b>${esc(t.cls)}반</b> <span class="muted small">${esc(t.title)}</span><br><span class="small">${t.now ? '🟢 지금 열림' : t.done ? '끝' : '⏳ 곧'} · 코드 <b>${t.code}</b> · 키 <b>${esc(t.hallKey)}</b></span></span>
-        <span class="td-b">${t.done ? '' : `<button class="btn small primary" data-open="${t.code}" data-key="${esc(t.hallKey)}">▶ 리모컨</button>`}${t.started || t.done ? '' : `<button class="btn small" data-rel="${t.key}">차시</button><button class="btn small" data-off="${t.key}">쉼</button>`}</span></div>`;
-    el.innerHTML = warn + `<div class="td-head"><b>📅 오늘 수업</b><span class="muted small">${list.length ? `${list.length}개 · 시각이 되면 학생 캠프 문이 저절로 열려요 (끝 + 10분)` : '오늘은 예약 수업이 없어요'}</span><button class="btn small" data-sc>📅 시간표</button></div>${list.map(row).join('')}`;
+    try { await S().ensure(); } catch (e) { /* 오프라인 · 권한 → 목록만 */ }
+    const [eff, all] = await Promise.all([S().effective(), S().plan({ past: true, days: 1 }).catch(() => [])]), now = DS.Net.now();
+    const list = all.filter((x) => x.date === S().kst(now).date);
+    const head = `<div class="td-head"><b>📅 오늘 수업</b><span class="muted small">${list.length ? `${list.length}개 · 칸을 눌러 그 반 · 그 차시로 열기` : '오늘은 시간표 수업이 없어요'}</span><button class="btn small" data-sc>📅 시간표</button><button class="btn small" data-ex>➕ 보충</button></div>`;
+    if (!Object.keys(eff.week).length && !list.length) { el.innerHTML = `<div class="td-empty"><span>📅 시간표를 넣으면 칸마다 「반 · 몇 차시」가 저절로 이어져요 · 보충은 ➕</span><button class="btn small" data-sc>📅 시간표 넣기</button><button class="btn small" data-ex>➕ 보충</button></div>`; bindSc(el); return; }
+    const row = (x, i) => { const on = !x.past && now >= x.from - 10 * 60e3 && now < x.to;
+      return `<div class="td-row${on ? ' now' : ''}${x.past || x.closed ? ' done' : ''}">
+        <span class="td-p"><b>${x.p}교시</b><small>${esc(S().BELLS[x.p][0])}</small></span>
+        <span class="td-c"><b>${esc(x.cls)}반</b> ${tag(x)}<br><span class="small">${x.no ? `<b>${x.no}차시</b> · ${esc(x.title)}` : esc(x.title)}${x.resume ? ` <span class="muted">(「${esc(x.resume.title || '')}」부터)</span>` : ''}</span><br><span class="small muted">${x.closed ? (x.doneL ? '✔ 끝 (다음 차시로)' : x.saved ? '⏸ 저장하고 끝 (같은 차시 이어서)' : '끝') : x.past ? '지남' : x.code ? '🟢 열림' : on ? '🟢 지금' : '⏳ 곧'}</span></span>
+        <span class="td-b">${x.code && !x.closed ? `<button class="btn small primary" data-rc="${x.code}">▶ 리모컨</button>` : !x.past && x.lesson ? `<button class="btn small primary" data-go="${i}">▶ 열기</button>` : ''}${!x.past && !x.code ? (x.extra ? `<button class="btn small" data-delx="${x.key}">보충 지우기</button>` : `<button class="btn small" data-off="${x.key}">쉼</button>`) : ''}</span></div>`; };
+    el.innerHTML = head + list.map(row).join('');
     bindSc(el);
-    el.querySelectorAll('[data-open]').forEach((b) => (b.onclick = () => run(() => DS.Teacher.open(b.dataset.open, b.dataset.key))));
-    el.querySelectorAll('[data-off]').forEach((b) => (b.onclick = () => run(async () => { if (!window.confirm('이 교시 수업을 이번만 쉴까요? (시간표는 그대로 · 다음 주는 다시 열림)')) return; await S().skipSlot(b.dataset.off, true); DS.UI.toast('이번 수업은 쉬어요.'); today(el); })));
-    el.querySelectorAll('[data-rel]').forEach((b) => (b.onclick = () => pickLesson(b.dataset.rel, () => today(el))));
-    if (made.made) DS.UI.toast(`📅 앞으로 7일 예약 수업 ${made.made}개를 준비했어요.`, 2600);
+    el.querySelectorAll('[data-go]').forEach((b) => (b.onclick = () => run(async () => { await S().openSlot(list[Number(b.dataset.go)]); })));
+    el.querySelectorAll('[data-rc]').forEach((b) => (b.onclick = () => run(async () => { const sec = await DS.Net.get(`secrets/${b.dataset.rc}`).catch(() => null); await DS.Teacher.open(b.dataset.rc, (sec || {}).hallKey || ''); })));
+    el.querySelectorAll('[data-off]').forEach((b) => (b.onclick = () => run(async () => { if (!window.confirm('이 교시 수업을 이번만 쉴까요? (시간표는 그대로 · 차시는 다음 수업으로 밀려요)')) return; await S().skipSlot(b.dataset.off, true); DS.UI.toast('이번 수업은 쉬어요 — 차시는 다음 칸으로.'); today(el); })));
+    el.querySelectorAll('[data-delx]').forEach((b) => (b.onclick = () => run(async () => { if (!window.confirm('이 보충 수업을 지울까요?')) return; await S().removeExtra(b.dataset.delx); today(el); })));
   }
-  const bindSc = (el) => el.querySelectorAll('[data-sc]').forEach((b) => (b.onclick = () => editor(() => today(el))));
-  function pickLesson(key, done) {
-    const L = DS.Lessons.list.filter((l) => !l.eval && !l.sheetLesson && l.no).sort((a, b) => a.no - b.no);
+  const bindSc = (el) => { el.querySelectorAll('[data-sc]').forEach((b) => (b.onclick = () => editor(() => today(el)))); el.querySelectorAll('[data-ex]').forEach((b) => (b.onclick = () => extraDlg(() => today(el)))); };
+  // ➕ 보충 (한 번짜리 칸 · 그 수업이 끝나면 사라짐)
+  async function extraDlg(done) {
+    const cs = await classes(), d0 = S().kst(DS.Net.now()).date;
     const m = document.createElement('div'); m.className = 'modal';
-    m.innerHTML = `<div class="quiz-box framed"><div class="quiz-head"><b>이 수업 차시 바꾸기</b><button class="btn small" data-x>✕ 닫기</button></div><p class="muted small">시작 전에만 · 수업 코드가 새로 바뀌어요</p>${L.map((l) => `<button class="btn big" data-l="${l.id}">${l.no}차시 · ${esc(l.title)}</button>`).join('')}</div>`;
+    m.innerHTML = `<div class="quiz-box framed"><div class="quiz-head"><b>➕ 보충 수업</b><button class="btn small" data-x>✕ 닫기</button></div>
+      <p class="muted small">한 번만 들어가는 수업이에요 · 그 수업이 끝나면 칸이 사라지고, 그 반 차시가 한 칸씩 당겨져요.</p>
+      <div class="sc-ex"><label>날짜 <input type="date" id="ex-d" value="${d0}"></label><label>교시 <select id="ex-p">${[1, 2, 3, 4, 5, 6, 7].map((p) => `<option value="${p}">${p}교시 (${S().BELLS[p][0]})</option>`).join('')}</select></label><label>반 <select id="ex-c">${cs.map((c) => `<option>${esc(c)}</option>`).join('')}</select></label></div>
+      <div class="row"><button class="btn primary" id="ex-ok">➕ 보충 넣기</button></div></div>`;
     m.querySelector('[data-x]').onclick = () => m.remove();
-    m.querySelectorAll('[data-l]').forEach((b) => (b.onclick = () => run(async () => { await S().relesson(key, b.dataset.l); m.remove(); DS.UI.toast('차시를 바꿨어요.'); done(); })));
+    m.querySelector('#ex-ok').onclick = () => run(async () => { const d = m.querySelector('#ex-d').value, p = m.querySelector('#ex-p').value, c = m.querySelector('#ex-c').value; if (!d || !c) throw Object.assign(new Error('날짜와 반을 골라 주세요.'), { user: true }); await S().addExtra(d, p, c); m.remove(); DS.UI.toast(`➕ ${md(d)} ${p}교시 ${c}반 보충을 넣었어요.`); if (done) done(); });
     document.body.appendChild(m);
   }
 
-  // ── 📅 시간표 편집 (요일 × 교시 → 반) ───────────────────────
+  // ── 📅 시간표 (요일 × 교시 → 반 · 매주) + 칸마다 다음 차시 · 진도 맞추기 · 앞으로 2주 ───────────────────────
   async function editor(done) {
     const [eff, cs] = await Promise.all([S().effective(), classes()]);
-    const w = { ...eff.week }, auto = eff.auto, man = { ...eff.manual };
+    const auto = eff.auto, man = { ...eff.manual }, L = DS.Lessons.list.filter((l) => !l.eval && !l.sheetLesson && l.no).sort((a, b) => a.no - b.no);
     const m = document.createElement('div'); m.className = 'modal sc-edit';
+    const wk = () => { const w = { ...(eff.on ? auto : {}) }; Object.entries(man).forEach(([k, v]) => { if (v === '-') delete w[k]; else w[k] = v; }); return w; };
     const cell = (d, p) => {
       if (!(S().PERIODS[d] || []).includes(p)) return '<td class="sc-no">—</td>';
       if (S().skipped(d, p)) return '<td class="sc-no" title="자율 · 동아리 (담임) — 수업으로 치지 않아요">자율·동아리</td>';
-      const v = w[`${d}-${p}`] || '';
-      return `<td${auto[`${d}-${p}`] && !(`${d}-${p}` in man) ? ' class="sc-auto" title="🔄 컴시간에서"' : ''}><select data-dp="${d}-${p}"><option value="">—</option>${cs.map((c) => `<option${c === v ? ' selected' : ''}>${esc(c)}</option>`).join('')}</select></td>`;
+      const v = wk()[`${d}-${p}`] || '';
+      return `<td${auto[`${d}-${p}`] && eff.on && !(`${d}-${p}` in man) ? ' class="sc-auto" title="🔄 컴시간에서"' : ''}><select data-dp="${d}-${p}"><option value="">—</option>${cs.map((c) => `<option${c === v ? ' selected' : ''}>${esc(c)}</option>`).join('')}</select><small class="sc-next" data-nx="${d}-${p}"></small></td>`;
     };
     const days = [1, 2, 3, 4, 5], ps = [1, 2, 3, 4, 5, 6, 7];
-    m.innerHTML = `<div class="quiz-box framed"><div class="quiz-head"><b>📅 시간표 (매주 반복)</b><button class="btn small" data-x>✕ 닫기</button><button class="btn primary" id="sc-save">저장</button></div>
-      ${eff.comci && eff.comci.ok ? `<label class="sc-comci"><input type="checkbox" id="sc-comci"${eff.on ? ' checked' : ''}> 🔄 <b>컴시간 시간표 쓰기</b> <span class="muted small">수학 ${eff.comci.n || 0}칸 · ${esc(S().kst(eff.comci.at || 0).date)} 받음 · 매일 새벽 6시 갱신 · 고친 칸이 우선</span></label>` : eff.comci ? `<p class="ngc small">⚠ 컴시간 연동 실패: ${esc(eff.comci.err || '')}</p>` : ''}
-      <p class="muted small">칸마다 수학 수업 반을 고르세요. 저장하면 앞으로 7일 수업 방을 미리 만들고, 그 시각(끝 + 10분까지)에 학생 캠프 문이 저절로 열려요. 차시는 그 반의 다음 차시로 저절로.</p>
+    const progCls = () => [...new Set([...Object.values(wk()), ...cs])].filter((c) => c && c !== '-').sort();
+    m.innerHTML = `<div class="quiz-box framed sc-box"><div class="quiz-head"><b>📅 시간표 · 진도 예정표</b><button class="btn small" data-x>✕ 닫기</button><button class="btn" id="sc-ex">➕ 보충</button><button class="btn primary" id="sc-save">저장</button></div>
+      ${eff.comci && eff.comci.ok ? `<label class="sc-comci"><input type="checkbox" id="sc-comci"${eff.on ? ' checked' : ''}> 🔄 <b>컴시간 시간표 쓰기</b> <span class="muted small">수학 ${eff.comci.n || 0}칸 · 고친 칸이 우선</span></label>` : ''}
+      <p class="muted small">정규 시간표는 한 번 넣으면 매주 반복 · 칸 아래 = 그 칸의 다음 수업이 몇 차시인지 (반마다 시간순으로 6 → 7 → 8 …) · <b>마무리까지 가서 「수업 끝」을 눌러야 다음 차시로</b> 넘어가요 (⏸ 저장 · 안 한 수업 = 같은 차시) · 방은 미리 만들지 않고 「오늘 수업」에서 눌러 열어요</p>
       ${cs.length ? '' : '<p class="ngc">먼저 학생 관리 → 명단 관리에서 반 명단을 올려 주세요.</p>'}
       <div class="sc-wrap"><table class="sc-tbl"><tr><th></th>${days.map((d) => `<th>${S().DOW[d]}</th>`).join('')}</tr>${ps.map((p) => `<tr><th>${p}교시<small>${S().BELLS[p][0]}</small></th>${days.map((d) => cell(d, p)).join('')}</tr>`).join('')}</table></div>
-      <p class="muted small">월 5교시 · 목 7교시 = 자율 · 동아리(담임)라 빼요. 수 7교시 = 특기적성 · 금 6 · 7교시 = 없음.${eff.on ? ' 🔄 노란 칸 = 컴시간에서 가져온 칸 (고치면 수동이 우선)' : ''}</p></div>`;
-    m.querySelector('[data-x]').onclick = () => m.remove();
-    // 🔄 컴시간 켜기 · 끄기 → 시간표 칸을 다시 그림 (저장을 눌러야 수업 방을 준비)
-    const cb = m.querySelector('#sc-comci'); if (cb) cb.onchange = () => run(async () => { await DS.Net.set('sched/comciOn', cb.checked ? true : null); m.remove(); await editor(done); DS.UI.toast(cb.checked ? '🔄 컴시간 시간표를 써요 — 「저장」을 누르면 수업 방을 준비해요' : '컴시간 시간표를 껐어요', 3000); });
-    // 수동 칸만 저장: 컴시간과 같으면 수동 기록을 지움 · 컴시간 칸을 비우면 '-'
-    m.querySelectorAll('[data-dp]').forEach((s) => (s.onchange = () => { const k = s.dataset.dp, a = auto[k] || ''; if (s.value === a) delete man[k]; else man[k] = s.value || '-'; s.parentNode.classList.toggle('sc-auto', !!a && !(k in man)); }));
+      <div class="sc-prog"><b>🎯 진도 맞추기</b> <span class="muted small">반마다 「다음 수업 = 몇 차시」 (처음 한 번 · 어긋났을 때)</span><div id="sc-prog"></div></div>
+      <div class="sc-plan"><b>🗓 앞으로 2주</b> <span class="muted small">보충 · 쉼 · 진도가 바뀌면 저절로 밀리거나 당겨져요</span><div id="sc-plan"></div></div></div>`;
+    const draw = async () => {
+      const pl = await S().plan({ week: man, reconcile: false, days: 14 }).catch(() => []), first = {};
+      pl.forEach((x) => { const k = `${x.dow}-${x.p}`; if (!x.extra && !x.code && !x.past && !first[k]) first[k] = x; }); // 아직 안 한 다음 수업
+      m.querySelectorAll('[data-nx]').forEach((e) => { const x = first[e.dataset.nx]; e.innerHTML = x && x.no ? `${md(x.date)} · <b>${x.no}차시</b>${x.resume ? ' ⏸' : ''}` : ''; });
+      const prog = await S().getProg();
+      const pc = progCls(), ptr = {}; for (const c of pc) ptr[c] = await S().pointer(c, prog).catch(() => null);
+      m.querySelector('#sc-prog').innerHTML = pc.map((c) => `<label class="sc-pr">${esc(c)}반 다음 <select data-pg="${esc(c)}">${L.map((l) => `<option value="${l.id}"${ptr[c] && ptr[c].id === l.id ? ' selected' : ''}>${l.no}차시 · ${esc(l.title).slice(0, 14)}</option>`).join('')}</select></label>`).join('');
+      m.querySelectorAll('[data-pg]').forEach((s) => (s.onchange = () => run(async () => { await S().setNext(s.dataset.pg, s.value); DS.UI.toast(`🎯 ${s.dataset.pg}반 다음 수업 = ${DS.Lessons.get(s.value).no}차시`); draw(); })));
+      const byDay = {}; pl.forEach((x) => (byDay[x.date] = byDay[x.date] || []).push(x));
+      m.querySelector('#sc-plan').innerHTML = Object.entries(byDay).map(([d, xs]) => `<div class="sc-day"><b>${md(d)} (${S().DOW[xs[0].dow]})</b>${xs.map((x) => `<span class="sc-it${x.extra ? ' ex' : ''}">${x.p}교시 ${esc(x.cls)}반 · ${x.no ? `${x.no}차시` : '—'} ${tag(x)}${x.extra ? `<button class="btn small" data-delx="${x.key}">✕</button>` : `<button class="btn small" data-off="${x.key}" title="이번만 쉼">쉼</button>`}</span>`).join('')}</div>`).join('') || '<p class="muted small">앞으로 2주 동안 수업 칸이 없어요.</p>';
+      m.querySelectorAll('#sc-plan [data-delx]').forEach((b) => (b.onclick = () => run(async () => { await S().removeExtra(b.dataset.delx); draw(); })));
+      m.querySelectorAll('#sc-plan [data-off]').forEach((b) => (b.onclick = () => run(async () => { if (!window.confirm('이 수업을 이번만 쉴까요? (차시는 다음 칸으로 밀려요)')) return; await S().skipSlot(b.dataset.off, true); draw(); })));
+    };
+    m.querySelector('[data-x]').onclick = () => { m.remove(); if (done) done(); };
+    m.querySelector('#sc-ex').onclick = () => extraDlg(draw);
+    const cb = m.querySelector('#sc-comci'); if (cb) cb.onchange = () => run(async () => { await DS.Net.set('sched/comciOn', cb.checked ? true : null); m.remove(); await editor(done); });
+    m.querySelectorAll('[data-dp]').forEach((s) => (s.onchange = () => { const k = s.dataset.dp, a = eff.on ? auto[k] || '' : ''; if (s.value === a) delete man[k]; else man[k] = s.value || '-'; s.parentNode.classList.toggle('sc-auto', !!a && !(k in man)); draw(); }));
     m.querySelector('#sc-save').onclick = () => run(async () => {
-      await DS.Net.set('sched/week', Object.keys(man).length ? man : null);
-      const r = await S().ensure(); m.remove();
-      DS.UI.toast(`저장했어요! 앞으로 7일 수업 ${r.made || 0}개를 새로 준비했어요.`, 3000); if (done) done();
+      await DS.Net.set('sched/week', Object.keys(man).length ? man : null); await S().ensure().catch(() => {}); m.remove();
+      DS.UI.toast('📅 시간표를 저장했어요 — 칸마다 차시가 이어져요.', 3000); if (done) done();
     });
-    document.body.appendChild(m);
+    document.body.appendChild(m); draw();
   }
 
   // ── 🗓 출석부 · 📖 수업 일지 화면 ───────────────────────────
