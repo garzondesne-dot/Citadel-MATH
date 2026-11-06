@@ -17,6 +17,7 @@
 //   응답
 //     { ok, status: 'pass'|'retry'|'check', score, total, pass, steps:[{id,pts,earned,note}], feedback, left }
 //     { ok:false, err: 'off'|'bad'|'auth'|'who'|'rubric'|'quota'|'busy'|'api'|... }
+//   결과 저장: photo/{반}/{번호}/{차시_방}/{id} (사진 ✗) · 교사가 대시보드에서 ok: true(처치 인정) / false · 학생 이의 신청 = appeal
 
 const PROPS = PropertiesService.getScriptProperties();
 const cfg = (k, d) => { const v = PROPS.getProperty(k); return v == null || v === '' ? d : v; };
@@ -57,7 +58,7 @@ function handle_(q) {
   // ⑤ Claude
   let g;
   try { g = grade_(q, rub, steps, media); }
-  catch (err) { give_(c, n, day); return { ok: false, err: 'api', msg: String((err && err.message) || err).slice(0, 200) }; }
+  catch (err) { give_(c, n, day, true); return { ok: false, err: 'api', msg: String((err && err.message) || err).slice(0, 200) }; }
   // ⑥ 점수는 여기서 다시 계산 (모델이 적은 합계를 믿지 않음 · 단계 점수는 0 ~ 배점으로 자름)
   const by = {}; (g.steps || []).forEach((x) => { if (x && x.id) by[x.id] = x; });
   const rows = steps.map((st) => { const x = by[st.id] || {}; const e = Math.max(0, Math.min(Number(st.pts) || 0, Math.round(Number(x.earned) || 0))); return { id: st.id, pts: Number(st.pts) || 0, earned: e, note: String(x.note || '').slice(0, 120) }; });
@@ -66,10 +67,12 @@ function handle_(q) {
   const flags = (g.flags || []).filter((f) => typeof f === 'string');
   const doubt = g.refused || !g.readable || g.confidence === 'low' || flags.some((f) => f !== 'copied_answer_only');
   const status = doubt ? 'check' : score >= pass ? 'pass' : 'retry';
+  let leftNow = left;
+  if (status === 'check') { const l2 = give_(c, n, day, false); if (l2 != null) leftNow = l2; } // 결정 2: 선생님 확인은 장 수를 안 깎음
   const rec = { at: { '.sv': 'timestamp' }, status, score, total, pass, steps: rows, ans: String(g.final_answer || '').slice(0, 80), conf: g.confidence || 'low', flags, fb: String(g.feedback || '').slice(0, 300), ask: String(q.ask || '').slice(0, 400), right: String(q.answer == null ? '' : q.answer).slice(0, 80), model: cfg('MODEL', 'claude-haiku-5-5'), tok: g.usage || null };
   const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
   db_('put', `photo/${c}/${n}/${q.lesson}_${q.room}/${id}`, rec); // 사진(q.image)은 저장하지 않음
-  return { ok: true, id, status, score, total, pass, steps: rows, feedback: rec.fb, left };
+  return { ok: true, id, status, score, total, pass, steps: rows, feedback: rec.fb, left: leftNow };
 }
 
 // ── Firebase 로그인 토큰 확인 (identitytoolkit accounts:lookup) ─────────────
@@ -90,24 +93,29 @@ function db_(method, path, body) {
   return JSON.parse(r.getContentText() || 'null');
 }
 
-// ── 하루 장 수: 남은 수(0 이상) · -1 = 다 씀 · -2 = 잠깐 붐빔 ──────────────
+// ── 하루 장 수 (2026-11-06 결정 3 · 2): 학생 1명 하루 DAILY_MAX 장 (문항 합계) · 「선생님 확인(check)」은 장 수를 돌려줌
+//   photo_q/{반}/{번호}/{날짜} = { n: 센 장 수, raw: 실제 부른 수 } · raw 는 DAILY_MAX × 2 까지 (check 로 계속 부르기 막음) · _all = 전체 (안 돌려줌)
+//   돌려주는 값: 남은 장 수(0 이상) · -1 = 다 씀 · -2 = 잠깐 붐빔
 function take_(c, n, day) {
   const lock = LockService.getScriptLock();
   if (!lock.tryLock(15000)) return -2;
   try {
-    const me = Number(db_('get', `photo_q/${c}/${n}/${day}`)) || 0, all = Number(db_('get', `photo_q/_all/${day}`)) || 0;
-    if (me >= Number(cfg('DAILY_MAX', '3')) || all >= Number(cfg('GLOBAL_MAX', '300'))) return -1;
-    db_('put', `photo_q/${c}/${n}/${day}`, me + 1); db_('put', `photo_q/_all/${day}`, all + 1);
-    return Number(cfg('DAILY_MAX', '3')) - me - 1;
+    const max = Number(cfg('DAILY_MAX', '3')), q = db_('get', `photo_q/${c}/${n}/${day}`) || {}, all = Number(db_('get', `photo_q/_all/${day}`)) || 0;
+    const me = Number(q.n) || 0, raw = Number(q.raw) || 0;
+    if (me >= max || raw >= max * 2 || all >= Number(cfg('GLOBAL_MAX', '300'))) return -1;
+    db_('put', `photo_q/${c}/${n}/${day}`, { n: me + 1, raw: raw + 1 }); db_('put', `photo_q/_all/${day}`, all + 1);
+    return max - me - 1;
   } finally { lock.releaseLock(); }
 }
-function give_(c, n, day) {
-  const lock = LockService.getScriptLock();
-  if (!lock.tryLock(15000)) return;
+// full = Claude 가 실패함 (전부 되돌림) · 아니면 check (센 장 수만 되돌림) → 남은 장 수
+function give_(c, n, day, full) {
+  const lock = LockService.getScriptLock(), max = Number(cfg('DAILY_MAX', '3'));
+  if (!lock.tryLock(15000)) return null;
   try {
-    const me = Number(db_('get', `photo_q/${c}/${n}/${day}`)) || 0, all = Number(db_('get', `photo_q/_all/${day}`)) || 0;
-    if (me > 0) db_('put', `photo_q/${c}/${n}/${day}`, me - 1);
-    if (all > 0) db_('put', `photo_q/_all/${day}`, all - 1);
+    const q = db_('get', `photo_q/${c}/${n}/${day}`) || {}, me = Math.max(0, (Number(q.n) || 0) - 1), raw = Math.max(0, (Number(q.raw) || 0) - (full ? 1 : 0));
+    db_('put', `photo_q/${c}/${n}/${day}`, { n: me, raw });
+    if (full) { const all = Number(db_('get', `photo_q/_all/${day}`)) || 0; if (all > 0) db_('put', `photo_q/_all/${day}`, all - 1); }
+    return max - me;
   } finally { lock.releaseLock(); }
 }
 

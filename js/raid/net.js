@@ -64,6 +64,7 @@ DS.Net = (function () {
       useAcc(u) { uid = u; try { sessionStorage.setItem(`${UIDKEY}-acc`, u); } catch (e) { /* 무시 */ } return u; },
       async signOut() { try { sessionStorage.removeItem(`${UIDKEY}-acc`); } catch (e) { /* 무시 */ } uid = null; return this.init(); },
       async reauth() { return uid; },
+      async idToken() { return `local-${uid}`; }, // 📷 체험 모드 (사진 채점 중계소는 실제 서버에서만)
       now: () => Date.now(),
       async get(p) { return clone(at(load(), p)); },
       async set(p, v) { const t = load(); put(t, p, v); save(t); changed(); },
@@ -115,6 +116,7 @@ DS.Net = (function () {
         try { await firebase.auth().signOut(); } catch (e) { /* 무시 */ }
         uid = (await firebase.auth().signInAnonymously()).user.uid; return uid;
       },
+      async idToken() { const u = firebase.auth().currentUser; return u ? u.getIdToken() : null; }, // 📷 사진 채점 중계소가 학생을 확인 (2026-11-06)
       now: () => Date.now() + offset,
       async get(p) { return (await db.ref(p).get()).val(); },
       set: (p, v) => db.ref(p).set(sv(v)),
@@ -151,6 +153,7 @@ DS.Net = (function () {
     signIn: (e, p) => api.impl.signIn(e, p),
     signOut: () => api.impl.signOut(),
     reauth: () => (api.impl.reauth ? api.impl.reauth() : Promise.resolve(api.impl.uid())),
+    idToken: () => (api.impl.idToken ? api.impl.idToken() : Promise.resolve(null)),
     denied: (e) => !!e && (e.code === 'PERMISSION_DENIED' || /permission.denied|permission_denied/i.test(e.message || '')),
     now: () => api.impl.now(),
     get: (p) => api.impl.get(p),

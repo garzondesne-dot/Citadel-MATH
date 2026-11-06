@@ -9,7 +9,7 @@
 |---|---|
 | 흐름 | 학생 폰 촬영 → 자르기 · 1024px 줄이기 → **Apps Script 웹 앱** → 로그인 확인 · 하루 장 수 → **Claude Haiku 5.5** (사진 + 문제 + 기준표) → 점수 · 피드백 **글자만** Firebase `photo/` 저장 → 학생 화면 결과 |
 | 서술형 방 | **7개** (NEXT-ROOM 의 「5문항」은 2층이 생기기 전 숫자): 1층 07 · 11 / 2층 07 · 10 / 3층 15 · 16 · 👑17 |
-| 이미 준비됨 | 중계소 초안 `tools/apps-script/photo-grade.gs` · 매니페스트 `appsscript.json` · 기준표 초안 `rubrics.draft.json` · 모의 시험 `tests/photo-gs.test.js` (8개 통과 · 돈 안 듦) |
+| 이미 준비됨 | 중계소 초안 `tools/apps-script/photo-grade.gs` · 매니페스트 `appsscript.json` · 기준표 초안 `lessons/rubrics.js` · 모의 시험 `tests/photo-gs.test.js` (8개 통과 · 돈 안 듦) |
 | 예상 비용 | 1장 ≈ **1~2원** (입력 ≈ 2,500 토큰 · 출력 ≈ 1,000 토큰 추정) → 월 7,500원 ≈ 4,000장. 시범 때 실제 토큰을 기록(`tok`)해 다시 계산 |
 | 주말 작업 | 약 5~6시간 (§8) |
 
@@ -60,7 +60,7 @@
 | 경로 | 내용 | 읽기 | 쓰기 |
 |---|---|---|---|
 | `gcfg/photo` | `{ url, on }` 웹 앱 주소 · 켜기 | 로그인한 누구나 | 교사 |
-| `photo_rubric/{차시}/{방}` | 기준표 (`rubrics.draft.json` 모양) | 로그인한 누구나 | 교사 |
+| `photo_rubric/{차시}/{방}` | 기준표 (`lessons/rubrics.js` 모양) | 로그인한 누구나 | 교사 |
 | `photo/{반}/{번호}/{차시_방}/{id}` | 결과 `{ at, status, score, total, pass, steps, ans, conf, flags, fb, ask, right, model, tok }` · 교사 확인 뒤 `ok`, 이의 신청 `appeal` | 본인 · 교사 | **교사 · 중계소만** (학생 직접 쓰기 ✗ — 이의 신청 칸만 본인) |
 | `photo_q/{반}/{번호}/{날짜}` · `photo_q/_all/{날짜}` | 하루 장 수 | 본인 · 교사 | 중계소만 |
 
@@ -80,7 +80,7 @@
 | 3층 16 귀류법 √k | 결론 부정 · m/n 서로소 | m² = kn² → m 은 k 배수 | m = kt → n 도 k 배수 | 서로소 모순 → 결론 | |
 | 3층 👑17 절대부등식 | 차 = a³+b³−a²b−ab² | (a+b)(a−b)² | a+b>0 · (a−b)² ≥ 0 | 등호 a = b | |
 
-부분 점수 메모: 07 원소 나열 실수 → s3 0점이지만 그 수로 맞게 계산하면 s4 인정 · 11 벤 다이어그램 범위도 s2 인정 · 16 서로소 빠지면 s1 · s4 0점 · 10 해석이 틀리면 뒤 계산 불인정. (원문: `tools/apps-script/rubrics.draft.json`, `on: false` → 확인 뒤 `true`)
+부분 점수 메모: 07 원소 나열 실수 → s3 0점이지만 그 수로 맞게 계산하면 s4 인정 · 11 벤 다이어그램 범위도 s2 인정 · 16 서로소 빠지면 s1 · s4 0점 · 10 해석이 틀리면 뒤 계산 불인정. (원문: `lessons/rubrics.js`, `on: false` → 확인 뒤 `true`)
 
 ## 6. Apps Script 설치 (주말에 같이 · 15분)
 
