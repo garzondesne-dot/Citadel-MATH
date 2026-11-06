@@ -108,6 +108,7 @@ DS.Fun = (function () {
   // ── 교사 · 종합상황실 ───────────────────────────────────
   const studentsIn = (R) => Object.keys(R.players || {}).filter((u) => !R.players[u].teacher && (R.active || {})[u]);
   async function start(code, R, kind = 'bal', which = 'now') { // which (OX 타임): prev = 지난 차시 · now = 이번 차시
+    if (kind === 'td' && DS.TD) { await N().set(P(code, 'fv'), null).catch(() => {}); return DS.TD.start(code, R); } // 🏰 타워 디펜스 (2026-11-07)
     kind = KIND[kind] ? kind : 'bal';
     const k = KIND[kind], alive = studentsIn(R);
     if (kind !== 'quiz' && alive.length < MIN) throw Object.assign(new Error(`${k.name}은 ${MIN}명 이상일 때 할 수 있어요 (지금 ${alive.length}명)`), { user: true });
@@ -146,6 +147,7 @@ DS.Fun = (function () {
       try {
         const f = await N().get(P(code, 'fun')).catch(() => null), me = N().uid(), now = N().now();
         if (!f) { clearInterval(drivers[code]); delete drivers[code]; return; }
+        if (f.kind === 'td') return; // 🏰 타워 디펜스는 교실 TV 가 진행
         if (f.drv && f.drv.u !== me && now - (f.drv.at || 0) < 4000) return; // 다른 기기가 맡고 있음
         if (f.phase === 'end' && f.kind === 'quiz' && !f.saved) { await N().set(P(code, `oxq/${f.g}`), { qs: arr(f.queue).slice(0, f.n), marks: f.marks || {}, lesson: f.lesson || null, at: f.g }).catch(() => {}); await N().set(P(code, 'fun/saved'), true).catch(() => {}); } // 📊 OX 타임 결과 → 개인 기록(ox) · 대시보드
         if (f.phase === 'end') { if (now - (f.endAt || now) > 60000) await stop(code); else if (!f.drv || f.drv.u !== me || now - f.drv.at > 1500) await N().set(P(code, 'fun/drv'), { u: me, at: now }); return; }
@@ -163,15 +165,17 @@ DS.Fun = (function () {
   // 교사 폰 쉼터 칸 · 종합상황실 아이콘 줄
   const status = (R) => {
     const f = R.fun; if (!f) return '';
+    if (f.kind === 'td') return '🏰 타워 디펜스';
     const n = Object.keys(f.alive || {}).length;
     if (f.kind === 'quiz') return `${K(f).short} · ${f.phase === 'end' ? '끝' : `${f.n} / ${Math.min(QN, arr(f.queue).length)}`}`;
     return `${K(f).short} · ${f.phase === 'end' ? `🏆 우승 ${arr(f.win).length}명` : `${f.n}판 · 생존 ${n}명`}`;
   };
-  const ctlHtml = (R) => (R.fun
+  const ctlHtml = (R) => (R.fun && R.fun.kind === 'td' && DS.TD ? DS.TD.ctlHtml(R) : R.fun
     ? `<div class="fun-ctl"><span>${esc(status(R))}</span><button class="btn small" data-fun="stop">⏹ 게임 끝</button><button class="btn small" data-fun="again">↻ 새 게임</button></div>`
-    : `<div class="fun-ctl pick"><span class="muted small">쉬는 시간 놀이</span>${Object.entries(KIND).filter(([k]) => k !== 'quiz').map(([k, v]) => `<button class="btn small fun-btn k-${k}" data-fun="start:${k}" title="${esc(v.rule)}">${esc(v.short)}</button>`).join('')}<button class="btn small fun-btn k-quiz" data-oxq="prev" title="탈락 없는 복습 5문장">⭕ OX 지난</button><button class="btn small fun-btn k-quiz" data-oxq="now" title="이번 차시 점검 5문장">⭕ OX 오늘</button></div>`); // 2026-11-05: OX 타임은 쉼터 안에서만
+    : `<div class="fun-ctl pick"><span class="muted small">쉬는 시간 놀이</span>${Object.entries(KIND).filter(([k]) => k !== 'quiz').map(([k, v]) => `<button class="btn small fun-btn k-${k}" data-fun="start:${k}" title="${esc(v.rule)}">${esc(v.short)}</button>`).join('')}<button class="btn small fun-btn k-quiz" data-oxq="prev" title="탈락 없는 복습 5문장">⭕ OX 지난</button><button class="btn small fun-btn k-quiz" data-oxq="now" title="이번 차시 점검 5문장">⭕ OX 오늘</button><button class="btn small fun-btn k-td" data-fun="start:td" title="반 모두 타워가 되어 성을 지켜요 (교실 TV 필요)">🏰 디펜스</button></div>`); // 2026-11-05: OX 타임은 쉼터 안에서만
   function bind(el, code, R) {
     if (R.fun) drive(code);
+    if (R.fun && R.fun.kind === 'td' && DS.TD) DS.TD.bindCtl(el, code, R);
     el.querySelectorAll('[data-fun]').forEach((b) => (b.onclick = () => DS.Control.run(async () => {
       const k = b.dataset.fun;
       if (k === 'stop') return stop(code);
@@ -274,7 +278,8 @@ DS.Fun = (function () {
 
   // 종합상황실
   let hallSig = '';
-  function hall(el, R) {
+  function hall(el, R, code) {
+    if (R.fun && R.fun.kind === 'td' && DS.TD) { if (code) DS.TD.setCode(code); return DS.TD.hall(el, R); }
     const f = norm(R.fun), sig = `${f.g}|${f.rk}|${f.phase}|${Object.keys(f.alive || {}).length}`;
     const voted = Object.keys(((R.fv || {})[f.rk]) || {}).filter((u) => (f.alive || {})[u]).length;
     if (hallSig === sig && el.querySelector('.fa-wrap')) { const v = el.querySelector('.fa-voted'); if (v) v.textContent = `고른 사람 ${voted} / ${Object.keys(f.alive || {}).length}`; return; }
@@ -290,6 +295,7 @@ DS.Fun = (function () {
   const funPaid = {}; // 💎 이 기기에서 이미 받은 판
   let phoneSig = '';
   function phone(body, R, me, code) {
+    if (R.fun && R.fun.kind === 'td' && DS.TD) return DS.TD.phone(body, R, me, code);
     const f = norm(R.fun), alive = !!(f.alive || {})[me], mine = ((R.fv || {})[f.rk] || {})[me] || pend[`${f.g}|${f.rk}`] || '';
     const sig = `${f.g}|${f.rk}|${f.phase}|${alive}|${mine}`;
     if (phoneSig === sig && body.querySelector('.fa-wrap')) return;
