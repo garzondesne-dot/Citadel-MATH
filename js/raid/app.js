@@ -306,6 +306,11 @@ DS.App = (function () {
       const sec = await DS.Net.get(`secrets/${code}`).catch(() => null);
       return DS.Teacher.open(code, sec && sec.hallKey);
     });
+    ['#h-key', '#h-code'].forEach((k) => { const el = $(k); if (el) el.addEventListener('keydown', (e) => { // ⏎ 비밀번호 넣고 엔터 = 바로 입장 (2026-11-06 사용자)
+      if (e.key !== 'Enter' || e.isComposing) return; e.preventDefault();
+      if (!$('#h-code').value.trim()) { const b = document.querySelector('[data-hc]'); if (b) b.click(); } // 코드가 비었으면 찾은 수업 맨 위
+      $('#h-go').click();
+    }); });
     $('#h-go').onclick = go(() => { hallEntering = true; clearTimeout(findT); return DS.Hall.enter($('#h-code').value.trim(), $('#h-key').value.trim()).catch((e) => { hallEntering = false; throw e; }); });
     $('#p-go').onclick = go(async () => DS.Prep.enter($('#p-lesson').value));
     $('#s-go').onclick = go(async () => DS.Students.enter());
@@ -318,7 +323,8 @@ DS.App = (function () {
       const v = $('#t-hallpw').value.trim();
       if (v && !/^\d{4}$/.test(v)) throw Object.assign(new Error('비밀번호는 숫자 4자리예요 (비우면 수업마다 새로).'), { user: true });
       await DS.Net.set('tcfg/hallPw', v || null);
-      DS.UI.toast(v ? `🖥 종합상황실 비밀번호를 ${v} 로 고정했어요 (다음 수업부터)` : '🖥 이제 수업마다 새 비밀번호가 생겨요', 3200);
+      const fixedN = v && DS.Sched && DS.Sched.syncKeys ? await DS.Sched.syncKeys().catch(() => 0) : 0; // 미리 만든 예약 방도 (2026-11-06)
+      DS.UI.toast(v ? `🖥 종합상황실 비밀번호를 ${v} 로 고정했어요 (다음 수업부터${fixedN ? ` · 예약 수업 ${fixedN}개도 바꿈` : ''})` : '🖥 이제 수업마다 새 비밀번호가 생겨요', 3400);
     });
     $('#x-go').onclick = go(async () => { if (!(await A().isAdmin())) throw Object.assign(new Error('교사 계정으로 로그인해야 해요.'), { user: true }); await DS.Test.start($('#p-lesson').value); });
   }

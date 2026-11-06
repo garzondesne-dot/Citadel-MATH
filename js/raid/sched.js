@@ -111,7 +111,21 @@ DS.Sched = (function () {
       else if (meta && meta.cls) await N().remove(`slots/${ck(meta.cls)}/${code}`).catch(() => {});
       await N().remove(`sched/made/${key}`).catch(() => {});
     }
+    await syncKeys().catch(() => {}); // 🖥 고정 비밀번호를 미리 만든 방에도
     return { made: n };
+  }
+  // 🖥 예약 방 비밀번호 맞추기 (2026-11-06 사용자 「자동으로 만들어진 차시 던전은 비밀번호가 무작위」): 예약 방은 며칠 전에 만들어져 그때 비밀번호를 받음
+  //   → 고정 비밀번호(tcfg/hallPw)를 저장하거나 시간표를 다시 채울 때, 아직 시작 안 한 예약 방도 고정 비밀번호로 바꿈 · 돌려주는 값 = 바꾼 방 수
+  async function syncKeys() {
+    if (!(await DS.Account.isAdmin())) return 0;
+    const fixed = await N().get('tcfg/hallPw').catch(() => null); if (!/^\d{4}$/.test(String(fixed || ''))) return 0;
+    const made = (await N().get('sched/made').catch(() => null)) || {}; let n = 0;
+    for (const code of Object.values(made)) {
+      const st = await N().get(`rooms/${code}/state`).catch(() => null); if (!st || st.closed || (st.step ?? -1) >= 0) continue;
+      const sec = await N().get(`secrets/${code}`).catch(() => null);
+      if (!sec || sec.hallKey !== String(fixed)) { await N().update(`secrets/${code}`, { hallKey: String(fixed) }).catch(() => {}); n++; }
+    }
+    return n;
   }
   async function make(s, L) {
     const r = await DS.Act.createRoom(L.id, s.cls, { slot: { key: s.key, p: s.p, from: s.from, to: s.to } });
@@ -196,5 +210,5 @@ DS.Sched = (function () {
   const setHide = (cls, code, on) => N().set(`classlog/${ck(cls)}/${code}/hide`, on ? true : null);
   const when = (g) => { const k = kst(g.from || g.at || 0); return { date: k.date, dow: DOW[k.dow], hm: k.hm }; };
 
-  return { periodEnd, BELLS, PERIODS, SKIP, DOW, AFTER, LATE, ST, CYCLE, kst, times, usable, skipped, upcoming, nextLesson, ensure, active, today, skipSlot, relesson, logs, sheet, judge, setAtt, setMemo, setHide, when, label, getWeek, effective, comci, ck };
+  return { syncKeys, periodEnd, BELLS, PERIODS, SKIP, DOW, AFTER, LATE, ST, CYCLE, kst, times, usable, skipped, upcoming, nextLesson, ensure, active, today, skipSlot, relesson, logs, sheet, judge, setAtt, setMemo, setHide, when, label, getWeek, effective, comci, ck };
 })();
