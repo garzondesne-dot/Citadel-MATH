@@ -317,7 +317,8 @@ DS.App = (function () {
     $('#s-go').onclick = go(async () => DS.Students.enter());
     $('#d-go').onclick = go(async () => DS.Dash.enter());
     $('#fb-go').onclick = go(async () => { await DS.Feedback.teacher(); $('#fb-go').textContent = '💬 학생 의견'; }); // 💬 2026-11-06
-    $('#ph-go').onclick = go(() => DS.Photo.settings()); // 📷 2026-11-06 사진 채점 설정 (결과 확인은 📊 대시보드 「📷 서술형」)
+    $('#ph-go').onclick = go(() => DS.Photo.settings());
+    $('#sv-go').onclick = go(() => DS.Survey.panel()); // 📝 2026-11-06 설문 수동 열기 (차시 번호 선생님이 고름) // 📷 2026-11-06 사진 채점 설정 (결과 확인은 📊 대시보드 「📷 서술형」)
     if (DS.Photo) DS.Photo.pending().then((n) => { const b = $('#ph-go'); if (b && n) b.innerHTML = `📷 사진 채점 <b class="fb-badge">${n}</b>`; }).catch(() => {});
     DS.Feedback.unread().then((n) => { const b = $('#fb-go'); if (b && n) b.innerHTML = `💬 학생 의견 <b class="fb-badge">${n}</b>`; }).catch(() => {});
     $('#t-camp').onclick = go(async () => { const t = read('citadel-teacher'); let code = '', key = ''; if (t && t.code && t.uid === DS.Net.uid()) { const st = await DS.Net.get(`rooms/${t.code}/state`).catch(() => null); if (st && !st.closed) { code = t.code; key = t.hallKey || ''; } } return DS.TCamp.enter({ code, hallKey: key }); });

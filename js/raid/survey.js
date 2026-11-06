@@ -2,7 +2,7 @@
 //   저장 (이름 · 번호 · 시각 없음):
 //     survey/{반}          = { open: true, no: 차시 }          ← 교사만 씀 (리모컨 마무리 · 대시보드)
 //     surveyA/{반}/{무작위} = { no, r: [[전, 지금] × 7], pick: [i, i], cmp, say, want }  ← 열려 있을 때만 새로 쓰기 · 교사만 읽기
-//     surveyDone/{반}/{번호} = true                              ← 응답했는지만 (한 번만 · +5 EXP) · 응답과 이어지는 값 없음
+//     surveyDone/{반}/{번호} = true                              ← 응답했는지만 (한 번만 · +5 EXP · 💎+10) · 응답과 이어지는 값 없음
 //   응답 키는 무작위(시각이 들어가는 push id 를 쓰지 않음) → EXP 기록 시각과 이어 맞출 수 없다
 window.DS = window.DS || {};
 
@@ -85,6 +85,7 @@ DS.Survey = (function () {
     await N().set(`surveyDone/${ck(m.c)}/${m.n}`, true);
     try { localStorage.setItem(doneKey(m), '1'); } catch (e) { /* 무시 */ }
     if (DS.Grow) DS.Grow.add(m, { survey: 1 }, 'survey').catch(() => {});
+    if (DS.Gem) await DS.Gem.add(m, DS.Gem.G.survey || 10, 'survey', '수업 설문', { free: true }).catch(() => 0); // 💎 10 (2026-11-06 사용자 · 하루 한도 밖 · 한 번만)
   }
 
   // ── 학생: 지켜보기 · 버튼 · 설문 창 ───────────────────
@@ -101,7 +102,7 @@ DS.Survey = (function () {
     return () => subs.delete(cb);
   }
   const pending = () => pend;
-  const btnHtml = (id = 'sv-open') => (pend ? `<button class="btn primary sv-btn" id="${id}">📝 수업 설문 (3분 · 이름 없이) <small>+5 EXP</small></button>` : '');
+  const btnHtml = (id = 'sv-open') => (pend ? `<button class="btn primary sv-btn" id="${id}">📝 수업 설문 (3분 · 이름 없이) <small>+5 EXP · 💎+10</small></button>` : '');
 
   function open(m, done) {
     const no = pend; if (!no) return;
@@ -140,20 +141,46 @@ DS.Survey = (function () {
       try { await submit(m, a, no); } catch (e) { btn.disabled = false; throw e; }
       el.remove(); pend = 0; subs.forEach((f) => f(0));
       if (DS.Sound) DS.Sound.correct();
-      DS.UI.toast('📝 고마워요! 설문이 전달됐어요 (+5 EXP)', 3200);
+      DS.UI.toast('📝 고마워요! 설문이 전달됐어요 (+5 EXP · 💎+10)', 3200);
       if (done) done();
     });
   }
 
-  // ── 교사: 리모컨 마무리 · 종합상황실 칸 ───────────────
-  const ctlHtml = (R, st) => (R && R.meta && R.meta.cls ? `<div class="sv-ctl"><span>📝 설문 <span class="muted small">(${R.meta.cls}반)</span></span>${st && st.open ? `<b class="gold small">열림 · ${st.no}차시</b><button class="btn small" data-sv="close">닫기</button>` : '<button class="btn small" data-sv="open">열기</button>'}</div>` : '');
+  // ── 교사: 수동 열기 (2026-11-06 사용자 「설문 10차시에 열거야 · 안 바뀌네 · 내가 수동으로」) ──
+  //   차시 번호는 선생님이 고름 (이 기기 기억 · 기본 10) — 게임 차시 파일이 없는 차시도 OK · 리모컨 마무리 · 교사 메뉴 「📝 설문」 어디서나 같은 번호
+  const NOKEY = 'citadel-survey-no';
+  const pickNo = () => { try { return Number(localStorage.getItem(NOKEY)) || 10; } catch (e) { return 10; } };
+  const keepNo = (v) => { try { localStorage.setItem(NOKEY, String(v)); } catch (e) { /* 이 기기만 */ } };
+  const noInput = (id) => `<label class="sv-noin">차시 <input id="${id}" type="number" min="1" max="30" value="${pickNo()}" class="sv-no"></label>`;
+  const readNo = (el, id) => { const v = Math.max(1, Math.min(30, Number((el.querySelector('#' + id) || {}).value) || pickNo())); keepNo(v); return v; };
+  const ctlHtml = (R, st) => (R && R.meta && R.meta.cls ? `<div class="sv-ctl"><span>📝 설문 <span class="muted small">(${R.meta.cls}반)</span></span>${st && st.open ? `<b class="gold small">열림 · ${st.no}차시</b><button class="btn small" data-sv="close">닫기</button>` : `${noInput('sv-cno')}<button class="btn small" data-sv="open">열기</button>`}</div>` : '');
   function bindCtl(el, R, L, after) {
     el.querySelectorAll('[data-sv]').forEach((b) => (b.onclick = () => DS.Control.run(async () => {
-      const on = b.dataset.sv === 'open';
-      if (on && !confirm(`${R.meta.cls}반 설문을 열까요? (${(L && L.no) || '?'}차시 · 학생 폰 대기실 · 캠프에 📝 버튼)`)) return;
-      await setOpen(R.meta.cls, on, (L && L.no) || 0); DS.UI.toast(on ? '📝 설문을 열었어요' : '📝 설문을 닫았어요'); if (after) after();
+      const on = b.dataset.sv === 'open', no = on ? readNo(el, 'sv-cno') : 0;
+      if (on && !confirm(`${R.meta.cls}반 설문을 ${no}차시로 열까요? (학생 폰 대기실 · 캠프에 📝 버튼)`)) return;
+      await setOpen(R.meta.cls, on, no); DS.UI.toast(on ? `📝 ${no}차시 설문을 열었어요` : '📝 설문을 닫았어요'); if (after) after();
     })));
   }
+  // 교사 메뉴 「📝 설문」 창: 반마다 · 전체 열기/닫기 · 응답 수
+  async function panel() {
+    const esc = DS.UI.esc;
+    const el = document.createElement('div'); el.className = 'modal fb-modal sv-modal'; document.body.appendChild(el);
+    const draw = async () => {
+      const cs = Object.keys((await N().get('roster').catch(() => null)) || {}).sort();
+      const rows = await Promise.all(cs.map(async (c) => ({ c, st: await state(c).catch(() => null), done: await doneCount(c).catch(() => 0), size: Object.keys((await N().get(`roster/${c}`).catch(() => null)) || {}).length })));
+      el.innerHTML = `<div class="quiz-box framed fb-box"><div class="set-head"><h2>📝 수업 설문</h2><button class="btn" data-x>닫기</button></div>
+        <p class="muted small">열면 그 반 학생 폰(대기실 · 캠프)에 📝 버튼이 떠요 · 이름 없이 3분 · 결과는 📊 대시보드 「📝 설문」</p>
+        <div class="row">${noInput('sv-pno')}<button class="btn primary" id="sv-all1">모든 반 열기</button><button class="btn" id="sv-all0">모든 반 닫기</button></div>
+        <table class="r-table sv-ctlt"><tr><th>반</th><th>상태</th><th>응답</th><th></th></tr>${rows.map((p) => `<tr><td>${esc(p.c)}반</td><td>${p.st && p.st.open ? `<b class="gold">열림 · ${p.st.no}차시</b>` : '<span class="muted">닫힘</span>'}</td><td>${p.done}/${p.size}명</td><td>${p.st && p.st.open ? `<button class="btn small" data-c="${esc(p.c)}" data-on="0">닫기</button>` : `<button class="btn small primary" data-c="${esc(p.c)}" data-on="1">열기</button>`}</td></tr>`).join('') || '<tr><td colspan="4" class="muted">명단이 없어요</td></tr>'}</table></div>`;
+      el.querySelector('[data-x]').onclick = () => el.remove();
+      el.querySelector('#sv-pno').onchange = () => readNo(el, 'sv-pno');
+      const set = async (list, on) => { const no = readNo(el, 'sv-pno'); for (const c of list) await setOpen(c, on, no); DS.UI.toast(on ? `📝 ${no}차시 설문을 열었어요` : '📝 설문을 닫았어요'); await draw(); };
+      el.querySelectorAll('[data-c]').forEach((b) => (b.onclick = () => DS.Control.run(() => set([b.dataset.c], b.dataset.on === '1'))));
+      el.querySelector('#sv-all1').onclick = () => DS.Control.run(async () => { if (confirm(`모든 반(${cs.length}개) 설문을 ${readNo(el, 'sv-pno')}차시로 열까요?`)) await set(cs, true); });
+      el.querySelector('#sv-all0').onclick = () => DS.Control.run(async () => { if (confirm('모든 반 설문을 닫을까요?')) await set(cs, false); });
+    };
+    await draw();
+  }
 
-  return { norm, PAIR, WHEN, SCALE, PICKS, CMP, MAXT, check, clean, summary, csvRows, setOpen, state, answers, doneCount, isDone, submit, watch, pending, btnHtml, open, ctlHtml, bindCtl };
+  return { norm, PAIR, WHEN, SCALE, PICKS, CMP, MAXT, check, clean, summary, csvRows, setOpen, state, answers, doneCount, isDone, submit, watch, pending, btnHtml, open, ctlHtml, bindCtl, panel, pickNo, keepNo };
 })();

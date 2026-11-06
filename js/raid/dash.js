@@ -296,15 +296,16 @@ DS.Dash = (function () {
     const W = words ? `<h3>💬 마지막 한마디 <span class="muted small">(${words.length}개 · 수업 화면에 이미 보인 말풍선)</span></h3><ul class="sv-texts">${words.map((w) => `<li><span class="muted small">${esc(w.cls)} · ${w.no ? `${w.no}차시` : ''}</span> ${esc(w.t)}</li>`).join('') || '<li class="muted">없음</li>'}</ul>` : '<button class="btn small" id="sv-words">💬 마지막 한마디 모아 보기</button>';
     return `<p class="muted small">🔒 응답에는 이름 · 번호 · 시각이 저장되지 않아요. 「응답한 학생 수」만 따로 세요 (한 번만 · +5 EXP).</p>
       <table class="r-table sv-ctlt"><tr><th>반</th><th>상태</th><th>응답</th><th></th></tr>${ctl}</table>
-      <p class="muted small">열 때 차시 = 이 반 기록의 마지막 차시(${maxNo || '?'}) — 바꾸려면 열기 전에 숫자를 고쳐요 <input id="sv-no" type="number" min="1" max="20" value="${maxNo || 7}" class="sv-no"> · <button class="btn small" id="sv-re">↻ 새로 고침</button></p>
+      <p class="muted small">열 때 차시 (선생님이 고름 · 이 기기 기억 · 기록의 마지막 차시 ${maxNo || '?'}) <input id="sv-no" type="number" min="1" max="30" value="${DS.Survey.pickNo ? DS.Survey.pickNo() : maxNo || 10}" class="sv-no"> · <button class="btn small" id="sv-re">↻ 새로 고침</button></p>
       ${body}${W}`;
   };
   function svBind(el) {
     el.querySelectorAll('[data-svc]').forEach((b) => (b.onclick = () => DS.Control.run(async () => {
-      const on = b.dataset.on === '1', no = Number((el.querySelector('#sv-no') || {}).value) || 0;
+      const on = b.dataset.on === '1', no = Number((el.querySelector('#sv-no') || {}).value) || 0; if (on && DS.Survey.keepNo) DS.Survey.keepNo(no);
       if (on && !confirm(`${b.dataset.svc}반 설문을 ${no}차시로 열까요? (학생 폰 대기실 · 캠프에 📝 버튼)`)) return;
       await DS.Survey.setOpen(b.dataset.svc, on, no); svFor = ''; render();
     })));
+    const ni = el.querySelector('#sv-no'); if (ni && DS.Survey.keepNo) ni.onchange = () => DS.Survey.keepNo(Number(ni.value) || 10); // 다시 그려도 고른 번호 그대로
     const re = el.querySelector('#sv-re'); if (re) re.onclick = () => { svFor = ''; render(); };
     const c = el.querySelector('#sv-csv'); if (c) c.onclick = () => {
       const q = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
