@@ -401,6 +401,17 @@
       "hallPw": {
         ".validate": "newData.isString() && newData.val().matches(/^[0-9]{4}$/)"
       }
+    },
+    "fb": {
+      ".read": "auth != null && root.child('admins/'+auth.uid).val() === true",
+      "$c": {
+        "$n": {
+          "$id": {
+            ".write": "auth != null && (root.child('accounts/'+$c+'/'+$n+'/uid').val() === auth.uid || root.child('admins/'+auth.uid).val() === true)",
+            ".validate": "!newData.exists() || (newData.hasChildren(['k', 't', 'at']) && newData.child('t').isString() && newData.child('t').val().length <= 400 && newData.child('k').isString())"
+          }
+        }
+      }
     }
   }
 }

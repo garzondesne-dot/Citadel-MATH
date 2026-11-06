@@ -2165,4 +2165,11 @@ body.tb-last-min::after { content: ''; position: fixed; inset: 0; z-index: 88; p
 .fh2.frozen .art { filter: saturate(.35) brightness(1.2) hue-rotate(170deg) drop-shadow(0 0 6px #9fe0ff); }
 .h-solve { position: absolute; left: 50%; top: 14%; transform: translateX(-50%); z-index: 15; padding: 8px 18px; border: 2px solid #9fe0ff; border-radius: 12px; background: #0b2238dd; color: #e8fbff; font: 900 22px var(--pixel, sans-serif); text-align: center; box-shadow: 0 0 20px #7fd8ff; pointer-events: none; }
 .h-solve small { display: block; font-size: 14px; font-weight: 400; opacity: .9; }
+/* 💬 의견 보내기 (2026-11-06) */
+.fb-box textarea { width: 100%; font-size: 16px; padding: 8px; margin: 8px 0; border-radius: 8px; background: #08101e; color: var(--text, #eef2ff); border: 1px solid var(--line); resize: vertical; }
+.fb-kinds { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; } .fb-kinds .btn.on { border-color: var(--gold); background: #33280f; }
+.fb-box.wide { max-width: 760px; } .fb-list { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
+.fb-item { border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; background: #0b1426; } .fb-item.new { border-color: #ffd25a; box-shadow: 0 0 8px #ffd25a55; }
+.fb-item p { margin: 6px 0 0; white-space: pre-wrap; } .fb-meta { font-size: 13px; color: #b9c6e8; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; } .fb-del { margin-left: auto; }
+.fb-badge { display: inline-block; min-width: 20px; padding: 0 6px; border-radius: 10px; background: #ff4d5e; color: #fff; font-size: 13px; }
 
