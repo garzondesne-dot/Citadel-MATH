@@ -77,7 +77,7 @@ DS.Attack = (function () {
     });
   }
   // ⚡ 필살기 컷인 (2026-11-06 사용자 「난무만 안 하게 · 퍼펙트 뜰 때 · Ⅳ 해금」): 화면 전체 위에 1.2초 — Ⅳ 결정석 + 퍼펙트 처치에서만 부른다
-  const ULT_COLOR = { wind: ['#9affd8', '#05301f'], cut: ['#9fe0ff', '#0b2a40'], smash: ['#ffb070', '#3a1a06'], sweep: ['#a0ffd0', '#06301e'], fire: ['#ff7a3a', '#3a0d00'], spark: ['#fff27a', '#2a2a00'], frost: ['#b8f0ff', '#062a3a'], star: ['#ffe9a0', '#2a2206'], magic: ['#d8a0ff', '#24063a'] };
+  const ULT_COLOR = { wind: ['#9affd8', '#05301f'], cut: ['#9fe0ff', '#0b2a40'], smash: ['#ffb070', '#3a1a06'], sweep: ['#a0ffd0', '#06301e'], fire: ['#ff7a3a', '#3a0d00'], spark: ['#fff27a', '#2a2a00'], frost: ['#b8f0ff', '#062a3a'], star: ['#ffe9a0', '#2a2206'], magic: ['#d8a0ff', '#24063a'], math: ['#ffe27a', '#0a2c46'] };
   // 눈빛 클로즈업: assets/manifest.js heroFaces (576×432 · 칸 192×72 · 3 × 6 · 번호 = 용사 번호) 가 오면 그 그림 · 없으면 도트 확대 (2026-11-06)
   // 🖼 얼굴 그림 미리 받기 (2026-11-06 사용자 「선생님 필살기 때 얼굴 클로즈업이 안 됐어」: 종합실 · 수업 폰에서 미리 받지 않아 1초 컷인 안에 못 받음)
   let faceImg = null;

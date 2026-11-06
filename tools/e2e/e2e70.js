@@ -146,7 +146,7 @@ const jpegSize = (buf) => { let i = 2; while (i < buf.length) { if (buf[i] !== 0
     대시보드: board.items.length === 1 && /이의 신청/.test(board.items[0]) && /확인할 것 1/.test(board.need) && /원/.test(board.cost),
     인정뒤처치: okv === true && rec07b.clear && !rec07b.pend && /처치/.test(t07c.sub),
     하루다씀안내: /다 썼어요/.test(q11err),
-    서술조각: sc11.scroll === 3 && sc11.photo === 5,
+    서술조각: sc11.scroll === 3 && sc11.photo === 6, // 💎 G.photo (2026-11-07 +20%: 5 → 6)
     통과처치: st11 && rec11.clear && rec11.ph === 'p1' && /처치/.test(win11),
     경고: /⚠/.test(btnWarn) && /warn/.test(warn.box) && /200/.test(warn.txt) && warn.daily === '6' && saved.daily === 4 && saved.room === 2 && saved.cool === 30 && saved.warnDay === 150 && saved.url === URL_GS && saved.on === true,
     사진크기: got.length === 3 && got.every((g) => g.size && Math.max(g.size.w, g.size.h) <= 1024 && g.idToken && g.c === '1-3' && g.n === 1 && !/json/.test(g.ctype || '')),

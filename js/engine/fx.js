@@ -15,6 +15,7 @@ DS.FX = (function () {
     { id: 'frost', name: '❄ 얼음', ids: ['frost', 'spikes', 'ice', 'nova'] },
     { id: 'star', name: '✨ 별', ids: ['twinkle', 'mana', 'stars', 'meteor'] },
     { id: 'magic', name: '🔮 마법', ids: ['orb', 'crit', 'vortex', 'void'] },
+    { id: 'math', name: '📐 수식', ids: ['ruler', 'compass', 'venn', 'qed'] },   // 2026-11-07 수식 책사(남 · 여) 특화 (사용자 「수학 도구 · 수식으로 멋지게」) · tools/pfx/custom/math-*.js
   ];
   const TIER_NAMES = ['Ⅰ 기본', 'Ⅱ 숙련', 'Ⅲ 화려', 'Ⅳ 전설'];
   const TIER_SCALE = [1, 1.15, 1.3, 1.5];                                    // Ⅰ → Ⅳ 크기 배율
@@ -35,6 +36,7 @@ DS.FX = (function () {
     frost: '❄ 얼음', spikes: '❄ 얼음 가시', ice: '❄ 얼음 파쇄', nova: '❄ 서리 폭발',
     twinkle: '✨ 별', mana: '✨ 마나 폭발', stars: '✨ 별빛 폭죽', meteor: '✨ 유성우',
     orb: '🔮 마법탄', crit: '🔮 치명 섬광', vortex: '🌀 차원 소용돌이', void: '🌀 블랙홀',
+    ruler: '📐 눈금 베기', compass: '📐 컴퍼스 원', venn: '📐 벤 다이어그램', qed: '📐 증명 완료 ∎',
     wings: '🪶 황금 날개', smite: '☀ 심판의 빛',
   };
   const famOf = (k) => FAMS.find((f) => f.ids.includes(k)) || null;
@@ -42,7 +44,7 @@ DS.FX = (function () {
   //   친화 계열 ★ = 용사마다 1개 — 친화 결정석을 끼우면 「공명」(이펙트 조금 크게 + 용사 빛) · 연출만, 데미지 · 보상 같음
   //   2026-11-06 🌬 바람 = 엘프 궁수 · 닌자 (질풍 닌자)
   //   2026-11-06 (근접 계열 2개 추가): 근접 용사는 근접 계열로 다시 짝지음 — 드워프 · 격투가 = 🔨 강타 · 창술사 · 무희 · 해적 = 🌪 연격 · 연금술사 = 🔥 불 · 성기사 = ✨ 별
-  const AFFINITY = { 0: 'cut', 16: 'cut', 3: 'wind', 6: 'smash', 9: 'smash', 5: 'sweep', 10: 'sweep', 13: 'sweep', 2: 'wind', 7: 'fire', 12: 'fire', 11: 'spark', 14: 'frost', 15: 'frost', 4: 'star', 8: 'star', 1: 'magic', 17: 'magic' };
+  const AFFINITY = { 0: 'cut', 16: 'cut', 3: 'wind', 6: 'smash', 9: 'smash', 5: 'sweep', 10: 'sweep', 13: 'sweep', 2: 'wind', 7: 'fire', 12: 'fire', 11: 'spark', 14: 'frost', 15: 'frost', 4: 'star', 8: 'star', 1: 'magic', 17: 'magic', 18: 'cut', 19: 'math', 20: 'math', 21: 'smash', 22: 'spark', 23: 'fire' }; // 2026-11-07 새 용사: 흑기사 ⚔ · 수식 책사 남 · 여 📐 · 메카닉 🔨 · 해커 ⚡ · 용기사 🔥
   const affOf = (hero) => FAMS.find((f) => f.id === AFFINITY[Number(hero)]) || FAMS[0];
   const crystalOf = (hero, socket) => { const k = (socket || {})[Number(hero)]; return KINDS.includes(k) ? k : affOf(hero).ids[0]; }; // 빈 칸 = 친화 계열 Ⅰ
   const resonates = (hero, k) => { const f = famOf(k); return !!f && f.id === AFFINITY[Number(hero)]; };

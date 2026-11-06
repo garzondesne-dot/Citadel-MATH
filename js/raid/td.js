@@ -18,6 +18,7 @@ DS.TD = (function () {
     cut: { dmg: [0.2, 0.3, 0.4, 0.5, 0.6] }, smash: { stun: [0.2, 0.35, 0.5, 0.7, 0.9] }, sweep: { splash: [0.5, 0.7, 0.9, 1.1, 1.3] },
     wind: { knock: [0.3, 0.5, 0.7, 0.9, 1.1] }, fire: { burn: [0.15, 0.2, 0.25, 0.3, 0.35] }, spark: { chain: [1, 2, 3, 4, 5] },
     frost: { slow: [0.15, 0.25, 0.35, 0.45, 0.55] }, star: { crit: [0.1, 0.15, 0.2, 0.25, 0.3] }, magic: { boss: [0.2, 0.3, 0.4, 0.5, 0.6] },
+    math: { proof: [0.1, 0.13, 0.16, 0.2, 0.24] }, // 📐 증명: 같은 몬스터를 연달아 맞힐 때마다 +% (3번까지 쌓임 · 2026-11-07)
   };
   const HP_K = 0.42; // 몬스터 체력 계수 (tests/td.test.js 로 이길 확률 ≈ 70% 에 맞춤)
   // ── 시드 무작위 ────────────────────────────────────────
@@ -66,6 +67,7 @@ DS.TD = (function () {
     const F = FAM[T.fam] || {}, ti = Math.min(4, T.tier), tk = T.terr;
     if (F.dmg) dmg *= 1 + F.dmg[ti] * tk;
     if (F.boss && TYPES[m.ty].boss) dmg *= 1 + F.boss[ti] * tk;
+    if (F.proof && !noFx) { T.stk = T.last === m ? Math.min(3, (T.stk || 0) + 1) : 0; T.last = m; dmg *= 1 + F.proof[ti] * tk * T.stk; }
     if (F.crit && S.R() < F.crit[ti] * tk) { dmg *= 2; if (!noFx) S.fx.push({ k: 'crit', x: m.x, y: m.y, t: S.t }); }
     m.hp -= dmg; T.dmg += dmg;
     if (F.slow) { m.slow = Math.max(m.slow || 0, F.slow[ti] * tk); m.slowUntil = S.t + 1.5; }
@@ -129,8 +131,8 @@ DS.TD = (function () {
   const studentsIn = (R) => Object.keys(R.players || {}).filter((u) => !R.players[u].teacher && (R.active || {})[u]);
   const kst = () => { const d = new Date(Date.now() + 9 * 3600e3); return `${d.getUTCFullYear()}${String(d.getUTCMonth() + 1).padStart(2, '0')}${String(d.getUTCDate()).padStart(2, '0')}`; };
   const ranged = (h) => !!(DS.Attack && DS.Attack.isRanged && DS.Attack.isRanged(Number(h) || 0));
-  const FAMC = { cut: '#e8eef8', smash: '#ffb14a', sweep: '#7dffa8', wind: '#9ef0ff', fire: '#ff7a1a', spark: '#ffe14a', frost: '#7fd3ff', star: '#fff3a0', magic: '#c08aff' };
-  const FAMN = { cut: '⚔ 베기 · 한 마리에 강하게', smash: '🔨 강타 · 기절', sweep: '🌪 연격 · 주변도 함께', wind: '🌬 바람 · 뒤로 밀기', fire: '🔥 불 · 불태우기', spark: '⚡ 번개 · 옆으로 튐', frost: '❄ 얼음 · 느리게', star: '✨ 별 · 치명타', magic: '🔮 마법 · 보스에게 강함' };
+  const FAMC = { cut: '#e8eef8', smash: '#ffb14a', sweep: '#7dffa8', wind: '#9ef0ff', fire: '#ff7a1a', spark: '#ffe14a', frost: '#7fd3ff', star: '#fff3a0', magic: '#c08aff', math: '#ffd25a' };
+  const FAMN = { cut: '⚔ 베기 · 한 마리에 강하게', smash: '🔨 강타 · 기절', sweep: '🌪 연격 · 주변도 함께', wind: '🌬 바람 · 뒤로 밀기', fire: '🔥 불 · 불태우기', spark: '⚡ 번개 · 옆으로 튐', frost: '❄ 얼음 · 느리게', star: '✨ 별 · 치명타', magic: '🔮 마법 · 보스에게 강함', math: '📐 수식 · 같은 적을 연달아 맞히면 점점 강하게' };
   const UPN = { a: '⚔ 공격 +25%', b: '⚡ 속도 +20%', c: '✨ 특기 한 단계' };
   const TIERN = ['Ⅰ', 'Ⅱ', 'Ⅲ', 'Ⅳ', 'Ⅴ'];
   const mapOf = (f) => M().get(f.map) || M().MAPS[0];

@@ -348,3 +348,15 @@ Theme: [아래 한 줄]
 | ❄ 얼음 소용돌이 | `tpl-td-ice.png` | frozen snowfield, packed light-blue snow road spiralling inward, ice crystals and frozen pines between the rings, small ice palace at the spiral center |
 | 🏜 사막 지그재그 | `tpl-td-desert.png` | sunny desert, pale sand road between darker dunes, cacti, bleached bones and sandstone rocks, sandstone fort with a red flag at the top right |
 | 🌙 묘지 두 입구 | `tpl-td-crypt.png` | moonlit graveyard, grey cobblestone road, tombstones, dead trees and lit candles in empty areas, purple mist at the two portals, dark gothic keep on the right |
+
+### 6-12. 🧑‍🎓 새 용사 6명 (2026-11-07 · 옆방 프롬프트 페이지 「새 용사 프롬프트」 · 사용자 그림 18장 = 7줄 · 5줄 · 눈빛 × 6)
+**✅ 넣음 (v0.9.15.0)**: `tools/sprite/hero_pair.py` 로 12줄 시트 · `hero_meta.py` 기준점 → `assets/manifest.js heroesV2.list` 18~23 · 눈빛 6장은 512×256 으로 줄여 마젠타 지움 → `hero-faces-v2.webp` (3열 × 8줄).
+| 번호 | 용사 | 파일 | 친화 계열 | 공격 | 💎 |
+|---|---|---|---|---|---|
+| 18 | 흑기사 | `hero-dknight-v2c.webp` | ⚔ 베기 | 근접 | 60 |
+| 19 | 수식 책사(남) | `hero-mathboy-v2c.webp` | 📐 수식 (새) | 원거리 · 컴퍼스 원 탄 | 30 |
+| 20 | 수식 책사(여) | `hero-mathgirl-v2c.webp` | 📐 수식 (새) | 원거리 · 삼각자 탄 | 30 |
+| 21 | 메카닉 | `hero-mechanic-v2c.webp` | 🔨 강타 | 근접 | 30 |
+| 22 | 해커 | `hero-hacker-v2c.webp` | ⚡ 번개 | 원거리 · 코드 번개 탄 | 30 |
+| 23 | 용기사 | `hero-dragoon-v2c.webp` | 🔥 불 | 근접 | 60 |
+남은 10명(마검사 · 해골 소환사 · 석궁 사냥꾼 · 주판 술사 · 기하 마도사 · 상인 · 드론 조종사 · 발키리 · 정령사 · 별점술사)은 그림이 오면 24번부터 같은 방법으로.

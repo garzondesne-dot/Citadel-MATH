@@ -8,47 +8,48 @@ DS.Gem = (function () {
   const N = () => DS.Net;
   const ck = (c) => String(c).replace(/[.#$/[\]]/g, '_');
   const kk = (k) => String(k).replace(/[.#$/[\]]/g, '_');
-  const DAY_CAP = 50; // 2026-11-06 경제 다시 맞춤: 30 → 50 (수학 풀이 보상을 올려서)
+  const DAY_CAP = 60; // 2026-11-06 경제 다시 맞춤: 30 → 50 (수학 풀이 보상을 올려서) · 2026-11-07 → 60 (보상 전체 +20%)
   const path = (m) => `gem/${ck(m.c)}/${m.n}`;
   const today = () => new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
   // 적립표 (확정안 · 한 곳에서 바꿈)
+  // 2026-11-07 사용자 「보상 전체 +20%」: 새 용사 6 · 📐 수식 이펙트로 상점이 💎1,580 → 1,980 → 수입도 약 1.2배 (비율은 그대로 · tests/economy.test.js)
   const G = {
-    join: 3,            // 레이드 참여
+    join: 4,            // 레이드 참여
     survey: 10,         // 📝 수업 설문 응답 (한 번 · 하루 한도 밖 · 2026-11-06 사용자)
-    solvedMax: 10,      // 맞힌 소문제 1개당 1 (처음이든 고쳐서든 같음) · 수업당 최대 10 (2026-11-06: 5 → 10)
-    perfect: 5,         // ⚡ 그 수업에서 첫 시도 퍼펙트 몬스터가 하나라도 (실력)
-    bossPerfect: 5,     // 👑 수업 중 형성평가 만점 (실력) — 실력 · 노력 갈래를 비슷하게 (tests/economy.test.js)
-    bossRe: 12,          // 👑 형성평가 재대결 처치 (처음)
-    room: 7, roomFirst: 5, roomBoss: 20, // 🏰 성채 방 · 첫 판에 틀림 없이 처치 보너스 · 보스 방 (처음 · 2026-11-06: 3 · 10 → 6 · 20)
-    photo: 5,           // 📷 서술형 사진 통과 (처음 · 노력)
-    review: 2, reviewDay: 5, // 🎯 허수아비에서 틀림 · 안 풂 해결 (하루 3번까지)
-    card: 2,            // ⚒ 처음 만든 카드
-    seal: 10,           // 🟪 인장 (한도 밖)
-    rift: 5,            // ⏳ 이어하기 완주
-    clear: 3,           // ⏰ 시간 안 클리어
-    note: 6,            // 📕 그 차시 오답노트 완성 (남은 문제 0)
-    streak: { 3: 3, 5: 5, 10: 10 }, // 🔁 연속 참여 (한도 밖)
-    level5: 5,          // 🆙 레벨 5 · 10 · 15 … (한도 밖)
-    first: 3,           // 🏰 성채 첫 방 · 🎯 허수아비 첫 복습 (한 번)
-    funJoin: 1, funWin: 3, oxWin: 6, quizAll: 2, // 🎖 쉼터 놀이 · OX 타임
-    comboBest: 3,       // 🔥 반 최고 콤보를 깬 사슬에 낀 학생 (한도 밖 · v0.9.11)
-    bat: 3,             // 🦇 황금 박쥐 포획 → 반 전체 (v0.9.11)
-    punchFirst: 5, punchUp: 3, // 🏁 반대항 1등 반 · 지난 차시보다 +10% (한도 밖)
+    solvedMax: 12,      // 맞힌 소문제 1개당 1 (처음이든 고쳐서든 같음) · 수업당 최대 10 (2026-11-06: 5 → 10)
+    perfect: 6,         // ⚡ 그 수업에서 첫 시도 퍼펙트 몬스터가 하나라도 (실력)
+    bossPerfect: 6,     // 👑 수업 중 형성평가 만점 (실력) — 실력 · 노력 갈래를 비슷하게 (tests/economy.test.js)
+    bossRe: 14,          // 👑 형성평가 재대결 처치 (처음)
+    room: 8, roomFirst: 6, roomBoss: 24, // 🏰 성채 방 · 첫 판에 틀림 없이 처치 보너스 · 보스 방 (처음 · 2026-11-06: 3 · 10 → 6 · 20)
+    photo: 6,           // 📷 서술형 사진 통과 (처음 · 노력)
+    review: 3, reviewDay: 6, // 🎯 허수아비에서 틀림 · 안 풂 해결 (하루 3번까지)
+    card: 3,            // ⚒ 처음 만든 카드
+    seal: 12,           // 🟪 인장 (한도 밖)
+    rift: 6,            // ⏳ 이어하기 완주
+    clear: 4,           // ⏰ 시간 안 클리어
+    note: 7,            // 📕 그 차시 오답노트 완성 (남은 문제 0)
+    streak: { 3: 4, 5: 6, 10: 12 }, // 🔁 연속 참여 (한도 밖)
+    level5: 6,          // 🆙 레벨 5 · 10 · 15 … (한도 밖)
+    first: 4,           // 🏰 성채 첫 방 · 🎯 허수아비 첫 복습 (한 번)
+    funJoin: 1, funWin: 4, oxWin: 7, quizAll: 2, // 🎖 쉼터 놀이 · OX 타임
+    comboBest: 4,       // 🔥 반 최고 콤보를 깬 사슬에 낀 학생 (한도 밖 · v0.9.11)
+    bat: 4,             // 🦇 황금 박쥐 포획 → 반 전체 (v0.9.11)
+    punchFirst: 6, punchUp: 4, // 🏁 반대항 1등 반 · 지난 차시보다 +10% (한도 밖)
     teacherMax: 5,      // 👩‍🏫 선생님 지급 1회 최대
   };
   // 상점 (조각으로 해금) · 업적 전용(도감 · 첫 레이드 · 인장 3개 · 놀이 메달)은 여기 없음
   const SHOP = {
-    hero: { 12: 30, 13: 30, 14: 60, 15: 60 },
+    hero: { 12: 30, 13: 30, 14: 60, 15: 60, 19: 30, 20: 30, 21: 30, 22: 30, 18: 60, 23: 60 }, // 2026-11-07 새 용사: 수식 책사 남 · 여 · 메카닉 · 해커 💎30 · 흑기사 · 용기사 💎60
     fx: { fire: 40, lightning: 40, ice: 40, stars: 60, slash: 60, vortex: 80, // Ⅲ 화려 (인장으로도)
       moon: 20, ring: 20, chain: 20, spikes: 20, mana: 20, crit: 20, // Ⅱ 숙련 (2026-11-06)
       twin: 80, pillar: 80, thunder: 80, nova: 80, meteor: 80, void: 80, // Ⅳ 전설 = 같은 계열 Ⅲ 이 있어야 (account.js need) · 2026-11-06: 💎120 → 💎80 + 📜3
       upper: 20, sweep: 20, hammer: 60, spin: 60, quake: 80, reap: 80,
-      gale: 20, leaf: 60, cyclone: 80 }, // 🌬 바람 (2026-11-06) // 🔨 강타 · 🌪 연격 (2026-11-06 · Ⅲ 은 인장 없이 💎60)
+      gale: 20, leaf: 60, cyclone: 80, compass: 20, venn: 60, qed: 80 }, // 🌬 바람 (2026-11-06) // 🔨 강타 · 🌪 연격 (2026-11-06 · Ⅲ 은 인장 없이 💎60)
   };
   const itemKey = (kind, id) => `${kind}_${id}`;
   const price = (kind, id) => (SHOP[kind] || {})[id] ?? null;
   // 📜 서술 조각 (2026-11-06): 서술형 사진 채점에서만 · 전설 Ⅳ · 강화 +7~ 에 함께 듦
-  const SCROLL_NEED = { fx: { twin: 3, pillar: 3, thunder: 3, nova: 3, meteor: 3, void: 3, quake: 3, reap: 3, cyclone: 3 } };
+  const SCROLL_NEED = { fx: { twin: 3, pillar: 3, thunder: 3, nova: 3, meteor: 3, void: 3, quake: 3, reap: 3, cyclone: 3, qed: 3 } };
   const scrollOf = (kind, id) => (SCROLL_NEED[kind] || {})[id] || 0;
   // 🔨 강화 +1 ~ +10 (캐릭터 하나 · 실패 없음 · 🌟 대성공 10% = 💎 절반 돌려받기 + 반짝)
   const ENH = [null, { g: 10 }, { g: 15 }, { g: 20 }, { g: 25 }, { g: 30 }, { g: 40 }, { g: 50, s: 1 }, { g: 60, s: 1 }, { g: 80, s: 2 }, { g: 100, s: 2 }];

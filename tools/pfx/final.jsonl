@@ -46,3 +46,10 @@
 {"fx-cyclone": {"id": "nature/tornado", "w": 149, "h": 165, "n": 22, "fps": 15, "px": 76, "py": 151, "loop": true, "act": null}}
 {"fx-bind": {"id": "status/chain-bind", "w": 138, "h": 81, "n": 20, "fps": 15, "px": 69, "py": 54, "loop": false, "act": null}}
 {"fx-bind2": {"id": "status/chain-bind", "w": 138, "h": 81, "n": 20, "fps": 15, "px": 69, "py": 54, "loop": false, "act": null}}
+{"fx-ruler": {"id": "arcane/math-ruler", "w": 130, "h": 115, "n": 15, "fps": 15, "px": 65, "py": 58, "loop": false, "act": null}}
+{"fx-compass": {"id": "arcane/math-compass", "w": 160, "h": 158, "n": 18, "fps": 15, "px": 80, "py": 79, "loop": false, "act": null}}
+{"fx-venn": {"id": "arcane/math-venn", "w": 201, "h": 162, "n": 25, "fps": 15, "px": 98, "py": 81, "loop": false, "act": null}}
+{"fx-qed": {"id": "arcane/math-qed", "w": 240, "h": 206, "n": 31, "fps": 15, "px": 120, "py": 107, "loop": false, "act": null}}
+{"p-mathboy": {"id": "projectiles/compass-orb", "w": 93, "h": 44, "n": 18, "fps": 30, "px": 70, "py": 22, "loop": true, "act": null}}
+{"p-mathgirl": {"id": "projectiles/setsquare", "w": 71, "h": 42, "n": 18, "fps": 30, "px": 50, "py": 21, "loop": true, "act": null}}
+{"p-hacker": {"id": "projectiles/code-bolt", "w": 95, "h": 40, "n": 18, "fps": 30, "px": 74, "py": 20, "loop": true, "act": null}}

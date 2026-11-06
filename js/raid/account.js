@@ -155,6 +155,7 @@ DS.Account = (function () {
     const bonus = (m && DS.Bonus && (await N().get(`bonus/${String(m.c).replace(/[.#$/[\]]/g, '_')}/${m.n}`).catch(() => null))) || {};
     const fo = DS.Bonus ? DS.Bonus.fxOpen(bonus) : {}, seals = DS.Bonus ? DS.Bonus.seals(bonus).length : 0;
     heroes.push({ id: 16, open: seals >= 3, cond: `🟪 중단원던전 인장 ${Math.min(seals, 3)} / 3개 모으면 열려요` }); // 2026-11-03 사용자 결정: 금발 검사 = 인장 3개
+    [18, 19, 20, 21, 22, 23].forEach((id) => heroes.push({ id, open: false, cond: '💎 조각으로 해금' })); // 2026-11-07 새 용사 6 (흑기사 · 수식 책사 남/여 · 메카닉 · 해커 · 용기사) = 💎 상점 (gem.js SHOP)
     // ⚔ 이펙트 v2 (2026-11-06): 계열 6 × 단계 4 — Ⅰ 열림 · Ⅱ 💎 · Ⅲ 인장(또는 💎) · Ⅳ 💎 + 같은 계열 Ⅲ 필요 · 특별(업적)
     const fx = [];
     DS.FX.FAMS.forEach((fam) => fam.ids.forEach((k, t) => {

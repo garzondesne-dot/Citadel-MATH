@@ -10,8 +10,8 @@ const shop = Object.values(SHOP).reduce((a, k) => a + Object.values(k).reduce((b
 // 갈래별 적립 (f = 하는 비율)
 function earn(f) {
   const skill = C.lessons * (f.solved * G.solvedMax + f.perfect * G.perfect + f.perfect * G.bossPerfect + f.boss * G.bossRe) + C.rooms * f.rooms * f.first * G.roomFirst + C.photoRooms * f.photo * G.photo; // 🧠 실력
-  const effort = C.lessons * (G.join + 3 /* 시간 안 클리어 */ + f.note * G.note + f.seal * G.seal) + C.rooms * f.rooms * G.room + C.bossRooms * f.rooms * (G.roomBoss + G.seal) + C.fixes * f.review * G.review + C.cards * f.cards * G.card + (f.rooms ? G.first * 2 : 0); // 💪 노력 · 참여
-  const etc = C.lessons * f.fun * 6 /* 쉼터 · 박쥐 · 반대항 */ + 15 /* 레벨 */ + 10 /* 설문 */ + f.streak * 18;
+  const effort = C.lessons * (G.join + G.clear /* 시간 안 클리어 */ + f.note * G.note + f.seal * G.seal) + C.rooms * f.rooms * G.room + C.bossRooms * f.rooms * (G.roomBoss + G.seal) + C.fixes * f.review * G.review + C.cards * f.cards * G.card + (f.rooms ? G.first * 2 : 0); // 💪 노력 · 참여
+  const etc = C.lessons * f.fun * 7 /* 쉼터 · 박쥐 · 반대항 */ + 18 /* 레벨 */ + G.survey /* 설문 */ + f.streak * 22;
   return { skill, effort, etc, total: skill + effort + etc };
 }
 const TYPES = {

@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><base href="../../"><title>새 용사 · 📐 이펙트 미리 보기</title>
+<!-- 2026-11-07 새 용사 6 (18~23) 공격 · 이펙트 · 탄 · 필살기 컷인 미리 보기 — 로컬 서버(저장소 맨 위)에서 tools/pfx/heroes-preview.html 열기 -->
+<link rel="stylesheet" href="css/style.css">
+<style>
+  body { background: #0b1020; color: #eef2ff; font-family: 'Noto Sans KR', sans-serif; padding: 12px; }
+  .grid { display: grid; grid-template-columns: repeat(3, 420px); gap: 10px; }
+  .sc { position: relative; width: 420px; height: 200px; background: #1a2238; border: 1px solid #fff2; border-radius: 10px; overflow: hidden; }
+  .sc .hb { position: absolute; left: 30px; bottom: 30px; width: 110px; height: 90px; }
+  .sc .mb { position: absolute; right: 30px; bottom: 30px; width: 110px; height: 100px; }
+  .sc b { position: absolute; left: 8px; top: 6px; font-size: 14px; }
+  .fxg { display: grid; grid-template-columns: repeat(4, 300px); gap: 10px; margin-top: 12px; }
+  .fxb { position: relative; width: 300px; height: 260px; background: #141a2e; border-radius: 10px; overflow: hidden; }
+  .fxb b { position: absolute; left: 8px; top: 6px; font-size: 14px; z-index: 30; }
+</style></head>
+<body>
+<div class="grid" id="g"></div>
+<div class="fxg" id="fx"></div>
+<script src="js/config.js"></script>
+<script src="assets/manifest.js"></script>
+<script src="js/engine/art.js"></script>
+<script src="js/engine/fx.js"></script>
+<script src="js/engine/attack.js"></script>
+<script>
+const HEROES = [18, 19, 20, 21, 22, 23];
+document.getElementById('g').innerHTML = HEROES.map((n) => { const fx = DS.FX.affOf(n).ids[0]; return `<div class="sc" data-n="${n}" data-fx="${fx}"><b>${n} ${DS.ASSETS.heroesV2.list[n].name} · ${DS.FX.NAMES[fx]}${DS.Attack.isRanged(n) ? ' · 원거리' : ' · 근접'}</b><div class="hb">${DS.Art.hero(n, 'idle', 'big')}</div><div class="mb">${DS.Art.monster(0, 'idle', 'big')}</div></div>`; }).join('');
+document.getElementById('fx').innerHTML = ['ruler', 'compass', 'venn', 'qed'].map((k) => `<div class="fxb" data-k="${k}"><b>${DS.FX.NAMES[k]}</b></div>`).join('');
+window.playAll = (fxOf) => document.querySelectorAll('.sc').forEach((sc) => { const n = Number(sc.dataset.n); DS.Attack.play(sc, { heroBox: sc.querySelector('.hb'), monBox: sc.querySelector('.mb'), hero: n, fx: fxOf ? fxOf(n) : sc.dataset.fx }); });
+window.playFx = () => document.querySelectorAll('.fxb').forEach((b) => DS.FX.play(b, b.dataset.k, { s: 1.4 }));
+window.cut = (n, fx, gold) => DS.Attack.cutin(n, fx, { gold });
+DS.FX.preload(['ruler', 'compass', 'venn', 'qed', 'cut', 'bash', 'spark', 'flame']); DS.Attack.preload && DS.Attack.preload(); DS.Attack.preloadFaces();
+</script>
+</body></html>
