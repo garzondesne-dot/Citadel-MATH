@@ -39,6 +39,10 @@
 
 `node tools/qr/mk.js <tools/qr 절대경로>` → `class-qr.html` 을 A4 PDF 로. `decode-check.js` 로 QR 이 학생 주소로 읽히는지 확인.
 
+## apps-script/ — 📷 서술형 사진 채점 중계소 (초안)
+
+Google Apps Script 웹 앱 `photo-grade.gs` · 매니페스트 · 채점 기준표 초안. 설치 · 결정할 것은 `docs/PHOTO-PREP.md`, 모의 시험은 `node tests/photo-gs.test.js`. API 키는 스크립트 속성에만.
+
 ## e2e/ — 브라우저 회귀 시험 (로컬 체험 모드)
 
 먼저 저장소 폴더에서 `python3 -m http.server 8765` 를 띄운다. 그다음 `node tools/e2e/e2e11.js <출력 폴더>`.
