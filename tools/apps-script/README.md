@@ -2,7 +2,7 @@
 
 | 파일 | 내용 |
 |---|---|
-| `photo-grade.gs` | Google Apps Script 웹 앱: Firebase 로그인 확인 → 하루 장 수 → Claude Haiku 5.5 → 결과 글자만 `photo/` 저장 (사진 저장 ✗) · `checkSetup()` 설정 확인 |
+| `photo-grade.gs` | Google Apps Script 웹 앱: Firebase 로그인 확인 → 하루 장 수 → Claude Haiku 5.5 (학교 BAZE 게이트웨이 · Claude 형식 주소) → 결과 글자만 `photo/` 저장 (사진 저장 ✗) · `checkSetup()` 설정 확인 |
 | `appsscript.json` | 매니페스트 (서울 시간 · 외부 요청 · Firebase · 웹 앱 = 나로 실행 · 모든 사용자) |
 | `lessons/rubrics.js` | 서술형 7문항 채점 기준표 초안 → 확정 뒤 Firebase `photo_rubric/` |
 

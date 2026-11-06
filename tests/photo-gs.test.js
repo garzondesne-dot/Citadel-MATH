@@ -5,7 +5,7 @@ const SRC = fs.readFileSync(path.join(__dirname, '../tools/apps-script/photo-gra
 global.window = global; global.DS = global.DS || {}; require(path.join(__dirname, '../lessons/rubrics.js')); const RUB = DS.Rubrics;
 
 function world(opt = {}) {
-  const props = Object.assign({ ANTHROPIC_API_KEY: 'k-test', FIREBASE_WEB_KEY: 'w', DB_URL: 'https://db.test', ENABLED: '1', DAILY_MAX: '3', GLOBAL_MAX: '300' }, opt.props || {});
+  const props = Object.assign({ API_KEY: 'k-test', FIREBASE_WEB_KEY: 'w', DB_URL: 'https://db.test', ENABLED: '1', DAILY_MAX: '3', GLOBAL_MAX: '300' }, opt.props || {});
   const rub = JSON.parse(JSON.stringify(RUB['eval-1'].q07));
   const db = { accounts: { '1-3': { 7: { uid: 'U7' } } }, photo_rubric: { 'eval-1': { q07: rub } }, photo_q: {}, photo: {} };
   const calls = { claude: [], put: [] };
@@ -29,7 +29,7 @@ function world(opt = {}) {
           if (o.method === 'get') return reply(200, at(p) === undefined ? null : at(p));
           calls.put.push([p, JSON.parse(o.payload)]); put(p, JSON.parse(o.payload)); return reply(200, o.payload);
         }
-        if (url === 'https://api.anthropic.com/v1/messages') {
+        if (url === 'https://api.baze.co/v1/gateway/claude/v1/messages/') {
           const b = JSON.parse(o.payload); calls.claude.push({ b, h: o.headers });
           if (opt.http) return reply(opt.http, { error: { type: 'overloaded_error' } });
           if (opt.stop) return reply(200, { stop_reason: opt.stop, content: [] });
@@ -53,7 +53,7 @@ t('만점 → pass · 사진은 저장 안 함 · 점수는 서버 계산', () =
   assert.ok(!JSON.stringify(saved).includes('AAAA'), '사진 base64 가 저장되면 안 됨');
   assert.deepStrictEqual(saved.at, { '.sv': 'timestamp' });
   const { b, h } = w.calls.claude[0];
-  assert.strictEqual(b.model, 'claude-haiku-5-5'); assert.strictEqual(h['x-api-key'], 'k-test'); assert.ok(h['anthropic-version']);
+  assert.strictEqual(b.model, 'claude-haiku-5-5'); assert.strictEqual(h.Authorization, 'Bearer k-test'); assert.ok(!h['x-api-key'], 'BAZE 는 Bearer'); assert.ok(h['anthropic-version']);
   assert.strictEqual(b.output_config.format.type, 'json_schema'); assert.ok(!('temperature' in b) && !('thinking' in b));
   assert.strictEqual(b.messages[0].content[0].type, 'image');
   assert.ok(b.messages[0].content[1].text.includes('x는 6의 약수') && b.messages[0].content[1].text.includes('18 이하의 3의 배수'), 'ask 의 {p} {N} {q} 가 채워짐');

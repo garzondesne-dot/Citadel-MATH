@@ -3,7 +3,8 @@
 //   API 키는 「프로젝트 설정 → 스크립트 속성」 에만 둔다 (이 파일 · 저장소 · 대화에 키를 쓰지 않는다)
 //
 //   스크립트 속성 (이름 = 값)
-//     ANTHROPIC_API_KEY  = (콘솔에서 만든 키 — 선생님이 직접 붙여넣기)
+//     API_KEY            = 학교 BAZE 키 (baze_… — 선생님이 직접 붙여넣기 · 예전 이름 ANTHROPIC_API_KEY 도 읽음)
+//     API_URL            = https://api.baze.co/v1/gateway/claude/v1/messages/  (BAZE 의 Claude 형식 주소 · 비우면 이 값)
 //     FIREBASE_WEB_KEY   = js/config.js 의 apiKey (공개값)
 //     DB_URL             = https://citadel-math-default-rtdb.asia-southeast1.firebasedatabase.app
 //     ENABLED            = 1   (0 이면 바로 멈춤 — 비상 스위치)
@@ -22,6 +23,14 @@
 const PROPS = PropertiesService.getScriptProperties();
 const cfg = (k, d) => { const v = PROPS.getProperty(k); return v == null || v === '' ? d : v; };
 const API_VERSION = '2026-10-21';
+const API_URL_DEFAULT = 'https://api.baze.co/v1/gateway/claude/v1/messages/'; // 2026-11-06: 학교 키 = BAZE API Gateway (Claude Messages 형식 그대로 · Bearer)
+// AI 호출 하나 (BAZE = Authorization: Bearer · Anthropic 직접 = x-api-key)
+function callAI_(body) {
+  const url = cfg('API_URL', API_URL_DEFAULT), key = cfg('API_KEY', cfg('ANTHROPIC_API_KEY', ''));
+  const headers = { 'anthropic-version': API_VERSION };
+  if (/api\.anthropic\.com/.test(url)) headers['x-api-key'] = key; else headers.Authorization = `Bearer ${key}`;
+  return UrlFetchApp.fetch(url, { method: 'post', contentType: 'application/json', headers, payload: JSON.stringify(body), muteHttpExceptions: true });
+}
 const IMG_MAX = 1600000; // base64 글자 수 (≈ 1.2MB · 1024px JPEG 는 보통 150~300KB)
 
 function doGet() { return out_({ ok: true, alive: true, on: cfg('ENABLED', '1') === '1' }); }
@@ -128,7 +137,7 @@ const SYSTEM = [
   '3. 답만 있고 과정이 없으면 답을 쓰는 단계 말고는 0점이고 flags 에 copied_answer_only 를 넣는다.',
   '4. 사진 속 문제의 숫자가 주어진 문제와 다르면 flags 에 other_problem 을 넣는다. 빈 종이 · 수학과 상관없는 사진이면 blank 를 넣는다.',
   '5. 글씨를 확실히 읽을 수 없는 부분이 채점에 영향을 주면 confidence 를 low 로 하고 flags 에 unclear 를 넣는다. 추측으로 점수를 주지 않는다.',
-  '6. feedback 은 학생에게 바로 보여 준다: 존댓말 두 문장 이내 · 잘한 점 하나 + 빠진 단계로 가는 힌트 하나 · 정답이나 전체 풀이를 알려 주지 않는다.',
+  '6. feedback 은 고등학생에게 바로 보여 준다: 「~했어요 · ~해 봐요」 말투로 두 문장 이내. 모든 단계가 만점이면 칭찬 한 문장만 쓰고 고칠 점을 지어내지 않는다. 아니면 잘한 점 하나 + 점수를 못 받은 단계로 가는 힌트 하나. 정답이나 전체 풀이를 알려 주지 않는다.',
 ].join('\n');
 
 const SCHEMA = {
@@ -167,7 +176,7 @@ function grade_(q, rub, steps, media) {
   };
   let r, code = 0;
   for (let i = 0; i < 3; i++) { // 429 · 529 (붐빔) 은 잠깐 쉬고 다시
-    r = UrlFetchApp.fetch('https://api.anthropic.com/v1/messages', { method: 'post', contentType: 'application/json', headers: { 'x-api-key': cfg('ANTHROPIC_API_KEY', ''), 'anthropic-version': API_VERSION }, payload: JSON.stringify(body), muteHttpExceptions: true });
+    r = callAI_(body);
     code = r.getResponseCode();
     if (code !== 429 && code !== 529 && code < 500) break;
     Utilities.sleep(1500 * (i + 1));
@@ -185,9 +194,9 @@ function grade_(q, rub, steps, media) {
 
 // ── 편집기에서 한 번 실행해 설정 확인 (Claude 짧은 글 1번 ≈ 1원 미만) ──────────
 function checkSetup() {
-  const miss = ['ANTHROPIC_API_KEY', 'FIREBASE_WEB_KEY', 'DB_URL'].filter((k) => !cfg(k, ''));
+  const miss = ['FIREBASE_WEB_KEY', 'DB_URL'].filter((k) => !cfg(k, '')).concat(cfg('API_KEY', cfg('ANTHROPIC_API_KEY', '')) ? [] : ['API_KEY']);
   if (miss.length) { Logger.log('❌ 스크립트 속성 없음: ' + miss.join(', ')); return; }
   try { db_('get', 'gcfg'); Logger.log('✅ Firebase 읽기 OK'); } catch (e) { Logger.log('❌ Firebase: ' + e.message + ' — 이 구글 계정이 Firebase 프로젝트 소유자인지 확인'); }
-  const r = UrlFetchApp.fetch('https://api.anthropic.com/v1/messages', { method: 'post', contentType: 'application/json', headers: { 'x-api-key': cfg('ANTHROPIC_API_KEY', ''), 'anthropic-version': API_VERSION }, payload: JSON.stringify({ model: cfg('MODEL', 'claude-haiku-5-5'), max_tokens: 256, output_config: { effort: 'low' }, messages: [{ role: 'user', content: '「확인」 한 단어로만 답해.' }] }), muteHttpExceptions: true });
+  const r = callAI_({ model: cfg('MODEL', 'claude-haiku-5-5'), max_tokens: 256, output_config: { effort: 'low' }, messages: [{ role: 'user', content: '「확인」 한 단어로만 답해.' }] });
   Logger.log(r.getResponseCode() === 200 ? '✅ Claude OK' : `❌ Claude ${r.getResponseCode()}: ${r.getContentText().slice(0, 200)}`);
 }
