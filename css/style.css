@@ -2027,6 +2027,10 @@ input.sv-no { width: 64px !important; display: inline-block; padding: 2px 4px; }
 .atk-ghost { position: absolute; pointer-events: none; z-index: 1; opacity: .45; filter: brightness(1.8) saturate(.4) drop-shadow(0 0 4px #9cf); transition: opacity .28s linear; }
 .atk-dmg { position: absolute; pointer-events: none; z-index: 22; font: 700 20px var(--pixel, monospace); color: #ff5a4a; text-shadow: 2px 2px 0 #2a0508, -1px -1px 0 #2a0508; animation: atkDmg .9s ease-out forwards; }
 @keyframes atkDmg { 0% { transform: translate(-50%, 0) scale(1.6); color: #fff; } 15% { transform: translate(-50%, -14px) scale(1); color: #ff5a4a; } 100% { transform: translate(-30%, -46px); opacity: 0; } }
+.ult-aoe { position: absolute; inset: 0; z-index: 22; pointer-events: none; background: radial-gradient(circle at var(--x) var(--y), #fff 0, var(--c) 18%, transparent 70%); mix-blend-mode: screen; opacity: 0; animation: ultAoe .65s ease-out forwards; } /* 💥 필살기 광역 섬광 (2026-11-06) */
+@keyframes ultAoe { 0% { opacity: 0; } 12% { opacity: .95; } 100% { opacity: 0; } }
+.ult-ring { position: absolute; z-index: 23; pointer-events: none; border-radius: 50%; border: 6px solid #fff; box-shadow: 0 0 24px var(--c), inset 0 0 24px var(--c); transform: translate(-50%, -50%) scale(.02); opacity: 1; animation: ultRing .6s cubic-bezier(.2,.8,.3,1) forwards; }
+@keyframes ultRing { to { transform: translate(-50%, -50%) scale(1); opacity: 0; border-width: 2px; } }
 .atk-wave { position: absolute; pointer-events: none; z-index: 19; border: 3px solid #fff6c8; border-radius: 50%; box-shadow: 0 0 12px #ffd25a, inset 0 0 10px #ffd25a; transform: translate(-50%, -50%) scaleY(.32); animation: atkWave .6s ease-out forwards; }
 @keyframes atkWave { from { width: 10px; height: 10px; opacity: 1; } to { width: 260px; height: 260px; opacity: 0; } }
 /* ⚙ 설정: 용사 근접 · 원거리 표 · 이펙트 계열 × 단계 표 · 미리보기 */

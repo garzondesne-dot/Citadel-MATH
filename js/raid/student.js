@@ -414,7 +414,7 @@ DS.Student = (function () {
     const ub = $('#st-ult');
     if (ub) ub.onclick = () => DS.Control.run(async () => {
       ub.disabled = true; await DS.Act.heal(code, raw, mid, { ult: true }); drawn = '';
-      if (DS.Attack) { const sc = body.querySelector('.scene'); await DS.Attack.cutin(myP().hero || 0, myP().fx); if (sc) { DS.FX.play(sc, myP().fx, { scale: 0.6, perfect: true }); const mon = sc.querySelector('.enc-mon .art.monster') || sc.querySelector('.enc-mon'); setTimeout(() => { if (DS.Thrill) DS.Thrill.chain(mon, DS.Combo ? DS.Combo.ULT_BIND : 15, 'ult'); }, 500); } } // ⚡ 필살기 대묶기
+      if (DS.Attack) { const sc = body.querySelector('.scene'); await DS.Attack.cutin(myP().hero || 0, myP().fx); if (sc) { const mon = sc.querySelector('.enc-mon .art.monster') || sc.querySelector('.enc-mon'); DS.Attack.ultBlast(sc, mon, myP().fx); setTimeout(() => { if (DS.Thrill) DS.Thrill.chain(mon, DS.Combo ? DS.Combo.ULT_BIND : 15, 'ult'); }, 500); } } // ⚡ 필살기 대묶기
       if (DS.Grow && !test) DS.Grow.add(acc(), { heal: 1 }, `ult_${code}_${mid}`).catch(() => {});
     });
     const pb2 = $('#st-party');

@@ -29,7 +29,7 @@ DS.Attack = (function () {
   async function impact(scene, monBox, fx, o = {}) {
     const M = rel(monBox, scene), cx = M.x + M.w * 0.5, cy = M.y + M.h * 0.52, floor = M.y + M.h - 4;
     const sp = DS.FX.spec(DS.FX.KINDS.includes(fx) ? fx : 'flame') || {};
-    DS.FX.play(scene, fx, { x: cx, y: cy, floor, s: o.s || 1.2, perfect: o.finish });
+    if (o.ult) ultBlast(scene, monBox, fx); else DS.FX.play(scene, fx, { x: cx, y: cy, floor, s: o.s || 1.2, perfect: o.finish });
     const hit = sp.hit || [0, 0.08, 0.18, 2];
     await wait(Math.min(0.3, hit[0] || 0.06) * 1000);
     if (!scene.isConnected) return;
@@ -77,7 +77,7 @@ DS.Attack = (function () {
     });
   }
   // ⚡ 필살기 컷인 (2026-11-06 사용자 「난무만 안 하게 · 퍼펙트 뜰 때 · Ⅳ 해금」): 화면 전체 위에 1.2초 — Ⅳ 결정석 + 퍼펙트 처치에서만 부른다
-  const ULT_COLOR = { cut: ['#9fe0ff', '#0b2a40'], smash: ['#ffb070', '#3a1a06'], sweep: ['#a0ffd0', '#06301e'], fire: ['#ff7a3a', '#3a0d00'], spark: ['#fff27a', '#2a2a00'], frost: ['#b8f0ff', '#062a3a'], star: ['#ffe9a0', '#2a2206'], magic: ['#d8a0ff', '#24063a'] };
+  const ULT_COLOR = { wind: ['#9affd8', '#05301f'], cut: ['#9fe0ff', '#0b2a40'], smash: ['#ffb070', '#3a1a06'], sweep: ['#a0ffd0', '#06301e'], fire: ['#ff7a3a', '#3a0d00'], spark: ['#fff27a', '#2a2a00'], frost: ['#b8f0ff', '#062a3a'], star: ['#ffe9a0', '#2a2206'], magic: ['#d8a0ff', '#24063a'] };
   // 눈빛 클로즈업: assets/manifest.js heroFaces (576×432 · 칸 192×72 · 3 × 6 · 번호 = 용사 번호) 가 오면 그 그림 · 없으면 도트 확대 (2026-11-06)
   function faceHtml(hero) {
     const F = A().heroFaces, n = Number(hero) || 0;
@@ -95,6 +95,25 @@ DS.Attack = (function () {
     setTimeout(() => d.remove(), 1500);
     return wait(1050);
   }
+  // 💥 필살기 광역 (2026-11-06 사용자 「보스몹에 맞추고 전체 광역 데미지 느낌」): 컷인 뒤 부른다 · 연출만 (데미지 · 묶기 규칙 그대로)
+  //   ① 본 이펙트 = 몬스터 폭 × 1.6 (장면을 넘지 않게) ② 같은 이펙트 4개를 장면 네 귀퉁이 쪽에 0.12초 간격 (본의 0.6배)
+  //   ③ 몬스터 중심에서 장면 끝까지 퍼지는 충격파 + 계열 색 섬광 ④ 흔들림 6px · 0.4초 · 멈칫 0.2초 — 그림 6장이라 교실 TV 도 가벼움
+  function ultBlast(scene, monBox, fx) {
+    if (!scene || !DS.FX) return wait(0);
+    if (getComputedStyle(scene).position === 'static') scene.style.position = 'relative';
+    const R = scene.getBoundingClientRect(), W = R.width, Hh = R.height;
+    const M = monBox && monBox.isConnected ? rel(monBox, scene) : { x: W * 0.35, y: Hh * 0.25, w: W * 0.3, h: Hh * 0.45 };
+    const cx = M.x + M.w / 2, cy = M.y + M.h * 0.52, sp = DS.FX.spec(fx) || DS.FX.spec('flame');
+    const fam = (DS.FX.famOf(fx) || { id: 'star' }).id, c1 = (ULT_COLOR[fam] || ULT_COLOR.star)[0];
+    const cap = sp ? Math.min((W * 0.95) / sp.w, (Hh * 0.95) / sp.h) : 3, sMain = sp ? Math.max(0.8, Math.min(cap, (M.w * 1.6) / sp.w)) : 2;
+    const fl = document.createElement('i'); fl.className = 'ult-aoe'; fl.style.setProperty('--c', c1); fl.style.setProperty('--x', `${cx}px`); fl.style.setProperty('--y', `${cy}px`); scene.appendChild(fl); setTimeout(() => fl.remove(), 700);
+    const ring = document.createElement('i'), d = 2.2 * Math.hypot(Math.max(cx, W - cx), Math.max(cy, Hh - cy)); ring.className = 'ult-ring'; ring.style.cssText = `left:${cx}px;top:${cy}px;width:${d}px;height:${d}px;--c:${c1}`; scene.appendChild(ring); setTimeout(() => ring.remove(), 650);
+    DS.FX.play(scene, fx, { x: cx, y: cy, floor: M.y + M.h * 0.9, s: sMain, flat: true });
+    [[0.17, 0.3], [0.83, 0.28], [0.2, 0.78], [0.8, 0.76]].forEach(([fx0, fy0], i) => setTimeout(() => { if (scene.isConnected) DS.FX.play(scene, fx, { x: W * fx0, y: Hh * fy0, floor: Hh * fy0 + 20, s: sMain * 0.6, flat: true }); }, 150 + i * 120));
+    shake(scene, 6, 400); if (monBox) knock(monBox, 28);
+    if (DS.Sound) { if (DS.Sound.fxHit) DS.Sound.fxHit(fx); setTimeout(() => DS.Sound.finish && DS.Sound.finish(), 180); }
+    return hitstop(scene, 200).then(() => wait(650));
+  }
   async function play(scene, o = {}) {
     const { heroBox, monBox } = o, hero = Number(o.hero) || 0, fx = o.fx || 'flame', reso = DS.FX && DS.FX.resonates && DS.FX.resonates(hero, fx), s = (o.s || 1.2) * (reso ? 1.15 : 1) * (o.ultimate ? 1.25 : 1);
     if (!scene || !heroBox || !monBox || !DS.FX) { if (DS.FX && !o.miss) DS.FX.play(scene, fx, { s }); return; }
@@ -109,8 +128,8 @@ DS.Attack = (function () {
       await fly(scene, projOf(hero), from, o.miss ? { x: M.x + M.w * 0.3, y: M.y - M.h * 0.35 } : to, o.ps || s * 1.15, o.miss);
       if (!scene.isConnected) return;
       if (o.miss) { if (DS.Sound && DS.Sound.block) DS.Sound.block(); if (monBox.animate) monBox.animate([{ rotate: '0deg' }, { rotate: '-6deg' }, { rotate: '0deg' }], { duration: 300 }); }
-      else await impact(scene, monBox, fx, { s, finish: o.finish, noDmg: o.noDmg });
-      await wait(120);
+      else await impact(scene, monBox, fx, { s, finish: o.finish || o.ultimate, noDmg: o.noDmg, ult: o.ultimate });
+      await wait(o.ultimate ? 700 : 120);
     } else {
       const reach = Math.max(0, M.x - (H.x + H.w * 0.55));
       setPose(heroBox, hero, 'walk');
@@ -120,8 +139,8 @@ DS.Attack = (function () {
       setPose(heroBox, hero, 'attack');
       await wait(110);
       if (o.miss) { if (DS.Sound && DS.Sound.block) DS.Sound.block(); knock(heroBox, -18); if (monBox.animate) monBox.animate([{ scale: '1' }, { scale: '1.08' }, { scale: '1' }], { duration: 260 }); shake(scene, 2, 120); await wait(200); }
-      else await impact(scene, monBox, fx, { s, finish: o.finish, noDmg: o.noDmg });
-      await wait(140);
+      else await impact(scene, monBox, fx, { s, finish: o.finish || o.ultimate, noDmg: o.noDmg, ult: o.ultimate });
+      await wait(o.ultimate ? 700 : 140);
       if (!scene.isConnected) return;
       setPose(heroBox, hero, 'walk');
       await dash(scene, heroBox, reach, 0, 220, false);
@@ -133,5 +152,5 @@ DS.Attack = (function () {
   // 필살기 조건: Ⅳ 전설 · 특화 스킬 + 퍼펙트(그 전투 첫 판에 하나도 안 틀리고 모두 맞힘) — 퍼펙트가 완성되는 공격에서 (2026-11-06: 「마지막 일격」 조건은 뺌)
   // 2026-11-06 사용자 「필살기 그리고 특화일 때만」: Ⅳ 전설 + 그 용사의 친화(특화) 계열 스킬일 때만
   const canUlt = (fx, hero) => !!(DS.FX && DS.FX.tierOf(fx) === 3 && DS.FX.resonates(hero, fx));
-  return { projOf, isRanged, play, impact, fly, preload, shake, knock, cutin, canUlt };
+  return { projOf, isRanged, play, impact, fly, preload, shake, knock, cutin, canUlt, ultBlast };
 })();

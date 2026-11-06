@@ -55,7 +55,7 @@ DS.Hall = (function () {
   function ulNext() {
     const u = ulQ.shift(); if (!u || !DS.Attack) { ulBusy = false; return; } ulBusy = true;
     const p = (R.players || {})[u] || {};
-    DS.Attack.cutin(p.hero || 0, p.fx || 'flame').then(() => { const arena = $('#raid'), m0 = $('#rm'); if (arena && m0) { const ar = arena.getBoundingClientRect(), mr = m0.getBoundingClientRect(); DS.FX.play(arena, p.fx || 'flame', { x: mr.left - ar.left + mr.width / 2, y: mr.top - ar.top + mr.height / 2, scale: Math.min(ar.width, ar.height) / 700, perfect: true }); setTimeout(() => { if (DS.Thrill) DS.Thrill.chain(m0, DS.Combo ? DS.Combo.ULT_BIND : 15, 'ult'); }, 500); } setTimeout(ulNext, 1400); }); // ⚡ 대묶기
+    DS.Attack.cutin(p.hero || 0, p.fx || 'flame').then(() => { const arena = $('#raid'), m0 = $('#rm'); if (arena && m0) { const ar = arena.getBoundingClientRect(), mr = m0.getBoundingClientRect(); DS.Attack.ultBlast(arena, m0, p.fx || 'flame'); setTimeout(() => { if (DS.Thrill) DS.Thrill.chain(m0, DS.Combo ? DS.Combo.ULT_BIND : 15, 'ult'); }, 500); } setTimeout(ulNext, 1400); }); // ⚡ 대묶기
   }
   function lvHall() {
     const v = R.lvup || {}, first = !lvSeen; if (first) lvSeen = {};
@@ -529,7 +529,7 @@ DS.Hall = (function () {
     requestAnimationFrame(() => t.classList.add('go'));
     setTimeout(() => {
       DS.Sound.hit(); setTimeout(() => DS.Sound.correct(), 140);
-      DS.FX.play(arena, tFx(), { x: mr.left - ar.left + mr.width / 2, y: mr.top - ar.top + mr.height / 2, scale: Math.min(ar.width, ar.height) / 700, perfect: true });
+      if (ult && DS.Attack) DS.Attack.ultBlast(arena, m0, tFx()); else DS.FX.play(arena, tFx(), { x: mr.left - ar.left + mr.width / 2, y: mr.top - ar.top + mr.height / 2, scale: Math.min(ar.width, ar.height) / 700, perfect: true }); // 💥 필살기 = 광역
       arena.classList.remove('shake'); void arena.offsetWidth; arena.classList.add('shake');
       const tag = document.createElement('div'); tag.className = `perfect ${kill ? 'vanish-txt' : 'demo-txt'}`; tag.textContent = kill ? '💥 소멸!' : '시연 · 데미지 없음'; arena.appendChild(tag); setTimeout(() => tag.remove(), 1600);
       if (kill) {
