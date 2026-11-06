@@ -138,11 +138,11 @@ DS.TD = (function () {
   const arr = (x) => (Array.isArray(x) ? x : x && typeof x === 'object' ? Object.values(x) : []);
 
   // ── 교사: 시작 · 방패 · 응원 · 끝 ──
-  async function start(code, R) {
-    if (!Object.keys(R.hosts || {}).length) throw Object.assign(new Error('🏰 타워 디펜스는 종합상황실(교실 TV)을 켜야 시작돼요 — TV 가 계산과 그림을 맡아요'), { user: true });
+  async function start(code, R, opt = {}) { // opt (🧪 테스트 모드 · 2026-11-07): noHost = 이 기기 작은 TV 창이 계산 · map = 지도 고르기
+    if (!opt.noHost && !Object.keys(R.hosts || {}).length) throw Object.assign(new Error('🏰 타워 디펜스는 종합상황실(교실 TV)을 켜야 시작돼요 — TV 가 계산과 그림을 맡아요'), { user: true });
     const n = studentsIn(R).length; if (n < 1) throw Object.assign(new Error('입장한 학생이 없어요'), { user: true });
-    const cls = (R.meta || {}).cls, idx = cls ? Number(await N().get(`funUsed/${ck(cls)}/td`).catch(() => 0)) || 0 : 0, map = M().MAPS[idx % M().MAPS.length];
-    if (cls) await N().set(`funUsed/${ck(cls)}/td`, idx + 1).catch(() => {}); // 지도 차례대로 (반마다)
+    const cls = (R.meta || {}).cls, idx = cls ? Number(await N().get(`funUsed/${ck(cls)}/td`).catch(() => 0)) || 0 : 0, map = M().get(opt.map) || M().MAPS[idx % M().MAPS.length];
+    if (cls && !opt.map) await N().set(`funUsed/${ck(cls)}/td`, idx + 1).catch(() => {}); // 지도 차례대로 (반마다)
     const now = N().now();
     await N().set(P(code, 'fun'), { kind: 'td', g: now, map: map.id, phase: 'pick', to: now + ((typeof window !== 'undefined' && window.DS_TD && window.DS_TD.pick) || PICK_MS), total: n });
   }
@@ -238,7 +238,10 @@ DS.TD = (function () {
   }
   function loop() {
     const h = H; if (!h || !h.S) return;
-    const f = h.f, now = N().now(), sp = (typeof window !== 'undefined' && window.DS_TD && window.DS_TD.speed) || 1, tgt = Math.max(0, ((now - f.t0) / 1000) * sp), S = h.S, R = h.R; // DS_TD.speed = 화면 시험용 빨리 감기
+    if (!h.root.isConnected) { if (H === h) H = null; return; } // ⏹ 게임 끝 · 다른 놀이 · 쉼터 끝으로 화면이 바뀌면 계산도 멈춤 (2026-11-07: 안 보이는 판이 끝나며 새 놀이를 덮어쓰던 것)
+    const f = h.f, now = N().now(), sp = (typeof window !== 'undefined' && window.DS_TD && window.DS_TD.speed) || 1, S = h.S, R = h.R; // DS_TD.speed = 화면 시험 · 🧪 테스트 모드 ⏩ 빨리 감기
+    if (!h.clk || h.clk.sp !== sp) h.clk = { sp, real: now, sim: h.clk ? h.clk.sim + ((now - h.clk.real) / 1000) * h.clk.sp : ((now - f.t0) / 1000) * sp }; // 속도가 바뀌면 그 순간부터 (건너뛰지 않음)
+    const tgt = Math.max(0, h.clk.sim + ((now - h.clk.real) / 1000) * sp);
     // 입력: 판 안 업그레이드 · 기술 · 선생님
     const U = ((R.tdu || {})[f.g]) || {}, Tt = ((R.tdt || {})[f.g]) || {};
     let n = 0; while (S.t < tgt && !S.done && n++ < 400) {
@@ -261,7 +264,8 @@ DS.TD = (function () {
   }
   function finish(h) {
     const S = h.S, top = S.towers.filter((T) => !T.teacher).sort((a, b) => b.kills - a.kills).slice(0, 3).map((T) => [T.uid, T.kills]);
-    N().update(P(codeOf(), 'fun'), { phase: 'end', endAt: N().now(), res: { win: S.win, life: S.life, top, t: Math.round(S.t) } }).catch(() => {});
+    const at = P(codeOf(), 'fun');
+    N().get(`${at}/g`).then((g) => { if (g === h.g) return N().update(at, { phase: 'end', endAt: N().now(), res: { win: S.win, life: S.life, top, t: Math.round(S.t) } }); }).catch(() => {}); // 같은 판일 때만
   }
   function banner(t) { const h = H; if (!h) return; const b = document.createElement('div'); b.className = 'td-banner'; b.textContent = t; h.stage.appendChild(b); setTimeout(() => b.remove(), 2600); }
   function queueCut(T, k) { const h = H; if (!DS.Attack || h.cut.length > 2) return; h.cut.push([T, k]); if (!h.cutBusy) nextCut(); }
@@ -360,6 +364,7 @@ DS.TD = (function () {
     body.innerHTML = `<div class="panel framed td-ph td-end ${r.win ? 'win' : 'lose'}"><h2>${r.win ? '🏆 승리! 성을 지켰어요' : '💥 아쉽게 졌어요'}</h2>${inIt ? `<p>내 처치 <b>${(L.kills || {})[me] || 0}</b>마리 · ⭐ ${(L.stars || {})[me] || 0}</p>` : ''}
       <p class="td-top3">${arr(r.top).map((x, i) => `<span>${['🥇', '🥈', '🥉'][i]} ${esc(((R.players || {})[x[0]] || {}).nick || '')} ${x[1]}</span>`).join(' ')}</p><p class="muted small">💎 ${r.win ? 3 : 1} (오늘 첫 판만) · 키운 레벨 · 강화 · 스킬이 곧 타워의 힘!</p></div>`;
   }
-  Object.assign(api, { start, ctlHtml, bindCtl, hall, phone, setCode: (c) => { code0 = c; }, _H: () => H });
+  const halt = () => { if (H && H.raf) cancelAnimationFrame(H.raf); H = null; }; // 🧪 테스트 TV 창을 닫을 때
+  Object.assign(api, { start, ctlHtml, bindCtl, hall, phone, halt, setCode: (c) => { code0 = c; }, _H: () => H });
   return api;
 })();

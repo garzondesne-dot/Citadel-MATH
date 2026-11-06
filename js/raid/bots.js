@@ -33,7 +33,35 @@ DS.Bots = (function () {
   }
   function stopAll() { if (stop) stop(); stop = null; code = null; done.clear(); }
 
+  // 🏕 쉼터 놀이 (🧪 테스트 모드 · 2026-11-07): ⚖ 🔄 ⭕ = 고르는 시간 안에 한 번 고름 · 🏰 디펜스 = 내 능력치 · 빈 자리 선착순
+  function fun() {
+    const f = R.fun, now = N().now();
+    if (f.kind === 'td') {
+      if (f.phase !== 'pick' || !DS.TDMaps) return;
+      const M = DS.TDMaps, sl = M.slots(M.get(f.map) || M.MAPS[0]);
+      ids().forEach((u, i) => {
+        if (!(R.active || {})[u]) return; const p = R.players[u] || {};
+        later(`tdm|${f.g}|${u}`, rand(400, 1500), () => N().set(P(`tdm/${f.g}/${u}`), { lv: 2 + ((i * 3) % 7), enh: i % 4, hero: p.hero || 0, fx: p.fx || 'flame' }));
+        later(`tdp|${f.g}|${u}`, rand(4000, 16000), async () => {
+          const cur = (await N().get(P(`tdp/${f.g}`)).catch(() => null)) || {}; if (Object.values(cur).includes(u)) return;
+          const free = sl.filter((s) => !cur[s.no]), star = free.filter((s) => s.star), pool = star.length && Math.random() < 0.5 ? star : free;
+          const s = pool[Math.floor(Math.random() * pool.length)]; if (s) await N().set(P(`tdp/${f.g}/${s.no}`), u).catch(() => {});
+        });
+      });
+      return;
+    }
+    const left = (f.to || 0) - now; if (f.phase !== 'pick' || left < 800) return;
+    ids().forEach((u) => {
+      if (!(f.alive || {})[u]) return;
+      later(`fv|${f.g}|${f.rk}|${u}`, rand(0.15, 0.75) * left * speed, () => {
+        const v = f.rps ? 'abc'[Math.floor(Math.random() * 3)] : f.ans ? (Math.random() < 0.7 ? f.ans : f.ans === 'a' ? 'b' : 'a') : Math.random() < 0.5 ? 'a' : 'b';
+        N().set(P(`fv/${f.rk}/${u}`), v).catch(() => {});
+      });
+    });
+  }
+
   function step() {
+    if (DS.Raid.restOn(R) && !DS.Raid.isLobby(R)) { if (R.fun) fun(); return; } // 쉼터: 공격은 쉬고 놀이만
     const st = DS.Raid.stepOf(L, R);
     ids().forEach((u, i) => {
       if (DS.Raid.isLobby(R)) later(`join|${u}`, 300 + i * rand(150, 450), () => N().set(P(`players/${u}`), { num: i + 2, nick: NICK[i % NICK.length], hero: Math.floor(Math.random() * 7), fx: DS.FX ? DS.FX.BASE[i % 6] : 'flame', cls: '1-1', at: N().TS }).then(() => N().set(P(`online/${u}`), true)));

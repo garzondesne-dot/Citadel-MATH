@@ -765,6 +765,15 @@ body.forge-open { overflow: hidden; }
 .test-bar .tb-step { flex: 1; font-size: 12px; color: #ffe7a8; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .test-bar .btn.primary { padding: 8px 14px; }
 body:has(#test-bar) #screen-student .wrap { padding-bottom: 90px; max-width: 460px; }
+/* 🧪 테스트 쉼터 놀이 (2026-11-07): 위 = 작은 TV 창 · 막대 위 = 놀이 단추 줄 */
+.test-fun { position: fixed; left: 0; right: 0; bottom: calc(56px + env(safe-area-inset-bottom)); z-index: 44; display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 6px 8px; background: #1b1030f0; border-top: 2px solid #c08aff; max-height: 40vh; overflow-y: auto; }
+.test-fun .fun-ctl { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin: 0; }
+.test-fun select { font: inherit; font-size: 12px; padding: 4px; border-radius: 8px; background: #0b1020; color: #eef2ff; border: 1px solid #fff4; }
+body:has(#test-fun) #screen-student .wrap { padding-bottom: 170px; }
+.test-tv { position: fixed; top: 0; left: 50%; transform: translateX(-50%); z-index: 43; overflow: hidden; background: #000; border-bottom: 3px solid #c08aff; box-shadow: 0 6px 18px #0009; }
+.test-tv .tt-in { position: absolute; left: 0; top: 0; width: 1280px; height: 720px; transform-origin: 0 0; }
+.test-tv .tt-l { position: absolute; right: 6px; bottom: 4px; font-size: 11px; font-style: normal; color: #fffc; background: #0008; padding: 1px 6px; border-radius: 6px; pointer-events: none; }
+body.has-test-tv #screen-student .wrap { padding-top: var(--tvh, 0px); }
 .t-concept h2 { margin: 4px 0 8px; color: var(--gold); }
 .t-sheet { display: block; width: 100%; height: auto; background: #fff; border: 2px solid #8a6a2c; margin: 6px 0; touch-action: pinch-zoom; }
 .t-sheet-modal .quiz-box { max-height: 92dvh; overflow-y: auto; }
@@ -1211,6 +1220,7 @@ body:has(#h-demo-ov) > .modal { z-index: 70; } /* 보스 시연: 학생과 같�
 /* 버전 꼬리표: 모든 화면 · 모든 창 위 왼쪽 아래 구석, 누름 막지 않음 */
 #ver-tag { position: fixed; left: calc(4px + env(safe-area-inset-left)); bottom: calc(2px + env(safe-area-inset-bottom)); z-index: 9999; font: 11px/1.2 monospace; color: #fff; opacity: .7; text-shadow: 1px 1px 0 #000; pointer-events: none; user-select: none; }
 body:has(#test-bar) #ver-tag { bottom: calc(64px + env(safe-area-inset-bottom)); }
+body:has(#test-fun) #ver-tag { display: none; } /* 🧪 쉼터 놀이 줄이 덮어서 */
 @media (min-width: 1000px) { #ver-tag { font-size: 14px; left: 8px; bottom: 6px; } } /* 종합상황실 · PC: 교실 뒤에서도 읽히게 */
 /* 🧙 선생님 모습 (교사 메뉴): 현자 · 수학자 */
 .t-skin { grid-template-columns: repeat(2, 1fr); max-width: 260px; margin: 4px 0 8px; }
