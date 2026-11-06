@@ -89,16 +89,17 @@ DS.Attack = (function () {
     if (F && F.src && n < F.cols * F.rows && faceReady()) { const c = n % F.cols, r = Math.floor(n / F.cols); return `<i class="u-facepic" style="background-image:url('${A().base}${F.src}');background-size:${F.cols * 100}% ${F.rows * 100}%;background-position:${F.cols > 1 ? (c / (F.cols - 1)) * 100 : 0}% ${F.rows > 1 ? (r / (F.rows - 1)) * 100 : 0}%"></i>`; }
     return `<div class="u-face">${DS.Art.hero(hero, 'idle')}</div>`;
   }
-  function cutin(hero, fx) {
+  // opt.gold = 🌟 진필살기 (2026-11-06): 금빛 띠 · 「眞」 · 조금 더 길게
+  function cutin(hero, fx, opt = {}) {
     if (reduce() || typeof document === 'undefined') return wait(0);
-    const fam = (DS.FX.famOf(fx) || { id: 'star' }).id, [c1, c2] = ULT_COLOR[fam] || ULT_COLOR.star;
-    const d = document.createElement('div'); d.className = 'ult'; d.style.setProperty('--uc', c1); d.style.setProperty('--uc2', c2);
+    const fam = (DS.FX.famOf(fx) || { id: 'star' }).id, [c1, c2] = opt.gold ? ['#ffd25a', '#fff3c0'] : ULT_COLOR[fam] || ULT_COLOR.star;
+    const d = document.createElement('div'); d.className = `ult${opt.gold ? ' true' : ''}`; d.style.setProperty('--uc', c1); d.style.setProperty('--uc2', c2);
     const crack = Array.from({ length: 9 }, (_, i) => `${(i * 12.5).toFixed(1)},${(50 + (i % 2 ? -1 : 1) * (6 + Math.random() * 10) + (i - 4) * 4).toFixed(1)}`).join(' ');
-    d.innerHTML = `<i class="u-dim"></i><div class="u-band">${faceHtml(hero)}<i class="u-eye" style="left:44%"></i><i class="u-eye" style="left:56%"></i></div><b class="u-name">${String(DS.FX.NAMES[fx] || '').replace(/^\S+\s/, '').replace(/[<>&]/g, '')}!</b><i class="u-flash"></i><div class="u-tear"><svg viewBox="0 0 100 100" preserveAspectRatio="none"><polyline points="${crack}" fill="none" stroke="#fff" stroke-width="1.6" style="filter:drop-shadow(0 0 2px ${c1})"/><polyline points="${crack}" fill="none" stroke="${c1}" stroke-width="0.5"/></svg></div>`;
+    d.innerHTML = `<i class="u-dim"></i><div class="u-band">${faceHtml(hero)}<i class="u-eye" style="left:44%"></i><i class="u-eye" style="left:56%"></i></div>${opt.gold ? '<b class="u-true">眞</b>' : ''}<b class="u-name">${opt.gold ? '진필살기 · ' : ''}${String(DS.FX.NAMES[fx] || '').replace(/^\S+\s/, '').replace(/[<>&]/g, '')}!</b><i class="u-flash"></i><div class="u-tear"><svg viewBox="0 0 100 100" preserveAspectRatio="none"><polyline points="${crack}" fill="none" stroke="#fff" stroke-width="1.6" style="filter:drop-shadow(0 0 2px ${c1})"/><polyline points="${crack}" fill="none" stroke="${c1}" stroke-width="0.5"/></svg></div>`;
     document.body.appendChild(d);
     if (DS.Sound) { DS.Sound.sample && DS.Sound.sample('special', 0.9); setTimeout(() => DS.Sound.finish && DS.Sound.finish(), 1000); }
-    setTimeout(() => d.remove(), 1500);
-    return wait(1050);
+    setTimeout(() => d.remove(), opt.gold ? 2000 : 1500);
+    return wait(opt.gold ? 1450 : 1050);
   }
   // 💥 필살기 광역 (2026-11-06 사용자 「보스몹에 맞추고 전체 광역 데미지 느낌」): 컷인 뒤 부른다 · 연출만 (데미지 · 묶기 규칙 그대로)
   //   ① 본 이펙트 = 몬스터 폭 × 1.6 (장면을 넘지 않게) ② 같은 이펙트 4개를 장면 네 귀퉁이 쪽에 0.12초 간격 (본의 0.6배)
@@ -156,6 +157,9 @@ DS.Attack = (function () {
   const preload = (hero, fx) => { if (!DS.FX) return; DS.FX.preload(fx); const p = projOf(hero); if (p) DS.FX.preload(p); if (canUlt(fx, hero)) preloadFaces(); }; // 필살기 쓸 수 있으면 얼굴 그림도 미리
   // 필살기 조건: Ⅳ 전설 · 특화 스킬 + 퍼펙트(그 전투 첫 판에 하나도 안 틀리고 모두 맞힘) — 퍼펙트가 완성되는 공격에서 (2026-11-06: 「마지막 일격」 조건은 뺌)
   // 2026-11-06 사용자 「필살기 그리고 특화일 때만」: Ⅳ 전설 + 그 용사의 친화(특화) 계열 스킬일 때만
-  const canUlt = (fx, hero) => !!(DS.FX && DS.FX.tierOf(fx) === 3 && DS.FX.resonates(hero, fx));
-  return { projOf, isRanged, play, impact, fly, preload, preloadFaces, shake, knock, cutin, canUlt, ultBlast };
+  // ⚡ 필살기 = 특화 계열 Ⅲ 이상 · 🌟 진필살기 = 특화 Ⅳ (2026-11-06 사용자 「추천대로」 · 둘 다 연출 · 데미지 그대로)
+  const tierN = (fx) => { const t = DS.FX ? DS.FX.tierOf(fx) : -1; return typeof t === 'number' ? t : -1; };
+  const canUlt = (fx, hero) => !!(DS.FX && tierN(fx) >= 2 && DS.FX.resonates(hero, fx));
+  const canTrue = (fx, hero) => !!(DS.FX && tierN(fx) === 3 && DS.FX.resonates(hero, fx));
+  return { projOf, isRanged, play, impact, fly, preload, preloadFaces, shake, knock, cutin, canUlt, canTrue, ultBlast };
 })();

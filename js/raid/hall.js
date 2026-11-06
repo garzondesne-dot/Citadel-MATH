@@ -6,6 +6,7 @@ window.DS = window.DS || {};
 
 DS.Hall = (function () {
   const $ = (s) => document.querySelector(s);
+  const enhCls = (p) => { const t = p && DS.Gem && DS.Gem.enhTier ? DS.Gem.enhTier(Number(p.enh) || 0) : 0; return t ? ` enh enh-${t}` : ''; }; // 🔨 강화 빛 (+3 은 · +5 금 · +7 오라 · +10 무지개)
   const { esc, pretty } = DS.UI;
   const C = () => DS.Control, Raid = () => DS.Raid;
   let code = null, L = null, R = null, raw = null, stop = null, stopPrep = null, prep = {};
@@ -47,17 +48,44 @@ DS.Hall = (function () {
     if (Raid().bossHp(L, R).won && !hxSeen.boss) { hxSeen.boss = true; if (!first) setTimeout(() => Raid().activeIds(R).filter((u) => Raid().bossAnswered(R, u) > 0).forEach((u, k) => setTimeout(() => C().xpFloat(document.getElementById(`fh-${u}`), '+10 EXP', 'big'), (k % 6) * 120)), 900); }
   }
   // ⚡ 학생 필살기 (2026-11-06): heals 칸 '!ult' → 종합상황실 큰 화면 컷인 · 한 번에 1명 · 겹치면 3명까지 차례로
+  // 2026-11-06 확정: ⚡ 필살기 = 첫 시도 퍼펙트 + 특화 Ⅲ↑ (현재 몬스터) · 🌟 진필살기 = '!true@시각' → 금빛 컷인 + 🗿 석화 · '!ult' = 예전 수업 · 🔥 끈기의 일격 = 두 번 넘게 틀린 뒤 다 맞힘 (띠만)
   function ulHall() {
     const H = R.heals || {}, first = !ulSeen; if (first) ulSeen = {};
-    Object.entries(H).forEach(([mid, byU]) => Object.entries(byU || {}).forEach(([u, byK]) => Object.entries(byK || {}).forEach(([k, v]) => { const key = `${mid}|${u}|${k}`; if (v !== '!ult' || ulSeen[key]) return; ulSeen[key] = true; if (!first && ulQ.length < 3) ulQ.push(u); })));
-    // 👑 형성평가 퍼펙트 (모든 문항 첫 시도 정답) + 특화 Ⅳ → 한 번
-    if (L.boss && DS.Attack) Raid().activeIds(R).forEach((u) => { const key = `boss|${u}`; if (ulSeen[key]) return; const p = (R.players || {})[u] || {}, f = Raid().bossFirst(L, R, u); if (f.length && f.every(Boolean) && DS.Attack.canUlt(p.fx, p.hero)) { ulSeen[key] = true; if (!first && ulQ.length < 3) ulQ.push(u); } });
+    const push = (it) => { if (!first && ulQ.length < 3) ulQ.push(it); else if (!first && it.kind === 'true') ulQ.unshift(it); };
+    Object.entries(H).forEach(([mid, byU]) => Object.entries(byU || {}).forEach(([u, byK]) => Object.entries(byK || {}).forEach(([k, v]) => { const key = `${mid}|${u}|${k}`; if ((v !== '!ult' && !Raid().isTrue(v)) || ulSeen[key]) return; ulSeen[key] = true; push({ u, kind: Raid().isTrue(v) ? 'true' : 'ult' }); })));
+    const step = Raid().stepOf(L, R);
+    if (step && step.kind === 'monster' && DS.Attack) Raid().activeIds(R).forEach((u) => {
+      const p = (R.players || {})[u] || {}, rec = Raid().record(L, R, step.id, u);
+      const kf = `f|${step.id}|${u}`; if (!ulSeen[kf] && rec.perfectAt === 0 && DS.Attack.canUlt(p.fx, p.hero)) { ulSeen[kf] = true; push({ u, kind: 'ult', noBind: true }); }
+      const kg = `g|${step.id}|${u}`; if (!ulSeen[kg] && rec.perfectAt >= 2) { ulSeen[kg] = true; if (!first) gritHall(p); }
+    });
+    // 👑 형성평가 퍼펙트 (모든 문항 첫 시도 정답) + 특화 Ⅲ↑ → 한 번
+    if (L.boss && DS.Attack) Raid().activeIds(R).forEach((u) => { const key = `boss|${u}`; if (ulSeen[key]) return; const p = (R.players || {})[u] || {}, f = Raid().bossFirst(L, R, u); if (f.length && f.every(Boolean) && DS.Attack.canUlt(p.fx, p.hero)) { ulSeen[key] = true; push({ u, kind: 'ult' }); } });
+    petriHall(step);
     if (!ulBusy) ulNext();
   }
   function ulNext() {
-    const u = ulQ.shift(); if (!u || !DS.Attack) { ulBusy = false; return; } ulBusy = true;
-    const p = (R.players || {})[u] || {};
-    DS.Attack.cutin(p.hero || 0, p.fx || 'flame').then(() => { try { const arena = $('#raid'), m0 = $('#rm'); if (arena && m0) { const ar = arena.getBoundingClientRect(), mr = m0.getBoundingClientRect(); DS.Attack.ultBlast(arena, m0, p.fx || 'flame'); setTimeout(() => { if (DS.Thrill) DS.Thrill.chain(m0, DS.Combo ? DS.Combo.ULT_BIND : 15, 'ult'); }, 500); } } catch (e) { console.error(e); } }).catch(() => {}).finally(() => setTimeout(ulNext, 1400)); // ⚡ 대묶기 · 2026-11-06 검증: 중간에 오류가 나도 다음 필살기가 막히지 않게
+    const it = ulQ.shift(); if (!it || !DS.Attack) { ulBusy = false; return; } ulBusy = true;
+    const p = (R.players || {})[it.u] || {}, gold = it.kind === 'true';
+    DS.Attack.cutin(p.hero || 0, p.fx || 'flame', { gold }).then(() => { try { const arena = $('#raid'), m0 = $('#rm'); if (arena && m0) { DS.Attack.ultBlast(arena, m0, p.fx || 'flame'); setTimeout(() => { if (!DS.Thrill) return; if (gold) DS.Thrill.petrify(m0.querySelector('.art.monster') || m0); else if (!it.noBind) DS.Thrill.chain(m0, DS.Combo ? DS.Combo.ULT_BIND : 15, 'ult'); }, 500); } } catch (e) { console.error(e); } }).catch(() => {}).finally(() => setTimeout(ulNext, gold ? 1800 : 1400)); // 중간에 오류가 나도 다음 필살기가 막히지 않게
+  }
+  // 🗿 석화 남은 초 (교실 TV 위쪽 큰 띠) · 몬스터 회색
+  let petriEnd = 0, petriT = null;
+  function petriHall(step) {
+    const pt = step && step.kind === 'monster' ? Raid().petrify(R, step.id) : null, arena = $('#raid'), m0 = $('#rm');
+    const on = !!(pt && DS.Net.now() < pt.until);
+    if (m0) m0.classList.toggle('petrified', on);
+    let bn = document.querySelector('.h-petri');
+    if (!on) { if (bn) bn.remove(); clearInterval(petriT); petriEnd = 0; return; }
+    if (bn && petriEnd === pt.until) return;
+    petriEnd = pt.until; if (!bn && arena) { bn = document.createElement('div'); bn.className = 'h-petri'; arena.appendChild(bn); }
+    const by = (R.players || {})[pt.by] || {}, draw = () => { const s = Math.ceil((pt.until - DS.Net.now()) / 1000); if (!bn || !bn.isConnected) return; if (s <= 0) { bn.remove(); clearInterval(petriT); if (m0) m0.classList.remove('petrified'); return; } bn.innerHTML = `🗿 석화 <b>${s}</b>초 <small>${esc(by.nick || '')}의 🌟 진필살기 — 몬스터 공격 멈춤 · 지금 맞히면 💎!</small>`; };
+    draw(); clearInterval(petriT); petriT = setInterval(draw, 500);
+  }
+  function gritHall(p) {
+    const arena = $('#raid'); if (!arena) return;
+    const b = document.createElement('div'); b.className = 'h-grit'; b.textContent = `🔥 끈기의 일격! ${p.num ? `${p.num}번 ` : ''}${p.nick || ''} 드디어 성공!`; arena.appendChild(b); setTimeout(() => b.remove(), 3200);
+    if (DS.Sound && DS.Sound.correct) DS.Sound.correct();
   }
   function lvHall() {
     const v = R.lvup || {}, first = !lvSeen; if (first) lvSeen = {};
@@ -210,7 +238,7 @@ DS.Hall = (function () {
       ${finale ? `<div class="lb2-cnt">💬 ${words.length} / ${n}</div>` : `<div class="lb2-qr"><div id="h-qr" class="qr"></div><b>${code}</b><span>QR · 수업 코드</span></div>`}
       <div class="lb2-say teacher">${finale ? '모두 수고했네! 오늘 배운 것 한마디씩 남기게' : `${L.no ? `${L.no}차시 ` : ''}${esc(L.title.split('·')[0].trim())} 던전에 온 것을 환영하네!`}</div>
       <div class="lb2-h teacher" style="left:50%;top:60%">${DS.Art.hero(DS.Art.teacherHero(R), finale ? 'attack' : 'idle', finale ? 'pairhop' : 'huff')}<i class="shadow"></i><span class="nm gold">선생님</span></div>
-      ${pos.map((o, i) => `<div class="lb2-h" style="left:${o.x}%;top:${o.y}%;z-index:${5 + Math.round(o.y / 10)};--sz:${size}px;animation-delay:${(i * 0.13) % 0.9}s"><span class="nm">${DS.Titles.nameHtml(o.p, { size: 16, short: true })}</span><div class="${(finale ? i % 2 === 1 : o.flip) ? 'face-l' : ''}">${DS.Art.hero(o.p.hero, 'idle', finale ? 'pairhop' : 'huff')}</div><i class="shadow"></i>${finale && words.includes(o.u) ? `<span class="lb2-bub" data-u="${o.u}">${esc(R.words[o.u].t)}</span>` : ''}</div>`).join('')}
+      ${pos.map((o, i) => `<div class="lb2-h${enhCls(o.p)}" style="left:${o.x}%;top:${o.y}%;z-index:${5 + Math.round(o.y / 10)};--sz:${size}px;animation-delay:${(i * 0.13) % 0.9}s"><span class="nm">${DS.Titles.nameHtml(o.p, { size: 16, short: true })}</span><div class="${(finale ? i % 2 === 1 : o.flip) ? 'face-l' : ''}">${DS.Art.hero(o.p.hero, 'idle', finale ? 'pairhop' : 'huff')}</div><i class="shadow"></i>${finale && words.includes(o.u) ? `<span class="lb2-bub" data-u="${o.u}">${esc(R.words[o.u].t)}</span>` : ''}</div>`).join('')}
       ${finale ? '<div class="stamp-bar wide">📮 반드시 학습지 확인도장 받아가세요.</div>' : ''}
       ${Raid().focusOn(R) ? '<div class="h-focus-badge">⚠ 집중모드</div>' : ''}
       <div class="h-acts corner${finale ? '' : ' below-qr'}">${finale ? klassBtn() + punchBtn() : `<button class="btn small" id="h-tcamp">🏛 교사 캠프</button>${(R.meta || {}).otShow && DS.Punch && !DS.Act.punchOff(R) ? '<button class="btn small" id="h-ot">⏳ 연장전 결과</button>' : ''}`}</div></div>`;
@@ -234,7 +262,7 @@ DS.Hall = (function () {
       <div class="rest-fire"><i class="camp-glow"></i><i class="camp-glow g2"></i><i class="camp-fire-img" style="background-image:url('${DS.ASSETS.base}${c.fire.src}');background-size:${c.fire.cols * 100}% ${(c.fire.rows || 1) * 100}%;background-position:0 0"></i></div>
       <div class="lb2-say teacher">잠깐 쉬었다 가세! 🔥</div>
       <div class="lb2-h teacher" style="left:50%;top:44%">${DS.Art.hero(DS.Art.teacherHero(R), 'sit', 'huff')}<i class="shadow"></i><span class="nm gold">선생님</span></div>
-      ${pos.map((o, i) => `<div class="lb2-h" style="left:${o.x}%;top:${o.y}%;z-index:${5 + Math.round(o.y / 10)};--sz:${size}px;animation-delay:${(i * 0.13) % 0.9}s"><span class="nm">${DS.Titles.nameHtml(o.p, { size: 16, short: true })}</span><div class="${o.flip ? 'face-l' : ''}">${DS.Art.hero(o.p.hero, 'sit', 'huff')}</div><i class="shadow"></i></div>`).join('')}</div>`;
+      ${pos.map((o, i) => `<div class="lb2-h${enhCls(o.p)}" style="left:${o.x}%;top:${o.y}%;z-index:${5 + Math.round(o.y / 10)};--sz:${size}px;animation-delay:${(i * 0.13) % 0.9}s"><span class="nm">${DS.Titles.nameHtml(o.p, { size: 16, short: true })}</span><div class="${o.flip ? 'face-l' : ''}">${DS.Art.hero(o.p.hero, 'sit', 'huff')}</div><i class="shadow"></i></div>`).join('')}</div>`;
     const f = c.fire; let k = 0; clearInterval(restFireT);
     restFireT = setInterval(() => { const e = document.querySelector('#h-arena .rest-fire .camp-fire-img'); if (!e) { clearInterval(restFireT); return; } k = (k + 1) % f.frames; e.style.backgroundPosition = `${((k % f.cols) / Math.max(1, f.cols - 1)) * 100}% ${(Math.floor(k / f.cols) / Math.max(1, (f.rows || 1) - 1)) * 100}%`; }, f.ms);
   }
@@ -274,7 +302,7 @@ DS.Hall = (function () {
       <div class="raid-top"><b>${step.kind === 'boss' ? '👑 ' : step.special ? '⭐ ' : step.review ? '📖 ' : ''}${esc(f.title)}</b></div>
       ${step.special ? '<div class="raid-banner">⭐ 스페셜 몬스터 난입!</div>' : step.kind === 'boss' ? '<div class="raid-banner boss">👑 보스 출현!</div>' : ''}
       <div class="raid2-shadow"></div><div class="raid2-mon" id="rm"><div class="raid-bars over-head"><div class="raid-hp"><i id="rh-bar"></i><span id="rh-txt"></span></div><div class="raid-atk" id="rh-atk" title="몬스터 공격 게이지 (학생 폰과 같은 시계)"><i></i><span></span></div></div>${DS.Art.monster(f.sprite, 'idle', 'float')}<div id="rm-fx"></div></div>
-      ${pos.map((o) => `<div class="fh2" id="fh-${o.u}" style="left:${o.x}%;top:${o.y}%;z-index:${5 + Math.round(o.y / 10)}"><span class="fh-name">${DS.Titles.nameHtml(o.p, { size: 16, short: true })}</span><div class="${o.x > 50 ? 'face-l' : ''}">${DS.Art.hero(o.p.hero, 'idle')}</div><i class="shadow"></i></div>`).join('')}
+      ${pos.map((o) => `<div class="fh2${enhCls(o.p)}" id="fh-${o.u}" style="left:${o.x}%;top:${o.y}%;z-index:${5 + Math.round(o.y / 10)}"><span class="fh-name">${DS.Titles.nameHtml(o.p, { size: 16, short: true })}</span><div class="${o.x > 50 ? 'face-l' : ''}">${DS.Art.hero(o.p.hero, 'idle')}</div><i class="shadow"></i></div>`).join('')}
       <div class="raid-clear" id="r-clear" hidden></div><div class="h-focus-badge">⚠ 집중모드</div><div class="h-combo" id="h-combo"></div>
     </div>`;
     seen = attacks(step);

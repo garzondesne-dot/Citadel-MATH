@@ -8,22 +8,25 @@ DS.Gem = (function () {
   const N = () => DS.Net;
   const ck = (c) => String(c).replace(/[.#$/[\]]/g, '_');
   const kk = (k) => String(k).replace(/[.#$/[\]]/g, '_');
-  const DAY_CAP = 30;
+  const DAY_CAP = 50; // 2026-11-06 경제 다시 맞춤: 30 → 50 (수학 풀이 보상을 올려서)
   const path = (m) => `gem/${ck(m.c)}/${m.n}`;
   const today = () => new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
   // 적립표 (확정안 · 한 곳에서 바꿈)
   const G = {
     join: 3,            // 레이드 참여
     survey: 10,         // 📝 수업 설문 응답 (한 번 · 하루 한도 밖 · 2026-11-06 사용자)
-    solvedMax: 5,       // 맞힌 소문제 1개당 1 (처음이든 고쳐서든 같음) · 수업당 최대 5
-    bossRe: 5,          // 👑 형성평가 재대결 처치 (처음)
-    room: 3, roomBoss: 10, // 🏰 성채 방 · 보스 방 처치 (처음)
-    review: 1, reviewDay: 3, // 🎯 허수아비에서 틀림 · 안 풂 해결 (하루 3번까지)
+    solvedMax: 10,      // 맞힌 소문제 1개당 1 (처음이든 고쳐서든 같음) · 수업당 최대 10 (2026-11-06: 5 → 10)
+    perfect: 5,         // ⚡ 그 수업에서 첫 시도 퍼펙트 몬스터가 하나라도 (실력)
+    bossPerfect: 5,     // 👑 수업 중 형성평가 만점 (실력) — 실력 · 노력 갈래를 비슷하게 (tests/economy.test.js)
+    bossRe: 12,          // 👑 형성평가 재대결 처치 (처음)
+    room: 7, roomFirst: 5, roomBoss: 20, // 🏰 성채 방 · 첫 판에 틀림 없이 처치 보너스 · 보스 방 (처음 · 2026-11-06: 3 · 10 → 6 · 20)
+    photo: 5,           // 📷 서술형 사진 통과 (처음 · 노력)
+    review: 2, reviewDay: 5, // 🎯 허수아비에서 틀림 · 안 풂 해결 (하루 3번까지)
     card: 2,            // ⚒ 처음 만든 카드
     seal: 10,           // 🟪 인장 (한도 밖)
     rift: 5,            // ⏳ 이어하기 완주
     clear: 3,           // ⏰ 시간 안 클리어
-    note: 3,            // 📕 그 차시 오답노트 완성 (남은 문제 0)
+    note: 6,            // 📕 그 차시 오답노트 완성 (남은 문제 0)
     streak: { 3: 3, 5: 5, 10: 10 }, // 🔁 연속 참여 (한도 밖)
     level5: 5,          // 🆙 레벨 5 · 10 · 15 … (한도 밖)
     first: 3,           // 🏰 성채 첫 방 · 🎯 허수아비 첫 복습 (한 번)
@@ -38,12 +41,19 @@ DS.Gem = (function () {
     hero: { 12: 30, 13: 30, 14: 60, 15: 60 },
     fx: { fire: 40, lightning: 40, ice: 40, stars: 60, slash: 60, vortex: 80, // Ⅲ 화려 (인장으로도)
       moon: 20, ring: 20, chain: 20, spikes: 20, mana: 20, crit: 20, // Ⅱ 숙련 (2026-11-06)
-      twin: 120, pillar: 120, thunder: 120, nova: 120, meteor: 120, void: 120, // Ⅳ 전설 = 같은 계열 Ⅲ 이 있어야 (account.js need)
-      upper: 20, sweep: 20, hammer: 60, spin: 60, quake: 120, reap: 120,
-      gale: 20, leaf: 60, cyclone: 120 }, // 🌬 바람 (2026-11-06) // 🔨 강타 · 🌪 연격 (2026-11-06 · Ⅲ 은 인장 없이 💎60)
+      twin: 80, pillar: 80, thunder: 80, nova: 80, meteor: 80, void: 80, // Ⅳ 전설 = 같은 계열 Ⅲ 이 있어야 (account.js need) · 2026-11-06: 💎120 → 💎80 + 📜3
+      upper: 20, sweep: 20, hammer: 60, spin: 60, quake: 80, reap: 80,
+      gale: 20, leaf: 60, cyclone: 80 }, // 🌬 바람 (2026-11-06) // 🔨 강타 · 🌪 연격 (2026-11-06 · Ⅲ 은 인장 없이 💎60)
   };
   const itemKey = (kind, id) => `${kind}_${id}`;
   const price = (kind, id) => (SHOP[kind] || {})[id] ?? null;
+  // 📜 서술 조각 (2026-11-06): 서술형 사진 채점에서만 · 전설 Ⅳ · 강화 +7~ 에 함께 듦
+  const SCROLL_NEED = { fx: { twin: 3, pillar: 3, thunder: 3, nova: 3, meteor: 3, void: 3, quake: 3, reap: 3, cyclone: 3 } };
+  const scrollOf = (kind, id) => (SCROLL_NEED[kind] || {})[id] || 0;
+  // 🔨 강화 +1 ~ +10 (캐릭터 하나 · 실패 없음 · 🌟 대성공 10% = 💎 절반 돌려받기 + 반짝)
+  const ENH = [null, { g: 10 }, { g: 15 }, { g: 20 }, { g: 25 }, { g: 30 }, { g: 40 }, { g: 50, s: 1 }, { g: 60, s: 1 }, { g: 80, s: 2 }, { g: 100, s: 2 }];
+  const ENH_MAX = 10, GREAT = 0.1;
+  const enhTier = (lv) => (lv >= 10 ? 4 : lv >= 7 ? 3 : lv >= 5 ? 2 : lv >= 3 ? 1 : 0); // 보이는 빛: 은빛(+3) · 금빛(+5) · 오라(+7) · 무지개(+10)
   async function mine(m) { return (m && m.c != null && m.n && !m.test ? await N().get(path(m)).catch(() => null) : null) || {}; }
   // 받기: n 개 · key 한 번만 (opt.upsert = 같은 key 는 늘어난 만큼만) · opt.free = 하루 한도 밖 → 실제로 받은 수
   async function add(m, n, key, why, opt = {}) {
@@ -61,6 +71,27 @@ DS.Gem = (function () {
     });
     pop(g, why);
     return g;
+  }
+  // 📜 받기: key 한 번만 (upsert = 늘어난 만큼만) · 하루 한도 없음
+  async function addScroll(m, n, key, why, opt = {}) {
+    n = Math.max(0, Math.floor(Number(n) || 0)); if (!m || m.c == null || !m.n || m.test || !n || !key) return 0;
+    const d = await mine(m), k = `s_${kk(key)}`, had = ((d.log || {})[k] || {}).s || 0;
+    if (had && !opt.upsert) return 0;
+    const g = Math.max(0, n - had); if (!g) return 0;
+    await N().update(path(m), { scroll: (Number(d.scroll) || 0) + g, scrollEarned: (Number(d.scrollEarned) || 0) + g, [`log/${k}`]: { s: had + g, at: N().TS, why: String(why || '').slice(0, 40) } });
+    if (typeof document !== 'undefined') { const e = document.createElement('div'); e.className = 'gem-pop scroll'; e.innerHTML = `📜 +${g}${why ? ` <small>${String(why).replace(/[<>&]/g, '')}</small>` : ''}`; document.body.appendChild(e); setTimeout(() => e.remove(), 2600); }
+    return g;
+  }
+  // 🔨 강화 한 단계: 실패 없음 · 대성공 10% = 낸 💎 의 절반 돌려받기 → { lv, great, back }
+  async function enhance(m, rnd = Math.random) {
+    if (!m || m.c == null || !m.n || m.test) throw Object.assign(new Error('학생 계정으로 강화할 수 있어요.'), { user: true });
+    const d = await mine(m), lv = Number(d.enh) || 0; if (lv >= ENH_MAX) throw Object.assign(new Error('이미 +10 이에요!'), { user: true });
+    const c = ENH[lv + 1], tot = Number(d.total) || 0, sc = Number(d.scroll) || 0;
+    if (tot < c.g) throw Object.assign(new Error(`💎 조각이 ${c.g - tot}개 모자라요.`), { user: true });
+    if (c.s && sc < c.s) throw Object.assign(new Error(`📜 서술 조각이 ${c.s - sc}개 모자라요 — 성채 서술형 방에서 풀이 사진을 통과하면 모여요.`), { user: true });
+    const great = rnd() < GREAT, back = great ? Math.floor(c.g / 2) : 0;
+    await N().update(path(m), { enh: lv + 1, total: tot - c.g + back, ...(c.s ? { scroll: sc - c.s } : {}), [`log/enh_${lv + 1}`]: { g: -c.g + back, ...(c.s ? { s: -c.s } : {}), at: N().TS, why: `🔨 강화 +${lv + 1}${great ? ' 🌟 대성공' : ''}` } });
+    return { lv: lv + 1, great, back };
   }
   // 🎁 선생님 선물 (2026-11-06 · 교사 폰 리모컨에서만): 하루 한도 밖 · 받은 학생 캠프에 알림 (log 키 gift_…)
   async function gift(c, n, g, tag) {
@@ -104,17 +135,18 @@ DS.Gem = (function () {
     const d = await mine(m), key = itemKey(kind, id);
     if ((d.buy || {})[key]) throw Object.assign(new Error('이미 해금했어요.'), { user: true });
     if ((Number(d.total) || 0) < p) throw Object.assign(new Error(`💎 조각이 ${p - (Number(d.total) || 0)}개 모자라요.`), { user: true });
-    await N().update(path(m), { total: (Number(d.total) || 0) - p, [`buy/${key}`]: N().TS, [`log/buy_${key}`]: { g: -p, at: N().TS, why: '상점 해금' } });
+    const sc = scrollOf(kind, id); if (sc && (Number(d.scroll) || 0) < sc) throw Object.assign(new Error(`📜 서술 조각이 ${sc - (Number(d.scroll) || 0)}개 모자라요 — 성채 서술형 방에서 풀이 사진을 통과하면 모여요.`), { user: true });
+    await N().update(path(m), { total: (Number(d.total) || 0) - p, ...(sc ? { scroll: (Number(d.scroll) || 0) - sc } : {}), [`buy/${key}`]: N().TS, [`log/buy_${key}`]: { g: -p, ...(sc ? { s: -sc } : {}), at: N().TS, why: '상점 해금' } });
     return true;
   }
   const owns = (d, kind, id) => !!((d || {}).buy || {})[itemKey(kind, id)];
   // 💰 되팔기 (2026-11-06 사용자 「회수 = (나) 조각 일부 환불 + 약간의 패널티」): 산 값의 70% 를 돌려받고 다시 잠김 · 상점에서 산 스킬만
   const REFUND = 0.7;
-  const refundOf = (kind, id) => { const p = price(kind, id); return p == null ? 0 : Math.floor(p * REFUND); };
+  const refundOf = (kind, id, d) => { const paid = -Number(((((d || {}).log || {})[`buy_${itemKey(kind, id)}`]) || {}).g) || price(kind, id); return paid == null ? 0 : Math.floor(paid * REFUND); }; // 산 값 기준 (값이 바뀌어도) · 📜 는 돌려주지 않음
   async function sell(m, kind, id) {
     const p = price(kind, id), d = await mine(m), key = itemKey(kind, id);
     if (p == null || !(d.buy || {})[key]) throw Object.assign(new Error('상점에서 산 것만 되팔 수 있어요.'), { user: true });
-    const back = refundOf(kind, id);
+    const back = refundOf(kind, id, d);
     await N().update(path(m), { total: (Number(d.total) || 0) + back, [`buy/${key}`]: null, [`log/sell_${key}_${Date.now()}`]: { g: back, at: N().TS, why: '되팔기 (70%)' } });
     return back;
   }
@@ -150,5 +182,5 @@ DS.Gem = (function () {
     return r ? { ...r, pity, feathers: (Number(d.feather) || 0) + (r.feather || 0) } : null;
   }
   const feathers = (d) => Number((d || {}).feather) || 0;
-  return { watchGifts, giftList, chest, feathers, G, SHOP, DAY_CAP, price, mine, add, gift, giftsSince, addDaily, medal, buy, sell, refundOf, REFUND, owns, itemKey, streak, today };
+  return { SCROLL_NEED, scrollOf, ENH, ENH_MAX, GREAT, enhTier, addScroll, enhance, watchGifts, giftList, chest, feathers, G, SHOP, DAY_CAP, price, mine, add, gift, giftsSince, addDaily, medal, buy, sell, refundOf, REFUND, owns, itemKey, streak, today };
 })();

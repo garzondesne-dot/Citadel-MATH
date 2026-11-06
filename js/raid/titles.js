@@ -58,7 +58,8 @@ DS.Titles = (function () {
     const t = p && p.title && p.title !== 'none' ? get(p.title) : null, cls = t ? TIER[t.tier].cls : '';
     const num = p && p.num != null && opt.num !== false ? `${p.num}${opt.beon ? '번' : ''} ` : '';
     const tag = !t ? '' : opt.short ? (t.medal ? `${medal(t, opt.size || 18)} ` : '') : `<span class="ttl ${cls}">${medal(t, opt.size || 18)}[${esc(t.name)}]</span> `;
-    return `${tag}<span class="tname ${cls}">${num}${esc((p && (p.nick || p.name)) || '')}</span>`;
+    const en = p && Number(p.enh) > 0 ? ` <b class="enh-tag t${DS.Gem && DS.Gem.enhTier ? DS.Gem.enhTier(Number(p.enh)) : 0}">+${Number(p.enh)}</b>` : ''; // 🔨 강화 (2026-11-06)
+    return `${tag}<span class="tname ${cls}">${num}${esc((p && (p.nick || p.name)) || '')}</span>${en}`;
   }
   return { TIER, all, get, data, earned, medal, nameHtml, BASE };
 })();

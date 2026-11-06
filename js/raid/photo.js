@@ -73,7 +73,8 @@ DS.Photo = (function () {
       let left = null, roomLeft = null, finished = false, coolUntil = 0; const rk = keyOf(ctx.lesson, ctx.room).replace(/[.#$/[\]]/g, '_');
       // D: 쉬는 시간 — 단추에 남은 초를 보여 주고 0 이 되면 누를 수 있게
       const coolBtn = (b, label) => { if (!b) return; const tick = () => { if (!document.body.contains(b)) return; const w = Math.ceil((coolUntil - Date.now()) / 1000); if (w > 0) { b.disabled = true; b.textContent = `${label} (${w}초 뒤)`; setTimeout(tick, 500); } else { b.disabled = false; b.textContent = label; } }; tick(); };
-      const close = (v) => { if (finished) return; finished = true; el.remove(); done(v || null); };
+      const scores = []; // 이번 창에서 받은 점수들 (📜 「점수가 오르면」 계산용)
+      const close = (v) => { if (finished) return; finished = true; el.remove(); done(v ? Object.assign({ scores }, v) : scores.length ? { status: 'retry', scores } : null); };
       const head = (t) => `<div class="set-head"><h2>${t}</h2><button class="btn" data-x>닫기</button></div>`;
       const bindX = () => el.querySelectorAll('[data-x]').forEach((b) => (b.onclick = () => close(null)));
       const intro = (msg = '') => {
@@ -133,27 +134,37 @@ DS.Photo = (function () {
         result(res);
       };
       const result = (res) => {
-        const sc = `<div class="ph-score ${res.status}"><b>${res.score}</b> / ${res.total}<span>통과 ${res.pass}점</span></div>`;
+        scores.push(Number(res.score) || 0);
+        const sc = `<div class="ph-score ${res.status}"><b class="ph-num">0</b> / ${res.total}<span>통과 ${res.pass}점</span></div>`;
         const fb = (res.feedback ? `<p class="ph-fb">💬 ${esc(res.feedback)}</p>` : '') + stepList(res.steps);
         if (res.status === 'pass') {
           if (DS.Sound) DS.Sound.correct();
           el.innerHTML = `<div class="quiz-box framed ph-box">${head('🎉 풀이 통과!')}${sc}${fb}<div class="row"><button class="btn primary big" id="ph-ok">⚔ 처치하러!</button></div></div>`;
-          bindX(); el.querySelector('#ph-ok').onclick = () => close({ status: 'pass', id: res.id });
-          el.querySelector('[data-x]').onclick = () => close({ status: 'pass', id: res.id });
-          return;
+          const pv = { status: 'pass', id: res.id, score: res.score, total: res.total };
+          bindX(); el.querySelector('#ph-ok').onclick = () => close(pv);
+          el.querySelector('[data-x]').onclick = () => close(pv);
+          stamp(res); return;
         }
         if (res.status === 'check') {
           el.innerHTML = `<div class="quiz-box framed ph-box">${head('⏳ 선생님이 직접 볼게요')}<p>사진이 흐리거나 AI 가 확신하지 못했어요. <b>선생님이 확인하면 처치</b>로 바뀌어요. 이번 장은 세지 않았어요${left != null ? ` (오늘 ${left}장 남음)` : ''}.</p>${fb}<div class="row"><button class="btn primary" id="ph-ok">알겠어요</button>${left && roomLeft !== 0 ? '<button class="btn" id="ph-again">📷 더 또렷하게 다시 찍기</button>' : ''}</div></div>`;
           bindX(); el.querySelector('#ph-ok').onclick = () => close({ status: 'check', id: res.id });
           el.querySelector('[data-x]').onclick = () => close({ status: 'check', id: res.id });
           const ag = el.querySelector('#ph-again'); if (ag) { ag.onclick = () => intro(); coolBtn(ag, '📷 더 또렷하게 다시 찍기'); }
-          return;
+          stamp(res); return;
         }
         el.innerHTML = `<div class="quiz-box framed ph-box">${head('✏ 조금만 더!')}${sc}${fb}<p class="muted small">빠진 단계를 채워 다시 찍어요 · 이 방 ${roomLeft != null ? roomLeft : '?'}장 · 오늘 ${left != null ? left : '?'}장 남음 · 점수가 이상하면 🙋 이의 신청 (선생님이 확인)</p>
           <div class="row">${left && roomLeft !== 0 ? '<button class="btn primary" id="ph-again">📷 고쳐서 다시 찍기</button>' : ''}<button class="btn" id="ph-app">🙋 이의 신청</button><button class="btn" data-x>나중에</button></div></div>`;
         bindX();
         const ag = el.querySelector('#ph-again'); if (ag) { ag.onclick = () => intro(); coolBtn(ag, '📷 고쳐서 다시 찍기'); }
         el.querySelector('#ph-app').onclick = () => appeal(res);
+        stamp(res);
+      };
+      // 📷 도장 쾅쾅 (2026-11-06): 단계마다 0.45초 간격으로 ✅/✏ 「쾅!」 → 점수가 올라감 → 만점이면 💯 금도장
+      const stamp = (res) => {
+        const li = [...el.querySelectorAll('.ph-steps li')], num = el.querySelector('.ph-num'), box = el.querySelector('.ph-score'); let shown = 0;
+        li.forEach((x) => x.classList.add('wait'));
+        if (!li.length && num) num.textContent = res.score;
+        li.forEach((x, i) => setTimeout(() => { if (!x.isConnected) return; x.classList.remove('wait'); x.classList.add('stamped'); if (DS.Sound) { if (x.classList.contains('ok') && DS.Sound.hit) DS.Sound.hit(); else if (DS.Sound.clank) DS.Sound.clank(); } if (x.classList.contains('ok')) { shown++; if (num) num.textContent = Math.min(shown, Number(res.score) || 0); } if (i === li.length - 1) { if (num) num.textContent = res.score; if (res.score === res.total && res.total > 0 && box) { box.classList.add('gold'); box.insertAdjacentHTML('beforeend', '<i class="ph-100">💯</i>'); if (DS.Sound && DS.Sound.correct) DS.Sound.correct(); } } }, 350 + i * 450));
       };
       const appeal = (res) => {
         el.innerHTML = `<div class="quiz-box framed ph-box fb-box">${head('🙋 이의 신청')}<p class="muted small">어느 부분을 맞게 썼는지 적어 주세요. 선생님이 확인하고 맞으면 처치로 바꿔 줘요.</p>

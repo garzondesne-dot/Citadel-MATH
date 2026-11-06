@@ -23,6 +23,7 @@ DS.Student = (function () {
     test = opt.test || null;
     cleared0 = false; resulted = false; drawn = ''; shown = ''; form = null; retrying = ''; bossSet = 1; othersSeen = {};
     an = null; thSeen = null; phaseWas = 0; chestDone = {}; chestQ = []; chestBusy = false; batPaid = ''; endPaid = ''; // v0.9.11
+    if (DS.Gem && info && info.cls != null && info.num) { const gd = await DS.Gem.mine({ c: info.cls, n: info.num }).catch(() => null); if (gd && gd.enh) info.enh = Number(gd.enh); } // 🔨 강화 단계 → 교실 TV 이름표 · 빛
     await DS.Act.join(c, info);
     if (DS.Attack && DS.Attack.preloadFaces && DS.Attack.canUlt(info.fx, info.hero)) DS.Attack.preloadFaces(); // ⚡ 필살기 조건이면 얼굴 그림 미리
     if (DS.Gem && DS.Gem.watchGifts && !test) DS.Gem.watchGifts({ c: info.cls, n: info.num });
@@ -185,7 +186,7 @@ DS.Student = (function () {
     if (myP().lobby) return lobbyView(body, true);
     if (Raid().isEnd(L, R)) return endView(body);
     const step = Raid().stepOf(L, R);
-    if (step.kind === 'monster') { monsterView(body, step); if (test || Raid().activeIds(R).length <= 6) othersFx(step, body); return; }
+    if (step.kind === 'monster') { const pt = Raid().petrify(R, step.id); sage = !!(pt && DS.Net.now() < pt.until && !Raid().record(L, R, step.id, me).perfect); monsterView(body, step); petri(body, step); if (test || Raid().activeIds(R).length <= 6) othersFx(step, body); return; }
     if (step.kind === 'boss') return bossView(body);
     if (test) { // 테스트 모드: 개념 설명 = 학습지 이미지를 폰에 크게
       const img = (test.prep.img || {})[step.id], sig = `concept|${step.id}|${img ? img.length : 0}`;
@@ -284,13 +285,14 @@ DS.Student = (function () {
   }
   // 1:1 대치: 왼쪽 내 용사(머리 위 = 남은 도전 기회 ●●●, 같이 움직임) vs 오른쪽 몬스터(아래 체력 칸)
   // cls: 'hit'(공격 성공 → 용사 돌진) · 'miss'(실패 → 축 처짐, 잠깐)
+  const enhCls = (p) => { const t = p && DS.Gem && DS.Gem.enhTier ? DS.Gem.enhTier(Number(p.enh) || 0) : 0; return t ? ` enh enh-${t}` : ''; };
   function scene(step, rec, hp, cls = '', gauge = '') {
     const segs = Array.from({ length: rec.total }, (_, i) => `<i class="${i < rec.best ? 'gone' : ''}"></i>`).join('');
     const left = rec.left, done = Raid().cleared(L, R, step.id);
     const pips = Array.from({ length: rec.slots }, (_, i) => `<i class="${i < left ? 'on' : ''}${i < Math.min(left, rec.healed) ? ' heal' : ''}"></i>`).join('');
     return `<div class="scene enc bg-scene th-${L.theme || ''} ${cls}${step.special ? ' special' : ''}"><div class="scene-bar"><div><b>${step.special ? '⭐ 난입! ' : step.review ? '📖 ' : ''}${esc(step.title)}</b><br><span class="muted small">레이드 체력 ${hp.left} / ${hp.max}</span></div></div>
       ${test ? `<div class="enc-friends">${Raid().activeIds(R).filter((u) => u !== me).slice(0, 4).map((u) => DS.Art.hero((R.players[u] || {}).hero || 0, 'idle', 'huff')).join('')}</div>` : ''}
-      <div class="enc-hero"><div class="enc-tries" title="남은 도전 기회">${pips}</div>${heroNow(pose2(done, cls), done ? 'pairhop' : cls === 'miss' ? 'slump' : 'huff')}<i class="shadow"></i></div>
+      <div class="enc-hero${enhCls(info0)}"><div class="enc-tries" title="남은 도전 기회">${pips}</div>${heroNow(pose2(done, cls), done ? 'pairhop' : cls === 'miss' ? 'slump' : 'huff')}<i class="shadow"></i></div>
       <div class="enc-mon">${DS.Art.monster(L.monsters[step.id].sprite, done ? 'down' : 'idle', done ? '' : 'float')}<div class="segs" title="내가 맞힌 만큼 칸이 깨져요">${segs}</div>${gauge}</div></div>`;
   }
   // 생각 시간: 틀린 칸이 있으면 해설은 읽을 수 있고 「다시 도전」만 잠깐 잠긴다 (수업 준비에서 0·5·10·15초, 기본 5초)
@@ -356,6 +358,28 @@ DS.Student = (function () {
   const healSeen = (k) => { try { const s = JSON.parse(sessionStorage.getItem('ds-heal-seen') || '{}'); if (s[k]) return true; s[k] = 1; sessionStorage.setItem('ds-heal-seen', JSON.stringify(s)); } catch (e) { /* 저장 못 하면 매번 확인 */ } return false; };
   const who = (u) => { const p = (R.players || {})[u] || {}; return `${p.num || ''}번 ${p.nick || '친구'}`; };
   // 💚 힐 표시 (v0.9.7.7 · 사용자 요청): 아래 배너 대신 게임 화면 용사 머리 위에 「+1 💚 김민수 응원」이 떠오름
+  // 🗿 석화 (🌟 진필살기 · 2026-11-06): 남은 초 띠 · 몬스터 회색 · 끝나면 다시 그림
+  let petriT = null;
+  function petri(body, step) {
+    const pt = Raid().petrify(R, step.id), left = pt ? Math.ceil((pt.until - DS.Net.now()) / 1000) : 0;
+    const old = body.querySelector('.petri-bn');
+    if (!pt || left <= 0) { if (old) old.remove(); return; }
+    body.querySelectorAll('.enc-mon').forEach((m) => m.classList.add('petrified'));
+    if (old) return;
+    const by = (R.players || {})[pt.by] || {}, el = document.createElement('div'); el.className = 'petri-bn';
+    el.innerHTML = `🗿 <b>석화 <span>${left}</span>초</b> — ${esc(by.nick || '친구')}의 진필살기! 지금 맞히면 <b>💎</b> (최대 ${PETRI_CAP})${sage ? '<br><small>💡 현자의 빛: 그림 힌트가 열렸어요</small>' : ''}`;
+    const host = body.querySelector('.panel') || body; host.prepend(el);
+    clearInterval(petriT); petriT = setInterval(() => { const s = Math.ceil((pt.until - DS.Net.now()) / 1000), sp = el.querySelector('span'); if (s <= 0 || !el.isConnected) { clearInterval(petriT); el.remove(); drawn = ''; render(); return; } if (sp) sp.textContent = s; }, 500);
+  }
+  // 석화 중 공격 성공 → 데미지(늘어난 맞힌 소문제 수) × 💎1 · 석화 한 번에 학생당 최대 PETRI_CAP (하루 한도 안)
+  const PETRI_CAP = 3;
+  function petriGem(mid, gain) {
+    const pt = Raid().petrify(R, mid); if (!pt || DS.Net.now() >= pt.until || !DS.Gem || test) return;
+    const k = `citadel-petri-${code}-${mid}-${pt.at}`; let had = 0; try { had = Number(localStorage.getItem(k)) || 0; } catch (e) { /* 무시 */ }
+    const tot = Math.min(PETRI_CAP, had + gain); if (tot <= had) return;
+    try { localStorage.setItem(k, String(tot)); } catch (e) { /* 무시 */ }
+    DS.Gem.add(acc(), tot, `petri_${code}_${mid}`, '🗿 석화 찬스', { upsert: true }).then((g) => { if (g) healPop(`💎 +${g} 석화 찬스!`, 900); }).catch(() => {});
+  }
   function healPop(text, delay = 0) {
     setTimeout(() => {
       const h = document.querySelector('#st-body .scene .enc-hero') || document.querySelector('#st-body .scene');
@@ -402,20 +426,26 @@ DS.Student = (function () {
     // ⚔ 마무리 일격: 내 이번 공격이 몬스터 체력을 0 으로 만들었으면
     const bestBefore = rec.tries.slice(0, -1).reduce((m, x) => Math.max(m, x.correct), 0), gain = rec.best - bestBefore;
     const finish = fx && !prac && gain > 0 && Raid().cleared(L, R, mid) && hp.left + gain > 0;
+    if (fx && !prac && gain > 0) petriGem(mid, gain);
+    // ⚡ 필살기 (2026-11-06 확정): 첫 시도에 다 맞힘 + 특화 Ⅲ 이상 → 그 공격이 저절로 필살기 (기회를 쓰지 않음 · 연출만)
+    const autoUlt = !!(fx && !prac && !test && t.attempt === 0 && t.total > 0 && t.correct === t.total && DS.Attack && DS.Attack.canUlt(myP().fx, myP().hero));
+    // 🔥 끈기의 일격: 두 번 넘게 틀린 뒤 드디어 다 맞힘 (연출만)
+    const grit = !!(fx && !prac && t.attempt >= 2 && rec.perfectAt === t.attempt);
     if (finish) setTimeout(() => { const sc = body.querySelector('.scene'); if (sc) { sc.classList.add('fin-flash'); DS.FX.play(sc, myP().fx || 'flame', { perfect: true, scale: 0.6 }); } DS.Sound.correct(); }, atk ? 1300 : 500);
     const head = prac ? `몬스터 묶기 ${t.correct}/${t.total} — 지금까지 <b>${Raid().bindOf(L, R, mid, me)}초</b> 묶음 <span class="small muted">(최대 ${Raid().BIND_MAX}초)</span>` : { success: '⚔ 공격 성공!', partial: `⚔ 부분 성공 (${t.correct}/${t.total})`, fail: '💨 공격 실패…' }[label];
     const done = Raid().cleared(L, R, mid);
     // ⚡ 수업 필살기 (2026-11-06 확정 ①): 첫 시도 퍼펙트 + 묶기 2번 퍼펙트 = 3연속 · 특화 Ⅳ 전설 스킬 · 마지막 기회가 남아 있을 때
-    const ult = !test && rec.perfectAt === 0 && Raid().perfStreak(rec) >= 3 && rec.left > 0 && !Raid().ultUsed(R, mid, me) && DS.Attack && DS.Attack.canUlt(myP().fx, myP().hero);
+    // 🌟 진필살기 (2026-11-06 확정): 3연속 퍼펙트 + 특화 Ⅳ · 마지막 기회 · 이 몬스터가 아직 안 굳었을 때 (반 전체 한 번)
+    const ult = !test && rec.perfectAt === 0 && Raid().perfStreak(rec) >= 3 && rec.left > 0 && !Raid().ultUsed(R, mid, me) && !Raid().petrify(R, mid) && DS.Attack && DS.Attack.canTrue(myP().fx, myP().hero);
     const sig = `res|${mid}|${t.attempt}|${done}|${rec.canRetry}|${rec.left}|${ult ? 'u' : ''}|${(R.help || {})[me] ? 1 : 0}`;
     if (sig === drawn && body.querySelector('.marks')) { hpText(body, hp); return; }
     drawn = sig;
     body.innerHTML = `<div class="panel framed">${scene(step, rec, hp, atk ? '' : fx)}
-      ${finish ? '<div class="fin-me">⚔ 마무리 일격! <small>내 공격으로 몬스터가 쓰러졌어요 — 모두의 과제를 마무리했어요!</small></div>' : ''}<h2 class="res-${prac ? 'success' : label}">${head}</h2>
+      ${finish ? '<div class="fin-me">⚔ 마무리 일격! <small>내 공격으로 몬스터가 쓰러졌어요 — 모두의 과제를 마무리했어요!</small></div>' : ''}${grit ? '<div class="fin-me grit">🔥 끈기의 일격! <small>여러 번 도전해서 드디어 해냈어요 — 오늘의 주인공!</small></div>' : ''}<h2 class="res-${prac ? 'success' : label}">${head}</h2>
       <div class="marks">${items.map((q, i) => `<div class="mark ${t.marks[i] ? 'ok' : 'ng'}"><b>${i + 1}</b> ${t.marks[i] ? '✔' : '✘'} <span class="math">${pretty(itemText(q))}</span>${t.marks[i] ? '' : `<br><span class="sol-line math">${pretty(solOf(q))}</span>`}</div>`).join('')}</div>
-      ${ult ? `<p class="okc">⚡ <b>3연속 퍼펙트!</b> 특화 전설 스킬이 깨어났어요</p><p>마지막 기회 하나로 무엇을 할까요?</p>
-        <div class="heal-pick"><button class="btn primary big ult-go" id="st-ult">⚡ ${esc(String(DS.FX.NAMES[myP().fx] || '').replace(/^\S+\s/, ''))}<br><small>필살기</small></button><button class="btn big heal-btn" id="st-party">💚 파티 힐<br><small>못 맞힌 친구 모두 +1</small></button></div>
-        <p class="muted small">필살기 = 필살기 연출 + 몬스터 대묶기 15초 · 파티 힐 = 아직 다 못 맞힌 친구 모두에게 도전 기회 한 칸 (둘 중 하나)</p>`
+      ${ult ? `<p class="okc">🌟 <b>3연속 퍼펙트!</b> 전설 스킬이 진짜 힘을 깨웠어요</p><p>마지막 기회로 <b>진필살기</b>를 쓸까요?</p>
+        <div class="heal-pick"><button class="btn primary big ult-go true" id="st-ult">🌟 ${esc(String(DS.FX.NAMES[myP().fx] || '').replace(/^\S+\s/, ''))}<br><small>진필살기</small></button><button class="btn big heal-btn" id="st-party">💚 파티 힐<br><small>못 맞힌 친구 모두 +1</small></button></div>
+        <p class="muted small">진필살기 = 몬스터가 ${Raid().TRUE_SEC}초 돌로 굳음 (공격 멈춤) + 못 맞힌 친구 모두 기회 +1 · 💡 힌트 + 그동안 맞힌 친구에게 💎 · 파티 힐 = 기회 +1 만</p>`
         : rec.perfect && rec.canRetry ? `<p class="okc">✔ 이미 성공한 몬스터예요!</p><p>남은 기회 <b>${rec.left}</b>번으로 무엇을 할까요?</p>
         <div class="heal-pick"><button class="btn primary big" id="st-retry">몬스터 묶기</button><button class="btn big heal-btn" id="st-heal">💚 친구 힐</button></div>
         <p class="muted small">몬스터 묶기 = 숫자 바뀐 문제를 맞힌 만큼 몬스터 공격을 늦춤 (1개 1초 · 최대 ${Raid().BIND_MAX}초) · 친구 힐 = 기회가 필요한 친구에게 도전 기회 한 칸</p>`
@@ -428,14 +458,15 @@ DS.Student = (function () {
     bindHelp();
     const sb = $('#st-sheet'); if (sb) sb.onclick = () => sheetModal(step);
     // v0.9.3 (⑤): 공격 자세는 잠깐만 → 다시 서 있는 자세 (격파됐으면 승리 자세 그대로)
-    if (atk) { const sc = body.querySelector('.scene'); if (sc) DS.Attack.play(sc, { heroBox: sc.querySelector('.enc-hero'), monBox: sc.querySelector('.enc-mon'), hero: myP().hero || 0, fx: myP().fx || 'flame', miss: label === 'fail' && !prac, s: 1, rest: done ? 'win' : 'idle', noDmg: prac }).then(() => { if (prac && t.correct > 0 && DS.Thrill && sc.isConnected) DS.Thrill.bindFx(sc.querySelector('.enc-mon .art.monster') || sc.querySelector('.enc-mon')); }); } // ⛓ 묶기 공격 = 사슬 이펙트
+    if (atk) { const sc = body.querySelector('.scene'); if (sc) DS.Attack.play(sc, { heroBox: sc.querySelector('.enc-hero'), monBox: sc.querySelector('.enc-mon'), hero: myP().hero || 0, fx: myP().fx || 'flame', miss: label === 'fail' && !prac, s: grit ? 1.3 : 1, rest: done ? 'win' : 'idle', noDmg: prac, ultimate: autoUlt, finish: grit }).then(() => { if (prac && t.correct > 0 && DS.Thrill && sc.isConnected) DS.Thrill.bindFx(sc.querySelector('.enc-mon .art.monster') || sc.querySelector('.enc-mon')); }); } // ⛓ 묶기 공격 = 사슬 이펙트
     else if (fx && !done) setTimeout(() => { const a = body.querySelector('.enc-hero .art'); if (a) a.outerHTML = heroNow('idle', fx === 'miss' ? 'slump' : 'huff'); }, 650);
     const rb = $('#st-retry');
     if (rb) { thinkTimer(rb, `${mid}|${t.attempt}`, rec.perfect ? '몬스터 묶기' : '↻ 다시 도전'); rb.onclick = () => { retrying = `${mid}|${rec.nextAttempt}`; form = null; DS.Sound.clank(); render(); }; }
     const ub = $('#st-ult');
     if (ub) ub.onclick = () => DS.Control.run(async () => {
-      ub.disabled = true; await DS.Act.heal(code, raw, mid, { ult: true }); drawn = '';
-      if (DS.Attack) { await DS.Attack.cutin(myP().hero || 0, myP().fx); const sc = document.querySelector('#st-body .scene') || body.querySelector('.scene'); /* 2026-11-06 검증: 컷인 동안 화면이 새로 그려질 수 있어 컷인 뒤에 장면을 찾음 */ if (sc) { const mon = sc.querySelector('.enc-mon .art.monster') || sc.querySelector('.enc-mon'); DS.Attack.ultBlast(sc, mon, myP().fx); setTimeout(() => { if (DS.Thrill) DS.Thrill.chain(mon, DS.Combo ? DS.Combo.ULT_BIND : 15, 'ult'); }, 500); } } // ⚡ 필살기 대묶기
+      ub.disabled = true; await DS.Act.heal(code, raw, mid, { true: true }); drawn = '';
+      if (DS.Attack) { await DS.Attack.cutin(myP().hero || 0, myP().fx, { gold: true }); const sc = document.querySelector('#st-body .scene') || body.querySelector('.scene'); if (sc) { const mon = sc.querySelector('.enc-mon .art.monster') || sc.querySelector('.enc-mon'); DS.Attack.ultBlast(sc, mon, myP().fx); if (DS.Thrill && DS.Thrill.petrify) setTimeout(() => DS.Thrill.petrify(mon), 500); } } // 🌟 진필살기 → 🗿 석화
+      healPop('💚 못 맞힌 친구 모두 기회 +1 · 🗿 석화!', 1600);
       if (DS.Grow && !test) DS.Grow.add(acc(), { heal: 1 }, `ult_${code}_${mid}`).catch(() => {});
     });
     const pb2 = $('#st-party');
@@ -504,6 +535,7 @@ DS.Student = (function () {
   // ref: 첫 시도면 '문제 1 (2)' 처럼 학습지 문항 이름 → 문제 위에 작은 꼬리표 (같은 문제를 학습지에서 바로 찾게)
   // 💡 그림 힌트 (v0.9.7.4): 집합 문제면 문제 아래 버튼 → 벤 다이어그램 (학생 폰 · 몬스터만 · 종합상황실 시연에는 안 보임) · 처음 펼칠 때 한 번 센다(결과 기록 hints)
   const hintOpen = new Set();
+  let sage = false; // 🌟 진필살기 석화 중 · 아직 못 맞힘
   const hintKey = (i) => `${(form && form.key) || ''}|${i}`;
   const hintCount = (c = code) => { try { return Number(localStorage.getItem(`citadel-hints-${c || ''}`)) || 0; } catch (e) { return 0; } };
   function hintTap(k) {
@@ -514,7 +546,7 @@ DS.Student = (function () {
   }
   function itemHtml(q, i, wasWrong, ref, G = form.given, noHint) { // G: 고른 답 (v0.9.3 종합상황실 시연도 같은 칸을 쓴다)
     const tag = `<span class="item-no">${i + 1}${wasWrong ? ' <b class="ngc">✘</b>' : ''}${ref ? ` <span class="sheet-tag">📄 ${esc(ref)}</span>` : ''}</span>`;
-    const hk = hintKey(i), hint = noHint || !DS.Hint ? '' : DS.Hint.html(q, hk, hintOpen.has(hk));
+    const hk = hintKey(i), hint = noHint || !DS.Hint ? '' : DS.Hint.html(q, hk, hintOpen.has(hk) || sage); // 🗿 석화 동안 못 맞힌 친구 = 💡 현자의 빛 (그림 힌트 저절로 펼침)
     const qText = (t) => `<div class="item-q">${DS.UI.rich(t)}</div>${hint}`;
     if (q.type === 'blanks') {
       const it = q.items[0], v = (G[i] || [])[0];

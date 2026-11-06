@@ -115,7 +115,7 @@ DS.Combo = (function () {
     an.binds.filter((b) => b.m === mid && b.at <= now).forEach((b) => { const w = Math.max(0, Math.floor((b.at - t0) / (CAP_WIN * 1000))); win[w] = (win[w] || 0) + b.sec; });
     let total = Object.values(win).reduce((a, s) => a + Math.min(CAP, s), 0);
     // ⚡ 필살기 대묶기 (2026-11-06 사용자 「필살기는 파격적인 묶기」): 수업 필살기('!ult') · 형성평가 퍼펙트 필살기 1번마다 ULT_BIND 초 · 상한 밖
-    if (mid !== 'boss') Object.values(((R.heals || {})[mid]) || {}).forEach((byK) => Object.values(byK || {}).forEach((v) => { if (v === '!ult') total += ULT_BIND; }));
+    if (mid !== 'boss') Object.values(((R.heals || {})[mid]) || {}).forEach((byK) => Object.values(byK || {}).forEach((v) => { if (v === '!ult') total += ULT_BIND; else if (Raid().isTrue && Raid().isTrue(v)) total += Raid().TRUE_SEC; }));
     else if (DS.Attack && L.boss) Raid().activeIds(R).forEach((u) => { const p = (R.players || {})[u] || {}, f = Raid().bossFirst(L, R, u); if (f.length && f.every(Boolean) && DS.Attack.canUlt(p.fx, p.hero)) total += ULT_BIND; });
     if (mid !== 'boss' && L.monsters[mid]) { // 예전 기록 (hits 없음): 학생마다 기존 계산 그대로
       const hits = R.hits || {};

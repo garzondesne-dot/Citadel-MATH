@@ -428,7 +428,8 @@ DS.Camp = (function () {
     const shopBuy = async (it) => {
       if (!it.shop || me.test) return false;
       if (L.gem < it.shop.price) { DS.UI.toast(`💎 조각이 ${it.shop.price - L.gem}개 모자라요 (지금 ${L.gem}개) · 레이드 · 복습 · 성채에서 모아요`, 3400); return true; }
-      if (!confirm(`💎 ${it.shop.price}개로 해금할까요? (남는 조각 ${L.gem - it.shop.price}개)`)) return true;
+      if (it.shop.scroll && (L.scroll || 0) < it.shop.scroll) { DS.UI.toast(`📜 서술 조각이 ${it.shop.scroll - (L.scroll || 0)}개 모자라요 — 🏰 성채 서술형 방에서 풀이 사진을 통과하면 모여요`, 3800); return true; }
+      if (!confirm(`💎 ${it.shop.price}개${it.shop.scroll ? ` + 📜 ${it.shop.scroll}개` : ''}로 해금할까요? (남는 조각 ${L.gem - it.shop.price}개)`)) return true;
       await DS.Gem.buy(me, it.shop.kind, it.shop.id); DS.Sound.correct(); DS.UI.toast('🎉 해금했어요!'); L = await DS.Account.looks(me); draw(); return true;
     };
     // 2026-11-06 설정 v2: 탭 3개 (🧙 용사 · 💎 결정석 · 🏅 호칭) · 결정석 = 용사마다 1칸 (동시 사용 · 빼기 = 회수) · 친화 ★ = 공명
@@ -455,13 +456,19 @@ DS.Camp = (function () {
         ${T ? ([3, 's'].includes(DS.FX.tierOf(fx)) ? '<button class="btn small ult-btn" id="ult-demo">⚡ 필살기 미리보기 <small>(선생님: 시연을 다 맞힌 뒤 ⚔ 일반 · ⚡ 필살기 중 골라요)</small></button>' : '<p class="muted small">⚡ 선생님 필살기는 Ⅳ 전설(9개 모두) · 🪶 특별 스킬일 때 시연 뒤 고를 수 있어요</p>') : DS.Attack && DS.Attack.canUlt(fx, hero) ? '<button class="btn small ult-btn" id="ult-demo">⚡ 필살기 미리보기 <small>(특화 계열 Ⅳ 전설 스킬 + 퍼펙트일 때)</small></button>' : DS.FX.tierOf(fx) === 3 ? `<p class="muted small">⚡ 필살기는 이 용사의 특화(친화 ${DS.FX.affOf(hero).name}) Ⅳ 전설 스킬일 때만 나가요</p>` : ''}
         <p class="muted small">⚔ 한 번 연 스킬은 <b>여러 용사가 동시에</b> 쓸 수 있고, 빼도 사라지지 않아요. ${T ? '' : '잠긴 스킬은 누르면 💎 조각 · 🟪 인장으로 열어요.'}</p>
         <div class="fx-fams">${DS.FX.FAMS.map((fam) => `<div class="fx-fam${fam.id === aff.id ? ' aff' : ''}"><b>${fam.name}${fam.id === aff.id ? ' ★' : ''}</b>${fam.ids.map(fxCell).join('')}</div>`).join('')}<div class="fx-fam sp"><b>🪶 특별</b>${DS.FX.ACHV.map(fxCell).join('')}<span></span></div></div>`; };
+    // 🔨 강화 (2026-11-06 · 실패 없음 · 🌟 대성공 10% = 💎 절반 돌려받기): 단계가 오를수록 무기 빛 · 교실 TV 이름표 「+N」
+    const enhTab = () => { const lv = L.enh || 0, nx = DS.Gem.ENH[lv + 1], t = DS.Gem.enhTier(lv), nt = DS.Gem.enhTier(lv + 1), LOOK = ['', '은빛 무기', '금빛 무기', '황금 오라', '무지개 오라'];
+      return `<div class="enh-box"><div class="enh-stage${t ? ` enh enh-${t}` : ''}" id="enh-stage">${DS.Art.hero(hero, 'idle', 'huff')}<b class="enh-lv">+${lv}</b></div>
+        ${nx ? `<p>다음 <b>+${lv + 1}</b> · 💎 <b>${nx.g}</b>${nx.s ? ` + 📜 <b>${nx.s}</b>` : ''}${nt > t ? ` → ✨ <b>${LOOK[nt]}</b>` : ''}</p><button class="btn primary big" id="enh-go">🔨 쾅! 강화</button>` : '<p class="gold">🌈 최고 단계 +10 — 전설의 무기!</p>'}
+        <p class="muted small">실패 없음 · 🌟 대성공(10%)이면 낸 💎 의 절반을 돌려받아요 · +3 은빛 · +5 금빛 · +7 오라 (📜 필요) · +10 무지개 · 교실 TV 이름 옆에 「+${lv}」</p>
+        <div class="enh-table">${DS.Gem.ENH.slice(1).map((c, i) => `<span class="${i + 1 <= lv ? 'done' : ''}">+${i + 1}<small>💎${c.g}${c.s ? ` 📜${c.s}` : ''}</small></span>`).join('')}</div></div>`; };
     const ttlTab = () => `<p class="muted small">얻은 ${got.length}개 · 고른 호칭이 이름 앞에 붙어요</p><div class="ttl-grid">${[{ id: 'none', name: '달지 않기', tier: 'w', cond: '' }, ...DS.Titles.all()].map((t) => { const has = t.id === 'none' || got.includes(t.id); return `<button class="ttl-pick ${DS.Titles.TIER[t.tier].cls}${t.id === title ? ' on' : ''}${has ? '' : ' lock'}" data-ttl="${t.id}" title="${esc(t.cond || '')}">${has ? DS.Titles.medal(t, 22) : '🔒'}<span>${esc(t.name)}</span>${has ? '' : `<small>${esc(t.cond)}</small>`}</button>`; }).join('')}</div>`;
     const draw = () => { const sb = el.querySelector('.set-box'), keep = sb ? sb.scrollTop : 0;
       el.innerHTML = `<div class="quiz-box framed set-box"><div class="set-head"><h2>⚙ ${T ? '선생님 모습' : '내 용사'}</h2><button class="btn" id="set-x">닫기</button><button class="btn primary" id="set-ok">저장</button></div>
-        ${T ? '' : `<div class="gem-bar">💎 <b>${L.gem}</b> 조각 <span class="muted small">· 🟪 인장 ${L.seals || 0} · 🎖 메달 ${Object.values(L.medal || {}).reduce((a, b) => a + (Number(b) || 0), 0)}</span></div>`}
-        <div class="set-tabs">${[['hero', '🧙 용사'], ['gem', '⚔ 스킬 고르기'], ['ttl', `🏅 호칭 <small>${got.length}</small>`]].map(([k, n]) => `<button data-tab="${k}" class="${tab === k ? 'on' : ''}">${n}</button>`).join('')}</div>
-        ${tab === 'ttl' ? '' : preview()}
-        ${tab === 'hero' ? heroTab() : tab === 'gem' ? gemTab() : ttlTab()}
+        ${T ? '' : `<div class="gem-bar">💎 <b>${L.gem}</b> 조각 · 📜 <b>${L.scroll || 0}</b> 서술 조각 · 🔨 <b>+${L.enh || 0}</b> <span class="muted small">· 🟪 인장 ${L.seals || 0} · 🎖 메달 ${Object.values(L.medal || {}).reduce((a, b) => a + (Number(b) || 0), 0)}</span></div>`}
+        <div class="set-tabs">${[['hero', '🧙 용사'], ['gem', '⚔ 스킬 고르기'], ...(T ? [] : [['enh', `🔨 강화 <small>+${L.enh || 0}</small>`]]), ['ttl', `🏅 호칭 <small>${got.length}</small>`]].map(([k, n]) => `<button data-tab="${k}" class="${tab === k ? 'on' : ''}">${n}</button>`).join('')}</div>
+        ${tab === 'ttl' || tab === 'enh' ? '' : preview()}
+        ${tab === 'hero' ? heroTab() : tab === 'gem' ? gemTab() : tab === 'enh' && !T ? enhTab() : ttlTab()}
       </div>`; // v0.9.3: 닫기 · 저장은 맨 위 (사용자 요청)
       { const sb2 = el.querySelector('.set-box'); if (sb2) sb2.scrollTop = keep; }
       el.querySelectorAll('canvas[data-still]').forEach((c) => DS.FX.still(c, c.dataset.still));
@@ -477,6 +484,14 @@ DS.Camp = (function () {
         if (!confirm(`「${nmOf(id)}」을 되팔까요?\n💎 ${back}개를 돌려받아요 (산 값 ${p}개의 70% · 30% 는 수수료).\n이 스킬은 다시 잠기고, 끼워 둔 용사는 기본 스킬로 돌아가요.`)) return;
         await DS.Gem.sell(me, 'fx', id); Object.keys(sock).forEach((h) => { if (sock[h] === id) delete sock[h]; });
         await DS.Account.setSocket(sock).catch(() => {}); me.socket = sock; L = await DS.Account.looks(me); DS.Sound.coin && DS.Sound.coin(); DS.UI.toast(`💰 되팔았어요 · 💎 +${back}`); draw();
+      }); }
+      { const eg = el.querySelector('#enh-go'); if (eg) eg.onclick = () => DS.Control.run(async () => {
+        eg.disabled = true; const st = el.querySelector('#enh-stage');
+        const r = await DS.Gem.enhance(me).catch((e) => { eg.disabled = false; throw e; });
+        for (let i = 0; i < 3; i++) { if (st) { st.classList.remove('hit'); void st.offsetWidth; st.classList.add('hit'); } if (DS.Sound && DS.Sound.clank) DS.Sound.clank(); await new Promise((res) => setTimeout(res, 330)); }
+        if (DS.Sound) DS.Sound.correct(); if (st && DS.FX) DS.FX.play(st, r.great ? 'stars' : 'flame', { scale: r.great ? 0.9 : 0.5 });
+        DS.UI.toast(r.great ? `🌟 대성공! +${r.lv} · 💎 ${r.back}개 돌려받았어요!` : `🔨 +${r.lv} 강화 성공!`, 3200);
+        L = await DS.Account.looks(me); me.enh = r.lv; draw();
       }); }
       { const out = el.querySelector('#sock-out'); if (out) out.onclick = () => { delete sock[hero]; DS.Sound.clank(); DS.UI.toast('스킬을 뺐어요 (기본 스킬로 · 언제든 다시 고를 수 있어요)', 2600); draw(); demo(); }; }
       el.querySelectorAll('[data-ttl]').forEach((b) => (b.onclick = () => { if (b.classList.contains('lock')) { DS.UI.toast(`🔒 ${b.title}`, 2600); return; } title = b.dataset.ttl; DS.Sound.clank(); draw(); }));

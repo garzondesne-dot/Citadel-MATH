@@ -169,7 +169,7 @@ DS.Account = (function () {
     const gem = DS.Gem && m ? await DS.Gem.mine(m) : {};
     if (DS.Gem) {
       heroes.forEach((h) => { const p = DS.Gem.price('hero', h.id); if (p == null) return; h.shop = { kind: 'hero', id: h.id, price: p }; h.open = h.open || DS.Gem.owns(gem, 'hero', h.id); h.cond = `💎 ${p} 조각으로 해금`; });
-      fx.forEach((f) => { const p = DS.Gem.price('fx', f.id); if (p == null) return; f.shop = { kind: 'fx', id: f.id, price: p }; f.open = f.open || DS.Gem.owns(gem, 'fx', f.id); f.cond = f.tier === 2 && DS.FX.FANCY.includes(f.id) ? `🟪${DS.Bonus ? DS.Bonus.UNLOCK[DS.FX.FANCY.indexOf(f.id)] : ''} · 💎${p}` : `💎${p}`; });
+      fx.forEach((f) => { const p = DS.Gem.price('fx', f.id); if (p == null) return; f.shop = { kind: 'fx', id: f.id, price: p, scroll: DS.Gem.scrollOf ? DS.Gem.scrollOf('fx', f.id) : 0 }; f.open = f.open || DS.Gem.owns(gem, 'fx', f.id); f.cond = f.tier === 2 && DS.FX.FANCY.includes(f.id) ? `🟪${DS.Bonus ? DS.Bonus.UNLOCK[DS.FX.FANCY.indexOf(f.id)] : ''} · 💎${p}` : `💎${p}${f.shop.scroll ? ` · 📜${f.shop.scroll}` : ''}`; });
       fx.forEach((f) => { f.bought = DS.Gem.owns(gem, 'fx', f.id); }); // 💰 되팔기 가능 (상점에서 산 것만)
       // 🔗 단계 순서 (2026-11-06 사용자 「2단계 해금해야 3단계 열리는 거 맞지? · 2단계 잠겨 있는데 3단계가 열려」): Ⅱ → Ⅲ → Ⅳ
       //   상점에서 이미 산 것은 그대로 (산 것을 빼앗지 않음) · 🟪 인장으로 받은 Ⅲ 은 같은 계열 Ⅱ 를 열어야 씀
@@ -191,7 +191,7 @@ DS.Account = (function () {
     if (DS.FX.ACHV) fx.push({ id: 'smite', tier: 's', open: bossA && bossB, cond: `🏰 성채 1 · 2층 보스 ${Number(bossA) + Number(bossB)} / 2` });
     // 🧪 테스트 · 🎮 체험판 (2026-11-04 사용자 요청): 해금 요소 모두 열림 (용사 · 이펙트)
     if (m && m.test) { heroes.forEach((h) => { h.open = true; }); fx.forEach((f) => { f.open = true; }); }
-    return { heroes, fx, got, need: need.length, seals, gem: Number(gem.total) || 0, medal: gem.medal || {}, feather: fe };
+    return { heroes, fx, got, need: need.length, seals, gem: Number(gem.total) || 0, scroll: Number(gem.scroll) || 0, enh: Number(gem.enh) || 0, medal: gem.medal || {}, feather: fe };
   }
   async function logout() { cache = null; tsess(false); await N().signOut(); }
 

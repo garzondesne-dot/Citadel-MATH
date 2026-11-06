@@ -103,6 +103,16 @@ DS.Bonus = (function () {
     render();
     if (opt.go) { const L = DS.Lessons.get(opt.go[0]); if (L) DS.Control.run(() => fight(L, opt.go[1])); }
   }
+  // 📜 서술 조각 (2026-11-06): 통과 1 · 만점 +1 · 같은 방 이전 점수보다 올라서 통과 +1 (방마다 한 번씩)
+  async function scrollWin(lid, rid, w, show) {
+    if (!DS.Gem || !DS.Gem.addScroll || !me || me.test) return 0;
+    let n = 0; const k = `${lid}_${rid}`;
+    n += await DS.Gem.addScroll(me, 1, `ph_${k}`, '서술형 통과').catch(() => 0);
+    if (w && w.total > 0 && w.score === w.total) n += await DS.Gem.addScroll(me, 1, `phfull_${k}`, '서술형 만점').catch(() => 0);
+    if (w && w.up) n += await DS.Gem.addScroll(me, 1, `phup_${k}`, '점수가 올랐어요').catch(() => 0);
+    if (n && show) show(`📜 +${n} 서술 조각`, 'seal');
+    return n;
+  }
   // 📷 기다리던 선생님 확인 (bonus/…/pend = 결과 id) → ✔ 인정이면 처치 + 보상 · ✖ 이면 기다림을 지우고 다시 사진
   async function photoSync() {
     if (!DS.Photo) return;
@@ -118,6 +128,7 @@ DS.Bonus = (function () {
         const sealed = !sealedBefore && seals(mine).includes(L.id);
         if (DS.Grow) DS.Grow.add(me, { bonusClear: 1, seal: sealed ? 1 : 0 }).catch(() => {});
         if (DS.Gem) { const G = DS.Gem.G; await DS.Gem.add(me, r.boss ? G.roomBoss : G.room, `room_${L.id}_${r.id}`, '성채 방 처치').catch(() => 0); if (sealed) await DS.Gem.add(me, G.seal, `seal_${L.id}`, '🟪 인장', { free: true }).catch(() => 0); }
+        if (DS.Gem) { await DS.Gem.add(me, DS.Gem.G.photo || 3, `photo_${L.id}_${r.id}`, '📷 서술형 통과').catch(() => 0); await scrollWin(L.id, r.id, null, null); }
         DS.Sound.correct(); DS.UI.toast(`✔ 선생님이 「${r.title}」 풀이를 인정했어요 — 처치!${sealed ? ' 🟪 인장도!' : ''}`, 4000);
       }
     }
@@ -333,6 +344,7 @@ DS.Bonus = (function () {
       return null;
     };
     // 📷 서술형 사진 단계 (2026-11-06 결정 1): 숫자 답을 맞힘 → 풀이 사진 통과 = 처치 · ⏳ 선생님 확인 · 이의 신청
+    let photoWin = null; // 📷 통과 정보 → win() 에서 💎 · 📜
     const photoStage = (items, fresh) => {
       const r0 = mine[L.id] && mine[L.id][mid] ? mine[L.id][mid] : rec, pend = r0.pend;
       const act = draw('', pend ? '<p class="gold">⏳ 선생님이 풀이를 확인하고 있어요. 확인되면 성채에 들어올 때 처치로 바뀌어요. 더 또렷한 사진을 다시 보내도 돼요.</p>' : `<p class="okc">${fresh ? '✔ <b>답을 맞혔어요!</b> ' : ''}이제 <b>종이에 쓴 풀이</b>를 📷 찍어 올리면 처치예요. <span class="muted small">(이 숫자 그대로 · 하루 3장)</span></p>`);
@@ -344,7 +356,9 @@ DS.Bonus = (function () {
         const res = await DS.Photo.grade(me, { lesson: L.id, room: mid, title: mon.title, items });
         if (!document.body.contains(el) || !res) return;
         const p = `bonus/${ck(me.c)}/${me.n}/${L.id}/${mid}`, cur = mine[L.id][mid] = mine[L.id][mid] || {};
-        if (res.status === 'pass') { await N().update(p, { clear: true, pend: null, ph: res.id, tries: cur.tries || 1, at: N().TS }).catch(() => {}); Object.assign(cur, { clear: true }); delete cur.pend; return win(); }
+        const sc = (res.scores || []).map(Number).filter((x) => !isNaN(x)), before = Number(cur.phBest) || 0, best = Math.max(before, ...sc, 0);
+        if (best > before) { await N().update(p, { phBest: best, tries: cur.tries || 1 }).catch(() => {}); cur.phBest = best; }
+        if (res.status === 'pass') { const prevMax = Math.max(before, ...sc.slice(0, -1), 0), hadTry = before > 0 || sc.length > 1; photoWin = { score: Number(res.score) || 0, total: Number(res.total) || 0, up: hadTry && (Number(res.score) || 0) > prevMax }; await N().update(p, { clear: true, pend: null, ph: res.id, tries: cur.tries || 1, at: N().TS }).catch(() => {}); Object.assign(cur, { clear: true }); delete cur.pend; return win(); }
         if (res.status === 'check' || res.status === 'appeal') { await N().update(p, { pend: res.id, tries: cur.tries || 1 }).catch(() => {}); cur.pend = res.id; photoStage(items, false); }
       });
       return null;
@@ -364,11 +378,12 @@ DS.Bonus = (function () {
       if (DS.Gem && !preview && me && !me.test) { // 💎 (2026-11-05) — 차례로 받아 실제로 받은 만큼만 표시 (이미 받았거나 오늘 한도면 안 뜸)
         const G = DS.Gem.G, gm = async (n, k, why, o) => { const g = await DS.Gem.add(me, n, k, why, o).catch(() => 0); if (g) show(`💎 +${g} ${why}`, 'gem'); };
         if (!clearedBefore) {
-          if (castle) { await gm((L.rooms.find((r) => r.id === mid) || {}).boss ? G.roomBoss : G.room, `room_${L.id}_${mid}`, '성채 방 처치'); await gm(G.first, 'firstcastle', '성채 첫 방'); }
+          if (castle) { await gm((L.rooms.find((r) => r.id === mid) || {}).boss ? G.roomBoss : G.room, `room_${L.id}_${mid}`, '성채 방 처치'); await gm(G.first, 'firstcastle', '성채 첫 방'); if (roundNo === 1 && !anyWrong && G.roomFirst) await gm(G.roomFirst, `roomfirst_${L.id}_${mid}`, '첫 판에 처치'); }
           else { if (mid === 'boss') await gm(G.bossRe, `bossre_${L.id}`, '형성평가 재대결'); await gm(G.first, 'firstreview', '첫 복습'); }
         }
         if (!castle && mid !== 'boss' && wasOpen && DS.Usage) DS.Usage.bump(me, 'f'); // 📈 오답 고침
         if (!castle && mid !== 'boss' && wasOpen) { const g = await DS.Gem.addDaily(me, G.review, 'review', G.reviewDay, '복습으로 해결').catch(() => 0); if (g) show(`💎 +${g} 복습으로 해결`, 'gem'); }
+        if (photoWin) { await gm(G.photo || 3, `photo_${L.id}_${mid}`, '📷 서술형 통과'); await scrollWin(L.id, mid, photoWin, show); photoWin = null; }
         if (sealed) await gm(G.seal, `seal_${L.id}`, '🟪 인장', { free: true });
         if (!castle) { const x = noteOf(L); if (!x.none && x.left === 0) await gm(G.note, `note_${L.id}`, '오답노트 완성'); }
       }

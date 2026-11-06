@@ -311,7 +311,7 @@ DS.Act = (function () {
     const dup = Object.entries(R.players || {}).find(([u, p]) => u !== me && !p.teacher && Number(p.num) === Number(info.num));
     if (dup) fail(`${info.num}번은 이미 입장했어요. 번호를 확인해 주세요.`);
     const was = (R.players || {})[me] || {};
-    await N().set(P(code, `players/${me}`), { num: Number(info.num), nick: String(info.nick).slice(0, 8), hero: Number(info.hero) || 0, fx: info.fx || 'flame', ...(info.cls ? { cls: String(info.cls) } : {}), ...(info.title ? { title: String(info.title).slice(0, 24) } : {}), ...(was.lobby ? { lobby: true } : {}), at: N().TS, first: was.first || N().TS }); // first = 처음 들어온 시각 (출석부)
+    await N().set(P(code, `players/${me}`), { num: Number(info.num), nick: String(info.nick).slice(0, 8), hero: Number(info.hero) || 0, fx: info.fx || 'flame', ...(info.cls ? { cls: String(info.cls) } : {}), ...(info.title ? { title: String(info.title).slice(0, 24) } : {}), ...(Number(info.enh) > 0 ? { enh: Math.min(10, Number(info.enh)) } : {}), ...(was.lobby ? { lobby: true } : {}), at: N().TS, first: was.first || N().TS }); // first = 처음 들어온 시각 (출석부)
     return R.meta;
   }
   // 접속 표시: 연결이 끊기면 서버가 지운다 (Firebase onDisconnect)
@@ -343,9 +343,15 @@ DS.Act = (function () {
     if (!step || step.id !== mid) fail('지금은 이 몬스터와 싸우는 시간이 아니에요.');
     const rec = Raid.record(L, R, mid, me);
     if (!rec.canHeal) fail('힐은 몬스터를 다 맞힌 뒤 남은 기회로 할 수 있어요.');
+    if (opt.true) { // 🌟 진필살기 (2026-11-06 사용자 확정): 3연속 퍼펙트 + 특화 Ⅳ · 파티 힐 + 🗿 석화 20초 · 한 몬스터에 반 전체 한 번
+      if (Raid.perfStreak(rec) < 3 || Raid.ultUsed(R, mid, me)) fail('3연속 퍼펙트일 때만 쓸 수 있어요.');
+      const p = (R.players || {})[me] || {}; if (DS.Attack && !DS.Attack.canTrue(p.fx, p.hero)) fail('진필살기는 특화 계열 Ⅳ 전설 스킬을 끼웠을 때만 쓸 수 있어요.');
+      if (Raid.petrify(R, mid)) fail('이 몬스터는 이미 진필살기로 굳었어요 — 지금 맞히면 💎 가 나와요!');
+      const v = `!true@${N().now()}`; await N().set(P(code, `heals/${mid}/${me}/${Raid.healsGiven(R, mid, me)}`), v); return v;
+    }
     if (opt.party || opt.ult) { // ⚡ 3연속 퍼펙트 (2026-11-06): 필살기 또는 💚 파티 힐 — 둘 중 하나 (마지막 기회)
       if (Raid.perfStreak(rec) < 3 || Raid.ultUsed(R, mid, me)) fail('3연속 퍼펙트일 때만 쓸 수 있어요.');
-      if (opt.ult && DS.Attack) { const p = (R.players || {})[me] || {}; if (!DS.Attack.canUlt(p.fx, p.hero)) fail('필살기는 특화 계열 Ⅳ 전설 스킬을 끼웠을 때만 쓸 수 있어요.'); } // 2026-11-06 검증: 화면 단추만이 아니라 여기서도 확인
+      if (opt.ult && DS.Attack) { const p = (R.players || {})[me] || {}; if (!DS.Attack.canUlt(p.fx, p.hero)) fail('필살기는 특화 계열 Ⅲ 이상 스킬을 끼웠을 때만 쓸 수 있어요.'); } // 2026-11-06 검증: 화면 단추만이 아니라 여기서도 확인
       await N().set(P(code, `heals/${mid}/${me}/${Raid.healsGiven(R, mid, me)}`), opt.ult ? '!ult' : '*');
       return opt.ult ? '!ult' : '*';
     }

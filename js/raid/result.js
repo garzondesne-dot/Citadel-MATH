@@ -117,6 +117,8 @@ DS.Result = (function () {
     const g = DS.Grow ? await DS.Grow.add(m, r.parts, `raid_${code}`, { upsert: true, cache: !!opt.cache }).catch(() => null) : null;
     if (DS.Gem && !(g && g.same)) { // 💎 (2026-11-05): 참여 3 + 맞힌 소문제 1개당 1 (처음이든 고쳐서든 · 최대 5) · 🔁 연속 참여 3 · 5 · 10차시 (한도 밖)
       const G = DS.Gem.G; DS.Gem.add(m, G.join + Math.min(G.solvedMax, Number(r.parts.correct) || 0), `raid_${code}`, '레이드', { upsert: true }).catch(() => {});
+      if (r.perfects > 0 && G.perfect) DS.Gem.add(m, G.perfect, `perfect_${code}`, '⚡ 퍼펙트').catch(() => {}); // 2026-11-06 실력: 첫 시도 퍼펙트 몬스터가 하나라도
+      if (r.parts.perfect && G.bossPerfect) DS.Gem.add(m, G.bossPerfect, `bossperfect_${code}`, '👑 형성평가 만점').catch(() => {});
       (async () => { const ck2 = (c) => String(c).replace(/[.#$/[\]]/g, '_'); const [recs, held] = await Promise.all([DS.Net.get(`records/${ck2(m.c)}/${m.n}`).catch(() => null), DS.Net.get(`held/${ck2(m.c)}`).catch(() => null)]);
         const s = DS.Gem.streak(recs || {}, Object.assign({}, held, { [L.id]: true })); if (G.streak[s]) DS.Gem.add(m, G.streak[s], `streak${s}_${L.id}`, `${s}차시 연속 참여`, { free: true }).catch(() => {}); })().catch(() => {});
     }

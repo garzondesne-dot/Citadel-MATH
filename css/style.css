@@ -2221,3 +2221,37 @@ body.tb-last-min::after { content: ''; position: fixed; inset: 0; z-index: 88; p
 .ph-steps li { display: flex; gap: 6px; padding: 6px 8px; border-radius: 8px; background: #0b1426; border: 1px solid var(--line); } .ph-steps li.ok { border-color: #3c8a5a; } .ph-steps li.no { border-color: #8a7a3c; }
 .ph-lim { margin: 6px 0; font-size: 14px; } .ph-lim label { display: block; margin: 4px 0; } .ph-lim input { width: 64px; padding: 2px 4px; border-radius: 6px; background: #08101e; color: var(--text, #eef2ff); border: 1px solid var(--line); }
 .ph-use { margin: 8px 0; padding: 8px 10px; border-radius: 8px; background: #0b1426; border: 1px solid var(--line); font-size: 14px; line-height: 1.6; } .ph-use.warn { border-color: #ff4d5e; background: #2a1016; } .ph-use.warn b:first-child { color: #ff8a95; }
+
+/* 🌟 진필살기 · 🗿 석화 · 🔥 끈기의 일격 (v0.9.13 · 2026-11-06) */
+.ult.true .u-band { background: linear-gradient(90deg, #6b4a00, #ffd25a 40%, #fff3c0 50%, #ffd25a 60%, #6b4a00); }
+.ult.true .u-true { position: fixed; left: 50%; top: 18%; transform: translateX(-50%); font-size: min(26vw, 220px); color: #ffd25a; text-shadow: 0 0 24px #ffb000, 0 0 60px #ff8a00; font-weight: 900; z-index: 3; animation: u-true 1.4s ease-out both; pointer-events: none; }
+@keyframes u-true { 0% { opacity: 0; transform: translateX(-50%) scale(2.2); } 25% { opacity: 1; transform: translateX(-50%) scale(1); } 80% { opacity: 1; } 100% { opacity: 0; transform: translateX(-50%) scale(1.1); } }
+.btn.ult-go.true { background: linear-gradient(180deg, #ffe58a, #f2b300); color: #3a2400; box-shadow: 0 0 14px #ffd25a; }
+.petrified .art.monster, .petrified.art.monster, #rm.petrified .art.monster { filter: grayscale(1) brightness(0.85) contrast(1.2) !important; animation: none !important; }
+.th-petri { position: absolute; inset: 0; pointer-events: none; z-index: 5; display: flex; align-items: center; justify-content: center; }
+.th-petri b { font-size: 26px; color: #e8e8e8; text-shadow: 0 2px 0 #444, 0 0 10px #000; animation: th-petri-b 2s ease-out both; }
+.th-petri i { position: absolute; width: 3px; height: 40%; background: #f4f4f4; box-shadow: 0 0 6px #fff; transform-origin: top; animation: th-crack 0.5s ease-out both; }
+.th-petri i:nth-child(1) { left: 40%; top: 20%; transform: rotate(18deg); } .th-petri i:nth-child(2) { left: 55%; top: 25%; transform: rotate(-24deg); animation-delay: 0.15s; } .th-petri i:nth-child(3) { left: 48%; top: 45%; transform: rotate(60deg); height: 25%; animation-delay: 0.3s; }
+@keyframes th-crack { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes th-petri-b { 0% { opacity: 0; transform: scale(1.8); } 20% { opacity: 1; transform: scale(1); } 85% { opacity: 1; } 100% { opacity: 0; } }
+.petri-bn { margin: 0 0 8px; padding: 8px 10px; border-radius: 10px; background: linear-gradient(90deg, #3a3a3a, #6b6b6b); border: 2px solid #ffd25a; color: #fff; text-align: center; font-size: 15px; line-height: 1.5; box-shadow: 0 0 12px #ffd25a88; }
+.petri-bn span { font-size: 22px; color: #ffd25a; }
+.h-petri { position: absolute; left: 50%; top: 6%; transform: translateX(-50%); z-index: 30; padding: 10px 22px; border-radius: 14px; background: linear-gradient(90deg, #333, #777, #333); border: 3px solid #ffd25a; color: #fff; font-size: clamp(18px, 2.6vw, 40px); font-weight: 900; text-align: center; box-shadow: 0 0 30px #ffd25a; }
+.h-petri b { color: #ffd25a; } .h-petri small { display: block; font-size: 0.5em; font-weight: 600; }
+.fin-me.grit { background: linear-gradient(90deg, #5a1a00, #c24a00, #5a1a00); border-color: #ff8a3c; }
+.h-grit { position: absolute; left: 50%; bottom: 18%; transform: translateX(-50%); z-index: 29; padding: 8px 18px; border-radius: 12px; background: linear-gradient(90deg, #5a1a00, #d2561a); border: 2px solid #ffb14a; color: #fff; font-size: clamp(16px, 2vw, 30px); font-weight: 800; animation: th-petri-b 3s ease-out both; white-space: nowrap; }
+/* 🔨 강화 빛 (v0.9.13): +3 은 · +5 금 · +7 오라 · +10 무지개 */
+.enh-1 .art.hero, .enh-1 > .art { filter: drop-shadow(0 0 4px #dfe7f5) drop-shadow(0 0 1px #fff); }
+.enh-2 .art.hero, .enh-2 > .art { filter: drop-shadow(0 0 6px #ffd25a) drop-shadow(0 0 2px #fff3c0); }
+.enh-3 .art.hero, .enh-3 > .art { filter: drop-shadow(0 0 8px #ffb000) drop-shadow(0 0 3px #fff3c0); animation: enh-aura 1.6s ease-in-out infinite; }
+.enh-4 .art.hero, .enh-4 > .art { animation: enh-rainbow 2.4s linear infinite; }
+@keyframes enh-aura { 0%, 100% { filter: drop-shadow(0 0 6px #ffb000) drop-shadow(0 0 2px #fff3c0); } 50% { filter: drop-shadow(0 0 14px #ffd25a) drop-shadow(0 0 4px #fff); } }
+@keyframes enh-rainbow { 0% { filter: drop-shadow(0 0 10px #ff4d5e) drop-shadow(0 0 3px #fff); } 25% { filter: drop-shadow(0 0 10px #ffd25a) drop-shadow(0 0 3px #fff); } 50% { filter: drop-shadow(0 0 10px #4dff9a) drop-shadow(0 0 3px #fff); } 75% { filter: drop-shadow(0 0 10px #4db8ff) drop-shadow(0 0 3px #fff); } 100% { filter: drop-shadow(0 0 10px #ff4d5e) drop-shadow(0 0 3px #fff); } }
+.enh-tag { font-size: 0.8em; padding: 0 4px; border-radius: 6px; background: #2a3550; color: #dfe7f5; font-weight: 800; } .enh-tag.t2 { background: #5a4510; color: #ffd25a; } .enh-tag.t3 { background: linear-gradient(90deg, #7a5200, #ffb000); color: #fff; } .enh-tag.t4 { background: linear-gradient(90deg, #ff4d5e, #ffd25a, #4dff9a, #4db8ff); color: #1a1a1a; }
+.gem-pop.scroll { background: linear-gradient(90deg, #4a3410, #8a6a2a); border-color: #ffd25a; }
+.enh-box { text-align: center; } .enh-stage { position: relative; display: inline-block; margin: 8px auto; padding: 10px 24px; border-radius: 12px; background: radial-gradient(#2a3a5a, #0b1426); } .enh-stage .art { transform: scale(1.6); transform-origin: bottom center; margin-top: 30px; }
+.enh-stage.hit { animation: enh-hit 0.3s ease-out; } @keyframes enh-hit { 0% { transform: translateX(0); } 30% { transform: translateX(-6px) scale(1.04); filter: brightness(1.8); } 60% { transform: translateX(5px); } 100% { transform: none; } }
+.enh-lv { position: absolute; right: 6px; top: 4px; font-size: 22px; color: #ffd25a; text-shadow: 0 0 6px #000; }
+.enh-table { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; margin-top: 6px; } .enh-table span { padding: 2px 6px; border-radius: 6px; background: #0b1426; border: 1px solid var(--line); font-size: 12px; display: flex; flex-direction: column; } .enh-table span.done { border-color: #ffd25a; color: #ffd25a; }
+.ph-steps li.wait { opacity: 0; transform: scale(1.4); } .ph-steps li.stamped { animation: ph-stamp 0.35s cubic-bezier(.2,1.6,.4,1) both; } @keyframes ph-stamp { 0% { opacity: 0; transform: scale(1.8) rotate(-6deg); } 100% { opacity: 1; transform: none; } }
+.ph-score { position: relative; } .ph-score.gold b { color: #ffd25a !important; text-shadow: 0 0 12px #ffb000; } .ph-100 { position: absolute; right: 10%; top: -6px; font-size: 40px; font-style: normal; animation: ph-stamp 0.4s cubic-bezier(.2,1.6,.4,1) both; transform-origin: center; }

@@ -55,14 +55,19 @@ DS.Raid = (function () {
   const healsGiven = (R, mid, uid) => keys(healsOf(R, mid)[uid]).length;
   // 받은 힐 목록 (시간 순서 없음 → 힐러 번호 · 칸 순서로 고정) · 앞의 HEAL_MAX 개만 기회가 된다
   // 2026-11-06 ⚡ 수업 필살기: 힐 칸 값 '*' = 💚 파티 힐 (아직 다 못 맞힌 친구 모두에게 +1) · '!ult' = 필살기 (마지막 기회를 씀 · 받는 사람 없음)
+  // 🌟 진필살기 (2026-11-06): 힐 칸 값 '!true@시각' = 파티 힐(못 맞힌 친구 모두 +1) + 🗿 석화 TRUE_SEC 초 (몬스터 공격 멈춤 · 그동안 맞히면 💎) · 한 몬스터에 반 전체 한 번
+  const TRUE_SEC = 20;
+  const isTrue = (v) => typeof v === 'string' && v.startsWith('!true');
+  const partyLike = (v) => v === '*' || isTrue(v);
+  function petrify(R, mid) { let out = null; Object.entries(healsOf(R, mid)).forEach(([from, byK]) => Object.values(byK || {}).forEach((v) => { if (isTrue(v)) { const at = Number(String(v).split('@')[1]) || 0; if (!out || at > out.at) out = { by: from, at, until: at + TRUE_SEC * 1000 }; } })); return out; }
   const perfectRaw = (L, R, mid, uid) => !!L && attemptsOf(R, mid, uid).some((t) => { const g = gradeAttempt(L, R, mid, uid, t.attempt, t.given); return g.total > 0 && g.correct === g.total; });
   function healsTo(R, mid, uid, L) {
     const out = [];
-    Object.entries(healsOf(R, mid)).forEach(([from, byK]) => Object.entries(byK || {}).forEach(([k, to]) => { if (to === uid || (to === '*' && from !== uid && uid !== teacherUid(R) && perfectRaw(L, R, mid, uid) === false && L)) out.push({ from, k: Number(k) }); }));
+    Object.entries(healsOf(R, mid)).forEach(([from, byK]) => Object.entries(byK || {}).forEach(([k, to]) => { if (to === uid || (partyLike(to) && from !== uid && uid !== teacherUid(R) && perfectRaw(L, R, mid, uid) === false && L)) out.push({ from, k: Number(k) }); }));
     return out.sort((a, b) => num(R, a.from) - num(R, b.from) || a.k - b.k);
   }
   const healsReceived = (R, mid, uid, L) => Math.min(HEAL_MAX, healsTo(R, mid, uid, L).length);
-  const ultUsed = (R, mid, uid) => Object.values(healsOf(R, mid)[uid] || {}).includes('!ult');
+  const ultUsed = (R, mid, uid) => Object.values(healsOf(R, mid)[uid] || {}).some((v) => v === '!ult' || isTrue(v));
   // 퍼펙트 연속: 첫 시도부터 다 맞힌 시도가 몇 번 이어졌나 (첫 시도가 아니면 0)
   const perfStreak = (rec) => { let n = 0; for (const t of rec.tries) { if (t.total > 0 && t.correct === t.total) n++; else break; } return n; };
   // 받을 친구 고르기: 아직 다 못 맞힌 친구 전원이 후보 · 남은 기회가 적을수록 무게가 크다 (0칸 8 · 1칸 4 · 2칸 2 · 그 밖 1)
@@ -238,5 +243,5 @@ DS.Raid = (function () {
   const timeLeft = (R, now) => { const d = deadline(R); return d == null ? null : Math.max(0, d - now); };
   // 던전 진행: 지나온 단계 / 전체 (마무리 = 끝)
   const progress = (L, R) => { const i = (R.state || {}).step ?? -1, n = L.steps.length; return Math.max(0, Math.min(1, (i + (isEnd(L, R) || bossHp(L, R).won ? 1 : 0)) / n)); };
-  return { solveLock, BOSS_TRIES, bossItem, bossTries, bossState, bossFirst, bossAnswered, skipped, deadline, timeLeft, progress, ATK, soloAtk, BIND_PER, BIND_MAX, bindOf, bindTotal, atkClock, atkTrack, RETRIES, HEAL_MAX, healsOf, healsGiven, healsTo, healsReceived, healTarget, ultUsed, perfStreak, LIVE_MS, lateIds, liveOpen, roomDone, inClass, activeIds, teacherUid, num, newRoom, stepOf, isLobby, isEnd, isFinale, isClosed, focusOn, restOn, sheetOn, videoOn, autoFocus, fullMarks, canLobby, online, seedOf, itemsFor, attemptsOf, gradeAttempt, record, resultLabel, headcount, pctOf, monsterHp, waiting, allSubmitted, cleared, mastery, bossHp, helpList };
+  return { solveLock, BOSS_TRIES, bossItem, bossTries, bossState, bossFirst, bossAnswered, skipped, deadline, timeLeft, progress, ATK, soloAtk, BIND_PER, BIND_MAX, bindOf, bindTotal, atkClock, atkTrack, RETRIES, HEAL_MAX, healsOf, healsGiven, healsTo, healsReceived, healTarget, ultUsed, perfStreak, TRUE_SEC, isTrue, petrify, LIVE_MS, lateIds, liveOpen, roomDone, inClass, activeIds, teacherUid, num, newRoom, stepOf, isLobby, isEnd, isFinale, isClosed, focusOn, restOn, sheetOn, videoOn, autoFocus, fullMarks, canLobby, online, seedOf, itemsFor, attemptsOf, gradeAttempt, record, resultLabel, headcount, pctOf, monsterHp, waiting, allSubmitted, cleared, mastery, bossHp, helpList };
 })();

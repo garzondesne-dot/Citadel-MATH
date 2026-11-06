@@ -100,5 +100,12 @@ DS.Thrill = (function () {
     const c = el(`th-chain${why === 'pf' ? ' pf' : ''}${why === 'ult' ? ' ult' : ''}`, `<b>+${sec}초 ${why === 'ult' ? '대묶기!' : '묶기'}</b>`, mon); setTimeout(() => c.remove(), 1800);
     bindFx(mon, why === 'ult');
   }
-  return { bindFx, sprite, perfect, badge, note, tierNote, phaseNote, chestOpen, batPhone, batShut, batHall, chain };
+  // 🗿 석화 (🌟 진필살기 · 2026-11-06): 몬스터가 회색 돌로 굳으며 금이 감 (연출 · 굳은 상태는 화면에서 .petrified 로 유지)
+  function petrify(mon) {
+    if (!mon || !mon.isConnected) return;
+    const box = mon.closest('.enc-mon') || mon.parentElement || mon; box.classList.add('petrified');
+    const c = el('th-petri', '<i></i><i></i><i></i><b>🗿 석화!</b>', box); setTimeout(() => c.remove(), 2200);
+    if (DS.Sound && DS.Sound.hit) { DS.Sound.hit(); setTimeout(() => DS.Sound.hit(), 180); }
+  }
+  return { bindFx, sprite, perfect, badge, note, tierNote, phaseNote, chestOpen, batPhone, batShut, batHall, chain, petrify };
 })();
