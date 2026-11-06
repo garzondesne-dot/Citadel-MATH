@@ -315,3 +315,35 @@ Order (left to right, top to bottom):
 | 자리 | ① 위 26% 벽 · 분위기 자유 ② 가운데(가로 34~66% · 세로 38~74%) 용사가 서는 밝고 평평한 바닥 ③ 왼쪽 22% = O 구역(푸른빛 · 발판 그리지 않음 · 아래 낭떠러지) ④ 오른쪽 22% = X 구역(주황빛 · 대칭) ⑤ 앞쪽 바닥 |
 | 금지 | 글자 · 숫자 · O/X 기호 · 발판 · 사람 · 몬스터 (게임이 겹쳐 그림) |
 | 화풍 | 지금 게임과 같은 16비트 도트 · 던전 · 밝기 중간 (흰 글씨 · 용사가 잘 보이게) |
+
+### 6-11. 🏰 타워 디펜스 지도 배경 5장 (2026-11-06 · 템플릿 `assets/templates/td/tpl-td-*.png` · 다시 만들기 `node tools/td/templates.js`)
+쓰는 곳: 쉼터 놀이 「🏰 디펜스」 종합실 큰 화면 (폰 자리 고르기 미니 지도에도 줄여서). 지금은 코드가 그린 단색 + 이모지 지도 → 그림이 오면 Claude 가 `assets/manifest.js` 에 등록하고 지도 그리기를 그림으로 바꾼다 (자리 원 · 몬스터 · 타워 · 효과는 게임이 그 위에 그림).
+| 항목 | 값 |
+|---|---|
+| 크기 | 1920×1080 (16:9) · 원본 480×270 을 4배 (1칸 = 120px = 원본 30px) · PNG · 배경 꽉 채움 |
+| 길 | 템플릿 살구색 띠 **모양 · 폭 그대로** (폭 0.7칸 + 테두리 · 꺾인 곳 둥글게) · 위에서 내려다본 길 · 바닥 무늬만 (화살표 그리지 않음) |
+| 입구 · 성 | 보라 원 = 몬스터가 나오는 어둠의 문 / 구멍 · 빨간 네모 = 우리 성 (그 지도 분위기 · 길 끝이 성문) |
+| 타워 자리 | 점선 원 = **평평한 맨바닥** (풀밭 · 돌바닥 · 모래) — 나무 · 바위 · 큰 장식 두지 않음 (원 · 용사는 게임이 올림) |
+| 글자 상자 | 가운데 위 점선 상자 = 게임 글자가 덮는 곳 → 어둡고 단순하게 |
+| 장식 | 길과 자리에서 떨어진 빈 곳에만 (지도마다 아래 소재) |
+| 금지 | 글자 · 숫자 · 격자 · 점선 원 · 화살표 · 사람 · 몬스터 · 탑 |
+| 보낼 파일 | `td-forest.png` · `td-volcano.png` · `td-ice.png` · `td-desert.png` · `td-crypt.png` → 드라이브 「07 에셋 원본」 → Claude 에게 「에셋 도착」 |
+
+```
+[STYLE BIBLE above — backgrounds: no outline, dithering allowed]
+Use the attached template only for layout; do NOT draw the grid, dashed circles, numbers, arrows, labels or the red/purple marks.
+Top-down tower-defense map, native 480x270 px (16x9 tiles of 30 px), upscaled 4x (1920x1080) with nearest-neighbor.
+The enemy road must follow the light-tan band of the template EXACTLY (same shape, same 21 px native width, rounded corners).
+At the purple circle(s): a dark swirling portal / cave mouth where monsters come out. At the red box: our small castle gate where the road ends.
+Inside every dashed circle: plain flat open ground (no trees, rocks or props) — towers will be placed there by the game.
+Keep the dashed box at the top center dark and simple (game text goes there). Decorations only in empty areas away from the road.
+Medium brightness, slightly desaturated so bright heroes and monsters pop. No characters, no towers, no text.
+Theme: [아래 한 줄]
+```
+| 지도 | 템플릿 | Theme 한 줄 |
+|---|---|---|
+| 🌲 초록 숲길 | `tpl-td-forest.png` | lush green forest clearing, packed brown dirt road with pebbles, pine trees and mushrooms at the map edges, small wooden castle with green banners |
+| 🌋 용암 두 갈래 | `tpl-td-volcano.png` | volcanic wasteland, dark basalt road with glowing orange lava cracks along its edges, the island between the two roads is cooled black rock with small lava pools, obsidian fortress gate |
+| ❄ 얼음 소용돌이 | `tpl-td-ice.png` | frozen snowfield, packed light-blue snow road spiralling inward, ice crystals and frozen pines between the rings, small ice palace at the spiral center |
+| 🏜 사막 지그재그 | `tpl-td-desert.png` | sunny desert, pale sand road between darker dunes, cacti, bleached bones and sandstone rocks, sandstone fort with a red flag at the top right |
+| 🌙 묘지 두 입구 | `tpl-td-crypt.png` | moonlit graveyard, grey cobblestone road, tombstones, dead trees and lit candles in empty areas, purple mist at the two portals, dark gothic keep on the right |

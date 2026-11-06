@@ -34,6 +34,7 @@
 ## sprite/templates_v0911.js — v0.9.11 그림 템플릿
 
 `node tools/sprite/templates_v0911.js` → `assets/templates/v0911/tpl-{punch,bat,chest,feather,arena}.png` (마젠타 칸 · 기준선 · 자리 표시). 프롬프트는 `docs/ASSET-SPEC.md` 6-7.
+`node tools/td/templates.js` → `assets/templates/td/tpl-td-{forest,volcano,ice,desert,crypt}.png` (🏰 타워 디펜스 지도 배경 · 길 · 자리 · 입구 · 성 · 글자 상자 표시). 프롬프트는 `docs/ASSET-SPEC.md` 6-11.
 
 ## qr/ — 수업 입장 QR (A4 한 장, 게임 느낌 없는 판)
 
