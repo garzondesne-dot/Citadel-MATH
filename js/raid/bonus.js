@@ -31,7 +31,7 @@ DS.Bonus = (function () {
   //   기본 = 1 · 2층 열림 · 3층(대단원) 잠김 (값이 없을 때) · 선생님은 늘 들어가 볼 수 있고 성채 화면에서 🔓 열기 / 🔒 잠그기 (교사 계정만 · 종합상황실 기기는 보기만)
   const FLOOR_DEFAULT = { 'eval-1': true, 'eval-2': true, 'eval-3': false };
   let floorOpen = {}, isAdm = false;
-  const floorIsOpen = (id) => (floorOpen[id] != null ? !!floorOpen[id] : FLOOR_DEFAULT[id] !== false);
+  const floorIsOpen = (id) => (DS.TRIAL ? id === DS.TRIAL.castle : floorOpen[id] != null ? !!floorOpen[id] : FLOOR_DEFAULT[id] !== false); // 👩‍🏫 체험판: 1층만
   // 고른 층 (이 기기 기억 · 없으면 학생에게 열린 층 중 마지막 = 진도에 가까운 층 · 잠긴 층은 학생이 못 고름 → 열린 층으로)
   const FKEY = 'citadel-floor';
   const selFloor = () => { let v = ''; try { v = localStorage.getItem(FKEY) || ''; } catch (e) { /* 무시 */ } const ok = (id) => FLOORS.some((f) => f.id === id) && (all() || floorIsOpen(id)); return ok(v) ? v : ((FLOORS.filter((f) => ok(f.id)).pop() || FLOORS[0]).id); };
@@ -199,7 +199,7 @@ DS.Bonus = (function () {
       <div class="cs-portals">${FLOORS.map(portal).join('')}</div>
       ${floor(FLOORS.find((f) => f.id === selFloor()) || FLOORS[0])}`;
     bindFight();
-    document.querySelectorAll('[data-floor]').forEach((b) => (b.onclick = () => { const id = b.dataset.floor; if (!all() && !floorIsOpen(id)) { DS.Sound.squish(); DS.UI.toast('🔒 선생님이 잠가 두었어요 — 단원 공부를 마치면 열려요', 2600); return; } DS.Sound.clank(); setFloor(id); render(); }));
+    document.querySelectorAll('[data-floor]').forEach((b) => (b.onclick = () => { const id = b.dataset.floor; if (!all() && !floorIsOpen(id)) { DS.Sound.squish(); DS.UI.toast(DS.TRIAL ? '🔒 체험판에서는 1층(04 · 07 방)만 열려요' : '🔒 선생님이 잠가 두었어요 — 단원 공부를 마치면 열려요', 2600); return; } DS.Sound.clank(); setFloor(id); render(); }));
     document.querySelectorAll('[data-lockmsg]').forEach((b) => (b.onclick = () => { DS.Sound.squish(); DS.UI.toast(`🔒 ${b.dataset.lockmsg}`, 2600); }));
     document.querySelectorAll('[data-flock]').forEach((b) => (b.onclick = () => DS.Control.run(async () => {
       const [id, v] = b.dataset.flock.split('|'), f = FLOORS.find((x) => x.id === id) || {};
