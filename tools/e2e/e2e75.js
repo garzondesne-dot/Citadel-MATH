@@ -6,7 +6,7 @@ const OUT = process.argv[2] || '.', U = 'http://localhost:8765/index.html?trial'
 (async () => {
   const b = await chromium.launch(); const ctx = await b.newContext({ viewport: { width: 390, height: 844 } }); const errs = [], log = [];
   await ctx.addInitScript(() => { window.DS_FUN = { pick: 4000, show: 2500 }; window.DS_TD = { pick: 8000, speed: 6 }; });
-  const p = await ctx.newPage(); p.on('pageerror', (e) => errs.push(e.message)); p.on('dialog', (d) => d.accept());
+  const p = await ctx.newPage(); p.on('pageerror', (e) => errs.push((e.stack || e.message).split('\n').slice(0, 3).join(' | '))); p.on('dialog', (d) => d.accept());
   const P = (s) => { log.push(s); console.log(s); };
   const shot = (n) => p.screenshot({ path: `${OUT}/75-${n}.png` });
   const ai = () => p.evaluate(() => (document.querySelector('.trial-ai .ta-msg') || {}).textContent || '');
