@@ -100,7 +100,7 @@ DS.Test = (function () {
     if (where === 'camp') {
       if (el.dataset.sig === 'camp') return;
       el.dataset.sig = 'camp';
-      el.innerHTML = trial ? `<b>👩‍🏫 체험판</b><span class="tb-step">${L.no}차시 · 내 캠프</span><button class="btn small" id="tb-x">🔄 처음부터</button>`
+      el.innerHTML = trial ? `<b>👩‍🏫 체험판</b><span class="tb-step">${DS.Lessons.noText(L.no)}차시 · 내 캠프</span><button class="btn small" id="tb-x">🔄 처음부터</button>`
         : `<b>🧪 테스트</b><span class="tb-step">${esc(L.title)} · 내 캠프</span><button class="btn small" id="tb-gate">🌀 차원문 다시 열기</button><button class="btn small" id="tb-x">끝내기</button>`;
       { const g = $('#tb-gate'); if (g) g.onclick = () => DS.Control.run(openGate); }
       $('#tb-x').onclick = () => { if (trial) return again(); if (confirm('테스트를 끝내고 교사 메뉴로 돌아갈까요?')) finish(false); };
@@ -194,7 +194,7 @@ DS.Test = (function () {
     sp.onclick = (e) => { if (!sp.classList.contains('done')) sp.classList.add('done'); e.stopPropagation(); };
     let box = sp.querySelector('.trial-pick');
     if (!box) { box = document.createElement('div'); box.className = 'trial-pick'; sp.appendChild(box); }
-    box.innerHTML = `<p class="tp-h">👩‍🏫 선생님 체험판 · ${L0.no}차시 「${esc(L0.title)}」</p><input id="tp-name" maxlength="8" placeholder="이름 (예: 김선생)" autocomplete="off">
+    box.innerHTML = `<p class="tp-h">👩‍🏫 선생님 체험판 · ${DS.Lessons.noText(L0.no)}차시 「${esc(L0.title)}」</p><input id="tp-name" maxlength="8" placeholder="이름 (예: 김선생)" autocomplete="off">
       <div class="tp-heroes">${HEROES.map((n) => `<button class="tp-h1${n === pick ? ' on' : ''}" data-h="${n}">${DS.Art.hero(n, 'idle')}<span>${esc((DS.ASSETS.heroesV2.list[n] || {}).name || '')}</span></button>`).join('')}</div>
       <button class="btn primary big" id="tp-go">⚔ 모험 시작</button><p class="tp-n">학생이 되어 한 차시를 직접! · 기록은 남지 않아요</p>`;
     box.onclick = (e) => e.stopPropagation();

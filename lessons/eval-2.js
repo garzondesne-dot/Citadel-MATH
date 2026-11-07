@@ -180,22 +180,22 @@
 
   const R = (id, no, title, sprite, fn, extra = {}) => ({ id, no, title, sprite, make: (a, r) => fn(a ? r : null).map((q) => Object.assign(q, { ref: id.slice(1) })), ...extra });
   const ROOMS = [
-    R('q01', 7, '01 명제 찾기 · 참 · 거짓', 'castle2:0@h120', m01),
-    R('q02', 7, '02 진리집합', 'castle2:1@h120', m02),
-    R('q03', 8, '03 역과 대우', 'castle2:2@h120', m03),
-    R('q04', 9, '04 충분 · 필요 · 필요충분', 'castle2:3@h120', m04),
-    R('q05', 7, '05 「모든 · 어떤」의 부정', 'castle2:4@h120', m05),
-    R('q06', 8, '06 명제와 진리집합', 'castle2:0@h240', m06),
-    R('q07', 8, '07 역이 참이 되는 a (서술형)', 'castle2:2@h240', m07, { photo: true }),
-    R('q08', 9, '08 충분조건이 되는 a', 'castle2:3@h240', m08),
-    R('q09', 8, '09 항상 참인 명제', 'castle2:1@h240', m09),
-    R('q10', 9, '10 두 명제가 거짓 (서술형)', 'castle2:4@h240', m10, { photo: true }),
-    R('q11', 10, '👑 11 절대부등식 최솟값', 'castleboss2:0', m11, { boss: true }),
+    R('q01', 8, '01 명제 찾기 · 참 · 거짓', 'castle2:0@h120', m01),
+    R('q02', 8, '02 진리집합', 'castle2:1@h120', m02),
+    R('q03', 9, '03 역과 대우', 'castle2:2@h120', m03),
+    R('q04', 10, '04 충분 · 필요 · 필요충분', 'castle2:3@h120', m04),
+    R('q05', 8, '05 「모든 · 어떤」의 부정', 'castle2:4@h120', m05),
+    R('q06', 9, '06 명제와 진리집합', 'castle2:0@h240', m06),
+    R('q07', 9, '07 역이 참이 되는 a (서술형)', 'castle2:2@h240', m07, { photo: true }),
+    R('q08', 10, '08 충분조건이 되는 a', 'castle2:3@h240', m08),
+    R('q09', 9, '09 항상 참인 명제', 'castle2:1@h240', m09),
+    R('q10', 10, '10 두 명제가 거짓 (서술형)', 'castle2:4@h240', m10, { photo: true }),
+    R('q11', 11, '👑 11 절대부등식 최솟값', 'castleboss2:0', m11, { boss: true }),
   ];
   const MONSTERS = Object.fromEntries(ROOMS.map((r) => [r.id, r]));
 
   DS.Lessons.register({
-    id: 'eval-2', no: 0, eval: true, after: 10, floor: 2, // 🏰 성채던전 2층 (레이드 아님 · 차시 목록 · 테스트 모드에 안 나옴)
+    id: 'eval-2', no: 0, eval: true, after: 11, floor: 2, // 🏰 성채던전 2층 (레이드 아님 · 차시 목록 · 테스트 모드에 안 나옴)
     title: '명제 중단원', unit: '공통수학2 Ⅱ-2 명제 · 평가2', sheet: '(평가2) 명제_중단원평가',
     theme: '08-crypt',
     goal: '명제 단원 개념을 스스로 점검한다 · 틀린 문항으로 보충할 부분을 찾는다',

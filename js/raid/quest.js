@@ -49,7 +49,7 @@ DS.Quest = (() => {
         <p class="muted small">내가 만든 문제가 친구들 🎯 복습에 나와요 · 출제되면 💎 +${REWARD.gem} · 📜 +${REWARD.scroll} · 첫 출제 호칭 「출제자」</p>
         <p class="mail-sub"><b>내가 만든 문제</b><span class="muted small">출제됨 ${ok.length}</span></p>
         <div class="mine">${list.map((q) => { const L = DS.Lessons.get(q.lesson) || {}; const s = ST[q.st] || ST.draft;
-          return `<div class="qs-mine"><span class="tx">${L.no}차시 · ${esc(conceptTitle(L, q.mid) || stepTitle(L, q.mid))}<small>${q.st === 'ok' ? `친구 ${cnt[q.id] || 0}명이 풀었어요` : q.st === 'fix' ? `선생님 메모 「${esc(q.memo || '')}」` : q.st === 'wait' ? '선생님 확인을 기다려요' : '쓰다 멈춤'}</small></span><i class="st ${s[1]}">${s[0]}</i>${q.st === 'fix' || q.st === 'draft' ? `<button class="btn small" data-edit="${q.id}">✏ 고치기</button>` : ''}</div>`; }).join('') || '<p class="muted small">아직 만든 문제가 없어요.</p>'}</div>
+          return `<div class="qs-mine"><span class="tx">${DS.Lessons.noText(L.no)}차시 · ${esc(conceptTitle(L, q.mid) || stepTitle(L, q.mid))}<small>${q.st === 'ok' ? `친구 ${cnt[q.id] || 0}명이 풀었어요` : q.st === 'fix' ? `선생님 메모 「${esc(q.memo || '')}」` : q.st === 'wait' ? '선생님 확인을 기다려요' : '쓰다 멈춤'}</small></span><i class="st ${s[1]}">${s[0]}</i>${q.st === 'fix' || q.st === 'draft' ? `<button class="btn small" data-edit="${q.id}">✏ 고치기</button>` : ''}</div>`; }).join('') || '<p class="muted small">아직 만든 문제가 없어요.</p>'}</div>
         <button class="btn primary big" id="qs-new"${lessons.length ? '' : ' disabled'}>＋ 새 문제 만들기</button>
         <p class="muted small">「고쳐 주세요」는 벌이 아니라 메모예요 · 몇 번이든 다시 보낼 수 있어요</p></div>`;
       el.querySelector('#qs-x').onclick = () => el.remove();
@@ -65,9 +65,9 @@ DS.Quest = (() => {
         const L = DS.Lessons.get(q.lesson);
         const steps = ['① 틀', '② 숫자', '③ 풀이', '④ 보내기'].map((t, i) => `<i class="${i + 1 < step ? 'd' : i + 1 === step ? 'on' : ''}">${t}</i>`).join('');
         let body = '';
-        if (step === 1) body = `<label>차시 <select id="qs-l">${lessons.map((l) => `<option value="${l.id}"${l.id === q.lesson ? ' selected' : ''}>${l.no}차시 · ${esc(l.title)}</option>`).join('')}</select></label>
+        if (step === 1) body = `<label>차시 <select id="qs-l">${lessons.map((l) => `<option value="${l.id}"${l.id === q.lesson ? ' selected' : ''}>${DS.Lessons.noText(l.no)}차시 · ${esc(l.title)}</option>`).join('')}</select></label>
           <p class="mail-sub"><b>어떤 문제 틀로?</b></p><div class="qs-frames">${fieldIds(L).map((id) => `<button class="btn${q.mid === id ? ' on' : ''}" data-mid="${id}">${esc(stepTitle(L, id))}<small>${esc(conceptTitle(L, id))}</small></button>`).join('')}</div>`;
-        else if (step === 2) body = `<p class="mail-sub"><b>내 문제 틀: ${L.no}차시 · ${esc(conceptTitle(L, q.mid) || stepTitle(L, q.mid))}</b></p><div class="paper qs-paper">${view(q)}</div><button class="btn" id="qs-roll">🎲 숫자 바꾸기</button><p class="muted small">숫자만 바꾸는 「틀 문제」 → 정답은 게임이 계산해서 틀린 정답이 나갈 수 없어요</p>`;
+        else if (step === 2) body = `<p class="mail-sub"><b>내 문제 틀: ${DS.Lessons.noText(L.no)}차시 · ${esc(conceptTitle(L, q.mid) || stepTitle(L, q.mid))}</b></p><div class="paper qs-paper">${view(q)}</div><button class="btn" id="qs-roll">🎲 숫자 바꾸기</button><p class="muted small">숫자만 바꾸는 「틀 문제」 → 정답은 게임이 계산해서 틀린 정답이 나갈 수 없어요</p>`;
         else if (step === 3) body = `<p class="mail-sub"><b>풀이 한 줄</b><span class="muted small">친구가 틀리면 보여 줘요</span></p><textarea id="qs-note" maxlength="120" rows="3" placeholder="예: U 에서 A 를 빼면 홀수만 남는다">${esc(q.note || '')}</textarea>`;
         else body = `<div class="paper qs-paper">${view(q)}<p class="qs-ans">풀이 · ${esc(q.note || '')}</p></div><p class="muted small">보내면 선생님이 확인해요 · ✅ 출제되면 친구들 🎯 복습에 「${esc(m.name || `${m.n}번`)}이 낸 문제」로 나와요</p>`;
         el.innerHTML = `<div class="quiz-box framed rs-box qs-box"><div class="quiz-head"><b>✏ 새 문제</b><button class="btn small" id="qs-back">◀ 출제 공방</button></div><div class="steps qs-steps">${steps}</div>${body}
@@ -110,7 +110,7 @@ DS.Quest = (() => {
       if (q) {
         const L = DS.Lessons.get(q.lesson) || {}, mineOk = all.filter((x) => x.c === q.c && Number(x.n) === Number(q.n) && x.st === 'ok');
         let solved = 0; for (const x of mineOk) solved += await solvedCount(q.c, x.id);
-        html = `<p class="mail-sub"><b>${esc(q.c)}반 ${esc(q.name || `${q.n}번`)}</b><span class="muted small">${L.no}차시 · ${esc(conceptTitle(L, q.mid) || stepTitle(L, q.mid))}</span></p>
+        html = `<p class="mail-sub"><b>${esc(q.c)}반 ${esc(q.name || `${q.n}번`)}</b><span class="muted small">${DS.Lessons.noText(L.no)}차시 · ${esc(conceptTitle(L, q.mid) || stepTitle(L, q.mid))}</span></p>
           <div class="paper qs-paper">${view(q)}<p class="qs-ans">풀이 「${esc(q.note || '')}」</p></div>
           <div class="row"><button class="btn primary" id="qr-ok">✅ 출제</button><button class="btn" id="qr-fix">🔁 고쳐 주세요</button></div>
           <input id="qr-memo" maxlength="80" placeholder="✎ 메모 (고쳐 주세요와 함께 · 예: (2) 답이 둘이 돼요)">

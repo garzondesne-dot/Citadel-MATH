@@ -19,7 +19,9 @@ DS.Lessons = (function () {
     list.push(pack);
   }
   const get = (id) => list.find((p) => p.id === id) || null;
-  return { list, register, get };
+  // 🔢 차시 표시 (2026-11-07 선생님: 7차시 = 6차시 이어서 → 게임 안에서는 「6·7차시」로) · 숫자 · 차시 객체 둘 다 받음
+  const noText = (x) => { const n = x && typeof x === 'object' ? x.no : x; return Number(n) === 6 ? '6·7' : n; };
+  return { list, register, get, noText };
 })();
 
 // 엄격한 연성 판정 (차시 묶음의 recipes·mistakes 로)

@@ -41,7 +41,7 @@ DS.Camp = (function () {
       const was = live; live = v;
       if (!document.getElementById('screen-camp').classList.contains('active')) return;
       watchRoom(); drawGate(); tutApply();
-      if (live && live.open && (!was || !was.open || was.code !== live.code) && liveSeen !== live.code) { liveSeen = live.code; showGate(); status(); DS.Sound.correct(); if (tutMode !== 'A') DS.UI.toast(`⚔ ${live.no ? `${live.no}차시 ` : ''}던전이 열렸어요! 오른쪽 빛나는 문을 눌러 들어가요`, 4200); }
+      if (live && live.open && (!was || !was.open || was.code !== live.code) && liveSeen !== live.code) { liveSeen = live.code; showGate(); status(); DS.Sound.correct(); if (tutMode !== 'A') DS.UI.toast(`⚔ ${live.no ? `${DS.Lessons.noText(live.no)}차시 ` : ''}던전이 열렸어요! 오른쪽 빛나는 문을 눌러 들어가요`, 4200); }
     }
     if (DS.Survey && !m.test) DS.Survey.watch(m, () => svDraw());
     if (riftStop) riftStop(); riftStop = m.test ? null : DS.Net.watch(`rift/${ck(m.c)}`, (v) => { const had = !!riftNow(); rifts = v || {}; if (document.getElementById('camp-gate')) drawGate(); if (!had && riftNow() && !(live && live.open)) DS.UI.toast(`⏳ ${riftNow().no}차시 이어하기 포털이 열렸어요! 오른쪽 문에서 남은 문제를 마저 해요`, 4200); });
@@ -106,7 +106,7 @@ DS.Camp = (function () {
       document.getElementById('camp').classList.add('tut-a'); stg.classList.add('tut-a'); co.classList.remove('block');
       if (gate) gate.classList.toggle('tut-spot', inClass());
       co.innerHTML = inClass()
-        ? `<div class="tut-box"><p>⚔ <b>${live.no ? `${live.no}차시 ` : ''}던전이 열렸어요!</b><br>오른쪽에 빛나는 <b>아치 문을 눌러</b> 입장해요. 친구들과 함께 몬스터를 물리쳐요! 👉</p></div>`
+        ? `<div class="tut-box"><p>⚔ <b>${live.no ? `${DS.Lessons.noText(live.no)}차시 ` : ''}던전이 열렸어요!</b><br>오른쪽에 빛나는 <b>아치 문을 눌러</b> 입장해요. 친구들과 함께 몬스터를 물리쳐요! 👉</p></div>`
         : '<div class="tut-box"><p>👋 <b>환영해요, 용사님!</b> 여기는 나만의 <b>내 캠프</b>이에요.<br>선생님이 수업을 열면 오른쪽 <b>아치 문</b>에 빛이 들어와요. 잠깐 기다려요!</p></div>';
       return;
     }
@@ -144,7 +144,7 @@ DS.Camp = (function () {
     el.classList.toggle('open', on); el.classList.toggle('rift', !!rf); document.querySelector('#camp .camp-stage').classList.toggle('gate-rift', !!rf);
     const lb = el.querySelector('.camp-label');
     if (me && me.teacher) { const t = me.teacher; DS.CampScene.gate(document.querySelector('#camp .camp-stage'), !!t.code); el.classList.toggle('open', !!t.code); if (lb) lb.innerHTML = t.code ? '⚔ 수업 진행 · 리모컨' : '⚔ 새 수업 열기 (교사 메뉴)'; return; } // 🏛 교사 개인 캠프 (2026-11-05)
-    if (lb) lb.innerHTML = on ? (DS.TRIAL && DS.Lessons.get(live.lesson) ? `<span>⚔ ${live.no ? `${live.no}차시 ` : ''}입장!</span><small class="gate-sub">${esc(DS.Lessons.get(live.lesson).title)}</small>` : `⚔ ${live.no ? `${live.no}차시 ` : ''}입장!`) : rf ? `⏳ ${rf.no}차시 이어하기 D-${Math.max(1, Math.ceil((rf.until - Date.now()) / 86400e3))}` : '🔒 차시 던전'; el.setAttribute('aria-label', on ? `${live.no ? `${live.no}차시 ` : ''}${name} 입장` : rf ? `${rf.no}차시 이어하기` : '차시 던전 (닫힘)');
+    if (lb) lb.innerHTML = on ? (DS.TRIAL && DS.Lessons.get(live.lesson) ? `<span>⚔ ${live.no ? `${DS.Lessons.noText(live.no)}차시 ` : ''}입장!</span><small class="gate-sub">${esc(DS.Lessons.get(live.lesson).title)}</small>` : `⚔ ${live.no ? `${DS.Lessons.noText(live.no)}차시 ` : ''}입장!`) : rf ? `⏳ ${DS.Lessons.noText(rf.no)}차시 이어하기 D-${Math.max(1, Math.ceil((rf.until - Date.now()) / 86400e3))}` : '🔒 차시 던전'; el.setAttribute('aria-label', on ? `${live.no ? `${DS.Lessons.noText(live.no)}차시 ` : ''}${name} 입장` : rf ? `${DS.Lessons.noText(rf.no)}차시 이어하기` : '차시 던전 (닫힘)');
   }
   // 그림 칸 하나 (배치표 시트에서 열·행)
   const sheet = (s, col, row, cls, style = '') => `<i class="${cls}" style="background-image:url('${base()}${s.src}');background-size:${s.cols * 100}% ${(s.rows || 1) * 100}%;background-position:${s.cols > 1 ? (col / (s.cols - 1)) * 100 : 0}% ${(s.rows || 1) > 1 ? (row / (s.rows - 1)) * 100 : 0}%;${style}"></i>`;
@@ -273,7 +273,7 @@ DS.Camp = (function () {
     const t = me.title && me.title !== 'none' && DS.Titles ? DS.Titles.get(me.title) : null;
     el.innerHTML = `<div class="st-head"><span class="lvb">Lv.${g ? g.lv : '-'}</span><span class="ttl">${g ? esc(g.title) : ''}</span><div class="st-exp"><i style="width:${g ? Math.round((100 * g.into) / g.next) : 0}%"></i><b>EXP ${g ? `${g.into} / ${g.next}` : '-'}</b></div></div>
       <div class="st-next">🎁 <b>다음 보상</b> — ${nextReward(L, owned, seals)}</div>
-      ${me.teacher ? '' : `<div class="st-go-row"><button class="btn primary big" id="camp-enter">${live && live.open ? `⚔ ${live.no ? `${live.no}차시 ` : ''}입장` : riftNow() ? `⏳ ${riftNow().no}차시 이어하기` : '🔒 수업 기다리는 중'}</button><button class="btn big" id="camp-me">🧙 내 용사</button></div>`}`; // 🧹 2026-11-07 정돈판: 능력치 · 장착 · 수집 줄 → 「🧙 내 용사」 창 안으로
+      ${me.teacher ? '' : `<div class="st-go-row"><button class="btn primary big" id="camp-enter">${live && live.open ? `⚔ ${live.no ? `${DS.Lessons.noText(live.no)}차시 ` : ''}입장` : riftNow() ? `⏳ ${riftNow().no}차시 이어하기` : '🔒 수업 기다리는 중'}</button><button class="btn big" id="camp-me">🧙 내 용사</button></div>`}`; // 🧹 2026-11-07 정돈판: 능력치 · 장착 · 수집 줄 → 「🧙 내 용사」 창 안으로
     { const ce = el.querySelector('#camp-enter'); if (ce) ce.onclick = () => { const g = $('#camp-gate'); if (g) g.click(); }; const cm = el.querySelector('#camp-me'); if (cm) cm.onclick = () => settings({ tab: 'hero' }); }
     document.querySelectorAll('#camp .sc-gn').forEach((e) => { e.textContent = L.gem != null ? L.gem : '·'; });
     void st; void sealMax; void U; void heroOpen; void heroAll; void t; void earned;
@@ -340,7 +340,7 @@ DS.Camp = (function () {
       return `<div class="sh-row"><span>${esc(st.title)}</span><span class="row">${vid && DS.Video.ok(vid) ? `<button class="btn small" data-v="${l.id}|${st.id}">🎬 영상</button>` : ''}${img ? `<button class="btn small" data-i="${l.id}|${st.id}">📄 개념</button>` : ''}</span></div>`;
     }).join('');
     el.innerHTML = `<div class="quiz-box framed rs-box"><div class="quiz-head"><b>📚 책장 — 개념 다시 보기</b><button class="btn small" id="sh-x">✕ 닫기</button></div>
-      ${open.length ? open.map((l) => `<details class="sh-l"${l === open[0] ? ' open' : ''}><summary><b>${l.no}차시 · ${esc(l.title)}</b></summary>${rows(l)}</details>`).join('') : '<p class="muted">선생님이 우리 반 수업을 열면 그 차시 개념이 꽂혀요.</p>'}</div>`;
+      ${open.length ? open.map((l) => `<details class="sh-l"${l === open[0] ? ' open' : ''}><summary><b>${DS.Lessons.noText(l.no)}차시 · ${esc(l.title)}</b></summary>${rows(l)}</details>`).join('') : '<p class="muted">선생님이 우리 반 수업을 열면 그 차시 개념이 꽂혀요.</p>'}</div>`;
     document.body.appendChild(el);
     el.querySelector('#sh-x').onclick = () => el.remove();
     const titleOf = (lid, sid) => (DS.Lessons.get(lid).steps.find((x) => x.id === sid) || {}).title || '';
@@ -364,7 +364,7 @@ DS.Camp = (function () {
       if (nt.list.length) ntHtml = `<div class="nt-box${nt.left ? ' open' : ''}"><p class="nt-h">${DS.Note.icon('book')} <b>오답노트</b> ${nt.left ? `<span class="nt-cnt">❗ 남은 문제 ${nt.left}</span>` : `<span class="nt-cnt ok">${DS.Note.icon('done')} 노트 완성!</span>`}</p>
         ${nt.list.slice().reverse().map((x) => { const todo = x.ids.map((id, i) => ({ id, st: x.mons[i] })).filter((o) => DS.Note.OPEN[o.st] || o.st === 'a'), bossTodo = x.boss.slice(0, x.hp).some((st) => DS.Note.OPEN[st] || st === 'a');
           const title = (id) => (x.L.steps.find((s) => s.id === id) || {}).title || id;
-          return `<div class="nt-les${x.left ? ' open' : ''}"><b>${x.L.no}차시</b>${x.absent ? ' <span class="muted small">불참</span>' : ''}${DS.Note.rows(x)}
+          return `<div class="nt-les${x.left ? ' open' : ''}"><b>${DS.Lessons.noText(x.L.no)}차시</b>${x.absent ? ' <span class="muted small">불참</span>' : ''}${DS.Note.rows(x)}
             ${todo.length || bossTodo ? `<div class="nt-go-list">${todo.map((o) => `<button class="btn small primary" data-go="${x.L.id}|${o.id}">🎯 바로 풀기 · ${esc(title(o.id))}</button>`).join('')}${bossTodo ? `<button class="btn small primary" data-go="${x.L.id}|boss">🎯 바로 풀기 · 👑 형성평가</button>` : ''}</div>` : ''}</div>`; }).join('')}
         <p class="muted small">${DS.Note.icon('x')} 틀림 · ${DS.Note.icon('-')} 안 풂 → 「🎯 바로 풀기」로 허수아비에서 풀면 ${DS.Note.icon('p')} 복습 완료</p></div>`;
     }
@@ -391,7 +391,7 @@ DS.Camp = (function () {
       <div class="nt-box open"><p class="nt-h">${DS.Note.icon('book')} <b>오답노트</b> <span class="nt-cnt">❗ 남은 문제 ${nt.left}</span></p>
         ${nt.list.slice().reverse().map((x) => { const todo = x.ids.map((id, i) => ({ id, st: x.mons[i] })).filter((q) => DS.Note.OPEN[q.st] || q.st === 'a'), bossTodo = x.boss.slice(0, x.hp).some((st) => DS.Note.OPEN[st] || st === 'a');
           const title = (id) => (x.L.steps.find((s) => s.id === id) || {}).title || id;
-          return `<div class="nt-les open"><b>${x.L.no}차시</b>${DS.Note.rows(x)}<div class="nt-go-list">${todo.map((q) => `<button class="btn small primary" data-go="${x.L.id}|${q.id}">🎯 바로 풀기 · ${esc(title(q.id))}</button>`).join('')}${bossTodo ? `<button class="btn small primary" data-go="${x.L.id}|boss">👑 형성평가 재대결</button>` : ''}</div></div>`; }).join('')}
+          return `<div class="nt-les open"><b>${DS.Lessons.noText(x.L.no)}차시</b>${DS.Note.rows(x)}<div class="nt-go-list">${todo.map((q) => `<button class="btn small primary" data-go="${x.L.id}|${q.id}">🎯 바로 풀기 · ${esc(title(q.id))}</button>`).join('')}${bossTodo ? `<button class="btn small primary" data-go="${x.L.id}|boss">👑 형성평가 재대결</button>` : ''}</div></div>`; }).join('')}
         <p class="muted small">${DS.Note.icon('x')} 틀림 · ${DS.Note.icon('-')} 안 풂 → 「🎯 바로 풀기」로 허수아비에서 풀면 ${DS.Note.icon('p')} 복습 완료</p></div>
       <p class="muted small">학생은 자기 기록으로 이 창을 봐요. 성적이 아니라 다음에 볼 것을 모아 둔 노트예요.</p>
       <div class="row"><button class="btn" id="nt-x">✕ 닫기</button><button class="btn primary" id="nt-bonus">🎯 복습 허수아비로</button></div></div>`;
@@ -471,7 +471,7 @@ DS.Camp = (function () {
         <p class="muted small">🗡 근접 · 🏹 원거리 · 데미지 · 보상은 모두 같아요 · 스킬은 ⚔ 스킬 탭에서</p>`; };
     const heroTab0 = () => `<div class="heroes set-grid">${L.heroes.map((h) => { const r = DS.Attack && DS.Attack.isRanged(h.id), af = DS.FX.affOf(h.id); return `<button class="hpick${h.id === hero ? ' on' : ''}${h.open ? '' : ' lock'}" data-h="${h.id}" title="${esc(h.cond || '')}"><b class="atk-badge${r ? ' r' : ''}">${r ? '🏹' : '🗡'}</b>${sock[h.id] ? '<i class="gemdot" title="스킬 고름"></i>' : ''}<b class="aff" title="친화 계열">${af.name.split(' ')[0]}</b>${DS.Art.hero(h.id, h.id === hero ? 'attack' : 'idle')}${h.open ? '' : '<b class="lk">🔒</b>'}</button>`; }).join('')}</div>
         <p class="muted small">🗡 근접 = 다가가서 · 🏹 원거리 = 탄을 날려서 · 오른쪽 아래 = 친화 계열 (같은 계열 스킬을 고르면 ★ 공명) · 파란 점 = 스킬 고름 · 데미지 · 보상은 모두 같아요</p>
-        ${T ? '' : `<p class="muted small">✨ 업적 용사: ① 1~3차시 도감 <b>${L.got} / ${L.need}</b>장 · ② 🎁 첫 레이드 · ③ 4~6차시 도감 · ④ 7~10차시 도감 · 금발 검사 = 🏆 업적 3개 / 💎 상점 용사 = 조각으로</p>`}`;
+        ${T ? '' : `<p class="muted small">✨ 업적 용사: ① 1~3차시 도감 <b>${L.got} / ${L.need}</b>장 · ② 🎁 첫 레이드 · ③ 4~6차시 도감 · ④ 8~11차시 도감 · 금발 검사 = 🏆 업적 3개 / 💎 상점 용사 = 조각으로</p>`}`;
     const gemTab = () => { const fx = fxNow(), aff = DS.FX.affOf(hero), reso = DS.FX.resonates(hero, fx), set = sock[hero] != null;
       return `<div class="sock"><canvas width="128" height="80" data-still="${fx}"></canvas><div><small>${heroName(hero)}의 스킬 · 친화 ${aff.name}</small><b>${esc(DS.FX.NAMES[fx] || '')} ${tierTag(fx)}${reso ? ' <span class="reso">★ 공명</span>' : ''}</b><small>${set ? '아래 표에서 누르면 바로 바뀌어요' : '고른 스킬 없음 → 친화 계열 Ⅰ 이 기본으로 나가요'}</small></div><div class="sock-btns">${set ? '<button class="btn small" id="sock-out">🔄 기본으로<br><small>스킬은 계속 가짐</small></button>' : ''}${!T && (L.fx.find((x) => x.id === fx) || {}).bought ? `<button class="btn small sock-sell" id="sock-sell">💰 되팔기<br><small>💎 +${DS.Gem.refundOf('fx', fx)} · 다시 잠김</small></button>` : ''}</div></div>
         ${T ? ([3, 's'].includes(DS.FX.tierOf(fx)) ? '<button class="btn small ult-btn" id="ult-demo">⚡ 필살기 미리보기 <small>(선생님: 시연을 다 맞힌 뒤 ⚔ 일반 · ⚡ 필살기 중 골라요)</small></button>' : '<p class="muted small">⚡ 선생님 필살기는 Ⅳ 전설(9개 모두) · 🪶 특별 스킬일 때 시연 뒤 고를 수 있어요</p>') : DS.Attack && DS.Attack.canUlt(fx, hero) ? '<button class="btn small ult-btn" id="ult-demo">⚡ 필살기 미리보기 <small>(특화 계열 Ⅳ 전설 스킬 + 퍼펙트일 때)</small></button>' : DS.FX.tierOf(fx) === 3 ? `<p class="muted small">⚡ 필살기는 이 용사의 특화(친화 ${DS.FX.affOf(hero).name}) Ⅳ 전설 스킬일 때만 나가요</p>` : ''}

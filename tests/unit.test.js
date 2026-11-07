@@ -57,13 +57,13 @@ const isPrime = (n) => n > 1 && [...Array(n).keys()].slice(2).every((d) => n % d
 check(isPrime(U.card('counter').ex.answer) && U.card('counter').ex.answer % 2 === 0, '반례: 짝수인 소수');
 // 엄격 순서 (4~10차시)
 check(!U.forge('minus', 'B', 'A', 5).ok && /순서/.test(U.forge('minus', 'B', 'A', 5).msg), 'B − A ≠ A − B');
-check(U.forge('then', 'q', 'p', 8).card.id === 'conv' && U.forge('then', 'p', 'q', 8).card.id === 'imp', '→ 순서가 명제 / 역을 가름');
-check(/대우/.test(U.forge('not', 'card:imp', null, 8).msg), '명제를 통째로 부정하면 대우가 아님');
+check(U.forge('then', 'q', 'p', 9).card.id === 'conv' && U.forge('then', 'p', 'q', 9).card.id === 'imp', '→ 순서가 명제 / 역을 가름');
+check(/대우/.test(U.forge('not', 'card:imp', null, 9).msg), '명제를 통째로 부정하면 대우가 아님');
 check(!U.forge('in', 'a', null, 2).ok, '두 칸 연산에 재료 하나면 실패');
-Object.keys(U.MISTAKES).forEach((k) => { const [op, rest] = k.split('|'); const p = rest.split(','); const g = U.forge(op, p[0], p[1] || null, 10); check(!g.ok && g.msg === U.MISTAKES[k], `실수 메시지(10차시) ${k}`); });
+Object.keys(U.MISTAKES).forEach((k) => { const [op, rest] = k.split('|'); const p = rest.split(','); const g = U.forge(op, p[0], p[1] || null, 11); check(!g.ok && g.msg === U.MISTAKES[k], `실수 메시지(10차시) ${k}`); });
 Object.keys(U.MISTAKES).forEach((k) => { const [op, rest] = k.split('|'); const p = rest.split(','); const g = U.forge(op, p[0], p[1] || null, 3); check(!g.ok && g.msg === U.MISTAKES[k] || (U.opOf(op).no > 3), `실수 메시지 ${k}`); });
 // 열리는 범위
-const want = { 2: 7, 3: 16, 4: 22, 5: 30, 6: 34, 7: 42, 8: 48, 9: 52, 10: 54 }; // 2026-11-05 재배열: 명제 · 부정 6→7 · 절대부등식 → 10
+const want = { 2: 7, 3: 16, 4: 22, 5: 30, 6: 34, 7: 34, 8: 42, 9: 48, 10: 52, 11: 54 }; // 2026-11-07: 7차시 = 6차시 이어서(새 카드 없음) · 명제 8~11차시
 Object.entries(want).forEach(([no, n]) => check(U.opens(Number(no)).length === n, `${no}차시까지 ${n}장 (${U.opens(Number(no)).length})`));
 check(U.opens(1).length === 0, '1차시 0장');
 if (fail) { console.error(`\n${fail}건 실패`); process.exit(1); }

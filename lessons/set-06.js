@@ -339,7 +339,7 @@
   DS.Lessons.register({
     id: 'set-06', no: 6,
     title: '드모르간의 법칙 · 집합 중단원 마무리',
-    unit: '공통수학2 Ⅱ. 집합과 명제 · 6차시',
+    unit: '공통수학2 Ⅱ. 집합과 명제 · 6·7차시',
     sheet: '학습과정 6차시 레이드용 v3',
     crops: CROPS_V3,
     theme: '01-burrow', // 던전 테마: 땅굴 (배경 dg-01 · 포털 portal-01)
@@ -359,8 +359,8 @@
     // 보강(bonus)은 2026-11-05 사용자 결정으로 삭제 — b1 · v2 명제 몬스터는 게임에 나오지 않음 (지난 기록 이어 셈용)
     items(id, seed, attempt) { return MONSTERS[id].make(attempt, DS.Rng(`${seed}|${id}|${attempt}`)); },
     WORDS: { TRUE, FALSE, NONE, NEG, SYL, PROP_EXTRA, NONE2, QD, QREP },
-    next: { title: '7차시 · 명제와 조건', ask: '「x 는 짝수이다」 는 참일까 거짓일까? x 가 정해지면?', link: '집합에서 배운 「모임」을 이용해 참 · 거짓을 가리는 문장(명제)과 조건, 진리집합을 배워요.' }, // 다음 수업
-    boss: { title: '6차시 형성평가 · 그림자 드래곤', sprite: '2@h250', items: 6, hpItems: 6, sets: BOSS, tags: ['c1', 'c2', 'c4', 'c4', 'c4', 'c1'],
+    next: { title: '8차시 · 명제와 조건 (7차시 = 6차시 이어서 · 설문 · 사진 채점)', ask: '「x 는 짝수이다」 는 참일까 거짓일까? x 가 정해지면?', link: '집합에서 배운 「모임」을 이용해 참 · 거짓을 가리는 문장(명제)과 조건, 진리집합을 배워요.' }, // 다음 수업
+    boss: { title: '6·7차시 형성평가 · 그림자 드래곤', sprite: '2@h250', items: 6, hpItems: 6, sets: BOSS, tags: ['c1', 'c2', 'c4', 'c4', 'c4', 'c1'],
       make(i, a, rng) { return a ? bossMake(i, a, rng) : BOSS1[i]; } }, // 재도전 1~3 = 같은 꼴 · 새 값 (시도 0 = 학습지 · 교과서 원문)
   });
 })();

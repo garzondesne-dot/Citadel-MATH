@@ -40,7 +40,7 @@ DS.Punch = (function () {
     const lanes = b.rows.slice(0, 8);
     const o = document.createElement('div'); o.className = `pm-ov rc-ov${opt.big ? ' big' : ''}`;
     o.innerHTML = `<div class="pm rc">
-      <div class="pm-head"><b>🏁 반대항 경주</b><span>${L.no ? `${L.no}차시 ` : ''}${esc(L.title)}${opt.overtime ? ' · ⏳ 연장전 결과' : ''}</span><button class="btn small pm-x">✕ 닫기</button></div>
+      <div class="pm-head"><b>🏁 반대항 경주</b><span>${L.no ? `${DS.Lessons.noText(L.no)}차시 ` : ''}${esc(L.title)}${opt.overtime ? ' · ⏳ 연장전 결과' : ''}</span><button class="btn small pm-x">✕ 닫기</button></div>
       <div class="rc-track${A.track && opt.big ? ' img' : ''}"${A.track && opt.big ? ` style="background-image:url('${DS.ASSETS.base}${A.track.src}')"` : ''}>
         <i class="rc-start"></i><i class="rc-goal"></i>
         ${lanes.map((r, i) => `<div class="rc-lane${me && r === me ? ' me' : ''}${r.near ? ' near' : ''}" data-i="${i}">

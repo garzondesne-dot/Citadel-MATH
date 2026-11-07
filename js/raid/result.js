@@ -72,7 +72,7 @@ DS.Result = (function () {
   // 🔎 자주 하는 실수 한 줄 (오개념 기록 · 점수 아님)
   const misLine = (mis) => { const t = DS.Mis ? DS.Mis.top(mis, 1)[0] : null; return t ? `<p class="rs-mis small">🔎 자주 하는 실수: ${esc(t.kid)} <span class="muted">(${t.wrong}번${t.fixed ? ` · ${t.fixed}번은 스스로 고침 ✔` : ''})</span></p>` : ''; };
   // 🔓 중단원던전 소개 (2026-11-03): 이 차시 수업이 열리면 그 차시 층이 열린다 — 결과 화면 · 종합상황실 마무리에서 한 줄
-  const floorText = (L) => { if (!L.no || !L.boss) return ''; const ev = DS.Lessons.list.filter((x) => x.rooms).flatMap((x) => x.rooms.filter((r) => r.no === L.no)).length; return `🔓 🎯 허수아비에서 <b>복습! ${L.no}차시</b>가 열렸어요 — 수업 문제 · 👑 형성평가 재대결${ev ? ` · 🏰 성채던전 새 방 ${ev}개` : ''}`; }; // 2026-11-05 성채던전 · 허수아비 개편
+  const floorText = (L) => { if (!L.no || !L.boss) return ''; const ev = DS.Lessons.list.filter((x) => x.rooms).flatMap((x) => x.rooms.filter((r) => r.no === L.no)).length; return `🔓 🎯 허수아비에서 <b>복습! ${DS.Lessons.noText(L.no)}차시</b>가 열렸어요 — 수업 문제 · 👑 형성평가 재대결${ev ? ` · 🏰 성채던전 새 방 ${ev}개` : ''}`; }; // 2026-11-05 성채던전 · 허수아비 개편
   const floorLine = (L) => (floorText(L) ? `<p class="rs-floor small">${floorText(L)} <span class="muted">(내 캠프 · 혼자 도전)</span></p>` : '');
   // 복습 추천 버튼: 학습지 개념 · 중단원던전(그 차시 층의 보강 · 재대결) · 영상
   function recs(L, r, prep, inClass) {
@@ -80,7 +80,7 @@ DS.Result = (function () {
     return r.weak.map((c) => {
       const img = DS.Act.hasImg(prep, c), vid = DS.Video.pick(L, prep.video, c);
       return `<div class="rs-rec"><b>📌 ${esc(r.titles[c] || c)}</b> <span class="muted small">첫 시도 ${r.conc[c].ok} / ${r.conc[c].total}</span>
-        <div class="row">${img ? `<button class="btn small" data-img="${c}">📄 학습지 개념 보기</button>` : ''}${L.no ? (inClass ? `<span class="muted small">🎯 수업이 끝나면 허수아비에서 복습! ${L.no}차시</span>` : `<button class="btn small" data-bonus="1">🎯 복습! ${L.no}차시 (허수아비)</button>`) : ''}${vid && DS.Video.ok(vid) ? `<button class="btn small" data-vid="${c}">🎬 설명 영상</button>` : ''}</div></div>`;
+        <div class="row">${img ? `<button class="btn small" data-img="${c}">📄 학습지 개념 보기</button>` : ''}${L.no ? (inClass ? `<span class="muted small">🎯 수업이 끝나면 허수아비에서 복습! ${DS.Lessons.noText(L.no)}차시</span>` : `<button class="btn small" data-bonus="1">🎯 복습! ${DS.Lessons.noText(L.no)}차시 (허수아비)</button>`) : ''}${vid && DS.Video.ok(vid) ? `<button class="btn small" data-vid="${c}">🎬 설명 영상</button>` : ''}</div></div>`;
     }).join('');
   }
   // 학생 폰: 수업이 끝나면 한 번 (같은 수업은 다시 저장하지 않음)
@@ -178,7 +178,7 @@ DS.Result = (function () {
     el.querySelector('#rs-ok').onclick = () => { el.remove(); then(); };
     const who = { name: (me && me.name) || '용사', hero: me ? me.hero : (DS.Test && DS.Test.active() ? 0 : 0) };
     if (!who.name || who.name === '용사') { try { const p = (R.players || {})[uid] || {}; who.name = p.nick || who.name; who.hero = p.hero || who.hero; } catch (e) { /* 무시 */ } }
-    const no = L.no ? `${L.no}차시 ` : '';
+    const no = L.no ? `${DS.Lessons.noText(L.no)}차시 ` : '';
     el.querySelector('#rs-card1').onclick = () => DS.Control.run(() => DS.ShareCard.preview(() => DS.ShareCard.battle({ L, r, me: who, lv, gained: g ? g.gained : 0, up, first, raids }), `오늘의 전투 기록 · ${no}${L.title}`, `⚔ 모두의 던전 ${no}${L.title} 클리어!${lv ? ` Lv.${lv.lv} ${lv.title}` : ''}${g && g.gained ? ` (+${g.gained} EXP)` : ''}`));
     el.querySelector('#rs-card2').onclick = () => DS.Control.run(() => DS.ShareCard.preview(() => DS.ShareCard.math({ L, r, me: who }), `오늘의 수학 노트 · ${no}${L.title}`, `📘 공통수학2 ${no}${L.title} — 오늘 배운 것과 다음 수업`));
     return null;
@@ -189,7 +189,7 @@ DS.Result = (function () {
     if (!ids.length) return '<p class="muted">아직 기록이 없어요. (v0.8.0 부터 수업이 끝날 때 쌓여요)</p>';
     return ids.map((id) => {
       const x = rec[id], L = DS.Lessons.get(id), names = x.names || {};
-      return `<div class="rs-hist"><b>${x.no ? `${x.no}차시` : ''} ${esc(L ? L.title : id)}</b> <span class="muted small">형성평가 ${x.boss || 0} / ${x.bossN || '-'} · +${x.xp || 0} EXP</span>
+      return `<div class="rs-hist"><b>${x.no ? `${DS.Lessons.noText(x.no)}차시` : ''} ${esc(L ? L.title : id)}</b> <span class="muted small">형성평가 ${x.boss || 0} / ${x.bossN || '-'} · +${x.xp || 0} EXP</span>
         ${Object.entries(x.conc || {}).map(([c, v]) => `<div class="rs-c"><span>${esc(names[c] || c)}</span><span class="rs-dots">${dots(v[0], v[1] || 1)}</span><span class="muted small">${v[0]} / ${v[1]}</span></div>`).join('')}
         ${misLine(x.mis)}${(x.weak || []).length ? `<p class="small">📌 복습 추천: <b>${x.weak.map((c) => esc(names[c] || c)).join(', ')}</b></p>` : '<p class="small okc">👍 고르게 잘함</p>'}</div>`;
     }).join('');

@@ -21,7 +21,7 @@ for (const id of SETS) {
 }
 check(S.LIST.every((s) => /^\[10공수2-02-0\d\]$/.test(s.code)), '코드 모양');
 check(S.level(85) === '도달' && S.level(80) === '도달' && S.level(79) === '근접' && S.level(50) === '근접' && S.level(49) === '미도달' && S.level(null) === '', '도달 구간');
-check(S.of('set-99', 'c1', 7) === '02-04', '새 차시 기본값(차시 번호)');
+check(S.of('set-99', 'c1', 8) === '02-04', '새 차시 기본값(차시 번호)');
 
 // (2) 형성평가 꼬리표
 for (const id of SETS) {

@@ -171,9 +171,9 @@ DS.Student = (function () {
     const sb = $('#st-set'); if (sb) sb.onclick = openShop;
     const bk = $('#st-back'); if (bk) bk.onclick = () => DS.Nav.leave(); // 확인 창 = nav.js ASK (수업에서 나갈까요?)
   }
-  const unitShort = () => String(L.unit || '').replace(/^공통수학\s*\d\s*/, '').replace(/\s*·\s*\d+차시\s*$/, '');
+  const unitShort = () => String(L.unit || '').replace(/^공통수학\s*\d\s*/, '').replace(/\s*·\s*[\d·]+차시\s*$/, '');
   const titleShort = () => { const t = String(L.title || '').split(' · ')[0]; return t.length > 11 ? `${t.slice(0, 10)}…` : t; };
-  const scTop = () => `<div class="sc-top"><button class="sc-rb" id="st-back" aria-label="메뉴화면 (수업에서 나가기)">◀</button><span class="sc-stage"><small>${esc(unitShort())}</small><b>${L.no ? `${L.no}차시 · ` : ''}${esc(titleShort())}</b></span>${test ? '' : `<button class="sc-rb sm" id="st-fb" aria-label="의견 보내기"${focusLock() ? ' disabled' : ''}>💬</button><button class="sc-gem${focusLock() ? ' off' : ''}" id="st-set" aria-label="💎 마정석 · 내 용사"${focusLock() ? ' disabled' : ''}>💎 <b class="sc-gn">${gemN == null ? '·' : gemN}</b><i>＋</i></button>`}</div>`;
+  const scTop = () => `<div class="sc-top"><button class="sc-rb" id="st-back" aria-label="메뉴화면 (수업에서 나가기)">◀</button><span class="sc-stage"><small>${esc(unitShort())}</small><b>${L.no ? `${DS.Lessons.noText(L.no)}차시 · ` : ''}${esc(titleShort())}</b></span>${test ? '' : `<button class="sc-rb sm" id="st-fb" aria-label="의견 보내기"${focusLock() ? ' disabled' : ''}>💬</button><button class="sc-gem${focusLock() ? ' off' : ''}" id="st-set" aria-label="💎 마정석 · 내 용사"${focusLock() ? ' disabled' : ''}>💎 <b class="sc-gn">${gemN == null ? '·' : gemN}</b><i>＋</i></button>`}</div>`;
   // HP 칸: HP 막대 · 몬스터 공격 게이지(주황 줄) · ⏳ 보스 문 남은 시간 (2026-11-07 결정 3: HP 칸 안에 한 줄)
   const hpBox = (left, max, gauge, label = 'HP') => `<div class="sc-hp"><b class="sc-l">${label}</b><div class="sc-bar"><i style="width:${max ? (100 * left) / max : 0}%"></i></div><span class="sc-n">${left} / ${max}</span>${gauge ? `<span class="sc-a">공격</span>${gauge}` : '<span></span><span></span>'}<span class="sc-door"></span></div>`;
   function header() {
@@ -251,7 +251,7 @@ DS.Student = (function () {
       <div class="lobby-scene bg-scene th-${L.theme || ''}"><p class="lb-title">${after ? `<i class="trophy-img sm" style="background-image:url('${DS.ASSETS.base}${DS.ASSETS.trophy}')"></i> ` : '⚔ '}${esc(dungeonName())} ${after ? '클리어!' : '단체 대기실'}</p>
         <div class="lb-h teacher" style="left:50%;bottom:20%">${DS.Art.hero(DS.ASSETS.heroes.teacher, 'idle', after && finale ? 'pairhop' : 'huff')}<i class="shadow"></i></div>
         ${crowd}<div class="lb-h me" style="left:34%;bottom:12%">${DS.Art.hero(myP().hero, 'idle', after && finale ? 'pairhop' : 'huff')}<i class="shadow"></i>${w && !(R.hide || {})[me] ? `<span class="lb-say">${esc(w.t)}</span>` : ''}</div>
-        <p class="lb-greet">${after ? '모두 수고했네! 오늘 배운 것 한마디씩 남기게' : `${L.no ? `${L.no}차시 ` : ''}${esc(L.title.split('·')[0].trim())} 던전에 온 것을 환영하네!`}</p></div>
+        <p class="lb-greet">${after ? '모두 수고했네! 오늘 배운 것 한마디씩 남기게' : `${L.no ? `${DS.Lessons.noText(L.no)}차시 ` : ''}${esc(L.title.split('·')[0].trim())} 던전에 온 것을 환영하네!`}</p></div>
       ${after ? `<div class="stamp-bar">📮 반드시 학습지 확인도장 받아가세요.</div>${sv ? DS.Survey.btnHtml('st-survey') : ''}<button class="btn primary" id="st-mine">⚔ 내 전투 결과 보기</button>${kr ? '<button class="btn sc-btn" id="st-klass">🏫 우리 반 학급 결과 보기</button>' : ''}${kr && DS.Punch && !DS.Act.punchOff(R) && R.meta.cls && L.no && !L.eval ? '<button class="btn" id="st-punch">🏁 반대항 경주</button>' : ''}${wordsForm(w)}${'' /* 2026-11-03 사용자 확정: 모루는 개인 캠프(모닥불)에서만 — 대기실에서는 열지 않는다 (수업 중엔 여유가 없음) */}`
         : test ? '<p class="center">친구들이 다 모이면 아래 「수업 시작 ▶」을 눌러요!</p>' : '<p class="center">선생님이 수업을 시작할 때까지 기다려요. 학습지를 꺼내 두세요!</p>'}</div>`;
     if (after) bindWords();

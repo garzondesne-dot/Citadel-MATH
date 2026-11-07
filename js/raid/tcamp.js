@@ -97,7 +97,7 @@ DS.TCamp = (function () {
     const closed = R && DS.Raid.isClosed(R), theme = L ? L.theme : '';
     const lb = g.querySelector('.camp-label'), on = !!(code && !closed && theme);
     DS.CampScene.gate(document.querySelector('#tcamp .tc-stage'), on); g.classList.toggle('open', on);
-    if (lb) lb.innerHTML = !code ? '⚔ 새 수업 열기 (교사 메뉴)' : !theme ? '⚔ 던전 불러오는 중…' : closed ? `🔒 수업 끝 · ${hall ? '종합상황실로' : '교사 화면 보기'}` : `⚔ ${L && L.no ? `${L.no}차시 ` : ''}${hall ? (R && DS.Raid.isLobby(R) ? '던전 입장' : '수업 중 · 종합상황실로') : '수업 진행'}`;
+    if (lb) lb.innerHTML = !code ? '⚔ 새 수업 열기 (교사 메뉴)' : !theme ? '⚔ 던전 불러오는 중…' : closed ? `🔒 수업 끝 · ${hall ? '종합상황실로' : '교사 화면 보기'}` : `⚔ ${L && L.no ? `${DS.Lessons.noText(L.no)}차시 ` : ''}${hall ? (R && DS.Raid.isLobby(R) ? '던전 입장' : '수업 중 · 종합상황실로') : '수업 진행'}`;
     drawLamps();
     const info = $('#tc-info');
     if (info && R) { const studs = Object.values(R.players || {}).filter((p) => !p.teacher).length; info.innerHTML = `${R.meta.cls ? `${esc(R.meta.cls)}반 · ` : ''}${L ? esc(L.title) : ''} · <b class="gold">입장 ${studs}명</b>${DS.Raid.isLobby(R) ? ' · 대기 중' : closed ? ' · 끝' : ' · 진행 중'}`; if (code && DS.Control) { info.insertAdjacentHTML('beforeend', DS.Control.lessonBtn(R)); DS.Control.bindLesson(info, code, R); } /* 🔄 차시 바꾸기 (대기 중만) */ }
@@ -127,7 +127,7 @@ DS.TCamp = (function () {
       if (nx && nextTried !== nx.code) {
         nextTried = nx.code;
         try { await DS.Hall.enter(nx.code, hallKey); return; } catch (e) {
-          const info = $('#tc-info'); if (info) info.innerHTML = `🔔 새 수업 <b class="gold">${esc(nx.cls)}반 ${nx.no ? `${nx.no}차시` : ''}</b> — <button class="btn small" id="tc-next">🖥 비밀번호 넣고 열기</button>`;
+          const info = $('#tc-info'); if (info) info.innerHTML = `🔔 새 수업 <b class="gold">${esc(nx.cls)}반 ${nx.no ? `${DS.Lessons.noText(nx.no)}차시` : ''}</b> — <button class="btn small" id="tc-next">🖥 비밀번호 넣고 열기</button>`;
           const b = $('#tc-next'); if (b) b.onclick = () => { const k = window.prompt('종합상황실 비밀번호 (교사 폰 위쪽 4자리)'); if (k) DS.Control.run(() => DS.Hall.enter(nx.code, k.trim())); };
         }
       }

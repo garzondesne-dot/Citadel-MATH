@@ -129,7 +129,7 @@ function verify(id, q, tag) {
 // (1) 방 구성
 check(L.eval && L.floor === 2 && L.steps.length === 0 && L.rooms.map((r) => r.id).join() === 'q01,q02,q03,q04,q05,q06,q07,q08,q09,q10,q11', '2층 = 11방');
 check(L.rooms.filter((r) => r.boss).map((r) => r.id).join() === 'q11' && L.rooms.filter((r) => r.photo).map((r) => r.id).join() === 'q07,q10', '👑 11 · 📷 07 · 10');
-check(L.rooms.map((r) => r.no).join() === '7,7,8,9,7,8,8,9,8,9,10', '열리는 차시 (제안서)');
+check(L.rooms.map((r) => r.no).join() === '8,8,9,10,8,9,9,10,9,10,11', '열리는 차시 (제안서)');
 
 // (2) 첫 시도 = 제안서 정답
 const ans = (q) => (q.type === 'multi' ? picked(q).join(',') : String(q.answer));

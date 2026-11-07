@@ -14,6 +14,7 @@ from playwright.sync_api import sync_playwright
 
 D = os.path.dirname(os.path.abspath(__file__))
 OUT = sys.argv[1] if len(sys.argv) > 1 else os.path.join(D, 'ws6-raid-v3.pdf')
+NO = sys.argv[2] if len(sys.argv) > 2 else '6' # 2026-11-07 선생님: 7차시 = 6차시 이어서 → 「6·7」 로 찍을 수 있게 (python3 gen_ws6v3.py 출력.pdf 6·7)
 S = '<b style="color:#d32f2f">★</b>'                 # 게임(몬스터)에 넣는 칸
 T = lambda n: f'<span class="mini" style="color:#a0620a">(교과서 78~79쪽 {n}번)</span>'
 MEMO = '<div class="memo" style="flex:1">✏ 풀이 · 메모</div>'
@@ -94,7 +95,7 @@ p2_left = f'''
 W = lambda h: f'<div style="height:{h}mm"></div>'
 fq = lambda n, s, h: f'<div class="q">{n}. {s}</div>{W(h)}'
 p2_right = f'''
-<div class="fa" style="margin-top:0"><div class="tt">✔ 6차시 형성평가 <span class="mini" style="font-weight:400">(혼자 풀기 · 6문항)</span>{GAME("보스")}</div>
+<div class="fa" style="margin-top:0"><div class="tt">✔ {NO}차시 형성평가 <span class="mini" style="font-weight:400">(혼자 풀기 · 6문항)</span>{GAME("보스")}</div>
 {fq(1, f'{v("(A ∪ B)")}{C} = {v("A")}{C} ( &nbsp;&nbsp; ) {v("B")}{C} &nbsp;(∪ 또는 ∩)', 10)}
 {fq(2, f'{v("n(U) = 20, n(A) = 7")}일 때 {v("n(A")}{C}) = ?', 11)}
 {fq(3, v("두 집합 A와 B에 대하여 n(A) = 18, n(B) = 23, n(A ∪ B) = 30일 때, n(A ∩ B)를 구하시오.") + " " + T("04"), 9)}
@@ -105,11 +106,11 @@ p2_right = f'''
 <div class="add mini">🏰 <b>더 해 보고 싶다면</b> — 수업 뒤 캠프의 성채던전 1층: 중단원 12문항(숫자를 바꾼 문제) · 🎯 허수아비 형성평가 재대결 | 다음 시간 = 명제와 조건 (7차시)</div>
 <div class="stampwrap" style="margin-top:auto"><div class="stamp"><span>확인 도장</span></div></div>'''
 
-rng = '공통수학2 Ⅱ. 집합과 명제 1. 집합 04. 드모르간의 법칙 · 중단원 마무리 (6차시) · 레이드용 v3'
-hd = header('6차시', rng)
+rng = f'공통수학2 Ⅱ. 집합과 명제 1. 집합 04. 드모르간의 법칙 · 중단원 마무리 ({NO}차시) · 레이드용 v3'
+hd = header(f'{NO}차시', rng)
 goal = '<div class="goal"><b>학습목표</b> ① 드모르간의 법칙을 이해하고 이용할 수 있다. ② 여집합·차집합의 원소의 개수를 구할 수 있다. ③ 집합 단원(중단원 마무리) 문제를 해결할 수 있다.</div>'
-pg = lambda g, l, r, n: f'<div class="page">{hd}{g}<div class="cols"><div class="col">{l}</div><div class="col">{r}</div></div><div class="pno">- 6차시 ({n}/2) -</div></div>'
-html = f"<!DOCTYPE html><html><head><meta charset='utf-8'><title>학습과정 6차시 레이드용 v3</title><style>{CSS}{EXTRA}</style></head><body>{pg(goal, p1_left, p1_right, 1)}{pg('', p2_left, p2_right, 2)}</body></html>"
+pg = lambda g, l, r, n: f'<div class="page">{hd}{g}<div class="cols"><div class="col">{l}</div><div class="col">{r}</div></div><div class="pno">- {NO}차시 ({n}/2) -</div></div>'
+html = f"<!DOCTYPE html><html><head><meta charset='utf-8'><title>학습과정 {NO}차시 레이드용 v3</title><style>{CSS}{EXTRA}</style></head><body>{pg(goal, p1_left, p1_right, 1)}{pg('', p2_left, p2_right, 2)}</body></html>"
 open(OUT.replace('.pdf', '.html'), 'w', encoding='utf-8').write(html)
 with sync_playwright() as p:
     b = p.chromium.launch(); page = b.new_page(); page.set_content(html); page.wait_for_timeout(300)

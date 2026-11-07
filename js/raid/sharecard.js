@@ -54,7 +54,7 @@ DS.ShareCard = (function () {
     if (bg) { const k = Math.max(W / bg.width, 760 / bg.height); g.drawImage(bg, (W - bg.width * k) / 2, 0, bg.width * k, bg.height * k); }
     const gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, '#070c1c55'); gr.addColorStop(0.45, '#070c1caa'); gr.addColorStop(0.62, '#070c1cf5'); g.fillStyle = gr; g.fillRect(0, 0, W, H);
     g.fillStyle = '#ffcf5a'; g.font = `700 64px ${PIX}`; g.textAlign = 'center'; g.fillText('⚔ 오늘의 전투 기록', W / 2, 96);
-    g.fillStyle = '#cfe0ff'; g.font = `30px ${PIX}`; g.fillText(`모두의 던전 · ${L.no ? `${L.no}차시 ` : ''}${L.title} · ${today()}`, W / 2, 146);
+    g.fillStyle = '#cfe0ff'; g.font = `30px ${PIX}`; g.fillText(`모두의 던전 · ${L.no ? `${DS.Lessons.noText(L.no)}차시 ` : ''}${L.title} · ${today()}`, W / 2, 146);
     // 용사 + 성장
     g.fillStyle = '#ffcf5a33'; g.beginPath(); g.ellipse(270, 560, 170, 34, 0, 0, Math.PI * 2); g.fill();
     await hero(g, me.hero, 'attack', 90, 210, 360);
@@ -95,7 +95,7 @@ DS.ShareCard = (function () {
     g.fillStyle = '#fbf8f0'; g.fillRect(0, 0, W, H);
     g.fillStyle = '#2d4a8a'; g.fillRect(0, 0, W, 170);
     g.fillStyle = '#fff'; g.textAlign = 'left'; g.font = `700 60px ${SANS}`; g.fillText('오늘의 수학 노트', 64, 92);
-    g.font = `30px ${SANS}`; g.fillStyle = '#dbe6ff'; g.fillText(`공통수학2 · ${L.no ? `${L.no}차시 ` : ''}${L.title} · ${today()}`, 64, 140);
+    g.font = `30px ${SANS}`; g.fillStyle = '#dbe6ff'; g.fillText(`공통수학2 · ${L.no ? `${DS.Lessons.noText(L.no)}차시 ` : ''}${L.title} · ${today()}`, 64, 140);
     let y = 230;
     const head = (t) => { g.fillStyle = '#2d4a8a'; g.font = `700 36px ${SANS}`; g.fillText(t, 64, y); g.fillStyle = '#2d4a8a33'; g.fillRect(64, y + 14, W - 128, 3); y += 60; };
     // 오늘 배운 것 + 나의 이해
@@ -152,7 +152,7 @@ DS.ShareCard = (function () {
     g.fillStyle = '#f6f9ff'; g.fillRect(0, 0, W, H);
     g.fillStyle = '#1f6f5c'; g.fillRect(0, 0, W, 180);
     g.fillStyle = '#fff'; g.textAlign = 'left'; g.font = `700 60px ${SANS}`; g.fillText('우리 반 수업 소식', 64, 96);
-    g.font = `30px ${SANS}`; g.fillStyle = '#d9fff3'; g.fillText(`${o.cls ? `${o.cls}반 · ` : ''}공통수학2 ${L.no ? `${L.no}차시 ` : ''}${L.title} · ${today()}`, 64, 146);
+    g.font = `30px ${SANS}`; g.fillStyle = '#d9fff3'; g.fillText(`${o.cls ? `${o.cls}반 · ` : ''}공통수학2 ${L.no ? `${DS.Lessons.noText(L.no)}차시 ` : ''}${L.title} · ${today()}`, 64, 146);
     let y = 250;
     const head = (t) => { g.fillStyle = '#1f6f5c'; g.font = `700 36px ${SANS}`; g.fillText(t, 64, y); g.fillStyle = '#1f6f5c33'; g.fillRect(64, y + 14, W - 128, 3); y += 58; };
     head('함께한 결과');
@@ -220,6 +220,6 @@ DS.ShareCard = (function () {
   }
   // v0.9.2: 🏫 학급 결과 — 마무리(또는 보스 격파) 뒤 어디서든 같은 카드 (교사 폰 · 교사 캠프 · 종합상황실 · 학생 대기실)
   const klassReady = (L, R) => !!(L && R && (DS.Raid.isEnd(L, R) || DS.Raid.isClosed(R) || DS.Raid.bossHp(L, R).won));
-  const klassOpen = (L, R, o = {}) => preview((praise) => klass({ L, R, cls: R.meta.cls, praise }), `우리 반 수업 소식 · ${L.no ? `${L.no}차시 ` : ''}${L.title}`, `🏫 ${R.meta.cls ? `${R.meta.cls}반 ` : ''}공통수학2 ${L.title} 수업 소식`, { praise: !!o.praise });
+  const klassOpen = (L, R, o = {}) => preview((praise) => klass({ L, R, cls: R.meta.cls, praise }), `우리 반 수업 소식 · ${L.no ? `${DS.Lessons.noText(L.no)}차시 ` : ''}${L.title}`, `🏫 ${R.meta.cls ? `${R.meta.cls}반 ` : ''}공통수학2 ${L.title} 수업 소식`, { praise: !!o.praise });
   return { battle, math, klass, classStats, share, preview, klassReady, klassOpen, W, H };
 })();

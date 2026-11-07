@@ -24,7 +24,7 @@ DS.Att = (function () {
     const row = (x, i) => { const on = !x.past && now >= x.from - 10 * 60e3 && now < x.to;
       return `<div class="td-row${on ? ' now' : ''}${x.past || x.closed ? ' done' : ''}">
         <span class="td-p"><b>${x.p}교시</b><small>${esc(S().BELLS[x.p][0])}</small></span>
-        <span class="td-c"><b>${esc(x.cls)}반</b> ${tag(x)}<br><span class="small">${x.no ? `<b>${x.no}차시</b> · ${esc(x.title)}` : esc(x.title)}${x.resume ? ` <span class="muted">(「${esc(x.resume.title || '')}」부터)</span>` : ''}</span><br><span class="small muted">${x.closed ? (x.doneL ? '✔ 끝 (다음 차시로)' : x.saved ? '⏸ 저장하고 끝 (같은 차시 이어서)' : '끝') : x.past ? '지남' : x.code ? '🟢 열림' : on ? '🟢 지금' : '⏳ 곧'}</span></span>
+        <span class="td-c"><b>${esc(x.cls)}반</b> ${tag(x)}<br><span class="small">${x.no ? `<b>${DS.Lessons.noText(x.no)}차시</b> · ${esc(x.title)}` : esc(x.title)}${x.resume ? ` <span class="muted">(「${esc(x.resume.title || '')}」부터)</span>` : ''}</span><br><span class="small muted">${x.closed ? (x.doneL ? '✔ 끝 (다음 차시로)' : x.saved ? '⏸ 저장하고 끝 (같은 차시 이어서)' : '끝') : x.past ? '지남' : x.code ? '🟢 열림' : on ? '🟢 지금' : '⏳ 곧'}</span></span>
         <span class="td-b">${x.code && !x.closed ? `<button class="btn small primary" data-rc="${x.code}">▶ 리모컨</button>` : !x.past && x.lesson ? `<button class="btn small primary" data-go="${i}">▶ 열기</button>` : ''}${!x.past && !x.code ? (x.extra ? `<button class="btn small" data-delx="${x.key}">보충 지우기</button>` : `<button class="btn small" data-off="${x.key}">쉼</button>`) : ''}</span></div>`; };
     el.innerHTML = head + list.map(row).join('');
     bindSc(el);
@@ -71,13 +71,13 @@ DS.Att = (function () {
     const draw = async () => {
       const pl = await S().plan({ week: man, reconcile: false, days: 14 }).catch(() => []), first = {};
       pl.forEach((x) => { const k = `${x.dow}-${x.p}`; if (!x.extra && !x.code && !x.past && !first[k]) first[k] = x; }); // 아직 안 한 다음 수업
-      m.querySelectorAll('[data-nx]').forEach((e) => { const x = first[e.dataset.nx]; e.innerHTML = x && x.no ? `${md(x.date)} · <b>${x.no}차시</b>${x.resume ? ' ⏸' : ''}` : ''; });
+      m.querySelectorAll('[data-nx]').forEach((e) => { const x = first[e.dataset.nx]; e.innerHTML = x && x.no ? `${md(x.date)} · <b>${DS.Lessons.noText(x.no)}차시</b>${x.resume ? ' ⏸' : ''}` : ''; });
       const prog = await S().getProg();
       const pc = progCls(), ptr = {}; for (const c of pc) ptr[c] = await S().pointer(c, prog).catch(() => null);
-      m.querySelector('#sc-prog').innerHTML = pc.map((c) => `<label class="sc-pr">${esc(c)}반 다음 <select data-pg="${esc(c)}">${L.map((l) => `<option value="${l.id}"${ptr[c] && ptr[c].id === l.id ? ' selected' : ''}>${l.no}차시 · ${esc(l.title).slice(0, 14)}</option>`).join('')}</select></label>`).join('');
+      m.querySelector('#sc-prog').innerHTML = pc.map((c) => `<label class="sc-pr">${esc(c)}반 다음 <select data-pg="${esc(c)}">${L.map((l) => `<option value="${l.id}"${ptr[c] && ptr[c].id === l.id ? ' selected' : ''}>${DS.Lessons.noText(l.no)}차시 · ${esc(l.title).slice(0, 14)}</option>`).join('')}</select></label>`).join('');
       m.querySelectorAll('[data-pg]').forEach((s) => (s.onchange = () => run(async () => { await S().setNext(s.dataset.pg, s.value); DS.UI.toast(`🎯 ${s.dataset.pg}반 다음 수업 = ${DS.Lessons.get(s.value).no}차시`); draw(); })));
       const byDay = {}; pl.forEach((x) => (byDay[x.date] = byDay[x.date] || []).push(x));
-      m.querySelector('#sc-plan').innerHTML = Object.entries(byDay).map(([d, xs]) => `<div class="sc-day"><b>${md(d)} (${S().DOW[xs[0].dow]})</b>${xs.map((x) => `<span class="sc-it${x.extra ? ' ex' : ''}">${x.p}교시 ${esc(x.cls)}반 · ${x.no ? `${x.no}차시` : '—'} ${tag(x)}${x.extra ? `<button class="btn small" data-delx="${x.key}">✕</button>` : `<button class="btn small" data-off="${x.key}" title="이번만 쉼">쉼</button>`}</span>`).join('')}</div>`).join('') || '<p class="muted small">앞으로 2주 동안 수업 칸이 없어요.</p>';
+      m.querySelector('#sc-plan').innerHTML = Object.entries(byDay).map(([d, xs]) => `<div class="sc-day"><b>${md(d)} (${S().DOW[xs[0].dow]})</b>${xs.map((x) => `<span class="sc-it${x.extra ? ' ex' : ''}">${x.p}교시 ${esc(x.cls)}반 · ${x.no ? `${DS.Lessons.noText(x.no)}차시` : '—'} ${tag(x)}${x.extra ? `<button class="btn small" data-delx="${x.key}">✕</button>` : `<button class="btn small" data-off="${x.key}" title="이번만 쉼">쉼</button>`}</span>`).join('')}</div>`).join('') || '<p class="muted small">앞으로 2주 동안 수업 칸이 없어요.</p>';
       m.querySelectorAll('#sc-plan [data-delx]').forEach((b) => (b.onclick = () => run(async () => { await S().removeExtra(b.dataset.delx); draw(); })));
       m.querySelectorAll('#sc-plan [data-off]').forEach((b) => (b.onclick = () => run(async () => { if (!window.confirm('이 수업을 이번만 쉴까요? (차시는 다음 칸으로 밀려요)')) return; await S().skipSlot(b.dataset.off, true); draw(); })));
     };
@@ -116,7 +116,7 @@ DS.Att = (function () {
     if (!vis.length) return '<p class="muted">아직 수업 기록이 없어요. 수업을 하면 학생이 들어온 시각으로 저절로 채워져요.</p>';
     const cnt = (r, k) => r.cells.filter((c) => c.s === k).length;
     return `<p class="muted small">⭕ 출석(시작 + 5분 안) · △ 지각 · ✕ 미입장(게임에 안 들어옴 — 폰 문제일 수 있어요) · 칸을 누르면 바꿀 수 있어요</p>
-      <div class="att-wrap"><table class="att-tbl"><tr><th>번호</th><th>이름</th>${vis.map((g) => { const w = W(g); return `<th title="${esc(g.memo || '')}">${w.date.slice(5).replace('-', '/')}<small>${w.dow}${g.p ? ` ${g.p}교시` : ''}<br>${g.no ? `${g.no}차시` : ''}</small></th>`; }).join('')}<th>⭕</th><th>△</th><th>✕·결석</th></tr>
+      <div class="att-wrap"><table class="att-tbl"><tr><th>번호</th><th>이름</th>${vis.map((g) => { const w = W(g); return `<th title="${esc(g.memo || '')}">${w.date.slice(5).replace('-', '/')}<small>${w.dow}${g.p ? ` ${g.p}교시` : ''}<br>${g.no ? `${DS.Lessons.noText(g.no)}차시` : ''}</small></th>`; }).join('')}<th>⭕</th><th>△</th><th>✕·결석</th></tr>
       ${grid.map((r) => `<tr><td>${r.n}</td><td class="nm">${esc(r.name)}</td>${r.cells.map((c) => `<td class="att-c s-${c.s}" data-code="${c.code}" data-n="${r.n}" title="${esc(c.m)}">${S().ST[c.s][0]}${c.m ? '<i>✎</i>' : ''}</td>`).join('')}<td>${cnt(r, 'o') + cnt(r, 'e')}</td><td>${cnt(r, 'l')}</td><td>${cnt(r, 'x') + cnt(r, 'a')}</td></tr>`).join('')}</table></div>
       <button class="btn" id="att-csv">📥 출석부 내려받기 (CSV)</button>`;
   }
@@ -125,7 +125,7 @@ DS.Att = (function () {
     if (!rows.length) return '<p class="muted">아직 수업 기록이 없어요.</p>';
     const prog = (g) => (!g.sum ? '-' : g.sum.boss ? '👑 보스 격파' : g.sum.end ? '끝까지' : g.sum.step < 0 ? '대기실까지' : `${g.sum.step + 1} / ${g.sum.steps} 단계`);
     return `<div class="att-wrap"><table class="att-tbl log-tbl"><tr><th>날짜</th><th>교시</th><th>차시</th><th>입장</th><th>진행</th><th>메모</th><th></th></tr>
-      ${rows.map((g) => { const w = W(g), L = DS.Lessons.get(g.lesson); return `<tr class="${g.hide ? 'hid' : ''}"><td>${w.date} (${w.dow})</td><td>${g.p ? `${g.p}교시` : `${w.hm} 바로`}</td><td>${L ? `${L.no}차시 · ${esc(L.title)}` : esc(g.lesson || '')}</td><td>${g.sum ? g.sum.n : 0}명</td><td>${prog(g)}</td><td>${esc(g.memo || '')}</td><td><button class="btn small" data-gather="${g.code}" title="수업 끝 전에 나간 학생 기록 · EXP 다시 만들기">📥 결과</button><button class="btn small" data-memo="${g.code}">✎</button><button class="btn small" data-hide="${g.code}">${g.hide ? '되살리기' : '빼기'}</button></td></tr>`; }).join('')}</table></div>
+      ${rows.map((g) => { const w = W(g), L = DS.Lessons.get(g.lesson); return `<tr class="${g.hide ? 'hid' : ''}"><td>${w.date} (${w.dow})</td><td>${g.p ? `${g.p}교시` : `${w.hm} 바로`}</td><td>${L ? `${DS.Lessons.noText(L.no)}차시 · ${esc(L.title)}` : esc(g.lesson || '')}</td><td>${g.sum ? g.sum.n : 0}명</td><td>${prog(g)}</td><td>${esc(g.memo || '')}</td><td><button class="btn small" data-gather="${g.code}" title="수업 끝 전에 나간 학생 기록 · EXP 다시 만들기">📥 결과</button><button class="btn small" data-memo="${g.code}">✎</button><button class="btn small" data-hide="${g.code}">${g.hide ? '되살리기' : '빼기'}</button></td></tr>`; }).join('')}</table></div>
       <p class="muted small">「빼기」 = 잘못 연 수업 · 연습을 출석부에서 뺌 (기록은 남음)</p><button class="btn" id="log-csv">📥 수업 일지 내려받기 (CSV)</button>`;
   }
   function bind(el) {

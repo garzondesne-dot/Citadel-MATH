@@ -157,7 +157,7 @@ DS.Dash = (function () {
         return `<td class="dash-c ${heat(p)}" title="${esc(l.title)}">${b}/${N}${star ? ic('star') : ''}${fill && b < N ? ` <b class="fillc">→ ${ic('p')}</b>` : ''}</td>`;
       };
       return `<p class="muted small">칸 제목을 누르면 정렬 · 차시 칸 = 형성평가(맞힌 문항 / 문항) · 색이 진할수록 높음 · 이름을 누르면 개인 기록</p>
-        <div class="st-scroll"><table class="r-table dash-t"><tr>${isAll() ? '<th>반</th>' : ''}${COLS.slice(0, 2).map(([k, t]) => `<th data-sort="${k}">${t}${arrow(k)}</th>`).join('')}${data.held.map((l) => `<th>${l.no}차시</th>`).join('')}${COLS.slice(2).map(([k, t]) => `<th data-sort="${k}">${t}${arrow(k)}</th>`).join('')}</tr>
+        <div class="st-scroll"><table class="r-table dash-t"><tr>${isAll() ? '<th>반</th>' : ''}${COLS.slice(0, 2).map(([k, t]) => `<th data-sort="${k}">${t}${arrow(k)}</th>`).join('')}${data.held.map((l) => `<th>${DS.Lessons.noText(l.no)}차시</th>`).join('')}${COLS.slice(2).map(([k, t]) => `<th data-sort="${k}">${t}${arrow(k)}</th>`).join('')}</tr>
         ${sorted().map((s) => `<tr>${isAll() ? `<td>${esc(s.cls)}</td>` : ''}<td>${s.n}</td><td><button class="linkish" data-who="${s.key}">${esc(s.name)}</button></td>${data.held.map((l) => lessonCell(s, l)).join('')}
           <td class="dash-c ${s.left ? 'nt-left' : 'ok'}">${s.left ? `❗ ${s.left}` : '✔'}</td>
           <td class="dash-c ${heat(s.part)}">${s.went}/${s.heldN}</td><td class="dash-c ${heat(s.boss)}">${show(s.boss)}</td><td class="dash-c ${heat(s.first)}">${show(s.first)}</td><td class="dash-c ${heat(s.ox)}">${show(s.ox)}</td>
@@ -191,7 +191,7 @@ DS.Dash = (function () {
       const rows = data.studs.map((s) => {
         const why = [];
         const miss = (s.held || data.held).slice(-2).filter((l) => !s.rec[l.id]);
-        if (miss.length) why.push(`최근 불참: ${miss.map((l) => `${l.no}차시`).join(', ')}`);
+        if (miss.length) why.push(`최근 불참: ${miss.map((l) => `${DS.Lessons.noText(l.no)}차시`).join(', ')}`);
         if (s.boss != null && s.boss < 50) why.push(`형성평가 평균 ${s.boss}%`);
         if (s.first != null && s.first < 50) why.push(`첫 시도 정답률 ${s.first}%`);
         if (s.went && !s.tries) why.push('허수아비 · 성채 0회');
@@ -199,7 +199,7 @@ DS.Dash = (function () {
         if (s.boss != null && s.first != null && s.boss >= 85 && s.first < 60 && s.fixed >= 6) why.push(`🔍 고침 패턴 확인 (형성평가 ${s.boss}% · 레이드 첫 시도 ${s.first}% · 고친 ${s.fixed}개)`);
         return { s, why };
       }).filter((r) => r.why.length);
-      return `<p class="muted small">최근 2차시(${isAll() ? '반마다' : last2.map((l) => `${l.no}차시`).join(' · ')}) 불참 · 형성평가 50% 미만 · 첫 시도 50% 미만 · 허수아비 · 성채 0회 · 🔍 고침 패턴(형성평가 85% 이상인데 레이드 첫 시도 60% 미만 · 고친 6개 이상 — 벌이 아니라 확인용)</p>
+      return `<p class="muted small">최근 2차시(${isAll() ? '반마다' : last2.map((l) => `${DS.Lessons.noText(l.no)}차시`).join(' · ')}) 불참 · 형성평가 50% 미만 · 첫 시도 50% 미만 · 허수아비 · 성채 0회 · 🔍 고침 패턴(형성평가 85% 이상인데 레이드 첫 시도 60% 미만 · 고친 6개 이상 — 벌이 아니라 확인용)</p>
         ${rows.length ? `<table class="r-table">${rows.map(({ s, why }) => `<tr><td>${isAll() ? `${esc(s.cls)} ` : ''}${s.n}번</td><td><button class="linkish" data-who="${s.key}">${esc(s.name)}</button></td><td>${why.map((w) => `<span class="dash-tag">${esc(w)}</span>`).join(' ')}</td></tr>`).join('')}</table>` : '<p class="okc">👍 지금 눈에 띄는 학생이 없어요.</p>'}`;
     },
     weak() {
@@ -207,7 +207,7 @@ DS.Dash = (function () {
       data.studs.forEach((s) => Object.entries(s.conc).forEach(([k, v]) => { const a = (agg[k] = agg[k] || { name: v.name, lesson: v.lesson, ok: 0, total: 0, who: 0 }); a.ok += v.ok; a.total += v.total; a.who += 1; }));
       const list = Object.values(agg).map((a) => ({ ...a, p: pct(a.ok, a.total) })).sort((a, b) => a.p - b.p);
       return `<p class="muted small">반 전체 첫 시도 정답률이 낮은 개념부터 — 다음 수업 복습 1순위</p>
-        <table class="r-table">${list.map((a, i) => `<tr><td>${i + 1}</td><td>${a.lesson.no}차시</td><td>${esc(a.name)}</td><td class="dash-c ${heat(a.p)}">${a.p}%</td><td class="muted small">${a.ok}/${a.total} · ${a.who}명</td></tr>`).join('')}</table>`;
+        <table class="r-table">${list.map((a, i) => `<tr><td>${i + 1}</td><td>${DS.Lessons.noText(a.lesson.no)}차시</td><td>${esc(a.name)}</td><td class="dash-c ${heat(a.p)}">${a.p}%</td><td class="muted small">${a.ok}/${a.total} · ${a.who}명</td></tr>`).join('')}</table>`;
     },
     std() {
       const S = DS.Standards; if (!S) return '';
@@ -279,7 +279,7 @@ DS.Dash = (function () {
     if (!DS.Survey) return '<p class="muted">설문 모듈이 없어요.</p>';
     if (svFor !== svClasses().join(',') || !sv) { if (svFor !== svClasses().join(',')) svLoad(); return '<p class="muted">설문 불러오는 중…</p>'; }
     const maxNo = Math.max(0, ...data.held.map((l) => l.no || 0));
-    const ctl = sv.map((p) => `<tr><td>${esc(p.c)}반</td><td>${p.st && p.st.open ? `<b class="gold">열림 · ${p.st.no}차시</b>` : '<span class="muted">닫힘</span>'}</td><td>${p.done}/${p.size}명 응답 · 응답 ${p.list.length}개</td>
+    const ctl = sv.map((p) => `<tr><td>${esc(p.c)}반</td><td>${p.st && p.st.open ? `<b class="gold">열림 · ${DS.Lessons.noText(p.st.no)}차시</b>` : '<span class="muted">닫힘</span>'}</td><td>${p.done}/${p.size}명 응답 · 응답 ${p.list.length}개</td>
       <td>${p.st && p.st.open ? `<button class="btn small" data-svc="${esc(p.c)}" data-on="0">✕ 닫기</button>` : `<button class="btn small" data-svc="${esc(p.c)}" data-on="1">열기</button>`}</td></tr>`).join('');
     const all = sv.flatMap((p) => p.list), S = DS.Survey.summary(all);
     const pMax = Math.max(1, ...S.picks.map((x) => x.n)), cMax = Math.max(1, ...S.cmp.map((x) => x.n));
@@ -293,7 +293,7 @@ DS.Dash = (function () {
       <h3>10. 달라진 점 <span class="muted small">(${S.say.length}개)</span></h3><ul class="sv-texts">${S.say.map((t) => `<li>${esc(t)}</li>`).join('') || '<li class="muted">없음</li>'}</ul>
       <h3>11. 바꿨으면 하는 점 <span class="muted small">(${S.want.length}개)</span></h3><ul class="sv-texts">${S.want.map((t) => `<li>${esc(t)}</li>`).join('') || '<li class="muted">없음</li>'}</ul>
       <button class="btn" id="sv-csv">📥 설문 응답 내려받기 (CSV · 이름 없음)</button>`;
-    const W = words ? `<h3>💬 마지막 한마디 <span class="muted small">(${words.length}개 · 수업 화면에 이미 보인 말풍선)</span></h3><ul class="sv-texts">${words.map((w) => `<li><span class="muted small">${esc(w.cls)} · ${w.no ? `${w.no}차시` : ''}</span> ${esc(w.t)}</li>`).join('') || '<li class="muted">없음</li>'}</ul>` : '<button class="btn small" id="sv-words">💬 마지막 한마디 모아 보기</button>';
+    const W = words ? `<h3>💬 마지막 한마디 <span class="muted small">(${words.length}개 · 수업 화면에 이미 보인 말풍선)</span></h3><ul class="sv-texts">${words.map((w) => `<li><span class="muted small">${esc(w.cls)} · ${w.no ? `${DS.Lessons.noText(w.no)}차시` : ''}</span> ${esc(w.t)}</li>`).join('') || '<li class="muted">없음</li>'}</ul>` : '<button class="btn small" id="sv-words">💬 마지막 한마디 모아 보기</button>';
     return `<p class="muted small">🔒 응답에는 이름 · 번호 · 시각이 저장되지 않아요. 「응답한 학생 수」만 따로 세요 (한 번만 · +5 EXP).</p>
       <table class="r-table sv-ctlt"><tr><th>반</th><th>상태</th><th>응답</th><th></th></tr>${ctl}</table>
       <p class="muted small">열 때 차시 (선생님이 고름 · 이 기기 기억 · 기록의 마지막 차시 ${maxNo || '?'}) <input id="sv-no" type="number" min="1" max="30" value="${DS.Survey.pickNo ? DS.Survey.pickNo() : maxNo || 10}" class="sv-no"> · <button class="btn small" id="sv-re">🔄 새로 고침</button></p>
@@ -328,7 +328,7 @@ DS.Dash = (function () {
     const gems = {}; for (const c of [...new Set(sorted().map((s) => s.cls))]) gems[c] = (await DS.Net.get(`gem/${String(c).replace(/[.#$/[\]]/g, '_')}`).catch(() => null)) || {};
     const cv = (s) => (((gems[s.cls] || {})[s.n] || {}).conv) || null;
     const cvAt = (x) => (x && Number(x.at) ? new Date(Number(x.at)).toLocaleString('ko-KR') : '');
-    const head = [...(isAll() ? ['반'] : []), '번호', '이름', ...data.held.map((l) => `${l.no}차시 형성평가`), '남은 문제(오답노트)', '참여', '형성평가 평균(%)', '첫 시도 정답률(%)', '재도전으로 고친 수', '그림 힌트(소문제)', '업적', '보강 도전', '카드', '레벨', 'EXP', '전환 시각', '전환 때 업적', '전환 전 깃털', '깃털→💎', '💎 소급 카드', '카드→💎', '전환 전 💎', '전환 뒤 💎'];
+    const head = [...(isAll() ? ['반'] : []), '번호', '이름', ...data.held.map((l) => `${DS.Lessons.noText(l.no)}차시 형성평가`), '남은 문제(오답노트)', '참여', '형성평가 평균(%)', '첫 시도 정답률(%)', '재도전으로 고친 수', '그림 힌트(소문제)', '업적', '보강 도전', '카드', '레벨', 'EXP', '전환 시각', '전환 때 업적', '전환 전 깃털', '깃털→💎', '💎 소급 카드', '카드→💎', '전환 전 💎', '전환 뒤 💎'];
     const rows = sorted().map((s) => [...(isAll() ? [s.cls] : []), s.n, s.name, ...data.held.map((l) => { const r = s.rec[l.id], fill = !!(((s.bon || {})[l.id] || {}).boss || {}).clear; if (!r) return fill ? '보충' : '불참'; const N = Number(r.bossN) || 0; return `${Math.min(Number(r.boss) || 0, N)}/${N}${fill ? ' (보충)' : ''}`; }), s.left, `${s.went}/${s.heldN}`, s.boss ?? '', s.first ?? '', s.fixed, s.hints || 0, s.seals, s.tries, s.cards, s.lv, s.xp, ...((x) => (x ? [cvAt(x), x.seals, x.feather, x.featherGem, x.cardsUnpaid, x.cardGem, x.gemBefore, x.gemAfter] : ['', '', '', '', '', '', '', '']))(cv(s))]);
     const csv = '﻿' + [head, ...rows].map((r) => r.map(q).join(',')).join('\r\n');
     const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));

@@ -145,10 +145,10 @@ DS.Control = (function () {
     const ov = document.createElement('div'); ov.className = 'modal'; document.body.appendChild(ov);
     ov.innerHTML = `<div class="quiz-box framed ls-box"><div class="set-head"><h2>🔄 차시 바꾸기</h2><button class="btn" data-lsx>✕ 닫기</button></div>
       <p class="muted small">같은 수업 코드 그대로 — 들어와 있는 학생 폰과 종합실이 바로 새 차시로 바뀌어요. (수업 시작 전에만)</p>
-      <div class="ls-grid">${list.map((x) => `<button class="btn${x.id === cur ? ' on' : ''}" data-ls="${x.id}"${x.id === cur ? ' disabled' : ''}><b>${x.no}차시</b>${x.id === cur ? ' · 지금' : ''}<small>${esc(x.title)}</small></button>`).join('')}</div></div>`;
+      <div class="ls-grid">${list.map((x) => `<button class="btn${x.id === cur ? ' on' : ''}" data-ls="${x.id}"${x.id === cur ? ' disabled' : ''}><b>${DS.Lessons.noText(x.no)}차시</b>${x.id === cur ? ' · 지금' : ''}<small>${esc(x.title)}</small></button>`).join('')}</div></div>`;
     const close = () => ov.remove();
     ov.querySelector('[data-lsx]').onclick = close; ov.addEventListener('click', (e) => { if (e.target === ov) close(); });
-    ov.querySelectorAll('[data-ls]').forEach((b) => (b.onclick = () => run(async () => { await Act().switchLesson(code, R, b.dataset.ls); close(); const L2 = DS.Lessons.get(b.dataset.ls); DS.UI.toast(`🔄 ${L2.no}차시로 바꿨어요 — 학생들은 그대로 기다리면 돼요`); })));
+    ov.querySelectorAll('[data-ls]').forEach((b) => (b.onclick = () => run(async () => { await Act().switchLesson(code, R, b.dataset.ls); close(); const L2 = DS.Lessons.get(b.dataset.ls); DS.UI.toast(`🔄 ${DS.Lessons.noText(L2.no)}차시로 바꿨어요 — 학생들은 그대로 기다리면 돼요`); })));
   }
   // 📝 풀이 시간 조절 칸 (2026-11-06): 몬스터 · 형성평가 단계에서 · 켜져 있으면 남은 시간 + 지금 풀기 · +30초 / 꺼져 있으면 켜기 + 기본 초
   function solveHtml(L, R) {

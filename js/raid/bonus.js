@@ -74,7 +74,7 @@ DS.Bonus = (function () {
   }
   // 몬스터 · 소문제 (👑 형성평가 재대결 = 세트 1 · 2 를 번갈아, 체력 문항까지만)
   const isField = (L, mid) => L.steps.some((st) => st.kind === 'monster' && st.id === mid); // 📕 수업 문제 (오답노트 복습)
-  const monOf = (L, mid) => (mid === 'boss' ? { title: `👑 ${L.no}차시 형성평가 재대결`, sprite: L.boss.sprite, note: '' } : isField(L, mid) ? { ...L.monsters[mid], title: (L.steps.find((st) => st.id === mid) || {}).title || L.monsters[mid].title || mid } : L.monsters[mid]);
+  const monOf = (L, mid) => (mid === 'boss' ? { title: `👑 ${DS.Lessons.noText(L.no)}차시 형성평가 재대결`, sprite: L.boss.sprite, note: '' } : isField(L, mid) ? { ...L.monsters[mid], title: (L.steps.find((st) => st.id === mid) || {}).title || L.monsters[mid].title || mid } : L.monsters[mid]);
   // 👑 형성평가 재대결 (2026-11-05): 첫 판 = 학습지 그대로 · 다음 판부터 문항마다 숫자가 바뀐 새 문제 (L.boss.make · 없으면 세트 1 ↔ 2)
   const itemsOf = (L, mid, seed, attempt) => (mid === 'boss' ? Array.from({ length: L.boss.hpItems || L.boss.items }, (_, i) => (!attempt ? L.boss.sets[1][i] : L.boss.make ? L.boss.make(i, attempt, DS.Rng(`${seed}|boss|${i}|${attempt}`)) : (L.boss.sets[attempt % 2 === 0 ? 1 : 2] || L.boss.sets[1])[i])) : L.items(mid, seed, attempt));
   // 화려한 이펙트 열림 { fire: true, … }
@@ -180,9 +180,9 @@ DS.Bonus = (function () {
       const tile = (r) => {
         const rr = roomRec(mine, L, r.id), open = S.isOpen(r), m = L.monsters[r.id], isNew = fresh.has(`${L.id}/${r.id}`);
         const st = !open ? 'lock' : rr.clear ? 'clear' : rr.tries ? 'drop' : 'ready';
-        const sub = open && !rr.clear && rr.pend ? '⏳ 선생님 확인 중' : open && !rr.clear && rr.ans && r.photo ? '📷 풀이 사진 올리기' : !open ? (!S.usable(r) ? '📷 사진 채점 준비 중' : r.boss && (all() || r.no <= no) ? `${S.cleared} / ${S.need} 처치하면 열려요` : `${r.no}차시 수업 뒤`) : rr.clear ? '✔ 처치' : rr.tries ? `💧 ${rr.tries}번 도전` : '⚔ 도전';
+        const sub = open && !rr.clear && rr.pend ? '⏳ 선생님 확인 중' : open && !rr.clear && rr.ans && r.photo ? '📷 풀이 사진 올리기' : !open ? (!S.usable(r) ? '📷 사진 채점 준비 중' : r.boss && (all() || r.no <= no) ? `${S.cleared} / ${S.need} 처치하면 열려요` : `${DS.Lessons.noText(r.no)}차시 수업 뒤`) : rr.clear ? '✔ 처치' : rr.tries ? `💧 ${rr.tries}번 도전` : '⚔ 도전';
         const gift = r.photo && open && !rr.clear && !mathOpen ? '<i class="cs-gift" title="풀이 사진까지 통과하면 수식 책사(남 · 여) 용사 해금">🎁 🧑‍🎓</i>' : '';
-        return `<button class="cs-room ${st}${r.boss ? ' boss' : ''}"${open ? ` data-fight="${L.id}|${r.id}"` : ` data-lockmsg="${esc(!S.usable(r) ? '서술형 방이에요. 선생님이 📷 사진 채점을 켜면 열려요' : r.boss ? `👑 보스 방은 열린 방 ${S.need}개를 처치하면 열려요 (지금 ${S.cleared}개)` : `${r.no}차시 수업을 하면 열려요`)}"`}>
+        return `<button class="cs-room ${st}${r.boss ? ' boss' : ''}"${open ? ` data-fight="${L.id}|${r.id}"` : ` data-lockmsg="${esc(!S.usable(r) ? '서술형 방이에요. 선생님이 📷 사진 채점을 켜면 열려요' : r.boss ? `👑 보스 방은 열린 방 ${S.need}개를 처치하면 열려요 (지금 ${S.cleared}개)` : `${DS.Lessons.noText(r.no)}차시 수업을 하면 열려요`)}"`}>
           ${isNew ? '<span class="cs-rnew">NEW</span>' : ''}${!open && r.boss && !sealed ? sealTag() : ''}<span class="cs-no">${r.id.slice(1)}</span>${open ? DS.Art.monster(m.sprite, rr.clear ? 'down' : 'idle') : '<i class="cs-lockic">🔒</i>'}
           <span class="cs-rt">${esc(r.title.replace(/^👑 /, '').replace(/^\d+ /, ''))}</span><span class="cs-rs">${sub}</span>${gift}${open && !rr.clear && !gLog(`room_${L.id}_${r.id}`) ? gTag((r.boss ? DS.Gem.G.roomBoss : DS.Gem.G.room) + (r.boss && !sealed ? DS.Gem.G.seal : 0)) : ''}${open && r.boss && !rr.clear && !sealed ? sealTag() : ''}</button>`;
       };
@@ -223,13 +223,13 @@ DS.Bonus = (function () {
     await N().set(p, true).catch(() => {});
     if (DS.Grow) DS.Grow.add(me, { rift: 1 }, `rift_${rift.lesson}`).catch(() => {});
     if (DS.Gem) DS.Gem.add(me, DS.Gem.G.rift, `rift_${rift.lesson}`, '이어하기 완주').catch(() => {});
-    DS.Sound.correct(); DS.UI.toast(`⏳ ${rift.no}차시 이어하기 완주! 끝까지 간 용사 🎉`, 3600);
+    DS.Sound.correct(); DS.UI.toast(`⏳ ${DS.Lessons.noText(rift.no)}차시 이어하기 완주! 끝까지 간 용사 🎉`, 3600);
   }
   // ✏ 친구가 낸 문제 (출제 공방에서 선생님이 ✅ 출제한 것 · 숫자는 친구가 고른 그대로)
   function questHtml() {
     if (!quests.length) return '';
     return `<div class="panel framed bn-card bn-quests"><p class="bn-h"><b>✏ 친구가 낸 문제</b><span class="muted small">${quests.filter((q) => !q.solved).length}개 새로</span></p><div class="bn-list">${quests.map((q) => { const L = DS.Lessons.get(q.lesson); if (!L) return ''; const t = (L.steps.find((x) => x.id === q.mid) || {}).title || q.mid;
-      return `<div class="bn-row${q.solved ? ' clear' : ''}" data-qfight="${q.id}">${DS.Art.monster((L.monsters[q.mid] || {}).sprite, q.solved ? 'down' : 'idle')}<span><b>${esc(q.name || '')}</b>이 낸 문제 · ${L.no}차시 ${esc(t)}${q.solved ? ' <span class="muted small">✔ 풀었어요</span>' : ''}</span></div>`; }).join('')}</div></div>`;
+      return `<div class="bn-row${q.solved ? ' clear' : ''}" data-qfight="${q.id}">${DS.Art.monster((L.monsters[q.mid] || {}).sprite, q.solved ? 'down' : 'idle')}<span><b>${esc(q.name || '')}</b>이 낸 문제 · ${DS.Lessons.noText(L.no)}차시 ${esc(t)}${q.solved ? ' <span class="muted small">✔ 풀었어요</span>' : ''}</span></div>`; }).join('')}</div></div>`;
   }
   function renderTrain() {
     const sl = seals(mine), open = lessons().filter((l) => (rift ? l.id === rift.lesson : all() || l.no <= no)).sort((a, b) => (noteOf(b).left ? 1 : 0) - (noteOf(a).left ? 1 : 0) || b.no - a.no);
@@ -238,7 +238,7 @@ DS.Bonus = (function () {
       const ids = [...fieldIds(l), 'boss'];
       const stOf = (id) => (id === 'boss' || x.none ? null : x.mons[x.ids.indexOf(id)]);
       const order = ids.slice().sort((a, b) => { const o = (id) => { const s = stOf(id); return s && (DS.Note.OPEN[s] || s === 'a') ? 0 : id === 'boss' ? 1 : 2; }; return o(a) - o(b); });
-      return `<div class="panel framed bn-card${sealed ? ' sealed' : ''}${x.left ? ' nt-left' : ''}"><p class="bn-h"><b>🎯 복습! ${l.no}차시 · ${esc(l.title)}</b>${x.none ? '' : x.left ? `<span class="nt-cnt">❗ 남은 문제 ${x.left}</span>${!gLog(`note_${l.id}`) ? gTag(DS.Gem.G.note, ' 다 풀면') : ''}` : '<span class="nt-cnt ok">✔ 복습 완료</span>'}${sealed ? '<span class="bn-stamp">🏆 업적</span>' : ''}</p>
+      return `<div class="panel framed bn-card${sealed ? ' sealed' : ''}${x.left ? ' nt-left' : ''}"><p class="bn-h"><b>🎯 복습! ${DS.Lessons.noText(l.no)}차시 · ${esc(l.title)}</b>${x.none ? '' : x.left ? `<span class="nt-cnt">❗ 남은 문제 ${x.left}</span>${!gLog(`note_${l.id}`) ? gTag(DS.Gem.G.note, ' 다 풀면') : ''}` : '<span class="nt-cnt ok">✔ 복습 완료</span>'}${sealed ? '<span class="bn-stamp">🏆 업적</span>' : ''}</p>
         <div class="bn-cpts"><button class="btn small" data-shelf="${l.id}">📚 개념 다시 보기 (🎬 · 📄)</button>${(() => { const cs = DS.Unit ? DS.Unit.CARDS.filter((c) => c.no === l.no) : []; if (!cs.length || all()) return ''; return `<button class="btn small fg-go" data-forge>⚒ 이 차시 개념 카드 ${cs.filter((c) => cardsMine[c.id]).length} / ${cs.length} · 모루로 ▶</button>`; })()}</div>
         ${x.none ? '' : DS.Note.rows(x)}
         <div class="bn-list">${order.map((id) => { const s = stOf(id), r = rec[id] || {}, m = monOf(l, id), need = s && (DS.Note.OPEN[s] || s === 'a'), bossNeed = id === 'boss' && !r.clear;
@@ -246,7 +246,7 @@ DS.Bonus = (function () {
     };
     const rx = rift && open[0] ? noteOf(open[0]) : null, rdone = rx && !rx.none && rx.left === 0, rdays = rift ? Math.max(1, Math.ceil((rift.until - Date.now()) / 86400e3)) : 0;
     if (rift && rdone && me && !all()) riftDone();
-    $('#bonus').innerHTML = rift ? `<div class="bn-top"><button class="btn small" id="bn-back">◀ 내 캠프</button><b>⏳ ${rift.no}차시 이어하기</b><span class="bn-seal">D-${rdays}</span></div>
+    $('#bonus').innerHTML = rift ? `<div class="bn-top"><button class="btn small" id="bn-back">◀ 내 캠프</button><b>⏳ ${DS.Lessons.noText(rift.no)}차시 이어하기</b><span class="bn-seal">D-${rdays}</span></div>
       <div class="rift-head${rdone ? ' done' : ''}"><p>${rdone ? '✔ <b>이어하기 완주!</b> 끝까지 해낸 용사예요.' : `수업 시간이 모자라 멈춘 던전이에요. <b>남은 몬스터 · 👑 형성평가</b>를 ${rdays}일 안에 마저 해요. 완주하면 보상!`}</p><span class="muted small">📚 못 본 개념은 차시 카드의 「📚 개념 다시 보기」에서 다시 볼 수 있어요 · 기한이 지나도 🎯 허수아비에서 계속 풀 수 있어요 (벌 없음)</span></div>
       ${open.map(card).join('')}` : `<div class="bn-top"><button class="btn small" id="bn-back">◀ ${preview ? '교사 캠프' : '내 캠프'}</button><b>🎯 복습 허수아비</b><span class="bn-seal">🏆 업적 ${sl.length}개</span></div>
       <p class="bn-fx">배운 차시의 <b>수업 문제를 숫자만 바꿔</b> 다시 풀어요. 틀림 · 안 푼 문제를 맞히면 📕 오답노트에 <b>복습 완료</b>! 👑 형성평가 재대결을 처치하면 🏆 업적.</p>
@@ -322,7 +322,7 @@ DS.Bonus = (function () {
       const segs = solved.map((s) => `<i class="${s ? 'gone' : ''}"></i>`).join('');
       const done = solved.every(Boolean);
       const cbg = castle ? ((DS.ASSETS.citadel || {})[(L.rooms.find((r) => r.id === mid) || {}).boss ? 'boss' : 'room']) : '';
-      el.innerHTML = `<div class="scene enc ${cbg ? `cs-bg${cbg === (DS.ASSETS.citadel || {}).boss ? ' cs-bossroom' : ''}` : `bg-scene th-${L.theme || ''}`} ${cls}"${cbg ? ` style="background-image:url('${DS.ASSETS.base}${cbg}')"` : ''}><div class="scene-bar"><div><b>⚔ ${esc(mon.title)}</b><br><span class="muted small">${castle ? `🏰 성채던전 ${L.floor || 1}층` : `🎯 복습! ${L.no}차시`} · 소문제 ${n}개를 모두 맞히면 처치</span></div><button class="btn small" id="bf-x">✕</button></div>
+      el.innerHTML = `<div class="scene enc ${cbg ? `cs-bg${cbg === (DS.ASSETS.citadel || {}).boss ? ' cs-bossroom' : ''}` : `bg-scene th-${L.theme || ''}`} ${cls}"${cbg ? ` style="background-image:url('${DS.ASSETS.base}${cbg}')"` : ''}><div class="scene-bar"><div><b>⚔ ${esc(mon.title)}</b><br><span class="muted small">${castle ? `🏰 성채던전 ${L.floor || 1}층` : `🎯 복습! ${DS.Lessons.noText(L.no)}차시`} · 소문제 ${n}개를 모두 맞히면 처치</span></div><button class="btn small" id="bf-x">✕</button></div>
           <div class="enc-hero"><div class="enc-tries" title="남은 도전 기회">${pips}</div>${DS.Art.hero(me.hero || 0, done || cls ? 'attack' : 'think', done ? 'pairhop' : cls === 'miss' ? 'slump' : 'huff')}<i class="shadow"></i></div>
           <div class="enc-mon">${DS.Art.monster(mon.sprite, done ? 'down' : 'idle', done ? '' : 'float')}<div class="segs">${segs}</div>${done || !castle ? '' : '<div class="atk-gauge" title="몬스터 공격 게이지"><i></i></div>'}</div></div>
         <div class="bf-body">${conceptLine(L, mid, prep)}${photoRoom && !mathOpen && !all() ? `<p class="bf-gift">${MATH_GIFT}</p>` : ''}${msg}${mon.note ? `<p class="muted small">💡 ${esc(mon.note)}</p>` : ''}
@@ -406,7 +406,7 @@ DS.Bonus = (function () {
       const xp = !clearedBefore && !preview ? DS.Grow.XP.bonusClear + (sealed ? DS.Grow.XP.seal : 0) : 0;
       if (DS.Grow && xp) DS.Grow.add(me, { bonusClear: 1, seal: sealed ? 1 : 0 }).catch(() => {});
       const fx = sealed ? DS.FX.FANCY.find((k, i) => seals(mine).length === UNLOCK[i]) : null;
-      const act = draw('', `<p class="okc"><b>🎉 처치!</b>${sealed ? ` <b class="gold">🏆 ${castle ? `성채 ${L.floor || 1}층` : `${L.no}차시`} 업적을 달성했어요!</b>` : ''}${fx ? `<br>✨ 화려한 이펙트 「${esc(DS.FX.NAMES[fx])}」이 열렸어요! 💎 상점에서 바꿀 수 있어요` : ''}</p>`);
+      const act = draw('', `<p class="okc"><b>🎉 처치!</b>${sealed ? ` <b class="gold">🏆 ${castle ? `성채 ${L.floor || 1}층` : `${DS.Lessons.noText(L.no)}차시`} 업적을 달성했어요!</b>` : ''}${fx ? `<br>✨ 화려한 이펙트 「${esc(DS.FX.NAMES[fx])}」이 열렸어요! 💎 상점에서 바꿀 수 있어요` : ''}</p>`);
       act.innerHTML = `<button class="btn primary" id="bf-out">${castle ? '성채 방 목록으로' : '허수아비로'}</button>`;
       act.querySelector('#bf-out').onclick = () => { el.remove(); render(); };
       // 🎁 받은 보상 = 내 용사 머리 위에 줄줄이 (2026-11-05 사용자: 팝업에 가릴 수 있어 오래 · 8초)

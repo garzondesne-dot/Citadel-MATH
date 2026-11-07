@@ -217,7 +217,7 @@ DS.Sched = (function () {
       const meta = await N().get(`rooms/${code}/meta`).catch(() => null); if (!meta || !meta.slot) continue;
       const sec = await N().get(`secrets/${code}`).catch(() => null), st = await N().get(`rooms/${code}/state`).catch(() => null);
       const L = DS.Lessons.get(meta.lesson);
-      out.push({ key, code, hallKey: (sec || {}).hallKey || '', cls: meta.cls, p: meta.slot.p, from: meta.slot.from, to: meta.slot.to, lesson: meta.lesson, title: L ? `${L.no}차시 · ${L.title}` : meta.lesson, now: now >= meta.slot.from && now < meta.slot.to, done: now >= meta.slot.to || !!(st && st.closed), started: !!(st && (st.step ?? -1) >= 0) });
+      out.push({ key, code, hallKey: (sec || {}).hallKey || '', cls: meta.cls, p: meta.slot.p, from: meta.slot.from, to: meta.slot.to, lesson: meta.lesson, title: L ? `${DS.Lessons.noText(L.no)}차시 · ${L.title}` : meta.lesson, now: now >= meta.slot.from && now < meta.slot.to, done: now >= meta.slot.to || !!(st && st.closed), started: !!(st && (st.step ?? -1) >= 0) });
     }
     return out.sort((a, b) => a.from - b.from);
   }

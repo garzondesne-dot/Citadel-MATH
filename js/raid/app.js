@@ -89,8 +89,8 @@ DS.App = (function () {
   // 차시 고르기 목록 (코드 차시 + 엑셀 차시)
   function fillLessons() {
     // v0.8.4: 차시 번호 · 제목을 앞에 (칸이 좁아도 무엇인지 보이게), 차시 순서대로
-    const unitShort = (u) => String(u || '').replace(/^공통수학2\s*/, '').replace(/\s*·\s*\d+차시$/, '');
-    const opts = DS.Lessons.list.filter((l) => !l.eval).sort((a, b) => (a.no || 99) - (b.no || 99)).map((l) => `<option value="${l.id}">${l.sheetLesson ? '📊 ' : ''}${l.no ? `${l.no}차시 · ` : ''}${esc(l.title)}${l.unit ? ` (${esc(unitShort(l.unit))})` : ''}</option>`).join('');
+    const unitShort = (u) => String(u || '').replace(/^공통수학2\s*/, '').replace(/\s*·\s*[\d·]+차시$/, '');
+    const opts = DS.Lessons.list.filter((l) => !l.eval).sort((a, b) => (a.no || 99) - (b.no || 99)).map((l) => `<option value="${l.id}">${l.sheetLesson ? '📊 ' : ''}${l.no ? `${DS.Lessons.noText(l.no)}차시 · ` : ''}${esc(l.title)}${l.unit ? ` (${esc(unitShort(l.unit))})` : ''}</option>`).join('');
     ['#lesson', '#p-lesson'].forEach((k) => { const el = $(k); if (el) { const v = el.value; el.innerHTML = opts; if (v) el.value = v; } });
   }
   function form(which) {
@@ -109,8 +109,8 @@ DS.App = (function () {
     if (!onHome()) return; // 그 사이 입장했으면 그만
     const L = (id) => DS.Lessons.get(id);
     // 2026-11-07 메뉴 정돈: 「지금 열린 수업」 카드 하나를 크게 · 다른 수업은 아래 작은 단추
-    const big = (r) => `<div class="mk-live" data-hc="${r.code}"><span class="muted small">지금 열린 수업</span><b>${esc(r.cls)}반${r.no ? ` · ${r.no}차시` : ''}</b><span>${esc(L(r.lesson) ? L(r.lesson).title : '')}${r.sched ? ' · 예약' : ''}</span><small>수업 코드 <b class="code">${r.code}</b></small></div>`;
-    box.innerHTML = rooms.length ? `${big(rooms[0])}${rooms.length > 1 ? `<div class="h-find-list">${rooms.slice(1).map((r) => `<button class="btn small" data-hc="${r.code}"><b>${esc(r.cls)}반</b> ${r.no ? `${r.no}차시` : ''}</button>`).join('')}</div>` : ''}<label class="mk-key">종합상황실 키 <input id="h-key2" class="masked" type="text" inputmode="numeric" maxlength="4" autocomplete="off" data-1p-ignore data-lpignore="true" placeholder="••••"></label>`
+    const big = (r) => `<div class="mk-live" data-hc="${r.code}"><span class="muted small">지금 열린 수업</span><b>${esc(r.cls)}반${r.no ? ` · ${DS.Lessons.noText(r.no)}차시` : ''}</b><span>${esc(L(r.lesson) ? L(r.lesson).title : '')}${r.sched ? ' · 예약' : ''}</span><small>수업 코드 <b class="code">${r.code}</b></small></div>`;
+    box.innerHTML = rooms.length ? `${big(rooms[0])}${rooms.length > 1 ? `<div class="h-find-list">${rooms.slice(1).map((r) => `<button class="btn small" data-hc="${r.code}"><b>${esc(r.cls)}반</b> ${r.no ? `${DS.Lessons.noText(r.no)}차시` : ''}</button>`).join('')}</div>` : ''}<label class="mk-key">종합상황실 키 <input id="h-key2" class="masked" type="text" inputmode="numeric" maxlength="4" autocomplete="off" data-1p-ignore data-lpignore="true" placeholder="••••"></label>`
       : '<p class="muted small">🔎 열린 수업을 찾는 중… 교사 폰에서 수업을 만들면 여기에 저절로 나타나요 (아래에 코드를 직접 넣어도 돼요)</p>';
     const pickCode = (c) => { $('#h-code').value = c; box.querySelectorAll('[data-hc]').forEach((b) => b.classList.toggle('on', b.dataset.hc === c)); };
     box.querySelectorAll('[data-hc]').forEach((b) => (b.onclick = () => { pickCode(b.dataset.hc); const k = $('#h-key2') || $('#h-key'); k.focus(); }));
@@ -244,7 +244,7 @@ DS.App = (function () {
       document.querySelectorAll('.t-out').forEach((b) => (b.onclick = go(async () => { await A().logout(); await teacherAuth(); await studentAuth(); })));
       const cs = Object.keys((await A().masks()) || {}).sort();
       $('#t-cls').innerHTML = cs.length ? cs.map((c) => `<option>${esc(c)}</option>`).join('') : '<option value="">(명단 없음 — 수업 준비에서 올려요)</option>';
-      $('#t-cls').onchange = () => suggestLesson().catch(() => {}); $('#lesson').onchange = () => resumeHint().catch(() => {}); suggestLesson().catch(() => {}); // 🔄 2026-11-06: 반을 고르면 그 반의 다음 차시로
+      $('#t-cls').onchange = () => suggestLesson().catch(() => {}); $('#lesson').onchange = () => resumeHint().catch((e) => console.warn('이어서', e)); suggestLesson().catch(() => {}); // 🔄 2026-11-06: 반을 고르면 그 반의 다음 차시로
       const t = read('citadel-teacher');
       $('#t-resume').hidden = true; // 「📋 만든 수업」 목록으로 합침 (v0.8.4)
       liveList(cs);
@@ -276,19 +276,35 @@ DS.App = (function () {
     let hint = document.getElementById('t-lhint'); if (!hint) { hint = document.createElement('p'); hint.id = 't-lhint'; hint.className = 'muted small t-lhint'; sel.closest('label').after(hint); }
     const done = codeL.filter((x) => held[x.id]).map((x) => x.no);
     if (next) sel.value = next.id;
-    hint.textContent = `📚 ${cls}반 · ${done.length ? `${done.join(' · ')}차시 함 → ` : ''}${next ? `${next.no}차시 차례라 골라 두었어요` : '차시를 골라 주세요'}`;
-    resumeHint().catch(() => {});
+    hint.textContent = `📚 ${cls}반 · ${done.length ? `${done.join(' · ')}차시 함 → ` : ''}${next ? `${DS.Lessons.noText(next.no)}차시 차례라 골라 두었어요` : '차시를 골라 주세요'}`;
+    resumeHint().catch((e) => console.warn('이어서', e));
+  }
+  // ▶ 이어서 시작할 단계 고르기 (2026-11-07): 개념 · 문제 · 형성평가 단계 목록 → 고른 단계 번호 (취소 = null)
+  function pickStep(L) {
+    return new Promise((res) => {
+      const el = document.createElement('div'); el.className = 'modal camp-modal';
+      const nm = (st) => st.title || (L.monsters[st.id] || {}).title || (st.kind === 'boss' ? L.boss.title : st.id);
+      el.innerHTML = `<div class="quiz-box framed rs-box"><div class="quiz-head"><b>▶ ${DS.Lessons.noText(L.no)}차시 · 어디부터 이어서?</b><button class="btn small" data-x>✕ 닫기</button></div><div class="pk-steps">${L.steps.map((st, k) => k ? `<button class="btn" data-k="${k}">${st.kind === 'boss' ? '👑' : st.kind === 'monster' ? '⚔' : '📣'} ${esc(nm(st))}</button>` : '').join('')}</div><p class="muted small">학생 기록(이미 푼 문제 · 경험치)은 그대로 남아요 · 고른 단계부터 수업이 열려요</p></div>`;
+      document.body.appendChild(el);
+      el.querySelector('[data-x]').onclick = () => { el.remove(); res(null); };
+      el.querySelectorAll('[data-k]').forEach((b) => (b.onclick = () => { el.remove(); res(Number(b.dataset.k)); }));
+    });
   }
   // ▶ 지난 수업 이어서 (2026-11-06): 같은 반 · 같은 차시에 「⏸ 수업 끝 (저장)」 지점이 있으면 단추
   async function resumeHint() {
     const cls = ($('#t-cls') || {}).value, lid = ($('#lesson') || {}).value; let b = document.getElementById('t-resume2');
-    if (!b) { b = document.createElement('button'); b.id = 't-resume2'; b.className = 'btn big t-resume2'; b.hidden = true; $('#t-new').after(b); }
+    if (!b) { b = document.createElement('button'); b.id = 't-resume2'; b.className = 'btn big t-resume2'; b.hidden = true; ($('#t-new').closest('.mk-open') || $('#t-new')).after(b); }
     b.hidden = true; if (!cls || !lid) return;
     let codes = []; try { codes = (JSON.parse(localStorage.getItem('citadel-rooms')) || []).filter((r) => r.cls === cls && r.lesson === lid).map((r) => r.code).slice(0, 5); } catch (e) { /* 없음 */ }
-    const r = await DS.Act.resumeInfo(lid, cls, codes); if (!r) return;
-    const Lx = DS.Lessons.get(lid);
-    b.innerHTML = `▶ 지난 수업 이어서 <small>${Lx.no}차시 · 「${esc(r.title)}」부터</small>`; b.hidden = false;
-    b.onclick = go(async () => { await DS.Teacher.create(lid, cls, { resume: r.stop, resumeOf: r.code }); });
+    const r = await DS.Act.resumeInfo(lid, cls, codes), Lx = DS.Lessons.get(lid);
+    // 2026-11-07 선생님 「이어하기 기능」: ⏸ 저장 지점이 없어도 그 반이 이 차시를 한 적 있으면 → 단계를 골라 이어서 (6·7차시 = 6차시 두 시간)
+    const did = !r && (await heldOf(cls).catch(() => ({})))[lid];
+    if (!r && !did) return;
+    b.innerHTML = r ? `▶ 지난 수업 이어서 <small>${DS.Lessons.noText(Lx.no)}차시 · 「${esc(r.title)}」부터</small>` : `▶ ${DS.Lessons.noText(Lx.no)}차시 이어서 <small>시작할 단계 고르기</small>`; b.hidden = false;
+    b.onclick = go(async () => { if (r) return DS.Teacher.create(lid, cls, { resume: r.stop, resumeOf: r.code }); const k = await pickStep(Lx); if (k != null) await DS.Teacher.create(lid, cls, { resume: k }); });
+    let p2 = document.getElementById('t-resume3'); if (!p2) { p2 = document.createElement('button'); p2.id = 't-resume3'; p2.className = 'mk-link'; b.after(p2); }
+    p2.hidden = !r; p2.textContent = '다른 단계부터 이어서 ▾';
+    p2.onclick = go(async () => { const k = await pickStep(Lx); if (k != null) await DS.Teacher.create(lid, cls, { resume: k }); });
   }
 
   function bind() {
@@ -302,7 +318,7 @@ DS.App = (function () {
       const cls = $('#t-cls').value;
       if (!cls) throw Object.assign(new Error('수업을 여는 반을 골라 주세요. (명단에 있는 반)'), { user: true });
       const lid = $('#lesson').value, held = await heldOf(cls), Lx = DS.Lessons.get(lid);
-      if (held[lid] && !confirm(`${cls}반은 ${Lx ? `${Lx.no}차시` : '이 차시'}를 이미 게임으로 수업했어요.\n그래도 이 차시로 열까요?`)) return; // 2026-11-06: 잘못 여는 것 막기
+      if (held[lid] && !confirm(`${cls}반은 ${Lx ? `${DS.Lessons.noText(Lx.no)}차시` : '이 차시'}를 이미 게임으로 수업했어요.\n그래도 이 차시로 열까요?`)) return; // 2026-11-06: 잘못 여는 것 막기
       await DS.Teacher.create(lid, cls);
     });
     $('#t-resume').onclick = go(() => { const t = read('citadel-teacher'); return DS.Teacher.open(t.code, t.hallKey); });
@@ -365,7 +381,7 @@ DS.App = (function () {
     const when = (t) => { const d = new Date(Number(t)); return Number(t) ? `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}` : ''; };
     box.innerHTML = rows.length ? `<p class="t-sec"><b>📋 만든 수업</b> <span class="muted small">들어가기 · 없애기</span></p>${rows.map((r) => {
       const L = DS.Lessons.get(r.lesson);
-      return `<div class="t-room${r.open ? ' on' : ''}"><div><b>${esc(r.cls || '-')}반 · ${L && L.no ? `${L.no}차시 ` : ''}${esc(L ? L.title : r.lesson || '')}</b>
+      return `<div class="t-room${r.open ? ' on' : ''}"><div><b>${esc(r.cls || '-')}반 · ${L && L.no ? `${DS.Lessons.noText(L.no)}차시 ` : ''}${esc(L ? L.title : r.lesson || '')}</b>
         <span class="muted small">코드 ${esc(r.code)} · ${r.open ? (r.step >= 0 ? '🟢 진행 중' : '🟡 대기실') : '⚪ 끝남'}${when(r.at) ? ` · ${when(r.at)}` : ''}</span></div>
         <button class="btn small" data-lgo="${esc(r.code)}">↩ 들어가기</button>${r.step >= 0 ? `<button class="btn small" data-lnews="${esc(r.code)}" title="우리 반 수업 소식">🏫</button>` : ''}<button class="btn small t-x" data-lx="${esc(r.code)}" data-lcls="${esc(r.cls || '')}" data-lopen="${r.open ? 1 : 0}" aria-label="없애기">✕</button></div>`;
     }).join('')}` : '';
