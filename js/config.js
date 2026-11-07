@@ -12,7 +12,12 @@ DS.FIREBASE = {
 };
 // 👩‍🏫 교사용 체험판 (2026-11-07 · 링크 = …/trial/ · 예전 …/?trial 은 그리로 옮김): 이 탭 안에서만 · 아무것도 남기지 않음 → 브라우저 저장소를 메모리로 바꿔 끼움 (실제 게임 기록 · 로그인과 섞이지 않음)
 //   v0.9.16.2: 전용 주소 trial/ (tools/trial/page.js) — 앱 정보를 스크립트로 바꿔 끼우던 방식은 삼성 인터넷 · 옛 캐시에서 실제 게임 앱으로 설치됨 (사용자 「여전히 본판」)
-if (typeof location !== 'undefined' && (/\/trial\/(index\.html)?$/.test(location.pathname) || /[?&]trial(=|&|$)/.test(location.search))) {
+// ⏸ 2026-11-07 사용자 「체험판 전면중단」: 체험판 링크(?trial · trial/)로 오면 안내 뒤 실제 게임 첫 화면으로. 다시 열려면 false (코드는 그대로 보관)
+DS.TRIAL_OFF = true;
+if (typeof location !== 'undefined' && DS.TRIAL_OFF && (/\/trial\/(index\.html)?$/.test(location.pathname) || /[?&]trial(=|&|$)/.test(location.search))) {
+  try { window.alert('👩‍🏫 체험판은 지금 준비 중이에요.\n「모두의 던전」 첫 화면으로 갈게요.'); } catch (e) { /* 무시 */ }
+  location.replace(new URL('./index.html', document.baseURI).href);
+} else if (typeof location !== 'undefined' && (/\/trial\/(index\.html)?$/.test(location.pathname) || /[?&]trial(=|&|$)/.test(location.search))) {
   if (!/\/trial\/(index\.html)?$/.test(location.pathname)) location.replace('trial/'); // 옛 링크 ?trial → 전용 주소
   const mem = () => { const m = new Map(); return { getItem: (k) => (m.has(String(k)) ? m.get(String(k)) : null), setItem: (k, v) => { m.set(String(k), String(v)); }, removeItem: (k) => { m.delete(String(k)); }, clear: () => m.clear(), key: (i) => Array.from(m.keys())[i] ?? null, get length() { return m.size; } }; };
   try { Object.defineProperty(window, 'localStorage', { value: mem(), configurable: true }); Object.defineProperty(window, 'sessionStorage', { value: mem(), configurable: true }); } catch (e) { /* 못 바꾸면 그대로 */ }
