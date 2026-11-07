@@ -75,7 +75,7 @@ DS.Photo = (function () {
       const coolBtn = (b, label) => { if (!b) return; const tick = () => { if (!document.body.contains(b)) return; const w = Math.ceil((coolUntil - Date.now()) / 1000); if (w > 0) { b.disabled = true; b.textContent = `${label} (${w}초 뒤)`; setTimeout(tick, 500); } else { b.disabled = false; b.textContent = label; } }; tick(); };
       const scores = []; // 이번 창에서 받은 점수들 (📜 「점수가 오르면」 계산용)
       const close = (v) => { if (finished) return; finished = true; el.remove(); done(v ? Object.assign({ scores }, v) : scores.length ? { status: 'retry', scores } : null); };
-      const head = (t) => `<div class="set-head"><h2>${t}</h2><button class="btn" data-x>닫기</button></div>`;
+      const head = (t) => `<div class="set-head"><h2>${t}</h2><button class="btn" data-x>✕ 닫기</button></div>`;
       const bindX = () => el.querySelectorAll('[data-x]').forEach((b) => (b.onclick = () => close(null)));
       const intro = (msg = '') => {
         el.innerHTML = `<div class="quiz-box framed ph-box">${head('📷 풀이 사진 올리기')}
@@ -100,7 +100,7 @@ DS.Photo = (function () {
         el.innerHTML = `<div class="quiz-box framed ph-box">${head('✂ 풀이 부분만 남기기')}
           <p class="muted small">사진 위를 손가락으로 끌면 그 부분만 남아요 (풀이 전체가 들어가게).</p>
           <div class="ph-stage"><canvas id="ph-cv"></canvas></div>
-          <div class="row"><button class="btn" id="ph-rot">⟳ 돌리기</button><button class="btn" id="ph-all">↺ 전체</button><button class="btn" id="ph-re">📷 다시 찍기</button></div>
+          <div class="row"><button class="btn" id="ph-rot">🔄 돌리기</button><button class="btn" id="ph-all">↺ 전체</button><button class="btn" id="ph-re">📷 다시 찍기</button></div>
           <div class="row"><button class="btn primary big" id="ph-send">📨 채점 받기</button></div></div>`;
         bindX();
         const cv = el.querySelector('#ph-cv'), g = cv.getContext('2d');
@@ -194,7 +194,7 @@ DS.Photo = (function () {
     let U = await usage().catch(() => null);
     const draw = () => {
       const q = list(), up = q.filter((y) => y.fb).length;
-      el.innerHTML = `<div class="quiz-box framed fb-box wide">${'<div class="set-head"><h2>📷 사진 채점 설정</h2><button class="btn" data-x>닫기</button></div>'}
+      el.innerHTML = `<div class="quiz-box framed fb-box wide">${'<div class="set-head"><h2>📷 사진 채점 설정</h2><button class="btn" data-x>✕ 닫기</button></div>'}
         <p class="muted small">설치 · 결정은 docs/PHOTO-PREP.md · API 키는 Apps Script 스크립트 속성에만 (여기 넣지 않아요) · 사진은 저장되지 않아요</p>
         <div class="ph-set"><label>웹 앱 주소 <input id="ph-url" type="url" placeholder="https://script.google.com/macros/s/…/exec" value="${esc(cfg.url || '')}"></label>
           <label class="ph-on"><input type="checkbox" id="ph-on"${cfg.on ? ' checked' : ''}> 학생에게 켜기 (끄면 서술형 방이 다시 잠겨요)</label>

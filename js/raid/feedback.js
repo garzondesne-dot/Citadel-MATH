@@ -18,7 +18,7 @@ DS.Feedback = (function () {
     let kind = ctx.kind || 'bug';
     const el = document.createElement('div'); el.className = 'modal camp-modal fb-modal'; document.body.appendChild(el);
     const draw = (txt = '') => {
-      el.innerHTML = `<div class="quiz-box framed fb-box"><div class="set-head"><h2>💬 의견 보내기</h2><button class="btn" id="fb-x">닫기</button></div>
+      el.innerHTML = `<div class="quiz-box framed fb-box"><div class="set-head"><h2>💬 의견 보내기</h2><button class="btn" id="fb-x">✕ 닫기</button></div>
         <p class="muted small">버그 · 하고 싶은 말 · 이런 게 있으면 좋겠다 — 무엇이든 선생님만 읽어요. (하루 ${DAY_MAX}번 · 오늘 ${used()}번 보냄)</p>
         <div class="fb-kinds">${KINDS.map(([k, n]) => `<button class="btn${k === kind ? ' on' : ''}" data-k="${k}">${n}</button>`).join('')}</div>
         <textarea id="fb-t" maxlength="400" rows="6" placeholder="${kind === 'bug' ? '어디서 · 무엇을 눌렀더니 · 어떻게 됐는지 적어 주면 빨리 고칠 수 있어요' : kind === 'idea' ? '이런 기능 · 이런 몬스터 · 이런 스킬이 있으면 좋겠어요!' : kind === 'love' ? '선생님께 하고 싶은 말' : '무엇이든'}">${esc(txt)}</textarea>
@@ -56,7 +56,7 @@ DS.Feedback = (function () {
     let filt = '';
     const draw = (items) => {
       const shown = items.filter((x) => !filt || x.k === filt);
-      el.innerHTML = `<div class="quiz-box framed fb-box wide"><div class="set-head"><h2>💬 학생 의견 <small class="muted">${items.length}개 · 새 의견 ${items.filter((x) => Number(x.at) > s).length}</small></h2><button class="btn" id="fb-x">닫기</button></div>
+      el.innerHTML = `<div class="quiz-box framed fb-box wide"><div class="set-head"><h2>💬 학생 의견 <small class="muted">${items.length}개 · 새 의견 ${items.filter((x) => Number(x.at) > s).length}</small></h2><button class="btn" id="fb-x">✕ 닫기</button></div>
         <div class="fb-kinds"><button class="btn${filt ? '' : ' on'}" data-f="">전체</button>${KINDS.map(([k, n]) => `<button class="btn${filt === k ? ' on' : ''}" data-f="${k}">${n} ${items.filter((x) => x.k === k).length}</button>`).join('')}</div>
         <div class="fb-list">${shown.map((x) => `<div class="fb-item${Number(x.at) > s ? ' new' : ''}"><div class="fb-meta"><b>${esc(K[x.k] || x.k)}</b> · ${esc(x.c)}반 ${x.n}번 ${esc(x.name || '')} · ${when(x.at)}${x.v ? ` · v${esc(x.v)}` : ''}${x.scr ? ` · ${esc(String(x.scr).replace('screen-', ''))}` : ''}${x.code ? ` · 수업 ${esc(x.code)}` : ''}<button class="btn small fb-del" data-del="${esc(x.c)}|${x.n}|${esc(x.id)}">지우기</button></div><p>${esc(x.t)}</p></div>`).join('') || '<p class="muted">아직 의견이 없어요.</p>'}</div></div>`;
       el.querySelector('#fb-x').onclick = () => el.remove();

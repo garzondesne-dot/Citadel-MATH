@@ -133,7 +133,7 @@ const jpegSize = (buf) => { let i = 2; while (i < buf.length) { if (buf[i] !== 0
 
   // ⚠ 사용량 경고 · 하루 장 수 설정
   await T.evaluate(async () => { await DS.Net.set(`photo_q/_all/${DS.Photo.day()}`, 200); });
-  await toMenu(); const btnWarn = ((await T.textContent('#ph-go').catch(() => '')) || '').trim();
+  await toMenu(); const btnWarn = await T.evaluate(() => { const b = document.querySelector('#ph-go'); return b ? b.textContent.trim() + (b.querySelector('[data-ic="warn"], .mk-bd.warn') ? ' ⚠' : '') : ''; });
   await T.click('#ph-go'); await T.waitForTimeout(1000);
   const warn = await T.evaluate(() => ({ box: (document.querySelector('.ph-use') || {}).className || '', txt: (document.querySelector('.ph-use') || {}).textContent || '', daily: (document.querySelector('#ph-daily') || {}).value }));
   await T.fill('#ph-daily', '4'); await T.click('#ph-save'); await T.waitForTimeout(800); const saved = await T.evaluate(() => DS.Net.get('gcfg/photo'));

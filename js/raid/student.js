@@ -286,7 +286,7 @@ DS.Student = (function () {
   function sheetModal(step) {
     const img = (test.prep.img || {})[step.id]; if (!img) return;
     const el = document.createElement('div'); el.className = 'modal t-sheet-modal';
-    el.innerHTML = `<div class="quiz-box framed"><p class="gold">📄 ${esc(step.title || '형성평가')} · 학습지</p><img class="t-sheet" src="${img}" alt="학습지"><button class="btn primary" id="ts-x">닫기</button></div>`;
+    el.innerHTML = `<div class="quiz-box framed"><p class="gold">📄 ${esc(step.title || '형성평가')} · 학습지</p><img class="t-sheet" src="${img}" alt="학습지"><button class="btn primary" id="ts-x">✕ 닫기</button></div>`;
     document.body.appendChild(el); el.querySelector('#ts-x').onclick = () => el.remove();
   }
   // 함께 싸우는 친구(테스트 모드의 가상 친구 · 인원이 적을 때)의 공격을 내 대치 화면에도 작게 보여 준다
@@ -482,9 +482,9 @@ DS.Student = (function () {
         : rec.perfect && rec.canRetry ? `<p class="muted small st-ask">남은 기회 <b>${rec.left}</b>번 · 무엇을 할까요?</p>
         <div class="heal-pick"><button class="btn primary big" id="st-retry">몬스터 묶기</button><button class="btn big heal-btn" id="st-heal">💚 친구 힐</button></div>
         <p class="muted small">몬스터 묶기 = 숫자 바뀐 문제를 맞힌 만큼 몬스터 공격을 늦춤 (1개 1초 · 최대 ${Raid().BIND_MAX}초) · 친구 힐 = 기회가 필요한 친구에게 도전 기회 한 칸</p>`
-        : done && rec.canRetry ? `<p class="okc big-msg">🎉 몬스터 격파!</p><p>틀린 소문제를 다시 풀어 볼까요? <span class="muted small">(남은 기회 ${rec.left}번 · 숫자가 모두 바뀌어요 · 고친 만큼 경험치가 더 쌓여요)</span></p><button class="btn primary big" id="st-retry">↻ 다시 도전</button>`
+        : done && rec.canRetry ? `<p class="okc big-msg">🎉 몬스터 격파!</p><p>틀린 소문제를 다시 풀어 볼까요? <span class="muted small">(남은 기회 ${rec.left}번 · 숫자가 모두 바뀌어요 · 고친 만큼 경험치가 더 쌓여요)</span></p><button class="btn primary big" id="st-retry">🔄 다시 도전</button>`
         : done ? '<p class="okc big-msg">🎉 몬스터 격파! 다음 신호를 기다려요.</p>'
-        : rec.canRetry ? `<p>다시 해 보겠습니까? <span class="muted small">(남은 기회 ${rec.left}번 · 숫자가 모두 바뀌어요)</span></p><button class="btn primary big" id="st-retry">↻ 다시 도전</button>`
+        : rec.canRetry ? `<p>다시 해 보겠습니까? <span class="muted small">(남은 기회 ${rec.left}번 · 숫자가 모두 바뀌어요)</span></p><button class="btn primary big" id="st-retry">🔄 다시 도전</button>`
         : `<p class="muted">${rec.perfect ? '멋져요! 기회를 모두 썼어요. 다른 용사들을 기다려요.' : '재도전 기회를 모두 썼어요. 해설을 보며 학습지에 정리해요.'} 데미지 <b>${rec.best}</b></p>`}
       ${test && (test.prep.img || {})[mid] ? '<button class="btn small" id="st-sheet">📄 학습지 보기 (문제 해설)</button>' : ''}
       ${dock(rec, done && !rec.canRetry ? '<span class="dock-wait">다음 단계를 기다려요</span>' : '')}
@@ -495,7 +495,7 @@ DS.Student = (function () {
     if (atk) { const sc = body.querySelector('.scene'); if (sc) DS.Attack.play(sc, { heroBox: sc.querySelector('.enc-hero'), monBox: sc.querySelector('.enc-mon'), hero: myP().hero || 0, fx: myP().fx || 'flame', miss: label === 'fail' && !prac, s: grit ? 1.3 : 1, rest: done ? 'win' : 'idle', noDmg: prac, ultimate: autoUlt, finish: grit }).then(() => { if (prac && t.correct > 0 && DS.Thrill && sc.isConnected) DS.Thrill.bindFx(sc.querySelector('.enc-mon .art.monster') || sc.querySelector('.enc-mon')); }); } // ⛓ 묶기 공격 = 사슬 이펙트
     else if (fx && !done) setTimeout(() => { const a = body.querySelector('.enc-hero .art'); if (a) a.outerHTML = heroNow('idle', fx === 'miss' ? 'slump' : 'huff'); }, 650);
     const rb = $('#st-retry');
-    if (rb) { thinkTimer(rb, `${mid}|${t.attempt}`, rec.perfect ? '몬스터 묶기' : '↻ 다시 도전'); rb.onclick = () => { retrying = `${mid}|${rec.nextAttempt}`; form = null; DS.Sound.clank(); render(); }; }
+    if (rb) { thinkTimer(rb, `${mid}|${t.attempt}`, rec.perfect ? '몬스터 묶기' : '🔄 다시 도전'); rb.onclick = () => { retrying = `${mid}|${rec.nextAttempt}`; form = null; DS.Sound.clank(); render(); }; }
     const ub = $('#st-ult');
     if (ub) ub.onclick = () => DS.Control.run(async () => {
       ub.disabled = true; await DS.Act.heal(code, raw, mid, { true: true }); drawn = '';

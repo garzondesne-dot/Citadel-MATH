@@ -218,6 +218,8 @@ Native cell 160x120 px, 2 cells in one row: a floating stone-and-wood platform h
 where 6–8 tiny heroes will stand. (1) intact, (2) the same platform with glowing cracks across it. No characters, no text.
 ```
 
+- **🖼 이모지 사전 새 아이콘 20개 (2026-11-07 · 템플릿 `tpl-icons4.png`)**: 📜 ⭕ 📝 📷 🎉 / ⚠ ❄ 💥 👀 ✏ / 📖 💾 📥 📤 🗑 / 👍 🔔 📢(📣) 🔑 📕 — 32×32 · 5×4 · 마젠타 배경 · 1px 진한 외곽선 · 글자 없음. 받은 그림을 칸마다 잘라 32px(nearest) → `ui-icons-v4.webp`(8×10 · 64px 칸) 58~77 칸 · 이름 scroll · okring · memo · camera · party · warn · snow · burst · eyes · pencil · book · save · down · up · trash · thumb · bell · megaphone · key · note · 이모지 연결은 `manifest ui.emoji`. 원본 · 프롬프트 = 방향 방 그림 페이지 (artifact J7f1samRRbrhuKw1K9hwG8).
+
 ### 6-8. 🏰 성채 2 · 3층 새 몬스터 (2026-11-06 · 템플릿 `assets/templates/castle/tpl-*.png` · 다시 만들기 `node tools/sprite/templates_v0911.js assets/templates/castle --only castle3,castleboss2`)
 성채가 3층이 됨: 1층 집합 중단원 · **2층 명제 중단원(새)** · 3층 집합과 명제 대단원(옮김). 지금 2층 방은 성채 2 몬스터 시트(`castle2`)를, 2층 보스 방은 「대단원의 군주」를 **임시로** 씀 → 이 묶음이 오면
 2층 보스 = 「진리의 심판관」 · 3층 일반 방 = 새 몬스터 5 로 바꾼다 (3층 보스 「대단원의 군주」는 그대로).

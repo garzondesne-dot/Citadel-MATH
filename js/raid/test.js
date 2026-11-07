@@ -83,7 +83,7 @@ DS.Test = (function () {
     bar(false); DS.Student.stop();
     const el = document.getElementById('st-body'); DS.UI.show('screen-student');
     if (el) el.innerHTML = `<div class="panel framed center win"><h2>🏆 체험 수업 끝!</h2><p>${esc(L.title)}${esc(score)}</p>${DS.Art.hero(look.hero, 'win', 'big')}
-      <p class="muted small">「모두의 던전」 체험판 · 기록은 저장하지 않아요</p><button class="btn primary" id="demo-again">↻ 처음부터 다시 하기</button></div>`;
+      <p class="muted small">「모두의 던전」 체험판 · 기록은 저장하지 않아요</p><button class="btn primary" id="demo-again">🔄 처음부터 다시 하기</button></div>`;
     const b = document.getElementById('demo-again'); if (b) b.onclick = () => location.reload();
   }
   const setLook = (hero, fx) => { look = { hero, fx }; };
@@ -100,7 +100,7 @@ DS.Test = (function () {
     if (where === 'camp') {
       if (el.dataset.sig === 'camp') return;
       el.dataset.sig = 'camp';
-      el.innerHTML = trial ? `<b>👩‍🏫 체험판</b><span class="tb-step">${L.no}차시 · 내 캠프</span><button class="btn small" id="tb-x">↻ 처음부터</button>`
+      el.innerHTML = trial ? `<b>👩‍🏫 체험판</b><span class="tb-step">${L.no}차시 · 내 캠프</span><button class="btn small" id="tb-x">🔄 처음부터</button>`
         : `<b>🧪 테스트</b><span class="tb-step">${esc(L.title)} · 내 캠프</span><button class="btn small" id="tb-gate">🌀 차원문 다시 열기</button><button class="btn small" id="tb-x">끝내기</button>`;
       { const g = $('#tb-gate'); if (g) g.onclick = () => DS.Control.run(openGate); }
       $('#tb-x').onclick = () => { if (trial) return again(); if (confirm('테스트를 끝내고 교사 메뉴로 돌아갈까요?')) finish(false); };

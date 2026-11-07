@@ -31,7 +31,7 @@ DS.Prep = (function () {
     $('#p-body').innerHTML = `<div class="panel framed"><h2>📋 수업 준비</h2><p class="muted small">이미지·영상 링크는 Firebase 에만 저장돼요 (저장소에는 올라가지 않아요). 학생 명단은 교사 메뉴 「👥 학생 관리」에서 관리해요.</p></div>
       <div class="panel framed"><h2>${esc(L.unit)} ${esc(L.title)}</h2>
         <p class="muted small">학습지: ${esc(L.sheet || '')} · 이미지는 종합상황실 화면 절반에 떠요.</p>
-        <div class="pct-row"><span>몬스터 체력 기준% 기본값</span><input id="p-pct" type="number" min="10" max="100" step="5" value="${data.pct || L.defaultPct || 90}"><button class="btn" id="p-pct-save">저장</button><span class="muted small">수업 중에는 교사 폰에서 몬스터마다 바꿔요</span></div>
+        <div class="pct-row"><span>몬스터 체력 기준% 기본값</span><input id="p-pct" type="number" min="10" max="100" step="5" value="${data.pct || L.defaultPct || 90}"><button class="btn" id="p-pct-save">💾 저장</button><span class="muted small">수업 중에는 교사 폰에서 몬스터마다 바꿔요</span></div>
         <div class="pct-row"><span>🤔 생각 시간 (틀린 뒤 재도전까지)</span><select id="p-think">${[0, 5, 10, 15].map((v) => `<option value="${v}"${(data.think != null ? Number(data.think) : 5) === v ? ' selected' : ''}>${v ? `${v}초` : '끄기'}</option>`).join('')}</select><span class="muted small">해설은 읽을 수 있고 「다시 도전」만 잠깐 잠겨요 · 새로 만드는 수업부터</span></div>
         <div class="pct-row"><span>📝 풀이 시간 (중단원 평가 문항 · 입력 잠금)</span><select id="p-solve">${[0, 30, 60, 90, 120, 180].map((v) => `<option value="${v}"${(data.solve != null ? Number(data.solve) : 60) === v ? ' selected' : ''}>${v ? `${v}초` : '끄기'}</option>`).join('')}</select><span class="muted small">문제가 열리면 ❄ 꽁꽁 묶기 — 학습지에 먼저 풀고 입력 · 수업 중에도 리모컨에서 켜고 끄기 · 새로 만드는 수업부터</span></div></div>
       ${pdfPanel()}
@@ -240,7 +240,7 @@ DS.Prep = (function () {
         <button class="btn small" id="ce-add">+ 조각</button>${d.rects.length > 1 ? '<button class="btn small" id="ce-rm">조각 빼기</button>' : ''}</div>
       <div class="crop-page" id="ce-page"><img src="${thumbs[r.p - 1]}" alt="${r.p}쪽" draggable="false">${d.rects.map((q, k) => (q.p === r.p ? `<div class="crop-box${k === piece ? ' on' : ''}" data-k="${k}" style="left:${q.x * 100}%;top:${q.y * 100}%;width:${q.w * 100}%;height:${q.h * 100}%"><i class="h tl"></i><i class="h br"></i></div>` : '')).join('')}</div>
       <p class="muted small">틀 안을 끌면 옮겨지고, 모서리(■)를 끌면 크기가 바뀌어요. 여러 쪽에 걸친 개념은 + 조각으로 이어 붙여요.</p>
-      <div class="row"><button class="btn primary" id="ce-ok">✂ 이대로 자르기</button><button class="btn" id="ce-cancel">닫기</button></div></div>`;
+      <div class="row"><button class="btn primary" id="ce-ok">✂ 이대로 자르기</button><button class="btn" id="ce-cancel">✕ 닫기</button></div></div>`;
   }
   function bindEditor() {
     const d = draft[editing], page = $('#ce-page');
@@ -279,7 +279,7 @@ DS.Prep = (function () {
     return `<details class="panel framed" id="p-tidy"${tidy ? ' open' : ''}><summary><b>📦 지난 차시 정리</b> <span class="muted small">백업 받고 서버에서 지우기 (Firebase 사용량 줄이기)</span></summary>
       <p class="muted small">이 차시의 <b>수업 방 기록 · 학습지 이미지 · 올린 영상</b>을 백업 파일(.json)로 받은 뒤 서버에서 지워요. 학생 EXP · 호칭 · 도감 · 개인 결과 · 중단원던전 기록은 그대로 남아요. 지우면 그 수업의 🏫 학급 결과는 백업 파일로만 볼 수 있어요.</p>
       <div class="row"><button class="btn" id="td-scan">🔍 이 차시 수업 찾기</button>${tidy ? `<span class="muted small">수업 방 ${tidy.rooms.length}개 · 이미지 ${Object.keys(data.img || data.has || {}).length}칸</span>` : ''}</div>
-      ${tidy ? `<div class="row"><button class="btn primary" id="td-backup">⬇ ① 백업 파일 받기</button><button class="btn danger" id="td-del"${tidy.backedUp ? '' : ' disabled'}>🗑 ② 서버에서 지우기</button></div>` : ''}</details>`;
+      ${tidy ? `<div class="row"><button class="btn primary" id="td-backup">📥 ① 백업 파일 받기</button><button class="btn danger" id="td-del"${tidy.backedUp ? '' : ' disabled'}>🗑 ② 서버에서 지우기</button></div>` : ''}</details>`;
   }
   function bindTidy() {
     const sc = $('#td-scan'); if (!sc) return;
@@ -317,13 +317,13 @@ DS.Prep = (function () {
     const d = sheetDraft;
     return `<details class="panel framed" id="p-sheet"${d ? ' open' : ''}><summary><b>📊 엑셀로 차시 만들기</b> <span class="muted small">선생님 본인용 문제 은행</span></summary>
       <p class="muted small">양식에 「차시 · 순서 · 문항」을 채워 올리면 레이드 수업 차시가 돼요. 문항마다 버전 0 = 학습지 원문(첫 시도), 버전 1·2 = 재도전용. <b>저장 전에 미리보기에서 정답을 꼭 확인</b>하세요.</p>
-      <div class="row"><a class="btn small" href="assets/templates/question-bank-v1.xlsx" download>⬇ 양식 내려받기 (.xlsx)</a><label class="btn small">📂 엑셀 올리기<input type="file" id="x-file" accept=".xlsx" hidden></label></div>
+      <div class="row"><a class="btn small" href="assets/templates/question-bank-v1.xlsx" download>📥 양식 내려받기 (.xlsx)</a><label class="btn small">📂 엑셀 올리기<input type="file" id="x-file" accept=".xlsx" hidden></label></div>
       ${d ? `<div class="x-prev"><p class="gold">미리보기: ${esc(d.pack.unit)} · ${esc(d.pack.title)} <span class="muted small">(${esc(d.pack.id)})</span></p>
         <table class="r-table"><tr><th>단계</th><th>종류</th><th>제목</th><th>문항</th></tr>${d.summary.map((s) => `<tr><td>${esc(s.id)}</td><td>${({ intro: '도입', concept: '개념', monster: '문제', boss: '형성평가' })[s.kind]}</td><td>${esc(s.title)}</td><td>${s.items || ''}</td></tr>`).join('')}</table>
         ${d.errors.length ? `<div class="x-err"><b>❌ 고칠 것 ${d.errors.length}개</b><br>${d.errors.map(esc).join('<br>')}</div>` : ''}
         ${d.warnings.length ? `<div class="x-warn"><b>⚠ 확인 ${d.warnings.length}개</b><br>${d.warnings.map(esc).join('<br>')}</div>` : ''}
         ${d.errors.length ? '' : `<details><summary>문항 전체 보기 (정답 확인)</summary>${qList(d.pack)}</details>`}
-        <div class="row">${d.errors.length ? '' : '<button class="btn primary" id="x-save">✅ 이 차시 저장</button>'}<button class="btn small" id="x-drop">버리기</button></div></div>` : ''}
+        <div class="row">${d.errors.length ? '' : '<button class="btn primary" id="x-save">💾 이 차시 저장</button>'}<button class="btn small" id="x-drop">버리기</button></div></div>` : ''}
       ${mine.length ? `<p class="shelf-title">저장된 엑셀 차시</p>${mine.map((l) => `<div class="wrow"><span>📊 ${esc(l.unit)} · ${esc(l.title)}</span><button class="btn small" data-xdel="${esc(l.id)}">지우기</button></div>`).join('')}` : ''}</details>`;
   }
   const ansText = (q) => (q.type === 'choice' ? `${q.answerIndex + 1}. ${q.choices[q.answerIndex]}` : q.type === 'ox' ? (q.answer ? 'O' : 'X') : q.type === 'multi' ? q.answer.map((i) => q.options[i]).join(', ') : q.type === 'blanks' ? q.items[0].answer : q.type === 'text' ? q.answers.join(' / ') : String(q.answer));

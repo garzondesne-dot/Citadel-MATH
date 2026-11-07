@@ -142,7 +142,7 @@ DS.Dash = (function () {
           <div class="use-tile"><span>최근 7일 접속 학생</span><b>${seen7}<small> / ${T}명</small></b><em>이번 주 수업 참여 ${now.joins}회</em></div>
         </div>
         <div class="use-grid">${useBars(W, 'active', '🧑‍🎓 수업 밖 활동 학생 수', '명')}${useBars(W, 'solves', '🎯 수업 밖 문제 풀이 수', '회')}${useBars(W, 'visits', '🚪 접속 학생 수', '명')}</div>
-        <div class="row"><h3 class="use-h">학생별 (최근 7일 수업 밖 풀이 순)</h3><button class="btn small" id="use-csv">⬇ CSV</button></div>
+        <div class="row"><h3 class="use-h">학생별 (최근 7일 수업 밖 풀이 순)</h3><button class="btn small" id="use-csv">📥 CSV</button></div>
         <div class="tbl-wrap"><table class="dash-table use-table"><thead><tr><th>번호</th><th>이름</th><th>최근 7일</th><th>그 전 7일</th><th>증감</th><th>마지막 활동</th></tr></thead><tbody>
         ${rows.map((r) => `<tr class="${idle(r.last) ? 'use-idle' : ''}"><td>${isAll() ? `${esc(r.c)}-` : ''}${r.n}</td><td>${esc(r.name)}</td><td><b>${r.now}</b></td><td>${r.prev}</td><td class="${r.now - r.prev > 0 ? 'up' : r.now - r.prev < 0 ? 'dn' : ''}">${r.now - r.prev > 0 ? '▲' : r.now - r.prev < 0 ? '▼' : '·'} ${Math.abs(r.now - r.prev)}</td><td>${r.last ? ymd(r.last) : '<span class="muted">-</span>'}${idle(r.last) ? ' <span class="use-tag">2주 넘게 없음</span>' : ''}</td></tr>`).join('')}</tbody></table></div>`;
     },
@@ -162,7 +162,7 @@ DS.Dash = (function () {
           <td class="dash-c ${s.left ? 'nt-left' : 'ok'}">${s.left ? `❗ ${s.left}` : '✔'}</td>
           <td class="dash-c ${heat(s.part)}">${s.went}/${s.heldN}</td><td class="dash-c ${heat(s.boss)}">${show(s.boss)}</td><td class="dash-c ${heat(s.first)}">${show(s.first)}</td><td class="dash-c ${heat(s.ox)}">${show(s.ox)}</td>
           <td>${s.fixed}</td><td>${s.hints || ''}</td><td>${s.seals}</td><td>${s.tries}</td><td>${s.cards}</td><td>Lv.${s.lv}</td></tr>`).join('')}</table></div>
-        <button class="btn" id="dash-csv">⬇ 표 내려받기 (엑셀에서 열리는 CSV)</button>`;
+        <button class="btn" id="dash-csv">📥 표 내려받기 (엑셀에서 열리는 CSV)</button>`;
     },
     rank() {
       const board = (title, note, key, fmt, n = 99) => {
@@ -280,7 +280,7 @@ DS.Dash = (function () {
     if (svFor !== svClasses().join(',') || !sv) { if (svFor !== svClasses().join(',')) svLoad(); return '<p class="muted">설문 불러오는 중…</p>'; }
     const maxNo = Math.max(0, ...data.held.map((l) => l.no || 0));
     const ctl = sv.map((p) => `<tr><td>${esc(p.c)}반</td><td>${p.st && p.st.open ? `<b class="gold">열림 · ${p.st.no}차시</b>` : '<span class="muted">닫힘</span>'}</td><td>${p.done}/${p.size}명 응답 · 응답 ${p.list.length}개</td>
-      <td>${p.st && p.st.open ? `<button class="btn small" data-svc="${esc(p.c)}" data-on="0">닫기</button>` : `<button class="btn small" data-svc="${esc(p.c)}" data-on="1">열기</button>`}</td></tr>`).join('');
+      <td>${p.st && p.st.open ? `<button class="btn small" data-svc="${esc(p.c)}" data-on="0">✕ 닫기</button>` : `<button class="btn small" data-svc="${esc(p.c)}" data-on="1">열기</button>`}</td></tr>`).join('');
     const all = sv.flatMap((p) => p.list), S = DS.Survey.summary(all);
     const pMax = Math.max(1, ...S.picks.map((x) => x.n)), cMax = Math.max(1, ...S.cmp.map((x) => x.n));
     const body = !S.n ? '<p class="muted">아직 응답이 없어요. 7~8차시 마무리 때 위에서 「열기」 (또는 교사 리모컨 마무리 화면의 📝 설문 열기)</p>' : `
@@ -292,11 +292,11 @@ DS.Dash = (function () {
         <div><p class="gold small">9. 쉼터 놀이 vs 예전 5분 퀴즈</p>${S.cmp.map((x) => `<p class="sv-row"><span>${esc(x.t)}</span>${bar(x.n, cMax)}<b>${x.n}</b></p>`).join('')}</div></div>
       <h3>10. 달라진 점 <span class="muted small">(${S.say.length}개)</span></h3><ul class="sv-texts">${S.say.map((t) => `<li>${esc(t)}</li>`).join('') || '<li class="muted">없음</li>'}</ul>
       <h3>11. 바꿨으면 하는 점 <span class="muted small">(${S.want.length}개)</span></h3><ul class="sv-texts">${S.want.map((t) => `<li>${esc(t)}</li>`).join('') || '<li class="muted">없음</li>'}</ul>
-      <button class="btn" id="sv-csv">⬇ 설문 응답 내려받기 (CSV · 이름 없음)</button>`;
+      <button class="btn" id="sv-csv">📥 설문 응답 내려받기 (CSV · 이름 없음)</button>`;
     const W = words ? `<h3>💬 마지막 한마디 <span class="muted small">(${words.length}개 · 수업 화면에 이미 보인 말풍선)</span></h3><ul class="sv-texts">${words.map((w) => `<li><span class="muted small">${esc(w.cls)} · ${w.no ? `${w.no}차시` : ''}</span> ${esc(w.t)}</li>`).join('') || '<li class="muted">없음</li>'}</ul>` : '<button class="btn small" id="sv-words">💬 마지막 한마디 모아 보기</button>';
     return `<p class="muted small">🔒 응답에는 이름 · 번호 · 시각이 저장되지 않아요. 「응답한 학생 수」만 따로 세요 (한 번만 · +5 EXP).</p>
       <table class="r-table sv-ctlt"><tr><th>반</th><th>상태</th><th>응답</th><th></th></tr>${ctl}</table>
-      <p class="muted small">열 때 차시 (선생님이 고름 · 이 기기 기억 · 기록의 마지막 차시 ${maxNo || '?'}) <input id="sv-no" type="number" min="1" max="30" value="${DS.Survey.pickNo ? DS.Survey.pickNo() : maxNo || 10}" class="sv-no"> · <button class="btn small" id="sv-re">↻ 새로 고침</button></p>
+      <p class="muted small">열 때 차시 (선생님이 고름 · 이 기기 기억 · 기록의 마지막 차시 ${maxNo || '?'}) <input id="sv-no" type="number" min="1" max="30" value="${DS.Survey.pickNo ? DS.Survey.pickNo() : maxNo || 10}" class="sv-no"> · <button class="btn small" id="sv-re">🔄 새로 고침</button></p>
       ${body}${W}`;
   };
   function svBind(el) {
@@ -342,7 +342,7 @@ DS.Dash = (function () {
       <p>형성평가 ${show(s.boss)} · 첫 시도 ${show(s.first)} · 참여 ${s.went}/${s.heldN} · 고친 수 ${s.fixed}</p>
       ${DS.Result ? DS.Result.history(s.rec || {}) : ''}
       <div class="dash-memo"><b>세특 메모 초안</b><p>${esc(memo(s))}</p></div>
-      <div class="row"><button class="btn" id="dd-gem">💎 조각 주기</button><button class="btn" id="dd-copy">메모 복사</button><button class="btn" id="dd-x">닫기</button></div></div>`;
+      <div class="row"><button class="btn" id="dd-gem">💎 조각 주기</button><button class="btn" id="dd-copy">메모 복사</button><button class="btn" id="dd-x">✕ 닫기</button></div></div>`;
     document.body.appendChild(el);
     el.querySelector('#dd-x').onclick = () => el.remove();
     el.querySelector('#dd-copy').onclick = () => copy(memo(s));

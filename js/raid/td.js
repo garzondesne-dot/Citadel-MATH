@@ -151,7 +151,7 @@ DS.TD = (function () {
   const ctlHtml = (R) => { const f = R.fun || {}, L = R.tdl ? (R.tdl[f.g] || {}) : {}, w = L.wave || 1;
     return `<div class="fun-ctl td-ctl"><span>🏰 ${esc(mapOf(f).name)} · ${f.phase === 'pick' ? '자리 고르는 중' : f.phase === 'play' ? `웨이브 ${w}/5 · ❤ ${L.life != null ? L.life : LIFE}` : f.res && f.res.win ? '🏆 승리!' : '💥 패배'}</span>
       ${f.phase === 'play' ? `<button class="btn small" data-td="sh"${f.sh ? ' disabled' : ''}>🛡 수호 방패${f.sh ? ' (씀)' : ''}</button><button class="btn small" data-td="ch"${(f.ch || {})[w] ? ' disabled' : ''}>✨ 응원 마법${(f.ch || {})[w] ? ' (이번 웨이브 씀)' : ''}</button>` : ''}
-      <button class="btn small" data-fun="stop">⏹ 게임 끝</button>${f.phase === 'end' ? '<button class="btn small" data-fun="again">↻ 새 게임</button>' : ''}</div>`; };
+      <button class="btn small" data-fun="stop">⏹ 게임 끝</button>${f.phase === 'end' ? '<button class="btn small" data-fun="again">🔄 새 게임</button>' : ''}</div>`; };
   function bindCtl(el, code, R) {
     el.querySelectorAll('[data-td]').forEach((b) => (b.onclick = () => DS.Control.run(async () => { const f = R.fun || {}, L = (R.tdl || {})[f.g] || {}, k = b.dataset.td;
       if (k === 'sh') { await N().set(P(code, 'fun/sh'), N().now()); DS.UI.toast('🛡 수호 방패! 성에 닿는 몬스터 3마리를 막아요'); }

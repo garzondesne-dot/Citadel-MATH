@@ -325,7 +325,7 @@ DS.App = (function () {
     $('#t-sched').onclick = go(async () => { if (DS.Att) DS.Att.editor(() => DS.Att.today($('#t-today')).catch(() => {})); }); // 📅 2026-11-07 메뉴 정돈: 준비 · 관리 칸
     $('#ph-go').onclick = go(() => DS.Photo.settings());
     $('#sv-go').onclick = go(() => DS.Survey.panel()); // 📝 2026-11-06 설문 수동 열기 (차시 번호 선생님이 고름) // 📷 2026-11-06 사진 채점 설정 (결과 확인은 📊 대시보드 「📷 서술형」)
-    if (DS.Photo) Promise.all([DS.Photo.pending().catch(() => 0), DS.Photo.usage().catch(() => null)]).then(([n, u]) => { const b = $('#ph-go'); if (b && (n || (u && u.warn))) b.innerHTML = `📷 사진 채점${u && u.warn ? ' <b class="fb-badge" title="사용량 경고">⚠</b>' : ''}${n ? ` <b class="fb-badge">${n}</b>` : ''}`; }).catch(() => {}); // 확인할 것 수 · ⚠ 사용량 경고
+    if (DS.Photo) Promise.all([DS.Photo.pending().catch(() => 0), DS.Photo.usage().catch(() => null)]).then(([n, u]) => { const b = $('#ph-go'); if (b && (n || (u && u.warn))) b.innerHTML = `<i>📷</i>사진 채점${n || (u && u.warn) ? `<b class="mk-bd${u && u.warn ? ' warn' : ''}" title="${u && u.warn ? '사용량 경고' : '확인할 것'}">${u && u.warn ? '⚠' : ''}${n || ''}</b>` : ''}`; }).catch(() => {}); // 확인할 것 수 · ⚠ 사용량 경고
     DS.Feedback.unread().then((n) => { const b = $('#fb-bd'); if (b && n) { b.textContent = n; b.hidden = false; } }).catch(() => {});
     $('#t-camp').onclick = go(async () => { const t = read('citadel-teacher'); let code = '', key = ''; if (t && t.code && t.uid === DS.Net.uid()) { const st = await DS.Net.get(`rooms/${t.code}/state`).catch(() => null); if (st && !st.closed) { code = t.code; key = t.hallKey || ''; } } return DS.TCamp.enter({ code, hallKey: key }); });
     // 🖥 종합상황실 비밀번호 고정 (2026-11-05 사용자): tcfg/hallPw (교사만 읽고 씀) · 비우면 수업마다 무작위

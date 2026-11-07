@@ -153,7 +153,7 @@ DS.Survey = (function () {
   const keepNo = (v) => { try { localStorage.setItem(NOKEY, String(v)); } catch (e) { /* 이 기기만 */ } };
   const noInput = (id) => `<label class="sv-noin">차시 <input id="${id}" type="number" min="1" max="30" value="${pickNo()}" class="sv-no"></label>`;
   const readNo = (el, id) => { const v = Math.max(1, Math.min(30, Number((el.querySelector('#' + id) || {}).value) || pickNo())); keepNo(v); return v; };
-  const ctlHtml = (R, st) => (R && R.meta && R.meta.cls ? `<div class="sv-ctl"><span>📝 설문 <span class="muted small">(${R.meta.cls}반)</span></span>${st && st.open ? `<b class="gold small">열림 · ${st.no}차시</b><button class="btn small" data-sv="close">닫기</button>` : `${noInput('sv-cno')}<button class="btn small" data-sv="open">열기</button>`}</div>` : '');
+  const ctlHtml = (R, st) => (R && R.meta && R.meta.cls ? `<div class="sv-ctl"><span>📝 설문 <span class="muted small">(${R.meta.cls}반)</span></span>${st && st.open ? `<b class="gold small">열림 · ${st.no}차시</b><button class="btn small" data-sv="close">✕ 닫기</button>` : `${noInput('sv-cno')}<button class="btn small" data-sv="open">열기</button>`}</div>` : '');
   function bindCtl(el, R, L, after) {
     el.querySelectorAll('[data-sv]').forEach((b) => (b.onclick = () => DS.Control.run(async () => {
       const on = b.dataset.sv === 'open', no = on ? readNo(el, 'sv-cno') : 0;
@@ -168,10 +168,10 @@ DS.Survey = (function () {
     const draw = async () => {
       const cs = Object.keys((await N().get('roster').catch(() => null)) || {}).sort();
       const rows = await Promise.all(cs.map(async (c) => ({ c, st: await state(c).catch(() => null), done: await doneCount(c).catch(() => 0), size: Object.keys((await N().get(`roster/${c}`).catch(() => null)) || {}).length })));
-      el.innerHTML = `<div class="quiz-box framed fb-box"><div class="set-head"><h2>📝 수업 설문</h2><button class="btn" data-x>닫기</button></div>
+      el.innerHTML = `<div class="quiz-box framed fb-box"><div class="set-head"><h2>📝 수업 설문</h2><button class="btn" data-x>✕ 닫기</button></div>
         <p class="muted small">열면 그 반 학생 폰(대기실 · 캠프)에 📝 버튼이 떠요 · 이름 없이 3분 · 결과는 📊 대시보드 「📝 설문」</p>
         <div class="row">${noInput('sv-pno')}<button class="btn primary" id="sv-all1">모든 반 열기</button><button class="btn" id="sv-all0">모든 반 닫기</button></div>
-        <table class="r-table sv-ctlt"><tr><th>반</th><th>상태</th><th>응답</th><th></th></tr>${rows.map((p) => `<tr><td>${esc(p.c)}반</td><td>${p.st && p.st.open ? `<b class="gold">열림 · ${p.st.no}차시</b>` : '<span class="muted">닫힘</span>'}</td><td>${p.done}/${p.size}명</td><td>${p.st && p.st.open ? `<button class="btn small" data-c="${esc(p.c)}" data-on="0">닫기</button>` : `<button class="btn small primary" data-c="${esc(p.c)}" data-on="1">열기</button>`}</td></tr>`).join('') || '<tr><td colspan="4" class="muted">명단이 없어요</td></tr>'}</table></div>`;
+        <table class="r-table sv-ctlt"><tr><th>반</th><th>상태</th><th>응답</th><th></th></tr>${rows.map((p) => `<tr><td>${esc(p.c)}반</td><td>${p.st && p.st.open ? `<b class="gold">열림 · ${p.st.no}차시</b>` : '<span class="muted">닫힘</span>'}</td><td>${p.done}/${p.size}명</td><td>${p.st && p.st.open ? `<button class="btn small" data-c="${esc(p.c)}" data-on="0">✕ 닫기</button>` : `<button class="btn small primary" data-c="${esc(p.c)}" data-on="1">열기</button>`}</td></tr>`).join('') || '<tr><td colspan="4" class="muted">명단이 없어요</td></tr>'}</table></div>`;
       el.querySelector('[data-x]').onclick = () => el.remove();
       el.querySelector('#sv-pno').onchange = () => readNo(el, 'sv-pno');
       const set = async (list, on) => { const no = readNo(el, 'sv-pno'); for (const c of list) await setOpen(c, on, no); DS.UI.toast(on ? `📝 ${no}차시 설문을 열었어요` : '📝 설문을 닫았어요'); await draw(); };

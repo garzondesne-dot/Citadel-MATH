@@ -368,7 +368,7 @@ DS.Camp = (function () {
     const el = document.createElement('div'); el.className = 'modal camp-modal';
     el.innerHTML = `<div class="quiz-box framed rs-box"><h2>📮 우편함 · 복습 노트</h2>${giftHtml}${ntHtml}${g ? `<div class="rs-lv"><b>Lv.${g.lv} ${esc(g.title)}</b> <span class="muted small">EXP ${g.total}</span><div class="rs-bar"><i style="width:${Math.round((100 * g.into) / g.next)}%"></i><span>${g.into} / ${g.next}</span></div></div>` : ''}
       <p class="muted small">성적이 아니라 다음에 볼 것을 모아 둔 노트예요. 📌 복습 추천 개념은 🎯 복습 허수아비에서 그 차시를 골라 연습할 수 있어요.</p>${DS.Result.history(rec)}
-      <div class="row"><button class="btn" id="nt-x">닫기</button><button class="btn primary" id="nt-bonus">🎯 복습 허수아비로</button></div></div>`;
+      <div class="row"><button class="btn" id="nt-x">✕ 닫기</button><button class="btn primary" id="nt-bonus">🎯 복습 허수아비로</button></div></div>`;
     document.body.appendChild(el);
     el.querySelector('#nt-x').onclick = () => el.remove();
     el.querySelector('#nt-bonus').onclick = () => { el.remove(); pick('#camp-dummy', () => DS.Control.run(() => DS.Bonus.enter(me, { train: true }))); };
@@ -389,7 +389,7 @@ DS.Camp = (function () {
           return `<div class="nt-les open"><b>${x.L.no}차시</b>${DS.Note.rows(x)}<div class="nt-go-list">${todo.map((q) => `<button class="btn small primary" data-go="${x.L.id}|${q.id}">🎯 바로 풀기 · ${esc(title(q.id))}</button>`).join('')}${bossTodo ? `<button class="btn small primary" data-go="${x.L.id}|boss">👑 형성평가 재대결</button>` : ''}</div></div>`; }).join('')}
         <p class="muted small">${DS.Note.icon('x')} 틀림 · ${DS.Note.icon('-')} 안 풂 → 「🎯 바로 풀기」로 허수아비에서 풀면 ${DS.Note.icon('p')} 복습 완료</p></div>
       <p class="muted small">학생은 자기 기록으로 이 창을 봐요. 성적이 아니라 다음에 볼 것을 모아 둔 노트예요.</p>
-      <div class="row"><button class="btn" id="nt-x">닫기</button><button class="btn primary" id="nt-bonus">🎯 복습 허수아비로</button></div></div>`;
+      <div class="row"><button class="btn" id="nt-x">✕ 닫기</button><button class="btn primary" id="nt-bonus">🎯 복습 허수아비로</button></div></div>`;
     document.body.appendChild(el);
     el.querySelector('#nt-x').onclick = () => el.remove();
     el.querySelector('#nt-bonus').onclick = () => { el.remove(); if (o.train) o.train(); };
@@ -401,7 +401,7 @@ DS.Camp = (function () {
     const el = document.createElement('div'); el.className = 'modal camp-modal';
     el.innerHTML = `<div class="quiz-box framed"><h2>🌀 차원문</h2><p>선생님이 알려 준 <b>수업 코드 6자리</b>를 넣으면 던전 대기실로 넘어가요.</p>
       <input id="g-code" name="class-code" inputmode="numeric" maxlength="6" placeholder="6자리" autocomplete="off" data-1p-ignore data-lpignore="true" value="${esc(code0 || last)}">
-      <div class="row"><button class="btn" id="g-x">닫기</button><button class="btn primary" id="g-go">⚔ 던전으로</button></div></div>`;
+      <div class="row"><button class="btn" id="g-x">✕ 닫기</button><button class="btn primary" id="g-go">⚔ 던전으로</button></div></div>`;
     document.body.appendChild(el);
     el.querySelector('#g-x').onclick = () => el.remove();
     el.querySelector('#g-go').onclick = () => DS.Control.run(async () => {

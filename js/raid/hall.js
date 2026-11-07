@@ -603,7 +603,7 @@ DS.Hall = (function () {
         <button class="btn small${d.attempt ? '' : ' on'}" data-da="0">📄 ${d.boss ? '세트 1 (학습지)' : '학습지 문제'}</button><button class="btn small${d.attempt ? ' on' : ''}" data-da="1">🔄 ${d.boss ? '세트 2 (숫자 바꿈)' : '숫자 바꾼 문제'}</button><button class="btn small" id="demo-x">✕ 닫기</button></div>
       ${d.marks ? res : `${!d.boss && (L.monsters[d.step.id] || {}).note ? `<p class="muted small">💡 ${esc(L.monsters[d.step.id].note)}</p>` : ''}${d.boss && d.hp < d.items.length ? `<p class="muted small">1~${d.hp}번을 모두 맞히면 선생님의 일격! (${d.hp + 1}번~ 보너스는 골라서)</p>` : ''}<div class="items demo-items${d.boss ? ' two' : ''}">${d.items.map(itemOf).join('')}</div>
         <div class="row demo-go-row"><button class="btn big" id="demo-reveal">💡 정답 펼치기</button><button class="btn primary big" id="demo-go"${ready ? '' : ' disabled'}>⚔ 공격! (시연)</button></div>`}
-      ${d.marks ? '<div class="row demo-row"><button class="btn" data-da="1">↻ 숫자 바꿔 다시</button><button class="btn primary" id="demo-x2">✕ 닫고 레이드로</button></div>' : ''}</div>`;
+      ${d.marks ? '<div class="row demo-row"><button class="btn" data-da="1">🔄 숫자 바꿔 다시</button><button class="btn primary" id="demo-x2">✕ 닫고 레이드로</button></div>' : ''}</div>`;
     ov.querySelector('#demo-x').onclick = demoClose; const x2 = ov.querySelector('#demo-x2'); if (x2) x2.onclick = demoClose; bindStrike(ov, d.step);
     ov.querySelectorAll('[data-da]').forEach((b) => (b.onclick = () => demoOpen(d.step, Number(b.dataset.da))));
     const reGo = () => { const go = ov.querySelector('#demo-go'); if (go) go.disabled = !need.every((q, j) => filled(q, d.given[j])); };

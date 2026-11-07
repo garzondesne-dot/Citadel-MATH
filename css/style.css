@@ -2559,3 +2559,4 @@ body:has(#h-demo-ov.side) .h-dock { right: calc(36vw + 18px); }
 .ink-tool { right: auto; left: 14px; }
 .h-dock > .icb:disabled { opacity: .35; cursor: default; } .h-dock > .dk-pin { width: 36px; font-size: 16px; }
 .ic-bar .icb { border-color: #8a6d45; } .ic-bar .icb small { color: #e6d6b8; } /* 숯청동: 파란 테두리 → 청동 */
+.mk-bd.warn { background: #ebb84f; color: #241800; }

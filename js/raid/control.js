@@ -143,7 +143,7 @@ DS.Control = (function () {
   function lessonPick(code, R) {
     const cur = (R.meta || {}).lesson, list = DS.Lessons.list.filter((x) => /^set-/.test(x.id)).sort((a, b) => (a.no || 0) - (b.no || 0));
     const ov = document.createElement('div'); ov.className = 'modal'; document.body.appendChild(ov);
-    ov.innerHTML = `<div class="quiz-box framed ls-box"><div class="set-head"><h2>🔄 차시 바꾸기</h2><button class="btn" data-lsx>닫기</button></div>
+    ov.innerHTML = `<div class="quiz-box framed ls-box"><div class="set-head"><h2>🔄 차시 바꾸기</h2><button class="btn" data-lsx>✕ 닫기</button></div>
       <p class="muted small">같은 수업 코드 그대로 — 들어와 있는 학생 폰과 종합실이 바로 새 차시로 바뀌어요. (수업 시작 전에만)</p>
       <div class="ls-grid">${list.map((x) => `<button class="btn${x.id === cur ? ' on' : ''}" data-ls="${x.id}"${x.id === cur ? ' disabled' : ''}><b>${x.no}차시</b>${x.id === cur ? ' · 지금' : ''}<small>${esc(x.title)}</small></button>`).join('')}</div></div>`;
     const close = () => ov.remove();

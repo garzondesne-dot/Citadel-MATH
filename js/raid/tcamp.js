@@ -39,7 +39,7 @@ DS.TCamp = (function () {
   }
   function render() {
     const base = DS.ASSETS.base, c = DS.ASSETS.camp;
-    $('#tcamp').innerHTML = `${hall ? '' : '<button class="btn small ui-back" id="tc-back">≪ 교사 메뉴</button>'}<div class="tc-top" style="background-image:linear-gradient(#110f0cdd,#110f0cdd),url('${base}${DS.ASSETS.tcamp.bg}')">${code ? `<div class="tc-qr" id="tc-qr"></div><div class="tc-code"><span class="muted small">${hall ? '📱 휴대폰 카메라로 QR 을 찍고 입장해요' : '학생 입장 · QR 찍기 또는 내 캠프 차원문'}</span><b>수업 코드 ${esc(code)}</b><span id="tc-info" class="small"></span></div>` : '<div class="tc-code"><b>🏛 교사 캠프</b><span class="muted small">수업을 열면 여기에 학생 입장 QR 이 크게 떠요</span></div>'}</div>
+    $('#tcamp').innerHTML = `${hall ? '' : '<button class="btn small ui-back" id="tc-back">◀ 교사 메뉴</button>'}<div class="tc-top" style="background-image:linear-gradient(#110f0cdd,#110f0cdd),url('${base}${DS.ASSETS.tcamp.bg}')">${code ? `<div class="tc-qr" id="tc-qr"></div><div class="tc-code"><span class="muted small">${hall ? '📱 휴대폰 카메라로 QR 을 찍고 입장해요' : '학생 입장 · QR 찍기 또는 내 캠프 차원문'}</span><b>수업 코드 ${esc(code)}</b><span id="tc-info" class="small"></span></div>` : '<div class="tc-code"><b>🏛 교사 캠프</b><span class="muted small">수업을 열면 여기에 학생 입장 QR 이 크게 떠요</span></div>'}</div>
       <div class="tc-stage camp-like cs-v2" style="background-image:url('${base}${c.bg}');aspect-ratio:${c.size[0]} / ${c.size[1]}">
         ${DS.CampScene.layers()}
         ${DS.CampScene.zone('tc-castle', 'castle', '🏰 성채던전')}${DS.CampScene.zone('tc-tent', 'tent', '⛺ 텐트 · 책장')}

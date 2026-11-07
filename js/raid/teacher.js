@@ -73,7 +73,7 @@ DS.Teacher = (function () {
     let g = 10; const pick = new Set();
     const ov = document.createElement('div'); ov.className = 'modal'; document.body.appendChild(ov);
     const draw = () => {
-      ov.innerHTML = `<div class="quiz-box framed gift-box"><div class="set-head"><h2>💎 마정석 선물</h2><button class="btn" id="gf-x">닫기</button></div>
+      ov.innerHTML = `<div class="quiz-box framed gift-box"><div class="set-head"><h2>💎 마정석 선물</h2><button class="btn" id="gf-x">✕ 닫기</button></div>
         <div class="gift-amt"><button class="btn" id="gf-m">− 5</button><b>💎 ${g}</b><button class="btn" id="gf-p">+ 5</button></div>
         <p class="muted small">${esc(cls)}반 · 학생을 눌러 고르세요 (하루 한도와 상관없이 바로 들어가요 · 학생 캠프에 「🎁 선생님 선물」 알림)</p>
         <div class="gift-grid">${studs.map((p) => `<button class="gift-st${pick.has(p.num) ? ' on' : ''}" data-n="${p.num}"><b>${p.num}</b> ${esc(p.nick || '')}</button>`).join('')}</div>

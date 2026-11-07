@@ -60,11 +60,18 @@ DS.UI = {
   },
   // 글로만 보여 줄 때 (결과 목록 등): 그림 표시를 짧은 글로
   plain(s) { return String(s).replace(/^vshade:(.+)$/, (_, r) => `[그림: ${({ 'A-B': 'A 만', 'B-A': 'B 만', AnB: 'A ∩ B', AuB: 'A ∪ B', Ac: 'A 바깥' })[r] || r} 색칠]`).replace(/\[\[venn:([^|\]]*)\|([^\]]*)\]\]/g, '[벤 다이어그램 $1: $2] '); },
+  // 🔣 알림 문구 기호 (2026-11-07 이모지 사전): 기호 없이 시작하는 알림만 종류별 하나 — ⚠ 주의 · 🔒 막힘 · ⏰ 시간 · ✅ 성공 · 💡 안내
+  toastMark(msg) {
+    const s = String(msg == null ? '' : msg);
+    if (!s || !/^[0-9A-Za-z가-힣「(]/.test(s)) return s;
+    const k = /달라요|모자라|못 했|못했|안 돼|안돼|실패|한 번 더 누르면|틀렸/.test(s) ? '⚠' : /로그인한|해야 해요|만 할 수|만 보낼|만 쓸|잠겨|열려야|먼저 /.test(s) ? '🔒' : /시간이|분 남|초 남|끝났어요/.test(s) ? '⏰' : /했어요|됐어요|바꿨어요|보냈어요|저장|완료|열었어요|복사/.test(s) ? '✅' : /아직|없어요|해 보세요|해요$/.test(s) ? '💡' : '';
+    return k ? `${k} ${s}` : s;
+  },
   toast(msg, ms = 2200) {
     if (typeof document === 'undefined') return;
     const t = document.querySelector('#toast');
     if (!t) return;
-    t.textContent = msg;
+    t.textContent = DS.UI.toastMark(msg);
     t.classList.add('show');
     clearTimeout(DS.UI._tt);
     DS.UI._tt = setTimeout(() => t.classList.remove('show'), ms);

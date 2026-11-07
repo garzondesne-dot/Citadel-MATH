@@ -61,7 +61,7 @@ DS.Att = (function () {
     };
     const days = [1, 2, 3, 4, 5], ps = [1, 2, 3, 4, 5, 6, 7];
     const progCls = () => [...new Set([...Object.values(wk()), ...cs])].filter((c) => c && c !== '-').sort();
-    m.innerHTML = `<div class="quiz-box framed sc-box"><div class="quiz-head"><b>📅 시간표 · 진도 예정표</b><button class="btn small" data-x>✕ 닫기</button><button class="btn" id="sc-ex">➕ 보충</button><button class="btn primary" id="sc-save">저장</button></div>
+    m.innerHTML = `<div class="quiz-box framed sc-box"><div class="quiz-head"><b>📅 시간표 · 진도 예정표</b><button class="btn small" data-x>✕ 닫기</button><button class="btn" id="sc-ex">➕ 보충</button><button class="btn primary" id="sc-save">💾 저장</button></div>
       ${eff.comci && (eff.comci.ok || eff.comci.week) ? `<label class="sc-comci"><input type="checkbox" id="sc-comci"${eff.on ? ' checked' : ''}> 🔄 <b>컴시간 시간표 쓰기</b> <span class="muted small">수학 ${eff.comci.n || 0}칸 · 고친 칸이 우선${Number(eff.comci.failAt) > (Number(eff.comci.at) || 0) ? ` · ⚠ ${new Date(Number(eff.comci.failAt)).toLocaleDateString('ko-KR')} 새로 받기 실패 → ${eff.comci.at ? new Date(Number(eff.comci.at)).toLocaleDateString('ko-KR') : '마지막'} 시간표 그대로` : ''}</span></label>` : eff.comci && eff.comci.err ? `<p class="ngc small">⚠ 컴시간 시간표를 받지 못했어요 (${esc(String(eff.comci.err).slice(0, 60))}) — 아래 칸에 직접 넣어 주세요</p>` : ''}
       <p class="muted small">정규 시간표는 한 번 넣으면 매주 반복 · 칸 아래 = 그 칸의 다음 수업이 몇 차시인지 (반마다 시간순으로 6 → 7 → 8 …) · <b>마무리까지 가서 「수업 끝」을 눌러야 다음 차시로</b> 넘어가요 (⏸ 저장 · 안 한 수업 = 같은 차시) · 방은 미리 만들지 않고 「오늘 수업」에서 눌러 열어요</p>
       ${cs.length ? '' : '<p class="ngc">먼저 학생 관리 → 명단 관리에서 반 명단을 올려 주세요.</p>'}
@@ -118,7 +118,7 @@ DS.Att = (function () {
     return `<p class="muted small">⭕ 출석(시작 + 5분 안) · △ 지각 · ✕ 미입장(게임에 안 들어옴 — 폰 문제일 수 있어요) · 칸을 누르면 바꿀 수 있어요</p>
       <div class="att-wrap"><table class="att-tbl"><tr><th>번호</th><th>이름</th>${vis.map((g) => { const w = W(g); return `<th title="${esc(g.memo || '')}">${w.date.slice(5).replace('-', '/')}<small>${w.dow}${g.p ? ` ${g.p}교시` : ''}<br>${g.no ? `${g.no}차시` : ''}</small></th>`; }).join('')}<th>⭕</th><th>△</th><th>✕·결석</th></tr>
       ${grid.map((r) => `<tr><td>${r.n}</td><td class="nm">${esc(r.name)}</td>${r.cells.map((c) => `<td class="att-c s-${c.s}" data-code="${c.code}" data-n="${r.n}" title="${esc(c.m)}">${S().ST[c.s][0]}${c.m ? '<i>✎</i>' : ''}</td>`).join('')}<td>${cnt(r, 'o') + cnt(r, 'e')}</td><td>${cnt(r, 'l')}</td><td>${cnt(r, 'x') + cnt(r, 'a')}</td></tr>`).join('')}</table></div>
-      <button class="btn" id="att-csv">⬇ 출석부 내려받기 (CSV)</button>`;
+      <button class="btn" id="att-csv">📥 출석부 내려받기 (CSV)</button>`;
   }
   function logHtml() {
     const { rows } = data;
@@ -126,7 +126,7 @@ DS.Att = (function () {
     const prog = (g) => (!g.sum ? '-' : g.sum.boss ? '👑 보스 격파' : g.sum.end ? '끝까지' : g.sum.step < 0 ? '대기실까지' : `${g.sum.step + 1} / ${g.sum.steps} 단계`);
     return `<div class="att-wrap"><table class="att-tbl log-tbl"><tr><th>날짜</th><th>교시</th><th>차시</th><th>입장</th><th>진행</th><th>메모</th><th></th></tr>
       ${rows.map((g) => { const w = W(g), L = DS.Lessons.get(g.lesson); return `<tr class="${g.hide ? 'hid' : ''}"><td>${w.date} (${w.dow})</td><td>${g.p ? `${g.p}교시` : `${w.hm} 바로`}</td><td>${L ? `${L.no}차시 · ${esc(L.title)}` : esc(g.lesson || '')}</td><td>${g.sum ? g.sum.n : 0}명</td><td>${prog(g)}</td><td>${esc(g.memo || '')}</td><td><button class="btn small" data-gather="${g.code}" title="수업 끝 전에 나간 학생 기록 · EXP 다시 만들기">📥 결과</button><button class="btn small" data-memo="${g.code}">✎</button><button class="btn small" data-hide="${g.code}">${g.hide ? '되살리기' : '빼기'}</button></td></tr>`; }).join('')}</table></div>
-      <p class="muted small">「빼기」 = 잘못 연 수업 · 연습을 출석부에서 뺌 (기록은 남음)</p><button class="btn" id="log-csv">⬇ 수업 일지 내려받기 (CSV)</button>`;
+      <p class="muted small">「빼기」 = 잘못 연 수업 · 연습을 출석부에서 뺌 (기록은 남음)</p><button class="btn" id="log-csv">📥 수업 일지 내려받기 (CSV)</button>`;
   }
   function bind(el) {
     el.querySelectorAll('[data-c]').forEach((b) => (b.onclick = () => { cls = b.dataset.c; load(); }));
@@ -143,7 +143,7 @@ DS.Att = (function () {
     const m = document.createElement('div'); m.className = 'modal';
     m.innerHTML = `<div class="quiz-box framed"><div class="quiz-head"><b>${r.n}번 ${esc(r.name)} · ${w.date.slice(5)} ${g.p ? `${g.p}교시` : ''}</b><button class="btn small" data-x>✕ 닫기</button></div>
       <div class="att-pick">${S().CYCLE.map((k) => `<button class="btn${k === c.s ? ' on' : ''}" data-s="${k}">${S().ST[k][0]} ${S().ST[k][1]}</button>`).join('')}</div>
-      <label>메모 <input id="att-m" maxlength="60" value="${esc(c.m)}" placeholder="예: 폰 배터리 없음 → 종이로 참여"></label><button class="btn primary big" id="att-ok">저장</button></div>`;
+      <label>메모 <input id="att-m" maxlength="60" value="${esc(c.m)}" placeholder="예: 폰 배터리 없음 → 종이로 참여"></label><button class="btn primary big" id="att-ok">💾 저장</button></div>`;
     let s = c.s;
     m.querySelector('[data-x]').onclick = () => m.remove();
     m.querySelectorAll('[data-s]').forEach((b) => (b.onclick = () => { s = b.dataset.s; m.querySelectorAll('[data-s]').forEach((x) => x.classList.toggle('on', x === b)); }));

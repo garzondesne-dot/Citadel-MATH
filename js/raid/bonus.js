@@ -191,7 +191,7 @@ DS.Bonus = (function () {
       return `<button class="cs-portal${on ? ' on' : ''}${lk || !L ? ' lock' : ''}${sl.includes(f.id) ? ' sealed' : ''}" data-floor="${f.id}"><i class="cs-pt-ic">${lk || !L ? '🔒' : '🌀'}</i><b>${f.floor}층</b><span>${esc(f.title)}</span><em>${!L ? '준비 중' : lk ? '잠김' : `처치 ${done} / ${S.rooms.length}`}${sl.includes(f.id) ? ' · 🏆' : ''}</em>${nNew ? `<span class="cs-rnew">NEW ${nNew}</span>` : ''}</button>`;
     };
     const nextFx = UNLOCK.findIndex((u) => sl.length < u);
-    $('#bonus').innerHTML = `<div class="bn-top"><button class="btn small" id="bn-back">≪ ${preview ? '교사 캠프' : '내 캠프'}</button><b>🏰 성채던전</b><span class="bn-seal">🏆 업적 ${sl.length}개</span></div>
+    $('#bonus').innerHTML = `<div class="bn-top"><button class="btn small" id="bn-back">◀ ${preview ? '교사 캠프' : '내 캠프'}</button><b>🏰 성채던전</b><span class="bn-seal">🏆 업적 ${sl.length}개</span></div>
       <div class="cs-hero" style="background-image:url('${A.base}${(A.citadel || {}).boss || ''}')"><p>교과서 단원 평가를 숫자만 바꾼 문제 · <b>방 하나에 몬스터 한 마리</b><br><span class="small">순서 없이 아무 방이나 · 그 차시 진도를 나가면 방이 열려요 · 👑 보스 방은 열린 방의 ${BOSS_PCT}%를 처치하면!</span></p></div>
       <p class="bn-fx">✨ 화려한 이펙트: ${nextFx < 0 ? '모두 열렸어요!' : `업적 <b>${UNLOCK[nextFx]}개</b>가 되면 「${esc(DS.FX.NAMES[DS.FX.FANCY[nextFx]])}」이 열려요 (지금 ${sl.length}개 · 🎯 허수아비에서 형성평가 재대결 · 🏰 보스 방을 처치하면 업적)`}</p>
       ${gemD ? `<p class="gm-line">💎 방을 처음 처치하면 <b>+${DS.Gem.G.room}</b> · 👑 보스 방 <b>+${DS.Gem.G.roomBoss}</b> + 🏆 업적 <b>+${DS.Gem.G.seal}</b>${gLog('firstcastle') ? '' : ` · 🎁 첫 방은 <b>+${DS.Gem.G.first}</b> 더!`}${gDayFull() ? ' <span class="muted small">(오늘 한도 30 이 찼어요 — 업적 💎 은 한도 밖)</span>' : ''}</p>` : ''}
@@ -233,9 +233,9 @@ DS.Bonus = (function () {
     };
     const rx = rift && open[0] ? noteOf(open[0]) : null, rdone = rx && !rx.none && rx.left === 0, rdays = rift ? Math.max(1, Math.ceil((rift.until - Date.now()) / 86400e3)) : 0;
     if (rift && rdone && me && !all()) riftDone();
-    $('#bonus').innerHTML = rift ? `<div class="bn-top"><button class="btn small" id="bn-back">≪ 내 캠프</button><b>⏳ ${rift.no}차시 이어하기</b><span class="bn-seal">D-${rdays}</span></div>
+    $('#bonus').innerHTML = rift ? `<div class="bn-top"><button class="btn small" id="bn-back">◀ 내 캠프</button><b>⏳ ${rift.no}차시 이어하기</b><span class="bn-seal">D-${rdays}</span></div>
       <div class="rift-head${rdone ? ' done' : ''}"><p>${rdone ? '✔ <b>이어하기 완주!</b> 끝까지 해낸 용사예요.' : `수업 시간이 모자라 멈춘 던전이에요. <b>남은 몬스터 · 👑 형성평가</b>를 ${rdays}일 안에 마저 해요. 완주하면 보상!`}</p><span class="muted small">📚 못 본 개념은 ⛺ 텐트 책장에서 다시 볼 수 있어요 · 기한이 지나도 🎯 허수아비에서 계속 풀 수 있어요 (벌 없음)</span></div>
-      ${open.map(card).join('')}` : `<div class="bn-top"><button class="btn small" id="bn-back">≪ ${preview ? '교사 캠프' : '내 캠프'}</button><b>🎯 복습 허수아비</b><span class="bn-seal">🏆 업적 ${sl.length}개</span></div>
+      ${open.map(card).join('')}` : `<div class="bn-top"><button class="btn small" id="bn-back">◀ ${preview ? '교사 캠프' : '내 캠프'}</button><b>🎯 복습 허수아비</b><span class="bn-seal">🏆 업적 ${sl.length}개</span></div>
       <p class="bn-fx">배운 차시의 <b>수업 문제를 숫자만 바꿔</b> 다시 풀어요. 틀림 · 안 푼 문제를 맞히면 📕 오답노트에 <b>복습 완료</b>! 👑 형성평가 재대결을 처치하면 🏆 업적.</p>
       ${gemD ? `<p class="gm-line">💎 틀림 · 안 푼 문제를 맞히면 <b>+${DS.Gem.G.review}</b> (오늘 <b>${gReviewLeft()}</b>번 남음) · 👑 재대결 <b>+${DS.Gem.G.bossRe}</b> + 🏆 업적 <b>+${DS.Gem.G.seal}</b> · 📕 차시 복습 완료 <b>+${DS.Gem.G.note}</b>${gLog('firstreview') ? '' : ` · 🎁 첫 복습 <b>+${DS.Gem.G.first}</b> 더!`}</p>` : ''}
       ${open.length ? open.map(card).join('') : '<div class="panel framed"><p class="muted">선생님이 우리 반 수업을 열면 그 차시를 복습할 수 있어요.</p></div>'}`;
