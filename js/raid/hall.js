@@ -6,21 +6,29 @@ window.DS = window.DS || {};
 
 DS.Hall = (function () {
   const $ = (s) => document.querySelector(s);
+  // 👩‍🏫 체험판 (2026-11-07 v2): 폰 화면 위 작은 TV 창 안에 종합상황실을 띄움 (embed) — 화면 전환 · 교사 캠프 이동 · 소리는 빼고 (폰 소리와 겹치지 않게) · 컷인은 TV 창 안에서
+  let embed = false;
+  const MUTE = new Proxy({}, { get: () => () => {} });
+  const Snd = () => (embed ? MUTE : DS.Sound);
+  const cutHost = () => (embed ? { host: document.getElementById('screen-hall'), mute: true } : {});
   const enhCls = (p) => { const t = p && DS.Gem && DS.Gem.enhTier ? DS.Gem.enhTier(Number(p.enh) || 0) : 0; return t ? ` enh enh-${t}` : ''; }; // 🔨 강화 빛 (+3 은 · +5 금 · +7 오라 · +10 무지개)
   const { esc, pretty } = DS.UI;
   const C = () => DS.Control, Raid = () => DS.Raid;
   let code = null, L = null, R = null, raw = null, stop = null, stopPrep = null, prep = {};
   let prepFor = '', lastHit = '', built = '', seen = {}, queue = [], playing = false, wonFx = '', bubbleT = 0, bubbleK = 0, hallKey = '', camped = false, zoom = '', zoomStep = -9, vanished = '', demo = null;
 
-  async function enter(c, key) {
+  async function enter(c, key, opt = {}) {
+    embed = !!opt.embed;
     await DS.Act.joinHall(c, key);
-    if (code !== c) { hxSeen = lvSeen = ulSeen = hthSeen = null; lvQ = []; ulQ = []; sndKey = ''; try { if (DS.Sound) { DS.Sound.setSfx(localStorage.getItem('ds-sfx-off') !== '1', false); DS.Sound.setBgm(localStorage.getItem('ds-bgm-off') !== '1', false); } } catch (e) { /* 무시 */ } } // 2026-11-06 검증: 다음 수업으로 넘어가면 「본 것」 기록 · 리모컨 소리 설정을 새로 (+EXP · 필살기 컷인이 안 나오거나 음소거가 이어지던 것)
+    if (code !== c) { hxSeen = lvSeen = ulSeen = hthSeen = null; lvQ = []; ulQ = []; sndKey = ''; try { if (Snd()) { Snd().setSfx(localStorage.getItem('ds-sfx-off') !== '1', false); Snd().setBgm(localStorage.getItem('ds-bgm-off') !== '1', false); } } catch (e) { /* 무시 */ } } // 2026-11-06 검증: 다음 수업으로 넘어가면 「본 것」 기록 · 리모컨 소리 설정을 새로 (+EXP · 필살기 컷인이 안 나오거나 음소거가 이어지던 것)
     code = c; hallKey = String(key); camped = false; L = null; R = null; built = '';
     if (!atkT) atkT = setInterval(hallAtk, 200);
     if (DS.Attack && DS.Attack.preloadFaces) DS.Attack.preloadFaces(); // ⚡ 필살기 컷인 얼굴 (선생님 · 학생) 미리
-    try { localStorage.setItem('citadel-hall', JSON.stringify({ code: c })); } catch (e) { /* 무시 */ } // 2026-11-06 사용자: 비밀번호는 기억하지 않음 (메뉴로 가거나 다시 접속하면 다시 입력)
-    DS.UI.show('screen-hall');
-    DS.Scene.save({ role: 'hall', code: c }); // 새로고침 · 다시 접속 → 코드만 채워 두고 비밀번호는 다시
+    if (!embed) {
+      try { localStorage.setItem('citadel-hall', JSON.stringify({ code: c })); } catch (e) { /* 무시 */ } // 2026-11-06 사용자: 비밀번호는 기억하지 않음 (메뉴로 가거나 다시 접속하면 다시 입력)
+      DS.UI.show('screen-hall');
+      DS.Scene.save({ role: 'hall', code: c }); // 새로고침 · 다시 접속 → 코드만 채워 두고 비밀번호는 다시
+    }
     if (stop) stop();
     stop = DS.Net.watch(`rooms/${code}`, (v) => {
       if (!v) return;
@@ -30,11 +38,11 @@ DS.Hall = (function () {
       if (DS.Act.isHost(R)) { DS.Act.admitLate(code, R, L); DS.Act.markBossWin(code, R, L); }
       if (first || L.id !== prepFor) { prepFor = L.id; built = ''; if (stopPrep) stopPrep(); stopPrep = DS.Net.watch(`prep/${L.id}`, (p) => { prep = p || {}; built = ''; if (R) render(); }); } // 🔄 차시 바꾸기: 새 차시의 개념 그림 · 영상
       xpHall(); lvHall(); ulHall();
-      { const sd = (R.state || {}).sound, key = sd ? `${sd.sfx}|${sd.bgm}` : ''; if (key && key !== sndKey && DS.Sound) { sndKey = key; DS.Sound.setSfx(sd.sfx !== false, false); DS.Sound.setBgm(sd.bgm !== false, false); } } // 🔇 교사 리모컨 → 종합실 소리
+      { const sd = (R.state || {}).sound, key = sd ? `${sd.sfx}|${sd.bgm}` : ''; if (key && key !== sndKey && Snd()) { sndKey = key; Snd().setSfx(sd.sfx !== false, false); Snd().setBgm(sd.bgm !== false, false); } } // 🔇 교사 리모컨 → 종합실 소리
       render();
       thrillHall();
       // v0.9.2: 종합상황실은 교사 캠프(학생 입장 QR · 모루 · 보강던전)에서 시작 — 수업이 시작되면 저절로 이 화면으로
-      if (first && !camped && Raid().isLobby(R) && DS.TCamp) { camped = true; DS.TCamp.enter({ code, hallKey, hall: true }).catch(() => {}); }
+      if (first && !camped && !embed && Raid().isLobby(R) && DS.TCamp) { camped = true; DS.TCamp.enter({ code, hallKey, hall: true }).catch(() => {}); }
     });
   }
   // 🆙 몬스터가 쓰러질 때 공격한 용사들 머리 위 +EXP · 🎉 레벨업 알림 (2026-11-05 · 좋은 순간만 크게 · 레벨 목록 · 순위는 안 보임)
@@ -67,7 +75,7 @@ DS.Hall = (function () {
   function ulNext() {
     const it = ulQ.shift(); if (!it || !DS.Attack) { ulBusy = false; return; } ulBusy = true;
     const p = (R.players || {})[it.u] || {}, gold = it.kind === 'true';
-    DS.Attack.cutin(p.hero || 0, p.fx || 'flame', { gold }).then(() => { try { const arena = $('#raid'), m0 = $('#rm'); if (arena && m0) { DS.Attack.ultBlast(arena, m0, p.fx || 'flame'); setTimeout(() => { if (!DS.Thrill) return; if (gold) DS.Thrill.petrify(m0.querySelector('.art.monster') || m0); else if (!it.noBind) DS.Thrill.chain(m0, DS.Combo ? DS.Combo.ULT_BIND : 15, 'ult'); }, 500); } } catch (e) { console.error(e); } }).catch(() => {}).finally(() => setTimeout(ulNext, gold ? 1800 : 1400)); // 중간에 오류가 나도 다음 필살기가 막히지 않게
+    DS.Attack.cutin(p.hero || 0, p.fx || 'flame', { gold, ...cutHost() }).then(() => { try { const arena = $('#raid'), m0 = $('#rm'); if (arena && m0) { DS.Attack.ultBlast(arena, m0, p.fx || 'flame'); setTimeout(() => { if (!DS.Thrill) return; if (gold) DS.Thrill.petrify(m0.querySelector('.art.monster') || m0); else if (!it.noBind) DS.Thrill.chain(m0, DS.Combo ? DS.Combo.ULT_BIND : 15, 'ult'); }, 500); } } catch (e) { console.error(e); } }).catch(() => {}).finally(() => setTimeout(ulNext, gold ? 1800 : 1400)); // 중간에 오류가 나도 다음 필살기가 막히지 않게
   }
   // 🗿 석화 남은 초 (교실 TV 위쪽 큰 띠) · 몬스터 회색
   let petriEnd = 0, petriT = null;
@@ -85,7 +93,7 @@ DS.Hall = (function () {
   function gritHall(p) {
     const arena = $('#raid'); if (!arena) return;
     const b = document.createElement('div'); b.className = 'h-grit'; b.textContent = `🔥 끈기의 일격! ${p.num ? `${p.num}번 ` : ''}${p.nick || ''} 드디어 성공!`; arena.appendChild(b); setTimeout(() => b.remove(), 3200);
-    if (DS.Sound && DS.Sound.correct) DS.Sound.correct();
+    if (Snd() && Snd().correct) Snd().correct();
   }
   function lvHall() {
     const v = R.lvup || {}, first = !lvSeen; if (first) lvSeen = {};
@@ -96,7 +104,7 @@ DS.Hall = (function () {
     const it = lvQ.shift(); if (!it) { lvBusy = false; return; } lvBusy = true;
     const [u, lv] = it, p = (R.players || {})[u] || {};
     const n = document.createElement('div'); n.className = 'h-lvup'; n.innerHTML = `${DS.Art.hero(p.hero || 0, 'attack', 'pairhop')}<div><p>🎉 LEVEL UP!</p><b>${p.num ? `${p.num}번 ` : ''}${esc(p.nick || '')}</b><span>Lv.${lv}</span></div>`;
-    document.getElementById('screen-hall').appendChild(n); DS.Sound.correct();
+    document.getElementById('screen-hall').appendChild(n); Snd().correct();
     const h = document.getElementById(`fh-${u}`); if (h) h.classList.add('lv-glow');
     setTimeout(() => { n.remove(); if (h) h.classList.remove('lv-glow'); lvNext(); }, 2200);
   }
@@ -148,7 +156,7 @@ DS.Hall = (function () {
     const st = Raid().stepOf(L, R), bh = Raid().bossHp(L, R);
     if (st && st.kind === 'boss' && !bh.won && !Raid().isClosed(R)) {
       const ph = DS.Combo.bossPhase(bh.max ? bh.left / bh.max : 1);
-      if (hPhase && ph.phase > hPhase) { DS.Thrill.phaseNote(ph, host); const a = $('#raid'); if (a) { a.classList.remove('quake-big'); void a.offsetWidth; a.classList.add('quake-big'); setTimeout(() => a.classList.remove('quake-big'), 1500); } DS.Sound.rumble(); }
+      if (hPhase && ph.phase > hPhase) { DS.Thrill.phaseNote(ph, host); const a = $('#raid'); if (a) { a.classList.remove('quake-big'); void a.offsetWidth; a.classList.add('quake-big'); setTimeout(() => a.classList.remove('quake-big'), 1500); } Snd().rumble(); }
       hPhase = ph.phase; const a = $('#raid'); if (a) { a.classList.toggle('ph-2', ph.phase === 2); a.classList.toggle('ph-3', ph.phase === 3); }
     } else hPhase = 0;
     comboHall();
@@ -306,7 +314,7 @@ DS.Hall = (function () {
       <div class="raid-clear" id="r-clear" hidden></div><div class="h-focus-badge">⚠ 집중모드</div><div class="h-combo" id="h-combo"></div>
     </div>`;
     seen = attacks(step);
-    if (step.kind === 'boss') DS.Sound.rumble();
+    if (step.kind === 'boss') Snd().rumble();
     updateFight(step);
   }
   function updateFight(step) {
@@ -326,7 +334,7 @@ DS.Hall = (function () {
     if (f.done) {
       clr.hidden = false; clr.className = 'raid-clear'; clr.innerHTML = step.kind === 'boss' ? '🎉 보스 격파! 모두 함께 이겼다!' : '⚔ 몬스터 격파!';
       if (wonFx !== built) { const fin = lastHit; setTimeout(() => finisher(fin, step), 350 * (queue.length + 1) + 300); }
-      if (wonFx !== built) { wonFx = built; setTimeout(() => { const m = $('#rm'); if (m && vanished !== built) { const art = m.querySelector('.art.monster'); if (art) art.outerHTML = DS.Art.monster(f.sprite, 'down'); else m.insertAdjacentHTML('beforeend', DS.Art.monster(f.sprite, 'down')); } /* 2026-11-06 검증: 예전엔 m.innerHTML 로 머리 위 체력 막대(#rh-bar)까지 지워 → 다음 갱신마다 장면을 새로 그려 쓰러진 뒤의 공격(몬스터 묶기 · 힐) 연출이 사라지고 「마무리 일격」이 되풀이됨 */ DS.Sound.correct(); document.querySelectorAll('.fh2').forEach((h, k) => { const a = h.querySelector('.art'); if (!a) return; a.parentElement.classList.toggle('face-l', k % 2 === 1); a.classList.add('pairhop'); a.style.animationDelay = `${(k % 2) * 0.22}s`; }); }, 600); }
+      if (wonFx !== built) { wonFx = built; setTimeout(() => { const m = $('#rm'); if (m && vanished !== built) { const art = m.querySelector('.art.monster'); if (art) art.outerHTML = DS.Art.monster(f.sprite, 'down'); else m.insertAdjacentHTML('beforeend', DS.Art.monster(f.sprite, 'down')); } /* 2026-11-06 검증: 예전엔 m.innerHTML 로 머리 위 체력 막대(#rh-bar)까지 지워 → 다음 갱신마다 장면을 새로 그려 쓰러진 뒤의 공격(몬스터 묶기 · 힐) 연출이 사라지고 「마무리 일격」이 되풀이됨 */ Snd().correct(); document.querySelectorAll('.fh2').forEach((h, k) => { const a = h.querySelector('.art'); if (!a) return; a.parentElement.classList.toggle('face-l', k % 2 === 1); a.classList.add('pairhop'); a.style.animationDelay = `${(k % 2) * 0.22}s`; }); }, 600); }
     } else if (step.kind === 'monster' && !wait.length && f.hp.left > 0) {
       clr.hidden = false; clr.className = 'raid-clear note'; clr.innerHTML = `모두 공격했다! 남은 체력 ${f.hp.left} — 재도전으로 더 공격하자`;
     } else clr.hidden = true;
@@ -350,7 +358,7 @@ DS.Hall = (function () {
       const at = { x: mr.left - ar.left + mr.width / 2, y: mr.top - ar.top + mr.height / 2 }, sc = Math.min(ar.width, ar.height) / 520;
       if (DS.FX) { DS.FX.play(arena, p.fx || 'flame', { ...at, scale: sc, perfect: true }); setTimeout(() => DS.FX.play(arena, p.fx || 'flame', { ...at, scale: sc * 0.75, perfect: true }), 220); }
       if (m0) { m0.classList.remove('flash'); void m0.offsetWidth; m0.classList.add('flash'); }
-      DS.Sound.hit(); setTimeout(() => DS.Sound.hit(), 140); setTimeout(() => DS.Sound.correct(), 380);
+      Snd().hit(); setTimeout(() => Snd().hit(), 140); setTimeout(() => Snd().correct(), 380);
     }, 1450);
     if (h) setTimeout(() => h.classList.remove('finisher', 'dash-slow'), 2600);
   }
@@ -368,11 +376,11 @@ DS.Hall = (function () {
       arena.querySelectorAll('.fh2').forEach((h) => h.classList.add('frozen'));
       if (!ban) { ban = document.createElement('div'); ban.className = 'h-solve'; arena.appendChild(ban); }
       ban.innerHTML = `❄ 꽁꽁 묶기! <b class="sl-left" data-sl-end="${lk.end}">${Math.ceil(lk.left / 1000)}초</b><small>학습지에 먼저 다 풀어요 — 얼음이 깨지면 공격!</small>`;
-      if (!was || was.split('|')[0] !== lk.id) { const m0 = $('#rm'), ar = arena.getBoundingClientRect(); if (DS.FX) DS.FX.play(arena, 'nova', { x: ar.width / 2, y: ar.height * 0.72, scale: Math.min(ar.width, ar.height) / 420, perfect: true }); if (m0 && DS.Attack) DS.Attack.knock(m0, -10); [...arena.querySelectorAll('.fh2')].slice(0, 6).forEach((h, k) => setTimeout(() => DS.Thrill && DS.Thrill.bindFx(h.querySelector('.art') || h), 250 + k * 90)); if (DS.Sound && DS.Sound.fxHit) DS.Sound.fxHit('nova'); }
+      if (!was || was.split('|')[0] !== lk.id) { const m0 = $('#rm'), ar = arena.getBoundingClientRect(); if (DS.FX) DS.FX.play(arena, 'nova', { x: ar.width / 2, y: ar.height * 0.72, scale: Math.min(ar.width, ar.height) / 420, perfect: true }); if (m0 && DS.Attack) DS.Attack.knock(m0, -10); [...arena.querySelectorAll('.fh2')].slice(0, 6).forEach((h, k) => setTimeout(() => DS.Thrill && DS.Thrill.bindFx(h.querySelector('.art') || h), 250 + k * 90)); if (Snd() && Snd().fxHit) Snd().fxHit('nova'); }
     } else {
       if (ban) ban.remove();
       const fz = [...arena.querySelectorAll('.fh2.frozen')]; fz.forEach((h) => h.classList.remove('frozen'));
-      if (was && fz.length && DS.FX) { const ar = arena.getBoundingClientRect(); fz.slice(0, 8).forEach((h, k) => setTimeout(() => { const r = h.getBoundingClientRect(); DS.FX.play(arena, 'ice', { x: r.left - ar.left + r.width / 2, y: r.top - ar.top + r.height / 2, scale: 0.45 }); }, k * 70)); if (DS.Sound && DS.Sound.correct) DS.Sound.correct(); }
+      if (was && fz.length && DS.FX) { const ar = arena.getBoundingClientRect(); fz.slice(0, 8).forEach((h, k) => setTimeout(() => { const r = h.getBoundingClientRect(); DS.FX.play(arena, 'ice', { x: r.left - ar.left + r.width / 2, y: r.top - ar.top + r.height / 2, scale: 0.45 }); }, k * 70)); if (Snd() && Snd().correct) Snd().correct(); }
     }
   }
   function hallAtk() {
@@ -394,7 +402,7 @@ DS.Hall = (function () {
       arena.classList.remove('atk-hit'); void arena.offsetWidth; arena.classList.add('atk-hit'); setTimeout(() => arena.classList.remove('atk-hit'), 800);
       const b = document.createElement('div'); b.className = 'atk-banner'; b.innerHTML = `💥 몬스터의 공격! <small>${c.lock}초 멈춤</small>`; arena.appendChild(b); setTimeout(() => b.remove(), 1600);
       if (DS.FX) DS.FX.play(arena, 'flame', { scale: 0.7 });
-      DS.Sound.squish(); setTimeout(() => DS.Sound.hit(), 120);
+      Snd().squish(); setTimeout(() => Snd().hit(), 120);
       document.querySelectorAll('.fh2').forEach((h) => {
         const u = h.id.slice(3), hid = ((R.players || {})[u] || {}).hero || 0;
         h.classList.remove('struck'); void h.offsetWidth; h.classList.add('struck'); setTimeout(() => h.classList.remove('struck'), 600);
@@ -417,7 +425,7 @@ DS.Hall = (function () {
     if (h && a.label === 'heal') {
       const t = document.createElement('span'); t.className = 'heal-tag'; t.textContent = `💚 ${(R.players[a.u] || {}).nick || ''}의 응원!`; h.appendChild(t); setTimeout(() => t.remove(), 1900);
       h.classList.remove('healing'); void h.offsetWidth; h.classList.add('healing'); setTimeout(() => h.classList.remove('healing'), 1300);
-      DS.Sound.correct();
+      Snd().correct();
     } else if (h && arena && m0) {
       // v0.9.2 연습 공격(이미 다 맞힌 학생): 돌진 + 이펙트 + 머리 위 「✔ 이미 성공」 · 데미지 숫자 · PERFECT 흔들림 없음
       const prac = a.label === 'practice', ok = a.label !== 'fail', perfect = a.label === 'success';
@@ -429,7 +437,7 @@ DS.Hall = (function () {
       pose(h, hid, 'attack', 820); // v0.9.3 (사용자 지적 ⑤): 돌진하는 동안 공격 자세 → 돌아오면 서 있는 자세
       const hit = () => {
         if (ok) {
-          DS.Sound.hit();
+          Snd().hit();
           const p = (R.players[a.u] || {}).fx || 'flame';
           DS.FX.play(arena, p, { x: mr.left - ar.left + mr.width / 2, y: mr.top - ar.top + mr.height / 2, scale: Math.min(ar.width, ar.height) / (perfect ? 900 : 1150), perfect });
           m0.classList.remove('flash'); void m0.offsetWidth; m0.classList.add('flash');
@@ -438,13 +446,13 @@ DS.Hall = (function () {
           if (fx && a.dmg) { const d = document.createElement('span'); d.className = `dmg${perfect ? ' big' : ''}`; d.textContent = `−${a.dmg}`; d.style.left = `${55 + Math.random() * 25}%`; fx.appendChild(d); setTimeout(() => d.remove(), 1300); }
           if (perfect) {
             const t = document.createElement('div'); t.className = 'perfect'; t.textContent = 'PERFECT!'; arena.appendChild(t); setTimeout(() => t.remove(), 1300);
-            arena.classList.remove('shake'); void arena.offsetWidth; arena.classList.add('shake'); setTimeout(() => DS.Sound.correct(), 120);
+            arena.classList.remove('shake'); void arena.offsetWidth; arena.classList.add('shake'); setTimeout(() => Snd().correct(), 120);
           }
-        } else DS.Sound.squish();
+        } else Snd().squish();
       };
       if (ranged) { // 탄: 용사 손 → 몬스터 (곡선 · 머리 돌림) · 빗나가면 위로 사라짐
         const from = { x: hr.left - ar.left + hr.width * 0.7, y: hr.top - ar.top + hr.height * 0.45 }, to = { x: mr.left - ar.left + mr.width * 0.45, y: mr.top - ar.top + mr.height * 0.5 };
-        if (DS.Sound.launch) DS.Sound.launch();
+        if (Snd().launch) Snd().launch();
         setTimeout(() => DS.Attack.fly(arena, DS.Attack.projOf(hid), from, ok ? to : { x: to.x - mr.width * 0.3, y: mr.top - ar.top - 20 }, Math.max(1, Math.min(ar.width, ar.height) / 380), !ok).then(hit), 120);
       } else setTimeout(hit, 330);
       setTimeout(() => h.classList.remove('dash', 'swing'), 850);
@@ -544,7 +552,7 @@ DS.Hall = (function () {
       const [i, v] = b.dataset.pick.split('|'), k = Number(i), t = d.items[k].type;
       if (t === 'multi') { const s = new Set(d.given[k]); const n = Number(v); if (s.has(n)) s.delete(n); else s.add(n); d.given[k] = [...s].sort((a, b2) => a - b2); }
       else if (t === 'choice') d.given[k] = Number(v); else if (t === 'ox') d.given[k] = v === 'O'; else d.given[k] = [v];
-      DS.Sound.clank(); demoDraw();
+      Snd().clank(); demoDraw();
     }));
     ov.querySelectorAll('[data-ask]').forEach((b) => (b.onclick = async () => { // 부분집합 모두 쓰기: 학생과 같은 입력 창
       const i = Number(b.dataset.ask), r = await DS.Quiz.ask({ name: `${title} ${i + 1}번 (시연)`, formula: d.attempt ? '🔄 숫자가 바뀌었어요' : '학습지' }, d.items[i], { collect: true, tag: '🎮 시연' });
@@ -553,13 +561,13 @@ DS.Hall = (function () {
     DS.UI.dial(ov, (i) => d.given[i], (i, v) => { d.given[i] = v; reGo(); });
     ov.querySelectorAll('[data-text]').forEach((inp) => inp.addEventListener('input', () => { d.given[Number(inp.dataset.text)] = inp.value; reGo(); }));
     const rv = ov.querySelector('#demo-reveal');
-    if (rv) rv.onclick = () => { d.shown = true; d.marks = d.items.map(() => true); DS.Sound.slash(); demoDraw(); };
+    if (rv) rv.onclick = () => { d.shown = true; d.marks = d.items.map(() => true); Snd().slash(); demoDraw(); };
     const go = ov.querySelector('#demo-go');
     if (go) go.onclick = () => {
       const given = d.items.map((q, i) => (q.type === 'number' ? Number(d.given[i]) : d.given[i]));
       d.marks = d.items.map((q, i) => filled(q, given[i]) && DS.Quiz.grade(q, given[i]));
       demoDraw();
-      if (d.marks.slice(0, d.hp).every(Boolean)) DS.Sound.slash(); else DS.Sound.squish(); // 다 맞히면 ⚔ 일반 · ⚡ 필살기 버튼 (2026-11-06)
+      if (d.marks.slice(0, d.hp).every(Boolean)) Snd().slash(); else Snd().squish(); // 다 맞히면 ⚔ 일반 · ⚡ 필살기 버튼 (2026-11-06)
     };
   }
   // ⚡ 선생님 필살기 (2026-11-06 사용자 확정): 시연을 다 맞히면 선생님이 「⚔ 일반 공격」 · 「⚡ 필살기」 중 고름 (홍보용으로 가끔)
@@ -573,7 +581,7 @@ DS.Hall = (function () {
   function bindStrike(ov, step) { ov.querySelectorAll('[data-strike]').forEach((b) => (b.onclick = () => { const ult = b.dataset.strike === '1' && tCanUlt(); demoClose(); teacherStrike(step, ult); })); }
   // 선생님 일격: 왼쪽에서 등장 → 몬스터로 돌진 → 팍! (이미 공략된 몬스터면 소멸)
   async function teacherStrike(step, ult) {
-    if (ult && DS.Attack) await DS.Attack.cutin(DS.Art.teacherHero(R), tFx()); // ⚡ 선생님 필살기 (고른 때만)
+    if (ult && DS.Attack) await DS.Attack.cutin(DS.Art.teacherHero(R), tFx(), cutHost()); // ⚡ 선생님 필살기 (고른 때만)
     const arena = $('#raid'), m0 = $('#rm'); if (!arena || !m0 || Raid().stepOf(L, R) !== step) return;
     const kill = step.kind === 'boss' ? Raid().bossHp(L, R).won : Raid().cleared(L, R, step.id), ar = arena.getBoundingClientRect(), mr = m0.getBoundingClientRect();
     const t = document.createElement('div'); t.className = 'teach-strike'; t.innerHTML = DS.Art.hero(DS.Art.teacherHero(R), 'attack');
@@ -581,7 +589,7 @@ DS.Hall = (function () {
     t.style.setProperty('--tx', `${mr.left - ar.left + mr.width * 0.2 - ar.width * 0.08}px`); t.style.setProperty('--ty', `${mr.top - ar.top + mr.height * 0.45 - ar.height * 0.62}px`);
     requestAnimationFrame(() => t.classList.add('go'));
     setTimeout(() => {
-      DS.Sound.hit(); setTimeout(() => DS.Sound.correct(), 140);
+      Snd().hit(); setTimeout(() => Snd().correct(), 140);
       if (ult && DS.Attack) DS.Attack.ultBlast(arena, m0, tFx()); else DS.FX.play(arena, tFx(), { x: mr.left - ar.left + mr.width / 2, y: mr.top - ar.top + mr.height / 2, scale: Math.min(ar.width, ar.height) / 700, perfect: true }); // 💥 필살기 = 광역
       arena.classList.remove('shake'); void arena.offsetWidth; arena.classList.add('shake');
       const tag = document.createElement('div'); tag.className = `perfect ${kill ? 'vanish-txt' : 'demo-txt'}`; tag.textContent = kill ? '💥 소멸!' : '시연 · 데미지 없음'; arena.appendChild(tag); setTimeout(() => tag.remove(), 1600);
@@ -594,5 +602,6 @@ DS.Hall = (function () {
     setTimeout(() => t.remove(), 1500);
   }
 
-  return { enter };
+  function leave() { embed = false; if (stop) stop(); stop = null; if (stopPrep) stopPrep(); stopPrep = null; clearInterval(atkT); atkT = 0; clearInterval(bubbleT); built = ''; } // 👩‍🏫 체험판 TV 창 닫기 (남은 연출 타이머가 R 을 읽어도 되게 R · L 은 그대로)
+  return { enter, leave };
 })();

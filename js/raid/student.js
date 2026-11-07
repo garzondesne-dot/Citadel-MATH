@@ -174,7 +174,7 @@ DS.Student = (function () {
     if (!R.players || !R.players[me]) { $('#st-body').innerHTML = '<div class="panel"><p>입장 정보가 없어요. 처음 화면에서 다시 입장해 주세요.</p></div>'; return; }
     header();
     { const tb = $('#st-tbar'); if (tb) { const sig = `${Raid().deadline(R)}|${Raid().isClosed(R)}|${Raid().bossHp(L, R).won}`; if (tb.dataset.sig !== sig) { tb.dataset.sig = sig; tb.innerHTML = test ? '' : DS.Control.tbarHtml(L, R, { mini: true, compact: true }); } } }
-    focus(!test && Raid().focusOn(R) && !Raid().isLobby(R) && !Raid().restOn(R));
+    focus((!test || !!test.real) && Raid().focusOn(R) && !Raid().isLobby(R) && !Raid().restOn(R)); // 👩‍🏫 체험판은 집중모드 화면도 실제처럼
     if (test && test.onRender) test.onRender(L, R);
     const body = $('#st-body');
     const st0 = Raid().stepOf(L, R);
@@ -279,7 +279,7 @@ DS.Student = (function () {
       const w = was[u] || { n: 0, best: 0 };
       if (r.tries.length <= w.n) return;
       const p = R.players[u] || {}, dmg = Math.max(0, r.best - w.best);
-      if (dmg || r.practice) DS.FX.play(sc, p.fx || 'flame', { scale: 0.18, x: sc.clientWidth * (raidOn() ? 0.42 + Math.random() * 0.16 : 0.7 + Math.random() * 0.1), y: sc.clientHeight * (raidOn() ? 0.32 : 0.55) });
+      if (dmg || r.practice) DS.FX.play(sc, p.fx || 'flame', { scale: 0.18, x: sc.clientWidth * (0.7 + Math.random() * 0.1), y: sc.clientHeight * 0.55 });
       const t = document.createElement('span'); t.className = 'ally-hit'; t.textContent = r.practice ? `${p.nick} ✔ 이미 성공` : dmg ? `${p.nick} −${dmg}` : `${p.nick} 💨`;
       t.style.left = `${55 + Math.random() * 25}%`; sc.appendChild(t); setTimeout(() => t.remove(), 1300);
     });
@@ -287,23 +287,13 @@ DS.Student = (function () {
   // 1:1 대치: 왼쪽 내 용사(머리 위 = 남은 도전 기회 ●●●, 같이 움직임) vs 오른쪽 몬스터(아래 체력 칸)
   // cls: 'hit'(공격 성공 → 용사 돌진) · 'miss'(실패 → 축 처짐, 잠깐)
   const enhCls = (p) => { const t = p && DS.Gem && DS.Gem.enhTier ? DS.Gem.enhTier(Number(p.enh) || 0) : 0; return t ? ` enh enh-${t}` : ''; };
-  // 👩‍🏫 교사 체험판 (2026-11-07 사용자 「전투는 종합실 레이드 화면 · 용사 수 줄이고 조화롭게」): 몬스터 가운데 · 나는 앞 가운데 · 친구 5명 V자 · 이름표 + 상태
-  const raidOn = () => !!(test && test.raid);
-  const PARTY_AT = [[10, 92], [70, 92], [40, 96], [1, 8], [79, 8]]; // 2026-11-07 「용사랑 몬스터 겹침」: 몬스터 아래 띠에만 — 뒷줄 3 · 앞줄 양끝 2 · 나는 앞 가운데
-  function partyHtml(stepId) {
-    if (!raidOn()) return test ? `<div class="enc-friends">${Raid().activeIds(R).filter((u) => u !== me).slice(0, 4).map((u) => DS.Art.hero((R.players[u] || {}).hero || 0, 'idle', 'huff')).join('')}</div>` : '';
-    const ids = Raid().activeIds(R).filter((u) => u !== me).sort().slice(0, PARTY_AT.length);
-    return `<div class="enc-party">${ids.map((u, i) => { const p = R.players[u] || {}, [l, b] = PARTY_AT[i];
-      let st = '';
-      if (stepId === 'boss') { const n = Raid().bossState(L, R, u).filter((x) => x.ok).length; st = n ? `👑 ${n}` : '🤔'; }
-      else if (stepId) { const r = Raid().record(L, R, stepId, u); st = r.total && r.best === r.total ? (r.tries.length === 1 ? '⚡' : '✔') : r.tries.length ? '🔁' : '🤔'; }
-      return `<div class="ep-h" style="left:${l}%;bottom:${b}px">${DS.Art.hero(p.hero || 0, 'idle', 'huff')}<span class="ep-n">${esc(p.nick || '')}${st ? ` ${st}` : ''}</span></div>`; }).join('')}</div>`;
-  }
+  // 🧪 테스트 · 👩‍🏫 체험판: 가상 친구 용사 (작은 줄)
+  const partyHtml = () => (test ? `<div class="enc-friends">${Raid().activeIds(R).filter((u) => u !== me).slice(0, 4).map((u) => DS.Art.hero((R.players[u] || {}).hero || 0, 'idle', 'huff')).join('')}</div>` : '');
   function scene(step, rec, hp, cls = '', gauge = '') {
     const segs = Array.from({ length: rec.total }, (_, i) => `<i class="${i < rec.best ? 'gone' : ''}"></i>`).join('');
     const left = rec.left, done = Raid().cleared(L, R, step.id);
     const pips = Array.from({ length: rec.slots }, (_, i) => `<i class="${i < left ? 'on' : ''}${i < Math.min(left, rec.healed) ? ' heal' : ''}"></i>`).join('');
-    return `<div class="scene enc bg-scene th-${L.theme || ''} ${cls}${step.special ? ' special' : ''}${raidOn() ? ' trial-raid' : ''}"><div class="scene-bar"><div><b>${step.special ? '⭐ 난입! ' : step.review ? '📖 ' : ''}${esc(step.title)}</b><br><span class="muted small">레이드 체력 ${hp.left} / ${hp.max}</span></div></div>
+    return `<div class="scene enc bg-scene th-${L.theme || ''} ${cls}${step.special ? ' special' : ''}"><div class="scene-bar"><div><b>${step.special ? '⭐ 난입! ' : step.review ? '📖 ' : ''}${esc(step.title)}</b><br><span class="muted small">레이드 체력 ${hp.left} / ${hp.max}</span></div></div>
       ${partyHtml(step.id)}
       <div class="enc-hero${enhCls(info0)}"><div class="enc-tries" title="남은 도전 기회">${pips}</div>${heroNow(pose2(done, cls), done ? 'pairhop' : cls === 'miss' ? 'slump' : 'huff')}<i class="shadow"></i></div>
       <div class="enc-mon">${DS.Art.monster(L.monsters[step.id].sprite, done ? 'down' : 'idle', done ? '' : 'float')}<div class="segs" title="내가 맞힌 만큼 칸이 깨져요">${segs}</div>${gauge}</div></div>`;
@@ -596,7 +586,7 @@ DS.Student = (function () {
     const S = Raid().bossState(L, R, me), hp = Raid().bossHp(L, R), N0 = Raid().BOSS_TRIES;
     const lab = (s) => (s.ok ? '✔ 도달' : !s.n ? '풀기' : s.left ? `✘ 다시 · 기회 ${s.left}` : '해설 보기');
     body.innerHTML = `<div class="panel framed">
-      <div class="scene enc bg-scene th-${L.theme || ''} boss${hp.won ? '' : ' quake-once'}${raidOn() ? ' trial-raid' : ''}">${partyHtml('boss')}<div class="scene-bar"><div><b>👑 ${esc(L.boss.title)}</b><br><span class="muted small">보스 체력 ${hp.left} / ${hp.max}</span></div></div>
+      <div class="scene enc bg-scene th-${L.theme || ''} boss${hp.won ? '' : ' quake-once'}"><div class="scene-bar"><div><b>👑 ${esc(L.boss.title)}</b><br><span class="muted small">보스 체력 ${hp.left} / ${hp.max}</span></div></div>
         <div class="enc-hero">${heroNow(hp.won ? pose2(true, '') : 'think', hp.won ? 'pairhop' : 'huff')}<i class="shadow"></i></div>
         <div class="enc-mon">${DS.Art.monster(L.boss.sprite, hp.won ? 'down' : 'idle', hp.won ? '' : 'float')}<div class="hpbar"><i style="width:${hp.max ? (100 * hp.left) / hp.max : 0}%"></i></div>${hp.won ? '' : GAUGE}</div></div>
       ${hp.won ? '<h2 class="okc center">🎉 보스 격파! 모두 함께 이겼어요!</h2>' : ''}

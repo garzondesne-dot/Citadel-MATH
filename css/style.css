@@ -2305,40 +2305,6 @@ body.tb-last-min::after { content: ''; position: fixed; inset: 0; z-index: 88; p
 .cs-gift { position: absolute; right: 3px; top: 20px; font-style: normal; font-size: 12px; padding: 1px 5px; border-radius: 8px; background: #3a2a06e0; border: 1px solid #ffd25a; animation: csGift 1.6s ease-in-out infinite; pointer-events: none; }
 @keyframes csGift { 50% { transform: translateY(-2px); box-shadow: 0 0 8px #ffd25a88; } }
 
-/* 👩‍🏫 교사 체험판 전투 = 종합실 레이드 배치 (2026-11-07): 몬스터 가운데 위 · 나는 앞 가운데 · 친구 5명 V자 */
-.scene.enc.trial-raid { height: 390px; } /* 2026-11-07: 몬스터(위) · 용사(아래 띠 190px) 안 겹치게 */
-.scene.enc.trial-raid .enc-mon { left: 50%; right: auto; bottom: auto; top: 30px; margin-left: -75px; width: 150px; }
-.scene.enc.trial-raid.boss .enc-mon { margin-left: -84px; width: 168px; top: 24px; }
-.scene.enc.trial-raid .enc-hero { left: calc(50% - 40px); bottom: 2px; z-index: 4; }
-.scene.enc.trial-raid .enc-hero .art { width: 80px; height: 80px; }
-.scene.enc.trial-raid .enc-hero::after { content: ''; position: absolute; left: 12px; right: 12px; bottom: 10px; height: 10px; border-radius: 50%; background: radial-gradient(#ffd25aaa, transparent 70%); z-index: -1; }
-.enc-party { position: absolute; inset: 0; pointer-events: none; z-index: 3; }
-.enc-party .ep-h { position: absolute; width: 64px; display: flex; flex-direction: column; align-items: center; }
-.enc-party .ep-h .art { width: 60px; height: 60px; }
-.enc-party .ep-n { margin-top: -6px; padding: 0 5px; border-radius: 6px; background: #0b1426d9; border: 1px solid #ffffff33; font-size: 10px; white-space: nowrap; color: #eef2ff; }
-/* 👩‍🏫 교사용 체험판 (2026-11-07 · ?trial): 첫 화면 이름 · 용사 고르기 · AI 선생님 말풍선 */
-.trial-pick { position: absolute; left: 12px; right: 12px; bottom: calc(14px + env(safe-area-inset-bottom)); z-index: 6; max-width: 440px; margin: 0 auto; padding: 10px; border-radius: 14px; background: #0b1426eb; border: 2px solid #ffd25a; box-shadow: 0 8px 24px #000a; }
-.trial-pick .tp-h { margin: 0 0 6px; font-size: 13.5px; font-weight: 900; color: #ffd25a; text-align: center; }
-.trial-pick input { width: 100%; box-sizing: border-box; padding: 9px 10px; border-radius: 10px; border: 2px solid #2c4370; background: #0a1020; color: #eef2ff; font: inherit; font-size: 16px; margin-bottom: 8px; }
-.trial-pick .tp-heroes { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; margin-bottom: 8px; }
-.trial-pick .tp-h1 { height: 70px; padding: 0; border-radius: 9px; background: #16223e; border: 2px solid #2c4370; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; color: #eef2ff; font-size: 9.5px; overflow: hidden; cursor: pointer; }
-.trial-pick .tp-h1 .art { width: 52px; height: 52px; }
-.trial-pick .tp-h1.on { border-color: #ffd25a; box-shadow: 0 0 10px #ffd25a88; background: #3a2a0c; }
-.trial-pick #tp-go { width: 100%; }
-.trial-pick .tp-n { margin: 6px 0 0; font-size: 11px; color: #9fb0d8; text-align: center; }
-.splash:has(.trial-pick) .splash-tap, .splash:has(.trial-pick) .splash-by { display: none; }
-.trial-ai { position: fixed; left: 8px; right: 8px; bottom: calc(8px + env(safe-area-inset-bottom)); z-index: 44; display: flex; gap: 8px; align-items: flex-end; max-width: 520px; margin: 0 auto; pointer-events: none; }
-.trial-ai > * { pointer-events: auto; }
-.trial-ai .ta-face { width: 50px; height: 50px; flex: none; border-radius: 50%; background: #1b2a48; border: 2px solid #7fd3ff; overflow: hidden; display: flex; align-items: flex-end; justify-content: center; }
-.trial-ai .ta-face .art { width: 54px; height: 54px; }
-.trial-ai .ta-msg { flex: 1; background: #fffffff2; color: #13203a; border-radius: 14px 14px 14px 4px; padding: 8px 10px; font-size: 13.5px; line-height: 1.45; box-shadow: 0 4px 14px #0008; }
-.trial-ai .ta-msg b { color: #b0302a; } .trial-ai .ta-who { margin-right: 4px; color: #1f5fbf !important; }
-.trial-ai .ta-btns { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; margin-top: 6px; }
-.trial-ai .ta-btns .btn { padding: 6px 12px; }
-.trial-ai .ta-pill { padding: 4px 10px; border-radius: 10px; background: #000c; border: 1px solid #ffd25a; color: #ffd25a; font-size: 12px; font-weight: 900; }
-.trial-ai:has(.ta-pill) { right: auto; align-items: center; }
-body:has(.trial-ai .ta-msg) #screen-student .wrap { padding-bottom: 170px; }
-body:has(.trial-ai) #ver-tag { display: none; }
 .camp-label .gate-sub { display: block; font-size: 10.5px; font-weight: 700; color: #ffd25a; white-space: nowrap; } /* 👩‍🏫 체험판: 관문에 수업 내용 */
 /* 2026-11-07 체험판 다듬기 (사용자 캡처): 관문 이름표 = 두 줄(입장! / 수업 내용) · 안내 상자는 ≪ 메뉴화면 · ⚙ 설정 아래 · 안내 중엔 빨간 띠 숨김 · 알림은 체험판 띠 위로 */
 #screen-camp .cs-v2 .camp-gate-z .camp-label:has(.gate-sub) { flex-direction: column; align-items: flex-end; gap: 0; text-align: right; padding: 2px 8px; border-radius: 8px; }
@@ -2346,8 +2312,6 @@ body:has(.trial-ai) #ver-tag { display: none; }
 #screen-camp .tut-box { top: 40px; }
 #camp.tut-on .stamp-bar { display: none; }
 body:has(#camp.tut-on) .gem-pop { top: auto; bottom: 86px; }
-body:has(.trial-ai .ta-pill) .toast { bottom: 72px; }
-body:has(.trial-ai .ta-pill) #camp { padding-bottom: 64px; }
 
 /* 👩‍🏫 체험판 전투 공간 (2026-11-07 사용자 「상단 이름 · 설명창 줄이거나 없애서 전투 공간 확보」): 위 카드 = 한 줄 (메뉴화면 버튼 옆 · 이름 + 단계 배지) */
 .trial #st-head { min-height: 0; padding: 3px 8px 3px 118px; margin-bottom: 4px; align-items: center; gap: 6px; }
@@ -2356,3 +2320,32 @@ body:has(.trial-ai .ta-pill) #camp { padding-bottom: 64px; }
 .trial #st-head .st-badge { padding: 1px 8px; font-size: 12px; }
 .trial #screen-student .wrap > .nav-back { display: flex; width: max-content; margin-bottom: -38px; }
 .trial #st-head { margin-top: 6px; min-height: 34px; }
+
+/* 👩‍🏫 체험판 v2 (2026-11-07 · 테스트 모드 기준): 첫 화면 안내 글 · 위 TV 창 = 종합상황실 그대로(1280×720 을 줄임) · 아래 = 학생 폰 · 막대가 아래를 가리지 않게 */
+.trial-cap { position: absolute; left: 12px; right: 12px; bottom: calc(64px + env(safe-area-inset-bottom)); z-index: 6; margin: 0; text-align: center; color: #ffe7a8; font-weight: 900; font-size: 14px; text-shadow: 0 2px 4px #000; pointer-events: none; }
+.trial-cap small { font-weight: 700; font-size: 11.5px; color: #e7ecff; }
+#screen-hall.tv-embed { display: block !important; position: absolute; left: 0; top: 0; width: 1280px; height: 720px; overflow: hidden; padding: 0; }
+#screen-hall.tv-embed .nav-back, #screen-hall.tv-embed #h-ctrl, #screen-hall.tv-embed #h-set, #screen-hall.tv-embed #h-camp, #screen-hall.tv-embed #h-fs { display: none !important; }
+.test-tv.tv-hall .tt-in { pointer-events: none; }
+.trial body, .trial #screen-student .wrap { padding-bottom: 72px; }
+.test-bar .tb-ic.on { background: #6b1d1d; border-color: #ff8080; }
+/* 👩‍🏫 체험판 TV 창 = 1280×720 교실 TV 와 같은 배치 (폰 화면 폭 · 높이 단위(vh) · 좁은 화면 규칙을 TV 크기로 고정) */
+#screen-hall.tv-embed .hall { min-height: 720px; height: 720px; box-sizing: border-box; }
+#screen-hall.tv-embed .h-main { grid-template-columns: 250px 1fr 300px; }
+#screen-hall.tv-embed .h-heroes { max-height: 630px; }
+#screen-hall.tv-embed .h-arena { min-height: 630px; }
+#screen-hall.tv-embed #h-side { max-height: 518px; }
+#screen-hall.tv-embed .h-lobby { flex-direction: row; text-align: left; }
+#screen-hall.tv-embed .raid { min-height: 432px; }
+#screen-hall.tv-embed .raid-mon { width: 302px; height: 302px; }
+#screen-hall.tv-embed .raid.boss .raid-mon { width: 374px; height: 374px; }
+#screen-hall.tv-embed .raid-clear { font-size: 40px; } #screen-hall.tv-embed .raid-clear.note { font-size: 20px; }
+#screen-hall.tv-embed .h-sheet { min-height: 360px; } #screen-hall.tv-embed .h-sheet img { max-height: 504px; }
+#screen-hall.tv-embed .h-concept .h-sheet img, #screen-hall.tv-embed .h-sheet-ov .h-sheet img { height: 550px; max-height: 560px; }
+#screen-hall.tv-embed .h-concept.split .h-sheet img { max-height: 530px; }
+#screen-hall.tv-embed .h-video-box { width: 1013px; }
+#screen-hall.tv-embed .fa-wrap.big .fa-arena { height: 480px; } #screen-hall.tv-embed .fa-wrap.big .fa-arena.img { height: auto; width: min(100%, 853px); }
+#screen-hall.tv-embed .fa-board { font-size: 15px; }
+.trial .toast { bottom: 84px; }
+.trial .test-tv { z-index: 46; } .trial .test-bar, .trial .test-fun { z-index: 47; } /* 👀 집중모드: 폰만 잠기고 위 TV · 아래 막대는 그대로 보임 */
+.trial .gem-pop { top: 104px; } /* 💎 +200 알림이 위 빨간 확인도장 띠를 가리지 않게 */

@@ -96,8 +96,8 @@ DS.Attack = (function () {
     const d = document.createElement('div'); d.className = `ult${opt.gold ? ' true' : ''}`; d.style.setProperty('--uc', c1); d.style.setProperty('--uc2', c2);
     const crack = Array.from({ length: 9 }, (_, i) => `${(i * 12.5).toFixed(1)},${(50 + (i % 2 ? -1 : 1) * (6 + Math.random() * 10) + (i - 4) * 4).toFixed(1)}`).join(' ');
     d.innerHTML = `<i class="u-dim"></i><div class="u-band">${faceHtml(hero)}<i class="u-eye" style="left:44%"></i><i class="u-eye" style="left:56%"></i></div>${opt.gold ? '<b class="u-true">眞</b>' : ''}<b class="u-name">${opt.gold ? '진필살기 · ' : ''}${String(DS.FX.NAMES[fx] || '').replace(/^\S+\s/, '').replace(/[<>&]/g, '')}!</b><i class="u-flash"></i><div class="u-tear"><svg viewBox="0 0 100 100" preserveAspectRatio="none"><polyline points="${crack}" fill="none" stroke="#fff" stroke-width="1.6" style="filter:drop-shadow(0 0 2px ${c1})"/><polyline points="${crack}" fill="none" stroke="${c1}" stroke-width="0.5"/></svg></div>`;
-    document.body.appendChild(d);
-    if (DS.Sound) { DS.Sound.sample && DS.Sound.sample('special', 0.9); setTimeout(() => DS.Sound.finish && DS.Sound.finish(), 1000); }
+    (opt.host || document.body).appendChild(d); // opt.host: 👩‍🏫 체험판 TV 창 안에서
+    if (DS.Sound && !opt.mute) { DS.Sound.sample && DS.Sound.sample('special', 0.9); setTimeout(() => DS.Sound.finish && DS.Sound.finish(), 1000); }
     setTimeout(() => d.remove(), opt.gold ? 2000 : 1500);
     return wait(opt.gold ? 1450 : 1050);
   }

@@ -63,7 +63,7 @@ DS.Camp = (function () {
   let tut = null, tutRecs = null, tutMode = '', tutStep = 0;
   const tutPath = () => `xp/${ck(me.c)}/${me.n}/tut`, tutKey = () => `citadel-tut-${ck(me.c)}-${me.n}`;
   async function tutLoad() {
-    if (me.test) { tut = { a: true, b: true }; return; }
+    if (me.test || me.trial) { tut = { a: true, b: true }; return; } // 👩‍🏫 체험판 v2: 테스트 모닥불처럼 처음부터 다 열림 (안내 없음)
     let local = {}; try { local = JSON.parse(localStorage.getItem(tutKey()) || '{}'); } catch (e) { /* 무시 */ }
     tut = Object.assign({}, local, (await DS.Net.get(tutPath()).catch(() => null)) || {});
     if (!tut.a) tutRecs = await DS.Net.get(`records/${ck(me.c)}/${me.n}`).catch(() => null);
@@ -325,7 +325,7 @@ DS.Camp = (function () {
   // 📚 책장: 열린 차시의 개념별 🎬 설명 영상 · 📄 학습지 개념 (기말 대비 다시 보기)
   async function shelf(all) { // all: 교사 캠프 — 모든 차시
     const no = all != null ? all : me.test ? 99 : Number(await DS.Net.get(`unlock/${ck(me.c)}`).catch(() => 0)) || 0;
-    const open = DS.Lessons.list.filter((l) => l.no && l.no <= no && (!DS.TRIAL || DS.TRIAL.lessons.includes(l.id))).sort((a, b) => b.no - a.no); // 👩‍🏫 체험판: 6차시만
+    const open = DS.Lessons.list.filter((l) => l.no && l.no <= no && (!DS.TRIAL || DS.TRIAL.lessons.includes(l.id))).sort((a, b) => b.no - a.no); // 👩‍🏫 체험판: 3차시만
     const preps = {};
     for (const l of open) preps[l.id] = (await DS.Act.prepLite(l.id).catch(() => null)) || {};
     const el = document.createElement('div'); el.className = 'modal camp-modal';
