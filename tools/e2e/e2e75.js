@@ -62,8 +62,9 @@ const OUT = process.argv[2] || '.', U = 'http://localhost:8765/index.html?trial'
   await answer(0, false); await p.waitForTimeout(6000); await tap('go'); await p.waitForTimeout(2500);
   await answer(0, false); await p.waitForTimeout(8000); await shot('7-boss');
   R = await room(); const bossItems = await p.evaluate(() => document.querySelectorAll('.boss-items .bitem').length);
-  await tap('go'); await p.waitForTimeout(4000); await shot('8-finale');
-  await tap('go'); await p.waitForTimeout(800); await tap('go'); await p.waitForTimeout(6000);
+  const closeRes = async () => { for (let k = 0; k < 4; k++) { const b = await p.$('#rs-ok'); if (!b) return; await b.click().catch(() => {}); await p.waitForTimeout(1200); } };
+  await closeRes(); await tap('go'); await p.waitForTimeout(4000); await closeRes(); await shot('8-finale');
+  await tap('go'); await p.waitForTimeout(800); await closeRes(); await tap('go'); await p.waitForTimeout(6000); await closeRes();
   P(`⑥ 문제 2 단계 ${st2} · 보스 문항 ${bossItems}개`);
   // ⑦ 캠프: 하나씩 소개(B) · 💎100
   await shot('9-camp-tour');
