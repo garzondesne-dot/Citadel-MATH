@@ -39,7 +39,7 @@ DS.Gem = (function () {
   };
   // 상점 (조각으로 해금) · 업적 전용(도감 · 첫 레이드 · 인장 3개 · 놀이 메달)은 여기 없음
   const SHOP = {
-    hero: { 12: 30, 13: 30, 14: 60, 15: 60, 19: 30, 20: 30, 21: 30, 22: 30, 18: 60, 23: 60 }, // 2026-11-07 새 용사: 수식 책사 남 · 여 · 메카닉 · 해커 💎30 · 흑기사 · 용기사 💎60
+    hero: { 12: 30, 13: 30, 14: 60, 15: 60, 21: 30, 22: 30, 18: 60, 23: 60 }, // 2026-11-07 새 용사: 메카닉 · 해커 💎30 · 흑기사 · 용기사 💎60 · 수식 책사 남 · 여(19 · 20)는 📷 서술형 사진 통과로 (PHOTO_HEROES)
     fx: { fire: 40, lightning: 40, ice: 40, stars: 60, slash: 60, vortex: 80, // Ⅲ 화려 (인장으로도)
       moon: 20, ring: 20, chain: 20, spikes: 20, mana: 20, crit: 20, // Ⅱ 숙련 (2026-11-06)
       twin: 80, pillar: 80, thunder: 80, nova: 80, meteor: 80, void: 80, // Ⅳ 전설 = 같은 계열 Ⅲ 이 있어야 (account.js need) · 2026-11-06: 💎120 → 💎80 + 📜3
@@ -50,6 +50,9 @@ DS.Gem = (function () {
   const price = (kind, id) => (SHOP[kind] || {})[id] ?? null;
   // 📜 서술 조각 (2026-11-06): 서술형 사진 채점에서만 · 전설 Ⅳ · 강화 +7~ 에 함께 듦
   const SCROLL_NEED = { fx: { twin: 3, pillar: 3, thunder: 3, nova: 3, meteor: 3, void: 3, quake: 3, reap: 3, cyclone: 3, qed: 3 } };
+  // 🧑‍🎓 수식 책사 남 · 여 (2026-11-07 사용자 「서술형 찍어서 정답 처리되면 해금」): 📷 사진 통과 기록(📜 s_ph_… · 하루 💎 한도와 상관없이 남음)이 하나라도 있으면
+  const PHOTO_HEROES = [19, 20];
+  const photoPassed = (d) => Object.keys((d && d.log) || {}).some((k) => k.startsWith('s_ph_'));
   const scrollOf = (kind, id) => (SCROLL_NEED[kind] || {})[id] || 0;
   // 🔨 강화 +1 ~ +10 (캐릭터 하나 · 실패 없음 · 🌟 대성공 10% = 💎 절반 돌려받기 + 반짝)
   const ENH = [null, { g: 10 }, { g: 15 }, { g: 20 }, { g: 25 }, { g: 30 }, { g: 40 }, { g: 50, s: 1 }, { g: 60, s: 1 }, { g: 80, s: 2 }, { g: 100, s: 2 }];
@@ -183,5 +186,5 @@ DS.Gem = (function () {
     return r ? { ...r, pity, feathers: (Number(d.feather) || 0) + (r.feather || 0) } : null;
   }
   const feathers = (d) => Number((d || {}).feather) || 0;
-  return { SCROLL_NEED, scrollOf, ENH, ENH_MAX, GREAT, enhTier, addScroll, enhance, watchGifts, giftList, chest, feathers, G, SHOP, DAY_CAP, price, mine, add, gift, giftsSince, addDaily, medal, buy, sell, refundOf, REFUND, owns, itemKey, streak, today };
+  return { PHOTO_HEROES, photoPassed, SCROLL_NEED, scrollOf, ENH, ENH_MAX, GREAT, enhTier, addScroll, enhance, watchGifts, giftList, chest, feathers, G, SHOP, DAY_CAP, price, mine, add, gift, giftsSince, addDaily, medal, buy, sell, refundOf, REFUND, owns, itemKey, streak, today };
 })();

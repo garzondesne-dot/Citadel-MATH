@@ -2298,3 +2298,9 @@ body.tb-last-min::after { content: ''; position: fixed; inset: 0; z-index: 88; p
 .td-ups { display: grid; grid-template-columns: 1fr; gap: 6px; } .td-sk { width: 100%; margin: 8px 0; } .td-sk.td-ult { background: linear-gradient(180deg, #ffe58a, #f2b300); color: #3a2400; }
 .td-ph.td-end.win h2 { color: #7dffa8; } .td-ph.td-end.lose h2 { color: #ff8a95; }
 .td-ph .td-btn { display: block; width: 100%; height: auto; min-height: 0; padding: 10px 12px; font-size: 17px; line-height: 1.35; margin: 6px 0; }
+
+/* 🧑‍🎓 수식 책사 해금 조건 (2026-11-07): 서술형 문제 화면 · 성채 방 카드 */
+.bf-gift { margin: 6px 0; padding: 8px 10px; border-radius: 10px; background: linear-gradient(90deg, #3a2a06d0, #0a2c46d0); border: 1px solid #ffd25a88; color: #fff3c0; font-size: 14px; line-height: 1.5; }
+.bf-gift b { color: #ffd25a; }
+.cs-gift { position: absolute; right: 3px; top: 20px; font-style: normal; font-size: 12px; padding: 1px 5px; border-radius: 8px; background: #3a2a06e0; border: 1px solid #ffd25a; animation: csGift 1.6s ease-in-out infinite; pointer-events: none; }
+@keyframes csGift { 50% { transform: translateY(-2px); box-shadow: 0 0 8px #ffd25a88; } }

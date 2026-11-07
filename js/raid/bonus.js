@@ -19,7 +19,8 @@ DS.Bonus = (function () {
   const TRIES = (DS.Raid ? DS.Raid.RETRIES : 3) + 1; // 레이드와 같은 기회 수
   const BOSS_PCT = 60;
   const PHOTO_READY = () => !!(DS.Photo && DS.Photo.ready && DS.Photo.ready()); // 📷 서술형 사진 분석 (v0.9.10) — 생기기 전까지 서술형 방은 잠금 · 보스 60% 계산에서도 뺌 (2026-11-05 사용자)                             // 👑 보스 방: 열린 방의 60% 처치 (2026-11-05 사용자 규칙)
-  let me = null, no = 0, mine = {}, prepCache = {};
+  let me = null, no = 0, mine = {}, prepCache = {}, mathOpen = false;
+  const MATH_GIFT = '🎁 <b>조건</b>: 답을 맞히고 📷 <b>풀이 사진까지 통과</b>하면 🧑‍🎓 <b>수식 책사(남) · (여)</b> 용사가 열려요!'; // 2026-11-07 사용자 「문제에 조건 표시」
   let train = false; // true = 🎯 허수아비 복습 · false = 🏰 성채던전
   let rift = null;   // ⏳ 이어하기 포털 { lesson, no, until, code } — 허수아비 복습 화면을 그 차시 하나로 (2026-11-05)
   const fieldIds = (l) => l.steps.filter((st) => st.kind === 'monster' && l.monsters[st.id]).map((st) => st.id);
@@ -95,6 +96,7 @@ DS.Bonus = (function () {
     recs = preview || (m && m.test) ? null : (await N().get(`records/${ck(m.c)}/${m.n}`).catch(() => null)) || {};
     heldM = recs ? (await N().get(`held/${ck(m.c)}`).catch(() => null)) || {} : {};
     gemD = preview || !m || m.test || !DS.Gem ? null : await DS.Gem.mine(m).catch(() => null);
+    mathOpen = !!(gemD && DS.Gem.photoPassed && DS.Gem.photoPassed(gemD)); // 🧑‍🎓 수식 책사 남 · 여 열렸나
     if (DS.Photo) await DS.Photo.load(true).catch(() => null); // 📷 gcfg/photo · photo_rubric
     if (!preview && me && !me.test) await photoSync().catch(() => {}); // ⏳ 선생님 확인 결과 → 처치 / 다시
     await loadLocks(); isAdm = all() && DS.Account ? await DS.Account.isAdmin().catch(() => false) : false; // 📕 오답노트 (null = 미리 보기 · 테스트: 표시 안 함)
@@ -107,7 +109,8 @@ DS.Bonus = (function () {
   async function scrollWin(lid, rid, w, show) {
     if (!DS.Gem || !DS.Gem.addScroll || !me || me.test) return 0;
     let n = 0; const k = `${lid}_${rid}`;
-    n += await DS.Gem.addScroll(me, 1, `ph_${k}`, '서술형 통과').catch(() => 0);
+    const first = await DS.Gem.addScroll(me, 1, `ph_${k}`, '서술형 통과').catch(() => 0); n += first;
+    if (first && !mathOpen) { mathOpen = true; setTimeout(() => DS.UI.toast('🧑‍🎓 새 용사 해금! 「수식 책사(남) · (여)」 — ⚙ 내 용사에서 골라 보세요', 5000), 1200); }
     if (w && w.total > 0 && w.score === w.total) n += await DS.Gem.addScroll(me, 1, `phfull_${k}`, '서술형 만점').catch(() => 0);
     if (w && w.up) n += await DS.Gem.addScroll(me, 1, `phup_${k}`, '점수가 올랐어요').catch(() => 0);
     if (n && show) show(`📜 +${n} 서술 조각`, 'seal');
@@ -172,9 +175,10 @@ DS.Bonus = (function () {
         const rr = roomRec(mine, L, r.id), open = S.isOpen(r), m = L.monsters[r.id], isNew = fresh.has(`${L.id}/${r.id}`);
         const st = !open ? 'lock' : rr.clear ? 'clear' : rr.tries ? 'drop' : 'ready';
         const sub = open && !rr.clear && rr.pend ? '⏳ 선생님 확인 중' : open && !rr.clear && rr.ans && r.photo ? '📷 풀이 사진 올리기' : !open ? (!S.usable(r) ? '📷 사진 채점 준비 중' : r.boss && (all() || r.no <= no) ? `${S.cleared} / ${S.need} 처치하면 열려요` : `${r.no}차시 수업 뒤`) : rr.clear ? '✔ 처치' : rr.tries ? `💧 ${rr.tries}번 도전` : '⚔ 도전';
+        const gift = r.photo && open && !rr.clear && !mathOpen ? '<i class="cs-gift" title="풀이 사진까지 통과하면 수식 책사(남 · 여) 용사 해금">🎁 🧑‍🎓</i>' : '';
         return `<button class="cs-room ${st}${r.boss ? ' boss' : ''}"${open ? ` data-fight="${L.id}|${r.id}"` : ` data-lockmsg="${esc(!S.usable(r) ? '서술형 방이에요. 선생님이 📷 사진 채점을 켜면 열려요' : r.boss ? `👑 보스 방은 열린 방 ${S.need}개를 처치하면 열려요 (지금 ${S.cleared}개)` : `${r.no}차시 수업을 하면 열려요`)}"`}>
           ${isNew ? '<span class="cs-rnew">NEW</span>' : ''}${!open && r.boss && !sealed ? sealTag() : ''}<span class="cs-no">${r.id.slice(1)}</span>${open ? DS.Art.monster(m.sprite, rr.clear ? 'down' : 'idle') : '<i class="cs-lockic">🔒</i>'}
-          <span class="cs-rt">${esc(r.title.replace(/^👑 /, '').replace(/^\d+ /, ''))}</span><span class="cs-rs">${sub}</span>${open && !rr.clear && !gLog(`room_${L.id}_${r.id}`) ? gTag((r.boss ? DS.Gem.G.roomBoss : DS.Gem.G.room) + (r.boss && !sealed ? DS.Gem.G.seal : 0)) : ''}${open && r.boss && !rr.clear && !sealed ? sealTag() : ''}</button>`;
+          <span class="cs-rt">${esc(r.title.replace(/^👑 /, '').replace(/^\d+ /, ''))}</span><span class="cs-rs">${sub}</span>${gift}${open && !rr.clear && !gLog(`room_${L.id}_${r.id}`) ? gTag((r.boss ? DS.Gem.G.roomBoss : DS.Gem.G.room) + (r.boss && !sealed ? DS.Gem.G.seal : 0)) : ''}${open && r.boss && !rr.clear && !sealed ? sealTag() : ''}</button>`;
       };
       return `<div class="panel framed cs-floor${sealed ? ' sealed' : ''}"><p class="bn-h"><b>${f.floor}층 · ${esc(f.title)}</b><span class="muted small">처치 ${S.rooms.filter((r) => roomRec(mine, L, r.id).clear).length} / ${S.rooms.length} · 열린 방 ${S.rooms.filter((r) => S.isOpen(r)).length}</span>${sealed ? '<span class="bn-stamp">🟪 인장</span>' : ''}${all() ? (fOpen ? '<span class="cs-lk on">🔓 학생에게 열림</span>' : '<span class="cs-lk">🔒 학생에게 잠김</span>') : ''}${lockBtn}</p>
         <div class="cs-rooms">${S.rooms.map(tile).join('')}</div></div>`;
@@ -290,7 +294,7 @@ DS.Bonus = (function () {
       el.innerHTML = `<div class="scene enc ${cbg ? `cs-bg${cbg === (DS.ASSETS.citadel || {}).boss ? ' cs-bossroom' : ''}` : `bg-scene th-${L.theme || ''}`} ${cls}"${cbg ? ` style="background-image:url('${DS.ASSETS.base}${cbg}')"` : ''}><div class="scene-bar"><div><b>⚔ ${esc(mon.title)}</b><br><span class="muted small">${castle ? `🏰 성채던전 ${L.floor || 1}층` : `🎯 복습! ${L.no}차시`} · 소문제 ${n}개를 모두 맞히면 처치</span></div><button class="btn small" id="bf-x">✕</button></div>
           <div class="enc-hero"><div class="enc-tries" title="남은 도전 기회">${pips}</div>${DS.Art.hero(me.hero || 0, done || cls ? 'attack' : 'think', done ? 'pairhop' : cls === 'miss' ? 'slump' : 'huff')}<i class="shadow"></i></div>
           <div class="enc-mon">${DS.Art.monster(mon.sprite, done ? 'down' : 'idle', done ? '' : 'float')}<div class="segs">${segs}</div>${done || !castle ? '' : '<div class="atk-gauge" title="몬스터 공격 게이지"><i></i></div>'}</div></div>
-        <div class="bf-body">${msg}${mon.note ? `<p class="muted small">💡 ${esc(mon.note)}</p>` : ''}
+        <div class="bf-body">${photoRoom && !mathOpen && !all() ? `<p class="bf-gift">${MATH_GIFT}</p>` : ''}${msg}${mon.note ? `<p class="muted small">💡 ${esc(mon.note)}</p>` : ''}
           <div class="row">${img ? '<button class="btn small" id="bf-sheet">📄 학습지 보기</button>' : ''}${(() => { const v = vidNow(); if (!v || !DS.Video.ok(v)) return ''; if (L.eval && !wrongSeen) return '<span class="muted small">🔒🎬 풀이 영상은 한 번 틀리면 열려요 — 먼저 스스로!</span>'; return `<button class="btn small" id="bf-vid">🎬 ${L.eval ? '풀이 영상 (예제)' : '설명 보기'}</button>`; })()}</div>
           <div class="row" id="bf-act"></div></div>`;
       el.querySelector('#bf-x').onclick = () => { el.remove(); DS.Quiz.close(); render(); }; // ✕ = 열린 문제 창도 닫음

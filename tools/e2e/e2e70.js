@@ -81,7 +81,9 @@ const jpegSize = (buf) => { let i = 2; while (i < buf.length) { if (buf[i] !== 0
   };
 
   // ── 07: 숫자 답 → 📷 → 재도전 → 🙋 이의 신청 ──
-  await S.click('[data-fight="eval-1|q07"]'); await S.waitForTimeout(1500); await S.click('#bf-go');
+  const gift0 = await S.evaluate(() => ({ card: !!document.querySelector('[data-fight="eval-1|q07"] .cs-gift'), heroes: null }));
+  gift0.heroes = await S.evaluate(async () => (await DS.Account.looks({ c: '1-3', n: 1 })).heroes.filter((h) => [19, 20].includes(h.id)).map((h) => h.open));
+  await S.click('[data-fight="eval-1|q07"]'); await S.waitForTimeout(1500); gift0.screen = await S.evaluate(() => (document.querySelector('.bn-fight .bf-gift') || {}).textContent || ''); await S.click('#bf-go');
   const st07 = await solve(); const rec07 = await S.evaluate(() => DS.Net.get('bonus/1-3/1/eval-1/q07'));
   P(`07 숫자 답 뒤: 사진 단추 ${st07} · 기록 ${JSON.stringify({ clear: !!rec07.clear, ans: !!rec07.ans })}`);
   await S.screenshot({ path: `${OUT}/70-3-photo-stage.png` });
@@ -124,6 +126,8 @@ const jpegSize = (buf) => { let i = 2; while (i < buf.length) { if (buf[i] !== 0
   await S.click('#ph-ok'); await S.waitForTimeout(2500);
   const sc11 = await S.evaluate(async () => { const d = (await DS.Gem.mine({ c: '1-3', n: 1 })) || {}; return { scroll: d.scroll || 0, photo: ((d.log || {})['photo_eval-1_q11'] || {}).g || 0 }; });
   const rec11 = await S.evaluate(() => DS.Net.get('bonus/1-3/1/eval-1/q11')), win11 = await S.evaluate(() => (document.querySelector('.bn-fight .okc') || {}).textContent || '');
+  const gift1 = await S.evaluate(async () => (await DS.Account.looks({ c: '1-3', n: 1 })).heroes.filter((h) => [19, 20].includes(h.id)).map((h) => h.open));
+  P(`🧑‍🎓 수식 책사 해금: 통과 전 ${JSON.stringify(gift0)} → 통과 뒤 ${JSON.stringify(gift1)}`);
   P(`11 통과 뒤: 📜 ${sc11.scroll} · 💎 사진 ${sc11.photo} · clear ${!!rec11.clear} · ph ${rec11.ph} · 화면 「${win11.slice(0, 30)}」`);
   await S.screenshot({ path: `${OUT}/70-8-win.png` });
 
@@ -147,6 +151,7 @@ const jpegSize = (buf) => { let i = 2; while (i < buf.length) { if (buf[i] !== 0
     인정뒤처치: okv === true && rec07b.clear && !rec07b.pend && /처치/.test(t07c.sub),
     하루다씀안내: /다 썼어요/.test(q11err),
     서술조각: sc11.scroll === 3 && sc11.photo === 6, // 💎 G.photo (2026-11-07 +20%: 5 → 6)
+    수식책사해금: gift0.card && /수식 책사/.test(gift0.screen) && gift0.heroes.join() === 'false,false' && gift1.join() === 'true,true',
     통과처치: st11 && rec11.clear && rec11.ph === 'p1' && /처치/.test(win11),
     경고: /⚠/.test(btnWarn) && /warn/.test(warn.box) && /200/.test(warn.txt) && warn.daily === '6' && saved.daily === 4 && saved.room === 2 && saved.cool === 30 && saved.warnDay === 150 && saved.url === URL_GS && saved.on === true,
     사진크기: got.length === 3 && got.every((g) => g.size && Math.max(g.size.w, g.size.h) <= 1024 && g.idToken && g.c === '1-3' && g.n === 1 && !/json/.test(g.ctype || '')),
