@@ -37,7 +37,7 @@ const OUT = process.argv[2] || '.', U = 'http://localhost:8765/index.html?trial'
   // ③ 개념 + 영상
   const concept = await ai(); await shot('4-concept');
   await tap('vid'); await p.waitForTimeout(1500); const vidOpen = await p.evaluate(() => !!document.querySelector('video'));
-  await p.keyboard.press('Escape'); await p.evaluate(() => document.querySelectorAll('.modal, .vid-modal').forEach((m) => m.remove())); await p.waitForTimeout(500);
+  await p.keyboard.press('Escape'); await p.evaluate(() => document.querySelectorAll('.video-modal').forEach((m) => m.remove())); await p.waitForTimeout(500);
   P(`③ 개념 AI 「${concept.slice(0, 40)}」 · 영상 열림 ${vidOpen}`);
   await tap('go'); await p.waitForTimeout(2500);
   // ④ 문제 1: 한 번 틀리고 → 고쳐서 맞힘
