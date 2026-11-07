@@ -1088,6 +1088,7 @@ details.panel[open] > summary::before { content: '▾ '; }
 .fc-one { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 6px; }
 .fc-ops { display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; }
 .fc-tile.mini { width: 44px; aspect-ratio: auto; height: 56px; padding: 6px 2px; font-size: 18px; flex: none; }
+.fc-tile.mini.ko { font-size: 13px; letter-spacing: -0.5px; white-space: nowrap; word-break: keep-all; line-height: 1.15; } /* 2026-11-07 사용자 캡처: 「이고 · 모든 · 어떤 · 부등식 · 모순」이 폰 글꼴에서 한 글자씩 세로로 → 한 줄 · 작은 글씨 */
 .fc-tile.mini.long { font-size: 12px; }
 .fc-tile.mini .fc-cardname { font-size: 10px; }
 .fc-one .fc-stage { width: min(100%, calc((100dvh - 330px) * 1.48)); max-width: 100%; margin: 0 auto; flex: none; }
@@ -2349,3 +2350,10 @@ body:has(#camp.tut-on) .gem-pop { top: auto; bottom: 86px; }
 .trial .toast { bottom: 84px; }
 .trial .test-tv { z-index: 46; } .trial .test-bar, .trial .test-fun { z-index: 47; } /* 👀 집중모드: 폰만 잠기고 위 TV · 아래 막대는 그대로 보임 */
 .trial .gem-pop { top: 104px; } /* 💎 +200 알림이 위 빨간 확인도장 띠를 가리지 않게 */
+.trial #ver-tag { bottom: calc(60px + env(safe-area-inset-bottom)); } /* 체험판: 버전 꼬리표가 아래 막대를 가리지 않게 */
+.trial .test-bar { gap: 4px; padding: 6px 6px calc(6px + env(safe-area-inset-bottom)); } /* 체험판 막대: 폰 폭에 단추가 한 줄로 (지금 단계는 위 TV 에 보임) */
+.trial .test-bar .tb-step { display: none; }
+.trial .test-bar .btn.small { padding: 4px 7px; }
+.trial .test-bar .btn.primary { padding: 7px 10px; font-size: 14px; margin-left: auto; }
+.trial .test-bar .tb-ic.on { box-shadow: 0 0 0 2px #ff8080, 0 0 10px #ff6060; } /* 👀 켜짐 = 빨간 테두리 */
+.test-bar .btn { white-space: nowrap; } .test-bar .tb-step { min-width: 0; }

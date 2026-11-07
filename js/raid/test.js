@@ -31,6 +31,7 @@ DS.Test = (function () {
     DS.Net.use(local);
     local.wipe();
     await local.init(); local.setUid('test-teacher');
+    if (trial && prep && typeof prep === 'object') await local.set(`prep/${lessonId}`, prep).catch(() => {}); // 👩‍🏫 체험판: 위 TV(종합상황실)도 학습지 그림 · 영상을 읽게 (메모리 저장소라 용량 걱정 없음 · 교사 테스트는 localStorage 라 넣지 않음)
     look = demo ? { hero: demo.hero ?? 16, fx: demo.fx || 'flame' } : { hero: 0, fx: 'flame' };
     if (trial) { // 👩‍🏫 메모리 저장소 안에 진짜 학생 계정 하나 (기록 · 💎 · EXP · 오답노트 · 성채가 실제처럼 · 탭을 닫으면 사라짐)
       look = { hero: trial.hero, fx: DS.FX.affOf(trial.hero).ids[0] };
@@ -117,7 +118,7 @@ DS.Test = (function () {
     el.dataset.sig = sig;
     el.innerHTML = `<b>${demo || trial ? (trial ? '👩‍🏫' : '🎮 체험판') : '🧪 테스트'}</b><span class="tb-step">${esc(DS.Control.stepName(L, R))}</span>
       ${media.vid ? '<button class="btn small tb-ic" id="tb-vid" title="이 단계 설명 영상">🎬</button>' : ''}${media.img ? `<button class="btn small tb-ic" id="tb-img" title="이 단계 학습지 · 문제 이미지">📄</button>` : ''}
-      ${i >= 0 && !demo && DS.Fun ? '<button class="btn small tb-ic" id="tb-rest" title="🏕 쉼터 — 쉬는 시간 놀이(⚖ 🔄 ⭕ 🏰)를 친구 봇들과 해 봐요">🏕</button>' : ''}${i >= 0 && !demo && !R.state.closed ? `<button class="btn small tb-ic${foc ? ' on' : ''}" id="tb-focus" title="👀 집중모드 — 학생 폰을 잠그고 앞(교실 TV)을 보게 해요 · 몬스터 공격도 멈춤">👀${foc ? ' 끄기' : ''}</button>` : ''}<button class="btn small" id="tb-back"${i < 0 ? ' disabled' : ''}>◀</button><button class="btn primary" id="tb-next">${next}</button><button class="btn small" id="tb-x">${trial ? '↻' : '끝내기'}</button>`;
+      ${i >= 0 && !demo && DS.Fun ? '<button class="btn small tb-ic" id="tb-rest" title="🏕 쉼터 — 쉬는 시간 놀이(⚖ 🔄 ⭕ 🏰)를 친구 봇들과 해 봐요">🏕</button>' : ''}${i >= 0 && !demo && !R.state.closed ? `<button class="btn small tb-ic${foc ? ' on' : ''}" id="tb-focus" title="👀 집중모드 — 학생 폰을 잠그고 앞(교실 TV)을 보게 해요 · 몬스터 공격도 멈춤">👀${foc && !trial ? ' 끄기' : ''}</button>` : ''}<button class="btn small" id="tb-back"${i < 0 ? ' disabled' : ''}>◀</button><button class="btn primary" id="tb-next">${next}</button><button class="btn small" id="tb-x">${trial ? '↻' : '끝내기'}</button>`;
     { const fo = $('#tb-focus'); if (fo) fo.onclick = () => DS.Control.run(() => DS.Act.setFocus(code, !foc)); } // 👀 집중모드 (2026-11-07 사용자 「체험판 막대에 집중모드」)
     // 🎬 · 📄 (2026-11-04 사용자 요청): 테스트 · 체험판에서도 그 단계에 붙은 설명 영상 · 문제(학습지) 이미지를 바로 확인
     const vb = $('#tb-vid'); if (vb) vb.onclick = () => DS.Video.open(media.vid, media.title, { lesson: L.id, slot: media.id });

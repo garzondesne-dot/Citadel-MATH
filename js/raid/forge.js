@@ -32,7 +32,7 @@ DS.Forge = (function () {
     const abs = (k) => `url('${new URL(DS.ASSETS.base + DS.ASSETS.forgeC[k], location.href).href}')`;
     el.style.setProperty('--fc-mat', abs('material')); el.style.setProperty('--fc-op', abs('operator'));
     el.innerHTML = `<div class="fg-wrap${tab === 'forge' && no ? ' one' : ''}"><div class="fg-bg" style="background-image:linear-gradient(#07132155,#071321aa),url('${DS.ASSETS.base}${DS.ASSETS.forgeC.bg}')"></div>
-      <div class="fg-hud"><b>⚒ 모루</b><span class="fg-pill">${esc(me.c)}반 · ${no ? `${no}차시까지 열림` : '아직 열린 차시 없음'}</span><span class="fg-pill blue">📖 ${have().length} / ${opened().length}</span><button class="btn small" id="fg-x">✕ 닫기</button></div>
+      <div class="fg-hud"><b>⚒ 모루</b><span class="fg-pill">${me.trial ? '👩‍🏫 체험판 · 모든 카드 열림' : `${esc(me.c)}반 · ${no ? `${no}차시까지 열림` : '아직 열린 차시 없음'}`}</span><span class="fg-pill blue">📖 ${have().length} / ${opened().length}</span><button class="btn small" id="fg-x">✕ 닫기</button></div>
       <div class="tabs fg-tabs">${[['forge', '🔨 연성'], ['book', '📖 도감'], ['mine', '🃏 내 카드']].map(([k, t]) => `<button class="tab${tab === k ? ' on' : ''}" data-tab="${k}">${t}</button>`).join('')}</div>
       <div class="fg-body">${!no ? '<p class="fg-empty">선생님이 우리 반에 수업(2차시부터)을 열면 레시피가 나타나요.</p>' : tab === 'book' ? book() : tab === 'mine' ? mine() : forgeTab()}</div></div>`;
     $('#fg-x').onclick = close;
@@ -57,7 +57,7 @@ DS.Forge = (function () {
     // v0.9.3 (사용자 결정): 연성은 한 화면 안에서 — 위: 연산 줄 · 가운데: 모루(카드 3칸 + 연성) · 아래: 재료 칩 · 힌트는 「💡 힌트」 창(차시별 접기)
     const h = hintGet(), todo = opened().filter((c) => !owned[c.id]).length;
     return `<div class="fc-one">
-      <div class="fc-ops">${opsOpen.map((x) => tile(pretty(x.sym), `op mini${x.sym.length > 3 ? ' long' : ''}`, `data-op="${x.id}"`)).join('')}${opsLock.map(() => tile('🔒', 'op mini lock', 'disabled title="선생님이 다음 차시를 열면 풀려요"')).join('')}</div>
+      <div class="fc-ops">${opsOpen.map((x) => tile(pretty(x.sym), `op mini${x.sym.length > 3 ? ' long' : ''}${/[가-힣]/.test(x.sym) ? ' ko' : ''}`, `data-op="${x.id}"`)).join('')}${opsLock.map(() => tile('🔒', 'op mini lock', 'disabled title="선생님이 다음 차시를 열면 풀려요"')).join('')}</div>
       <div class="fc-stage" id="fc-stage">
         <img class="fc-anvil" src="${img('anvil')}" alt="모루">
         <div class="fc-slots">${slot('l')}${slot('op')}${slot('r')}</div>
@@ -67,7 +67,7 @@ DS.Forge = (function () {
         <div class="fc-ring" id="fc-ring"></div><div class="fc-sparks" id="fg-spark"></div>
       </div>
       <p class="fg-msg" id="fg-msg">${o && o.unary ? `${esc(o.sym)} 는 한 칸 연산 — 재료 하나만 올려요.` : '연산을 고르고 재료 · 연산 · 재료를 올려 연성하세요.'}</p>
-      <div class="fc-mats">${U().MATS.map((m) => tile(pretty(m.sym), `mat mini${m.sym.length > 3 ? ' long' : ''}`, `data-put="${m.id}" title="${esc(m.tip)}"`)).join('')}${have().map((c) => tile(`<span class="fc-cardname fm${cardFm(c).length > 8 ? ' long xl' : cardFm(c).length > 5 ? ' long' : ''}">${pretty(cardFm(c))}</span>`, 'mat mini card', `data-put="card:${c.id}" title="${esc(c.name)}"`)).join('')}</div>
+      <div class="fc-mats">${U().MATS.map((m) => tile(pretty(m.sym), `mat mini${m.sym.length > 3 ? ' long' : ''}${/[가-힣]/.test(m.sym) ? ' ko' : ''}`, `data-put="${m.id}" title="${esc(m.tip)}"`)).join('')}${have().map((c) => tile(`<span class="fc-cardname fm${cardFm(c).length > 8 ? ' long xl' : cardFm(c).length > 5 ? ' long' : ''}">${pretty(cardFm(c))}</span>`, 'mat mini card', `data-put="card:${c.id}" title="${esc(c.name)}"`)).join('')}</div>
       <div class="fc-foot"><button class="btn small" id="fg-hints">💡 힌트 <b class="fc-ptsn">${h.pts}</b> · 남은 ${todo}장</button><button class="btn small" id="fg-clear">비우기</button></div>
     </div>`;
   }
