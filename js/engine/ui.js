@@ -163,3 +163,11 @@ if (typeof document !== 'undefined' && typeof MutationObserver !== 'undefined') 
   const start = () => new MutationObserver((ms) => ms.forEach((m) => m.addedNodes.forEach(scan))).observe(document.body, { childList: true, subtree: true });
   if (document.body) start(); else document.addEventListener('DOMContentLoaded', start);
 }
+// 🤏 두 손가락 확대 막기 (2026-11-07 사용자 「두 손가락으로 당기면 줌이 당겨지기 시작했네?」): 게임 화면은 확대하지 않음 · 학습지 그림(.t-sheet · .bn-sheet) · 그림 자르기 · 사진 칸에서만 허용
+//   iOS 사파리 = gesturestart · 안드로이드 크롬 = 두 손가락 touchmove 를 막음 (viewport user-scalable=no 는 iOS 가 무시해서)
+if (typeof document !== 'undefined') {
+  const ZOOM_OK = '.t-sheet, .bn-sheet, .crop-page, .ph-stage, .zoom-ok';
+  const okAt = (t) => !!(t && t.closest && t.closest(ZOOM_OK));
+  document.addEventListener('touchmove', (e) => { if (e.touches && e.touches.length > 1 && !okAt(e.target)) e.preventDefault(); }, { passive: false });
+  ['gesturestart', 'gesturechange'].forEach((ev) => document.addEventListener(ev, (e) => { if (!okAt(e.target)) e.preventDefault(); }, { passive: false }));
+}
