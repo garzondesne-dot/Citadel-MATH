@@ -2323,8 +2323,6 @@ body:has(#camp.tut-on) .gem-pop { top: auto; bottom: 86px; }
 .trial #st-head { margin-top: 6px; min-height: 34px; }
 
 /* 👩‍🏫 체험판 v2 (2026-11-07 · 테스트 모드 기준): 첫 화면 안내 글 · 위 TV 창 = 종합상황실 그대로(1280×720 을 줄임) · 아래 = 학생 폰 · 막대가 아래를 가리지 않게 */
-.trial-cap { position: absolute; left: 12px; right: 12px; bottom: calc(64px + env(safe-area-inset-bottom)); z-index: 6; margin: 0; text-align: center; color: #ffe7a8; font-weight: 900; font-size: 14px; text-shadow: 0 2px 4px #000; pointer-events: none; }
-.trial-cap small { font-weight: 700; font-size: 11.5px; color: #e7ecff; }
 #screen-hall.tv-embed { display: block !important; position: absolute; left: 0; top: 0; width: 1280px; height: 720px; overflow: hidden; padding: 0; }
 #screen-hall.tv-embed .nav-back, #screen-hall.tv-embed #h-ctrl, #screen-hall.tv-embed #h-set, #screen-hall.tv-embed #h-camp, #screen-hall.tv-embed #h-fs { display: none !important; }
 .test-tv.tv-hall .tt-in { pointer-events: none; }
@@ -2368,3 +2366,15 @@ body:has(#camp.tut-on) .gem-pop { top: auto; bottom: 86px; }
 .fa-arena.oxart .fa-plat.b.ox-drop { --oxr: -4deg; }
 .fa-arena.oxart .fa-crack, .fa-arena.oxart .fa-piece { display: none; }
 
+/* 👩‍🏫 체험판 첫 화면 = 이름 · 용사 6 고르기 (2026-11-07 사용자 「첫 화면에 용사랑 이름 적는 거 다시」) */
+.trial-pick { position: absolute; left: 12px; right: 12px; bottom: calc(14px + env(safe-area-inset-bottom)); z-index: 6; max-width: 440px; margin: 0 auto; padding: 10px; border-radius: 14px; background: #0b1426eb; border: 2px solid #ffd25a; box-shadow: 0 8px 24px #000a; }
+.trial-pick .tp-h { margin: 0 0 6px; font-size: 13.5px; font-weight: 900; color: #ffd25a; text-align: center; }
+.trial-pick input { width: 100%; box-sizing: border-box; padding: 9px 10px; border-radius: 10px; border: 2px solid #2c4370; background: #0a1020; color: #eef2ff; font: inherit; font-size: 16px; margin-bottom: 8px; }
+.trial-pick .tp-heroes { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; margin-bottom: 8px; }
+.trial-pick .tp-h1 { height: 70px; padding: 0; border-radius: 9px; background: #16223e; border: 2px solid #2c4370; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; color: #eef2ff; font-size: 9.5px; overflow: hidden; cursor: pointer; }
+.trial-pick .tp-h1 .art { width: 52px; height: 52px; }
+.trial-pick .tp-h1.on { border-color: #ffd25a; box-shadow: 0 0 10px #ffd25a88; background: #3a2a0c; }
+.trial-pick #tp-go { width: 100%; }
+.trial-pick .tp-n { margin: 6px 0 0; font-size: 11px; color: #9fb0d8; text-align: center; }
+.splash:has(.trial-pick) .splash-tap, .splash:has(.trial-pick) .splash-by { display: none; }
+.trial body:has(#screen-splash.active) #ver-tag { display: none; } /* 체험판 첫 화면: 꼬리표가 「모험 시작」을 가리지 않게 */

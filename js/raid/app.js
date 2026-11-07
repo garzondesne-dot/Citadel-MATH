@@ -139,8 +139,8 @@ DS.App = (function () {
     if (m) {
       hero = m.hero;
       box.innerHTML = `<div class="acc-card"><b>${esc(m.c)} · ${m.n}번 ${esc(m.name)}</b><span class="muted small">로그인됨</span></div>
-        <div class="me-hero">${DS.Art.hero(m.hero, 'idle', 'big huff')}<div><p class="gold">내 용사 · ${DS.FX.NAMES[m.fx] || ''}</p><p class="muted small">모닥불 ⚙ 설정에서 바꿀 수 있어요</p></div></div>
-        <button id="s-go" class="btn primary big">🪵 모닥불로 가기</button>
+        <div class="me-hero">${DS.Art.hero(m.hero, 'idle', 'big huff')}<div><p class="gold">내 용사 · ${DS.FX.NAMES[m.fx] || ''}</p><p class="muted small">내 캠프 💎 상점에서 바꿀 수 있어요</p></div></div>
+        <button id="s-go" class="btn primary big">🏕 내 캠프로 가기</button>
         <button id="s-out" class="btn small">다른 사람으로 로그인</button>`;
       $('#s-go').onclick = go(() => DS.Camp.enter(m, q.get('code')));
       $('#s-out').onclick = go(async () => { await A().logout(); studentAuth(); });
@@ -191,7 +191,7 @@ DS.App = (function () {
     } else if (sMode === 'signup') {
       f.innerHTML = sForm(c(), n(), `<p class="muted small">이름이 맞는지 꼭 확인하고 가입해요. 한 번호는 한 명만 가입할 수 있어요.</p>
         <div class="row2"><label>비밀번호 4자리 ${pinInput('s-p1', '숫자 4자리', 'new-password')}</label><label>한 번 더 ${pinInput('s-p2', '다시', 'new-password')}</label></div>${heroPicker()}${fxPicker()}
-        <p class="muted small">용사·이펙트는 나중에 모닥불 ⚙ 설정에서 언제든 바꿀 수 있어요.</p>
+        <p class="muted small">용사·이펙트는 나중에 내 캠프 💎 상점에서 언제든 바꿀 수 있어요.</p>
         <button id="s-make" type="submit" class="btn primary big">✨ 가입하기</button><button id="s-back" type="button" class="btn small">← 로그인으로</button>`);
       bindHeroes(() => { const a = $('#s-p1').value, b = $('#s-p2').value; drawForm(); $('#s-p1').value = a; $('#s-p2').value = b; });
       bindFx();
@@ -368,7 +368,7 @@ DS.App = (function () {
     })));
     box.querySelectorAll('[data-lx]').forEach((b) => (b.onclick = () => DS.Control.run(async () => {
       const code = b.dataset.lx, open = b.dataset.lopen === '1';
-      if (!confirm(open ? `수업 ${code} 을(를) 끝내고 목록에서 없앨까요?\n학생은 결과를 보고 모닥불로 가고, 차원문은 사라져요.` : `수업 ${code} 을(를) 목록에서 없앨까요?\n(모닥불의 꺼진 차원문도 사라져요)`)) return;
+      if (!confirm(open ? `수업 ${code} 을(를) 끝내고 목록에서 없앨까요?\n학생은 결과를 보고 내 캠프로 가고, 차원문은 사라져요.` : `수업 ${code} 을(를) 목록에서 없앨까요?\n(모닥불의 꺼진 차원문도 사라져요)`)) return;
       if (open) await DS.Act.endClassAsk(code);
       const cls = b.dataset.lcls;
       if (cls) { const k = `live/${String(cls).replace(/[.#$/[\\]]/g, '_')}`; const lv = await DS.Net.get(k).catch(() => null); if (lv && lv.code === code) await DS.Net.remove(k).catch(() => {}); }

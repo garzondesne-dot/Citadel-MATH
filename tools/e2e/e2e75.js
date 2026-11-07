@@ -1,6 +1,6 @@
 // 👩‍🏫 교사용 체험판 v2 (trial/ · 2026-11-07 「테스트 모드 기준 · 3차시 · 디펜스 빼기」)
-//   첫 화면(터치) → 테스트 모닥불 → 차원문 → 대기실(친구 4) → 도입 · 개념1(👀 집중) → 문제 1(한 번 틀리고 고침) · 위 TV = 종합상황실 레이드
-//   → 🏕 쉼터(디펜스 없음 · ⚖ 한 판) → 개념2 · 문제 2 → 👑 3문항 → 결과 → 모닥불 💎 200 · 성채 1층 01~03 · 허수아비 3차시 · ≪ 메뉴화면
+//   첫 화면(이름 · 용사 6) → 내 캠프 → 차원문 → 대기실(친구 4) → 도입 · 개념1(👀 집중) → 문제 1(한 번 틀리고 고침) · 위 TV = 종합상황실 레이드
+//   → 🏕 쉼터(디펜스 없음 · ⚖ 한 판) → 개념2 · 문제 2 → 👑 3문항 → 결과 → 내 캠프 💎 200 · 성채 1층 01~03 · 허수아비 3차시 · ≪ 메뉴화면
 //   node tools/e2e/e2e75.js <출력 폴더>   (로컬 서버 http://localhost:8765)
 const { chromium } = require('playwright');
 if (/DS\.TRIAL_OFF = true/.test(require('fs').readFileSync(require('path').join(__dirname, '..', '..', 'js', 'config.js'), 'utf8'))) { console.log('⏸ 체험판 중단 (js/config.js DS.TRIAL_OFF) — 건너뜀'); process.exit(0); }
@@ -23,14 +23,16 @@ const OUT = process.argv[2] || '.', U = 'http://localhost:8765/trial/';
     await DS.Net.set(`rooms/${c}/subs/${st.id}/${me}/${att}`, DS.Net.pack(items.map((q, i) => DS.Bots.given(q, !(w && i === 0)))));
     return st.id;
   }, [att, firstWrong]);
-  // ① 첫 화면 → 모닥불
+  // ① 첫 화면(이름 · 용사) → 내 캠프
   await p.goto(U); await p.waitForTimeout(4000); await shot('1-splash');
-  const cap = await p.evaluate(() => (document.querySelector('.trial-cap') || {}).textContent || '');
-  await p.click('#splash'); await p.waitForTimeout(300); if (await p.$('#splash:visible')) await p.click('#splash');
+  const cap = await p.evaluate(() => (document.querySelector('.trial-pick .tp-h') || {}).textContent || '');
+  const pick6 = (await p.$$('.trial-pick .tp-h1')).length;
+  await p.fill('#tp-name', '김선생'); await p.click('.tp-h1[data-h="2"]'); await p.click('#tp-go');
   await p.waitForTimeout(3500); await shot('2-camp');
   const mem = await p.evaluate(() => !(window.localStorage instanceof Storage));
   const camp1 = { bar: await bar(), anvil: await p.evaluate(() => !!document.querySelector('#camp-anvil') && getComputedStyle(document.querySelector('#camp-anvil')).display !== 'none'), gate: await p.evaluate(() => document.querySelector('#camp-gate .camp-label').textContent) };
-  P(`① 안내 「${cap.slice(0, 40)}」 · 메모리 저장소 ${mem} · 막대 「${camp1.bar.replace(/\n/g, ' ')}」 · 모루 보임 ${camp1.anvil} · 관문 「${camp1.gate}」`);
+  const campName = await p.evaluate(() => (document.querySelector('.camp-plate') || {}).textContent || ''), setLbl = await p.evaluate(() => (document.querySelector('#camp-set') || {}).textContent || '');
+  P(`① 안내 「${cap.slice(0, 40)}」 · 용사 ${pick6}명 · 이름 「${campName.trim()}」 · 단추 「${setLbl}」 · 메모리 저장소 ${mem} · 막대 「${camp1.bar.replace(/\n/g, ' ')}」 · 모루 보임 ${camp1.anvil} · 관문 「${camp1.gate}」`);
   // ② 관문 → 대기실 → 수업 시작
   await shut(); await p.click('#camp-gate'); await p.waitForTimeout(4000);
   for (let k = 0; k < 15; k++) { if (/수업 시작 ▶ \(5/.test(await bar())) break; await p.waitForTimeout(1000); }
@@ -50,7 +52,7 @@ const OUT = process.argv[2] || '.', U = 'http://localhost:8765/trial/';
   const raidTv = await p.evaluate(() => !!document.querySelector('#test-tv #raid'));
   let R = await room(); const friends = Object.values(R.players || {}).filter((x) => !x.teacher).length - 1;
   P(`④ 문제 1 · TV 레이드 ${raidTv} · 친구 ${friends}명`);
-  // ⑨ ≪ 메뉴화면 (수업 중): → 모닥불(TV 닫힘) → 아치 문으로 다시 들어가면 이어서
+  // ⑨ ≪ 메뉴화면 (수업 중): → 내 캠프(TV 닫힘) → 아치 문으로 다시 들어가면 이어서
   await shut(); await p.click('#screen-student .nav-back'); await p.waitForTimeout(2500);
   const back = await p.evaluate(() => ({ scr: document.querySelector('.screen.active').id, tv: !!document.querySelector('#test-tv') }));
   await shut(); await p.click('#camp-gate'); await p.waitForTimeout(5000);
@@ -71,7 +73,7 @@ const OUT = process.argv[2] || '.', U = 'http://localhost:8765/trial/';
   const closeRes = async () => { await shut(); for (let k = 0; k < 4; k++) { const x = await p.$('#rs-ok'); if (!x) return; await x.click().catch(() => {}); await p.waitForTimeout(1200); } };
   await closeRes(); await next(4000); await closeRes(); await shot('9-finale');
   await next(800); await closeRes(); await next(6000); await closeRes();
-  // ⑦ 모닥불: 💎 200 · 막대 · TV 닫힘 · 안내 없음
+  // ⑦ 내 캠프: 💎 200 · 막대 · TV 닫힘 · 안내 없음
   await shot('10-camp-after');
   const after = await p.evaluate(async () => { const d = (await DS.Gem.mine({ c: '체험', n: 1 })) || {}; return { gem: d.total || 0, gift: !!((d.log || {}).trial_gift), tv: !!document.querySelector('#test-tv'), tut: !!document.querySelector('#tut-coach'), scr: document.querySelector('.screen.active').id, recs: Object.keys((await DS.Net.get('records/체험/1')) || {}) }; });
   P(`⑥ 보스 문항 ${bossN} · ⑦ ${after.scr} · 💎 ${after.gem} (선물 ${after.gift}) · TV 닫힘 ${!after.tv} · 안내 없음 ${!after.tut} · 기록 ${after.recs.join(',')}`);
@@ -83,7 +85,7 @@ const OUT = process.argv[2] || '.', U = 'http://localhost:8765/trial/';
   const dummy = await p.evaluate(() => document.querySelector('#bonus') ? document.querySelector('#bonus').innerText.match(/\d+차시/g) || [] : []);
   await p.click('#bn-back'); await p.waitForTimeout(2000);
   P(`⑧ 성채 열린 방 ${rooms.join(',')} · 허수아비 ${[...new Set(dummy)].join(',')}`);
-  const ok = /3차시/.test(cap) && mem && /체험판/.test(camp1.bar) && camp1.anvil && /3차시 입장/.test(camp1.gate) && tvLobby.tv && foc && focOff && focOn2 && raidTv && friends >= 4
+  const ok = /3차시/.test(cap) && pick6 === 6 && /김선생/.test(campName) && /상점/.test(setLbl) && mem && /체험판/.test(camp1.bar) && camp1.anvil && /3차시 입장/.test(camp1.gate) && tvLobby.tv && foc && focOff && focOn2 && raidTv && friends >= 4
     && !funBtns.some((t) => /디펜스/.test(t)) && funBtns.some((t) => /밸런스/.test(t)) && balTv && bossN === 3 && after.scr === 'screen-camp' && after.gem >= 200 && after.gift && !after.tv && !after.tut && after.recs.includes('set-03')
     && rooms.join(',') === 'q01,q02,q03' && dummy.includes('3차시') && back.scr === 'screen-camp' && !back.tv && again.scr === 'screen-student' && again.tv && /문제 1/.test(again.step);
   console.log(ok ? '✅ 통과' : '❌ 기대와 다름'); console.log('errors', errs.length ? errs.slice(0, 5) : 'none'); await b.close(); if (!ok || errs.length) process.exit(1);

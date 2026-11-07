@@ -73,7 +73,7 @@ DS.Result = (function () {
   const misLine = (mis) => { const t = DS.Mis ? DS.Mis.top(mis, 1)[0] : null; return t ? `<p class="rs-mis small">🔎 자주 하는 실수: ${esc(t.kid)} <span class="muted">(${t.wrong}번${t.fixed ? ` · ${t.fixed}번은 스스로 고침 ✔` : ''})</span></p>` : ''; };
   // 🔓 중단원던전 소개 (2026-11-03): 이 차시 수업이 열리면 그 차시 층이 열린다 — 결과 화면 · 종합상황실 마무리에서 한 줄
   const floorText = (L) => { if (!L.no || !L.boss) return ''; const ev = DS.Lessons.list.filter((x) => x.rooms).flatMap((x) => x.rooms.filter((r) => r.no === L.no)).length; return `🔓 🎯 허수아비에서 <b>복습! ${L.no}차시</b>가 열렸어요 — 수업 문제 · 👑 형성평가 재대결${ev ? ` · 🏰 성채던전 새 방 ${ev}개` : ''}`; }; // 2026-11-05 성채던전 · 허수아비 개편
-  const floorLine = (L) => (floorText(L) ? `<p class="rs-floor small">${floorText(L)} <span class="muted">(모닥불 캠프 · 혼자 도전)</span></p>` : '');
+  const floorLine = (L) => (floorText(L) ? `<p class="rs-floor small">${floorText(L)} <span class="muted">(내 캠프 · 혼자 도전)</span></p>` : '');
   // 복습 추천 버튼: 학습지 개념 · 중단원던전(그 차시 층의 보강 · 재대결) · 영상
   function recs(L, r, prep, inClass) {
     if (!r.weak.length) return '<p class="okc">👍 오늘 개념을 고르게 잘 해냈어요! 🏰 성채던전에서 단원 평가 문제에 도전해 보세요.</p>';
@@ -157,14 +157,14 @@ DS.Result = (function () {
     el.innerHTML = `<div class="quiz-box framed rs-box"><h2>⚔ 오늘의 전투 결과</h2><p class="muted small">${esc(L.unit || '')} · ${esc(L.title)} — 성적이 아니라 다음에 볼 것을 알려 주는 기록이에요</p>
       ${lv ? `<div class="rs-lv${up ? ' up' : ''}"><b>${up ? '🎉 레벨 업! ' : ''}Lv.${lv.lv} ${esc(lv.title)}</b>${g && g.gained ? ` <span class="gold">+${g.gained} EXP</span>` : ''}<div class="rs-bar"><i style="width:${Math.round((100 * lv.into) / lv.next)}%"></i><span>${lv.into} / ${lv.next}</span></div></div>` : ''}
       ${g && g.gained ? `<p class="rs-why">${DS.Grow.lines(r.parts).map((l) => `${esc(l.why)} ${l.n > 1 ? `×${l.n} ` : ''}<b>+${l.xp}</b>`).join(' · ')}</p>` : ''}
-      ${first ? `<div class="rs-perk"><b>🎁 첫 출정 특전!</b> 새 용사가 합류했어요 ${DS.Art.hero(9, 'attack', 'pairhop')}<span class="muted small">모닥불 ⚙ 설정에서 고를 수 있어요</span></div>` : ''}
+      ${first ? `<div class="rs-perk"><b>🎁 첫 출정 특전!</b> 새 용사가 합류했어요 ${DS.Art.hero(9, 'attack', 'pairhop')}<span class="muted small">내 캠프 💎 상점에서 고를 수 있어요</span></div>` : ''}
       <p class="shelf-title">몬스터별</p><table class="r-table rs-t">${r.mons.map((m) => `<tr><td>${esc(m.title)}</td><td>${mark(m)}</td></tr>`).join('')}
         <tr><td>👑 형성평가</td><td>${r.boss.tried ? `${r.boss.mast.slice(0, r.boss.hp).filter(Boolean).length} / ${r.boss.hp}${r.boss.mast.length > r.boss.hp && r.boss.mast[r.boss.hp] ? ' + 보너스 ✔' : ''}` : '<span class="muted">— 안 함</span>'}</td></tr></table>
       <p class="muted small">✔ 처음에 맞힘 · 🔁 재도전으로 고침 · ✖ 끝까지 못 맞힘</p>
       <p class="shelf-title">개념별 (첫 시도)</p>${Object.entries(r.conc).map(([c, v]) => `<div class="rs-c"><span>${esc(r.titles[c] || c)}</span><span class="rs-dots">${dots(v.ok, v.total)}</span><span class="muted small">${v.ok} / ${v.total}</span></div>`).join('')}
       <p class="shelf-title">복습 추천</p>${floorLine(L)}${misLine(r.mis)}${recs(L, r, prep, opt.inClass)}
       <p class="shelf-title">📤 카톡으로 보내기</p><div class="row rs-share"><button class="btn" id="rs-card1">⚔ 전투 기록 보내기</button><button class="btn" id="rs-card2">📘 수학 노트 보내기</button></div>
-      <div class="row"><button class="btn primary big" id="rs-ok">${opt.inClass ? '🏕 대기실로' : '🪵 모닥불로'}</button></div></div>`;
+      <div class="row"><button class="btn primary big" id="rs-ok">${opt.inClass ? '🏕 대기실로' : '🏕 내 캠프로'}</button></div></div>`;
     document.body.appendChild(el);
     if (up) DS.Sound.correct();
     el.querySelectorAll('[data-img]').forEach((b) => (b.onclick = () => DS.Control.run(async () => {

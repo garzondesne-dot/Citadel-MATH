@@ -108,7 +108,7 @@ DS.Act = (function () {
       if (R.meta.resumeFrom != null && R.meta.cls) N().set(`${prepPath(L.id, 'resume')}/${ck(R.meta.cls)}`, null).catch(() => {}); // 이어서 시작 = 저장 지점 지움 // 📕 그 반이 게임으로 수업한 차시 (오답노트 「불참」 판단 · v0.9.7.9)
       return;
     }
-    if (dir > 0 && i >= L.steps.length) { // 마무리 → 수업 끝 (학생은 모닥불로 · 차원문은 꺼진 채 남음)
+    if (dir > 0 && i >= L.steps.length) { // 마무리 → 수업 끝 (학생은 내 캠프로 · 차원문은 꺼진 채 남음)
       await savePunch(code, unpackRoom(R), L, { final: true }).catch(() => {}); // 🥊 끝내기 전에 저장 → 학생이 결과를 볼 때 이미 있음
       await N().update(P(code, 'state'), { closed: true, focus: false, stepAt: N().TS });
       const cls = (R.meta || {}).cls;

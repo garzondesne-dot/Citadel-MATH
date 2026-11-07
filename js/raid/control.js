@@ -19,7 +19,7 @@ DS.Control = (function () {
     const i = R.state.step ?? -1;
     if (i < 0) return '수업 시작';
     if (Raid().isClosed(R)) return '—';
-    if (i >= L.steps.length) return '수업 끝 (학생은 모닥불로)';
+    if (i >= L.steps.length) return '수업 끝 (학생은 내 캠프로)';
     if (i + 1 >= L.steps.length) return FINALE;
     return L.steps[i + 1].title;
   };
@@ -50,7 +50,7 @@ DS.Control = (function () {
   const back = (code, R, L) => { armed = ''; if (Raid().isClosed(R)) return DS.Net.set(`rooms/${code}/state/closed`, null); return Act().go(code, R, L, -1); };
   // 마무리에서 ▶ = 수업 끝: 한 번 더 확인
   async function forwardEnd(code, R, L) {
-    if (armed !== 'end') { armed = 'end'; DS.UI.toast('▶ 를 한 번 더 누르면 수업을 끝내고 학생들은 모닥불로 돌아가요', 4200); return true; }
+    if (armed !== 'end') { armed = 'end'; DS.UI.toast('▶ 를 한 번 더 누르면 수업을 끝내고 학생들은 내 캠프로 돌아가요', 4200); return true; }
     armed = ''; await Act().go(code, R, L, 1); return true;
   }
   // 🏕 쉼터 버튼 (아무 단계에서나): 켜면 종합상황실 · 학생 폰이 쉼터 장면 · 끄면 하던 단계로 · 타이머는 교사가 −1 / +1 분 (기본 5분)

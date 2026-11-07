@@ -178,7 +178,7 @@ DS.ShareCard = (function () {
     head('다 함께 할 일');
     g.font = `28px ${SANS}`; g.fillStyle = '#1b2236';
     if (L.next) y += wrap(g, `· 다음 수업 ${L.next.title} — ${L.next.ask}`, 64, y, W - 128, 38, 2);
-    y += wrap(g, `· 복습: 🎯 허수아비 복습 (각자 모닥불에서) · 설명 영상 다시 보기`, 64, y, W - 128, 38, 2) + 20;
+    y += wrap(g, `· 복습: 🎯 허수아비 복습 (각자 내 캠프에서) · 설명 영상 다시 보기`, 64, y, W - 128, 38, 2) + 20;
     const praise = o.praise || (s.tried >= s.headcount && s.won ? '전원 출전에 보스 격파까지 — 멋진 협동이었어요!' : s.won ? '힘을 모아 보스를 격파했어요. 다음 시간에도 함께해요!' : '끝까지 함께 도전한 우리 반, 다음 시간에 꼭 격파해요!');
     rr(g, 48, y - 10, W - 96, 90, 22); g.fillStyle = '#e7f6f0'; g.fill(); g.fillStyle = '#1f6f5c'; g.font = `700 30px ${SANS}`; wrap(g, `👏 ${praise}`, 76, y + 44, W - 152, 36, 1); y += 120;
     if (s.words.length && y < H - 120) {

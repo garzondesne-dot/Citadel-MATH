@@ -104,7 +104,7 @@ DS.Camp = (function () {
       if (gate) gate.classList.toggle('tut-spot', inClass());
       co.innerHTML = inClass()
         ? `<div class="tut-box"><p>⚔ <b>${live.no ? `${live.no}차시 ` : ''}던전이 열렸어요!</b><br>오른쪽에 빛나는 <b>아치 문을 눌러</b> 입장해요. 친구들과 함께 몬스터를 물리쳐요! 👉</p></div>`
-        : '<div class="tut-box"><p>👋 <b>환영해요, 용사님!</b> 여기는 나만의 <b>모닥불(개인 캠프)</b>이에요.<br>선생님이 수업을 열면 오른쪽 <b>아치 문</b>에 빛이 들어와요. 잠깐 기다려요!</p></div>';
+        : '<div class="tut-box"><p>👋 <b>환영해요, 용사님!</b> 여기는 나만의 <b>내 캠프</b>이에요.<br>선생님이 수업을 열면 오른쪽 <b>아치 문</b>에 빛이 들어와요. 잠깐 기다려요!</p></div>';
       return;
     }
     // B: 하나씩 나타나며 설명 (아직 소개 안 한 것은 숨김)
@@ -151,7 +151,7 @@ DS.Camp = (function () {
   }
   function render() {
     const c = C(), S = DS.CampScene;
-    $('#camp').innerHTML = `<div class="camp-top"><button class="btn small camp-set" id="camp-set">⚙ 설정</button></div>
+    $('#camp').innerHTML = `<div class="camp-top"><button class="btn small camp-set" id="camp-set">${me.teacher ? '🧙 선생님 모습' : '💎 상점'}</button></div>
       ${stampToday() ? '<div class="stamp-bar">📮 반드시 학습지 확인도장 받아가세요.</div>' : ''}
       <div class="camp-stage cs-v2" style="background-image:url('${base()}${c.bg}');aspect-ratio:${c.size[0]} / ${c.size[1]}">
         ${S.layers()}
@@ -418,7 +418,7 @@ DS.Camp = (function () {
     const got = DS.Titles.earned(await DS.Titles.data(me).catch(() => ({}))).filter((t) => !/^lv\d/.test(t.id));
     const fresh = got.filter((t) => !(seen || []).includes(t.id));
     try { localStorage.setItem(k, JSON.stringify(got.map((t) => t.id))); } catch (e) { /* 무시 */ }
-    if (fresh.length) DS.UI.toast(`🏅 새 호칭 ${fresh.slice(0, 2).map((t) => `[${t.name}]`).join(' ')}${fresh.length > 2 ? ` 외 ${fresh.length - 2}개` : ''} 획득! ⚙ 설정에서 이름 앞에 달 수 있어요`, 4200);
+    if (fresh.length) DS.UI.toast(`🏅 새 호칭 ${fresh.slice(0, 2).map((t) => `[${t.name}]`).join(' ')}${fresh.length > 2 ? ` 외 ${fresh.length - 2}개` : ''} 획득! 💎 상점에서 이름 앞에 달 수 있어요`, 4200);
   }
   // ⚙ 설정: 용사 · 공격 이펙트 (잠긴 것은 🔒 + 조건)
   // ⚙ 설정 — opt.teacher (2026-11-04): 교사 캠프에서 선생님 모습 고르기 = 용사 18명 · 이펙트 · 호칭 모두 열림 · 이 기기에 저장 (수업 중이면 그 방 선생님 용사도 바로)
@@ -466,7 +466,7 @@ DS.Camp = (function () {
         <div class="enh-table">${DS.Gem.ENH.slice(1).map((c, i) => `<span class="${i + 1 <= lv ? 'done' : ''}">+${i + 1}<small>💎${c.g}${c.s ? ` 📜${c.s}` : ''}</small></span>`).join('')}</div></div>`; };
     const ttlTab = () => `<p class="muted small">얻은 ${got.length}개 · 고른 호칭이 이름 앞에 붙어요</p><div class="ttl-grid">${[{ id: 'none', name: '달지 않기', tier: 'w', cond: '' }, ...DS.Titles.all()].map((t) => { const has = t.id === 'none' || got.includes(t.id); return `<button class="ttl-pick ${DS.Titles.TIER[t.tier].cls}${t.id === title ? ' on' : ''}${has ? '' : ' lock'}" data-ttl="${t.id}" title="${esc(t.cond || '')}">${has ? DS.Titles.medal(t, 22) : '🔒'}<span>${esc(t.name)}</span>${has ? '' : `<small>${esc(t.cond)}</small>`}</button>`; }).join('')}</div>`;
     const draw = () => { const sb = el.querySelector('.set-box'), keep = sb ? sb.scrollTop : 0;
-      el.innerHTML = `<div class="quiz-box framed set-box"><div class="set-head"><h2>⚙ ${T ? '선생님 모습' : '내 용사'}</h2><button class="btn" id="set-x">닫기</button><button class="btn primary" id="set-ok">저장</button></div>
+      el.innerHTML = `<div class="quiz-box framed set-box"><div class="set-head"><h2>${T ? '🧙 선생님 모습' : '💎 상점'}</h2><button class="btn" id="set-x">닫기</button><button class="btn primary" id="set-ok">저장</button></div>
         ${T ? '' : `<div class="gem-bar">💎 <b>${L.gem}</b> 조각 · 📜 <b>${L.scroll || 0}</b> 서술 조각 · 🔨 <b>+${L.enh || 0}</b> <span class="muted small">· 🟪 인장 ${L.seals || 0} · 🎖 메달 ${Object.values(L.medal || {}).reduce((a, b) => a + (Number(b) || 0), 0)}</span></div>`}
         <div class="set-tabs">${[['hero', '🧙 용사'], ['gem', '⚔ 스킬 고르기'], ...(T ? [] : [['enh', `🔨 강화 <small>+${L.enh || 0}</small>`]]), ['ttl', `🏅 호칭 <small>${got.length}</small>`]].map(([k, n]) => `<button data-tab="${k}" class="${tab === k ? 'on' : ''}">${n}</button>`).join('')}</div>
         ${tab === 'ttl' || tab === 'enh' ? '' : preview()}

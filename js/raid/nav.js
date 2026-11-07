@@ -38,7 +38,7 @@ DS.Nav = (function () {
     location.replace(`${location.pathname}${qs ? `?${qs}` : ''}`);
   };
   // v0.8.1: 교사 화면에서 나갈 때 한 번 더 — [확인] 수업 끝내기 / [취소] 잠깐 나가기 (수업은 계속 · 교사 메뉴에서 이어서)
-  const END = '수업도 끝낼까요?\n\n[확인] 수업 끝내기 — 학생은 결과를 보고 모닥불로, 차원문은 꺼져요\n[취소] 잠깐 나가기 — 수업은 계속돼요 (교사 메뉴에서 이어서)';
+  const END = '수업도 끝낼까요?\n\n[확인] 수업 끝내기 — 학생은 결과를 보고 내 캠프로, 차원문은 꺼져요\n[취소] 잠깐 나가기 — 수업은 계속돼요 (교사 메뉴에서 이어서)';
   const endHook = (id) => {
     if (id === 'screen-tcamp' && DS.TCamp && !DS.TCamp.hallMode() && DS.TCamp.code() && DS.TCamp.open() && window.confirm(END)) return DS.Act.endClassAsk(DS.TCamp.code()).catch(() => {});
     if (id === 'screen-teacher' && DS.Teacher && DS.Teacher.live() && window.confirm(END)) return DS.Act.endClassAsk(DS.Teacher.code()).catch(() => {});

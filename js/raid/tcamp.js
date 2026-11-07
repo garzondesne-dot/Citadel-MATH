@@ -39,7 +39,7 @@ DS.TCamp = (function () {
   }
   function render() {
     const base = DS.ASSETS.base, c = DS.ASSETS.camp;
-    $('#tcamp').innerHTML = `${hall ? '' : '<button class="btn small ui-back" id="tc-back">≪ 교사 메뉴</button>'}<div class="tc-top" style="background-image:linear-gradient(#050b1cdd,#050b1cdd),url('${base}${DS.ASSETS.tcamp.bg}')">${code ? `<div class="tc-qr" id="tc-qr"></div><div class="tc-code"><span class="muted small">${hall ? '📱 휴대폰 카메라로 QR 을 찍고 입장해요' : '학생 입장 · QR 찍기 또는 모닥불 차원문'}</span><b>수업 코드 ${esc(code)}</b><span id="tc-info" class="small"></span></div>` : '<div class="tc-code"><b>🏛 교사 캠프</b><span class="muted small">수업을 열면 여기에 학생 입장 QR 이 크게 떠요</span></div>'}</div>
+    $('#tcamp').innerHTML = `${hall ? '' : '<button class="btn small ui-back" id="tc-back">≪ 교사 메뉴</button>'}<div class="tc-top" style="background-image:linear-gradient(#050b1cdd,#050b1cdd),url('${base}${DS.ASSETS.tcamp.bg}')">${code ? `<div class="tc-qr" id="tc-qr"></div><div class="tc-code"><span class="muted small">${hall ? '📱 휴대폰 카메라로 QR 을 찍고 입장해요' : '학생 입장 · QR 찍기 또는 내 캠프 차원문'}</span><b>수업 코드 ${esc(code)}</b><span id="tc-info" class="small"></span></div>` : '<div class="tc-code"><b>🏛 교사 캠프</b><span class="muted small">수업을 열면 여기에 학생 입장 QR 이 크게 떠요</span></div>'}</div>
       <div class="tc-stage camp-like cs-v2" style="background-image:url('${base}${c.bg}');aspect-ratio:${c.size[0]} / ${c.size[1]}">
         ${DS.CampScene.layers()}
         ${DS.CampScene.zone('tc-castle', 'castle', '🏰 성채던전')}${DS.CampScene.zone('tc-tent', 'tent', '⛺ 텐트 · 책장')}
@@ -47,7 +47,7 @@ DS.TCamp = (function () {
         ${prop('dummy', '🎯', '허수아비')}${prop('mail', '📮', hall ? '우편함' : '대시보드')}
         <button class="camp-anvil tc-anvil" id="tc-anvil" aria-label="모루"><i class="camp-anvil-img" style="background-image:url('${base}${c.anvil.src}');background-size:${c.anvil.cols * 100}% 100%;background-position:0 0"></i><span class="camp-label">⚒ 모루</span></button>
         <div class="tc-hero">${DS.Art.hero(DS.Art.teacherHero(R), 'idle', 'huff')}<i class="shadow"></i>${plate()}</div>
-        <button class="btn small tc-set" id="tc-set">⚙ 설정</button>
+        <button class="btn small tc-set" id="tc-set">🧙 선생님 모습</button>
         <button class="cs-zone camp-gate-z tc-gate" id="tc-gate" style="${DS.CampScene.box(c.zones.gate)}" aria-label="차시 던전"><span class="camp-label"></span></button>
       </div>
       <div class="tc-bar" id="tc-bar"></div>`;
@@ -136,7 +136,7 @@ DS.TCamp = (function () {
   }
   async function leave() {
     if (hall) return toHall();
-    if (code && R && !DS.Raid.isClosed(R) && window.confirm('수업도 끝낼까요?\n\n[확인] 수업 끝내기 — 학생은 결과를 보고 모닥불로, 차원문은 꺼져요\n[취소] 잠깐 나가기 — 수업은 계속돼요 (교사 메뉴 「📋 만든 수업」에서 다시 들어오기)')) await DS.Act.endClassAsk(code).catch(() => {});
+    if (code && R && !DS.Raid.isClosed(R) && window.confirm('수업도 끝낼까요?\n\n[확인] 수업 끝내기 — 학생은 결과를 보고 내 캠프로, 차원문은 꺼져요\n[취소] 잠깐 나가기 — 수업은 계속돼요 (교사 메뉴 「📋 만든 수업」에서 다시 들어오기)')) await DS.Act.endClassAsk(code).catch(() => {});
     if (stop) stop(); stop = null; DS.Scene.clear(); location.replace(`${location.pathname}?${DS.Net.mode === 'local' ? 'local&' : ''}role=teacher`);
   }
   // 캠프 소품 (학생 캠프와 같은 그림 · 이모지 팻말 대신)
