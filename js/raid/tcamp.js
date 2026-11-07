@@ -58,7 +58,7 @@ DS.TCamp = (function () {
       shownHero = null; tHero(); const p = document.querySelector('.tc-hero .camp-plate'); if (p) p.outerHTML = plate();
     } }));
     $('#tc-anvil').onclick = () => pick('#tc-anvil', () => DS.Forge.open(ME(), { preview: true, no: maxNo() }));
-    $('#tc-castle').onclick = () => pick('#tc-castle', () => DS.Control.run(() => DS.Bonus.enter(ME(), { preview: true, no: maxNo() })));
+    $('#tc-castle').onclick = () => { if (!picking) DS.CampScene.press(document.querySelector('.tc-stage.cs-v2'), 'castle'); pick('#tc-castle', () => DS.Control.run(() => DS.Bonus.enter(ME(), { preview: true, no: maxNo() }))); };
     $('#tc-dummy').onclick = () => pick('#tc-dummy', () => DS.Control.run(() => DS.Bonus.enter(ME(), { preview: true, train: true, no: maxNo() })));
     $('#tc-tent').onclick = () => { const st = document.querySelector('#tcamp .tc-stage'); DS.CampScene.objOn(st, 'tent', true); pick('#tc-tent', () => { DS.Control.run(() => DS.Camp.shelf(maxNo())); setTimeout(() => DS.CampScene.objOn(st, 'tent', false), 1500); }); };
     // 📮 우편함 (2026-11-06 사용자 「화면 배치는 그대로 · 우편함이 오답노트라던지 기능은 학생과 똑같이」): 종합상황실 = 학생과 같은 📕 오답노트 창(예시 기록) — 기능 설명용

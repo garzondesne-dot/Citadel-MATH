@@ -15,7 +15,14 @@ DS.CampScene = (function () {
   // 그림 위 누르는 자리 (id · 접근성 이름 · 눌렀을 때 이름표)
   const zone = (id, key, label, cls = '') => `<button class="cs-zone cs-int ${cls}" id="${id}"${(C().objs || {})[key] ? ` data-obj="${key}"` : ''} style="${box(C().zones[key])}" aria-label="${label}"><i class="cs-glow"></i><span class="camp-label">${label}</span></button>`;
   // 성채 · 텐트 겹 (2026-11-05 · 사용자가 배경에서 떼어 낸 그림)
-  const objs = () => Object.entries(C().objs || {}).map(([k, o]) => `<img class="cs-obj cs-obj-${k}" alt="" src="${base()}${o.src}" style="left:${pct(o.x, W())};top:${pct(o.y, H())};width:${pct(o.w, W())}">${o.on ? `<img class="cs-obj cs-obj-${k} cs-on" alt="" src="${base()}${o.on}" style="left:${pct(o.x, W())};top:${pct(o.y, H())};width:${pct(o.w, W())}">` : ''}`).join('');
+  const objs = () => Object.entries(C().objs || {}).map(([k, o]) => `<img class="cs-obj cs-obj-${k}" alt="" src="${base()}${o.src}" style="left:${pct(o.x, W())};top:${pct(o.y, H())};width:${pct(o.w, W())}">${o.on ? `<img class="cs-obj cs-obj-${k} cs-on" alt="" src="${base()}${o.on}" style="left:${pct(o.x, W())};top:${pct(o.y, H())};width:${pct(o.w, W())}">` : ''}${o.lit ? `<img class="cs-obj cs-obj-${k} cs-lit" alt="" src="${base()}${o.lit}" style="left:${pct(o.x, W())};top:${pct(o.y, H())};width:${pct(o.w, W())}">` : ''}`).join('');
+  // 🏰 누르면 반응 (2026-11-07 선생님): 창 불빛 번쩍 + 성 통통(1.04 → 1) + 성문 반짝이 + 「쿵」 — 0.6초 뒤 여는 건 부르는 쪽(pick)
+  function press(stage, k) {
+    const o = (C().objs || {})[k], img = stage && stage.querySelector(`.cs-obj-${k}:not(.cs-on):not(.cs-lit)`); if (!o || !img) return;
+    stage.querySelectorAll(`.cs-obj-${k}:not(.cs-on)`).forEach((e) => { e.classList.remove('cs-press'); void e.offsetWidth; e.classList.add('cs-press'); setTimeout(() => e.classList.remove('cs-press'), 900); });
+    if (o.door) { const sp = document.createElement('span'); sp.className = 'cs-spark cs-door'; sp.setAttribute('aria-hidden', 'true'); sp.style.left = `calc(${pct(o.x + (o.w * o.door[0]) / 100, W())} - 12px)`; sp.style.top = `calc(${pct(o.y + (o.w * (img.naturalHeight / (img.naturalWidth || 1)) * o.door[1]) / 100, H())} - 12px)`; stage.appendChild(sp); setTimeout(() => sp.remove(), 1300); }
+    if (DS.Sound && DS.Sound.hit) DS.Sound.hit();
+  }
   // 누른 그림으로 바꾸기 (텐트: 책이 빛나며 나옴) — 미리 겹쳐 두고 켜기만 해서 깜빡임 없음
   const objOn = (stage, k, on) => { const e = stage && stage.querySelector(`.cs-obj-${k}.cs-on`); if (e) e.classList.toggle('show', !!on); };
   // 장면 겹: 차시 문 빛 · 윤곽선 · 깃발 (배경 위 · 오브젝트 아래)
@@ -70,5 +77,5 @@ DS.CampScene = (function () {
     try { localStorage.setItem(key, JSON.stringify(states)); } catch (e) { /* 무시 */ }
     return seen ? states.map((s, i) => (s !== 'off' && s !== seen[i] ? i : -1)).filter((i) => i >= 0) : [];
   }
-  return { objOn, zone, layers, lamps, flag, gate, intro, floorStates, freshLamps, box };
+  return { objOn, press, zone, layers, lamps, flag, gate, intro, floorStates, freshLamps, box };
 })();

@@ -2648,3 +2648,13 @@ body:not(:has(#test-tv)) #screen-student.st-battle > .wrap { padding-top: 0 !imp
 #camp-stamp { cursor: pointer; } #camp-stamp small { opacity: .7; margin-left: 6px; }
 .pk-steps { display: flex; flex-direction: column; gap: 6px; max-height: 60vh; overflow-y: auto; } .pk-steps .btn { margin: 0 !important; text-align: left; }
 .t-resume2 { display: block; width: 100%; margin: 6px 0 0 !important; } .t-resume2 small { display: block; font-size: 12px; font-weight: 400; } .t-resume2[hidden] { display: none !important; }
+/* 🏰 성채 v2 (2026-11-07 선생님 그림): 창 불빛 겹 = 평소 천천히 숨쉬기(3.6초) · 누르면(0.6초) 불빛 번쩍 + 성 통통(1.04 → 1) + 성문 반짝이 */
+.cs-v2 .cs-obj.cs-lit { mix-blend-mode: screen; opacity: .15; animation: csLit 3.6s ease-in-out infinite; }
+@keyframes csLit { 50% { opacity: .75; filter: drop-shadow(0 0 3px #ffd25a); } }
+.cs-v2 .cs-obj-castle { transform-origin: 50% 92%; }
+.cs-v2 .cs-obj-castle.cs-press:not(.cs-lit) { animation: csCastleBump .6s ease-out 1 !important; }
+.cs-v2 .cs-obj-castle.cs-lit.cs-press { animation: csLitFlash .6s ease-out 1 !important; }
+@keyframes csCastleBump { 0% { transform: scale(1); } 30% { transform: scale(1.04); filter: brightness(1.15); } 100% { transform: scale(1); filter: brightness(1); } }
+@keyframes csLitFlash { 0% { opacity: .3; transform: scale(1); } 30% { opacity: 1; transform: scale(1.04); filter: brightness(1.6) drop-shadow(0 0 4px #ffe7a0) drop-shadow(0 0 12px #ffb02e); } 100% { opacity: .3; transform: scale(1); filter: none; } }
+.cs-v2 > .cs-spark.cs-door { right: auto; z-index: 4; }
+@media (prefers-reduced-motion: reduce) { .cs-v2 .cs-obj.cs-lit { animation: none; opacity: .4; } }
