@@ -357,7 +357,14 @@ DS.Bonus = (function () {
       if (DS.TRIAL && !pend) act.innerHTML = `<p class="bf-gift">📷 <b>체험판이라 사진 채점은 테스트로 보여 줘요.</b> 실제 게임에서는 종이에 쓴 풀이를 찍으면 AI 가 단계마다 채점하고 잘한 단계는 칭찬해 줘요 (구현 완료 · 선생님 확인 · 이의 신청까지).</p><button class="btn primary big" id="bf-pv">✔ 테스트: 사진 통과로 보기</button><button class="btn" id="bf-later">나중에</button>`; // 👩‍🏫 2026-11-07 사용자 「7번 사진은 테스트라고 안내 · 실제로는 구현됨」
       act.querySelector('#bf-later').onclick = () => { el.remove(); render(); };
       const pv = act.querySelector('#bf-pv'); if (pv) pv.onclick = () => win();
-      if (DS.TRIAL && !pend) return;
+      if (DS.TRIAL && !pend) { // 👩‍🏫 체험판: 테스트 통과 = 실제 통과와 똑같이 (처치 · 💎 · 📜 · 수식 책사 해금)
+        const tp = act.querySelector('#bf-pv'); if (tp) tp.onclick = () => DS.Control.run(async () => {
+          const p = `bonus/${ck(me.c)}/${me.n}/${L.id}/${mid}`, cur = mine[L.id][mid] = mine[L.id][mid] || {};
+          photoWin = { score: 4, total: 4, up: false };
+          await N().update(p, { clear: true, pend: null, ph: 'trial', phBest: 4, tries: cur.tries || 1, at: N().TS }).catch(() => {}); Object.assign(cur, { clear: true }); return win();
+        });
+        return;
+      }
       act.querySelector('#bf-photo').onclick = () => DS.Control.run(async () => {
         if (all()) { DS.UI.toast('미리 보기 · 테스트에서는 사진을 보내지 않아요 — 학생 계정으로 해 보세요.', 3000); return; }
         const res = await DS.Photo.grade(me, { lesson: L.id, room: mid, title: mon.title, items });
