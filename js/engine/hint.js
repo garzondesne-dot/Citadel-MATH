@@ -6,7 +6,7 @@
 window.DS = window.DS || {};
 
 DS.Hint = (function () {
-  const C = { a: '#3d63f5', b: '#ff8a1f', c: '#8b5cf6', ink: '#1a1d29', sub: '#6b7385' };
+  const C = { a: '#3d63f5', b: '#ff8a1f', c: '#8b5cf6', ink: '#26201a', sub: '#8c7661' };
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const T = (x, y, s, o = {}) => `<text x="${x}" y="${y}" text-anchor="middle" font-size="${o.size || 13}" fill="${o.color || C.ink}"${o.bold ? ' font-weight="700"' : ''}${o.it ? ' font-style="italic"' : ''}>${esc(s)}</text>`;
   const circ = (cx, cy, r, color) => `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${color}" fill-opacity=".07" stroke="${color}" stroke-width="2"/>`;

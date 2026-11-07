@@ -64,15 +64,15 @@ DS.Art = (function () {
 ${a.fonts.gothic ? `@font-face{font-family:'DS Gothic';src:url('${a.fonts.gothic}') format('woff2');font-display:swap}
 @font-face{font-family:'DS Gothic';font-weight:700;src:url('${a.fonts.gothicBold}') format('woff2');font-display:swap}` : ''}
 ${a.ui && a.ui.panel ? '' : `.framed{border:14px solid transparent;border-image:url('${a.base}${a.frame.src}') ${a.frame.slice} / 14px stretch}`}
-.bg-dungeon{background:#0a0d18}.bg-dungeon::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(#0a142400 55%,#0a142466),url('${a.base}${a.background.src}') center top/cover no-repeat}
-.bg-scene{background-image:linear-gradient(#0a142466,#0a142411 40%,#0a1424dd),url('${a.base}${(a.scene || a.background).src}');background-size:cover;background-position:center 65%}
+.bg-dungeon{background:#12100d}.bg-dungeon::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(#1a161200 55%,#1a161266),url('${a.base}${a.background.src}') center top/cover no-repeat}
+.bg-scene{background-image:linear-gradient(#1a161266,#1a161211 40%,#1a1612dd),url('${a.base}${(a.scene || a.background).src}');background-size:cover;background-position:center 65%}
 ${a.brand ? `.brand-head{background:url('${a.base}${a.brand.header}') center/contain no-repeat;aspect-ratio:960/461}
 ${a.brand.splash ? '' : `.splash{background-image:url('${a.base}${a.brand.title}')}`}
 .menu-ic{background-image:url('${a.base}${a.brand.menu.src}');background-size:${a.brand.menu.cols * 100}% 100%}
 ${Object.entries(a.brand.menu.kinds).map(([k, i]) => `.menu-ic[data-ic="${k}"]{background-position:${(i / (a.brand.menu.cols - 1)) * 100}% 0}`).join('')}` : ''}
 ${a.ui && a.ui.kit ? skin(a) : ''}
 ${a.ui && a.ui.paper ? `:root{--paper-tex:url('${new URL(a.base + a.ui.paper, document.baseURI).href}')}` : ''}
-${(a.dungeons ? a.dungeons.ids : []).map((id) => `.bg-scene.th-${id}{background-image:linear-gradient(#0a142455,#0a142400 40%,#0a1424cc),url('${a.base}${a.dungeons.bg(id)}')}`).join('\n')}`;
+${(a.dungeons ? a.dungeons.ids : []).map((id) => `.bg-scene.th-${id}{background-image:linear-gradient(#1a161255,#1a161200 40%,#1a1612cc),url('${a.base}${a.dungeons.bg(id)}')}`).join('\n')}`;
   }
   // UI 키트 입히기 (2026-11-04): 창 · 버튼 · 탭 · 입력칸 · ✕ · 뒤로 · 아이콘 버튼. 다른 규칙의 border 묶음 지정이 border-image 를 지우므로 그림 · 두께는 !important
   function skin(a) {

@@ -31,7 +31,7 @@ DS.Forge = (function () {
     // CSS 변수 안의 url() 은 style.css 기준으로 풀리므로 절대 주소로 넣는다
     const abs = (k) => `url('${new URL(DS.ASSETS.base + DS.ASSETS.forgeC[k], location.href).href}')`;
     el.style.setProperty('--fc-mat', abs('material')); el.style.setProperty('--fc-op', abs('operator'));
-    el.innerHTML = `<div class="fg-wrap${tab === 'forge' && no ? ' one' : ''}"><div class="fg-bg" style="background-image:linear-gradient(#07132155,#071321aa),url('${DS.ASSETS.base}${DS.ASSETS.forgeC.bg}')"></div>
+    el.innerHTML = `<div class="fg-wrap${tab === 'forge' && no ? ' one' : ''}"><div class="fg-bg" style="background-image:linear-gradient(#17141055,#171410aa),url('${DS.ASSETS.base}${DS.ASSETS.forgeC.bg}')"></div>
       <div class="fg-hud"><b>⚒ 모루</b><span class="fg-pill">${me.trial ? '👩‍🏫 체험판 · 모든 카드 열림' : `${esc(me.c)}반 · ${no ? `${no}차시까지 열림` : '아직 열린 차시 없음'}`}</span><span class="fg-pill blue">📖 ${have().length} / ${opened().length}</span><button class="btn small" id="fg-x">✕ 닫기</button></div>
       <div class="tabs fg-tabs">${[['forge', '🔨 연성'], ['book', '📖 도감'], ['mine', '🃏 내 카드']].map(([k, t]) => `<button class="tab${tab === k ? ' on' : ''}" data-tab="${k}">${t}</button>`).join('')}</div>
       <div class="fg-body">${!no ? '<p class="fg-empty">선생님이 우리 반에 수업(2차시부터)을 열면 레시피가 나타나요.</p>' : tab === 'book' ? book() : tab === 'mine' ? mine() : forgeTab()}</div></div>`;
