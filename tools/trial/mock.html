@@ -1,95 +1,70 @@
 <!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><base href="../../"><title>교사용 체험판 시안</title>
-<!-- 2026-11-07 👩‍🏫 교사용 체험판 시안 (docs/DECISIONS.md 2026-11-07) — 진짜 게임 그림으로 화면 7장. 로컬 서버(저장소 맨 위)에서 tools/trial/mock.html -->
+<html lang="ko"><head><meta charset="utf-8"><base href="../../"><title>교사용 체험판 시안 v2</title>
+<!-- 2026-11-07 👩‍🏫 교사용 체험판 시안 v2 (사용자 피드백: 학생 입장만 · 전투 = 레이드 배치 · 첫 화면 그림 그대로 · 첫 캠프는 차원문만 · 6차시 복습만)
+     로컬 서버(저장소 맨 위)에서 tools/trial/mock.html -->
 <link rel="stylesheet" href="css/style.css">
 <style>
   body { background: #070b16; color: #eef2ff; font-family: 'Noto Sans KR', sans-serif; margin: 0; padding: 16px; }
   .row { display: flex; gap: 18px; flex-wrap: wrap; }
   .cap { width: 390px; font-size: 15px; font-weight: 800; color: #ffd25a; margin: 0 0 6px; }
-  .ph { width: 390px; height: 800px; position: relative; overflow: hidden; border-radius: 26px; border: 3px solid #2c4370; background: #0b1426; box-shadow: 0 10px 30px #0008; display: flex; flex-direction: column; }
-  .tabs { display: flex; background: #0a1020; border-bottom: 2px solid #ffd25a55; }
-  .tabs b { flex: 1; text-align: center; padding: 9px 0; font-size: 14px; color: #9fb0d8; }
-  .tabs b.on { color: #fff; background: #1b2a48; box-shadow: inset 0 -3px 0 #ffd25a; }
-  .tabs .tag { position: absolute; right: 8px; top: 6px; font-size: 10px; color: #ff9aa8; }
-  .bd { flex: 1; position: relative; overflow: hidden; }
-  .bar { display: flex; align-items: center; gap: 6px; padding: 8px 10px; background: #2a1608f2; border-top: 3px solid #ffcf5a; }
-  .bar .b { padding: 8px 12px; border-radius: 10px; background: #1a2c4c; border: 2px solid #2c4370; font-weight: 800; font-size: 14px; }
-  .bar .s { flex: 1; font-size: 12px; color: #ffe7a8; text-align: center; line-height: 1.3; }
-  .bar .go { background: #f2b544; color: #2a1608; border-color: #ffe08a; }
-  .ai { position: absolute; left: 10px; right: 10px; bottom: 10px; display: flex; gap: 8px; align-items: flex-end; z-index: 9; }
-  .ai .face { width: 46px; height: 46px; border-radius: 50%; background: #1b2a48; border: 2px solid #7fd3ff; display: flex; align-items: center; justify-content: center; font-size: 24px; flex: none; }
-  .ai .msg { background: #ffffffee; color: #13203a; border-radius: 14px 14px 14px 4px; padding: 8px 11px; font-size: 13.5px; line-height: 1.45; box-shadow: 0 4px 12px #0007; }
-  .ai .msg b { color: #c0392b; }
-  .pill { display: inline-block; padding: 2px 8px; border-radius: 9px; font-size: 11px; background: #ffffff1a; margin: 2px; }
-  /* 1 입장 */
-  .gate { padding: 26px 18px; text-align: center; background: radial-gradient(circle at 50% 20%, #24345e, #0b1426 70%); height: 100%; box-sizing: border-box; }
-  .gate h1 { font-size: 24px; margin: 6px 0 2px; } .gate .sub { color: #9fb0d8; font-size: 13px; margin: 0 0 16px; }
-  .inp { margin: 0 auto 14px; width: 260px; padding: 11px; border-radius: 12px; border: 2px solid #ffd25a; background: #0a1020; font-size: 17px; color: #fff; text-align: left; }
-  .hg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 8px 0 14px; }
-  .hg .c { height: 92px; border-radius: 12px; background: #16223e; border: 2px solid #2c4370; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; font-size: 12px; padding-bottom: 4px; position: relative; overflow: hidden; }
-  .hg .c.on { border-color: #ffd25a; box-shadow: 0 0 12px #ffd25a88; }
-  .hg .c.lk { opacity: .45; } .hg .c.lk::after { content: '🔒'; position: absolute; top: 6px; right: 8px; }
-  .big { display: block; margin: 0 auto; width: 260px; padding: 13px; border-radius: 14px; background: #f2b544; color: #2a1608; font-weight: 900; font-size: 17px; }
-  .note { font-size: 11.5px; color: #9fb0d8; margin-top: 10px; }
-  /* 2 캠프 */
-  .camp { background-size: cover; background-position: center 30%; height: 100%; position: relative; }
-  .obj { position: absolute; padding: 4px 8px; border-radius: 10px; background: #000b; border: 2px solid #ffffff55; font-size: 12.5px; font-weight: 800; white-space: nowrap; }
-  .obj.hot { border-color: #b388ff; box-shadow: 0 0 14px #b388ff; animation: pls 1.4s infinite; } @keyframes pls { 50% { transform: scale(1.06); } }
-  .obj .dot { display: inline-block; min-width: 16px; border-radius: 8px; background: #ff4d5e; color: #fff; font-size: 11px; text-align: center; margin-left: 4px; }
-  .me { position: absolute; left: 165px; top: 470px; }
-  .hud { position: absolute; left: 8px; right: 8px; top: 8px; display: flex; justify-content: space-between; font-size: 12.5px; }
+  .ph { width: 390px; height: 844px; position: relative; overflow: hidden; border-radius: 26px; border: 3px solid #2c4370; background: #0b1426; box-shadow: 0 10px 30px #0008; }
+  .bg { position: absolute; inset: 0; background-size: cover; background-position: center; }
+  .ai { position: absolute; left: 10px; right: 10px; bottom: 12px; display: flex; gap: 8px; align-items: flex-end; z-index: 9; }
+  .ai .face { width: 50px; height: 50px; border-radius: 50%; background: #1b2a48; border: 2px solid #7fd3ff; overflow: hidden; flex: none; display: flex; align-items: flex-end; justify-content: center; }
+  .ai .face .art { transform: scale(.9); transform-origin: center bottom; }
+  .ai .msg { flex: 1; background: #ffffffee; color: #13203a; border-radius: 14px 14px 14px 4px; padding: 8px 11px; font-size: 13.5px; line-height: 1.45; box-shadow: 0 4px 12px #0007; }
+  .ai .msg b { color: #c0392b; } .ai .msg .nx { float: right; margin: 4px 0 0 8px; padding: 5px 12px; border-radius: 10px; background: #f2b544; color: #2a1608; font-weight: 900; }
+  /* ① 스플래시 · ② 첫 메뉴 (진짜 그림) */
+  .logo { position: absolute; left: 50%; top: 18px; transform: translateX(-50%); width: 330px; }
+  .tap { position: absolute; left: 0; right: 0; bottom: 140px; text-align: center; font-size: 17px; color: #eef2ffcc; text-shadow: 0 2px 4px #000; }
+  .prop { position: absolute; image-rendering: pixelated; }
+  .form { position: absolute; left: 16px; right: 16px; top: 190px; padding: 12px; border-radius: 14px; background: #0b1426e6; border: 2px solid #ffd25a; }
+  .form .t { font-size: 14px; font-weight: 900; margin: 0 0 6px; color: #ffd25a; }
+  .inp { padding: 10px; border-radius: 10px; border: 2px solid #2c4370; background: #0a1020; font-size: 16px; margin-bottom: 10px; }
+  .hg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .hg .c { height: 84px; border-radius: 10px; background: #16223e; border: 2px solid #2c4370; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; font-size: 11.5px; padding-bottom: 3px; overflow: hidden; }
+  .hg .c.on { border-color: #ffd25a; box-shadow: 0 0 10px #ffd25a88; }
+  .go { display: block; margin-top: 10px; padding: 12px; border-radius: 12px; background: #f2b544; color: #2a1608; text-align: center; font-weight: 900; font-size: 17px; }
+  .note { font-size: 11px; color: #9fb0d8; text-align: center; margin: 6px 0 0; }
+  /* ③ · ⑥ 캠프 */
+  .hud { position: absolute; left: 8px; right: 8px; top: 8px; display: flex; justify-content: space-between; font-size: 12.5px; z-index: 3; }
   .hud span { background: #000a; padding: 4px 8px; border-radius: 9px; }
-  /* 3 레이드 (폰) */
-  .fld { height: 250px; background-size: cover; background-position: center; position: relative; }
-  .mon { position: absolute; right: 40px; top: 60px; transform: scale(1.5); transform-origin: right top; }
-  .hp { position: absolute; left: 10px; right: 10px; top: 8px; height: 16px; border-radius: 8px; background: #300; border: 2px solid #000; overflow: hidden; }
-  .hp i { display: block; height: 100%; width: 58%; background: linear-gradient(#ff7a85, #c8243a); }
-  .hp b { position: absolute; left: 0; right: 0; top: -1px; text-align: center; font-size: 11px; }
-  .mine { position: absolute; left: 40px; bottom: 26px; transform: scale(1.4); transform-origin: left bottom; }
-  .combo { position: absolute; right: 10px; top: 30px; background: #000b; border: 2px solid #ff9a3c; border-radius: 10px; padding: 2px 8px; font-weight: 900; color: #ffb35a; font-size: 13px; }
-  .party { display: flex; gap: 4px; padding: 6px 6px 2px; overflow: hidden; background: #0a1020; }
-  .mate { width: 44px; text-align: center; font-size: 9.5px; color: #cdd7f0; position: relative; }
-  .mate .st { display: block; font-size: 9px; color: #ffd25a; white-space: nowrap; overflow: hidden; }
-  .mate .art { transform: scale(.55); transform-origin: center bottom; margin-top: -14px; }
-  .qz { margin: 6px 10px; padding: 10px; border-radius: 12px; background: #13203a; border: 2px solid #2c4370; font-size: 13.5px; line-height: 1.5; }
+  .obj { position: absolute; padding: 5px 9px; border-radius: 10px; background: #000c; border: 2px solid #ffffff66; font-size: 13px; font-weight: 800; white-space: nowrap; z-index: 2; }
+  .obj.hot { border-color: #b388ff; box-shadow: 0 0 16px #b388ff; }
+  .obj .new { display: inline-block; margin-left: 4px; padding: 0 5px; border-radius: 7px; background: #2f7bff; font-size: 10px; }
+  .obj .dot { display: inline-block; min-width: 16px; border-radius: 8px; background: #ff4d5e; font-size: 11px; text-align: center; margin-left: 4px; }
+  .dim { position: absolute; inset: 0; background: #0006; }
+  .me { position: absolute; z-index: 2; }
+  .banner { position: absolute; left: 14px; right: 14px; top: 46px; padding: 10px; border-radius: 12px; background: linear-gradient(90deg, #3a2a06f0, #0a2c46f0); border: 2px solid #ffd25a; text-align: center; font-size: 14px; font-weight: 800; z-index: 3; }
+  /* ④ 레이드 (종합실 배치: 몬스터 가운데 · 용사들 아래 모임) */
+  .top { position: absolute; left: 8px; right: 8px; top: 8px; z-index: 3; }
+  .top .ttl { display: flex; justify-content: space-between; font-size: 12.5px; font-weight: 800; background: #000b; border-radius: 10px; padding: 5px 9px; }
+  .hp { margin-top: 5px; height: 16px; border-radius: 8px; background: #300; border: 2px solid #000; position: relative; overflow: hidden; }
+  .hp i { display: block; height: 100%; width: 58%; background: linear-gradient(#ff7a85, #c8243a); } .hp b { position: absolute; inset: 0; text-align: center; font-size: 11px; line-height: 13px; }
+  .boss { position: absolute; left: 50%; top: 120px; transform: translateX(-50%) scale(2.1); transform-origin: center top; z-index: 1; }
+  .fx { position: absolute; left: 50%; top: 175px; transform: translateX(-50%); font-size: 46px; filter: drop-shadow(0 0 14px #ffd25a); z-index: 2; }
+  .party { position: absolute; left: 0; right: 0; top: 330px; height: 150px; z-index: 2; }
+  .hm { position: absolute; width: 60px; text-align: center; }
+  .hm .art { transform: scale(.85); transform-origin: center bottom; }
+  .hm b { display: block; font-size: 10px; color: #fff; text-shadow: 0 1px 2px #000; margin-top: -4px; white-space: nowrap; }
+  .hm .bub { position: absolute; left: 50%; bottom: 58px; transform: translateX(-50%); white-space: nowrap; font-size: 10px; background: #fff; color: #13203a; border-radius: 8px; padding: 1px 6px; }
+  .hm.mine::before { content: ''; position: absolute; left: 6px; right: 6px; bottom: 14px; height: 10px; border-radius: 50%; background: radial-gradient(#ffd25a, transparent 70%); }
+  .hm.mine b { color: #ffd25a; }
+  .combo { position: absolute; right: 10px; top: 76px; background: #000b; border: 2px solid #ff9a3c; border-radius: 10px; padding: 2px 8px; font-weight: 900; color: #ffb35a; font-size: 13px; z-index: 3; }
+  .qz { position: absolute; left: 10px; right: 10px; top: 490px; padding: 10px; border-radius: 12px; background: #13203af2; border: 2px solid #2c4370; font-size: 13.5px; line-height: 1.5; z-index: 3; }
   .qz .ch { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 8px; } .qz .ch span { padding: 8px; border-radius: 9px; background: #1b2a48; border: 1px solid #fff3; text-align: center; font-weight: 700; }
   .qz .ch span.pick { border-color: #ffd25a; background: #3a2a0c; }
-  .heal { display: flex; gap: 6px; margin: 0 10px; } .heal span { flex: 1; text-align: center; padding: 7px; border-radius: 10px; font-size: 12.5px; font-weight: 800; }
-  /* 4 교실 TV */
-  .tv { height: 100%; background-size: cover; background-position: center; position: relative; }
-  .tvtop { position: absolute; left: 8px; right: 8px; top: 8px; background: #000b; border-radius: 10px; padding: 6px 8px; font-size: 12px; }
-  .tvtop .tb { height: 8px; border-radius: 4px; background: #1c2440; margin-top: 4px; overflow: hidden; } .tvtop .tb i { display: block; height: 100%; width: 70%; background: #4fd0f0; }
-  .tvmon { position: absolute; right: 30px; top: 120px; transform: scale(2.2); transform-origin: right top; }
-  .tvline { position: absolute; left: 6px; bottom: 120px; display: grid; grid-template-columns: repeat(3, 56px); gap: 2px 0; }
-  .tvline .art { transform: scale(.8); transform-origin: left bottom; }
-  .fx { position: absolute; right: 70px; top: 170px; font-size: 54px; filter: drop-shadow(0 0 12px #ffd25a); }
-  .feed { position: absolute; left: 8px; right: 8px; bottom: 60px; background: #000a; border-radius: 10px; padding: 6px 8px; font-size: 11.5px; line-height: 1.6; }
-  /* 5 리모컨 */
-  .rc { padding: 12px; }
-  .rc h3 { margin: 4px 0 8px; font-size: 15px; }
-  .steps { background: #13203a; border-radius: 12px; padding: 8px 10px; font-size: 13px; line-height: 1.9; margin-bottom: 12px; }
-  .steps .now { color: #ffd25a; font-weight: 900; } .steps .dn { color: #6f7fa8; text-decoration: line-through; }
-  .grid4 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .grid4 span { height: 74px; border-radius: 14px; background: #1b2a48; border: 2px solid #2c4370; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 26px; }
-  .grid4 span small { font-size: 13px; font-weight: 800; margin-top: 2px; } .grid4 span.on { border-color: #ffd25a; background: #3a2a0c; }
-  .sub4 { display: flex; gap: 6px; margin-top: 10px; } .sub4 span { flex: 1; text-align: center; padding: 9px 0; border-radius: 10px; background: #2a1c40; border: 1px solid #b388ff88; font-size: 13px; font-weight: 800; }
-  .stat { margin-top: 12px; background: #0a1020; border-radius: 12px; padding: 8px 10px; font-size: 12.5px; line-height: 1.7; }
-  /* 6 쉼터 */
-  .arena { height: 100%; background-size: cover; background-position: center; position: relative; }
-  .q { position: absolute; left: 10px; right: 10px; top: 10px; background: #000c; border-radius: 12px; padding: 8px 10px; text-align: center; font-size: 14px; font-weight: 800; }
+  .qz .hl { display: flex; gap: 6px; margin-top: 8px; } .qz .hl span { flex: 1; text-align: center; padding: 6px; border-radius: 9px; font-size: 12px; font-weight: 800; }
+  /* ⑤ 쉼터 */
+  .q { position: absolute; left: 10px; right: 10px; top: 10px; background: #000c; border-radius: 12px; padding: 8px 10px; text-align: center; font-size: 14px; font-weight: 800; z-index: 3; }
   .q em { display: block; font-style: normal; font-size: 11.5px; color: #ffd25a; margin-top: 2px; }
-  .side { position: absolute; top: 150px; width: 150px; text-align: center; font-weight: 900; }
-  .side.a { left: 8px; } .side.b { right: 8px; } .side .pl { display: flex; flex-wrap: wrap; justify-content: center; gap: 0; }
-  .side .pl .art { transform: scale(.7); margin: -8px -6px; } .side .n { font-size: 28px; color: #fff; text-shadow: 0 2px 0 #000; }
+  .side { position: absolute; top: 150px; width: 150px; text-align: center; font-weight: 900; z-index: 2; }
+  .side.a { left: 8px; } .side.b { right: 8px; } .side .pl { display: flex; flex-wrap: wrap; justify-content: center; }
+  .side .pl .art { transform: scale(.7); margin: -8px -6px; } .side .n { font-size: 28px; text-shadow: 0 2px 0 #000; }
   .side.a .t { color: #7fd3ff; } .side.b .t { color: #ffb35a; }
-  .chat { position: absolute; font-size: 11px; background: #fff; color: #13203a; border-radius: 10px; padding: 3px 7px; }
-  .pk { position: absolute; left: 10px; right: 10px; bottom: 74px; display: flex; gap: 8px; } .pk span { flex: 1; padding: 12px; text-align: center; border-radius: 12px; font-weight: 900; }
-  /* 7 결과 */
-  .res { padding: 14px; text-align: center; }
-  .res h2 { margin: 6px 0; font-size: 21px; color: #ffd25a; }
-  .card { background: #13203a; border: 2px solid #2c4370; border-radius: 12px; padding: 10px; margin: 8px 0; text-align: left; font-size: 13px; line-height: 1.7; }
-  .card b.g { color: #7dffa8; } .card b.y { color: #ffd25a; }
-  .words { display: flex; flex-direction: column; gap: 5px; } .words span { background: #fff; color: #13203a; border-radius: 10px; padding: 4px 8px; font-size: 12px; align-self: flex-start; }
+  .chat { position: absolute; font-size: 11px; background: #fff; color: #13203a; border-radius: 10px; padding: 3px 7px; z-index: 3; }
+  .pk { position: absolute; left: 10px; right: 10px; top: 560px; display: flex; gap: 8px; z-index: 3; } .pk span { flex: 1; padding: 12px; text-align: center; border-radius: 12px; font-weight: 900; }
+  .tmr { position: absolute; left: 0; right: 0; top: 520px; text-align: center; font-size: 13px; color: #ffd25a; font-weight: 900; z-index: 3; }
 </style></head>
 <body>
 <div class="row" id="r1"></div>
@@ -98,53 +73,49 @@
 <script src="assets/manifest.js"></script>
 <script src="js/engine/art.js"></script>
 <script>
-const A = DS.ASSETS, H = (n, p = 'idle', c = '') => DS.Art.hero(n, p, c), M = (n, p = 'idle') => DS.Art.monster(n, p), img = (f) => `url('${A.base}${f}')`;
-const tabs = (on) => `<div class="tabs">${['📱 내 폰', '📺 교실 TV', '🎮 리모컨'].map((t, i) => `<b class="${i === on ? 'on' : ''}">${t}</b>`).join('')}</div>`;
-const bar = (step, back = true) => `<div class="bar"><span class="b"${back ? '' : ' style="opacity:.4"'}>◀</span><span class="s">${step}</span><span class="b go">진행 ▶</span></div>`;
-const ai = (t) => `<div class="ai"><div class="face">🤖</div><div class="msg"><b>AI 선생님</b> · ${t}</div></div>`;
-const MATES = [[0, '민준', '🧠 ⚡퍼펙트!'], [3, '서연', '🏃 2번째 도전'], [2, '도윤', '🐢 생각 중…'], [4, '하은', '😵 💚 힐 받음'], [9, '시우', '🧠 💚 힐 줌'], [5, '지유', '🏃 🔥 콤보'], [11, '주원', '🐢 제출 전'], [13, '서아', '💤 방금 입장']];
+const A = DS.ASSETS, H = (n, p = 'idle', c = '') => DS.Art.hero(n, p, c), M = (n, p = 'idle', c = '') => DS.Art.monster(n, p, c), url = (f) => `url('${A.base}${f}')`, src = (f) => A.base + f;
+const ai = (t, nx) => `<div class="ai"><div class="face">${H(7)}</div><div class="msg"><b>AI 선생님</b> · ${t}${nx ? `<span class="nx">${nx}</span>` : ''}</div></div>`;
 const frame = (cap, html) => `<div><p class="cap">${cap}</p><div class="ph">${html}</div></div>`;
-const f1 = frame('① 입장 — 이름 · 용사 고르기 (저장 안 됨)', `<div class="gate"><div style="font-size:42px">🏰</div><h1>모두의 던전</h1><p class="sub">👩‍🏫 선생님 체험판 · 학생이 되어 한 차시를 직접 해 봐요</p>
-  <div class="inp">이름 &nbsp;<b>김선생</b><span style="opacity:.5">|</span></div><p style="margin:0;font-size:13px;font-weight:800">용사를 골라요</p>
-  <div class="hg">${[0, 1, 2, 3, 21, 23].map((n, i) => `<div class="c${i === 0 ? ' on' : ''}">${H(n)}<span>${A.heroesV2.list[n].name}</span></div>`).join('')}${[19, 18, 8].map((n) => `<div class="c lk">${H(n)}<span>${A.heroesV2.list[n].name}</span></div>`).join('')}</div>
-  <span class="big">🏕 캠프로 들어가기</span><p class="note">기록은 어디에도 저장되지 않아요 · 새로고침하면 처음부터</p></div>`);
-const f2 = frame('② 캠프에서 시작 — 6차시 차원문이 열림', `${tabs(0)}<div class="bd"><div class="camp" style="background-image:${img(A.camp.bg)}">
-  <div class="hud"><span>🧑 김선생 · Lv 1</span><span>💎 0 · 📜 0</span></div>
-  <span class="obj hot" style="left:225px;top:300px">🌀 6차시 차원문</span><span class="obj" style="left:20px;top:250px">🏰 성채던전 (4방)</span>
-  <span class="obj" style="left:16px;top:410px">📚 책장 · 5차시</span><span class="obj" style="left:230px;top:430px">🎯 허수아비 · 5차시</span>
-  <span class="obj" style="left:120px;top:540px">📮 우편함<span class="dot">3</span></span>
-  <div class="me">${H(0)}</div>${ai('차원문이 열렸어요! <b>🌀 6차시 차원문</b>을 눌러 오늘 수업에 들어가 보세요. 친구들도 들어오고 있어요.')}</div></div>${bar('🏕 수업 전 · 캠프', false)}`);
-const f3 = frame('③ 📱 내 폰 — 문제 풀고 공격 · 재도전 · 💚 힐', `${tabs(0)}<div class="bd"><div class="fld" style="background-image:${img(A.fields.forest)}"><div class="hp"><i></i><b>문제 1 · 공동 체력 58%</b></div><span class="combo">🔥 콤보 7</span><div class="mon">${M('extra:3')}</div><div class="mine">${H(0, 'attack')}</div></div>
-  <div class="party">${MATES.map(([h, n, s]) => `<div class="mate">${H(h)}<b>${n}</b><span class="st">${s}</span></div>`).join('')}</div>
-  <div class="qz"><b>소문제 2 / 3</b> · 전체집합 U 에서 (A ∪ B)<sup>C</sup> 와 같은 것은?<div class="ch"><span>A<sup>C</sup> ∪ B<sup>C</sup></span><span class="pick">A<sup>C</sup> ∩ B<sup>C</sup></span><span>A ∩ B<sup>C</sup></span><span>U − A</span></div></div>
-  <div class="heal"><span style="background:#123a24;border:1px solid #7dffa8">💚 하은에게 힐 주기</span><span style="background:#1b2a48;border:1px solid #fff3">💧 재도전 2번 남음</span></div>
-  ${ai('지금은 <b>문제 시간</b>! 모두 맞히면 몬스터 체력이 깎여요. 틀려도 숫자만 바뀌어 다시 도전해요.')}</div>${bar('⚔ 3 / 9 · 문제 1')}`);
-const f4 = frame('④ 📺 교실 TV — 레이드 장면 (반 전체)', `${tabs(1)}<div class="bd"><div class="tv" style="background-image:${img(A.fields.forest)}">
-  <div class="tvtop">⚔ <b>문제 1</b> · 공동 체력 <b style="color:#ff8a95">58%</b> · 제출 6 / 9 · 🔥 콤보 7<div class="tb"><i></i></div></div>
-  <div class="tvmon">${M('extra:3')}</div><div class="fx">⚔</div>
-  <div class="tvline">${[0, 0, 3, 2, 4, 9, 5, 11, 13].map((h) => H(h)).join('')}</div>
-  <div class="feed">⚡ <b>민준</b> 첫 시도 퍼펙트 — 필살기! · 💚 <b>시우</b> → 하은 힐 · 🔥 콤보 7 · 🐢 <b>도윤</b> 생각 중…</div>
-  ${ai('반 전체가 보는 화면이에요. 정답 글자는 안 나오고 <b>공격 연출</b>만 보여요.')}</div></div>${bar('⚔ 3 / 9 · 문제 1')}`);
-const f5 = frame('⑤ 🎮 리모컨 — 초간단', `${tabs(2)}<div class="bd"><div class="rc"><h3>🎮 선생님 리모컨 <span class="pill">체험판</span></h3>
-  <div class="steps"><span class="dn">1 개념 · 드모르간</span><br><span class="dn">2 영상</span><br><span class="now">▶ 3 문제 1 (지금)</span><br>4 🏕 쉼터<br>5 문제 2<br>6 👑 보스 형성평가 (3문항)<br>7 🏫 결과 · 마무리</div>
-  <div class="grid4"><span>📘<small>개념</small></span><span>🎬<small>영상</small></span><span>🏕<small>쉼터</small></span><span class="on">🎯<small>집중모드</small></span></div>
-  <div class="sub4"><span>⭕ OX</span><span>⚖ 밸런스</span><span>🔄 반대로</span><span>🏰 디펜스</span></div><p class="note" style="margin:4px 0 0">쉼터 안에서만 보여요</p>
-  <div class="stat">제출 <b>6 / 9</b> · 다 맞힘 4 · 재도전 중 3 · 도움 요청 🙋 1</div></div>
-  ${ai('진행은 제가 안내하고, <b>넘기는 건 선생님</b>이에요. 맨 아래 <b>진행 ▶</b>를 누르세요.')}</div>${bar('⚔ 3 / 9 · 문제 1')}`);
-const f6 = frame('⑥ 🏕 쉼터 — 밸런스 게임 (가상 동료)', `${tabs(1)}<div class="bd"><div class="arena" style="background-image:${img(A.fun.bg)}">
+const props = () => (A.ui.home.phone || []).map(([f, pos, w]) => `<img class="prop" src="${src(f)}" style="${pos};width:${w}px">`).join('') + `<img class="prop" src="${src(A.ui.home.emblem)}" style="left:50%;transform:translateX(-50%);bottom:250px;width:110px">`;
+// 가상 동료 8 + 나 (종합실처럼 아래쪽에 두 줄로 모임)
+const MATES = [[0, '민준', '⚡ 퍼펙트!'], [3, '서연', '🔁 다시!'], [2, '도윤', '🤔 생각 중'], [4, '하은', '💚 고마워'], [9, '시우', ''], [5, '지유', '🔥'], [11, '주원', '🤔'], [13, '서아', '👋 왔어요']];
+const ME = { h: 0, n: '김선생' };
+const party = () => { const all = [...MATES.slice(0, 4), [ME.h, ME.n, '', true], ...MATES.slice(4)];
+  return all.map(([h, n, s, mine], i) => { const row = i < 5 ? 0 : 1, col = row ? i - 5 : i, x = row ? 40 + col * 80 : 4 + col * 76, y = row ? 70 : 0;
+    return `<div class="hm${mine ? ' mine' : ''}" style="left:${x}px;top:${y}px">${s ? `<span class="bub">${s}</span>` : ''}${H(h, mine ? 'attack' : 'idle')}<b>${n}</b></div>`; }).join(''); };
+const f1 = frame('① 첫 화면 (진짜 게임 그림 그대로)', `<div class="bg" style="background-image:${url(A.brand.splash.bg)}"></div><img class="logo" src="${src(A.brand.splash.logo)}"><p class="tap">화면을 가볍게 터치하세요<br><small style="font-size:12px;opacity:.7">👩‍🏫 선생님 체험판</small></p>`);
+const f2 = frame('② 첫 메뉴 — 이름 · 용사 고르기 (저장 안 됨)', `<div class="bg" style="background-image:${url(A.background.src)}"></div><img class="logo" src="${src(A.brand.splash.logo)}" style="width:300px">${props()}
+  <div class="form"><p class="t">👩‍🏫 선생님 체험판 · 학생이 되어 한 차시를 직접!</p><div class="inp">이름 &nbsp;<b>김선생</b><span style="opacity:.5">|</span></div>
+  <div class="hg">${[0, 1, 2, 3, 21, 23].map((n, i) => `<div class="c${i === 0 ? ' on' : ''}">${H(n)}<span>${A.heroesV2.list[n].name}</span></div>`).join('')}</div>
+  <span class="go">⚔ 모험 시작</span><p class="note">기록은 어디에도 저장되지 않아요 · 새로고침하면 처음부터</p></div>`);
+const f3 = frame('③ 첫 캠프 — 오브젝트 없이 차원문만', `<div class="bg" style="background-image:${url(A.camp.bg)}"></div><div class="dim"></div>
+  <div class="hud"><span>🧑 김선생 · Lv 1</span><span>💎 0</span></div>
+  <span class="obj hot" style="left:118px;top:330px;font-size:15px">🌀 6차시 던전 · 열림</span><div class="me" style="left:165px;top:470px">${H(0)}</div>
+  ${ai('오늘 수업 던전이 열렸어요! <b>🌀 6차시 던전</b>을 눌러 들어가요. 수업이 끝나면 캠프의 다른 곳들이 열려요.')}`);
+const f4 = frame('④ 전투 = 레이드 배치 (몬스터 가운데 · 용사들 아래)', `<div class="bg" style="background-image:${url(A.fields.forest)}"></div>
+  <div class="top"><div class="ttl"><span>⚔ 문제 1 · 6차시 드모르간</span><span>제출 6 / 9</span></div><div class="hp"><i></i><b>공동 체력 58%</b></div></div>
+  <span class="combo">🔥 콤보 7</span><div class="boss">${M('extra:3')}</div><div class="fx">⚔</div>
+  <div class="party">${party()}</div>
+  <div class="qz"><b>소문제 2 / 3</b> · 전체집합 U 에서 (A ∪ B)<sup>C</sup> 와 같은 것은?<div class="ch"><span>A<sup>C</sup> ∪ B<sup>C</sup></span><span class="pick">A<sup>C</sup> ∩ B<sup>C</sup></span><span>A ∩ B<sup>C</sup></span><span>U − A</span></div>
+  <div class="hl"><span style="background:#123a24;border:1px solid #7dffa8">💚 하은에게 힐</span><span style="background:#1b2a48;border:1px solid #fff3">💧 재도전 2번 남음</span></div></div>
+  ${ai('모두 맞히면 몬스터 체력이 깎여요. 틀려도 숫자만 바뀌어 다시! 다 풀면 넘어갈게요.', '다음 ▶')}`);
+const f5 = frame('⑤ 🏕 쉼터 — 밸런스 게임 (가상 동료와 함께)', `<div class="bg" style="background-image:${url(A.fun.bg)}"></div>
   <div class="q">⚖ 밸런스 게임 2판 — 적은 쪽이 탈락!<em>평생 라면 없이 살기 vs 평생 치킨 없이 살기</em></div>
   <div class="side a"><div class="t">라면 없이</div><div class="n">3</div><div class="pl">${[0, 2, 11].map((h) => H(h)).join('')}</div></div>
   <div class="side b"><div class="t">치킨 없이</div><div class="n">6</div><div class="pl">${[3, 4, 9, 5, 13, 0].map((h) => H(h)).join('')}</div></div>
-  <span class="chat" style="left:20px;top:300px">도윤: 라면은 못 참지 ㅠ</span><span class="chat" style="right:16px;top:330px">지유: 치킨이 더 소중해!</span>
-  <div class="pk"><span style="background:#173a5a;border:2px solid #7fd3ff">라면 없이</span><span style="background:#4a2a08;border:2px solid #ffd25a">치킨 없이 ✔</span></div>
-  ${ai('쉬는 시간 놀이예요. ⭕ OX → ⚖ 밸런스 → 🔄 반대로 → 🏰 디펜스 순서로 해 볼까요?')}</div></div>${bar('🏕 쉼터 · 밸런스 게임')}`);
-const f7 = frame('⑦ 🏫 결과 → 대기실 → 캠프 자유 시간', `${tabs(0)}<div class="bd"><div class="res"><div style="font-size:40px">🏆</div><h2>보스 격파! 수업 끝</h2>
-  <div class="card">🏫 <b>학급 결과</b> · 참여 9 / 9 · 첫 시도 정답 <b class="y">68%</b> · 고쳐서 맞힘 <b class="g">+21%</b> · 💚 힐 7번</div>
-  <div class="card">🧑 <b>내 결과</b> · 문제 1 ✔(처음) · 문제 2 ✔(고쳐서) · 형성평가 2 / 3 · <b class="g">+86 EXP</b> · 💎 +14<br>📌 다시 볼 것: 드모르간의 법칙 → 🎯 허수아비</div>
-  <div class="card"><b>💬 대기실 · 마지막 한마디</b><div class="words"><span>민준: 드모르간 이제 완벽!</span><span>도윤: 늦었지만 끝까지 풀었다</span><span>하은: 힐 받아서 고쳤어요 고마워</span></div></div>
-  <div class="card" style="border-color:#ffd25a">🏕 <b>캠프 자유 시간</b> · 🎁 체험 💎100 받음 → ⚙ 상점 · 🔨 강화 · 🎯 허수아비 · 🏰 성채 · 📮 우편함</div></div>
-  ${ai('수고했어요! 이제 캠프에서 <b>자유롭게</b> 둘러보세요. 저장은 안 되니 마음껏 눌러 봐요.')}</div>${bar('🏁 수업 끝 · 캠프 자유')}`);
-document.getElementById('r1').innerHTML = f1 + f2 + f3 + f4;
-document.getElementById('r2').innerHTML = f5 + f6 + f7;
+  <span class="chat" style="left:20px;top:330px">도윤: 라면은 못 참지 ㅠ</span><span class="chat" style="right:16px;top:360px">지유: 치킨이 더 소중해!</span>
+  <p class="tmr">⏱ 4초</p><div class="pk"><span style="background:#173a5a;border:2px solid #7fd3ff">라면 없이</span><span style="background:#4a2a08;border:2px solid #ffd25a">치킨 없이 ✔</span></div>
+  ${ai('쉬는 시간 놀이! ⭕ OX → ⚖ 밸런스 → 🔄 반대로 → 🏰 디펜스 차례로 해요.', '다음 ▶')}`);
+const f6 = frame('⑥ 수업 끝 → 캠프가 열림 (6차시 복습)', `<div class="bg" style="background-image:${url(A.camp.bg)}"></div>
+  <div class="hud"><span>🧑 김선생 · Lv 3</span><span>💎 114 · 📜 0</span></div>
+  <img src="${src(A.camp.objs.castle.src)}" style="position:absolute;left:10px;top:105px;width:381px;z-index:1;filter:drop-shadow(0 0 12px #ffd25a88)">
+  <div class="banner">🏆 수업 끝! 캠프가 열렸어요 · 🎁 체험 💎100</div>
+  <span class="obj" style="left:120px;top:250px">🏰 성채던전 (4방)<span class="new">NEW</span></span><span class="obj" style="left:225px;top:300px">🌀 6차시 다시 하기</span>
+  <span class="obj" style="left:14px;top:410px">📚 책장 · 6차시<span class="new">NEW</span></span><span class="obj" style="left:212px;top:430px">🎯 허수아비 · 6차시<span class="new">NEW</span></span>
+  <span class="obj" style="left:110px;top:540px">📮 우편함<span class="dot">2</span><span class="new">NEW</span></span><span class="obj" style="left:240px;top:590px">⚙ 상점 · 강화<span class="new">NEW</span></span>
+  <div class="me" style="left:165px;top:470px">${H(0, 'win')}</div>
+  ${ai('수고했어요! 📮 우편함엔 <b>방금 틀린 문제</b>가 있어요. 🎯 허수아비에서 숫자만 바꿔 다시 풀어 봐요.')}`);
+document.getElementById('r1').innerHTML = f1 + f2 + f3;
+document.getElementById('r2').innerHTML = f4 + f5 + f6;
 </script>
 </body></html>
