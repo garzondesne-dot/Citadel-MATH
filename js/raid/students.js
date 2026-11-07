@@ -49,7 +49,7 @@ DS.Students = (function () {
         <div class="tabs st-cls">${classes.map((c) => `<button class="tab${c === cls ? ' on' : ''}" data-cls="${esc(c)}">${esc(c)} <span class="muted small">${Object.keys(roster[c] || {}).length}</span></button>`).join('') || '<span class="muted">아직 반이 없어요 — 아래에서 새 반 명단을 붙여 넣어요.</span>'}</div></div>
       ${cls ? `<div class="panel framed"><h3 class="gold">${esc(cls)} <span class="muted small">${ns.length}명 · 가입 ${ns.filter((n) => acc[n] && !acc[n].reset).length}명</span></h3>
         <div class="st-add"><label>번호 <input id="a-n" type="number" min="1" max="40" inputmode="numeric"></label><label>이름 <input id="a-name" maxlength="8"></label><button class="btn primary" id="a-go">＋ 한 명 추가</button></div>
-        <div class="st-scroll"><table class="r-table"><tr><th>번호</th><th>이름</th><th>계정</th><th>레벨</th><th>도감</th><th>인장</th><th></th></tr>${ns.map(row).join('')}</table></div></div>` : ''}
+        <div class="st-scroll"><table class="r-table"><tr><th>번호</th><th>이름</th><th>계정</th><th>레벨</th><th>도감</th><th>업적</th><th></th></tr>${ns.map(row).join('')}</table></div></div>` : ''}
       <details class="panel framed"${classes.length ? '' : ' open'}><summary><b>📋 명단 한꺼번에 붙여넣기</b> <span class="muted small">새 반 · 여러 명</span></summary>
         <p class="muted small">반 이름(예: 1-3)을 넣고, 한 줄에 "번호 이름" 으로 붙여 넣어요. 시트에서 "반 번호 이름" 세 칸을 복사해 붙여도 돼요. 같은 번호가 있으면 이름을 새로 바꿔요.</p>
         <div class="row2"><label>반 <input id="r-cls" placeholder="1-3" value="${esc(keep.newc || cls)}"></label><span></span></div>
@@ -101,7 +101,7 @@ DS.Students = (function () {
     const seals = DS.Bonus ? DS.Bonus.seals((extra.bonus || {})[n]) : [];
     const el = document.createElement('div'); el.className = 'modal camp-modal';
     el.innerHTML = `<div class="quiz-box framed st-detail"><h2>${esc(cls)} ${n}번 ${esc(name)}</h2>
-      <p>${lv ? `<b class="gold">Lv.${lv.lv} ${esc(lv.title)}</b> · EXP ${total}` : `EXP ${total}`} · 도감 ${Object.keys((extra.cards || {})[n] || {}).length}장 · 던전 인장 ${seals.length}개</p>
+      <p>${lv ? `<b class="gold">Lv.${lv.lv} ${esc(lv.title)}</b> · EXP ${total}` : `EXP ${total}`} · 도감 ${Object.keys((extra.cards || {})[n] || {}).length}장 · 업적 ${seals.length}개</p>
       ${DS.Result ? DS.Result.history(rec || {}) : '<p class="muted">아직 기록이 없어요.</p>'}
       <div class="row"><button class="btn" id="sd-x">닫기</button></div></div>`;
     document.body.appendChild(el);

@@ -154,7 +154,7 @@ DS.Account = (function () {
     // 화려한 이펙트 = 🟪 중단원던전 인장 1 · 2 · 4 · 6 · 8 · 10개에서 하나씩 (v0.8.0 · 2026-11-03 보강던전 → 중단원던전)
     const bonus = (m && DS.Bonus && (await N().get(`bonus/${String(m.c).replace(/[.#$/[\]]/g, '_')}/${m.n}`).catch(() => null))) || {};
     const fo = DS.Bonus ? DS.Bonus.fxOpen(bonus) : {}, seals = DS.Bonus ? DS.Bonus.seals(bonus).length : 0;
-    heroes.push({ id: 16, open: seals >= 3, cond: `🟪 중단원던전 인장 ${Math.min(seals, 3)} / 3개 모으면 열려요` }); // 2026-11-03 사용자 결정: 금발 검사 = 인장 3개
+    heroes.push({ id: 16, open: seals >= 3, cond: `🏆 업적 ${Math.min(seals, 3)} / 3 — 🎯 허수아비 👑 형성평가 재대결 · 🏰 성채 보스 방을 처치하면 하나씩` }); // 2026-11-03 사용자 결정: 금발 검사 = 인장 3개
     [18, 19, 20, 21, 22, 23].forEach((id) => heroes.push({ id, open: false, cond: '💎 조각으로 해금' })); // 2026-11-07 새 용사 6 (흑기사 · 메카닉 · 해커 · 용기사 = 💎 상점 · gem.js SHOP)
     // ⚔ 이펙트 v2 (2026-11-06): 계열 6 × 단계 4 — Ⅰ 열림 · Ⅱ 💎 · Ⅲ 인장(또는 💎) · Ⅳ 💎 + 같은 계열 Ⅲ 필요 · 특별(업적)
     const fx = [];
@@ -167,12 +167,18 @@ DS.Account = (function () {
       fx.push(f);
     }));
     // 💎 조각 상점 (2026-11-05): 용사 12~15 · 화려한 이펙트 = 조각으로 골라 해금 (인장으로 이미 연 이펙트는 그대로) · 도감 · 첫 레이드 · 인장 3개 용사는 업적 전용
+    // 🔁 화폐 전환 (2026-11-07 · 계정마다 한 번 · gem/…/conv 기록) · 📚 도감 특전 용사를 💎 로 연 뒤 카드를 다 모았으면 💎 돌려받기
+    if (DS.Gem && DS.Gem.convert && m && !m.test && !m.teacher) {
+      await DS.Gem.convert(m, { seals, cards: owned }).catch(() => null);
+      const done = { 8: need.length > 0 && got === need.length, 10: need46.length > 0 && got46 === need46.length, 11: need710.length > 0 && got710 === need710.length };
+      for (const id of DS.Gem.CARD_HEROES) if (done[id]) await DS.Gem.cardRefund(m, id).catch(() => 0);
+    }
     const gem = DS.Gem && m ? await DS.Gem.mine(m) : {};
     if (DS.Gem) {
       const phOk = DS.Gem.photoPassed ? DS.Gem.photoPassed(gem) : false; // 🧑‍🎓 수식 책사 남 · 여 = 📷 서술형 사진 통과 (2026-11-07)
       heroes.forEach((h) => { if (!(DS.Gem.PHOTO_HEROES || []).includes(h.id)) return; h.open = phOk || DS.Gem.owns(gem, 'hero', h.id); h.cond = '📷 성채 서술형 문제를 풀이 사진까지 통과하면 열려요'; h.photo = true; });
-      heroes.forEach((h) => { const p = DS.Gem.price('hero', h.id); if (p == null) return; h.shop = { kind: 'hero', id: h.id, price: p }; h.open = h.open || DS.Gem.owns(gem, 'hero', h.id); h.cond = `💎 ${p} 조각으로 해금`; });
-      fx.forEach((f) => { const p = DS.Gem.price('fx', f.id); if (p == null) return; f.shop = { kind: 'fx', id: f.id, price: p, scroll: DS.Gem.scrollOf ? DS.Gem.scrollOf('fx', f.id) : 0 }; f.open = f.open || DS.Gem.owns(gem, 'fx', f.id); f.cond = f.tier === 2 && DS.FX.FANCY.includes(f.id) ? `🟪${DS.Bonus ? DS.Bonus.UNLOCK[DS.FX.FANCY.indexOf(f.id)] : ''} · 💎${p}` : `💎${p}${f.shop.scroll ? ` · 📜${f.shop.scroll}` : ''}`; });
+      heroes.forEach((h) => { const p = DS.Gem.price('hero', h.id); if (p == null) return; const card = (DS.Gem.CARD_HEROES || []).includes(h.id), byCard = card && h.open; h.shop = { kind: 'hero', id: h.id, price: p, nosell: card }; h.open = h.open || DS.Gem.owns(gem, 'hero', h.id); if (byCard) { h.shop = null; return; } h.cond = card ? `${h.cond.replace(' 모으면 열려요', '')} 모으면 무료 · 💎 ${p} 로 먼저 열면 다 모았을 때 💎 돌려받아요` : `💎 ${p} 조각으로 해금`; });
+      fx.forEach((f) => { const p = DS.Gem.price('fx', f.id); if (p == null) return; f.shop = { kind: 'fx', id: f.id, price: p, scroll: DS.Gem.scrollOf ? DS.Gem.scrollOf('fx', f.id) : 0 }; f.open = f.open || DS.Gem.owns(gem, 'fx', f.id); f.cond = f.tier === 2 && DS.FX.FANCY.includes(f.id) ? `🏆${DS.Bonus ? DS.Bonus.UNLOCK[DS.FX.FANCY.indexOf(f.id)] : ''} · 💎${p}` : `💎${p}${f.shop.scroll ? ` · 📜${f.shop.scroll}` : ''}`; });
       fx.forEach((f) => { f.bought = DS.Gem.owns(gem, 'fx', f.id); }); // 💰 되팔기 가능 (상점에서 산 것만)
       // 🔗 단계 순서 (2026-11-06 사용자 「2단계 해금해야 3단계 열리는 거 맞지? · 2단계 잠겨 있는데 3단계가 열려」): Ⅱ → Ⅲ → Ⅳ
       //   상점에서 이미 산 것은 그대로 (산 것을 빼앗지 않음) · 🟪 인장으로 받은 Ⅲ 은 같은 계열 Ⅱ 를 열어야 씀
@@ -183,12 +189,12 @@ DS.Account = (function () {
         if (f.open && f.bought) return; // 예전에 산 것
         const sealGot = f.open && !f.bought; f.open = false;
         f.locked = `먼저 ${TN[t - 1]} 「${DS.FX.NAMES[f.need].replace(/^\S+\s/, '')}」`;
-        f.cond = sealGot ? `🟪 받음 · ${TN[t - 1]}먼저` : `💎${f.shop ? f.shop.price : ''} · ${TN[t - 1]}먼저`;
+        f.cond = sealGot ? `🏆 받음 · ${TN[t - 1]}먼저` : `💎${f.shop ? f.shop.price : ''} · ${TN[t - 1]}먼저`;
       }));
     }
     // 🪶 황금 날개 (v0.9.11 업적 전용): 🎁 보물 상자에서 황금 깃털 5개
-    const fe = DS.Gem ? DS.Gem.feathers(gem) : 0;
-    if (DS.FX.ACHV) fx.push({ id: 'wings', tier: 's', open: fe >= 5, cond: `🪶 황금 깃털 ${Math.min(fe, 5)} / 5개 (🎁 보물 상자 영웅 · 전설)` });
+    const fe = DS.Gem ? DS.Gem.rareOf(gem) : 0;
+    if (DS.FX.ACHV) fx.push({ id: 'wings', tier: 's', open: fe >= 5, cond: `🏆 🎁 보물 상자 영웅 · 전설 ${Math.min(fe, 5)} / 5번` });
     // ☀ 심판의 빛 (2026-11-06): 🏰 성채 1층 · 2층 👑 보스 방을 모두 처치
     const bossA = !!(((bonus['eval-1'] || {}).q12 || {}).clear), bossB = !!(((bonus['eval-2'] || {}).q11 || {}).clear);
     if (DS.FX.ACHV) fx.push({ id: 'smite', tier: 's', open: bossA && bossB, cond: `🏰 성채 1 · 2층 보스 ${Number(bossA) + Number(bossB)} / 2` });

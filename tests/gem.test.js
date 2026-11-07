@@ -19,7 +19,7 @@ const G = DS.Gem, m = { c: '1-3', n: 5 };
   const db2 = {}; Object.assign(db, { gem: { '9-9': { 1: {} } } }); const m2 = { c: '9-9', n: 1 };
   let r = 0; for (let i = 0; i < 5; i++) r += await G.addDaily(m2, 1, 'review', 3);
   check(r === 3, `허수아비 복습은 하루 3번 (${r})`);
-  check(G.price('hero', 12) === 30 && G.price('hero', 8) === null && G.price('fx', 'vortex') === 80, '상점: 업적 용사 8 은 못 삼');
+  check(G.price('hero', 12) === 30 && G.price('hero', 8) === 60 && G.price('hero', 16) === null && G.price('fx', 'vortex') === 80, '상점: 도감 특전 용사 8 = 💎 60 (돌려받기) · 업적 용사 16 은 못 삼');
   let err = ''; try { await G.buy(m2, 'fx', 'vortex'); } catch (e) { err = e.message; }
   check(/모자라요/.test(err), '조각 모자라면 못 삼');
   await G.add(m2, 60, 't', '', { free: true });
@@ -47,5 +47,20 @@ const G = DS.Gem, m = { c: '1-3', n: 5 };
   err = ''; try { await G.enhance(m3); } catch (e) { err = e.message; } check(/\+10/.test(err), '+10 이 끝');
   check(G.enhTier(2) === 0 && G.enhTier(3) === 1 && G.enhTier(5) === 2 && G.enhTier(7) === 3 && G.enhTier(10) === 4, '강화 빛 단계');
   check(await G.medal(m, 'ox') === 1 && await G.medal(m, 'ox') === 2, '메달 개수');
+  // 🔁 화폐 전환 (2026-11-07): 깃털 1 = 💎 10 · 💎 못 받은 카드 1장 = 💎 3 · conv 기록 · 한 번만 · 옛 feather 남김
+  { const mc = { c: '7-7', n: 3 };
+    setP('gem/7-7/3', { total: 50, earned: 80, feather: 2, log: { card_union: { g: 3, at: 1, why: '첫 카드' } } });
+    const r = await G.convert(mc, { seals: 4, cards: { union: true, inter: true, comp: true } }), dc = await G.mine(mc);
+    check(r && r.feather === 2 && r.featherGem === 20 && r.cards === 3 && r.cardsUnpaid === 2 && r.cardGem === 6 && r.seals === 4 && r.gemBefore === 50 && r.gemAfter === 76, `전환 기록 ${JSON.stringify(r)}`);
+    check(dc.total === 76 && dc.feather === 2 && dc.rare === 2 && dc.conv && dc.log.conv_feather.gift && dc.log.conv_card.g === 6 && G.giftList(dc).length === 2, '💎 우편 2통 · 옛 깃털 값 남김 · 날개 셈 = 2');
+    check(await G.convert(mc, { seals: 9, cards: {} }) === null && (await G.mine(mc)).total === 76, '전환은 한 번만');
+    check(G.rareOf(dc) === 2 && G.rareOf({ feather: 3 }) === 3 && G.rareOf({ feather: 3, rare: 1 }) === 4, '날개 업적 셈 (전환 전 · 뒤)');
+    // 📚 도감 특전 용사 💎 60 → 되팔기 불가 · 카드 다 모으면 돌려받기 한 번
+    setP('gem/7-7/4', { total: 70 }); const mh = { c: '7-7', n: 4 };
+    await G.buy(mh, 'hero', 8); let e2 = ''; try { await G.sell(mh, 'hero', 8); } catch (e) { e2 = e.message; }
+    check((await G.mine(mh)).total === 10 && /되팔 수 없/.test(e2), '특전 용사 💎 60 · 되팔기 막음');
+    check(await G.cardRefund(mh, 8) === 60 && await G.cardRefund(mh, 8) === 0 && (await G.mine(mh)).total === 70, '도감 완성 → 💎 60 돌려받기 한 번');
+    check(await G.cardRefund(mh, 10) === 0, '안 산 용사는 돌려받기 없음');
+  }
   console.log(fail ? `❌ ${fail}개 실패` : '✅ 💎 조각 시험 모두 통과'); process.exit(fail ? 1 : 0);
 })();

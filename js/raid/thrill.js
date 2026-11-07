@@ -45,11 +45,11 @@ DS.Thrill = (function () {
   // 🎁 보물 상자 열기 (폰): 닫힘 → 흔들림 → 열림 → 보상 · 확률 공개
   function chestOpen(r, onClose) {
     if (!r) return;
-    const C = DS.Combo.CHEST, prize = r.feather ? `🪶 황금 깃털 ×${r.feather}` : `💎 조각 +${r.gem}`;
+    const C = DS.Combo.CHEST, prize = `💎 조각 +${r.gem}`;
     const o = el('th-chest-ov', `<div class="th-chest tier-${r.tier}"><p class="th-chest-t">🎁 보물 상자!${r.pity ? ' <small>(오래 기다린 상자 — 확정)</small>' : ''}</p>
-      <div class="th-chest-box">${sprite('chest', 0, 'shut')}</div><p class="th-chest-r" hidden><b class="tier-${r.tier}">${esc(r.name)}</b> ${prize}${r.feather ? `<br><small>깃털 ${Math.min(r.feathers || 0, C.feathers)} / ${C.feathers} — 5개면 🪶 황금 날개 이펙트</small>` : ''}</p>
+      <div class="th-chest-box">${sprite('chest', 0, 'shut')}</div><p class="th-chest-r" hidden><b class="tier-${r.tier}">${esc(r.name)}</b> ${prize}${r.rare ? `<br><small>🏆 영웅 · 전설 상자 ${Math.min(r.rares || 0, C.feathers)} / ${C.feathers} — 5번이면 🌟 황금 날개 이펙트</small>` : ''}</p>
       <details class="th-odds"><summary>상자 확률 보기</summary><p>몬스터를 쓰러뜨릴 때 데미지를 준 용사 <b>${C.p * 100}%</b> (✨ 퍼펙트 3연속 이상이면 +${C.streakBonus * 100}%) · 하루 ${C.day}개 · ${C.pity}수업 연속 못 받으면 다음 첫 처치 때 확정 · 🦇 황금 박쥐를 맞히면 확정</p>
-      <ul>${C.table.map((t) => `<li><b class="tier-${t.id}">${t.name}</b> ${Math.round(t.p * 100)}% — ${t.gem ? `💎 ${t.gem[0]}~${t.gem[1]}` : `🪶 깃털 ${t.feather}`}</li>`).join('')}</ul></details>
+      <ul>${C.table.map((t) => `<li><b class="tier-${t.id}">${t.name}</b> ${Math.round(t.p * 100)}% — 💎 ${t.gem[0] === t.gem[1] ? t.gem[0] : `${t.gem[0]}~${t.gem[1]}`}</li>`).join('')}</ul></details>
       <button class="btn primary" hidden>좋아요!</button></div>`);
     const box = o.querySelector('.th-chest-box'), res = o.querySelector('.th-chest-r'), btn = o.querySelector('button');
     setTimeout(() => { box.innerHTML = sprite('chest', 1, 'shake'); if (DS.Sound) DS.Sound.clank(); }, 450);

@@ -135,8 +135,8 @@ const total = (mid) => L.monsters[mid] ? X.itemsFor(L, { meta: { code: '777777' 
 // ── 6. 🎁 보물 상자 확률 (확정 수치 · 많이 굴려 확인) ───────────────────────
 {
   let got = 0, got3 = 0, bad = 0; const tier = { common: 0, rare: 0, hero: 0, legend: 0 }, N0 = 40000, gems = { common: new Set(), rare: new Set() };
-  for (let i = 0; i < N0; i++) { if (C.chestRoll(`s${i}`, false)) got++; if (C.chestRoll(`s${i}`, true)) got3++; const r = C.chestRoll(`t${i}`, false, true); tier[r.tier]++; if (gems[r.tier]) gems[r.tier].add(r.gem); if ((r.tier === 'hero' && r.feather !== 1) || (r.tier === 'legend' && r.feather !== 3)) bad++; }
-  check([...gems.common].sort().join() === '1,2' && [...gems.rare].sort().join() === '3,4,5' && !bad, `흔함 💎 1~2 · 희귀 💎 3~5 · 영웅 🪶 1 · 전설 🪶 3 (${[...gems.common]} / ${[...gems.rare]})`);
+  for (let i = 0; i < N0; i++) { if (C.chestRoll(`s${i}`, false)) got++; if (C.chestRoll(`s${i}`, true)) got3++; const r = C.chestRoll(`t${i}`, false, true); tier[r.tier]++; if (gems[r.tier]) gems[r.tier].add(r.gem); if ((r.tier === 'hero' && (r.gem !== 10 || !r.rare)) || (r.tier === 'legend' && (r.gem !== 30 || !r.rare))) bad++; }
+  check([...gems.common].sort().join() === '1,2' && [...gems.rare].sort().join() === '3,4,5' && !bad, `흔함 💎 1~2 · 희귀 💎 3~5 · 영웅 💎 10 · 전설 💎 30 (깃털 → 💎 전환) (${[...gems.common]} / ${[...gems.rare]})`);
   check(Math.abs(got / N0 - 0.15) < 0.01, `기본 15% (${(got / N0).toFixed(3)})`);
   check(Math.abs(got3 / N0 - 0.25) < 0.01, `퍼펙트 3연속 25% (${(got3 / N0).toFixed(3)})`);
   check(Math.abs(tier.common / N0 - 0.6) < 0.01 && Math.abs(tier.rare / N0 - 0.3) < 0.01 && Math.abs(tier.hero / N0 - 0.09) < 0.006 && Math.abs(tier.legend / N0 - 0.01) < 0.003, `흔함 60 · 희귀 30 · 영웅 9 · 전설 1 (${JSON.stringify(tier)})`);

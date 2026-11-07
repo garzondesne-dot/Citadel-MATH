@@ -59,8 +59,8 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   await solveAll(); await S.waitForTimeout(1500);
   const h2 = await heads(); await S.screenshot({ path: `${OUT}/4-review-win.png` });
   log.push(`허수아비 4차시 문제 1 처치 → 머리 위 ${JSON.stringify(h2)}`);
-  const C = { 성채꼬리표: /\+3/.test(tags.room) && /인장/.test(tags.boss) && /첫 방/.test(tags.line), 성채머리: h1.some((t) => /EXP/.test(t)) && h1.some((t) => /성채 방 처치/.test(t)) && h1.some((t) => /성채 첫 방/.test(t)), 오래: h1late.length >= 2, 받은뒤: after === '없음',
-    허수아비꼬리표: rows.some((r) => /\+1/.test(r)) && rows.some((r) => /인장/.test(r)), 허수아비머리: h2.some((t) => /복습으로 해결/.test(t)) && h2.some((t) => /첫 복습/.test(t)) };
+  const C = { 성채꼬리표: /\+3/.test(tags.room) && /업적/.test(tags.boss) && /첫 방/.test(tags.line), 성채머리: h1.some((t) => /EXP/.test(t)) && h1.some((t) => /성채 방 처치/.test(t)) && h1.some((t) => /성채 첫 방/.test(t)), 오래: h1late.length >= 2, 받은뒤: after === '없음',
+    허수아비꼬리표: rows.some((r) => /\+1/.test(r)) && rows.some((r) => /업적/.test(r)), 허수아비머리: h2.some((t) => /복습으로 해결/.test(t)) && h2.some((t) => /첫 복습/.test(t)) };
   const bad = Object.keys(C).filter((k) => !C[k]); if (bad.length) log.push('틀린 항목: ' + bad.join(', '));
   console.log(log.join('\n')); console.log(!bad.length ? '✅ 통과' : '❌ 기대와 다름'); console.log('errors', errs.length ? errs : 'none'); await b.close(); if (bad.length || errs.length) process.exit(1);
 })();

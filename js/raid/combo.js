@@ -21,7 +21,7 @@ DS.Combo = (function () {
   const BOSS_LOCK = [[67, 4], [34, 3], [0, 2]]; // 👑 보스 단계 멈춤: 체력 100~67% 4초 · 66~34% 3초 · 33~0% 2초
   const BAT = { min: 30, max: 90, dur: 20, need: 0.3, gem: 3, combo: 3, bind: 5, late: 5 * 60e3 };
   const CHEST = { p: 0.15, streakBonus: 0.10, day: 2, pity: 3, feathers: 5,
-    table: [{ id: 'common', name: '흔함', p: 0.60, gem: [1, 2] }, { id: 'rare', name: '희귀', p: 0.30, gem: [3, 5] }, { id: 'hero', name: '영웅', p: 0.09, feather: 1 }, { id: 'legend', name: '전설', p: 0.01, feather: 3 }] };
+    table: [{ id: 'common', name: '흔함', p: 0.60, gem: [1, 2] }, { id: 'rare', name: '희귀', p: 0.30, gem: [3, 5] }, { id: 'hero', name: '영웅', p: 0.09, gem: [10, 10], rare: 1 }, { id: 'legend', name: '전설', p: 0.01, gem: [30, 30], rare: 1 }] }; // 2026-11-07 🪶 깃털 없앰 → 💎 (깃털 1 = 💎 10 · 영웅 = 깃털 1 · 전설 = 깃털 3 과 같은 값) · rare = 🌟 황금 날개 업적 셈
   const PUNCH_W = { join: 25, fix: 25, combo: 20, first: 20, heal: 10 };
   const PUNCH_NAMES = { join: '참여', fix: '고침', combo: '콤보', first: '첫 시도', heal: '돕기' }; // 교실 TV 에 이모지 글꼴이 없어 글자만 (2026-11-05)
 
@@ -177,7 +177,7 @@ DS.Combo = (function () {
     let r = rnd(`${seed}|b`), t = CHEST.table[CHEST.table.length - 1];
     for (const x of CHEST.table) { if (r < x.p) { t = x; break; } r -= x.p; }
     const r3 = rnd(`${seed}|c`);
-    return { tier: t.id, name: t.name, gem: t.gem ? t.gem[0] + Math.floor(r3 * (t.gem[1] - t.gem[0] + 1)) : 0, feather: t.feather || 0 };
+    return { tier: t.id, name: t.name, gem: t.gem ? t.gem[0] + Math.floor(r3 * (t.gem[1] - t.gem[0] + 1)) : 0, rare: t.rare || 0 };
   }
 
   // ── 🏁 반대항 경주 점수 (A안) ─────────────────────────

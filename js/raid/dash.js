@@ -92,7 +92,7 @@ DS.Dash = (function () {
     el.querySelectorAll('[data-copy]').forEach((b) => (b.onclick = () => copy(b.dataset.copy === 'all' ? data.studs.map((s) => `${who(s)}: ${memo(s)}`).join('\n\n') : memo(data.studs.find((s) => s.key === b.dataset.copy)))));
   }
   const who = (s) => `${isAll() ? `${s.cls}반 ` : ''}${s.n}번 ${s.name}`;
-  const COLS = [['n', '번호'], ['name', '이름'], ['left', '❗ 남은 문제'], ['part', '참여'], ['boss', '형성평가'], ['first', '첫 시도'], ['ox', '⭕ OX'], ['fixed', '고친 수'], ['hints', '💡 힌트'], ['seals', '인장'], ['tries', '던전 도전'], ['cards', '카드'], ['xp', 'Lv']];
+  const COLS = [['n', '번호'], ['name', '이름'], ['left', '❗ 남은 문제'], ['part', '참여'], ['boss', '형성평가'], ['first', '첫 시도'], ['ox', '⭕ OX'], ['fixed', '고친 수'], ['hints', '💡 힌트'], ['seals', '업적'], ['tries', '던전 도전'], ['cards', '카드'], ['xp', 'Lv']];
   function sorted() {
     const v = (s) => (s[sortKey] == null ? -1 : s[sortKey]);
     const base = (a, b) => String(a.cls).localeCompare(String(b.cls)) || a.n - b.n;
@@ -182,7 +182,7 @@ DS.Dash = (function () {
         </div>
         <div class="dash-boards small3">
           ${board('🔁 끈기 TOP 5', '재도전으로 고친 문제', 'fixed', (s) => `${s.fixed}개`, 5)}
-          ${board('🟪 자기주도 TOP 5', '중단원던전 도전 횟수', 'tries', (s) => `${s.tries}회 · 인장 ${s.seals}`, 5)}
+          ${board('🏆 자기주도 TOP 5', '중단원던전 도전 횟수', 'tries', (s) => `${s.tries}회 · 업적 ${s.seals}`, 5)}
           ${board('⭐ 성장 TOP 5', 'EXP', 'xp', (s) => `Lv.${s.lv} · ${s.xp}`, 5)}
         </div>`;
     },
@@ -322,10 +322,14 @@ DS.Dash = (function () {
       render();
     });
   }
-  function downloadCsv() {
+  async function downloadCsv() {
     const q = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
-    const head = [...(isAll() ? ['반'] : []), '번호', '이름', ...data.held.map((l) => `${l.no}차시 형성평가`), '남은 문제(오답노트)', '참여', '형성평가 평균(%)', '첫 시도 정답률(%)', '재도전으로 고친 수', '그림 힌트(소문제)', '보강 인장', '보강 도전', '카드', '레벨', 'EXP'];
-    const rows = sorted().map((s) => [...(isAll() ? [s.cls] : []), s.n, s.name, ...data.held.map((l) => { const r = s.rec[l.id], fill = !!(((s.bon || {})[l.id] || {}).boss || {}).clear; if (!r) return fill ? '보충' : '불참'; const N = Number(r.bossN) || 0; return `${Math.min(Number(r.boss) || 0, N)}/${N}${fill ? ' (보충)' : ''}`; }), s.left, `${s.went}/${s.heldN}`, s.boss ?? '', s.first ?? '', s.fixed, s.hints || 0, s.seals, s.tries, s.cards, s.lv, s.xp]);
+    // 🔁 화폐 전환 기록 (2026-11-07 · gem/{반}/{번호}/conv): 전환 전 깃털 · 💎 로 바뀐 양 · 그때 업적 수 → 분석용
+    const gems = {}; for (const c of [...new Set(sorted().map((s) => s.cls))]) gems[c] = (await DS.Net.get(`gem/${String(c).replace(/[.#$/[\]]/g, '_')}`).catch(() => null)) || {};
+    const cv = (s) => (((gems[s.cls] || {})[s.n] || {}).conv) || null;
+    const cvAt = (x) => (x && Number(x.at) ? new Date(Number(x.at)).toLocaleString('ko-KR') : '');
+    const head = [...(isAll() ? ['반'] : []), '번호', '이름', ...data.held.map((l) => `${l.no}차시 형성평가`), '남은 문제(오답노트)', '참여', '형성평가 평균(%)', '첫 시도 정답률(%)', '재도전으로 고친 수', '그림 힌트(소문제)', '업적', '보강 도전', '카드', '레벨', 'EXP', '전환 시각', '전환 때 업적', '전환 전 깃털', '깃털→💎', '💎 소급 카드', '카드→💎', '전환 전 💎', '전환 뒤 💎'];
+    const rows = sorted().map((s) => [...(isAll() ? [s.cls] : []), s.n, s.name, ...data.held.map((l) => { const r = s.rec[l.id], fill = !!(((s.bon || {})[l.id] || {}).boss || {}).clear; if (!r) return fill ? '보충' : '불참'; const N = Number(r.bossN) || 0; return `${Math.min(Number(r.boss) || 0, N)}/${N}${fill ? ' (보충)' : ''}`; }), s.left, `${s.went}/${s.heldN}`, s.boss ?? '', s.first ?? '', s.fixed, s.hints || 0, s.seals, s.tries, s.cards, s.lv, s.xp, ...((x) => (x ? [cvAt(x), x.seals, x.feather, x.featherGem, x.cardsUnpaid, x.cardGem, x.gemBefore, x.gemAfter] : ['', '', '', '', '', '', '', '']))(cv(s))]);
     const csv = '﻿' + [head, ...rows].map((r) => r.map(q).join(',')).join('\r\n');
     const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
     a.download = `학급대시보드_${isAll() ? '전체' : cls}_${new Date().toISOString().slice(0, 10)}.csv`; document.body.appendChild(a); a.click(); a.remove();
@@ -334,7 +338,7 @@ DS.Dash = (function () {
     const s = data.studs.find((x) => x.key === k); if (!s) return;
     const el = document.createElement('div'); el.className = 'modal camp-modal';
     el.innerHTML = `<div class="quiz-box framed st-detail"><h2>${esc(s.cls)} ${s.n}번 ${esc(s.name)}</h2>
-      <p>Lv.${s.lv} ${esc(s.lvTitle || '')} · EXP ${s.xp} · 카드 ${s.cards} · 던전 인장 ${s.seals} · 던전 도전 ${s.tries}회</p>
+      <p>Lv.${s.lv} ${esc(s.lvTitle || '')} · EXP ${s.xp} · 카드 ${s.cards} · 업적 ${s.seals} · 던전 도전 ${s.tries}회</p>
       <p>형성평가 ${show(s.boss)} · 첫 시도 ${show(s.first)} · 참여 ${s.went}/${s.heldN} · 고친 수 ${s.fixed}</p>
       ${DS.Result ? DS.Result.history(s.rec || {}) : ''}
       <div class="dash-memo"><b>세특 메모 초안</b><p>${esc(memo(s))}</p></div>

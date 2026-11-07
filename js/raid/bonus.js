@@ -83,7 +83,7 @@ DS.Bonus = (function () {
     DS.FX.FANCY.forEach((k, i) => { if (n >= UNLOCK[i]) out[k] = true; });
     return out;
   }
-  const fxCond = (i) => `🟪 던전 인장 ${UNLOCK[i]}개`;
+  const fxCond = (i) => `🏆 업적 ${UNLOCK[i]}개 (👑 재대결 · 성채 보스 처치)`;
 
   let recs = null, heldM = {}; // 📕 records/{반}/{번호} · held/{반}
   let gemD = null; // 💎 gem/{반}/{번호} — 문제 밖에서 「받을 수 있는 마정석」 표시 (2026-11-05 사용자 「꼬드겨야지」)
@@ -130,9 +130,9 @@ DS.Bonus = (function () {
         await N().update(p, { clear: true, pend: null, tries: rr.tries || 1, at: N().TS }).catch(() => {}); rr.clear = true; delete rr.pend;
         const sealed = !sealedBefore && seals(mine).includes(L.id);
         if (DS.Grow) DS.Grow.add(me, { bonusClear: 1, seal: sealed ? 1 : 0 }).catch(() => {});
-        if (DS.Gem) { const G = DS.Gem.G; await DS.Gem.add(me, r.boss ? G.roomBoss : G.room, `room_${L.id}_${r.id}`, '성채 방 처치').catch(() => 0); if (sealed) await DS.Gem.add(me, G.seal, `seal_${L.id}`, '🟪 인장', { free: true }).catch(() => 0); }
+        if (DS.Gem) { const G = DS.Gem.G; await DS.Gem.add(me, r.boss ? G.roomBoss : G.room, `room_${L.id}_${r.id}`, '성채 방 처치').catch(() => 0); if (sealed) await DS.Gem.add(me, G.seal, `seal_${L.id}`, '🏆 업적', { free: true }).catch(() => 0); }
         if (DS.Gem) { await DS.Gem.add(me, DS.Gem.G.photo || 3, `photo_${L.id}_${r.id}`, '📷 서술형 통과').catch(() => 0); await scrollWin(L.id, r.id, null, null); }
-        DS.Sound.correct(); DS.UI.toast(`✔ 선생님이 「${r.title}」 풀이를 인정했어요 — 처치!${sealed ? ' 🟪 인장도!' : ''}`, 4000);
+        DS.Sound.correct(); DS.UI.toast(`✔ 선생님이 「${r.title}」 풀이를 인정했어요 — 처치!${sealed ? ' 🏆 업적도!' : ''}`, 4000);
       }
     }
   }
@@ -153,7 +153,7 @@ DS.Bonus = (function () {
   const gTag = (n, extra = '', free = false) => (!gemD || !DS.Gem || !n ? '' : `<span class="gm-tag${!free && gDayFull() ? ' full' : ''}" title="${!free && gDayFull() ? '오늘 💎 한도(30)가 찼어요 — 내일 받아요' : '처치하면 받아요'}">💎+${n}${extra}</span>`);
   // 🟪 인장 꼬리표: 이번 인장으로 열리는 것까지 (다음 인장 = 지금 + 1 → 이펙트 · 3개 = 금발 검사)
   const sealTag = () => { const nx = seals(mine).length + 1, i = UNLOCK.indexOf(nx), what = i >= 0 ? DS.FX.NAMES[DS.FX.FANCY[i]] : nx === 3 ? '용사 금발 검사' : '';
-    return `<span class="gm-tag seal" title="처치하면 인장 ${nx}개째">🟪 인장${what ? ` → ${esc(what)}` : ''}</span>`; };
+    return `<span class="gm-tag seal" title="처치하면 업적 ${nx}개째">🏆 업적${what ? ` → ${esc(what)}` : ''}</span>`; };
   // 🎁 머리 위 보상 줄 (처치 순간 · 차례로 하나씩 떠올라 8초 머묾 · 팝업 위로)
   function headRewards(host) {
     if (!host) return () => {};
@@ -180,7 +180,7 @@ DS.Bonus = (function () {
           ${isNew ? '<span class="cs-rnew">NEW</span>' : ''}${!open && r.boss && !sealed ? sealTag() : ''}<span class="cs-no">${r.id.slice(1)}</span>${open ? DS.Art.monster(m.sprite, rr.clear ? 'down' : 'idle') : '<i class="cs-lockic">🔒</i>'}
           <span class="cs-rt">${esc(r.title.replace(/^👑 /, '').replace(/^\d+ /, ''))}</span><span class="cs-rs">${sub}</span>${gift}${open && !rr.clear && !gLog(`room_${L.id}_${r.id}`) ? gTag((r.boss ? DS.Gem.G.roomBoss : DS.Gem.G.room) + (r.boss && !sealed ? DS.Gem.G.seal : 0)) : ''}${open && r.boss && !rr.clear && !sealed ? sealTag() : ''}</button>`;
       };
-      return `<div class="panel framed cs-floor${sealed ? ' sealed' : ''}"><p class="bn-h"><b>${f.floor}층 · ${esc(f.title)}</b><span class="muted small">처치 ${S.rooms.filter((r) => roomRec(mine, L, r.id).clear).length} / ${S.rooms.length} · 열린 방 ${S.rooms.filter((r) => S.isOpen(r)).length}</span>${sealed ? '<span class="bn-stamp">🟪 인장</span>' : ''}${all() ? (fOpen ? '<span class="cs-lk on">🔓 학생에게 열림</span>' : '<span class="cs-lk">🔒 학생에게 잠김</span>') : ''}${lockBtn}</p>
+      return `<div class="panel framed cs-floor${sealed ? ' sealed' : ''}"><p class="bn-h"><b>${f.floor}층 · ${esc(f.title)}</b><span class="muted small">처치 ${S.rooms.filter((r) => roomRec(mine, L, r.id).clear).length} / ${S.rooms.length} · 열린 방 ${S.rooms.filter((r) => S.isOpen(r)).length}</span>${sealed ? '<span class="bn-stamp">🏆 업적</span>' : ''}${all() ? (fOpen ? '<span class="cs-lk on">🔓 학생에게 열림</span>' : '<span class="cs-lk">🔒 학생에게 잠김</span>') : ''}${lockBtn}</p>
         <div class="cs-rooms">${S.rooms.map(tile).join('')}</div></div>`;
     };
     // 🌀 층 고르기 (2026-11-06 사용자 「중단원 · 대단원을 쭉 나열하지 말고 맨 위 포털 메뉴 → 그 층 몬스터만」)
@@ -188,13 +188,13 @@ DS.Bonus = (function () {
       const L = castleOf(f.id), on = selFloor() === f.id, lk = !floorIsOpen(f.id) && !all();
       const S = L ? roomsState(L, mine, no, all()) : null, done = S ? S.rooms.filter((r) => roomRec(mine, L, r.id).clear).length : 0;
       const nNew = L && !lk ? S.rooms.filter((r) => fresh.has(`${L.id}/${r.id}`)).length : 0;
-      return `<button class="cs-portal${on ? ' on' : ''}${lk || !L ? ' lock' : ''}${sl.includes(f.id) ? ' sealed' : ''}" data-floor="${f.id}"><i class="cs-pt-ic">${lk || !L ? '🔒' : '🌀'}</i><b>${f.floor}층</b><span>${esc(f.title)}</span><em>${!L ? '준비 중' : lk ? '잠김' : `처치 ${done} / ${S.rooms.length}`}${sl.includes(f.id) ? ' · 🟪' : ''}</em>${nNew ? `<span class="cs-rnew">NEW ${nNew}</span>` : ''}</button>`;
+      return `<button class="cs-portal${on ? ' on' : ''}${lk || !L ? ' lock' : ''}${sl.includes(f.id) ? ' sealed' : ''}" data-floor="${f.id}"><i class="cs-pt-ic">${lk || !L ? '🔒' : '🌀'}</i><b>${f.floor}층</b><span>${esc(f.title)}</span><em>${!L ? '준비 중' : lk ? '잠김' : `처치 ${done} / ${S.rooms.length}`}${sl.includes(f.id) ? ' · 🏆' : ''}</em>${nNew ? `<span class="cs-rnew">NEW ${nNew}</span>` : ''}</button>`;
     };
     const nextFx = UNLOCK.findIndex((u) => sl.length < u);
-    $('#bonus').innerHTML = `<div class="bn-top"><button class="btn small" id="bn-back">≪ ${preview ? '교사 캠프' : '내 캠프'}</button><b>🏰 성채던전</b><span class="bn-seal">🟪 인장 ${sl.length}개</span></div>
+    $('#bonus').innerHTML = `<div class="bn-top"><button class="btn small" id="bn-back">≪ ${preview ? '교사 캠프' : '내 캠프'}</button><b>🏰 성채던전</b><span class="bn-seal">🏆 업적 ${sl.length}개</span></div>
       <div class="cs-hero" style="background-image:url('${A.base}${(A.citadel || {}).boss || ''}')"><p>교과서 단원 평가를 숫자만 바꾼 문제 · <b>방 하나에 몬스터 한 마리</b><br><span class="small">순서 없이 아무 방이나 · 그 차시 진도를 나가면 방이 열려요 · 👑 보스 방은 열린 방의 ${BOSS_PCT}%를 처치하면!</span></p></div>
-      <p class="bn-fx">✨ 화려한 이펙트: ${nextFx < 0 ? '모두 열렸어요!' : `인장 <b>${UNLOCK[nextFx]}개</b>가 되면 「${esc(DS.FX.NAMES[DS.FX.FANCY[nextFx]])}」이 열려요 (지금 ${sl.length}개 · 🎯 허수아비에서 형성평가 재대결 · 🏰 보스 방을 처치하면 인장)`}</p>
-      ${gemD ? `<p class="gm-line">💎 방을 처음 처치하면 <b>+${DS.Gem.G.room}</b> · 👑 보스 방 <b>+${DS.Gem.G.roomBoss}</b> + 🟪 인장 <b>+${DS.Gem.G.seal}</b>${gLog('firstcastle') ? '' : ` · 🎁 첫 방은 <b>+${DS.Gem.G.first}</b> 더!`}${gDayFull() ? ' <span class="muted small">(오늘 한도 30 이 찼어요 — 인장 💎 은 한도 밖)</span>' : ''}</p>` : ''}
+      <p class="bn-fx">✨ 화려한 이펙트: ${nextFx < 0 ? '모두 열렸어요!' : `업적 <b>${UNLOCK[nextFx]}개</b>가 되면 「${esc(DS.FX.NAMES[DS.FX.FANCY[nextFx]])}」이 열려요 (지금 ${sl.length}개 · 🎯 허수아비에서 형성평가 재대결 · 🏰 보스 방을 처치하면 업적)`}</p>
+      ${gemD ? `<p class="gm-line">💎 방을 처음 처치하면 <b>+${DS.Gem.G.room}</b> · 👑 보스 방 <b>+${DS.Gem.G.roomBoss}</b> + 🏆 업적 <b>+${DS.Gem.G.seal}</b>${gLog('firstcastle') ? '' : ` · 🎁 첫 방은 <b>+${DS.Gem.G.first}</b> 더!`}${gDayFull() ? ' <span class="muted small">(오늘 한도 30 이 찼어요 — 업적 💎 은 한도 밖)</span>' : ''}</p>` : ''}
       <div class="cs-portals">${FLOORS.map(portal).join('')}</div>
       ${floor(FLOORS.find((f) => f.id === selFloor()) || FLOORS[0])}`;
     bindFight();
@@ -226,7 +226,7 @@ DS.Bonus = (function () {
       const ids = [...fieldIds(l), 'boss'];
       const stOf = (id) => (id === 'boss' || x.none ? null : x.mons[x.ids.indexOf(id)]);
       const order = ids.slice().sort((a, b) => { const o = (id) => { const s = stOf(id); return s && (DS.Note.OPEN[s] || s === 'a') ? 0 : id === 'boss' ? 1 : 2; }; return o(a) - o(b); });
-      return `<div class="panel framed bn-card${sealed ? ' sealed' : ''}${x.left ? ' nt-left' : ''}"><p class="bn-h"><b>🎯 복습! ${l.no}차시 · ${esc(l.title)}</b>${x.none ? '' : x.left ? `<span class="nt-cnt">❗ 남은 문제 ${x.left}</span>${!gLog(`note_${l.id}`) ? gTag(DS.Gem.G.note, ' 다 풀면') : ''}` : '<span class="nt-cnt ok">✔ 복습 완료</span>'}${sealed ? '<span class="bn-stamp">🟪 인장</span>' : ''}</p>
+      return `<div class="panel framed bn-card${sealed ? ' sealed' : ''}${x.left ? ' nt-left' : ''}"><p class="bn-h"><b>🎯 복습! ${l.no}차시 · ${esc(l.title)}</b>${x.none ? '' : x.left ? `<span class="nt-cnt">❗ 남은 문제 ${x.left}</span>${!gLog(`note_${l.id}`) ? gTag(DS.Gem.G.note, ' 다 풀면') : ''}` : '<span class="nt-cnt ok">✔ 복습 완료</span>'}${sealed ? '<span class="bn-stamp">🏆 업적</span>' : ''}</p>
         ${x.none ? '' : DS.Note.rows(x)}
         <div class="bn-list">${order.map((id) => { const s = stOf(id), r = rec[id] || {}, m = monOf(l, id), need = s && (DS.Note.OPEN[s] || s === 'a'), bossNeed = id === 'boss' && !r.clear;
           return `<div class="bn-row${need ? ' nt-open' : r.clear || (s && !need) ? ' clear' : ''}${id === 'boss' ? ' boss' : ''}">${s ? DS.Note.icon(s) : DS.Art.monster(m.sprite, r.clear ? 'down' : 'idle')}<span>${need ? '<b class="nt-ex">❗</b> ' : ''}${esc(m.title)}${s ? ` <span class="muted small">· ${esc(DS.Note.WHY[s] || '')}</span>` : bossNeed ? '' : ''}${(() => { const t = (need && gReviewLeft() ? gTag(DS.Gem.G.review) : bossNeed && !gLog(`bossre_${l.id}`) ? gTag(DS.Gem.G.bossRe + (sealed ? 0 : DS.Gem.G.seal)) : '') + (bossNeed && !sealed ? sealTag() : ''); return t ? `<em class="gm-wrap">${t}</em>` : ''; })()}</span><button class="btn small${need || bossNeed ? ' primary' : ''}" data-fight="${l.id}|${id}">${need ? (s === 'x' ? '⚔ 다시 풀기' : '⚔ 풀기') : r.clear ? '✔ 다시 하기' : id === 'boss' ? '👑 재대결' : '🎯 연습'}</button></div>`; }).join('')}</div></div>`;
@@ -235,9 +235,9 @@ DS.Bonus = (function () {
     if (rift && rdone && me && !all()) riftDone();
     $('#bonus').innerHTML = rift ? `<div class="bn-top"><button class="btn small" id="bn-back">≪ 내 캠프</button><b>⏳ ${rift.no}차시 이어하기</b><span class="bn-seal">D-${rdays}</span></div>
       <div class="rift-head${rdone ? ' done' : ''}"><p>${rdone ? '✔ <b>이어하기 완주!</b> 끝까지 해낸 용사예요.' : `수업 시간이 모자라 멈춘 던전이에요. <b>남은 몬스터 · 👑 형성평가</b>를 ${rdays}일 안에 마저 해요. 완주하면 보상!`}</p><span class="muted small">📚 못 본 개념은 ⛺ 텐트 책장에서 다시 볼 수 있어요 · 기한이 지나도 🎯 허수아비에서 계속 풀 수 있어요 (벌 없음)</span></div>
-      ${open.map(card).join('')}` : `<div class="bn-top"><button class="btn small" id="bn-back">≪ ${preview ? '교사 캠프' : '내 캠프'}</button><b>🎯 복습 허수아비</b><span class="bn-seal">🟪 인장 ${sl.length}개</span></div>
-      <p class="bn-fx">배운 차시의 <b>수업 문제를 숫자만 바꿔</b> 다시 풀어요. 틀림 · 안 푼 문제를 맞히면 📕 오답노트에 <b>복습 완료</b>! 👑 형성평가 재대결을 처치하면 🟪 인장.</p>
-      ${gemD ? `<p class="gm-line">💎 틀림 · 안 푼 문제를 맞히면 <b>+${DS.Gem.G.review}</b> (오늘 <b>${gReviewLeft()}</b>번 남음) · 👑 재대결 <b>+${DS.Gem.G.bossRe}</b> + 🟪 인장 <b>+${DS.Gem.G.seal}</b> · 📕 차시 복습 완료 <b>+${DS.Gem.G.note}</b>${gLog('firstreview') ? '' : ` · 🎁 첫 복습 <b>+${DS.Gem.G.first}</b> 더!`}</p>` : ''}
+      ${open.map(card).join('')}` : `<div class="bn-top"><button class="btn small" id="bn-back">≪ ${preview ? '교사 캠프' : '내 캠프'}</button><b>🎯 복습 허수아비</b><span class="bn-seal">🏆 업적 ${sl.length}개</span></div>
+      <p class="bn-fx">배운 차시의 <b>수업 문제를 숫자만 바꿔</b> 다시 풀어요. 틀림 · 안 푼 문제를 맞히면 📕 오답노트에 <b>복습 완료</b>! 👑 형성평가 재대결을 처치하면 🏆 업적.</p>
+      ${gemD ? `<p class="gm-line">💎 틀림 · 안 푼 문제를 맞히면 <b>+${DS.Gem.G.review}</b> (오늘 <b>${gReviewLeft()}</b>번 남음) · 👑 재대결 <b>+${DS.Gem.G.bossRe}</b> + 🏆 업적 <b>+${DS.Gem.G.seal}</b> · 📕 차시 복습 완료 <b>+${DS.Gem.G.note}</b>${gLog('firstreview') ? '' : ` · 🎁 첫 복습 <b>+${DS.Gem.G.first}</b> 더!`}</p>` : ''}
       ${open.length ? open.map(card).join('') : '<div class="panel framed"><p class="muted">선생님이 우리 반 수업을 열면 그 차시를 복습할 수 있어요.</p></div>'}`;
     bindFight();
   }
@@ -373,7 +373,7 @@ DS.Bonus = (function () {
       const xp = !clearedBefore && !preview ? DS.Grow.XP.bonusClear + (sealed ? DS.Grow.XP.seal : 0) : 0;
       if (DS.Grow && xp) DS.Grow.add(me, { bonusClear: 1, seal: sealed ? 1 : 0 }).catch(() => {});
       const fx = sealed ? DS.FX.FANCY.find((k, i) => seals(mine).length === UNLOCK[i]) : null;
-      const act = draw('', `<p class="okc"><b>🎉 처치!</b>${sealed ? ` <b class="gold">🟪 ${castle ? `성채 ${L.floor || 1}층` : `${L.no}차시`} 인장을 얻었어요!</b>` : ''}${fx ? `<br>✨ 화려한 이펙트 「${esc(DS.FX.NAMES[fx])}」이 열렸어요! 💎 상점에서 바꿀 수 있어요` : ''}</p>`);
+      const act = draw('', `<p class="okc"><b>🎉 처치!</b>${sealed ? ` <b class="gold">🏆 ${castle ? `성채 ${L.floor || 1}층` : `${L.no}차시`} 업적을 달성했어요!</b>` : ''}${fx ? `<br>✨ 화려한 이펙트 「${esc(DS.FX.NAMES[fx])}」이 열렸어요! 💎 상점에서 바꿀 수 있어요` : ''}</p>`);
       act.innerHTML = `<button class="btn primary" id="bf-out">${castle ? '성채 방 목록으로' : '허수아비로'}</button>`;
       act.querySelector('#bf-out').onclick = () => { el.remove(); render(); };
       // 🎁 받은 보상 = 내 용사 머리 위에 줄줄이 (2026-11-05 사용자: 팝업에 가릴 수 있어 오래 · 8초)
@@ -388,15 +388,15 @@ DS.Bonus = (function () {
         if (!castle && mid !== 'boss' && wasOpen && DS.Usage) DS.Usage.bump(me, 'f'); // 📈 오답 고침
         if (!castle && mid !== 'boss' && wasOpen) { const g = await DS.Gem.addDaily(me, G.review, 'review', G.reviewDay, '복습으로 해결').catch(() => 0); if (g) show(`💎 +${g} 복습으로 해결`, 'gem'); }
         if (photoWin) { await gm(G.photo || 3, `photo_${L.id}_${mid}`, '📷 서술형 통과'); await scrollWin(L.id, mid, photoWin, show); photoWin = null; }
-        if (sealed) await gm(G.seal, `seal_${L.id}`, '🟪 인장', { free: true });
+        if (sealed) await gm(G.seal, `seal_${L.id}`, '🏆 업적', { free: true });
         if (!castle) { const x = noteOf(L); if (!x.none && x.left === 0) await gm(G.note, `note_${L.id}`, '오답노트 완성'); }
       }
-      if (sealed) show(`🟪 인장 ${seals(mine).length}개째!`, 'seal');
+      if (sealed) show(`🏆 업적 ${seals(mine).length}개째!`, 'seal');
       if (fx) show(`✨ ${DS.FX.NAMES[fx]} 열림`, 'seal');
       if (sealed && seals(mine).length === 3) show('🧑 용사 금발 검사 열림', 'seal');
     };
     if (photoRoom && rec.ans && !rec.clear && rec.ans.seed) { cur = itemsOf(L, mid, rec.ans.seed, rec.ans.attempt || 0); solved.fill(true); return photoStage(cur, false); } // 📷 답은 이미 맞힘 → 같은 숫자로 사진 단계
-    const act = draw('', `<p>${castle ? (first ? '교과서 단원 평가를 숫자만 바꾼 문제예요. 서술형은 풀이를 학습지에 써요.' : '다시 들어오면 새 숫자로 나와요.') : mid === 'boss' ? (first ? '수업 때 형성평가 문제 그대로예요. 처치하면 🟪 인장!' : '세트를 바꿔 다시 도전해요.') : '📕 수업 때 문제를 숫자만 바꿨어요. 모두 맞히면 오답노트에 복습 완료!'} 기회 ${TRIES}번 — 틀린 소문제만 다시 풀어요.</p>`);
+    const act = draw('', `<p>${castle ? (first ? '교과서 단원 평가를 숫자만 바꾼 문제예요. 서술형은 풀이를 학습지에 써요.' : '다시 들어오면 새 숫자로 나와요.') : mid === 'boss' ? (first ? '수업 때 형성평가 문제 그대로예요. 처치하면 🏆 업적!' : '세트를 바꿔 다시 도전해요.') : '📕 수업 때 문제를 숫자만 바꿨어요. 모두 맞히면 오답노트에 복습 완료!'} 기회 ${TRIES}번 — 틀린 소문제만 다시 풀어요.</p>`);
     act.innerHTML = '<button class="btn primary big" id="bf-go">⚔ 전투 시작</button>';
     act.querySelector('#bf-go').onclick = () => round();
   }

@@ -39,13 +39,15 @@ DS.Gem = (function () {
   };
   // 상점 (조각으로 해금) · 업적 전용(도감 · 첫 레이드 · 인장 3개 · 놀이 메달)은 여기 없음
   const SHOP = {
-    hero: { 12: 30, 13: 30, 14: 60, 15: 60, 21: 30, 22: 30, 18: 60, 23: 60 }, // 2026-11-07 새 용사: 메카닉 · 해커 💎30 · 흑기사 · 용기사 💎60 · 수식 책사 남 · 여(19 · 20)는 📷 서술형 사진 통과로 (PHOTO_HEROES)
+    hero: { 8: 60, 10: 60, 11: 60, 12: 30, 13: 30, 14: 60, 15: 60, 21: 30, 22: 30, 18: 60, 23: 60 }, // 2026-11-07 새 용사: 메카닉 · 해커 💎30 · 흑기사 · 용기사 💎60 · 수식 책사 남 · 여(19 · 20)는 📷 서술형 사진 통과로 (PHOTO_HEROES)
     fx: { fire: 40, lightning: 40, ice: 40, stars: 60, slash: 60, vortex: 80, // Ⅲ 화려 (인장으로도)
       moon: 20, ring: 20, chain: 20, spikes: 20, mana: 20, crit: 20, // Ⅱ 숙련 (2026-11-06)
       twin: 80, pillar: 80, thunder: 80, nova: 80, meteor: 80, void: 80, // Ⅳ 전설 = 같은 계열 Ⅲ 이 있어야 (account.js need) · 2026-11-06: 💎120 → 💎80 + 📜3
       upper: 20, sweep: 20, hammer: 60, spin: 60, quake: 80, reap: 80,
       gale: 20, leaf: 60, cyclone: 80, compass: 20, venn: 60, qed: 80 }, // 🌬 바람 (2026-11-06) // 🔨 강타 · 🌪 연격 (2026-11-06 · Ⅲ 은 인장 없이 💎60)
   };
+  // 📚 도감 특전 용사 (2026-11-07 사용자 「모루 💎」): 성기사 8 · 무희 10 · 음유시인 11 = 💎 60 으로 먼저 열 수 있음 → 그 도감 카드를 다 모으면 💎 60 돌려받음 · 되팔기 불가
+  const CARD_HEROES = [8, 10, 11];
   const itemKey = (kind, id) => `${kind}_${id}`;
   const price = (kind, id) => (SHOP[kind] || {})[id] ?? null;
   // 📜 서술 조각 (2026-11-06): 서술형 사진 채점에서만 · 전설 Ⅳ · 강화 +7~ 에 함께 듦
@@ -149,6 +151,7 @@ DS.Gem = (function () {
   const refundOf = (kind, id, d) => { const paid = -Number(((((d || {}).log || {})[`buy_${itemKey(kind, id)}`]) || {}).g) || price(kind, id); return paid == null ? 0 : Math.floor(paid * REFUND); }; // 산 값 기준 (값이 바뀌어도) · 📜 는 돌려주지 않음
   async function sell(m, kind, id) {
     const p = price(kind, id), d = await mine(m), key = itemKey(kind, id);
+    if (kind === 'hero' && CARD_HEROES.includes(Number(id))) throw Object.assign(new Error('도감 특전 용사는 되팔 수 없어요 — 카드를 다 모으면 💎 를 돌려받아요.'), { user: true });
     if (p == null || !(d.buy || {})[key]) throw Object.assign(new Error('상점에서 산 것만 되팔 수 있어요.'), { user: true });
     const back = refundOf(kind, id, d);
     await N().update(path(m), { total: (Number(d.total) || 0) + back, [`buy/${key}`]: null, [`log/sell_${key}_${Date.now()}`]: { g: back, at: N().TS, why: '되팔기 (70%)' } });
@@ -180,11 +183,41 @@ DS.Gem = (function () {
     const r = !ctx.force && used >= C.day ? null : DS.Combo.chestRoll(`${ctx.code}|${ctx.uid}|${ctx.mid}`, !!ctx.streak3, !!ctx.force || pity);
     const patch = { 'chest/cur': cur, 'chest/got': got || !!r, 'chest/dry': r ? 0 : dry, [`chest/log/${k}`]: r ? r.tier : 'none' };
     if (r && !ctx.force) patch[`chest/day/${day}`] = used + 1;
-    if (r && r.feather) patch.feather = (Number(d.feather) || 0) + r.feather;
+    if (r && r.rare) patch.rare = (Number(d.rare) || 0) + r.rare;
     await N().update(path(m), patch);
-    if (r && r.gem) await add(m, r.gem, `chest_${ctx.code}_${ctx.mid}`, `🎁 ${r.name} 상자`, { free: !!ctx.force });
-    return r ? { ...r, pity, feathers: (Number(d.feather) || 0) + (r.feather || 0) } : null;
+    if (r && r.gem) await add(m, r.gem, `chest_${ctx.code}_${ctx.mid}`, `🎁 ${r.name} 상자`, { free: !!ctx.force || !!r.rare });
+    return r ? { ...r, pity, rares: rareOf(d) + (r.rare || 0) } : null;
   }
-  const feathers = (d) => Number((d || {}).feather) || 0;
-  return { PHOTO_HEROES, photoPassed, SCROLL_NEED, scrollOf, ENH, ENH_MAX, GREAT, enhTier, addScroll, enhance, watchGifts, giftList, chest, feathers, G, SHOP, DAY_CAP, price, mine, add, gift, giftsSince, addDaily, medal, buy, sell, refundOf, REFUND, owns, itemKey, streak, today };
+  // 🌟 황금 날개 업적 = 🎁 영웅 · 전설 상자 5번 (전환 전 🪶 깃털 수 + 전환 뒤 rare)
+  const rareOf = (d) => (d && d.conv ? 0 : Number((d || {}).feather) || 0) + (Number((d || {}).rare) || 0);
+  const feathers = rareOf; // 예전 이름
+  // 🔁 화폐 전환 (2026-11-07 사용자 「1 이번」 + 「전환 전 인장 · 깃털 수를 기록으로 남기기 (누가 몇 개였는지 · 💎로 바뀐 양) → 분석 때 그대로」)
+  //   학생 계정마다 한 번 (캠프 · 내 용사 창을 열 때) · gem/{반}/{번호}/conv = 그대로 남는 기록 (옛 feather 값도 지우지 않음)
+  //   🪶 깃털 1 = 💎 10 · ⚒ 이미 만든 카드 중 💎 를 못 받은 카드 1장 = 💎 3 → 📮 우편함(선물 기록)으로
+  const CONV = { v: '2026-11-07', feather: 10, card: 3 };
+  async function convert(m, info = {}) {
+    if (!m || m.c == null || !m.n || m.test || m.teacher) return null;
+    const d = await mine(m); if (d.conv) return null;
+    const fe = Number(d.feather) || 0, log = d.log || {};
+    const cards = Object.keys(info.cards || {}).filter((id) => (info.cards || {})[id]);
+    const unpaid = cards.filter((id) => !log[kk(`card_${id}`)]);
+    const fg = fe * CONV.feather, cg = unpaid.length * CONV.card, g = fg + cg, tot = Number(d.total) || 0;
+    const rec = { v: CONV.v, at: N().TS, seals: Number(info.seals) || 0, feather: fe, featherGem: fg, cards: cards.length, cardsUnpaid: unpaid.length, cardGem: cg, gemBefore: tot, gemAfter: tot + g };
+    const patch = { conv: rec, rare: (Number(d.rare) || 0) + fe };
+    if (g) Object.assign(patch, { total: tot + g, earned: (Number(d.earned) || 0) + g });
+    if (fg) patch['log/conv_feather'] = { g: fg, at: N().TS, why: `🪶 깃털 ${fe}개 → 💎`, gift: true };
+    if (cg) patch['log/conv_card'] = { g: cg, at: N().TS, why: `⚒ 만든 카드 ${unpaid.length}장 💎`, gift: true };
+    await N().update(path(m), patch);
+    return rec;
+  }
+  // 📚 도감 특전 용사를 💎 로 먼저 연 뒤 카드를 다 모으면 → 산 값 돌려받기 (한 번 · 📮 우편함)
+  async function cardRefund(m, id) {
+    if (!m || m.c == null || !m.n || m.test || m.teacher) return 0;
+    const d = await mine(m), key = itemKey('hero', id), log = d.log || {};
+    if (!(d.buy || {})[key] || log[`refund_${key}`]) return 0;
+    const back = -Number((log[`buy_${key}`] || {}).g) || price('hero', id) || 0; if (!back) return 0;
+    await N().update(path(m), { total: (Number(d.total) || 0) + back, [`log/refund_${key}`]: { g: back, at: N().TS, why: '📚 도감 완성 → 💎 돌려받음', gift: true } });
+    return back;
+  }
+  return { PHOTO_HEROES, photoPassed, SCROLL_NEED, scrollOf, ENH, ENH_MAX, GREAT, enhTier, addScroll, enhance, watchGifts, giftList, chest, feathers, rareOf, convert, CONV, cardRefund, CARD_HEROES, G, SHOP, DAY_CAP, price, mine, add, gift, giftsSince, addDaily, medal, buy, sell, refundOf, REFUND, owns, itemKey, streak, today };
 })();

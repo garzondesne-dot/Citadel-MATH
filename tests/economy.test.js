@@ -6,7 +6,8 @@ global.window = global; global.DS = { Net: {} }; require('../js/raid/gem.js');
 const G = DS.Gem.G, SHOP = DS.Gem.SHOP;
 // 기말까지 콘텐츠 (2026-11-06 기준 추정): 레이드 2~10차시 = 9 · 성채 40방 (일반 37 · 보스 3) · 서술형 7 · 카드 약 67장 · 약 35일
 const C = { lessons: 9, rooms: 37, bossRooms: 3, photoRooms: 7, cards: 67, fixes: 27 };
-const shop = Object.values(SHOP).reduce((a, k) => a + Object.values(k).reduce((b, v) => b + v, 0), 0);
+// 📚 도감 특전 용사(CARD_HEROES)는 카드를 다 모으면 💎 를 돌려받으므로 상점 합계에서 뺌 (2026-11-07)
+const shop = Object.entries(SHOP).reduce((a, [kind, k]) => a + Object.entries(k).reduce((b, [id, v]) => b + (kind === 'hero' && DS.Gem.CARD_HEROES.includes(Number(id)) ? 0 : v), 0), 0);
 // 갈래별 적립 (f = 하는 비율)
 function earn(f) {
   const skill = C.lessons * (f.solved * G.solvedMax + f.perfect * G.perfect + f.perfect * G.bossPerfect + f.boss * G.bossRe) + C.rooms * f.rooms * f.first * G.roomFirst + C.photoRooms * f.photo * G.photo; // 🧠 실력
