@@ -98,6 +98,13 @@ function week(d) {
   }
   return { week: best ? best.out : {}, n: best ? best.n : 0, how: best ? `${best.key} · ${best.mode} · 분리 ${sep}` : '', teacher: ids.map((i) => `${i}:${T[i]}`).join(',') };
 }
+// 실패 때는 PATCH: 마지막으로 성공한 시간표(ok · week)는 그대로 두고 실패 기록(failAt · err)만 덧붙임 (2026-11-07: 실패가 시간표 스위치를 지우던 것)
+async function patch(path, val) {
+  if (DRY) { console.log('[dry] PATCH', path, JSON.stringify(val).slice(0, 300)); return; }
+  const tok = await firebaseToken();
+  const r = await fetch(`${DB}/${path}.json`, { method: 'PATCH', headers: { Authorization: `Bearer ${tok}`, 'content-type': 'application/json' }, body: JSON.stringify(val), signal: AbortSignal.timeout(60000) });
+  if (!r.ok) throw new Error(`Firebase ${path} → ${r.status} ${await r.text()}`);
+}
 async function put(path, val) {
   if (DRY) { console.log('[dry] PUT', path, JSON.stringify(val).slice(0, 300)); return; }
   const tok = await firebaseToken();
@@ -116,7 +123,7 @@ async function put(path, val) {
     await put('sched/comci', { at, ok: true, n: w.n, how: w.how, week: w.week, ...(RAW ? { raw: JSON.stringify(d).slice(0, 900000) } : {}) });
   } catch (e) {
     console.error('❌', e.message);
-    await put('sched/comci', { at, ok: false, err: String(e.message).slice(0, 300), ...(e.keys ? { keys: e.keys } : {}), ...(e.snip ? { snip: e.snip } : {}), ...(d && (RAW || e.keys) ? { raw: JSON.stringify(d).slice(0, 900000) } : {}) }).catch((x) => console.error('Firebase 기록 실패', x.message));
+    await patch('sched/comci', { failAt: at, err: String(e.message).slice(0, 300), keys: null, snip: null, ...(e.keys ? { keys: e.keys } : {}), ...(e.snip ? { snip: e.snip } : {}), ...(d && (RAW || e.keys) ? { raw: JSON.stringify(d).slice(0, 900000) } : {}) }).catch((x) => console.error('Firebase 기록 실패', x.message));
     process.exit(1);
   }
 })();

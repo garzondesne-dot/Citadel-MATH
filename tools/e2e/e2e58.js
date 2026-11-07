@@ -7,12 +7,12 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   const T = await mk('T');
   await T.goto(U + '&role=teacher'); await T.waitForTimeout(1200);
   await T.fill('#f-teacher .t-id', 'e2e-teacher'); await T.fill('#f-teacher .t-pw', '909090'); await T.click('#f-teacher .t-login'); await T.waitForTimeout(1200);
-  const att = await T.$('#a-go'), stuRow = (await T.textContent('.t-stu-row')).replace(/\s+/g, ' ');
+  const att = await T.$('#a-go'), stuRow = (await T.textContent('.mk-grid')).replace(/\s+/g, ' ');
   await T.click('#s-go'); await T.waitForTimeout(500); await T.fill('#r-cls', '1-3'); await T.fill('#r-text', '1 김민준\n2 이서연'); await T.click('#r-up'); await T.waitForTimeout(800);
   await T.evaluate(() => DS.Scene.clear()); await T.goto(U + '&role=teacher'); await T.waitForTimeout(2500);
   if (await T.isVisible('#splash')) { await T.click('#splash'); await T.waitForTimeout(800); }
   await T.screenshot({ path: `${OUT}/0-teacher.png` });
-  await T.fill('#t-hallpw', '2580'); await T.click('#t-hallpw-save'); await T.waitForTimeout(600);
+  await T.evaluate(() => { document.querySelector('#t-set').open = true; }); await T.fill('#t-hallpw', '2580'); await T.click('#t-hallpw-save'); await T.waitForTimeout(600);
   const pw = await T.evaluate(() => DS.Net.get('tcfg/hallPw'));
   const r1 = await T.evaluate(async () => { const c = await DS.Act.createRoom('set-04', '1-3', { noLimit: true }); return { code: c.code, key: c.hallKey }; });
   log.push(`비밀번호 고정 ${pw} → 수업 ${r1.code} 키 ${r1.key} · 출석부 버튼 ${att ? '있음' : '없음'} · 학생 관리 「${stuRow}」`);
@@ -21,7 +21,7 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   await H.goto(U + '&role=hall'); await H.waitForTimeout(2500);
   const found = await H.evaluate(() => ({ list: (document.querySelector('#h-find') || {}).textContent || '', code: document.querySelector('#h-code').value }));
   await H.screenshot({ path: `${OUT}/1-hall-find.png` });
-  await H.fill('#h-key', '2580'); await H.click('#h-go'); await H.waitForTimeout(3000);
+  await H.fill((await H.$('#h-key2')) ? '#h-key2' : '#h-key', '2580'); await H.click('#h-go'); await H.waitForTimeout(3000);
   const in1 = await H.evaluate(() => (document.querySelector('.screen.active') || {}).id);
   log.push(`종합상황실 찾기: 「${found.list.replace(/\s+/g, ' ').slice(0, 60)}」 · 코드 칸 ${found.code} · 입장 뒤 화면 ${in1}`);
   // 수업 끝 → 다음 수업 만들기 → 종합상황실 캠프가 저절로 새 수업으로

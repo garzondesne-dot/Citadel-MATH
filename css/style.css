@@ -2470,3 +2470,34 @@ body:not(:has(#screen-home.active, #screen-splash.active, #screen-camp.active, .
 .me-next { margin: 0 0 10px; color: var(--muted); font-size: 12.5px; }
 .set-box .set-foot { position: sticky; bottom: -1px; margin: 10px -4px -4px; padding: 8px 4px; background: linear-gradient(transparent, var(--panel) 30%); display: flex; justify-content: flex-end; z-index: 3; } .set-box .set-foot .btn { margin: 0 !important; min-width: 140px; }
 .set-box .set-tabs { display: grid !important; grid-template-columns: repeat(4, 1fr) !important; gap: 4px !important; } .set-box .set-tabs button { min-width: 0 !important; padding-left: 2px !important; padding-right: 2px !important; font-size: 13px !important; white-space: nowrap; margin: 0 !important; }
+
+/* ── 🧹 5판 메뉴 3탭 정돈 (2026-11-07 최종 정돈판 ⑦) ───────────────── */
+#mode, .brand-ver { display: none !important; }
+.mk-chip { align-self: center; display: block; margin: 0 auto 8px; font: inherit; font-size: 12px; padding: 4px 12px; border-radius: 14px; border: 1px solid var(--line); color: var(--muted); background: rgba(20,16,13,.7); cursor: pointer; }
+.mk-card { display: flex; flex-direction: column; gap: 8px; padding: 10px 2px 12px; border-bottom: 1px solid #3a3026; }
+.mk-card:last-child { border-bottom: none; }
+.mk-h { margin: 0; font-size: 15px; color: var(--gold); }
+.mk-open { display: grid; grid-template-columns: 1fr 1.4fr auto; gap: 6px; align-items: end; }
+.mk-open label { display: flex; flex-direction: column; font-size: 12px; color: var(--muted); min-width: 0; }
+.mk-open select { width: 100%; min-width: 0; }
+.mk-open .btn { margin: 0 !important; white-space: nowrap; }
+.mk-pl { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); } .mk-pl select { flex: 1; min-width: 0; }
+.mk-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.mk-grid .btn { position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; margin: 0 !important; padding: 8px 2px !important; font-size: 12.5px; min-height: 62px; justify-content: center; }
+.mk-grid .btn i { font-style: normal; font-size: 20px; line-height: 1.1; }
+.mk-bd { position: absolute; top: 3px; right: 5px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9px; background: #e5534b; color: #fff; font-size: 11px; display: flex; align-items: center; justify-content: center; }
+.mk-more > summary, .mk-set > summary { cursor: pointer; color: var(--muted); font-size: 13px; padding: 6px 2px; list-style: none; display: flex; justify-content: space-between; }
+.mk-more > summary::after, .mk-set > summary::after { content: '▾'; }
+.mk-more[open] > summary::after, .mk-set[open] > summary::after { content: '▴'; }
+.mk-more > summary::-webkit-details-marker, .mk-set > summary::-webkit-details-marker { display: none; }
+.mk-set { gap: 6px; }
+.mk-wel { display: flex; align-items: center; gap: 10px; justify-content: center; }
+.mk-wel p { margin: 0; font-size: 17px; } .mk-wel small { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; }
+.mk-wel .hero-sprite, .mk-wel > *:first-child { flex: none; }
+.mk-link { display: block; margin: 6px auto 0; background: none; border: 0; color: var(--muted); text-decoration: underline; font: inherit; font-size: 13px; padding: 4px; cursor: pointer; }
+.mk-live { display: flex; flex-direction: column; gap: 3px; align-items: center; text-align: center; padding: 12px; border-radius: 10px; border: 2px solid var(--gold); background: var(--panel2); cursor: pointer; }
+.mk-live b { font-size: 20px; color: var(--gold); } .mk-live .code { font-size: 15px; color: var(--text); letter-spacing: 2px; }
+.mk-key { display: flex; align-items: center; gap: 8px; justify-content: center; margin: 8px 0 2px; font-size: 13px; } .mk-key input { width: 7em; text-align: center; }
+.mk-c { text-align: center; }
+.home-emblem, .home-props img[src*="banner"] { display: none !important; } /* 가운데 장식 빼고 아래 소품만 */
+.mk-open { grid-template-columns: 1fr 1.6fr; } .mk-open .btn { grid-column: 1 / -1; }

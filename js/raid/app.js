@@ -108,10 +108,13 @@ DS.App = (function () {
     const rooms = await DS.Act.openRooms();
     if (!onHome()) return; // 그 사이 입장했으면 그만
     const L = (id) => DS.Lessons.get(id);
-    box.innerHTML = rooms.length ? `<p class="shelf-title">🔎 지금 열린 수업</p><div class="h-find-list">${rooms.map((r, i) => `<button class="btn${i === 0 ? ' on' : ''}" data-hc="${r.code}"><b>${esc(r.cls)}반</b> ${r.no ? `${r.no}차시` : ''} <span class="muted small">${esc(L(r.lesson) ? L(r.lesson).title : '')}${r.sched ? ' · 예약' : ''}</span></button>`).join('')}</div><p class="muted small">고른 수업에 비밀번호만 넣고 열어요</p>`
+    // 2026-11-07 메뉴 정돈: 「지금 열린 수업」 카드 하나를 크게 · 다른 수업은 아래 작은 단추
+    const big = (r) => `<div class="mk-live" data-hc="${r.code}"><span class="muted small">지금 열린 수업</span><b>${esc(r.cls)}반${r.no ? ` · ${r.no}차시` : ''}</b><span>${esc(L(r.lesson) ? L(r.lesson).title : '')}${r.sched ? ' · 예약' : ''}</span><small>수업 코드 <b class="code">${r.code}</b></small></div>`;
+    box.innerHTML = rooms.length ? `${big(rooms[0])}${rooms.length > 1 ? `<div class="h-find-list">${rooms.slice(1).map((r) => `<button class="btn small" data-hc="${r.code}"><b>${esc(r.cls)}반</b> ${r.no ? `${r.no}차시` : ''}</button>`).join('')}</div>` : ''}<label class="mk-key">종합상황실 키 <input id="h-key2" class="masked" type="text" inputmode="numeric" maxlength="4" autocomplete="off" data-1p-ignore data-lpignore="true" placeholder="••••"></label>`
       : '<p class="muted small">🔎 열린 수업을 찾는 중… 교사 폰에서 수업을 만들면 여기에 저절로 나타나요 (아래에 코드를 직접 넣어도 돼요)</p>';
     const pickCode = (c) => { $('#h-code').value = c; box.querySelectorAll('[data-hc]').forEach((b) => b.classList.toggle('on', b.dataset.hc === c)); };
-    box.querySelectorAll('[data-hc]').forEach((b) => (b.onclick = () => { pickCode(b.dataset.hc); $('#h-key').focus(); }));
+    box.querySelectorAll('[data-hc]').forEach((b) => (b.onclick = () => { pickCode(b.dataset.hc); const k = $('#h-key2') || $('#h-key'); k.focus(); }));
+    const k2 = $('#h-key2'); if (k2) { k2.value = $('#h-key').value; k2.oninput = () => { $('#h-key').value = k2.value; }; }
     if (rooms.length) {
       pickCode(rooms[0].code);
       const key = $('#h-key').value.trim(); // 이번에 직접 넣은 비밀번호만 (저장된 비밀번호로 저절로 들어가지 않음)
@@ -138,10 +141,10 @@ DS.App = (function () {
     const m = await A().me();
     if (m) {
       hero = m.hero;
-      box.innerHTML = `<div class="acc-card"><b>${esc(m.c)} · ${m.n}번 ${esc(m.name)}</b><span class="muted small">로그인됨</span></div>
-        <div class="me-hero">${DS.Art.hero(m.hero, 'idle', 'big huff')}<div><p class="gold">내 용사 · ${DS.FX.NAMES[m.fx] || ''}</p><p class="muted small">내 캠프 💎 상점에서 바꿀 수 있어요</p></div></div>
-        <button id="s-go" class="btn primary big">🏕 내 캠프로 가기</button>
-        <button id="s-out" class="btn small">다른 사람으로 로그인</button>`;
+      // 2026-11-07 메뉴 정돈: 한 번 로그인한 폰 = 「▶ ○반 ○번 이름으로 계속」 단추 하나
+      box.innerHTML = `<div class="mk-wel">${DS.Art.hero(m.hero, 'idle', 'huff')}<p>다시 오셨네요!<small>이 폰에서 마지막으로 들어온 계정</small></p></div>
+        <button id="s-go" class="btn primary big">▶ ${esc(m.c)}반 ${m.n}번 ${esc(m.name)}으로 계속</button>
+        <button id="s-out" class="mk-link">다른 학생이에요 ▾</button>`;
       $('#s-go').onclick = go(() => DS.Camp.enter(m, q.get('code')));
       $('#s-out').onclick = go(async () => { await A().logout(); studentAuth(); });
       return;
@@ -236,7 +239,8 @@ DS.App = (function () {
     if (ok && DS.Att) DS.Att.today($('#t-today')).catch((e) => console.warn('오늘 수업', e)); // 📅 v0.9.7.0: 예약 수업 7일 치 채우기 + 오늘 목록
     if (ok) DS.Net.get('tcfg/hallPw').then((v) => { const el = $('#t-hallpw'); if (el && v) el.value = v; }).catch(() => {}); // 🖥 고정 비밀번호 (있으면)
     if (ok) {
-      document.querySelectorAll('.t-auth').forEach((e) => { e.innerHTML = '<div class="acc-card"><b>👩‍🏫 교사 계정</b><span class="muted small">로그인됨</span><button class="btn small t-out">로그아웃</button></div>'; });
+      document.querySelectorAll('.t-auth').forEach((e) => { e.innerHTML = ''; }); // 2026-11-07 메뉴 정돈: 로그아웃은 ⚙ 설정 안으로
+      document.querySelectorAll('.t-auth-out').forEach((e) => { e.innerHTML = '<div class="acc-card"><b>👩‍🏫 교사 계정</b><span class="muted small">로그인됨</span><button class="btn small t-out">로그아웃</button></div>'; });
       document.querySelectorAll('.t-out').forEach((b) => (b.onclick = go(async () => { await A().logout(); await teacherAuth(); await studentAuth(); })));
       const cs = Object.keys((await A().masks()) || {}).sort();
       $('#t-cls').innerHTML = cs.length ? cs.map((c) => `<option>${esc(c)}</option>`).join('') : '<option value="">(명단 없음 — 수업 준비에서 올려요)</option>';
@@ -317,11 +321,12 @@ DS.App = (function () {
     $('#p-go').onclick = go(async () => DS.Prep.enter($('#p-lesson').value));
     $('#s-go').onclick = go(async () => DS.Students.enter());
     $('#d-go').onclick = go(async () => DS.Dash.enter());
-    $('#fb-go').onclick = go(async () => { await DS.Feedback.teacher(); $('#fb-go').textContent = '💬 학생 의견'; }); // 💬 2026-11-06
+    $('#fb-go').onclick = go(async () => { await DS.Feedback.teacher(); $('#fb-bd').hidden = true; }); // 💬 2026-11-06
+    $('#t-sched').onclick = go(async () => { if (DS.Att) DS.Att.editor(() => DS.Att.today($('#t-today')).catch(() => {})); }); // 📅 2026-11-07 메뉴 정돈: 준비 · 관리 칸
     $('#ph-go').onclick = go(() => DS.Photo.settings());
     $('#sv-go').onclick = go(() => DS.Survey.panel()); // 📝 2026-11-06 설문 수동 열기 (차시 번호 선생님이 고름) // 📷 2026-11-06 사진 채점 설정 (결과 확인은 📊 대시보드 「📷 서술형」)
     if (DS.Photo) Promise.all([DS.Photo.pending().catch(() => 0), DS.Photo.usage().catch(() => null)]).then(([n, u]) => { const b = $('#ph-go'); if (b && (n || (u && u.warn))) b.innerHTML = `📷 사진 채점${u && u.warn ? ' <b class="fb-badge" title="사용량 경고">⚠</b>' : ''}${n ? ` <b class="fb-badge">${n}</b>` : ''}`; }).catch(() => {}); // 확인할 것 수 · ⚠ 사용량 경고
-    DS.Feedback.unread().then((n) => { const b = $('#fb-go'); if (b && n) b.innerHTML = `💬 학생 의견 <b class="fb-badge">${n}</b>`; }).catch(() => {});
+    DS.Feedback.unread().then((n) => { const b = $('#fb-bd'); if (b && n) { b.textContent = n; b.hidden = false; } }).catch(() => {});
     $('#t-camp').onclick = go(async () => { const t = read('citadel-teacher'); let code = '', key = ''; if (t && t.code && t.uid === DS.Net.uid()) { const st = await DS.Net.get(`rooms/${t.code}/state`).catch(() => null); if (st && !st.closed) { code = t.code; key = t.hallKey || ''; } } return DS.TCamp.enter({ code, hallKey: key }); });
     // 🖥 종합상황실 비밀번호 고정 (2026-11-05 사용자): tcfg/hallPw (교사만 읽고 씀) · 비우면 수업마다 무작위
     $('#t-hallpw-save').onclick = go(async () => {
