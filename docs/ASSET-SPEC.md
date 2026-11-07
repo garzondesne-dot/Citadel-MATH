@@ -308,6 +308,7 @@ Order (left to right, top to bottom):
 - 한 번에 하나씩 뽑아 마음에 드는 것만 올린다. 지금 그림은 참고용 묶음(`assets-v1-참고.zip`)을 AI 에 함께 넣으면 콘셉트가 이어진다.
 
 ### 6-10. ⭕ OX 퀴즈 배경 (2026-11-06 · 사용자 「퀴즈 배경 퀄리티 높이고 싶어 · 코드 말고 에셋으로」 · 템플릿 `assets/templates/fun/tpl-ox-bg.png` · 지금 모습 `now-ox-hall.png`)
+**✅ 2026-11-07 도착 · 넣음 (v0.9.17.1)**: 사용자 6장 = 배경 2 (`fun-ox-pit-v1` 양옆 낭떠러지 → ⭕ 수학 OX 서바이벌 · `fun-ox-safe-v1` 바닥이 다 있음 → ⭕ OX 타임(탈락 없음)) + 발판 4 (`fun-ox-o-v1` · `fun-ox-x-v1` · 무너지는 `fun-ox-o-break-v1` · `fun-ox-x-break-v1` — 같은 724×543 캔버스라 겹쳐 바꿈). 틀린 쪽: 흔들림 → 무너지는 그림 → 통째로 아래로 · 용사 떨어짐. `assets/manifest.js` `fun.bgOx · bgQuiz · ox`.
 쓰는 곳: 쉼터 ⭕ 수학 OX · 수업 중 ⭕ OX 타임 (종합실 큰 화면 + 학생 폰 작은 창). 지금은 밸런스 게임 배경(`fun-arena-v1`)을 얼음빛으로 바꿔 씀 → 이 그림이 오면 `assets/manifest.js` `fun.bgOx: 'fun-ox-v1.webp'` 한 줄만 바꾸면 됨 (코드 수정 없음).
 | 항목 | 값 |
 |---|---|

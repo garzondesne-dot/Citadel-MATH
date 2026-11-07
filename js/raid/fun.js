@@ -189,7 +189,11 @@ DS.Fun = (function () {
   const nameOf = (R, u) => (R.players[u] || {}).nick || '';
   const heroOf = (R, u) => DS.Art.hero((R.players[u] || {}).hero || 0, 'idle', 'small');
   // 무대 그림: 종류마다 (rev = 침대 숙소 그림이 오기 전엔 CSS · ox = 다리 그림을 얼음빛으로)
-  const bgOf = (kind) => (kind === 'rev' ? A().bgRev : kind === 'ox' || kind === 'quiz' ? A().bgOx || A().bg : A().bg) || null;
+  const bgOf = (kind) => (kind === 'rev' ? A().bgRev : kind === 'quiz' ? A().bgQuiz || A().bgOx || A().bg : kind === 'ox' ? A().bgOx || A().bg : A().bg) || null;
+  // ⭕ OX 전용 발판 그림 (2026-11-07): 서바이벌 = ⭕ · ❌ 발판이 낭떠러지 위에 · 틀린 쪽은 무너지는 그림으로 바뀌고 아래로 / OX 타임 = 바닥이 다 있는 배경(발판 그림 없음)
+  const oxArt = (kind) => !!(A().ox && (kind === 'ox' || kind === 'quiz'));
+  const oxImg = (side, broken) => `url('${DS.ASSETS.base}${A().ox[side + (broken ? 'Break' : '')]}')`;
+  const platAt = (kind, side) => (oxArt(kind) ? (kind === 'ox' ? ` style="background-image:${oxImg(side)}"` : '') : platStyle());
   const platStyle = () => (A().plat ? ` style="background-image:url('${DS.ASSETS.base}${A().plat}')${A().platFrames > 1 ? `;background-size:${A().platFrames * 100}% auto;background-position:0 0` : ''}"` : ''); // 발판 그림 2칸 = 멀쩡 · 금 감 (2026-11-05)
   const left = (f) => Math.max(0, Math.round((f.to - N().now()) / 1000));
   if (typeof document !== 'undefined') setInterval(() => document.querySelectorAll('[data-fun-end]').forEach((e) => { e.textContent = Math.max(0, Math.round((Number(e.dataset.funEnd) - N().now()) / 1000)); }), 250);
@@ -208,11 +212,11 @@ DS.Fun = (function () {
     const gal = spect.slice(0, big ? 24 : 10).map((u, i) => `<div class="fa-g${u === me ? ' me' : ''}" style="left:${4 + (i * (92 / Math.max(1, Math.min(spect.length, big ? 24 : 10))))}%">${heroOf(R, u)}</div>`).join('');
     const lose = show ? res.lose : '';
     const kind = f.kind || 'bal', bg = bgOf(kind), spring = kind === 'rev' ? '<i class="fa-spring"></i>' : '';
-    return `<div class="fa-arena k-${kind}${big ? ' big' : ''}${bg || kind === 'rev' ? ' img' : ''}${A().plat ? ' pimg' : ''}">${bg ? `<i class="fa-bg" style="background-image:url('${DS.ASSETS.base}${bg}')"></i>` : kind === 'rev' ? '<i class="fa-bg dorm"></i>' : ''}
+    return `<div class="fa-arena k-${kind}${big ? ' big' : ''}${bg || kind === 'rev' ? ' img' : ''}${oxArt(kind) ? ' oxart' : A().plat ? ' pimg' : ''}">${bg ? `<i class="fa-bg" style="background-image:url('${DS.ASSETS.base}${bg}')"></i>` : kind === 'rev' ? '<i class="fa-bg dorm"></i>' : ''}
       <div class="fa-gal">${gal}${spect.length ? `<span class="fa-gn">👀 관객 ${spect.length}</span>` : ''}</div>
       <div class="fa-pit l"></div><div class="fa-pit r"></div>
-      ${f.rps ? `<div class="fa-rps">${show ? `<p>선생님</p><b>${HAND_EMO[res.hand] || '❔'}</b><em>${HAND_KO[res.hand] || ''}</em>` : '<p>선생님 손은…</p><b class="spin">✊✌️✋</b><em>바위 · 가위 · 보</em>'}</div>` : `<div class="fa-plat a${lose === 'a' ? ' doom' : ''}"${platStyle()}><i class="fa-flag">${kind === 'ox' || kind === 'quiz' ? '⭕' : esc(f.q[0])}</i>${show ? `<em class="fa-cnt">${res.a.length}</em>` : ''}${spring}</div>
-      <div class="fa-plat b${lose === 'b' ? ' doom' : ''}"${platStyle()}><i class="fa-flag">${kind === 'ox' || kind === 'quiz' ? '❌' : esc(f.q[1])}</i>${show ? `<em class="fa-cnt">${res.b.length}</em>` : ''}${spring}</div>`}
+      ${f.rps ? `<div class="fa-rps">${show ? `<p>선생님</p><b>${HAND_EMO[res.hand] || '❔'}</b><em>${HAND_KO[res.hand] || ''}</em>` : '<p>선생님 손은…</p><b class="spin">✊✌️✋</b><em>바위 · 가위 · 보</em>'}</div>` : `<div class="fa-plat a${lose === 'a' ? ' doom' : ''}"${platAt(kind, 'a')}><i class="fa-flag">${kind === 'ox' || kind === 'quiz' ? '⭕' : esc(f.q[0])}</i>${show ? `<em class="fa-cnt">${res.a.length}</em>` : ''}${spring}</div>
+      <div class="fa-plat b${lose === 'b' ? ' doom' : ''}"${platAt(kind, 'b')}><i class="fa-flag">${kind === 'ox' || kind === 'quiz' ? '❌' : esc(f.q[1])}</i>${show ? `<em class="fa-cnt">${res.b.length}</em>` : ''}${spring}</div>`}
       <div class="fa-plaza"></div>${plaza}${kind === 'rev' ? board(f) : ''}</div>`;
   }
   // 🔄 생존자 전광판 (그림의 아치 위 검은 판) · 안내 방송 자막 (판 시작 때 한 글자씩)
@@ -230,7 +234,7 @@ DS.Fun = (function () {
       root.querySelectorAll('.fa-h[data-go]').forEach((h) => {
         const u = h.dataset.u, side = h.dataset.go;
         if (side === 'n') { h.classList.add('fa-lost'); return; }
-        const i = go[side].indexOf(u), s = spot(i, go[side].length, side === 'a' ? 2 : 81, side === 'a' ? 19 : 98, rev ? 50 : 46, cols); // 발판 위 (그림 v1: 양옆 허공 위 떠 있는 발판)
+        const i = go[side].indexOf(u), ox = oxArt(f.kind), s = ox ? spot(i, go[side].length, side === 'a' ? 7 : 75, side === 'a' ? 25 : 93, 47, cols) : spot(i, go[side].length, side === 'a' ? 2 : 81, side === 'a' ? 19 : 98, rev ? 50 : 46, cols); // ⭕ OX 발판 그림: 발판 윗면 위 // 발판 위 (그림 v1: 양옆 허공 위 떠 있는 발판)
         h.style.left = `${s.x}%`; h.style.top = `${s.y}%`; h.classList.add(side === 'a' ? 'run-l' : 'run-r');
       });
       if (DS.Sound && DS.Sound.card) DS.Sound.card();
@@ -241,12 +245,13 @@ DS.Fun = (function () {
     }, 1900);
     // 💥 바닥 꺼짐 (2026-11-05 사용자): 금이 감 → 발판이 조각조각 무너짐 → 용사가 빙글 떨어짐 · 먼지 · 흔들림 (폰은 내 쪽이면 진동)
     if (res.lose && f.kind !== 'quiz') setTimeout(() => {
-      const plat = root.querySelector(`.fa-plat.${res.lose}`); if (plat) { const c = document.createElement('i'); c.className = 'fa-crack'; plat.appendChild(c); if (A().platFrames > 1) plat.style.backgroundPosition = '100% 0'; } // 그림이 있으면 금 간 칸으로
+      const plat = root.querySelector(`.fa-plat.${res.lose}`); if (plat && oxArt(f.kind)) plat.style.backgroundImage = oxImg(res.lose, true); /* ⭕ OX: 무너지는 발판 그림으로 */ else if (plat) { const c = document.createElement('i'); c.className = 'fa-crack'; plat.appendChild(c); if (A().platFrames > 1) plat.style.backgroundPosition = '100% 0'; } // 그림이 있으면 금 간 칸으로
       if (DS.Sound && DS.Sound.clank) DS.Sound.clank();
     }, 2000);
     if (res.lose && f.kind !== 'quiz') setTimeout(() => {
       const plat = root.querySelector(`.fa-plat.${res.lose}`);
-      if (plat) {
+      if (plat && oxArt(f.kind)) { plat.classList.add('ox-drop'); const dust = document.createElement('i'); dust.className = 'fa-dust'; plat.appendChild(dust); } // ⭕ OX: 무너진 발판이 통째로 떨어짐
+      else if (plat) {
         const n = 6, bg = getComputedStyle(plat).backgroundImage, F = A().platFrames > 1 ? A().platFrames : 1; // 조각도 금 간 칸(마지막 칸)에서 자름
         plat.classList.add('broken');
         for (let i = 0; i < n; i++) {
