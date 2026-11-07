@@ -2644,3 +2644,4 @@ body:not(:has(#test-tv)) #screen-student.st-battle > .wrap { padding-top: 0 !imp
 .fg-cw { position: relative; display: inline-block; } .fg-g3 { position: absolute; right: 2px; bottom: 4px; font-style: normal; font-size: 11px; font-weight: 700; padding: 0 5px; border-radius: 8px; background: rgba(16,12,9,.85); color: var(--cyan); }
 .fg-gem3 { color: var(--cyan); font-size: 16px; }
 .rs-forge { margin: 8px 0; padding: 8px; border-radius: 9px; border: 1.5px solid #b08d57; background: #1f1a16; font-size: 14px; } .rs-forge b { color: var(--gold); }
+.h-words-box { top: auto !important; right: auto !important; left: 18px; bottom: 18px; max-height: 42vh; width: 300px; } /* 마지막 한마디 = 왼쪽 아래 (학급 결과 단추를 가리지 않게) */
