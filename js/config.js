@@ -15,8 +15,9 @@ if (typeof location !== 'undefined' && /[?&]trial(=|&|$)/.test(location.search))
   const mem = () => { const m = new Map(); return { getItem: (k) => (m.has(String(k)) ? m.get(String(k)) : null), setItem: (k, v) => { m.set(String(k), String(v)); }, removeItem: (k) => { m.delete(String(k)); }, clear: () => m.clear(), key: (i) => Array.from(m.keys())[i] ?? null, get length() { return m.size; } }; };
   try { Object.defineProperty(window, 'localStorage', { value: mem(), configurable: true }); Object.defineProperty(window, 'sessionStorage', { value: mem(), configurable: true }); } catch (e) { /* 못 바꾸면 그대로 */ }
   DS.TRIAL = { lesson: 'set-06', lessons: ['set-06'], castle: 'eval-1', rooms: ['q04', 'q07'], cls: '체험' };
+  { const ln = document.querySelector('link[rel="manifest"]'); if (ln) ln.setAttribute('href', 'manifest-trial.webmanifest'); } // 📲 체험판 링크에서 「앱 설치」 = 체험판 앱 (시작 주소 ?trial · 이름 「던전 체험판」 · 실제 게임 앱과 따로)
 }
-DS.VERSION = 'citadel-0.9.16.0';
+DS.VERSION = 'citadel-0.9.16.1';
 DS.AUTHOR = '김찬우'; // 개발자 (2026-11-03 사용자 요청: 모든 화면 · 첫 화면에 새김)
 // 버전 꼬리표 (2026-11-03): 어느 화면에서든 왼쪽 아래 구석에 작게 — 학생 · 교사 · 전광판 화면에서 업데이트 됐는지 바로 확인
 if (typeof document !== 'undefined') {
