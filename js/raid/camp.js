@@ -81,8 +81,8 @@ DS.Camp = (function () {
   const TUT_B = [
     ['#camp-castle', '🏰 성채던전', '교과서 <b>단원 평가 문제</b>가 방마다 몬스터 한 마리씩 기다려요. 그 차시 진도를 나가면 방이 열리고(🆕 파란 배지), 👑 보스 방은 열린 방의 60%를 처치하면 열려요!'],
     ['#camp-dummy', '🎯 복습 허수아비', '배운 차시를 <b>복습</b>해요. 수업 문제를 숫자만 바꿔 다시 풀고, 틀림 · 안 푼 문제를 맞히면 📕 오답노트에 복습 완료! 👑 형성평가 재대결을 처치하면 🏆 업적.'],
-    ['#camp-tent', '⛺ 텐트 · 책장', '텐트 안 책장에서 차시별 🎬 <b>개념 영상</b>과 📄 <b>학습지 개념</b>을 다시 볼 수 있어요.'],
-    ['#camp-mail', '📮 우편함', '내 <b>수업 결과</b>와 <b>복습 노트</b>가 도착해요. 틀린 문제를 다시 확인해요.'],
+    ['#camp-tent', '⛺ 출제 공방', '배운 문제 틀로 <b>내가 문제를 만들어</b> 친구들 복습에 내요. 선생님이 확인하면 출제!'],
+    ['#camp-mail', '📮 우편함', '<b>선생님 소식</b>(선물 · 공지 · 답장)이 오고, 편지 · 설문 · 친구 선물을 <b>보내는</b> 곳이에요.'],
     ['#camp-anvil', '⚒ 모루', '수업에서 배운 개념으로 <b>카드를 만드는 대장간</b>이에요. 수업이 없을 때 여기서만 열려요.'],
   ];
   function tutClear() {
@@ -156,7 +156,7 @@ DS.Camp = (function () {
       ${stampToday() ? '<div class="stamp-bar">📮 반드시 학습지 확인도장 받아가세요.</div>' : ''}
       <div class="camp-stage cs-v2" style="background-image:url('${base()}${c.bg}');aspect-ratio:${c.size[0]} / ${c.size[1]}">
         ${S.layers()}
-        ${S.zone('camp-castle', 'castle', '🏰 성채던전')}${S.zone('camp-tent', 'tent', '⛺ 텐트 · 책장')}
+        ${S.zone('camp-castle', 'castle', '🏰 성채던전')}${S.zone('camp-tent', 'tent', me.teacher ? '⛺ 텐트 · 책장' : '⛺ 출제 공방')}
         <button class="cs-zone camp-gate-z" id="camp-gate" style="${S.box(c.zones.gate)}" aria-label="차시 던전"><span class="camp-label">🔒 차시 던전</span></button>
         <button class="camp-anvil cs-int" id="camp-anvil" aria-label="모루">${sheet(c.anvil, c.anvil.states.idle, 0, 'camp-anvil-img')}<span class="camp-label">⚒ 모루</span></button>
         <div class="camp-fire"><i class="camp-glow"></i><i class="camp-glow g2"></i>${sheet(c.fire, 0, 0, 'camp-fire-img', '')}</div>
@@ -182,8 +182,8 @@ DS.Camp = (function () {
     $('#camp-code').onclick = codeGate;
     if (me.trial) { const cb = $('#camp-code'); if (cb) cb.hidden = true; } // 👩‍🏫 체험판: 코드 입장 필요 없음
     { const fb = $('#camp-fb'); if (fb) fb.onclick = () => DS.Feedback.open({ c: me.c, n: me.n, name: me.name }, { where: 'camp' }); } // 💬 2026-11-06 · 2026-11-07 캠프 위로
-    $('#camp-mail').onclick = () => pick('#camp-mail', () => { if (me.teacher) return DS.Control.run(() => DS.Dash.enter()); if (cues.mark) cues.mark('mail'); DS.Control.run(note); }); // 교사 = 📊 학급 대시보드
-    $('#camp-tent').onclick = () => (DS.CampScene.objOn(document.querySelector('#camp .camp-stage'), 'tent', true), pick('#camp-tent', () => { if (cues.mark) cues.mark('tent'); DS.Control.run(shelf); setTimeout(() => DS.CampScene.objOn(document.querySelector('#camp .camp-stage'), 'tent', false), 1500); }));
+    $('#camp-mail').onclick = () => pick('#camp-mail', () => { if (me.teacher) return DS.Control.run(() => DS.Dash.enter()); if (cues.mark) cues.mark('mail'); DS.Control.run(() => (DS.Mail && !me.test ? DS.Mail.open(me, { onClose: () => status() }) : note())); }); // 교사 = 📊 학급 대시보드 · 2026-11-07 6판: 우편함 = 소식 + 보내기 (오답노트는 🎯 허수아비로)
+    $('#camp-tent').onclick = () => (DS.CampScene.objOn(document.querySelector('#camp .camp-stage'), 'tent', true), pick('#camp-tent', () => { if (cues.mark) cues.mark('tent'); DS.Control.run(() => (DS.Quest && !me.teacher ? DS.Quest.open(me) : shelf())); setTimeout(() => DS.CampScene.objOn(document.querySelector('#camp .camp-stage'), 'tent', false), 1500); })); // ⛺ 텐트 = ✏ 출제 공방 (2026-11-07 6판 · 책장은 🎯 허수아비 차시 카드로)
     $('#camp-dummy').onclick = () => pick('#camp-dummy', () => DS.Control.run(() => DS.Bonus.enter(me, { train: true })));
     $('#camp-set').onclick = () => (me.teacher ? settings({ teacher: true, onSave: async (v) => { me.hero = v.hero; me.fx = v.fx; me.title = v.title; const t = me.teacher; if (t.code) { try { await DS.Net.set(`rooms/${t.code}/state/tlook`, { hero: v.hero, fx: v.fx, at: DS.Net.TS }).catch(() => {}); /* 2026-11-06: 종합상황실도 쓸 수 있는 칸 → 수업 화면이 이 모습을 먼저 씀 */ const R0 = await DS.Net.get(`rooms/${t.code}/meta`); if (R0 && R0.teacher === DS.Net.uid()) await DS.Net.update(`rooms/${t.code}/players/${R0.teacher}`, { hero: v.hero, fx: v.fx }); } catch (e) { /* 다음 수업부터 */ } } render(); drawGate(); } }) : settings({ buy: true }));
     if (me.teacher) { const cb = $('#camp-code'); if (cb) cb.hidden = true; }
@@ -280,8 +280,9 @@ DS.Camp = (function () {
     // 📕 오답노트 배지: 남은 문제(틀림 + 안 풂) 수는 📮 우편함 한 곳에만 (0 이면 금색 도장) · 🎯 허수아비엔 작은 점 (2026-11-05 정신없음 줄이기)
     if (DS.Note && !me.test) {
       const held = await DS.Net.get(`held/${k}`).catch(() => null), nt = DS.Note.all(rec || {}, bonus || {}, no, held);
-      const z = document.getElementById('camp-mail'); if (z) { const old = z.querySelector('.nt-badge'); if (old) old.remove(); if (nt.list.length) z.insertAdjacentHTML('beforeend', DS.Note.badge(nt.left)); }
-      const d = document.getElementById('camp-dummy'); if (d) d.classList.toggle('nt-dot', nt.left > 0);
+      // 2026-11-07 6판: 남은 복습 수 = 🎯 허수아비 위 · 📮 우편함 = 안 읽은 소식 수
+      const d = document.getElementById('camp-dummy'); if (d) { const old = d.querySelector('.nt-badge'); if (old) old.remove(); if (nt.list.length) d.insertAdjacentHTML('beforeend', DS.Note.badge(nt.left)); }
+      const z = document.getElementById('camp-mail'); if (z && DS.Mail) { const un = await DS.Mail.unread(me).catch(() => 0), old = z.querySelector('.ml-badge'); if (old) old.remove(); if (un) z.insertAdjacentHTML('beforeend', `<span class="ml-badge">${un}</span>`); }
     }
     // 🏰 성채던전 NEW (2026-11-05): 진도를 나가 새로 열린 방 수 → 파란 배지 · 늘었으면 한 번 안내
     if (DS.Bonus && !me.test) {
@@ -324,9 +325,9 @@ DS.Camp = (function () {
     return `<button class="camp-prop" id="camp-${id}" style="${pos}" aria-label="${label}">${src ? `<i class="camp-prop-img${two ? ' two' : ''}" style="background-image:url('${base()}${src}')"></i>` : `<i class="camp-prop-ic">${icon}</i>`}<span class="camp-label">${icon} ${label}</span></button>`;
   }
   // 📚 책장: 열린 차시의 개념별 🎬 설명 영상 · 📄 학습지 개념 (기말 대비 다시 보기)
-  async function shelf(all) { // all: 교사 캠프 — 모든 차시
+  async function shelf(all, only) { // all: 교사 캠프 — 모든 차시 · only: 그 차시만 (🎯 허수아비 차시 카드에서 · 2026-11-07)
     const no = all != null ? all : me.test ? 99 : Number(await DS.Net.get(`unlock/${ck(me.c)}`).catch(() => 0)) || 0;
-    const open = DS.Lessons.list.filter((l) => l.no && l.no <= no && (!DS.TRIAL || DS.TRIAL.lessons.includes(l.id))).sort((a, b) => b.no - a.no); // 👩‍🏫 체험판: 3차시만
+    const open = DS.Lessons.list.filter((l) => l.no && l.no <= no && (!only || l.id === only) && (!DS.TRIAL || DS.TRIAL.lessons.includes(l.id))).sort((a, b) => b.no - a.no); // 👩‍🏫 체험판: 3차시만
     const preps = {};
     for (const l of open) preps[l.id] = (await DS.Act.prepLite(l.id).catch(() => null)) || {};
     const el = document.createElement('div'); el.className = 'modal camp-modal';
@@ -527,5 +528,5 @@ DS.Camp = (function () {
     draw(); document.body.appendChild(el); if (tab !== 'ttl') demo();
   }
   const back = () => (me ? enter(me) : null);
-  return { teacher: () => !!(me && me.teacher), noteDemo, enter, back, settings, shelf: (all) => shelf(all), refresh: () => { if (document.getElementById('camp-forge')) status(); }, stampToday, markStamp: () => { try { localStorage.setItem('citadel-stamp', today()); } catch (e) { /* 무시 */ } } };
+  return { teacher: () => !!(me && me.teacher), noteDemo, enter, back, settings, shelf: (all, only) => shelf(all, only), refresh: () => { if (document.getElementById('camp-forge')) status(); }, stampToday, markStamp: () => { try { localStorage.setItem('citadel-stamp', today()); } catch (e) { /* 무시 */ } } };
 })();

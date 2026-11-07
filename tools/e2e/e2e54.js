@@ -23,7 +23,7 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
     await DS.Net.set('records/1-3/1/set-04', { at: 1, no: 4, mons: { r1: 'o', m1: 'x', m2: 'o', m3: 'f' }, bossM: 'ooxoo', boss: 4, bossN: 5, conc: {}, names: {} });
   });
   await S.evaluate(() => DS.Camp.back()); await S.waitForTimeout(2500);
-  const newB = (await S.textContent('#camp-castle .cs-newb').catch(() => '')).trim(), mailBadge = !!(await S.$('#camp-mail .nt-badge')), castleNt = !!(await S.$('#camp-castle .nt-badge')), dot = await S.evaluate(() => document.getElementById('camp-dummy').classList.contains('nt-dot'));
+  const newB = (await S.textContent('#camp-castle .cs-newb').catch(() => '')).trim(), mailBadge = !!(await S.$('#camp-dummy .nt-badge')) /* 2026-11-07 6판: 남은 복습 수 = 허수아비 위 */, castleNt = !!(await S.$('#camp-castle .nt-badge')), dot = !(await S.$('#camp-mail .nt-badge'));
   log.push(`캠프: 성채 ${newB} · 우편함 배지 ${mailBadge} · 성채 오답 배지 ${castleNt} · 허수아비 점 ${dot}`);
   await S.screenshot({ path: `${OUT}/1-camp.png` });
   // 🏰 성채던전
@@ -54,11 +54,11 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   await S.screenshot({ path: `${OUT}/4-boss-fight.png` });
   await S.click('#bf-x'); await S.waitForTimeout(400); await S.screenshot({ path: `${OUT}/5-castle-after.png`, fullPage: true });
   await S.click('#bn-back'); await S.waitForTimeout(1500);
-  // 📮 바로 풀기
-  await S.click('#camp-mail', { force: true }); await S.waitForTimeout(1500);
-  const goBtns = await S.evaluate(() => [...document.querySelectorAll('[data-go]')].map((b) => b.dataset.go));
+  // 🎯 바로 풀기 (2026-11-07 6판: 오답노트 = 복습 허수아비 · 맨 위 「남은 복습 ▶ 바로 풀기」)
+  await S.click('#camp-dummy', { force: true }); await S.waitForTimeout(1800);
+  const goBtns = await S.evaluate(() => [...document.querySelectorAll('.bn-todo [data-fight], .bn-card.nt-left [data-fight]')].map((b) => b.dataset.fight));
   await S.screenshot({ path: `${OUT}/6-mail.png`, fullPage: true });
-  await S.click('[data-go="set-04|m1"]'); await S.waitForTimeout(2200);
+  await S.click('.bn-todo [data-fight]'); await S.waitForTimeout(2200);
   const quick = await S.evaluate(() => ({ screen: document.getElementById('screen-bonus').classList.contains('active'), fight: !!document.querySelector('.bn-fight'), tag: (document.querySelector('.bn-fight .scene-bar') || {}).textContent || '' }));
   log.push('바로 풀기: ' + JSON.stringify({ goBtns, ...quick, tag: quick.tag.replace(/\s+/g, ' ').slice(0, 60) }));
   await S.screenshot({ path: `${OUT}/7-quick-fight.png` });

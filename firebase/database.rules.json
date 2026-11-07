@@ -437,6 +437,11 @@
       },
       "photo": {
         ".validate": "newData.hasChildren(['on']) && newData.child('on').isBoolean() && (!newData.child('url').exists() || (newData.child('url').isString() && newData.child('url').val().length <= 300))"
+      },
+      "giftOn": {
+        "$c": {
+          ".validate": "newData.isBoolean()"
+        }
       }
     },
     "tcfg": {
@@ -493,6 +498,56 @@
       "$c": {
         "$n": {
           ".read": "auth != null && root.child('accounts/'+$c+'/'+$n+'/uid').val() === auth.uid"
+        }
+      }
+    },
+    "notice": {
+      ".read": "auth != null",
+      "$c": {
+        ".write": "auth != null && root.child('admins/'+auth.uid).val() === true",
+        "$id": {
+          ".validate": "!newData.exists() || (newData.hasChildren(['t', 'at']) && newData.child('t').isString() && newData.child('t').val().length <= 300)"
+        }
+      }
+    },
+    "fbr": {
+      "$c": {
+        "$n": {
+          ".read": "auth != null && (root.child('accounts/'+$c+'/'+$n+'/uid').val() === auth.uid || root.child('admins/'+auth.uid).val() === true)",
+          ".write": "auth != null && root.child('admins/'+auth.uid).val() === true"
+        }
+      }
+    },
+    "fgift": {
+      "$c": {
+        ".read": "auth != null && root.child('admins/'+auth.uid).val() === true",
+        "$n": {
+          ".read": "auth != null",
+          "$id": {
+            ".write": "auth != null && ((!data.exists() && newData.child('fromUid').val() === auth.uid && root.child('gcfg/giftOn/'+$c).val() === true) || (data.exists() && root.child('accounts/'+$c+'/'+$n+'/uid').val() === auth.uid) || root.child('admins/'+auth.uid).val() === true)",
+            ".validate": "!newData.exists() || (newData.hasChildren(['from', 'g', 'at']) && newData.child('g').isNumber() && newData.child('g').val() >= 1 && newData.child('g').val() <= 10)"
+          }
+        }
+      }
+    },
+    "quest": {
+      ".read": "auth != null && root.child('admins/'+auth.uid).val() === true",
+      "$c": {
+        ".read": "auth != null",
+        "$id": {
+          ".write": "auth != null && (root.child('admins/'+auth.uid).val() === true || (newData.exists() && root.child('accounts/'+$c+'/'+newData.child('n').val()+'/uid').val() === auth.uid && newData.child('st').val() !== 'ok' && (!data.exists() || data.child('st').val() !== 'ok')))",
+          ".validate": "!newData.exists() || (newData.hasChildren(['n', 'lesson', 'mid', 'seed', 'st']) && newData.child('note').val().length <= 120)"
+        }
+      }
+    },
+    "qsolve": {
+      "$c": {
+        ".read": "auth != null",
+        "$id": {
+          "$n": {
+            ".write": "auth != null && (root.child('accounts/'+$c+'/'+$n+'/uid').val() === auth.uid || root.child('admins/'+auth.uid).val() === true)",
+            ".validate": "newData.val() === true || !newData.exists()"
+          }
         }
       }
     }

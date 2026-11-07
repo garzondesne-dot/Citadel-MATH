@@ -28,6 +28,7 @@ DS.Titles = (function () {
     { id: 'gambler', name: '쉼터의 승부사', tier: 'b', medal: ['rank', 4], cond: '🎖 쉼터 놀이 우승 메달 3개', test: (d) => Object.values(((d.gem || {}).medal) || {}).reduce((a, b) => a + (Number(b) || 0), 0) >= 3 },
     { id: 'oxsurv', name: 'OX 서바이버', tier: 'p', medal: ['rank', 6], cond: '🎖 수학 OX 우승 메달 3개', test: (d) => (Number((((d.gem || {}).medal) || {}).ox) || 0) >= 3 },
     { id: 'steady', name: '꾸준한 용사', tier: 'b', medal: ['rank', 2], cond: '🔁 10차시 연속 참여', test: (d) => Object.keys(((d.gem || {}).log) || {}).some((k) => k.startsWith('streak10_')) },
+    { id: 'quester', name: '출제자', tier: 'p', medal: ['rank', 3], cond: '✏ 출제 공방에서 만든 문제가 처음 출제됨', test: (d) => Object.keys(((d.gem || {}).log) || {}).some((k) => k.startsWith('quest_')) }, // 2026-11-07 6판
   ];
   // 던전 정복: 차시마다 그 던전 테마의 메달 (보스 격파 또는 형성평가 만점)
   function dungeonTitles() {

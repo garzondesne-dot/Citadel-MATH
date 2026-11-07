@@ -322,6 +322,9 @@ DS.App = (function () {
     $('#s-go').onclick = go(async () => DS.Students.enter());
     $('#d-go').onclick = go(async () => DS.Dash.enter());
     $('#fb-go').onclick = go(async () => { await DS.Feedback.teacher(); $('#fb-bd').hidden = true; }); // 💬 2026-11-06
+    $('#t-quest').onclick = go(async () => { await DS.Quest.review(); }); // ✏ 출제 확인 (2026-11-07 6판)
+    $('#t-mail').onclick = go(async () => { await DS.Mail.teacher(); }); // 📮 공지 · 🎁 친구 선물 켜기 (반별 · 처음엔 꺼짐)
+    DS.Quest.pendingCount().then((n) => { const b = $('#qs-bd'); if (b && n) { b.textContent = n; b.hidden = false; } }).catch(() => {});
     $('#t-sched').onclick = go(async () => { if (DS.Att) DS.Att.editor(() => DS.Att.today($('#t-today')).catch(() => {})); }); // 📅 2026-11-07 메뉴 정돈: 준비 · 관리 칸
     $('#ph-go').onclick = go(() => DS.Photo.settings());
     $('#sv-go').onclick = go(() => DS.Survey.panel()); // 📝 2026-11-06 설문 수동 열기 (차시 번호 선생님이 고름) // 📷 2026-11-06 사진 채점 설정 (결과 확인은 📊 대시보드 「📷 서술형」)
