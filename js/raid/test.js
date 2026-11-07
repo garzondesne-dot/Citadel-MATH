@@ -187,6 +187,7 @@ DS.Test = (function () {
   async function trialBoot() {
     const L0 = DS.Lessons.get(DS.TRIAL.lesson); trimLesson(L0);
     let pr = {}; try { pr = (await DS.Net.get(`prep/${L0.id}`)) || {}; } catch (e) { pr = {}; } // 학습지 개념 그림은 실제 서버에서 읽기만
+    try { if (DS.Net.impl && DS.Net.impl.offline) DS.Net.impl.offline(); } catch (e) { /* 무시 */ } // 🔌 읽은 뒤 바로 연결 끊기 (체험판은 끝까지 이 기기 메모리에서만)
     const sp = document.getElementById('splash'); if (!sp) return;
     // 첫 화면 (2026-11-07 사용자 「첫 화면에 용사랑 이름 적는 거 다시」): 그림 아래 이름 칸 + 앞줄 용사 6 중 하나 → ⚔ 모험 시작 → 내 캠프
     const HEROES = [0, 1, 2, 3, 4, 5]; let pick = 0;

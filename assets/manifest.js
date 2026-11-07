@@ -122,6 +122,7 @@ DS.ASSETS = {
     // 글 속 이모지 → 도트 아이콘 (DS.Art 가 화면에 그릴 때 저절로 바꿈 · ✕ ★ 🧪 등 표에 없는 것은 그대로)
     emoji: {"⚔": "sword", "⚙": "gear", "🔒": "lock", "🔓": "unlock", "✔": "ok", "✅": "ok", "❌": "ng", "📄": "sheet", "🎬": "video", "💡": "hint", "🔎": "mis", "📌": "pin", "📊": "dash", "👥": "students", "📋": "prep", "🏰": "castle", "⛺": "tent", "📮": "mail", "🎯": "dummy", "⚒": "anvil", "🔥": "flame", "🏕": "rest", "🚪": "gate", "👑": "boss", "🟪": "seal", "✨": "fx", "🏅": "medal", "🎁": "chest", "⭐": "star", "💚": "heal", "⏱": "timer", "🛡": "shield", "🧭": "compass", "🎮": "demo", "🔴": "focus", "💬": "talk", "🏫": "class", "⛶": "full", "↩": "retry", "⚡": "bolt", "🌈": "rainbow", "⛓": "chain", "🪶": "feather", "🦇": "bat", "💎": "gem", "🏆": "trophy", "🏁": "flag", "🙋": "hand", "🔁": "loop", "⏳": "hourglass", "🪵": "fire"},
     kit: { btn: 'ui-btn-v2.webp', press: 'ui-btn-press-v2.webp', off: 'ui-btn-off-v2.webp', gold: 'ui-btn-gold-v2.webp', goldPress: 'ui-btn-gold-press-v2.webp', tab: 'ui-tab-v2.webp', tabOn: 'ui-tab-on-v2.webp', input: 'ui-input-v2.webp', icbtn: 'ui-icbtn-v2.webp', slice: 12 },
+    paper: 'ui-paper-v1.webp', // 📜 다듬은 양피지 (2026-11-07 정돈판: ui-panels-v1 양피지 칸의 속지만 · 금테 없이) — 학생 문제지 · 시연 · 성채 · 허수아비
     panel: { src: 'ui-panel-v3.webp', slice: 13, w: 10 }, // 창 = 버튼과 같은 키트(아이콘 버튼 틀 · 안쪽만 더 어둡게) — 금장 테두리는 통일감 없어 안 씀 (사용자 2026-11-04)
     // 첫 화면: 엠블럼 + 소품 (폰 = 바닥 · 엠블럼 양옆 깃발 / PC = 양옆 깃발 · 바닥 — 횃불은 배경에 이미 있어 안 씀). 자리는 화면 % · 너비 px(폰은 390 기준 비율)
     home: { emblem: 'ui-emblem-v1.webp',
@@ -143,5 +144,5 @@ DS.ASSETS = {
     title: 'brand-m2-title-v3.webp', splash: { bg: 'brand-bg-v1.webp', logo: 'menu-logo-v1.webp' }, // 시작 화면 (2026-11-04): 로고 없는 배경 + 로고 따로 — 카메라 내려옴 · 로고 떨어짐
     header: 'menu-logo-v1.webp', logo: 'brand-m2-logo-v3.webp' },
   panels: { src: 'ui-panels-v1.webp', cols: 2, rows: 2, kinds: { inventory: 0, paper: 1, dialog: 2, reward: 3 } }, // 남색 인벤토리 · 양피지 문제지 · 청록 대화창 · 보라 보상창
-  fonts: { pixel: 'assets/fonts/Galmuri11.woff2', pixelBold: 'assets/fonts/Galmuri11-Bold.woff2' },
+  fonts: { pixel: 'assets/fonts/Galmuri11.woff2', pixelBold: 'assets/fonts/Galmuri11-Bold.woff2', gothic: 'assets/fonts/ds-gothic-400-v1.woff2', gothicBold: 'assets/fonts/ds-gothic-700-v1.woff2' }, // gothic = Noto Sans CJK KR 부분 글꼴 (2026-11-07 글꼴 A안: 읽고 계산하는 글자)
 };

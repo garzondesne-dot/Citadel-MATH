@@ -116,7 +116,8 @@ DS.Net = (function () {
         try { await firebase.auth().signOut(); } catch (e) { /* 무시 */ }
         uid = (await firebase.auth().signInAnonymously()).user.uid; return uid;
       },
-      async idToken() { const u = firebase.auth().currentUser; return u ? u.getIdToken() : null; }, // 📷 사진 채점 중계소가 학생을 확인 (2026-11-06)
+      async idToken() { const u = firebase.auth().currentUser; return u ? u.getIdToken() : null; },
+      offline() { try { if (db) db.goOffline(); } catch (e) { /* 무시 */ } }, // 👩‍🏫 체험판: 학습지 그림만 읽고 실제 서버 연결을 끊음 (동시 접속 100명 한도 · 2026-11-07) // 📷 사진 채점 중계소가 학생을 확인 (2026-11-06)
       now: () => Date.now() + offset,
       async get(p) { return (await db.ref(p).get()).val(); },
       set: (p, v) => db.ref(p).set(sv(v)),

@@ -11,7 +11,7 @@ DS.Nav = (function () {
   const current = () => { const id = (document.querySelector('.screen.active') || {}).id || 'screen-home'; return id === 'screen-splash' ? 'screen-home' : id; };
   const ASK = {
     'screen-camp': null,
-    'screen-student': '수업 화면에서 나갈까요?\n수업은 계속되고, 다시 들어오면 기록은 그대로예요.',
+    'screen-student': '수업에서 나갈까요?\n돌아오면 이어서 해요.', // 2026-11-07 정돈판: 전투 화면 ◀ 도 같은 확인 창
     'screen-teacher': null, // v0.9.2: 교사 메뉴로 (수업 중이면 끝낼지 한 번 묻는다)
     'screen-hall': '종합상황실을 닫고 첫 화면으로 갈까요?\n수업은 계속돼요.',
   };

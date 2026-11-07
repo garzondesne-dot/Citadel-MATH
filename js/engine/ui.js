@@ -7,7 +7,7 @@ DS.UI = {
   },
   // '1/2' 같은 분수를 세로 분수로, 줄바꿈은 <br>
   pretty(s) {
-    return DS.UI.esc(s).replace(/((?:\d*√)?\d+)\/(\d+)/g, '<span class="fr"><span>$1</span><span>$2</span></span>').replace(/\n/g, '<br>');
+    return DS.UI.esc(s).replace(/((?:\d*√)?\d+)\/(\d+)/g, '<span class="fr"><span>$1</span><span>$2</span></span>').replace(/ᶜ/g, '<sup class="cpl">C</sup>').replace(/\n/g, '<br>'); // ᶜ (여집합) = 보이는 것만 위첨자 C (글꼴에 ᶜ 가 없어서 · 채점은 원래 글자, 2026-11-07)
   },
   // 벤 다이어그램 그림 (이름, 원소 글자)
   venn(name, elems) {

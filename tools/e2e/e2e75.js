@@ -53,7 +53,7 @@ const OUT = process.argv[2] || '.', U = 'http://localhost:8765/trial/';
   let R = await room(); const friends = Object.values(R.players || {}).filter((x) => !x.teacher).length - 1;
   P(`④ 문제 1 · TV 레이드 ${raidTv} · 친구 ${friends}명`);
   // ⑨ ≪ 메뉴화면 (수업 중): → 내 캠프(TV 닫힘) → 아치 문으로 다시 들어가면 이어서
-  await shut(); await p.click('#screen-student .nav-back'); await p.waitForTimeout(2500);
+  await shut(); await p.click('#st-back'); await p.waitForTimeout(2500);
   const back = await p.evaluate(() => ({ scr: document.querySelector('.screen.active').id, tv: !!document.querySelector('#test-tv') }));
   await shut(); await p.click('#camp-gate'); await p.waitForTimeout(5000);
   const again = await p.evaluate(() => ({ scr: document.querySelector('.screen.active').id, tv: !!document.querySelector('#test-tv #screen-hall'), step: (document.querySelector('#test-bar .tb-step') || {}).textContent || '' }));
