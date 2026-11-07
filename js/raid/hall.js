@@ -169,12 +169,21 @@ DS.Hall = (function () {
     DS.Thrill.batHall($('#raid'), Raid().isClosed(R) ? null : b);
   }
   C().onTimeUp('hall', (now) => { if (!R || !L || !DS.Act.isHost(R) || !document.getElementById('screen-hall').classList.contains('active')) return; const d = Raid().deadline(R); if (d && now >= d && !Raid().isClosed(R)) DS.Act.timeUp(code, R, L).catch(() => {}); });
+  // 🧭 위 줄 「도입 · 개념 · 문제 · 형성」 (2026-11-07 최종 정돈판 ⑤): 지금 단계만 금색 + 그 종류 안에서 「1 / 5」 · 아래 얇은 진행 점(단계 하나 = 점 하나 · 형성평가는 긴 점)
+  const KIND4 = (st) => (st.kind === 'concept' ? '개념' : st.kind === 'monster' ? '문제' : st.kind === 'boss' ? '형성' : '도입');
+  function stepChips(i) {
+    const steps = L.steps, now = steps[i], kinds = ['도입', '개념', '문제', '형성'];
+    const chips = kinds.map((k) => { const same = steps.filter((x) => KIND4(x) === k); if (!same.length) return ''; const on = now && KIND4(now) === k; return `<i class="${on ? 'on' : ''}">${k}${on && same.length > 1 ? `<small>${same.indexOf(now) + 1} / ${same.length}</small>` : ''}</i>`; }).join('');
+    const dots = steps.map((x, k) => `<i class="${x.kind === 'boss' ? 'b ' : x.kind === 'concept' ? 'c ' : ''}${k < i || Raid().isClosed(R) ? 'd' : k === i ? 'on' : ''}"></i>`).join('');
+    return `<span class="h-stp">${Raid().isLobby(R) ? '<i class="on">대기실</i>' : Raid().isFinale(L, R) ? '<i class="on">마무리</i>' : chips}</span><span class="h-dots">${dots}</span>`;
+  }
   function render() {
     const i = R.state.step ?? -1;
-    $('#h-top').innerHTML = `<b>${esc(L.unit)} · ${esc(L.title)}</b><span>${esc(C().stepName(L, R))}</span><span class="muted">수업 코드 <b>${code}</b></span><button class="btn small" id="h-set">🧙 선생님 모습</button>${!Raid().isClosed(R) && !Raid().isLobby(R) ? '<button class="btn small" id="h-camp">🏕 캠프 보기</button>' : ''}${DS.UI.fs.btn('h-fs')}`; // ⚙ 던전 안에서도 선생님 모습 · 스킬 (2026-11-06)
+    $('#h-top').innerHTML = `<b>${esc(L.title)}</b>${stepChips(i)}<button class="h-code-chip" id="h-code-big" title="늦게 온 학생 · 다시 들어오는 학생용 — 누르면 크게">🚪 코드 <b>${code}</b></button><span class="h-sp"></span><button class="btn small" id="h-set">🧙 선생님 모습</button>${!Raid().isClosed(R) && !Raid().isLobby(R) ? '<button class="btn small" id="h-camp">🏕 캠프 보기</button>' : ''}${DS.UI.fs.btn('h-fs')}`; // ⚙ 던전 안에서도 선생님 모습 · 스킬 (2026-11-06)
+    { const cb = $('#h-code-big'); if (cb) cb.onclick = () => bigNote(`<p class="h-bigcode-t">🚪 수업 코드</p><b class="h-bigcode">${code}</b><p class="muted">학생 폰 → 내 캠프 → 🚪 코드로 입장</p>`, 6000, 'code'); }
     { const hc = $('#h-camp'); if (hc) hc.onclick = toCamp; } // 🏕 수업 중에도 캠프 보기 (2026-11-06 사용자 C · 「교사도 캠프로 가야 되는데」) → 캠프의 「⚔ 레이드로 돌아가기」로 복귀
     { const hs = $('#h-set'); if (hs) hs.onclick = () => C().run(() => DS.Camp.settings({ teacher: true, onSave: async (v) => { await DS.Net.set(`rooms/${code}/state/tlook`, { hero: v.hero, fx: v.fx, at: DS.Net.TS }).catch(() => {}); built = ''; if (R) render(); } })); }
-    const tb = $('#h-tbar'); if (tb) { const sig = `${Raid().deadline(R)}|${Raid().progress(L, R)}|${Raid().isClosed(R)}|${Raid().bossHp(L, R).won}|${Raid().isLobby(R)}`; if (tb.dataset.sig !== sig) { tb.dataset.sig = sig; tb.innerHTML = C().tbarHtml(L, R, { prog: true }); } }
+    const tb = $('#h-tbar'); if (tb) { const sig = `${Raid().deadline(R)}|${Raid().progress(L, R)}|${Raid().isClosed(R)}|${Raid().bossHp(L, R).won}|${Raid().isLobby(R)}`; if (tb.dataset.sig !== sig) { tb.dataset.sig = sig; tb.innerHTML = C().tbarHtml(L, R, { prog: false }); /* 「제출 n / m」 은 왼쪽 위 범례로 (2026-11-07) */ } }
     goalAndClear(i);
     DS.UI.fs.bind('h-fs');
     heroes(); side(i);
@@ -311,7 +320,7 @@ DS.Hall = (function () {
       ${step.special ? '<div class="raid-banner">⭐ 스페셜 몬스터 난입!</div>' : step.kind === 'boss' ? '<div class="raid-banner boss">👑 보스 출현!</div>' : ''}
       <div class="raid2-shadow"></div><div class="raid2-mon" id="rm"><div class="raid-bars over-head"><div class="raid-hp"><i id="rh-bar"></i><span id="rh-txt"></span></div><div class="raid-atk" id="rh-atk" title="몬스터 공격 게이지 (학생 폰과 같은 시계)"><i></i><span></span></div></div>${DS.Art.monster(f.sprite, 'idle', 'float')}<div id="rm-fx"></div></div>
       ${pos.map((o) => `<div class="fh2${enhCls(o.p)}" id="fh-${o.u}" style="left:${o.x}%;top:${o.y}%;z-index:${5 + Math.round(o.y / 10)}"><span class="fh-name">${DS.Titles.nameHtml(o.p, { size: 16, short: true })}</span><div class="${o.x > 50 ? 'face-l' : ''}">${DS.Art.hero(o.p.hero, 'idle')}</div><i class="shadow"></i></div>`).join('')}
-      <div class="raid-clear" id="r-clear" hidden></div><div class="h-focus-badge">⚠ 집중모드</div><div class="h-combo" id="h-combo"></div>
+      <div class="h-leg" id="h-leg"></div><div class="raid-clear" id="r-clear" hidden></div><div class="h-focus-badge">⚠ 집중모드</div><div class="h-combo" id="h-combo"></div>
     </div>`;
     seen = attacks(step);
     if (step.kind === 'boss') Snd().rumble();
@@ -329,6 +338,7 @@ DS.Hall = (function () {
       if ((a.h || 0) > (was.h || 0)) queue.push({ u, label: 'heal' }); // v0.9.6 💚 힐: 힐러만 보인다 (받은 학생은 안 보임)
     });
     seen = now;
+    legend(step);
     const wait = step.kind === 'monster' ? Raid().waiting(L, R, step.id) : [];
     const clr = $('#r-clear');
     if (f.done) {
@@ -339,6 +349,20 @@ DS.Hall = (function () {
       clr.hidden = false; clr.className = 'raid-clear note'; clr.innerHTML = `모두 공격했다! 남은 체력 ${f.hp.left} — 재도전으로 더 공격하자`;
     } else clr.hidden = true;
     play();
+  }
+  // 🏷 이름표 상태 + 왼쪽 위 범례 (2026-11-07 최종 정돈판 ⑤): ✓ 제출 · … 풀이 중 · z 끊김 — 정답 · 오답 · 재도전 횟수는 띄우지 않음
+  function legend(step) {
+    const cnt = { ok: 0, go: 0, off: 0 };
+    studs().filter(([u]) => (R.active || {})[u]).forEach(([u]) => {
+      const done = step.kind === 'boss' ? Raid().bossAnswered(R, u) : Raid().record(L, R, step.id, u).submitted;
+      const k = !Raid().online(R, u) ? 'off' : done ? 'ok' : 'go'; cnt[k]++;
+      const h = document.getElementById(`fh-${u}`); if (!h) return;
+      h.classList.toggle('off', k === 'off');
+      let si = h.querySelector('.si'); if (!si) { si = document.createElement('i'); const nm = h.querySelector('.fh-name'); if (nm) nm.prepend(si); }
+      si.className = `si ${k}`; si.textContent = k === 'ok' ? '✓' : k === 'go' ? '…' : 'z';
+    });
+    const el = document.getElementById('h-leg'); if (!el) return;
+    el.innerHTML = `<span class="tot">제출 <b>${cnt.ok}</b> / ${cnt.ok + cnt.go + cnt.off}</span><span><i class="si ok">✓</i>제출 ${cnt.ok}</span><span><i class="si go">…</i>풀이 중 ${cnt.go}</span>${cnt.off ? `<span><i class="si off">z</i>끊김 ${cnt.off}</span>` : ''}`;
   }
   // ⚔ 마무리 일격 (2026-11-03 · 0.9.6.9 고침: 이름 배너 없앰): 체력을 0 으로 만든 학생의 용사가 슬로모션으로 돌진 → 하얀 섬광 · 큰 이펙트 두 번 · 강한 흔들림
   function finisher(u, step) {
@@ -491,17 +515,45 @@ DS.Hall = (function () {
   }
 
   // ── 오른쪽: 수업 순서 · ◀ ▶ · 기준% · 집중모드 · 말풍선 ──────
+  // ── 🎛 떠 있는 조작 막대 (2026-11-07 최종 정돈판 ⑤): 오른쪽 칸(수업 순서 · 조작) 없앰 → 화면 오른쪽 아래 한 줄
+  //   🏕 쉼터 · 🎬 영상 · 📄 문제 · 🔴 집중 · 🎮 시연 · ✏ 필기 | ◀ 뒤로 · 앞으로 ▶(다음 단계 이름) · 체력 기준 · 풀이 시간은 교사 폰 리모컨에서만
+  //   마우스를 움직이거나 화면을 터치하면 나타나고 3초 뒤 숨음 · 📌 = 늘 보이기 (이 PC 기억) · ✏ 필기 중에는 터치해도 안 나타남
+  const PIN = 'citadel-hall-dock-pin';
+  const pinned = () => { try { return localStorage.getItem(PIN) === '1'; } catch (e) { return false; } };
+  let dockT = 0;
+  function dockShow() {
+    const d = document.getElementById('h-dock'); if (!d) return;
+    d.classList.add('show'); clearTimeout(dockT);
+    if (!pinned()) dockT = setTimeout(() => { if (!d.matches(':hover')) d.classList.remove('show'); }, 3000);
+  }
+  if (typeof document !== 'undefined') ['mousemove', 'touchstart'].forEach((ev) => document.addEventListener(ev, (e) => { if (embed || !hallOn() || (ev === 'touchstart' && DS.Ink && DS.Ink.on())) return; dockShow(); }, { passive: true }));
   function side(i) {
-    const titles = C().stepTitles(L);
-    $('#h-side').innerHTML = `<p class="shelf-title">📜 수업 순서</p><ol class="h-steps">${titles.map((s, k) => `<li class="${k < i || Raid().isClosed(R) ? 'done' : k === i ? 'now' : ''}${s.sp ? ' sp' : ''}">${esc(s.title)}</li>`).join('')}</ol>
-      ${Raid().isEnd(L, R) ? `<div class="h-words">${C().wordsHtml(R)}</div>` : ''}`;
-    C().bindWords($('#h-side'), code, R);
-    const el = $('#h-ctrl'), live = !Raid().isLobby(R) && !Raid().isClosed(R);
-    el.innerHTML = `${C().lessonBtn(R)}${C().pctHtml(L, R)}${live ? C().solveHtml(L, R) : ''}<p class="muted small">다음 ▶ ${esc(C().nextName(L, R))}</p><div class="row"><button class="btn" id="h-back"${i < 0 ? ' disabled' : ''}>◀ 뒤로</button><button class="btn primary" id="h-fwd"${Raid().isClosed(R) ? ' disabled' : ''}>${Raid().isFinale(L, R) ? '수업 끝 ▶' : '앞으로 ▶'}</button></div>${live ? C().iconBar(L, R, prep.video, true) : ''}${C().saveBtn(R)}`;
+    let d = document.getElementById('h-dock');
+    if (!d) {
+      d = document.createElement('div'); d.id = 'h-dock'; d.className = 'h-dock'; document.querySelector('#screen-hall .hall').appendChild(d);
+      // 숨은 막대를 처음 건드리면 보이기만 (안 보이는 단추가 눌리지 않게) · 마우스는 움직이는 순간 이미 보임
+      let was = true; d.addEventListener('pointerdown', () => { was = d.classList.contains('show'); }, true);
+      d.addEventListener('click', (e) => { if (!was) { e.stopPropagation(); e.preventDefault(); dockShow(); } was = true; }, true);
+    }
+    d.classList.toggle('pin', pinned());
+    const live = !Raid().isLobby(R) && !Raid().isClosed(R), step = Raid().stepOf(L, R);
+    const inkOk = step && (step.kind === 'concept' || Raid().sheetOn(R));
+    const fin = Raid().isFinale(L, R);
+    d.innerHTML = `${live ? C().iconBar(L, R, prep.video, true) : ''}${live && !Raid().restOn(R) ? `<button class="icb${DS.Ink && DS.Ink.on() ? ' on' : ''}" id="h-ink"${inkOk ? '' : ' disabled'} title="개념 · 문제 화면 위에 손가락 · 펜으로 쓰기 (TV 화면에만 · 저장 안 함)">✏<small>필기</small></button>` : ''}
+      <span class="dk-sep"></span>${C().lessonBtn(R)}${C().saveBtn(R)}
+      <button class="btn" id="h-back"${i < 0 ? ' disabled' : ''}>◀ 뒤로</button><button class="btn primary" id="h-fwd"${Raid().isClosed(R) ? ' disabled' : ''}>${fin ? '수업 끝 ▶' : '앞으로 ▶'}<small>${esc(C().nextName(L, R))}</small></button>
+      <button class="icb dk-pin${pinned() ? ' on' : ''}" id="h-pin" title="조작 막대 늘 보이기">📌</button>`;
     const db = $('#h-demo'); if (db) db.onclick = () => demoOpen(Raid().stepOf(L, R));
-    C().bindRest(el, code, R); C().bindLesson(el, code, R); C().bindSave(el, code, R, L); C().bindSolve(el, code, R, L); C().bindPct(el, code, R, L); C().bindFocus(el, code, R); C().bindSheet(el, code, R); C().bindVideo(el, code, R);
+    const ik = $('#h-ink'); if (ik) ik.onclick = () => { if (DS.Ink) DS.Ink.toggle(document.getElementById('h-arena'), `${code}|${i}|${Raid().sheetOn(R) ? 's' : 'c'}`); side(i); };
+    $('#h-pin').onclick = () => { try { localStorage.setItem(PIN, pinned() ? '0' : '1'); } catch (e) { /* 이 PC 만 */ } side(i); dockShow(); };
+    C().bindRest(d, code, R); C().bindLesson(d, code, R); C().bindSave(d, code, R, L); C().bindFocus(d, code, R); C().bindSheet(d, code, R); C().bindVideo(d, code, R);
     $('#h-fwd').onclick = () => C().run(() => C().forward(code, R, L));
     $('#h-back').onclick = () => C().run(() => C().back(code, R, L));
+    if (DS.Ink) DS.Ink.sync(`${code}|${i}|${Raid().sheetOn(R) ? 's' : 'c'}`); // 다음 단계로 넘기면 필기 저절로 지움
+    // 💬 마지막 한마디 (마무리): 오른쪽 위 작은 칸
+    let w = document.getElementById('h-words-box');
+    if (Raid().isEnd(L, R)) { if (!w) { w = document.createElement('div'); w.id = 'h-words-box'; w.className = 'h-words-box framed'; document.querySelector('#screen-hall .hall').appendChild(w); } w.innerHTML = `<div class="h-words">${C().wordsHtml(R)}</div>`; C().bindWords(w, code, R); } else if (w) w.remove();
+    if (pinned()) d.classList.add('show');
   }
 
   // ── 🎮 시연 (v0.9.3 사용자 요청): 교사가 학생과 똑같은 문제 칸으로 풀어 본다 · 데미지 · 기록 없음 (이 PC 화면에서만) ─────────
@@ -516,7 +568,13 @@ DS.Hall = (function () {
     demo = { step, attempt, boss, hp: boss ? L.boss.hpItems || items.length : items.length, items, given: items.map((q) => (q.type === 'multi' || q.type === 'subsets' ? [] : q.type === 'number' ? 0 : q.type === 'text' ? '' : null)), marks: null, shown: false };
     demoDraw();
   }
-  function demoClose() { const ov = document.getElementById('h-demo-ov'); if (ov) ov.remove(); demo = null; }
+  function demoHero(on) {
+    const raid = document.getElementById('raid'); let t = document.getElementById('fh-teach');
+    if (!on || !raid) { if (t) t.remove(); return; }
+    if (t) return;
+    raid.insertAdjacentHTML('beforeend', `<div class="fh2 teach" id="fh-teach" style="left:8%;top:62%;z-index:12"><span class="dtag">🎮 시연 중</span><span class="fh-name">👩‍🏫 선생님</span><div>${DS.Art.hero(DS.Art.teacherHero(R), 'idle')}</div><i class="shadow"></i></div>`);
+  }
+  function demoClose() { const ov = document.getElementById('h-demo-ov'); if (ov) ov.remove(); demo = null; demoHero(false); }
   const filled = (q, g) => (q.type === 'multi' || q.type === 'subsets' ? g.length > 0 : q.type === 'text' ? String(g || '').trim() !== '' : g != null);
   function ansText(q) { // 💡 정답 펼치기에 쓰는 정답 글
     const SG = DS.SetGen, P = DS.UI.pretty;
@@ -530,8 +588,9 @@ DS.Hall = (function () {
   }
   function demoDraw() {
     let ov = document.getElementById('h-demo-ov');
-    if (!ov) { ov = document.createElement('div'); ov.id = 'h-demo-ov'; ov.className = 'h-demo-ov'; document.getElementById('screen-hall').appendChild(ov); }
-    DS.UI.fitCenter(ov); // 2026-11-06: 레이드 칸(가운데)에 딱 맞춤
+    if (!ov) { ov = document.createElement('div'); ov.id = 'h-demo-ov'; ov.className = 'h-demo-ov side'; document.getElementById('screen-hall').appendChild(ov); }
+    // 2026-11-07 최종 정돈판 ⑤: 시연 칸 = 오른쪽에서 밀려 나온 36% 칸 · 레이드는 왼쪽에 그대로 · 선생님 용사가 필드에 (금색 이름표 「🎮 시연 중」)
+    demoHero(true);
     const d = demo, S = DS.Student, need = d.items.slice(0, d.hp), ready = need.every((q, i) => filled(q, d.given[i]));
     const win = d.shown || (d.marks && d.marks.slice(0, d.hp).every(Boolean)), title = d.boss ? L.boss.title : d.step.title;
     const bonusTag = (i) => (d.boss && i >= d.hp ? '<span class="demo-bonus">⭐ 보너스</span>' : '');
