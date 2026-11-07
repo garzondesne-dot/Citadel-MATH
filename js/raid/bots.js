@@ -5,7 +5,9 @@ window.DS = window.DS || {};
 DS.Bots = (function () {
   const NICK = ['민준', '서연', '도윤', '하은', '시우', '지유', '주원', '서아', '하준', '지안', '은우', '수아', '건우', '윤서', '선우', '채원', '유준', '다은', '이안', '소율', '태윤', '예린', '로운', '하린', '지호', '아린', '준서', '서윤', '현우'];
   const WORDS = ['벤 다이어그램 이제 알겠다!', '오늘 재밌었어요', '공집합 헷갈렸는데 해결', 'n(∅)=0 외웠다', '재도전 2번 만에 성공!', '다음 던전 언제해요?', '조건제시법 어려워요 ㅠ', '보스 막타 내가 침'];
-  let code = null, n = 0, stop = null, R = null, L = null, speed = 1, acc = { item: 0.8, boss: 0.8 };
+  let code = null, n = 0, stop = null, R = null, L = null, speed = 1, acc = { item: 0.8, boss: 0.8 }, PER = null;
+  // 👩‍🏫 교사 체험판 (2026-11-07): 친구마다 성격 { nick, hero, acc, slow, retry, heal, late, ok0 } — 없으면 예전처럼 모두 같게
+  const per = (i) => (PER && PER[i]) || {};
   const done = new Set();
   const N = () => DS.Net, P = (s) => `rooms/${code}/${s}`;
   const ids = () => Array.from({ length: n }, (_, i) => `bot${String(i + 1).padStart(2, '0')}`);
@@ -28,7 +30,7 @@ DS.Bots = (function () {
 
   function start(c, count, opt = {}) {
     stopAll();
-    code = c; n = count; speed = opt.speed || 1; Object.assign(acc, opt.acc || {});
+    code = c; n = count; speed = opt.speed || 1; Object.assign(acc, opt.acc || {}); PER = opt.personas || null; if (PER) n = PER.length;
     stop = N().watch(`rooms/${code}`, (v) => { if (!v) return; R = DS.Act.unpackRoom(v); L = DS.Lessons.get(R.meta.lesson); step(); });
   }
   function stopAll() { if (stop) stop(); stop = null; code = null; done.clear(); }
@@ -64,7 +66,8 @@ DS.Bots = (function () {
     if (DS.Raid.restOn(R) && !DS.Raid.isLobby(R)) { if (R.fun) fun(); return; } // 쉼터: 공격은 쉬고 놀이만
     const st = DS.Raid.stepOf(L, R);
     ids().forEach((u, i) => {
-      if (DS.Raid.isLobby(R)) later(`join|${u}`, 300 + i * rand(150, 450), () => N().set(P(`players/${u}`), { num: i + 2, nick: NICK[i % NICK.length], hero: Math.floor(Math.random() * 7), fx: DS.FX ? DS.FX.BASE[i % 6] : 'flame', cls: '1-1', at: N().TS }).then(() => N().set(P(`online/${u}`), true)));
+      const pp = per(i), slow = pp.slow || 1;
+      if (DS.Raid.isLobby(R) || (pp.late && !(R.players || {})[u])) later(`join|${u}`, pp.late ? pp.late * speed : 300 + i * rand(150, 450), () => N().set(P(`players/${u}`), { num: i + 2, nick: pp.nick || NICK[i % NICK.length], hero: pp.hero != null ? pp.hero : Math.floor(Math.random() * 7), fx: pp.fx || (DS.FX ? DS.FX.BASE[i % 6] : 'flame'), cls: (R.meta || {}).cls || '1-1', at: N().TS }).then(() => N().set(P(`online/${u}`), true)).then(() => { if (!DS.Raid.isLobby(R)) N().set(P(`active/${u}`), true).catch(() => {}); })); // 💤 늦게 온 친구: 들어오면 바로 함께
       if (!(R.active || {})[u]) return;
       // 마무리: 대기실로 이동 → 한마디
       if (DS.Raid.isFinale(L, R) || (st && st.kind === 'boss' && DS.Raid.canLobby(L, R, u))) {
@@ -76,17 +79,18 @@ DS.Bots = (function () {
         const rec = DS.Raid.record(L, R, st.id, u);
         const a = rec.nextAttempt;
         // v0.9.6 💚 다 맞힌 가상 친구는 절반쯤 힐을 고른다
-        if (rec.canHeal && Math.random() < 0.5) { const k = DS.Raid.healsGiven(R, st.id, u); later(`heal|${st.id}|${u}|${k}`, rand(3000, 8000), () => N().set(P(`heals/${st.id}/${u}/${k}`), DS.Raid.healTarget(L, R, st.id, u) || '_')); return; }
-        const go = !rec.submitted || (rec.canRetry && Math.random() < 0.85);
-        if (go) later(`sub|${st.id}|${u}|${a}`, rand(a ? 4000 : 6000, a ? 9000 : 18000), () => {
+        if (rec.canHeal && Math.random() < (pp.heal != null ? pp.heal : 0.5)) { const k = DS.Raid.healsGiven(R, st.id, u); later(`heal|${st.id}|${u}|${k}`, rand(3000, 8000), () => N().set(P(`heals/${st.id}/${u}/${k}`), DS.Raid.healTarget(L, R, st.id, u) || '_')); return; }
+        const go = !rec.submitted || (rec.canRetry && Math.random() < (pp.retry != null ? pp.retry : 0.85));
+        if (go) later(`sub|${st.id}|${u}|${a}`, rand(a ? 4000 : 6000, a ? 9000 : 18000) * slow, () => {
           const items = DS.Raid.itemsFor(L, R, st.id, u, a);
-          N().set(P(`subs/${st.id}/${u}/${a}`), N().pack(items.map((q) => given(q, Math.random() < acc.item + a * 0.08))));
+          const pa = pp.acc != null ? pp.acc : acc.item, all0 = a === 0 && pp.ok0; // ok0 = 첫 시도 퍼펙트(잘하는 친구)
+          N().set(P(`subs/${st.id}/${u}/${a}`), N().pack(items.map((q) => given(q, all0 || Math.random() < pa + a * 0.12))));
         });
       }
       if (st.kind === 'boss') {
         // 2026-11-05: 문항 · 시도별 (첫 시도 → 틀린 문항은 숫자 바뀐 재도전에서 맞힘)
-        L.boss.sets[1].forEach((q, i) => { const ok0 = Math.random() < acc.boss;
-          later(`boss0|${u}|${i}`, rand(6000, 20000), () => N().set(P(`bossTry/${u}/${i}/0`), N().pack(given(q, ok0))));
+        L.boss.sets[1].slice(0, L.boss.items).forEach((q, i) => { const ok0 = pp.ok0 || Math.random() < (pp.acc != null ? pp.acc + 0.1 : acc.boss);
+          later(`boss0|${u}|${i}`, rand(6000, 20000) * slow, () => N().set(P(`bossTry/${u}/${i}/0`), N().pack(given(q, ok0))));
           if (!ok0) later(`boss1|${u}|${i}`, rand(24000, 40000), () => N().set(P(`bossTry/${u}/${i}/1`), N().pack(given(DS.Raid.bossItem(L, R, u, i, 1), true)))); });
       }
     });

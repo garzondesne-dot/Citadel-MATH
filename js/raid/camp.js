@@ -140,7 +140,7 @@ DS.Camp = (function () {
     el.classList.toggle('open', on); el.classList.toggle('rift', !!rf); document.querySelector('#camp .camp-stage').classList.toggle('gate-rift', !!rf);
     const lb = el.querySelector('.camp-label');
     if (me && me.teacher) { const t = me.teacher; DS.CampScene.gate(document.querySelector('#camp .camp-stage'), !!t.code); el.classList.toggle('open', !!t.code); if (lb) lb.innerHTML = t.code ? '⚔ 수업 진행 · 리모컨' : '⚔ 새 수업 열기 (교사 메뉴)'; return; } // 🏛 교사 개인 캠프 (2026-11-05)
-    if (lb) lb.innerHTML = on ? `⚔ ${live.no ? `${live.no}차시 ` : ''}입장!` : rf ? `⏳ ${rf.no}차시 이어하기 D-${Math.max(1, Math.ceil((rf.until - Date.now()) / 86400e3))}` : '🔒 차시 던전'; el.setAttribute('aria-label', on ? `${live.no ? `${live.no}차시 ` : ''}${name} 입장` : rf ? `${rf.no}차시 이어하기` : '차시 던전 (닫힘)');
+    if (lb) lb.innerHTML = on ? `⚔ ${live.no ? `${live.no}차시 ` : ''}입장!${DS.TRIAL && DS.Lessons.get(live.lesson) ? `<small class="gate-sub">${esc(DS.Lessons.get(live.lesson).title)}</small>` : ''}` : rf ? `⏳ ${rf.no}차시 이어하기 D-${Math.max(1, Math.ceil((rf.until - Date.now()) / 86400e3))}` : '🔒 차시 던전'; el.setAttribute('aria-label', on ? `${live.no ? `${live.no}차시 ` : ''}${name} 입장` : rf ? `${rf.no}차시 이어하기` : '차시 던전 (닫힘)');
   }
   // 그림 칸 하나 (배치표 시트에서 열·행)
   const sheet = (s, col, row, cls, style = '') => `<i class="${cls}" style="background-image:url('${base()}${s.src}');background-size:${s.cols * 100}% ${(s.rows || 1) * 100}%;background-position:${s.cols > 1 ? (col / (s.cols - 1)) * 100 : 0}% ${(s.rows || 1) > 1 ? (row / (s.rows - 1)) * 100 : 0}%;${style}"></i>`;
@@ -178,7 +178,7 @@ DS.Camp = (function () {
     // v0.9.7.0: 이름표의 Lv 는 뺌 (사용자 — 캠프에서 이질적). 레벨은 아래 상태창에만
     newTitles();
     $('#camp-code').onclick = codeGate;
-    { const fb = $('#camp-fb'); if (fb) { if (me.teacher || me.test) fb.hidden = true; else fb.onclick = () => DS.Feedback.open({ c: me.c, n: me.n, name: me.name }, { where: 'camp' }); } } // 💬 2026-11-06
+    { const fb = $('#camp-fb'); if (fb) { if (me.teacher || me.test || me.trial) fb.hidden = true; else fb.onclick = () => DS.Feedback.open({ c: me.c, n: me.n, name: me.name }, { where: 'camp' }); } } // 💬 2026-11-06
     $('#camp-mail').onclick = () => pick('#camp-mail', () => { if (me.teacher) return DS.Control.run(() => DS.Dash.enter()); if (cues.mark) cues.mark('mail'); DS.Control.run(note); }); // 교사 = 📊 학급 대시보드
     $('#camp-tent').onclick = () => (DS.CampScene.objOn(document.querySelector('#camp .camp-stage'), 'tent', true), pick('#camp-tent', () => { if (cues.mark) cues.mark('tent'); DS.Control.run(shelf); setTimeout(() => DS.CampScene.objOn(document.querySelector('#camp .camp-stage'), 'tent', false), 1500); }));
     $('#camp-dummy').onclick = () => pick('#camp-dummy', () => DS.Control.run(() => DS.Bonus.enter(me, { train: true })));
@@ -311,7 +311,7 @@ DS.Camp = (function () {
     }, f.ms);
   }
   async function enterCode(code) {
-    if (me.test && DS.Test.active()) return DS.Test.join(code); // 🧪 테스트 모닥불
+    if ((me.test || me.trial) && DS.Test.active()) return DS.Test.join(code); // 🧪 테스트 모닥불 · 👩‍🏫 교사 체험판
     try { localStorage.setItem('citadel-student', JSON.stringify({ code })); } catch (e) { /* 무시 */ }
     await DS.Student.enter(code, { num: me.n, nick: me.name, hero: me.hero, fx: me.fx || 'flame', cls: me.c, title: me.title || 'none' });
   }
@@ -323,7 +323,7 @@ DS.Camp = (function () {
   // 📚 책장: 열린 차시의 개념별 🎬 설명 영상 · 📄 학습지 개념 (기말 대비 다시 보기)
   async function shelf(all) { // all: 교사 캠프 — 모든 차시
     const no = all != null ? all : me.test ? 99 : Number(await DS.Net.get(`unlock/${ck(me.c)}`).catch(() => 0)) || 0;
-    const open = DS.Lessons.list.filter((l) => l.no && l.no <= no).sort((a, b) => b.no - a.no);
+    const open = DS.Lessons.list.filter((l) => l.no && l.no <= no && (!DS.TRIAL || DS.TRIAL.lessons.includes(l.id))).sort((a, b) => b.no - a.no); // 👩‍🏫 체험판: 6차시만
     const preps = {};
     for (const l of open) preps[l.id] = (await DS.Act.prepLite(l.id).catch(() => null)) || {};
     const el = document.createElement('div'); el.className = 'modal camp-modal';

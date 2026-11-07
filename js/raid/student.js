@@ -18,7 +18,8 @@ DS.Student = (function () {
 
   let info0 = null, focusWas = false, cleared0 = false, locked = false;
   let heroFx = null, heroFxT = null, heroBack = ['idle', 'huff']; // v2 용사 잠깐 동작 (힐 받음 · 힐 쓰기) · 끝나면 돌아갈 자세
-  let test = null;          // 🧪 테스트 모드: { prep: 학습지 이미지, exit() } — 이 기기 안에서만, 집중모드 대신 학습지 이미지
+  let test = null;
+  const real = () => !test || !!test.real; // 👩‍🏫 교사 체험판 (2026-11-07): 테스트 화면 + 실제 학생처럼 기록 · 💎 · EXP (메모리 저장소라 남지 않음)          // 🧪 테스트 모드: { prep: 학습지 이미지, exit() } — 이 기기 안에서만, 집중모드 대신 학습지 이미지
   async function enter(c, info, opt = {}) {
     test = opt.test || null;
     cleared0 = false; resulted = false; drawn = ''; shown = ''; form = null; retrying = ''; bossSet = 1; othersSeen = {};
@@ -43,7 +44,7 @@ DS.Student = (function () {
       { const nq = Object.keys(R.oxq || {}).length; if (nq !== lastOx) { if (lastOx !== null) dirty = true; lastOx = nq; } } // ⭕ OX 타임 결과도 다음 저장 때 기록에
       { const st = (R.state || {}).step ?? -1; if (lastStep !== null && st !== lastStep && dirty) setTimeout(saveNow, 300 + Math.random() * 2500); lastStep = st; } // 단계가 바뀌면 저장 (18명이 한꺼번에 몰리지 않게 조금씩 늦춤)
       L = DS.Lessons.get(R.meta.lesson); if (L && L.id !== DS.Art._entered) { DS.Art._entered = L.id; DS.Art.lessonEnter(L); } // v0.9.6 차시별 다운로드
-      if (!test && DS.Gem && R.state && R.state.clearLeft != null && Raid().activeIds(R).includes(me) && clearPaid !== code) { clearPaid = code; DS.Gem.add(acc(), DS.Gem.G.clear, `clear_${code}`, '⏰ 시간 안 클리어').catch(() => {}); }
+      if (real() && DS.Gem && R.state && R.state.clearLeft != null && Raid().activeIds(R).includes(me) && clearPaid !== code) { clearPaid = code; DS.Gem.add(acc(), DS.Gem.G.clear, `clear_${code}`, '⏰ 시간 안 클리어').catch(() => {}); }
       xpWatch();
       render();
       thrillWatch();
@@ -59,7 +60,7 @@ DS.Student = (function () {
     an.marks.forEach((m) => { const k = `t${m.at}|${m.n}`; if (thSeen[k]) return; thSeen[k] = true; if (!first) DS.Thrill.tierNote(m.n); });
     const st = Raid().stepOf(L, R), bh = Raid().bossHp(L, R);
     if (st && st.kind === 'boss' && !bh.won && !Raid().isClosed(R)) { const ph = DS.Combo.bossPhase(bh.max ? bh.left / bh.max : 1); if (phaseWas && ph.phase > phaseWas) DS.Thrill.phaseNote(ph); phaseWas = ph.phase; } else phaseWas = 0;
-    if (!test) chestCheck();
+    if (real()) chestCheck();
     comboTick();
   }
   function chestCheck() {
@@ -93,7 +94,7 @@ DS.Student = (function () {
   }
   // 수업이 끝날 때: 🔥 반 최고 콤보를 깬 사슬에 낀 용사 💎 +3 · 🏁 반대항 보상
   function endRewards() {
-    if (test || !DS.Gem || !DS.Combo || !info0 || info0.cls == null || !L || !R || endPaid === code || !Raid().activeIds(R).includes(me)) return;
+    if (!real() || !DS.Gem || !DS.Combo || !info0 || info0.cls == null || !L || !R || endPaid === code || !Raid().activeIds(R).includes(me)) return;
     endPaid = code;
     const a = DS.Combo.analyze(L, R), was = Number((R.meta || {}).comboBest) || 0;
     if (a.best >= 10 && a.best > was && a.bestUsers.includes(me)) DS.Gem.add(acc(), DS.Gem.G.comboBest, `combo_${code}`, `🔥 반 최고 콤보 ${a.best}!`, { free: true }).catch(() => {});
@@ -102,7 +103,7 @@ DS.Student = (function () {
   // 🆙 몬스터를 쓰러뜨리는 순간 내 용사 머리 위 +EXP · 보스 처치 +EXP (처음 들어왔을 때 이미 쓰러진 것은 빼고)
   let xpSeen = null;
   function xpWatch() {
-    if (!L || !R || test) return;
+    if (!L || !R || !real()) return;
     const ids = L.steps.filter((s) => s.kind === 'monster' && L.monsters[s.id]).map((s) => s.id), first = !xpSeen;
     if (first) xpSeen = {};
     ids.forEach((mid) => { if (!Raid().cleared(L, R, mid) || xpSeen[mid]) return; xpSeen[mid] = true; const x = DS.Control.xpOf(Raid().record(L, R, mid, me)); if (!first && x) setTimeout(() => DS.Control.xpFloat(document.querySelector('#st-body .enc-hero') || document.querySelector('#st-body'), `+${x} EXP`), 400); });
@@ -116,14 +117,14 @@ DS.Student = (function () {
     const o = document.createElement('div'); o.className = inClass ? 'lvup-mini' : 'lvup-full';
     o.innerHTML = inClass ? `<b>🎉 LEVEL UP!</b> Lv.${after.lv} <span>${esc(after.title)}</span>` : `<div><p>🎉 LEVEL UP!</p><b>Lv.${after.lv}</b><span>${esc(after.title)}</span></div>`;
     document.body.appendChild(o); if (DS.Sound.levelup) DS.Sound.levelup(); else DS.Sound.correct(); setTimeout(() => o.remove(), inClass ? 3200 : 2800);
-    if (code && R && !test && !Raid().isClosed(R)) DS.Net.set(`rooms/${code}/lvup/${me}`, { lv: after.lv, at: DS.Net.TS }).catch(() => {});
+    if (code && R && real() && !Raid().isClosed(R)) DS.Net.set(`rooms/${code}/lvup/${me}`, { lv: after.lv, at: DS.Net.TS }).catch(() => {});
   });
   let clearPaid = '';
   const acc = () => ({ c: info0.cls, n: info0.num, name: info0.nick, hero: info0.hero, fx: info0.fx, title: info0.title });
   // 💾 진행 저장 (v0.9.7.6 → v0.9.8.0 줄임 · 사용자 확정): ① 선생님이 다음 단계로 넘길 때 ② 형성평가는 마지막 답 10초 뒤 한 번 ③ 앱을 내리거나 닫을 때
   //   → 수업 끝 전에 나가도 대시보드 · EXP 가 남는다 · 기록 목록은 한 번만 읽고 바뀐 게 없으면 안 씀 (테스트 모드는 저장 안 함)
   let saveT = null, lastStep = null, dirty = false, lastOx = null;
-  const canSave = () => !test && DS.Result && info0 && info0.cls != null && info0.num && L && R && me && Raid().activeIds(R).includes(me);
+  const canSave = () => real() && DS.Result && info0 && info0.cls != null && info0.num && L && R && me && Raid().activeIds(R).includes(me);
   function saveNow() { clearTimeout(saveT); saveT = null; if (!dirty || !canSave()) return; dirty = false; DS.Result.save(L, R, me, acc(), code, null, null, { cache: true }).catch(() => { dirty = true; }); }
   function saveSoon(ms = 10000) { dirty = true; clearTimeout(saveT); saveT = setTimeout(saveNow, ms); }
   if (typeof document !== 'undefined') {
@@ -234,7 +235,7 @@ DS.Student = (function () {
     const svb = $('#st-survey'); if (svb) svb.onclick = () => DS.Survey.open(acc(), () => { drawn = ''; render(); });
     const kb = $('#st-klass'); if (kb) kb.onclick = () => DS.Control.run(() => DS.ShareCard.klassOpen(L, R));
     const pb = $('#st-punch'); if (pb) pb.onclick = () => DS.Control.run(() => DS.Punch.open(L, R));
-    const mb = $('#st-mine'); if (mb) mb.onclick = () => DS.Control.run(() => DS.Result.show(L, R, me, test ? null : acc(), code, () => {}, { inClass: true, force: true }));
+    const mb = $('#st-mine'); if (mb) mb.onclick = () => DS.Control.run(() => DS.Result.show(L, R, me, !real() ? null : acc(), code, () => {}, { inClass: true, force: true }));
   }
   function wordsForm(w) {
     if (locked) return '<p class="muted small center">💬 한마디는 선생님이 잠가 두었어요.</p>';
@@ -254,7 +255,7 @@ DS.Student = (function () {
   const showResult = () => new Promise((res) => {
     if (resulted || !DS.Result || !Raid().activeIds(R).includes(me)) return res();
     resulted = true;
-    DS.Result.show(L, R, me, test ? null : acc(), code, () => res(), { inClass: true }).catch(() => res());
+    DS.Result.show(L, R, me, !real() ? null : acc(), code, () => res(), { inClass: true }).catch(() => res());
   });
   const bindLobby = () => { const b = $('#st-lobby'); if (b) b.onclick = () => DS.Control.run(async () => { await showResult(); await DS.Act.toLobby(code); drawn = ''; }); };
 
@@ -278,7 +279,7 @@ DS.Student = (function () {
       const w = was[u] || { n: 0, best: 0 };
       if (r.tries.length <= w.n) return;
       const p = R.players[u] || {}, dmg = Math.max(0, r.best - w.best);
-      if (dmg || r.practice) DS.FX.play(sc, p.fx || 'flame', { scale: 0.18, x: sc.clientWidth * (0.7 + Math.random() * 0.1), y: sc.clientHeight * 0.55 });
+      if (dmg || r.practice) DS.FX.play(sc, p.fx || 'flame', { scale: 0.18, x: sc.clientWidth * (raidOn() ? 0.42 + Math.random() * 0.16 : 0.7 + Math.random() * 0.1), y: sc.clientHeight * (raidOn() ? 0.32 : 0.55) });
       const t = document.createElement('span'); t.className = 'ally-hit'; t.textContent = r.practice ? `${p.nick} ✔ 이미 성공` : dmg ? `${p.nick} −${dmg}` : `${p.nick} 💨`;
       t.style.left = `${55 + Math.random() * 25}%`; sc.appendChild(t); setTimeout(() => t.remove(), 1300);
     });
@@ -286,12 +287,24 @@ DS.Student = (function () {
   // 1:1 대치: 왼쪽 내 용사(머리 위 = 남은 도전 기회 ●●●, 같이 움직임) vs 오른쪽 몬스터(아래 체력 칸)
   // cls: 'hit'(공격 성공 → 용사 돌진) · 'miss'(실패 → 축 처짐, 잠깐)
   const enhCls = (p) => { const t = p && DS.Gem && DS.Gem.enhTier ? DS.Gem.enhTier(Number(p.enh) || 0) : 0; return t ? ` enh enh-${t}` : ''; };
+  // 👩‍🏫 교사 체험판 (2026-11-07 사용자 「전투는 종합실 레이드 화면 · 용사 수 줄이고 조화롭게」): 몬스터 가운데 · 나는 앞 가운데 · 친구 5명 V자 · 이름표 + 상태
+  const raidOn = () => !!(test && test.raid);
+  const PARTY_AT = [[6, 10], [70, 10], [20, 70], [56, 70], [38, 104]];
+  function partyHtml(stepId) {
+    if (!raidOn()) return test ? `<div class="enc-friends">${Raid().activeIds(R).filter((u) => u !== me).slice(0, 4).map((u) => DS.Art.hero((R.players[u] || {}).hero || 0, 'idle', 'huff')).join('')}</div>` : '';
+    const ids = Raid().activeIds(R).filter((u) => u !== me).sort().slice(0, PARTY_AT.length);
+    return `<div class="enc-party">${ids.map((u, i) => { const p = R.players[u] || {}, [l, b] = PARTY_AT[i];
+      let st = '';
+      if (stepId === 'boss') { const n = Raid().bossState(L, R, u).filter((x) => x.ok).length; st = n ? `👑 ${n}` : '🤔'; }
+      else if (stepId) { const r = Raid().record(L, R, stepId, u); st = r.total && r.best === r.total ? (r.tries.length === 1 ? '⚡' : '✔') : r.tries.length ? '🔁' : '🤔'; }
+      return `<div class="ep-h" style="left:${l}%;bottom:${b}px">${DS.Art.hero(p.hero || 0, 'idle', 'huff')}<span class="ep-n">${esc(p.nick || '')}${st ? ` ${st}` : ''}</span></div>`; }).join('')}</div>`;
+  }
   function scene(step, rec, hp, cls = '', gauge = '') {
     const segs = Array.from({ length: rec.total }, (_, i) => `<i class="${i < rec.best ? 'gone' : ''}"></i>`).join('');
     const left = rec.left, done = Raid().cleared(L, R, step.id);
     const pips = Array.from({ length: rec.slots }, (_, i) => `<i class="${i < left ? 'on' : ''}${i < Math.min(left, rec.healed) ? ' heal' : ''}"></i>`).join('');
-    return `<div class="scene enc bg-scene th-${L.theme || ''} ${cls}${step.special ? ' special' : ''}"><div class="scene-bar"><div><b>${step.special ? '⭐ 난입! ' : step.review ? '📖 ' : ''}${esc(step.title)}</b><br><span class="muted small">레이드 체력 ${hp.left} / ${hp.max}</span></div></div>
-      ${test ? `<div class="enc-friends">${Raid().activeIds(R).filter((u) => u !== me).slice(0, 4).map((u) => DS.Art.hero((R.players[u] || {}).hero || 0, 'idle', 'huff')).join('')}</div>` : ''}
+    return `<div class="scene enc bg-scene th-${L.theme || ''} ${cls}${step.special ? ' special' : ''}${raidOn() ? ' trial-raid' : ''}"><div class="scene-bar"><div><b>${step.special ? '⭐ 난입! ' : step.review ? '📖 ' : ''}${esc(step.title)}</b><br><span class="muted small">레이드 체력 ${hp.left} / ${hp.max}</span></div></div>
+      ${partyHtml(step.id)}
       <div class="enc-hero${enhCls(info0)}"><div class="enc-tries" title="남은 도전 기회">${pips}</div>${heroNow(pose2(done, cls), done ? 'pairhop' : cls === 'miss' ? 'slump' : 'huff')}<i class="shadow"></i></div>
       <div class="enc-mon">${DS.Art.monster(L.monsters[step.id].sprite, done ? 'down' : 'idle', done ? '' : 'float')}<div class="segs" title="내가 맞힌 만큼 칸이 깨져요">${segs}</div>${gauge}</div></div>`;
   }
@@ -374,7 +387,7 @@ DS.Student = (function () {
   // 석화 중 공격 성공 → 데미지(늘어난 맞힌 소문제 수) × 💎1 · 석화 한 번에 학생당 최대 PETRI_CAP (하루 한도 안)
   const PETRI_CAP = 3;
   function petriGem(mid, gain) {
-    const pt = Raid().petrify(R, mid); if (!pt || DS.Net.now() >= pt.until || !DS.Gem || test) return;
+    const pt = Raid().petrify(R, mid); if (!pt || DS.Net.now() >= pt.until || !DS.Gem || !real()) return;
     const k = `citadel-petri-${code}-${mid}-${pt.at}`; let had = 0; try { had = Number(localStorage.getItem(k)) || 0; } catch (e) { /* 무시 */ }
     const tot = Math.min(PETRI_CAP, had + gain); if (tot <= had) return;
     try { localStorage.setItem(k, String(tot)); } catch (e) { /* 무시 */ }
@@ -390,7 +403,7 @@ DS.Student = (function () {
   }
   const nickOf = (u) => ((R.players || {})[u] || {}).nick || '친구';
   function healNotice(mid) {
-    if (test) return;
+    if (!real()) return;
     let k = 0;
     Raid().healsTo(R, mid, me, L).slice(0, Raid().HEAL_MAX).forEach((h) => {
       if (healSeen(`${code}|${mid}|${h.from}|${h.k}`)) return;
@@ -428,7 +441,7 @@ DS.Student = (function () {
     const finish = fx && !prac && gain > 0 && Raid().cleared(L, R, mid) && hp.left + gain > 0;
     if (fx && !prac && gain > 0) petriGem(mid, gain);
     // ⚡ 필살기 (2026-11-06 확정): 첫 시도에 다 맞힘 + 특화 Ⅲ 이상 → 그 공격이 저절로 필살기 (기회를 쓰지 않음 · 연출만)
-    const autoUlt = !!(fx && !prac && !test && t.attempt === 0 && t.total > 0 && t.correct === t.total && DS.Attack && DS.Attack.canUlt(myP().fx, myP().hero));
+    const autoUlt = !!(fx && !prac && real() && t.attempt === 0 && t.total > 0 && t.correct === t.total && DS.Attack && DS.Attack.canUlt(myP().fx, myP().hero));
     // 🔥 끈기의 일격: 두 번 넘게 틀린 뒤 드디어 다 맞힘 (연출만)
     const grit = !!(fx && !prac && t.attempt >= 2 && rec.perfectAt === t.attempt);
     if (finish) setTimeout(() => { const sc = body.querySelector('.scene'); if (sc) { sc.classList.add('fin-flash'); DS.FX.play(sc, myP().fx || 'flame', { perfect: true, scale: 0.6 }); } DS.Sound.correct(); }, atk ? 1300 : 500);
@@ -436,7 +449,7 @@ DS.Student = (function () {
     const done = Raid().cleared(L, R, mid);
     // ⚡ 수업 필살기 (2026-11-06 확정 ①): 첫 시도 퍼펙트 + 묶기 2번 퍼펙트 = 3연속 · 특화 Ⅳ 전설 스킬 · 마지막 기회가 남아 있을 때
     // 🌟 진필살기 (2026-11-06 확정): 3연속 퍼펙트 + 특화 Ⅳ · 마지막 기회 · 이 몬스터가 아직 안 굳었을 때 (반 전체 한 번)
-    const ult = !test && rec.perfectAt === 0 && Raid().perfStreak(rec) >= 3 && rec.left > 0 && !Raid().ultUsed(R, mid, me) && !Raid().petrify(R, mid) && DS.Attack && DS.Attack.canTrue(myP().fx, myP().hero);
+    const ult = real() && rec.perfectAt === 0 && Raid().perfStreak(rec) >= 3 && rec.left > 0 && !Raid().ultUsed(R, mid, me) && !Raid().petrify(R, mid) && DS.Attack && DS.Attack.canTrue(myP().fx, myP().hero);
     const sig = `res|${mid}|${t.attempt}|${done}|${rec.canRetry}|${rec.left}|${ult ? 'u' : ''}|${(R.help || {})[me] ? 1 : 0}`;
     if (sig === drawn && body.querySelector('.marks')) { hpText(body, hp); return; }
     drawn = sig;
@@ -467,13 +480,13 @@ DS.Student = (function () {
       ub.disabled = true; await DS.Act.heal(code, raw, mid, { true: true }); drawn = '';
       if (DS.Attack) { await DS.Attack.cutin(myP().hero || 0, myP().fx, { gold: true }); const sc = document.querySelector('#st-body .scene') || body.querySelector('.scene'); if (sc) { const mon = sc.querySelector('.enc-mon .art.monster') || sc.querySelector('.enc-mon'); DS.Attack.ultBlast(sc, mon, myP().fx); if (DS.Thrill && DS.Thrill.petrify) setTimeout(() => DS.Thrill.petrify(mon), 500); } } // 🌟 진필살기 → 🗿 석화
       healPop('💚 못 맞힌 친구 모두 기회 +1 · 🗿 석화!', 1600);
-      if (DS.Grow && !test) DS.Grow.add(acc(), { heal: 1 }, `ult_${code}_${mid}`).catch(() => {});
+      if (DS.Grow && real()) DS.Grow.add(acc(), { heal: 1 }, `ult_${code}_${mid}`).catch(() => {});
     });
     const pb2 = $('#st-party');
     if (pb2) pb2.onclick = () => DS.Control.run(async () => {
       pb2.disabled = true; await DS.Act.heal(code, raw, mid, { party: true }); DS.Sound.correct(); drawn = '';
       heroFx = { pose: 'heal', until: Date.now() + 1600 }; setTimeout(() => heroFlash('heal', 1400), 60); healPop('💚 파티 힐 — 못 맞힌 친구 모두 +1!');
-      if (DS.Grow && !test) DS.Grow.add(acc(), { heal: 1 }, `party_${code}_${mid}`).catch(() => {});
+      if (DS.Grow && real()) DS.Grow.add(acc(), { heal: 1 }, `party_${code}_${mid}`).catch(() => {});
     });
     const hb = $('#st-heal');
     if (hb) hb.onclick = () => DS.Control.run(async () => {
@@ -482,7 +495,7 @@ DS.Student = (function () {
       DS.Sound.correct(); drawn = '';
       heroFx = { pose: 'heal', until: Date.now() + 1600 }; setTimeout(() => heroFlash('heal', 1400), 60);
       healPop(to ? `💚 ${nickOf(to)}에게 +1` : '💚 응원 보냄!');
-      if (DS.Grow && !test) DS.Grow.add(acc(), { heal: 1 }, `heal_${code}_${mid}_${k}`).catch(() => {});
+      if (DS.Grow && real()) DS.Grow.add(acc(), { heal: 1 }, `heal_${code}_${mid}_${k}`).catch(() => {});
     });
   }
   // 보기 글자: 'venn:B|1 2 3 6' 은 벤 다이어그램 그림으로
@@ -583,7 +596,7 @@ DS.Student = (function () {
     const S = Raid().bossState(L, R, me), hp = Raid().bossHp(L, R), N0 = Raid().BOSS_TRIES;
     const lab = (s) => (s.ok ? '✔ 도달' : !s.n ? '풀기' : s.left ? `✘ 다시 · 기회 ${s.left}` : '해설 보기');
     body.innerHTML = `<div class="panel framed">
-      <div class="scene enc bg-scene th-${L.theme || ''} boss${hp.won ? '' : ' quake-once'}"><div class="scene-bar"><div><b>👑 ${esc(L.boss.title)}</b><br><span class="muted small">보스 체력 ${hp.left} / ${hp.max}</span></div></div>
+      <div class="scene enc bg-scene th-${L.theme || ''} boss${hp.won ? '' : ' quake-once'}${raidOn() ? ' trial-raid' : ''}">${partyHtml('boss')}<div class="scene-bar"><div><b>👑 ${esc(L.boss.title)}</b><br><span class="muted small">보스 체력 ${hp.left} / ${hp.max}</span></div></div>
         <div class="enc-hero">${heroNow(hp.won ? pose2(true, '') : 'think', hp.won ? 'pairhop' : 'huff')}<i class="shadow"></i></div>
         <div class="enc-mon">${DS.Art.monster(L.boss.sprite, hp.won ? 'down' : 'idle', hp.won ? '' : 'float')}<div class="hpbar"><i style="width:${hp.max ? (100 * hp.left) / hp.max : 0}%"></i></div>${hp.won ? '' : GAUGE}</div></div>
       ${hp.won ? '<h2 class="okc center">🎉 보스 격파! 모두 함께 이겼어요!</h2>' : ''}

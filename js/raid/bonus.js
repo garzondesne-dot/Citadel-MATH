@@ -38,7 +38,8 @@ DS.Bonus = (function () {
   const setFloor = (id) => { try { localStorage.setItem(FKEY, id); } catch (e) { /* 무시 */ } };
   async function loadLocks() { floorOpen = (await N().get('gcfg/floorOpen').catch(() => null)) || {}; return floorOpen; } // 2층은 문제 확정 뒤 (변경 제안 PDF → 컨펌)
   const castleOf = (id) => DS.Lessons.get(id);
-  const lessons = () => DS.Lessons.list.filter((l) => l.no && !l.eval && l.boss).sort((a, b) => a.no - b.no);
+  const lessons = () => DS.Lessons.list.filter((l) => l.no && !l.eval && l.boss && (!DS.TRIAL || DS.TRIAL.lessons.includes(l.id))).sort((a, b) => a.no - b.no); // 👩‍🏫 체험판: 6차시만
+  const trialOk = (L, r) => !DS.TRIAL || (L.id === DS.TRIAL.castle && DS.TRIAL.rooms.includes(r.id)); // 👩‍🏫 체험판: 성채 1층 04 · 07 만
   const bossOf = (L) => (L.rooms || []).find((r) => r.boss);
   // 방 상태 (data = bonus/{반}/{번호}) — 옛 7마리 기록은 그 방들을 처치한 것으로
   function roomRec(data, L, rid) {
@@ -50,7 +51,7 @@ DS.Bonus = (function () {
   // 열린 방 · 👑 보스 방 조건 (upto = 우리 반이 연 마지막 차시)
   function roomsState(L, data, upto, all) {
     const rooms = L.rooms || [], boss = bossOf(L);
-    const usable = (r) => !r.photo || (PHOTO_READY() && DS.Photo.ready(L.id, r.id)); // 📷 기준표를 켠 방만 (시범 = 1층 07 · 11)
+    const usable = (r) => trialOk(L, r) && (!r.photo || !!DS.TRIAL || (PHOTO_READY() && DS.Photo.ready(L.id, r.id))); // 📷 기준표를 켠 방만 (시범 = 1층 07 · 11) · 체험판은 사진 단계를 테스트로
     const open = rooms.filter((r) => usable(r) && (all || r.no <= upto)), plain = open.filter((r) => !r.boss);
     const cleared = plain.filter((r) => roomRec(data, L, r.id).clear).length, need = Math.ceil((plain.length * BOSS_PCT) / 100);
     const bossOpen = !!boss && usable(boss) && (all || boss.no <= upto) && cleared >= need && plain.length > 0;
@@ -174,9 +175,9 @@ DS.Bonus = (function () {
       const tile = (r) => {
         const rr = roomRec(mine, L, r.id), open = S.isOpen(r), m = L.monsters[r.id], isNew = fresh.has(`${L.id}/${r.id}`);
         const st = !open ? 'lock' : rr.clear ? 'clear' : rr.tries ? 'drop' : 'ready';
-        const sub = open && !rr.clear && rr.pend ? '⏳ 선생님 확인 중' : open && !rr.clear && rr.ans && r.photo ? '📷 풀이 사진 올리기' : !open ? (!S.usable(r) ? '📷 사진 채점 준비 중' : r.boss && (all() || r.no <= no) ? `${S.cleared} / ${S.need} 처치하면 열려요` : `${r.no}차시 수업 뒤`) : rr.clear ? '✔ 처치' : rr.tries ? `💧 ${rr.tries}번 도전` : '⚔ 도전';
+        const sub = open && !rr.clear && rr.pend ? '⏳ 선생님 확인 중' : open && !rr.clear && rr.ans && r.photo ? '📷 풀이 사진 올리기' : !open ? (!S.usable(r) ? (trialOk(L, r) ? '📷 사진 채점 준비 중' : '🔒 체험판') : r.boss && (all() || r.no <= no) ? `${S.cleared} / ${S.need} 처치하면 열려요` : `${r.no}차시 수업 뒤`) : rr.clear ? '✔ 처치' : rr.tries ? `💧 ${rr.tries}번 도전` : '⚔ 도전';
         const gift = r.photo && open && !rr.clear && !mathOpen ? '<i class="cs-gift" title="풀이 사진까지 통과하면 수식 책사(남 · 여) 용사 해금">🎁 🧑‍🎓</i>' : '';
-        return `<button class="cs-room ${st}${r.boss ? ' boss' : ''}"${open ? ` data-fight="${L.id}|${r.id}"` : ` data-lockmsg="${esc(!S.usable(r) ? '서술형 방이에요. 선생님이 📷 사진 채점을 켜면 열려요' : r.boss ? `👑 보스 방은 열린 방 ${S.need}개를 처치하면 열려요 (지금 ${S.cleared}개)` : `${r.no}차시 수업을 하면 열려요`)}"`}>
+        return `<button class="cs-room ${st}${r.boss ? ' boss' : ''}"${open ? ` data-fight="${L.id}|${r.id}"` : ` data-lockmsg="${esc(!trialOk(L, r) ? '👩‍🏫 체험판에서는 04 · 07 방만 열려요' : !S.usable(r) ? '서술형 방이에요. 선생님이 📷 사진 채점을 켜면 열려요' : r.boss ? `👑 보스 방은 열린 방 ${S.need}개를 처치하면 열려요 (지금 ${S.cleared}개)` : `${r.no}차시 수업을 하면 열려요`)}"`}>
           ${isNew ? '<span class="cs-rnew">NEW</span>' : ''}${!open && r.boss && !sealed ? sealTag() : ''}<span class="cs-no">${r.id.slice(1)}</span>${open ? DS.Art.monster(m.sprite, rr.clear ? 'down' : 'idle') : '<i class="cs-lockic">🔒</i>'}
           <span class="cs-rt">${esc(r.title.replace(/^👑 /, '').replace(/^\d+ /, ''))}</span><span class="cs-rs">${sub}</span>${gift}${open && !rr.clear && !gLog(`room_${L.id}_${r.id}`) ? gTag((r.boss ? DS.Gem.G.roomBoss : DS.Gem.G.room) + (r.boss && !sealed ? DS.Gem.G.seal : 0)) : ''}${open && r.boss && !rr.clear && !sealed ? sealTag() : ''}</button>`;
       };
@@ -353,8 +354,10 @@ DS.Bonus = (function () {
       const r0 = mine[L.id] && mine[L.id][mid] ? mine[L.id][mid] : rec, pend = r0.pend;
       const act = draw('', pend ? '<p class="gold">⏳ 선생님이 풀이를 확인하고 있어요. 확인되면 성채에 들어올 때 처치로 바뀌어요. 더 또렷한 사진을 다시 보내도 돼요.</p>' : `<p class="okc">${fresh ? '✔ <b>답을 맞혔어요!</b> ' : ''}이제 <b>종이에 쓴 풀이</b>를 📷 찍어 올리면 처치예요. <span class="muted small">(이 숫자 그대로 · 하루 3장)</span></p>`);
       act.innerHTML = `<button class="btn primary big" id="bf-photo">📷 풀이 사진 올리기</button>${all() ? '<button class="btn" id="bf-pv">미리 보기: 통과로 보기</button>' : ''}<button class="btn" id="bf-later">나중에</button>`;
+      if (DS.TRIAL && !pend) act.innerHTML = `<p class="bf-gift">📷 <b>체험판이라 사진 채점은 테스트로 보여 줘요.</b> 실제 게임에서는 종이에 쓴 풀이를 찍으면 AI 가 단계마다 채점하고 잘한 단계는 칭찬해 줘요 (구현 완료 · 선생님 확인 · 이의 신청까지).</p><button class="btn primary big" id="bf-pv">✔ 테스트: 사진 통과로 보기</button><button class="btn" id="bf-later">나중에</button>`; // 👩‍🏫 2026-11-07 사용자 「7번 사진은 테스트라고 안내 · 실제로는 구현됨」
       act.querySelector('#bf-later').onclick = () => { el.remove(); render(); };
       const pv = act.querySelector('#bf-pv'); if (pv) pv.onclick = () => win();
+      if (DS.TRIAL && !pend) return;
       act.querySelector('#bf-photo').onclick = () => DS.Control.run(async () => {
         if (all()) { DS.UI.toast('미리 보기 · 테스트에서는 사진을 보내지 않아요 — 학생 계정으로 해 보세요.', 3000); return; }
         const res = await DS.Photo.grade(me, { lesson: L.id, room: mid, title: mon.title, items });
