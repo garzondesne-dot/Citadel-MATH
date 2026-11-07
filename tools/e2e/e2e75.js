@@ -78,16 +78,23 @@ const OUT = process.argv[2] || '.', U = 'http://localhost:8765/index.html?trial'
   await p.click('#camp-castle'); await p.waitForTimeout(3500);
   const rooms = await p.evaluate(() => [...document.querySelectorAll('.cs-room[data-fight]')].map((e) => e.dataset.fight.split('|')[1]));
   await shot('11-castle');
-  let photo = '';
+  let photo = '', photoPass = false;
   if (rooms.includes('q07')) {
     await p.click('[data-fight="eval-1|q07"]'); await p.waitForTimeout(1500); await p.click('#bf-go').catch(() => {});
-    for (let k = 0; k < 8; k++) { await p.waitForTimeout(600); const open = await p.evaluate(() => !document.getElementById('quiz').classList.contains('hidden')); if (!open) break;
-      const ans = String(await p.evaluate(() => DS.Quiz.last.answer)); for (const ch of ans) await p.click(`#quiz-choices .num-pad button:text-is("${ch === '-' ? '−' : ch}")`).catch(() => {}); await p.click('#quiz-choices .num-pad .ok, #quiz-ok, .qz-ok').catch(() => {}); }
-    await p.waitForTimeout(1500); photo = await p.evaluate(() => (document.querySelector('.bn-fight .bf-gift') || {}).textContent || ''); await shot('12-photo');
+    for (let k = 0; k < 6; k++) { // e2e70 과 같은 숫자 답 입력
+      await p.waitForTimeout(500); if (await p.$('#bf-pv')) break;
+      const open = await p.evaluate(() => { const q = document.getElementById('quiz'); return !!q && !q.classList.contains('hidden'); }); if (!open) continue;
+      const ans = String(await p.evaluate(() => DS.Quiz.last.answer));
+      for (const ch of ans) await p.click(`#quiz-choices .num-pad button:text-is("${ch === '-' ? '−' : ch}")`).catch(() => {});
+      await p.click('#quiz-choices .q-submit').catch(() => {}); await p.waitForTimeout(1600);
+    }
+    await p.waitForTimeout(1500); photo = await p.evaluate(() => [...document.querySelectorAll('.bn-fight .bf-gift')].map((e) => e.textContent).join(' | ')); await shot('12-photo');
+    const pv = await p.$('#bf-pv'); if (pv) { await pv.click(); await p.waitForTimeout(3000); } await shot('13-photo-pass');
+    photoPass = await p.evaluate(async () => !!(((await DS.Net.get('bonus/체험/1/eval-1/q07')) || {}).clear));
   }
-  P(`⑧ 성채 열린 방 ${rooms.join(',')} · 07 사진 안내 「${photo.slice(0, 40)}」`);
+  P(`⑧ 성채 열린 방 ${rooms.join(',')} · 07 사진 안내 「${photo.slice(0, 80)}」 · 테스트 통과 → 처치 ${photoPass}`);
   const ok = pick6 === 6 && memStore && tutA && /6차시 입장/.test(gateLbl) && /드모르간/.test(gateLbl) && /개념/.test(concept) && vidOpen && party >= 4 && late
-    && games.length === 4 && games.every((g) => /:end$/.test(g)) && bossItems === 3 && tour.length >= 5 && gem.gift && recs.includes('set-06') && rooms.join(',') === 'q04,q07';
+    && games.length === 4 && games.every((g) => /:end$/.test(g)) && bossItems === 3 && tour.length >= 5 && gem.gift && recs.includes('set-06') && rooms.join(',') === 'q04,q07' && /테스트/.test(photo) && photoPass;
   console.log(ok ? '✅ 통과' : '❌ 기대와 다름'); console.log('errors', errs.length ? errs.slice(0, 5) : 'none'); await b.close(); if (!ok || errs.length) process.exit(1);
   function DS_step(R) { try { return R.state.step; } catch (e) { return '?'; } }
 })();
