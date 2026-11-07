@@ -10,7 +10,8 @@ const OUT = process.argv[2] || '.', U = 'http://localhost:8765/index.html?trial'
   const P = (s) => { log.push(s); console.log(s); };
   const shot = (n) => p.screenshot({ path: `${OUT}/75-${n}.png` });
   const ai = () => p.evaluate(() => (document.querySelector('.trial-ai .ta-msg') || {}).textContent || '');
-  const tap = async (k) => { const el = await p.$(`[data-ta="${k}"]`); if (el) { await el.click(); return true; } return false; };
+  const shut = () => p.evaluate(() => document.querySelectorAll('.th-chest-ov, .bat-ov, .th-bat').forEach((e) => e.remove())); // 🎁 · 🦇 무작위 팝업 (실제 학생처럼 뜸)
+  const tap = async (k) => { await shut(); const el = await p.$(`[data-ta="${k}"]`); if (el) { await el.click(); return true; } return false; };
   const room = () => p.evaluate(async () => { const c = Object.keys((await DS.Net.get('rooms')) || {}).pop(); return c ? DS.Act.unpackRoom(await DS.Net.get(`rooms/${c}`)) : null; });
   // 내 답 (bots.js given 과 같은 꼴): ok = [소문제마다 맞힘?]
   const answer = (att, okFirstWrong) => p.evaluate(async ([att, w]) => {
@@ -62,20 +63,20 @@ const OUT = process.argv[2] || '.', U = 'http://localhost:8765/index.html?trial'
   await answer(0, false); await p.waitForTimeout(6000); await tap('go'); await p.waitForTimeout(2500);
   await answer(0, false); await p.waitForTimeout(8000); await shot('7-boss');
   R = await room(); const bossItems = await p.evaluate(() => document.querySelectorAll('.boss-items .bitem').length);
-  const closeRes = async () => { for (let k = 0; k < 4; k++) { const b = await p.$('#rs-ok'); if (!b) return; await b.click().catch(() => {}); await p.waitForTimeout(1200); } };
+  const closeRes = async () => { await shut(); for (let k = 0; k < 4; k++) { const b = await p.$('#rs-ok'); if (!b) return; await b.click().catch(() => {}); await p.waitForTimeout(1200); } };
   await closeRes(); await tap('go'); await p.waitForTimeout(4000); await closeRes(); await shot('8-finale');
   await tap('go'); await p.waitForTimeout(800); await closeRes(); await tap('go'); await p.waitForTimeout(6000); await closeRes();
   P(`⑥ 문제 2 단계 ${st2} · 보스 문항 ${bossItems}개`);
   // ⑦ 캠프: 하나씩 소개(B) · 💎100
   await shot('9-camp-tour');
   const tour = [];
-  for (let k = 0; k < 8; k++) { const t = await p.evaluate(() => { const c = document.querySelector('#tut-coach .tut-box b'); return c ? c.textContent : ''; }); if (!t) break; tour.push(t); const n = await p.$('#tut-next'); if (!n) break; await n.click(); await p.waitForTimeout(700); }
+  for (let k = 0; k < 8; k++) { const t = await p.evaluate(() => { const c = document.querySelector('#tut-coach .tut-box b'); return c ? c.textContent : ''; }); if (!t) break; tour.push(t); await shut(); const n = await p.$('#tut-next'); if (!n) break; await n.click(); await p.waitForTimeout(700); }
   const gem = await p.evaluate(async () => { const d = (await DS.Gem.mine({ c: '체험', n: 1 })) || {}; return { total: d.total || 0, gift: !!((d.log || {}).trial_gift) }; });
   const recs = await p.evaluate(async () => Object.keys((await DS.Net.get('records/체험/1')) || {}));
   P(`⑦ 소개 ${tour.join(' → ')} · 💎 ${gem.total} (선물 ${gem.gift}) · 기록 ${recs.join(',')}`);
   await shot('10-camp-free');
   // ⑧ 성채: 04 · 07 만 · 07 사진 = 테스트 안내
-  await p.click('#camp-castle'); await p.waitForTimeout(3500);
+  await shut(); await p.click('#camp-castle'); await p.waitForTimeout(3500);
   const rooms = await p.evaluate(() => [...document.querySelectorAll('.cs-room[data-fight]')].map((e) => e.dataset.fight.split('|')[1]));
   await shot('11-castle');
   let photo = '', photoPass = false;
