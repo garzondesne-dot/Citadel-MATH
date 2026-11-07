@@ -33,7 +33,7 @@ const OUT = process.argv[2] || '.', U = 'http://localhost:8765/index.html?local'
   await T.evaluate(() => DS.Gem.gift('1-3', 1, 10, 'e2e66')); await S.waitForTimeout(1200);
   log.push('② 선물 알림(던전): ' + (await S.evaluate(() => (document.querySelector('.gift-note') ? document.querySelector('.gift-note').textContent : '없음'))));
   // ③ 🏕 수업 중 캠프 보기 → 돌아가기
-  await H.bringToFront(); await H.click('#h-camp'); await H.waitForTimeout(1500);
+  await H.bringToFront(); await H.click('#h-gear'); await H.click('#h-camp'); await H.waitForTimeout(1500);
   log.push('③ 캠프 보기: ' + (await H.evaluate(() => document.querySelector('.screen.active').id)) + ' · 돌아가기 단추 「' + ((await H.textContent('#tc-menu').catch(() => '')) || '').trim() + '」');
   await H.click('#tc-menu'); await H.waitForTimeout(1000); log.push('   돌아감: ' + (await H.evaluate(() => document.querySelector('.screen.active').id)));
   // ④ ⏸ 수업 끝 (저장) at u6 → 이어서

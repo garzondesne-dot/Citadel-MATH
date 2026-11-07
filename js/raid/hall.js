@@ -177,13 +177,18 @@ DS.Hall = (function () {
     const dots = steps.map((x, k) => `<i class="${x.kind === 'boss' ? 'b ' : x.kind === 'concept' ? 'c ' : ''}${k < i || Raid().isClosed(R) ? 'd' : k === i ? 'on' : ''}"></i>`).join('');
     return `<span class="h-stp">${Raid().isLobby(R) ? '<i class="on">대기실</i>' : Raid().isFinale(L, R) ? '<i class="on">마무리</i>' : chips}</span><span class="h-dots">${dots}</span>`;
   }
+  let gearOpen = false; // ⚙ 종합실 메뉴 (메뉴화면 · 선생님 모습 · 캠프 보기 · 전체 화면 · 보스 문 닫힘 시각)
   function render() {
     const i = R.state.step ?? -1;
-    $('#h-top').innerHTML = `<b>${esc(L.title)}</b>${stepChips(i)}<button class="h-code-chip" id="h-code-big" title="늦게 온 학생 · 다시 들어오는 학생용 — 누르면 크게">🚪 코드 <b>${code}</b></button><span class="h-sp"></span><button class="btn small" id="h-set">🧙 선생님 모습</button>${!Raid().isClosed(R) && !Raid().isLobby(R) ? '<button class="btn small" id="h-camp">🏕 캠프 보기</button>' : ''}${DS.UI.fs.btn('h-fs')}`; // ⚙ 던전 안에서도 선생님 모습 · 스킬 (2026-11-06)
+    // 2026-11-07 정돈판 비교 1~3: 위 한 줄 = 「n차시 · 단계」 · 4단계 · 시간 막대 · 🚪 코드 · ⚙ (메뉴화면 · 선생님 모습 · 캠프 보기 · 전체 화면은 ⚙ 안)
+    $('#h-top').innerHTML = `<b>${L.no ? `${L.no}차시 · ` : ''}${esc(Raid().isLobby(R) ? '대기실' : C().stepName(L, R))}</b>${stepChips(i)}<span class="h-tb2" id="h-tb2"></span><button class="h-code-chip" id="h-code-big" title="늦게 온 학생 · 다시 들어오는 학생용 — 누르면 크게">🚪 코드 <b>${code}</b></button><button class="h-gear" id="h-gear" title="메뉴화면 · 선생님 모습 · 캠프 보기 · 전체 화면">⚙</button>
+      <div class="h-gmenu" id="h-gmenu"${gearOpen ? '' : ' hidden'}><button class="btn small" id="h-menu">◀ 메뉴화면</button><button class="btn small" id="h-set">🧙 선생님 모습</button>${!Raid().isClosed(R) && !Raid().isLobby(R) ? '<button class="btn small" id="h-camp">🏕 캠프 보기</button>' : ''}${DS.UI.fs.btn('h-fs')}<span class="muted small" id="h-close-at"></span></div>`;
+    { const g = $('#h-gear'); if (g) g.onclick = () => { gearOpen = !gearOpen; const mm = $('#h-gmenu'); if (mm) mm.hidden = !gearOpen; }; const mb = $('#h-menu'); if (mb) mb.onclick = () => { const nb = document.querySelector('#screen-hall .nav-back'); if (nb) nb.click(); }; }
+    { const ca = $('#h-close-at'), dl = Raid().deadline(R); if (ca && dl) { const d = new Date(dl); ca.textContent = `👑 보스 문 닫힘 ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; } }
     { const cb = $('#h-code-big'); if (cb) cb.onclick = () => bigNote(`<p class="h-bigcode-t">🚪 수업 코드</p><b class="h-bigcode">${code}</b><p class="muted">학생 폰 → 내 캠프 → 🚪 코드로 입장</p>`, 6000, 'code'); }
     { const hc = $('#h-camp'); if (hc) hc.onclick = toCamp; } // 🏕 수업 중에도 캠프 보기 (2026-11-06 사용자 C · 「교사도 캠프로 가야 되는데」) → 캠프의 「⚔ 레이드로 돌아가기」로 복귀
     { const hs = $('#h-set'); if (hs) hs.onclick = () => C().run(() => DS.Camp.settings({ teacher: true, onSave: async (v) => { await DS.Net.set(`rooms/${code}/state/tlook`, { hero: v.hero, fx: v.fx, at: DS.Net.TS }).catch(() => {}); built = ''; if (R) render(); } })); }
-    const tb = $('#h-tbar'); if (tb) { const sig = `${Raid().deadline(R)}|${Raid().progress(L, R)}|${Raid().isClosed(R)}|${Raid().bossHp(L, R).won}|${Raid().isLobby(R)}`; if (tb.dataset.sig !== sig) { tb.dataset.sig = sig; tb.innerHTML = C().tbarHtml(L, R, { prog: false }); /* 「제출 n / m」 은 왼쪽 위 범례로 (2026-11-07) */ } }
+    { const tb = $('#h-tb2'); if (tb) tb.innerHTML = C().tbarHtml(L, R, { mini: true }); } // ⏳ 시간 막대 = 위 한 줄 안 (2026-11-07 비교 2)
     goalAndClear(i);
     DS.UI.fs.bind('h-fs');
     heroes(); side(i);
@@ -329,7 +334,7 @@ DS.Hall = (function () {
   function updateFight(step) {
     const f = fightOf(step);
     $('#rh-bar').style.width = `${f.hp.max ? (100 * f.hp.left) / f.hp.max : 0}%`;
-    $('#rh-txt').textContent = `${f.hp.left} / ${f.hp.max}  ·  기준 ${f.hp.pct}%`;
+    $('#rh-txt').textContent = `HP ${f.hp.left} / ${f.hp.max}`; // 2026-11-07 비교 6: 기준 % 는 교사 폰에만
     const now = attacks(step);
     Object.entries(now).forEach(([u, a]) => {
       const was = seen[u] || { n: 0, dmg: 0 };
@@ -362,7 +367,8 @@ DS.Hall = (function () {
       si.className = `si ${k}`; si.textContent = k === 'ok' ? '✓' : k === 'go' ? '…' : 'z';
     });
     const el = document.getElementById('h-leg'); if (!el) return;
-    el.innerHTML = `<span class="tot">제출 <b>${cnt.ok}</b> / ${cnt.ok + cnt.go + cnt.off}</span><span><i class="si ok">✓</i>제출 ${cnt.ok}</span><span><i class="si go">…</i>풀이 중 ${cnt.go}</span>${cnt.off ? `<span><i class="si off">z</i>끊김 ${cnt.off}</span>` : ''}`;
+    const wait = studs().filter(([u]) => !(R.active || {})[u] && Raid().online(R, u)).length; // ● 접속 · 대기 (늦게 와 대기실에 있는 학생)
+    el.innerHTML = `<span><i class="si ok">✓</i>제출 ${cnt.ok}</span><span><i class="si go">…</i>풀이 중 ${cnt.go}</span><span><i class="si on">●</i>접속 · 대기 ${wait}</span><span><i class="si off">z</i>끊김 ${cnt.off}</span><span class="nt">정답 · 오답 글자는 띄우지 않아요</span>`; // 2026-11-07 비교 4: 「제출 n / m」 큰 줄 삭제 (선생님 지시)
   }
   // ⚔ 마무리 일격 (2026-11-03 · 0.9.6.9 고침: 이름 배너 없앰): 체력을 0 으로 만든 학생의 용사가 슬로모션으로 돌진 → 하얀 섬광 · 큰 이펙트 두 번 · 강한 흔들림
   function finisher(u, step) {
@@ -416,7 +422,7 @@ DS.Hall = (function () {
     if (c.paused) { g.classList.add('bound'); txt.textContent = '⏸ 집중모드'; return; }
     const tr = Raid().atkTrack(atkMemo, c, `${code}|${(R.state || {}).step}|${c.kind}`);
     bar.style.width = `${(tr.p * 100).toFixed(1)}%`; g.classList.toggle('hot', tr.p > 0.8); g.classList.remove('bound');
-    txt.textContent = `${c.phase ? `👑 ${c.phase}단계 · 멈춤 ${c.lock}초 · ` : ''}👾 공격까지 ${Math.max(0, Math.ceil((1 - tr.p) * c.per))}초 · ${c.per < 30 ? '🔥 빠름' : c.per < 40 ? '보통' : '🐢 느려짐'}${c.bind ? `  ·  ⛓ 묶기 ${c.bind}초` : ''}`;
+    txt.textContent = `⏱ ${Math.max(0, Math.ceil((1 - tr.p) * c.per))}${c.bind ? ` · ⛓ ${c.bind}초` : ''}`; // 2026-11-07 비교 6: 「HP ▬ n / N ⏱ 20」 (빠름 · 단계 글자 없음)
     if (tr.strike) hallStrike(c);
   }
   function hallStrike(c) {
@@ -572,7 +578,7 @@ DS.Hall = (function () {
     const raid = document.getElementById('raid'); let t = document.getElementById('fh-teach');
     if (!on || !raid) { if (t) t.remove(); return; }
     if (t) return;
-    raid.insertAdjacentHTML('beforeend', `<div class="fh2 teach" id="fh-teach" style="left:8%;top:62%;z-index:12"><span class="dtag">🎮 시연 중</span><span class="fh-name">👩‍🏫 선생님</span><div>${DS.Art.hero(DS.Art.teacherHero(R), 'idle')}</div><i class="shadow"></i></div>`);
+    raid.insertAdjacentHTML('beforeend', `<div class="fh2 teach" id="fh-teach" style="left:46%;top:60%;z-index:20"><span class="dtag">🎮 시연 중</span><span class="fh-name">👩‍🏫 선생님</span><div>${DS.Art.hero(DS.Art.teacherHero(R), 'idle')}</div><i class="shadow"></i></div>`);
   }
   function demoClose() { const ov = document.getElementById('h-demo-ov'); if (ov) ov.remove(); demo = null; demoHero(false); }
   const filled = (q, g) => (q.type === 'multi' || q.type === 'subsets' ? g.length > 0 : q.type === 'text' ? String(g || '').trim() !== '' : g != null);
@@ -599,7 +605,7 @@ DS.Hall = (function () {
     const itemOf = (q, i) => (q.type === 'subsets'
       ? `<div class="item"><span class="item-no">${i + 1}</span>${bonusTag(i)}<div class="item-q">${DS.UI.rich(q.question || S.itemText(q))}</div><button class="btn" data-ask="${i}">${d.given[i].length ? `✏ ${d.given[i].length}개 썼어요 · 고치기` : '✏ 입력 창 열기'}</button></div>`
       : (bonusTag(i) ? `<div class="demo-bwrap">${bonusTag(i)}${S.itemHtml(q, i, d.given)}</div>` : S.itemHtml(q, i, d.given)));
-    ov.innerHTML = `<div class="demo-box framed${d.boss ? ' boss' : ''}"><div class="demo-head"><b>🎮 시연 · ${esc(title)}</b><span class="demo-tag">데미지 · 기록 없음</span>
+    ov.innerHTML = `<div class="demo-box paper${d.boss ? ' boss' : ''}"><div class="demo-head"><b>🎮 시연 · ${esc(title)}</b><span class="demo-tag">데미지 · 기록 없음</span>
         <button class="btn small${d.attempt ? '' : ' on'}" data-da="0">📄 ${d.boss ? '세트 1 (학습지)' : '학습지 문제'}</button><button class="btn small${d.attempt ? ' on' : ''}" data-da="1">🔄 ${d.boss ? '세트 2 (숫자 바꿈)' : '숫자 바꾼 문제'}</button><button class="btn small" id="demo-x">✕ 닫기</button></div>
       ${d.marks ? res : `${!d.boss && (L.monsters[d.step.id] || {}).note ? `<p class="muted small">💡 ${esc(L.monsters[d.step.id].note)}</p>` : ''}${d.boss && d.hp < d.items.length ? `<p class="muted small">1~${d.hp}번을 모두 맞히면 선생님의 일격! (${d.hp + 1}번~ 보너스는 골라서)</p>` : ''}<div class="items demo-items${d.boss ? ' two' : ''}">${d.items.map(itemOf).join('')}</div>
         <div class="row demo-go-row"><button class="btn big" id="demo-reveal">💡 정답 펼치기</button><button class="btn primary big" id="demo-go"${ready ? '' : ' disabled'}>⚔ 공격! (시연)</button></div>`}

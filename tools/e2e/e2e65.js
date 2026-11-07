@@ -22,7 +22,7 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   await T.evaluate(async (c) => { for (let k = 0; k < 4; k++) { const R = DS.Act.unpackRoom(await DS.Net.get(`rooms/${c}`)); await DS.Act.go(c, R, DS.Lessons.get(R.meta.lesson), 1); } }, code); await T.waitForTimeout(2500);
   // 종합실 던전 안 ⚙ · 시연
   await H.bringToFront(); log.push('종합실 화면: ' + (await H.evaluate(() => document.querySelector('.screen.active').id)) + ' · ⚙ 단추 ' + !!(await H.$('#h-set')));
-  await H.click('#h-set'); await H.waitForTimeout(700); log.push(`던전 안 설정: 창 ${await box('.set-box')} · 가운데 ${await ctr()}`); await H.screenshot({ path: `${OUT}/sf-2-hall-set.png` });
+  await H.click('#h-gear'); await H.click('#h-set'); await H.waitForTimeout(700); log.push(`던전 안 설정: 창 ${await box('.set-box')} · 가운데 ${await ctr()}`); await H.screenshot({ path: `${OUT}/sf-2-hall-set.png` });
   await H.click('.set-grid .hpick[data-h="3"]'); await H.evaluate(() => (document.getElementById('set-ok') || document.querySelector('.set-box .btn.primary')).click()); await H.waitForTimeout(1500);
   log.push('선생님 모습 바뀜(tlook): ' + (await T.evaluate(async (c) => JSON.stringify(await DS.Net.get(`rooms/${c}/state/tlook`)), code)).slice(0, 40));
   await H.click('#h-demo'); await H.waitForTimeout(600); log.push(`시연 창: ${await box('#h-demo-ov .demo-box')} · 가운데 ${await ctr()}`); await H.screenshot({ path: `${OUT}/sf-3-demo.png` }); await H.click('#demo-x');

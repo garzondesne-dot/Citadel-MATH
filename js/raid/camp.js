@@ -248,8 +248,8 @@ DS.Camp = (function () {
     const hn = (id) => ((DS.ASSETS.heroesV2.list[id] || {}).name || '용사');
     const lock = (id) => !((L.heroes || []).find((h) => h.id === id) || {}).open;
     if (lock(16)) cand.push([3 - seals, `업적 ${3 - seals}개 더 모으면 <b class="gold">${hn(16)}</b> 해금!`]);
-    const need3 = U.filter((c) => c.no <= 3 && c.id !== 'subcount'); if (lock(8) && need3.length) cand.push([need3.length - hasN(need3), `1~3차시 도감 ${need3.length - hasN(need3)}장 더 → <b class="gold">${hn(8)}</b> 해금!`]);
-    const r46 = range(4, 6); if (lock(10) && r46.length) cand.push([r46.length - hasN(r46), `4~6차시 도감 ${r46.length - hasN(r46)}장 더 → <b class="gold">${hn(10)}</b> 해금!`]);
+    const need3 = U.filter((c) => c.no <= 3 && c.id !== 'subcount'); if (lock(8) && need3.length) cand.push([need3.length - hasN(need3), `카드 ${need3.length - hasN(need3)}장 더 → 🧑 <b class="gold">${hn(8)}</b>`]);
+    const r46 = range(4, 6); if (lock(10) && r46.length) cand.push([r46.length - hasN(r46), `카드 ${r46.length - hasN(r46)}장 더 → 🧑 <b class="gold">${hn(10)}</b>`]);
     const ui = DS.Bonus ? DS.Bonus.UNLOCK.findIndex((u) => seals < u) : -1;
     if (ui >= 0) cand.push([DS.Bonus.UNLOCK[ui] - seals, `업적 ${DS.Bonus.UNLOCK[ui] - seals}개 더 → ✨ <b class="gold">${esc(DS.FX.NAMES[DS.FX.FANCY[ui]])}</b> 이펙트!`]);
     const c = cand.filter((x) => x[0] > 0).sort((a, b) => a[0] - b[0])[0];

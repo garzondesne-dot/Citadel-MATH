@@ -17,7 +17,7 @@ DS.Ink = (() => {
     close(); if (!host) return;
     key = k || ''; strokes = [];
     box = document.createElement('div'); box.className = 'ink-box';
-    box.innerHTML = `<canvas class="ink-cv zoom-ok"></canvas><div class="ink-tool">${PENS.map((p) => `<button class="ink-b ink-${p.k}${p === pen ? ' on' : ''}" data-pen="${p.k}" title="${{ red: '빨강', blue: '파랑', black: '검정', hi: '형광펜', er: '지우개' }[p.k]}">${p.k === 'hi' ? '🖍' : p.k === 'er' ? '🧽' : ''}</button>`).join('')}<hr><button class="ink-b" data-undo title="되돌리기">↶</button><button class="ink-b" data-clear title="전체 지우기">🗑</button><button class="ink-b" data-close title="필기 끝내기">✕</button></div><span class="ink-pill">✏ 필기 중</span>`;
+    box.innerHTML = `<canvas class="ink-cv zoom-ok"></canvas><div class="ink-tool">${PENS.map((p) => `<button class="ink-b ink-${p.k}${p === pen ? ' on' : ''}" data-pen="${p.k}" title="${{ red: '빨강', blue: '파랑', black: '검정', hi: '형광펜', er: '지우개' }[p.k]}">${p.k === 'hi' ? '🖍' : p.k === 'er' ? '🧽' : ''}</button>`).join('')}<hr><button class="ink-b" data-undo title="되돌리기">↶</button><button class="ink-b" data-clear title="전체 지우기">🗑</button><button class="ink-b" data-close title="필기 끝내기">✕</button></div><span class="ink-pill">✏ 필기 중 · 다음 단계로 넘어가면 지워져요</span>`;
     host.style.position = host.style.position || 'relative'; host.appendChild(box);
     cv = box.querySelector('canvas'); g = cv.getContext('2d'); size();
     cv.onpointerdown = (e) => { e.preventDefault(); cv.setPointerCapture(e.pointerId); cur = { c: pen.c, w: pen.w, pts: [at(e)] }; strokes.push(cur); line(cur); };

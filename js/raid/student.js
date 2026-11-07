@@ -182,9 +182,9 @@ DS.Student = (function () {
     gemRefresh();
     Promise.resolve().then(() => { const lk = focusLock(); document.querySelectorAll('#st-set, #st-fb').forEach((b) => { b.disabled = lk; b.classList.toggle('off', lk); }); }); // 👀 집중모드 = 💬 · 💎 잠금 (장면을 다시 그리지 않아도)
     if (battleNow()) { $('#st-head').innerHTML = ''; return; }
-    $('#st-head').innerHTML = `${DS.Art.hero(p.hero || 0, 'idle', 'me')}
-      <div><b>${DS.Titles ? DS.Titles.nameHtml(p, { beon: true }) : `${p.num}번 ${esc(p.nick || '')}`}</b><br><span class="muted small">${esc(L.unit)} · ${esc(L.title)}</span></div>
-      <div class="st-badge">${Raid().isLobby(R) || myP().lobby ? '대기실' : Raid().isEnd(L, R) ? '마무리' : step.kind === 'boss' ? '보스' : step.kind === 'monster' ? (step.special ? '스페셜' : '전투') : '설명'}</div>${test ? '' : `<button class="btn small st-set" id="st-fb"${focusLock() ? ' disabled' : ''} title="의견 보내기">💬</button>`}${test ? '' : `<button class="btn small st-set" id="st-set"${focusLock() ? ' disabled title="집중모드에는 상점을 열 수 없어요"' : ' title="💎 상점 (용사 · 스킬 · 강화 · 호칭)"'}>💎</button>`}`;
+    // 2026-11-07 정돈판 비교 10: 대기실 · 설명 · 마무리도 전투와 같은 위 칸 (동그란 ◀ · 무대 이름 · 💬 · 💎 칩) — 장면 대신 얇은 띠
+    const badge = Raid().isLobby(R) || myP().lobby ? '대기실' : Raid().isEnd(L, R) ? '마무리' : step.kind === 'boss' ? '보스' : step.kind === 'monster' ? (step.special ? '스페셜' : '전투') : '설명';
+    $('#st-head').innerHTML = `<div class="sc-top flat">${scTop().replace(/^<div class="sc-top">/, '').replace(/<\/div>$/, '')}</div><div class="st-plate">${DS.Art.hero(p.hero || 0, 'idle', 'me')}<b>${DS.Titles ? DS.Titles.nameHtml(p, { beon: true }) : `${p.num}번 ${esc(p.nick || '')}`}</b><span class="st-badge">${badge}</span></div>`;
     bindTop(); // 💬 버그 · 의견 (2026-11-06) · 💎 = 내 용사 창
   }
   const focusLock = () => !!(R && Raid().focusOn(R) && !Raid().isLobby(R)); // 👀 집중모드: 학생 설정 잠금 (2026-11-06 사용자)

@@ -164,6 +164,7 @@ DS.Result = (function () {
       <p class="shelf-title">개념별 (첫 시도)</p>${Object.entries(r.conc).map(([c, v]) => `<div class="rs-c"><span>${esc(r.titles[c] || c)}</span><span class="rs-dots">${dots(v.ok, v.total)}</span><span class="muted small">${v.ok} / ${v.total}</span></div>`).join('')}
       <p class="shelf-title">복습 추천</p>${floorLine(L)}${misLine(r.mis)}${recs(L, r, prep, opt.inClass)}
       <p class="shelf-title">📤 카톡으로 보내기</p><div class="row rs-share"><button class="btn" id="rs-card1">⚔ 전투 기록 보내기</button><button class="btn" id="rs-card2">📘 수학 노트 보내기</button></div>
+      ${(() => { const cs = DS.Unit ? DS.Unit.CARDS.filter((c) => c.no === L.no) : []; return cs.length ? `<p class="rs-forge">⚒ 오늘 배운 개념 카드 <b>${cs.length}장</b>이 모루에서 기다려요 · 장마다 💎 +${DS.Gem ? DS.Gem.G.card : 3}</p>` : ''; })()}
       <div class="row"><button class="btn primary big" id="rs-ok">${opt.inClass ? '🏕 대기실로' : '🏕 내 캠프로'}</button></div></div>`;
     document.body.appendChild(el);
     if (up) DS.Sound.correct();

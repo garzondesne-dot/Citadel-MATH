@@ -2395,7 +2395,7 @@ body:has(#screen-student.st-battle.active) #ver-tag { display: none; }
 .sc-stage { flex: 1; min-width: 0; line-height: 1.2; text-shadow: 0 1px 2px #000, 0 0 4px #000; }
 .sc-stage small { display: block; font-size: 11px; color: #e8dcc6; } .sc-stage b { display: block; font-size: 14px; color: var(--gold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .sc-gem { height: 30px; flex: none; display: flex; align-items: center; gap: 4px; padding: 0 4px 0 9px; border: 0; border-radius: 15px; background: rgba(16, 12, 9, .62); box-shadow: inset 0 0 0 2px rgba(176, 141, 87, .85); color: #8fd8ff; font: 700 13px var(--pixel); cursor: pointer; }
-.sc-gem i { font-style: normal; width: 20px; height: 20px; border-radius: 50%; background: var(--gold); color: #2a1d0a; display: flex; align-items: center; justify-content: center; }
+.sc-gem i:not(.ui-ic) { font-style: normal; width: 20px; height: 20px; border-radius: 50%; background: var(--gold); color: #2a1d0a; display: flex; align-items: center; justify-content: center; }
 .sc-gem.off, .sc-gem:disabled { opacity: .45; }
 .sc-gn.up { animation: scGemUp .9s ease; } @keyframes scGemUp { 0% { transform: scale(1); color: #fff; } 40% { transform: scale(1.5); color: #ffe27a; } 100% { transform: scale(1); } }
 .sc-hp { position: absolute; left: 10px; right: 10px; top: 52px; z-index: 6; padding: 5px 8px 6px; border-radius: 8px; background: rgba(16, 12, 9, .68); box-shadow: inset 0 0 0 1.5px rgba(176, 141, 87, .8); display: grid; grid-template-columns: auto 1fr auto auto; gap: 4px 8px; align-items: center; font: 12px var(--pixel); }
@@ -2596,3 +2596,51 @@ body:has(#h-demo-ov.side) .h-dock { right: calc(36vw + 18px); }
 .qs-saeng { font-size: 13px; line-height: 1.6; padding: 8px; border: 1.5px dashed var(--cyan); border-radius: 8px; }
 .bn-quests .bn-row { cursor: pointer; }
 .mk-grid { grid-template-columns: repeat(4, 1fr); } .mk-grid .btn { font-size: 11.5px; min-height: 58px; }
+
+/* ── 🔍 정돈판 비교 반영 (2026-11-07 방향 방 15건) ── */
+/* 9: 💎 칩 = 도트 💎 + 둥근 칩만 (네모 배경 없앰) */
+#screen-camp .camp-top .sc-gem.camp-set { background: rgba(16,12,9,.62) !important; padding: 0 4px 0 9px !important; margin: 0 !important; border-radius: 15px !important; }
+.sc-gem .ui-ic { width: 18px; height: 18px; margin: 0; }
+/* 12: 캠프 하위 화면 ◀ = 동그란 ◀ (허수아비 · 성채 · 이어하기) */
+#screen-bonus #bn-back { width: 38px !important; height: 38px !important; min-width: 0 !important; padding: 0 !important; border: 0 !important; border-image: none !important; border-radius: 50% !important; background: rgba(16,12,9,.62) !important; box-shadow: inset 0 0 0 2px rgba(176,141,87,.85) !important; font-size: 0 !important; display: inline-flex !important; align-items: center; justify-content: center; flex: none; }
+#screen-bonus #bn-back::before { content: '◀'; font: 15px var(--pixel); color: #f3d9a4; }
+/* 1 · 2 · 5 · 7 · 8: 종합실 위 한 줄 · 필드 끝까지 · 시연 양피지 · 필기 도구 오른쪽 */
+#screen-hall .nav-back, #screen-hall #h-tbar { display: none !important; }
+.h-tb2 { flex: 1; min-width: 160px; } .h-tb2 * { transition: none !important; animation: none !important; } .h-tb2 .tbar, .h-tb2 > div { margin: 0 !important; padding: 2px 6px !important; }
+.h-gear { font: inherit; font-size: 18px; width: 38px; height: 34px; border-radius: 8px; border: 1.5px solid #b08d57; background: #1f1a16; color: var(--text); cursor: pointer; }
+.h-gmenu { position: absolute; right: 12px; top: 100%; z-index: 70; display: flex; flex-direction: column; gap: 6px; padding: 10px; border-radius: 10px; background: #1f1a16f2; border: 2px solid #b08d57; box-shadow: 0 8px 22px #0009; }
+.h-gmenu[hidden] { display: none !important; } .h-gmenu .btn { margin: 0 !important; }
+#screen-hall .hall > .h-top { padding-left: 14px; }
+#screen-hall .h-arena.framed { border: 0 !important; border-image: none !important; padding: 0 !important; background: none !important; }
+#screen-hall .raid-top { display: none; }
+#screen-hall .h-main { padding: 0 !important; gap: 0 !important; }
+.h-leg .nt { flex-basis: 100%; color: var(--muted); font-size: 12px; }
+.si.on { background: transparent; color: #62d394; font-size: 13px; }
+.h-demo-ov.side .demo-box { background: linear-gradient(rgba(247,236,205,.6), rgba(247,236,205,.6)), #ecd9a8 var(--paper-tex) center / cover !important; color: #000 !important; border-radius: 14px; box-shadow: inset 0 0 20px rgba(120,80,25,.32) !important; }
+.fh2.teach { transform: translateX(-50%) scale(1.5); transform-origin: bottom center; }
+.ink-tool { left: auto !important; right: 14px !important; }
+.ink-pill { bottom: 96px; }
+.fh2.teach { transform: none; } .fh2.teach > div { transform: scale(1.7); transform-origin: bottom center; margin-top: 30px; }
+/* 10 · 11: 학생 폰 대기실 · 설명도 같은 위 칸 · 전투 장면은 화면 맨 위까지 */
+#screen-student .st-head.framed { border: 0 !important; border-image: none !important; background: none !important; padding: 0 !important; box-shadow: none !important; display: block; }
+#screen-student .sc-top.flat { position: static; margin: 2px 0 6px; padding: 4px 2px; }
+#screen-student .sc-top.flat .sc-stage small { color: var(--muted); }
+.st-plate { display: flex; align-items: center; gap: 8px; font-size: 14px; padding: 2px 4px 6px; } .st-plate .art { width: 40px; height: 40px; } .st-plate .st-badge { margin-left: auto; }
+#screen-student > .wrap > .nav-back { display: none !important; }
+body:not(:has(#test-tv)) #screen-student.st-battle > .wrap { padding-top: 0 !important; } /* 체험판 위 TV 창 아래는 그대로 */
+#screen-student.st-battle #st-body > .st-fight, #screen-student.st-battle #st-body > .panel:first-child { margin-top: 0 !important; }
+.rg.rg8 { grid-template-columns: repeat(4, 1fr); } .rg.rg8 .rg-b:disabled { opacity: .35; }
+/* 15: 교사 탭 로고 작게 · 오늘 수업 안내는 ⓘ */
+#screen-home:has(.role[data-role="teacher"].on) .home-title, #screen-home:has(.role[data-role="hall"].on) .home-title { transform: scale(.66); transform-origin: top center; margin-bottom: -44px !important; }
+.td-empty { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; } .td-empty > b { color: var(--gold); flex: 1; } .td-i { cursor: help; color: var(--muted); border: 1px solid var(--line); border-radius: 50%; width: 20px; height: 20px; display: inline-grid; place-items: center; font-size: 12px; }
+/* 13: ⚒ 모루 — 도감 특전 3줄 · 카드 💎+3 · 완성 창 */
+.fg-perks { display: flex; flex-direction: column; gap: 6px; margin: 4px 0 10px; }
+.fg-perk { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 9px; border: 1.5px solid #b08d57; background: rgba(20,16,12,.78); }
+.fg-perk .art { width: 44px; height: 44px; flex: none; }
+.fg-perk .tx { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; } .fg-perk .tx b { color: var(--gold); font-size: 14px; } .fg-perk .tx small { color: var(--muted); font-size: 12px; }
+.fg-pbar { display: block; height: 6px; border-radius: 3px; background: #3a3026; overflow: hidden; } .fg-pbar > i { display: block; height: 100%; background: var(--gold); }
+.fg-perk .btn { margin: 0 !important; white-space: nowrap; } .fg-pok { font-size: 12px; color: #62d394; white-space: nowrap; }
+.fg-perk.done { border-color: #62d394; }
+.fg-cw { position: relative; display: inline-block; } .fg-g3 { position: absolute; right: 2px; bottom: 4px; font-style: normal; font-size: 11px; font-weight: 700; padding: 0 5px; border-radius: 8px; background: rgba(16,12,9,.85); color: var(--cyan); }
+.fg-gem3 { color: var(--cyan); font-size: 16px; }
+.rs-forge { margin: 8px 0; padding: 8px; border-radius: 9px; border: 1.5px solid #b08d57; background: #1f1a16; font-size: 14px; } .rs-forge b { color: var(--gold); }

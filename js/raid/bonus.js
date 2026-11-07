@@ -86,7 +86,7 @@ DS.Bonus = (function () {
   const fxCond = (i) => `🏆 업적 ${UNLOCK[i]}개 (👑 재대결 · 성채 보스 처치)`;
 
   let recs = null, heldM = {}; // 📕 records/{반}/{번호} · held/{반}
-  let quests = []; // ✏ 친구가 낸 문제 (출제 공방 · 2026-11-07 6판)
+  let quests = [], cardsMine = {}; // ⚒ 내 카드 (허수아비 차시 카드 「이 차시 개념 카드 n / m · 모루로」 · 2026-11-07) // ✏ 친구가 낸 문제 (출제 공방 · 2026-11-07 6판)
   let gemD = null; // 💎 gem/{반}/{번호} — 문제 밖에서 「받을 수 있는 마정석」 표시 (2026-11-05 사용자 「꼬드겨야지」)
   let preview = false; // preview = 교사 캠프: 모든 방 · 모든 차시 미리 보기 (기록 저장 안 함)
   // opt.train = 🎯 허수아비 · opt.go = [차시 id, 몬스터 id] → 들어가자마자 그 문제 (📮 우편함 「바로 풀기」)
@@ -97,6 +97,7 @@ DS.Bonus = (function () {
     recs = preview || (m && m.test) ? null : (await N().get(`records/${ck(m.c)}/${m.n}`).catch(() => null)) || {};
     heldM = recs ? (await N().get(`held/${ck(m.c)}`).catch(() => null)) || {} : {};
     gemD = preview || !m || m.test || !DS.Gem ? null : await DS.Gem.mine(m).catch(() => null);
+    cardsMine = train && m && !m.test && !preview ? (await N().get(`cards/${ck(m.c)}/${m.n}`).catch(() => null)) || {} : {};
     quests = train && DS.Quest && m && !m.test && !preview ? await DS.Quest.friends(m, no).catch(() => []) : [];
     mathOpen = !!(gemD && DS.Gem.photoPassed && DS.Gem.photoPassed(gemD)); // 🧑‍🎓 수식 책사 남 · 여 열렸나
     if (DS.Photo) await DS.Photo.load(true).catch(() => null); // 📷 gcfg/photo · photo_rubric
@@ -147,6 +148,7 @@ DS.Bonus = (function () {
   function bindFight() {
     document.querySelectorAll('[data-fight]').forEach((b) => (b.onclick = () => { const [lid, mid] = b.dataset.fight.split('|'); DS.Control.run(() => fight(DS.Lessons.get(lid), mid)); }));
     document.querySelectorAll('[data-qfight]').forEach((b) => (b.onclick = () => { const q = quests.find((x) => x.id === b.dataset.qfight); if (q) DS.Control.run(() => fight(DS.Lessons.get(q.lesson), q.mid, { quest: q })); }));
+    document.querySelectorAll('[data-forge]').forEach((b) => (b.onclick = () => DS.Forge.open(me))); // ⚒ 모루로 (개인 캠프 밖이지만 혼자 하는 곳 · 2026-11-03 결정: 모루는 언제나 열림)
     document.querySelectorAll('[data-shelf]').forEach((b) => (b.onclick = () => DS.Control.run(() => DS.Camp.shelf(all() ? 99 : null, b.dataset.shelf)))); // 📚 텐트 책장 → 허수아비 (2026-11-07)
     $('#bn-back').onclick = () => { if (DS.Sound && DS.Sound.bgm) DS.Sound.bgm(null); return preview ? DS.TCamp.back() : DS.Camp.enter(me); };
   }
@@ -237,7 +239,7 @@ DS.Bonus = (function () {
       const stOf = (id) => (id === 'boss' || x.none ? null : x.mons[x.ids.indexOf(id)]);
       const order = ids.slice().sort((a, b) => { const o = (id) => { const s = stOf(id); return s && (DS.Note.OPEN[s] || s === 'a') ? 0 : id === 'boss' ? 1 : 2; }; return o(a) - o(b); });
       return `<div class="panel framed bn-card${sealed ? ' sealed' : ''}${x.left ? ' nt-left' : ''}"><p class="bn-h"><b>🎯 복습! ${l.no}차시 · ${esc(l.title)}</b>${x.none ? '' : x.left ? `<span class="nt-cnt">❗ 남은 문제 ${x.left}</span>${!gLog(`note_${l.id}`) ? gTag(DS.Gem.G.note, ' 다 풀면') : ''}` : '<span class="nt-cnt ok">✔ 복습 완료</span>'}${sealed ? '<span class="bn-stamp">🏆 업적</span>' : ''}</p>
-        <div class="bn-cpts"><button class="btn small" data-shelf="${l.id}">📚 개념 다시 보기 (🎬 · 📄)</button></div>
+        <div class="bn-cpts"><button class="btn small" data-shelf="${l.id}">📚 개념 다시 보기 (🎬 · 📄)</button>${(() => { const cs = DS.Unit ? DS.Unit.CARDS.filter((c) => c.no === l.no) : []; if (!cs.length || all()) return ''; return `<button class="btn small fg-go" data-forge>⚒ 이 차시 개념 카드 ${cs.filter((c) => cardsMine[c.id]).length} / ${cs.length} · 모루로 ▶</button>`; })()}</div>
         ${x.none ? '' : DS.Note.rows(x)}
         <div class="bn-list">${order.map((id) => { const s = stOf(id), r = rec[id] || {}, m = monOf(l, id), need = s && (DS.Note.OPEN[s] || s === 'a'), bossNeed = id === 'boss' && !r.clear;
           return `<div class="bn-row${need ? ' nt-open' : r.clear || (s && !need) ? ' clear' : ''}${id === 'boss' ? ' boss' : ''}">${s ? DS.Note.icon(s) : DS.Art.monster(m.sprite, r.clear ? 'down' : 'idle')}<span>${need ? '<b class="nt-ex">❗</b> ' : ''}${esc(m.title)}${s ? ` <span class="muted small">· ${esc(DS.Note.WHY[s] || '')}</span>` : bossNeed ? '' : ''}${(() => { const t = (need && gReviewLeft() ? gTag(DS.Gem.G.review) : bossNeed && !gLog(`bossre_${l.id}`) ? gTag(DS.Gem.G.bossRe + (sealed ? 0 : DS.Gem.G.seal)) : '') + (bossNeed && !sealed ? sealTag() : ''); return t ? `<em class="gm-wrap">${t}</em>` : ''; })()}</span><button class="btn small${need || bossNeed ? ' primary' : ''}" data-fight="${l.id}|${id}">${need ? (s === 'x' ? '⚔ 다시 풀기' : '⚔ 풀기') : r.clear ? '✔ 다시 하기' : id === 'boss' ? '👑 재대결' : '🎯 연습'}</button></div>`; }).join('')}</div></div>`;

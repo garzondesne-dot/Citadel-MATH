@@ -20,7 +20,7 @@ DS.Att = (function () {
     const [eff, all] = await Promise.all([S().effective(), S().plan({ past: true, days: 1 }).catch(() => [])]), now = DS.Net.now();
     const list = all.filter((x) => x.date === S().kst(now).date);
     const head = `<div class="td-head"><b>📅 오늘 수업</b><span class="muted small">${list.length ? `${list.length}개 · 칸을 눌러 그 반 · 그 차시로 열기` : '오늘은 시간표 수업이 없어요'}</span><button class="btn small" data-sc>📅 시간표</button><button class="btn small" data-ex>➕ 보충</button></div>`;
-    if (!Object.keys(eff.week).length && !list.length) { el.innerHTML = `<div class="td-empty"><span>📅 시간표를 넣으면 칸마다 「반 · 몇 차시」가 저절로 이어져요 · 보충은 ➕</span><button class="btn small" data-sc>📅 시간표 넣기</button><button class="btn small" data-ex>➕ 보충</button></div>`; bindSc(el); return; }
+    if (!Object.keys(eff.week).length && !list.length) { el.innerHTML = `<div class="td-empty"><b>📅 오늘 수업</b><span class="td-i" title="시간표를 넣으면 칸마다 「반 · 몇 차시」가 저절로 이어져요 · 보충은 ➕">ⓘ</span><button class="btn small" data-sc>📅 시간표 넣기</button><button class="btn small" data-ex>➕ 보충</button></div>`; bindSc(el); return; }
     const row = (x, i) => { const on = !x.past && now >= x.from - 10 * 60e3 && now < x.to;
       return `<div class="td-row${on ? ' now' : ''}${x.past || x.closed ? ' done' : ''}">
         <span class="td-p"><b>${x.p}교시</b><small>${esc(S().BELLS[x.p][0])}</small></span>

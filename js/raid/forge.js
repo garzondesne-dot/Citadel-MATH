@@ -14,11 +14,23 @@ DS.Forge = (function () {
   const cardFm = (c) => c.mf || c.fm; // 재료로 쓸 때는 수식 (2026-11-05)
   const symOf = (t) => { if (!t) return ''; const c = tok(t); if (c) return cardFm(c); const m = U().MATS.find((x) => x.id === t); return m ? m.sym : t; };
 
+  let gemD = null; // 💎 (특전 용사 먼저 열기 · 2026-11-07 모루 살리기)
+  // 📖 도감 특전 3줄 (2026-11-07 모루 시안): 🧑 성기사 = 1~3차시(「부분집합의 개수」 빼고) · 무희 = 4~6 · 음유시인 = 7~10 · 💎 60 먼저 열기 → 다 모으면 돌려받음
+  const PERKS = [{ id: 8, a: 1, b: 3, skip: 'subcount' }, { id: 10, a: 4, b: 6 }, { id: 11, a: 7, b: 10 }];
+  const perkCards = (p) => U().CARDS.filter((c) => c.no >= p.a && c.no <= p.b && c.id !== p.skip);
+  const heroName = (id) => ((DS.ASSETS.heroesV2.list[id] || {}).name || '용사');
+  const perkOf = (c) => PERKS.find((p) => perkCards(p).some((x) => x.id === c.id));
+  const bought = (id) => !!(gemD && DS.Gem && DS.Gem.owns(gemD, 'hero', id));
+  function perksHtml() {
+    return `<div class="fg-perks">${PERKS.map((p) => { const cs = perkCards(p), got = cs.filter((c) => owned[c.id]).length, done = cs.length && got === cs.length, price = DS.Gem ? DS.Gem.price('hero', p.id) : null;
+      return `<div class="fg-perk${done ? ' done' : ''}">${DS.Art.hero(p.id, 'idle')}<span class="tx"><b>🧑 ${esc(heroName(p.id))}</b><small>${p.a}~${p.b}차시 카드 ${got} / ${cs.length}</small><i class="fg-pbar"><i style="width:${cs.length ? (100 * got) / cs.length : 0}%"></i></i></span>${done ? '<span class="fg-pok">✔ 열림</span>' : bought(p.id) ? '<span class="fg-pok">💎 로 열림 · 다 모으면 돌려받음</span>' : price != null && !preview && gemD ? `<button class="btn small" data-perk="${p.id}">💎 ${price} 먼저 열기</button>` : ''}</div>`; }).join('')}</div>`;
+  }
   let preview = false; // 교사 대기공간: 모든 차시 미리 보기 (저장하지 않음)
   async function open(m, opt = {}) {
     me = m; tab = 'forge'; slots = { l: null, op: null, r: null }; pick = 'l'; preview = !!opt.preview;
     no = 99; // 2026-11-05 사용자: 연성 도감은 진도(unlock)와 상관없이 모두 해금 가능 (처음 만든 카드는 예제를 맞혀야 완성 · 그대로)
     owned = preview ? {} : (await N().get(`cards/${key(m.c)}/${m.n}`).catch(() => null)) || {};
+    gemD = preview || !DS.Gem || m.test ? null : await DS.Gem.mine(m).catch(() => null);
     $('#forge').hidden = false; document.body.classList.add('forge-open');
     render();
   }
@@ -32,11 +44,12 @@ DS.Forge = (function () {
     const abs = (k) => `url('${new URL(DS.ASSETS.base + DS.ASSETS.forgeC[k], location.href).href}')`;
     el.style.setProperty('--fc-mat', abs('material')); el.style.setProperty('--fc-op', abs('operator'));
     el.innerHTML = `<div class="fg-wrap${tab === 'forge' && no ? ' one' : ''}"><div class="fg-bg" style="background-image:linear-gradient(#17141055,#171410aa),url('${DS.ASSETS.base}${DS.ASSETS.forgeC.bg}')"></div>
-      <div class="fg-hud"><b>⚒ 모루</b><span class="fg-pill">${me.trial ? '👩‍🏫 체험판 · 모든 카드 열림' : `${esc(me.c)}반 · ${no ? `${no}차시까지 열림` : '아직 열린 차시 없음'}`}</span><span class="fg-pill blue">📖 ${have().length} / ${opened().length}</span><button class="btn small" id="fg-x">✕ 닫기</button></div>
+      <div class="fg-hud"><b>⚒ 모루</b><span class="fg-pill">카드 1장 = 💎 ${DS.Gem ? DS.Gem.G.card : 3}</span><span class="fg-pill blue">📖 ${have().length} / ${opened().length}</span><button class="btn small" id="fg-x">✕ 닫기</button></div>
       <div class="tabs fg-tabs">${[['forge', '🔨 연성'], ['book', '📖 도감'], ['mine', '🃏 내 카드']].map(([k, t]) => `<button class="tab${tab === k ? ' on' : ''}" data-tab="${k}">${t}</button>`).join('')}</div>
       <div class="fg-body">${!no ? '<p class="fg-empty">선생님이 우리 반에 수업(2차시부터)을 열면 레시피가 나타나요.</p>' : tab === 'book' ? book() : tab === 'mine' ? mine() : forgeTab()}</div></div>`;
     $('#fg-x').onclick = close;
     el.querySelectorAll('[data-tab]').forEach((b) => (b.onclick = () => { tab = b.dataset.tab; render(); }));
+    el.querySelectorAll('[data-perk]').forEach((b) => (b.onclick = () => DS.Control.run(async () => { const id = Number(b.dataset.perk), price = DS.Gem.price('hero', id); if (!window.confirm(`💎 ${price} 로 🧑 ${heroName(id)}를 먼저 열까요?\n그 차시 카드를 다 모으면 💎 ${price} 를 돌려받아요 (되팔기는 안 돼요).`)) return; await DS.Gem.buy(me, 'hero', id); gemD = await DS.Gem.mine(me).catch(() => gemD); DS.UI.toast(`🧑 ${heroName(id)} 열림! 🧙 내 용사에서 골라요`); render(); })));
     if (tab === 'forge' && no) bindForge();
     el.querySelectorAll('.mcard[data-card]').forEach((c) => (c.onclick = () => zoom(c.dataset.card)));
   }
@@ -68,7 +81,7 @@ DS.Forge = (function () {
       </div>
       <p class="fg-msg" id="fg-msg">${o && o.unary ? `${esc(o.sym)} 는 한 칸 연산 — 재료 하나만 올려요.` : '연산을 고르고 재료 · 연산 · 재료를 올려 연성하세요.'}</p>
       <div class="fc-mats">${U().MATS.map((m) => tile(pretty(m.sym), `mat mini${m.sym.length > 3 ? ' long' : ''}${/[가-힣]/.test(m.sym) ? ' ko' : ''}`, `data-put="${m.id}" title="${esc(m.tip)}"`)).join('')}${have().map((c) => tile(`<span class="fc-cardname fm${cardFm(c).length > 8 ? ' long xl' : cardFm(c).length > 5 ? ' long' : ''}">${pretty(cardFm(c))}</span>`, 'mat mini card', `data-put="card:${c.id}" title="${esc(c.name)}"`)).join('')}</div>
-      <div class="fc-foot"><button class="btn small" id="fg-hints">💡 힌트 <b class="fc-ptsn">${h.pts}</b> · 남은 ${todo}장</button><button class="btn small" id="fg-clear">비우기</button></div>
+      <div class="fc-foot"><button class="btn small" id="fg-hints">💡 만들 수 있는 카드 · 힌트 <b class="fc-ptsn">${h.pts}</b></button><button class="btn small" id="fg-clear">비우기</button></div>
     </div>`;
   }
   // 💡 만들 수 있는 카드 (v0.9.0): 이름은 ??? · 힌트 한 줄 + 모양(칸 수). 연성에 실패하면 💡 힌트 조각 +1 → 조각으로 한 단계씩 더 연다 (1단계: 재료 · 2단계: 연산까지)
@@ -164,24 +177,25 @@ DS.Forge = (function () {
     const el = document.createElement('div'); el.className = 'fg-reveal';
     const n = have().length + (first ? 1 : 0);
     el.innerHTML = `<div class="fg-burst"></div><b class="fg-new">${first ? 'NEW CARD!' : '이미 가진 카드'}</b>${DS.Card.html(c, { w: Math.min(260, innerWidth * 0.62) })}
-      <b class="fg-name">${esc(c.name)}</b><span class="muted small">도감 ${n} / ${opened().length}</span><button class="btn primary big" id="fg-keep">${first ? '🃏 내 카드에 넣기' : '확인'}</button>`;
+      <b class="fg-name">${esc(c.name)}</b>${first && !preview ? `<b class="fg-gem3">💎 +${DS.Gem ? DS.Gem.G.card : 3} · 마정석을 받았어요</b>` : ''}${(() => { const p = perkOf(c); if (!p) return `<span class="muted small">도감 ${n} / ${opened().length}</span>`; const cs = perkCards(p), got = cs.filter((x) => owned[x.id] || (first && x.id === c.id)).length; return `<span class="muted small">🧑 ${esc(heroName(p.id))}까지 ${cs.length - got}장 · ${got} / ${cs.length}</span>`; })()}<button class="btn primary big" id="fg-keep">${first ? '🃏 내 카드에 넣기' : '확인'}</button>`;
     $('#forge').appendChild(el);
     DS.Sound.correct();
     el.querySelector('#fg-keep').onclick = () => DS.Control.run(async () => {
       if (first) { if (!preview) { await N().set(`cards/${key(me.c)}/${me.n}/${c.id}`, true); if (DS.Grow) DS.Grow.add(me, { card: 1 }, `card_${c.id}`).catch(() => {}); if (DS.Gem) DS.Gem.add(me, DS.Gem.G.card, `card_${c.id}`, '첫 카드', { free: true }).catch(() => {}); } owned[c.id] = true; }
       slots = { l: null, op: null, r: null }; pick = 'l'; el.remove(); render();
-      if (first && have().length === opened().length) DS.UI.toast('🎉 열린 레시피를 모두 모았어요! (도감 완성 특전은 곧)', 4000);
+      const pk = first ? perkOf(c) : null; if (pk && perkCards(pk).every((x) => owned[x.id])) DS.UI.toast(`🎉 🧑 ${heroName(pk.id)} 열림!${bought(pk.id) ? ` · 💎 ${DS.Gem.price('hero', pk.id)} 돌려받았어요 (캠프에 들어가면 우편함으로)` : ''}`, 4500);
+      else if (first && have().length === opened().length) DS.UI.toast('🎉 열린 레시피를 모두 모았어요!', 4000);
     });
   }
 
   // ── 도감 · 내 카드 ──────────────────────────────────────
   function book() {
     const secs = [...new Set(U().CARDS.map((c) => c.sec))];
-    return secs.map((s) => {
+    return perksHtml() + secs.map((s) => {
       const cs = U().CARDS.filter((c) => c.sec === s);
       if (cs[0].no > no) return '';
       const got = cs.filter((c) => owned[c.id]).length; // v0.9.3: 도감도 차시별 접기 · 해금 개수
-      return `<details class="fc-hgroup" open><summary><b>${esc(s)}</b><span class="fc-unlock${got === cs.length ? ' done' : ''}">해금 ${got} / ${cs.length}</span></summary><div class="fg-grid">${cs.map((c) => DS.Card.html(c, { w: 104, unknown: !owned[c.id] })).join('')}</div></details>`;
+      return `<details class="fc-hgroup" open><summary><b>${esc(s)}</b><span class="fc-unlock${got === cs.length ? ' done' : ''}">해금 ${got} / ${cs.length}</span></summary><div class="fg-grid">${cs.map((c) => `<div class="fg-cw">${DS.Card.html(c, { w: 104, unknown: !owned[c.id] })}${owned[c.id] ? '' : '<i class="fg-g3">💎+3</i>'}</div>`).join('')}</div></details>`;
     }).join('') + (U().CARDS.some((c) => c.no > no) ? '<p class="fg-lock">🔒 다음 소단원은 선생님이 차시를 배포하면 나타나요</p>' : '');
   }
   function mine() {
