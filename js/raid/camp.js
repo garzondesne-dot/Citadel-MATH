@@ -15,6 +15,9 @@ DS.Camp = (function () {
   const ck = (c) => String(c).replace(/[.#$/[\]]/g, '_');
   const today = () => new Date().toISOString().slice(0, 10);
   const stampToday = () => { try { return localStorage.getItem('citadel-stamp') === today(); } catch (e) { return false; } };
+  // 📮 도장 안내 = 수업 뒤 캠프에서 한 번만 (2026-11-07 사용자 「계속 뜸」) · 누르면 바로 닫힘 · 같은 날 다시 안 뜸
+  const stampSeen = () => { try { return localStorage.getItem('citadel-stamp-seen') === today(); } catch (e) { return false; } };
+  const stampMarkSeen = () => { try { localStorage.setItem('citadel-stamp-seen', today()); } catch (e) { /* 무시 */ } };
 
   async function enter(m, code) {
     if (DS.Sound && DS.Sound.bgm) DS.Sound.bgm(null); // 🎵 캠프로 오면 성채 · 허수아비 배경음 끔
@@ -153,7 +156,7 @@ DS.Camp = (function () {
     const c = C(), S = DS.CampScene;
     const chip = !me.teacher; // 🧹 2026-11-07 정돈판: 캠프 위 = 던전과 같게 「◀ · · · 💬 · 💎 n」 (선생님은 🧙 선생님 모습)
     $('#camp').innerHTML = `<div class="camp-top${chip ? ' chip' : ''}">${chip && !me.test && !me.trial ? '<button class="sc-rb sm" id="camp-fb" aria-label="의견 보내기">💬</button>' : ''}${chip ? '<button class="sc-gem camp-set" id="camp-set" aria-label="💎 마정석 · 내 용사">💎 <b class="sc-gn">·</b><i>＋</i></button>' : '<button class="btn small camp-set" id="camp-set">🧙 선생님 모습</button>'}</div>
-      ${stampToday() ? '<div class="stamp-bar">📮 반드시 학습지 확인도장 받아가세요.</div>' : ''}
+      ${stampToday() && !stampSeen() ? '<div class="stamp-bar" id="camp-stamp" title="누르면 닫혀요">📮 반드시 학습지 확인도장 받아가세요. <small>✕</small></div>' : ''}
       <div class="camp-stage cs-v2" style="background-image:url('${base()}${c.bg}');aspect-ratio:${c.size[0]} / ${c.size[1]}">
         ${S.layers()}
         ${S.zone('camp-castle', 'castle', '🏰 성채던전')}${S.zone('camp-tent', 'tent', me.teacher ? '⛺ 텐트 · 책장' : '⛺ 출제 공방')}
@@ -185,6 +188,7 @@ DS.Camp = (function () {
     $('#camp-mail').onclick = () => pick('#camp-mail', () => { if (me.teacher) return DS.Control.run(() => DS.Dash.enter()); if (cues.mark) cues.mark('mail'); DS.Control.run(() => (DS.Mail && !me.test ? DS.Mail.open(me, { onClose: () => status() }) : note())); }); // 교사 = 📊 학급 대시보드 · 2026-11-07 6판: 우편함 = 소식 + 보내기 (오답노트는 🎯 허수아비로)
     $('#camp-tent').onclick = () => (DS.CampScene.objOn(document.querySelector('#camp .camp-stage'), 'tent', true), pick('#camp-tent', () => { if (cues.mark) cues.mark('tent'); DS.Control.run(() => (DS.Quest && !me.teacher ? DS.Quest.open(me) : shelf())); setTimeout(() => DS.CampScene.objOn(document.querySelector('#camp .camp-stage'), 'tent', false), 1500); })); // ⛺ 텐트 = ✏ 출제 공방 (2026-11-07 6판 · 책장은 🎯 허수아비 차시 카드로)
     $('#camp-dummy').onclick = () => pick('#camp-dummy', () => DS.Control.run(() => DS.Bonus.enter(me, { train: true })));
+    { const sb = $('#camp-stamp'); if (sb) { stampMarkSeen(); sb.onclick = () => sb.remove(); setTimeout(() => { if (sb.isConnected) sb.remove(); }, 15000); } } // 한 번 보여 주고 15초 뒤 · 누르면 닫힘
     $('#camp-set').onclick = () => (me.teacher ? settings({ teacher: true, onSave: async (v) => { me.hero = v.hero; me.fx = v.fx; me.title = v.title; const t = me.teacher; if (t.code) { try { await DS.Net.set(`rooms/${t.code}/state/tlook`, { hero: v.hero, fx: v.fx, at: DS.Net.TS }).catch(() => {}); /* 2026-11-06: 종합상황실도 쓸 수 있는 칸 → 수업 화면이 이 모습을 먼저 씀 */ const R0 = await DS.Net.get(`rooms/${t.code}/meta`); if (R0 && R0.teacher === DS.Net.uid()) await DS.Net.update(`rooms/${t.code}/players/${R0.teacher}`, { hero: v.hero, fx: v.fx }); } catch (e) { /* 다음 수업부터 */ } } render(); drawGate(); } }) : settings({ buy: true }));
     if (me.teacher) { const cb = $('#camp-code'); if (cb) cb.hidden = true; }
     drawGate();

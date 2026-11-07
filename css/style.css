@@ -2645,3 +2645,4 @@ body:not(:has(#test-tv)) #screen-student.st-battle > .wrap { padding-top: 0 !imp
 .fg-gem3 { color: var(--cyan); font-size: 16px; }
 .rs-forge { margin: 8px 0; padding: 8px; border-radius: 9px; border: 1.5px solid #b08d57; background: #1f1a16; font-size: 14px; } .rs-forge b { color: var(--gold); }
 .h-words-box { top: auto !important; right: auto !important; left: 18px; bottom: 18px; max-height: 42vh; width: 300px; } /* 마지막 한마디 = 왼쪽 아래 (학급 결과 단추를 가리지 않게) */
+#camp-stamp { cursor: pointer; } #camp-stamp small { opacity: .7; margin-left: 6px; }
