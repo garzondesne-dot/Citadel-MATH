@@ -85,7 +85,7 @@ const OUT = process.argv[2] || '.', U = 'http://localhost:8765/trial/';
   const dummy = await p.evaluate(() => document.querySelector('#bonus') ? document.querySelector('#bonus').innerText.match(/\d+차시/g) || [] : []);
   await p.click('#bn-back'); await p.waitForTimeout(2000);
   P(`⑧ 성채 열린 방 ${rooms.join(',')} · 허수아비 ${[...new Set(dummy)].join(',')}`);
-  const ok = /3차시/.test(cap) && pick6 === 6 && /김선생/.test(campName) && /상점/.test(setLbl) && mem && /체험판/.test(camp1.bar) && camp1.anvil && /3차시 입장/.test(camp1.gate) && tvLobby.tv && foc && focOff && focOn2 && raidTv && friends >= 4
+  const ok = /3차시/.test(cap) && pick6 === 6 && /김선생/.test(campName) && /＋|상점/.test(setLbl) && mem && /체험판/.test(camp1.bar) && camp1.anvil && /3차시 입장/.test(camp1.gate) && tvLobby.tv && foc && focOff && focOn2 && raidTv && friends >= 4
     && !funBtns.some((t) => /디펜스/.test(t)) && funBtns.some((t) => /밸런스/.test(t)) && balTv && bossN === 3 && after.scr === 'screen-camp' && after.gem >= 200 && after.gift && !after.tv && !after.tut && after.recs.includes('set-03')
     && rooms.join(',') === 'q01,q02,q03' && dummy.includes('3차시') && back.scr === 'screen-camp' && !back.tv && again.scr === 'screen-student' && again.tv && /문제 1/.test(again.step);
   console.log(ok ? '✅ 통과' : '❌ 기대와 다름'); console.log('errors', errs.length ? errs.slice(0, 5) : 'none'); await b.close(); if (!ok || errs.length) process.exit(1);

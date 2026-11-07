@@ -2447,3 +2447,26 @@ body:not(:has(#screen-home.active, #screen-splash.active, #screen-camp.active, .
 .sc-banner.second { top: 78%; }
 .st-after .heal-pick { display: grid !important; grid-template-columns: 1fr 1fr; gap: 8px; } .st-after .heal-pick .btn { margin: 0 !important; min-height: 54px; font-size: 16px !important; }
 .st-after > p.muted.small:last-of-type { font-size: 12px; }
+/* ── 🧹 정돈판 2판 (2026-11-07): 캠프 위 「◀ · · · 💬 · 💎 n」 · 상태판 = 레벨 · 다음 보상 · 입장 / 내 용사 · 「🧙 내 용사」 창 (탭 4 · 능력치 · 기록 · 💾 저장 아래) ── */
+#screen-camp .camp-back { width: 38px !important; height: 38px !important; min-width: 0 !important; padding: 0 !important; border: 0 !important; border-image: none !important; border-radius: 50% !important; background: rgba(16, 12, 9, .62) !important; box-shadow: inset 0 0 0 2px rgba(176, 141, 87, .85) !important; font-size: 0 !important; display: flex !important; align-items: center; justify-content: center; }
+#screen-camp .camp-back::before { content: '◀'; font: 15px var(--pixel); color: #f3d9a4; position: static; display: block; background: none; border: 0; width: auto; height: auto; }
+#screen-camp .camp-back::after { display: none !important; }
+#screen-camp .camp-top.chip { display: flex !important; flex-direction: row; align-items: center; gap: 8px; top: 6px; right: 8px; }
+#screen-camp .camp-top.chip > * { position: static; flex: none; margin: 0 !important; }
+#screen-camp .camp-top .sc-gem { height: 32px; }
+#screen-camp .camp-bar .btn { background: none !important; border: 0 !important; border-image: none !important; box-shadow: none !important; color: var(--muted) !important; text-decoration: underline; font-size: 12px !important; min-height: 0; }
+#screen-camp .camp-bar .btn::before, #screen-camp .camp-bar .btn::after { display: none !important; }
+.st-go-row { display: grid; grid-template-columns: 1.5fr 1fr; gap: 8px; margin-top: 10px; } .st-go-row .btn { margin: 0 !important; min-height: 50px; white-space: nowrap; padding-left: 6px !important; padding-right: 6px !important; font-size: 15px !important; }
+.set-head .me-h { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; } .set-head .me-h .g { color: #8fd8ff; font-size: 16px; } .set-head .me-h .s { color: #ffd25a; font-size: 16px; }
+.set-head #set-x { margin-left: auto; }
+.me-buy { margin: 0 0 8px; padding: 8px 10px; border-radius: 8px; background: rgba(58, 143, 216, .14); box-shadow: inset 0 0 0 1.5px #3a8fd8; color: #cfe8ff; font-size: 13px; }
+.set-tabs button { position: relative; } .set-bd { position: absolute; top: -7px; right: -4px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9px; background: #3a8fd8; color: #fff; font: 700 11px var(--pixel); font-style: normal; display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
+.me-head { display: grid; grid-template-columns: 64px 1fr; gap: 10px; align-items: center; margin: 4px 0 8px; } .me-head .art { width: 64px; height: 64px; } .me-head b { color: var(--gold); } .me-head small { display: block; color: var(--muted); }
+.me-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin-bottom: 10px; } .me-stats span { display: flex; justify-content: space-between; padding: 4px 8px; border-radius: 6px; background: var(--panel2); font-size: 12.5px; } .me-stats b { color: var(--gold); }
+.me-sec { margin: 8px 2px 4px; color: var(--gold); font-size: 14px; }
+.me-lock { margin-top: 8px; border: 1.5px dashed var(--line); border-radius: 8px; padding: 8px; } .me-lock > summary { cursor: pointer; color: var(--muted); font-size: 14px; list-style: none; } .me-lock > summary::-webkit-details-marker { display: none; }
+.hpick { position: relative; } .hpick .hp-cost { position: absolute; left: 2px; bottom: 2px; font-size: 10px; background: #000a; color: #cfe8ff; padding: 0 3px; border-radius: 4px; } .hpick.canbuy { box-shadow: 0 0 0 2px #3a8fd8, 0 0 10px #3a8fd8aa; }
+.me-ach { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin: 4px 0 8px; } .me-ach span { padding: 8px 10px; border-radius: 8px; background: var(--panel2); box-shadow: inset 0 0 0 1px var(--line); font-size: 13px; } .me-ach b { color: var(--gold); float: right; }
+.me-next { margin: 0 0 10px; color: var(--muted); font-size: 12.5px; }
+.set-box .set-foot { position: sticky; bottom: -1px; margin: 10px -4px -4px; padding: 8px 4px; background: linear-gradient(transparent, var(--panel) 30%); display: flex; justify-content: flex-end; z-index: 3; } .set-box .set-foot .btn { margin: 0 !important; min-width: 140px; }
+.set-box .set-tabs { display: grid !important; grid-template-columns: repeat(4, 1fr) !important; gap: 4px !important; } .set-box .set-tabs button { min-width: 0 !important; padding-left: 2px !important; padding-right: 2px !important; font-size: 13px !important; white-space: nowrap; margin: 0 !important; }
