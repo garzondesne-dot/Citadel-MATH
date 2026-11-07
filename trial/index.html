@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<base href="../"><!-- 👩‍🏫 체험판 전용 주소 · tools/trial/page.js 가 index.html 에서 만듦 (직접 고치지 말 것) -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a1424">
+<meta name="author" content="김찬우">
+<title>모두의 던전 체험판 (선생님용)</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="manifest" href="trial/manifest.webmanifest">
+<link rel="icon" href="icons/icon-192-m2.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon-m2.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="던전 체험판">
+</head>
+<body class="bg-dungeon">
+
+<!-- 시작 화면: 큰 제목 그림 + "화면을 가볍게 터치하세요" (터치하면 첫 화면으로) -->
+<section id="screen-splash" class="screen">
+  <div class="splash" id="splash"><p class="splash-tap">화면을 가볍게 터치하세요</p><p class="splash-ver" id="splash-ver"></p><p class="splash-by">개발 · 김찬우</p></div>
+</section>
+
+<!-- 첫 화면: 역할 고르기 -->
+<section id="screen-home" class="screen">
+  <div class="wrap">
+    <header class="home-title brand-head"><h1 class="sr">모두의 던전 : 공통수학2</h1><p class="brand-ver"><span id="ver"></span></p></header>
+    <p id="mode" class="mode small"></p>
+    <button id="btn-install" class="btn primary big" hidden>📲 앱으로 설치 (홈 화면 아이콘)</button>
+    <p id="install-tip" class="install-tip small" hidden>📲 아이폰: 사파리 아래 <b>공유</b> 버튼 → <b>홈 화면에 추가</b> 하면 앱처럼 열려요.</p>
+    <div class="roles">
+      <button class="role on" data-role="student"><i class="menu-ic" data-ic="student"></i><b>학생</b></button>
+      <button class="role" data-role="teacher"><i class="menu-ic" data-ic="teacher"></i><b>교사</b></button>
+      <button class="role" data-role="hall"><i class="menu-ic" data-ic="hall"></i><b>종합상황실</b></button>
+    </div>
+
+    <div id="f-student" class="role-form panel framed">
+      <div id="s-auth"></div>
+    </div>
+
+    <div id="f-teacher" class="role-form panel framed" hidden>
+      <div class="t-auth"></div>
+      <div class="t-only" hidden>
+        <p class="t-sec"><i class="menu-ic sm" data-ic="teacher"></i><b>수업 열기</b> <span class="muted small">교사 폰</span></p>
+        <div id="t-today" class="t-today"></div>
+        <label class="t-lesson">차시 <select id="lesson"></select></label>
+        <div class="t-cls-row"><label>반 <select id="t-cls"></select></label></div>
+        <p class="muted small">반을 고르면 그 반 학생들의 모닥불에 이 차시 차원문이 바로 나타나요.</p>
+        <button id="t-new" class="btn primary big">✨ 새 수업 만들기</button>
+        <button id="t-camp" class="btn">🏕 내 캠프 (학생 캠프 그대로 · 모든 차시 열림 · 기록 저장 안 함)</button>
+        <button id="t-resume" class="btn" hidden></button>
+        <div id="t-live" class="t-live"></div>
+        <div class="row2"><label>수업 코드로 이어서 <input id="t-code" name="class-code" inputmode="numeric" maxlength="6" autocomplete="off" data-1p-ignore data-lpignore="true"></label><button id="t-code-go" class="btn">↩ 이어서</button></div>
+        <p class="muted small">수업 코드(학생용)와 종합상황실 키(PC용)가 만들어져요. 학생 정답·도움 요청은 교사 화면에만 보여요.</p>
+        <div class="row2 t-hallpw"><label>🖥 종합상황실 비밀번호 <input id="t-hallpw" class="masked" type="text" inputmode="numeric" maxlength="4" placeholder="비우면 수업마다 새로" autocomplete="off" data-1p-ignore data-lpignore="true"></label><button id="t-hallpw-save" class="btn">저장</button></div>
+        <p class="muted small">숫자 4자리를 넣고 저장하면 모든 수업이 그 비밀번호예요 (교실 PC 가 기억해서 다음부터 바로 입장). 비워 두고 저장하면 수업마다 무작위 4자리.</p>
+        <p class="t-sec"><i class="menu-ic sm" data-ic="prep"></i><b>수업 준비</b> <span class="muted small">PC 권장</span></p>
+        <div class="t-prep-row"><label>차시 <select id="p-lesson"></select></label><button id="x-go" class="btn primary" title="학생 계정 없이 학생 폰 화면으로 이 차시를 끝까지 · 가상 친구 4명 · 기록 저장 안 함">🧪 테스트</button></div>
+        <button id="p-go" class="btn big">📋 수업 준비 열기</button>
+        <p class="muted small">학습지 PDF · 단계별 이미지 · 설명 영상 · 몬스터 체력 기준% · 생각 시간 · 엑셀 차시 · 🧪 테스트는 기록을 저장하지 않아요 (실제 수업과 완전히 분리)</p>
+        <p class="t-sec"><span class="t-ic">👥</span><b>학생 관리</b> <span class="muted small">대시보드는 교사만</span></p>
+        <div class="t-stu-row"><button id="s-go" class="btn big">📋 명단</button><button id="d-go" class="btn big">📊 대시보드</button><button id="fb-go" class="btn big">💬 학생 의견</button><button id="ph-go" class="btn big">📷 사진 채점</button><button id="sv-go" class="btn big">📝 설문</button></div>
+        <p class="muted small">🧙 선생님 모습 · 이펙트 · 호칭은 <b>교사 캠프 ⚙ 설정</b>에서 바꿔요 (모두 열림).</p>
+      </div>
+    </div>
+
+    <div id="f-hall" class="role-form panel framed" hidden>
+      <div id="h-find" class="h-find"></div>
+      <div class="row2"><label>수업 코드 <input id="h-code" name="class-code" inputmode="numeric" maxlength="6" autocomplete="off" data-1p-ignore data-lpignore="true"></label><label>종합상황실 키 <input id="h-key" class="masked" type="text" name="hall-key" inputmode="numeric" maxlength="4" autocomplete="off" data-1p-ignore data-lpignore="true" placeholder="••••"></label></div>
+      <button id="h-go" class="btn primary big">🖥 종합상황실 열기</button>
+      <p class="muted small">교실 PC·TV 화면용. 키는 교사 폰 위쪽에 있어요.</p>
+    </div>
+    <p id="home-msg" class="ngc"></p>
+  </div>
+</section>
+
+<!-- 모닥불 (학생 개인 대기실): 왼쪽 모루 · 가운데 모닥불 · 오른쪽 차원문 -->
+<section id="screen-camp" class="screen">
+  <button class="nav-back btn small camp-back">≪ 메뉴화면</button>
+  <div id="camp"></div>
+</section>
+
+<!-- 학생 (스마트폰) -->
+<section id="screen-student" class="screen">
+  <div class="wrap">
+    <button class="nav-back btn small">≪ 메뉴화면</button>
+    <div id="st-head" class="st-head framed"></div>
+    <div id="st-tbar"></div>
+    <div id="st-combo"></div>
+    <div id="st-body"></div>
+  </div>
+</section>
+
+<!-- 교사 폰 -->
+<section id="screen-teacher" class="screen">
+  <div class="wrap">
+    <button class="nav-back btn small">≪ 메뉴화면</button>
+    <div id="t-head" class="st-head framed"></div>
+    <div id="t-tbar"></div>
+    <span id="t-key" hidden></span>
+    <div id="t-tabs" class="tabs"></div>
+    <div id="t-body"></div>
+  </div>
+</section>
+
+<!-- 종합상황실 (PC 큰 화면) -->
+<section id="screen-hall" class="screen">
+  <div class="hall">
+    <button class="nav-back btn small">≪ 메뉴화면</button>
+    <div id="h-top" class="h-top framed"></div>
+    <div id="h-tbar"></div>
+    <div class="h-main">
+      <aside id="h-heroes" class="panel framed h-heroes"></aside>
+      <div id="h-arena" class="h-arena framed"></div>
+      <aside class="h-right">
+        <div id="h-side" class="panel framed"></div>
+        <div id="h-ctrl" class="panel framed h-ctrl"></div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- 교사 대기공간 (v0.9.1) -->
+<section id="screen-tcamp" class="screen">
+  <div class="wrap"><div id="tcamp"></div></div>
+</section>
+
+<!-- 학생 관리 (교사) -->
+<section id="screen-students" class="screen">
+  <div class="wrap wide"><button class="nav-back btn small">≪ 메뉴화면</button><div id="sm-body"></div></div>
+</section>
+
+<!-- 📊 학급 대시보드 (교사만) -->
+<section id="screen-dash" class="screen">
+  <div class="wrap wide"><button class="nav-back btn small">≪ 메뉴화면</button><div id="dash-body"></div></div>
+</section>
+
+<!-- 🗓 출석부 · 📖 수업 일지 (교사만 · v0.9.7.0) -->
+<section id="screen-att" class="screen">
+  <div class="wrap wide"><button class="nav-back btn small">≪ 메뉴화면</button><div id="att-body"></div></div>
+</section>
+
+<!-- 보강던전 (학생 혼자 · 모닥불에서) -->
+<section id="screen-bonus" class="screen">
+  <div class="wrap"><div id="bonus"></div></div>
+</section>
+
+<!-- 수업 준비 (PC) -->
+<section id="screen-prep" class="screen">
+  <div class="wrap wide"><button class="nav-back btn small">≪ 메뉴화면</button><div id="p-body"></div></div>
+</section>
+
+<!-- 문제 창 (DIMENSION SLASHER 엔진) -->
+<div id="quiz" class="modal hidden" role="dialog" aria-modal="true">
+  <div class="quiz-box framed">
+    <div class="quiz-head"><b id="quiz-card"></b><span id="quiz-formula" class="math"></span></div>
+    <p id="quiz-q" class="quiz-q math"></p>
+    <div id="quiz-choices" class="choices"></div>
+    <div id="quiz-sol" class="sol math hidden"></div>
+    <button id="quiz-next" class="btn primary hidden">해설 확인 · 계속 ▶</button>
+  </div>
+</div>
+<div id="focus" class="focus-ov" hidden></div>
+<div id="forge" class="forge-ov" hidden></div>
+<div id="toast" class="toast"></div>
+
+<script src="js/config.js"></script>
+<script src="assets/manifest.js"></script>
+<script src="js/engine/ui.js"></script>
+<script src="js/engine/video.js"></script>
+<script src="js/engine/audio.js"></script>
+<script src="js/engine/sound-ui.js"></script>
+<script src="js/engine/setgen.js"></script>
+<script src="js/engine/quiz.js"></script>
+<script src="js/engine/hint.js"></script>
+<script src="js/engine/lessons.js"></script>
+<script src="js/engine/sheet-lesson.js"></script>
+<script src="lessons/set-02.js"></script>
+<script src="lessons/set-03.js"></script>
+<script src="lessons/set-04.js"></script>
+<script src="lessons/set-05.js"></script><script src="lessons/set-06.js"></script><script src="lessons/eval-1.js"></script><script src="lessons/eval-2.js"></script><script src="lessons/eval-3.js"></script><script src="lessons/rubrics.js"></script><script src="lessons/curriculum.js"></script>
+<script src="js/engine/art.js"></script>
+<script src="js/engine/fx.js"></script>
+<script src="js/engine/attack.js"></script>
+<script src="js/engine/qrcode.min.js"></script>
+<script src="js/engine/pwa.js"></script>
+<script src="js/raid/net.js"></script>
+<script src="js/raid/model.js"></script>
+<script src="js/raid/combo.js"></script>
+<script src="js/raid/words.js"></script>
+<script src="js/raid/actions.js"></script>
+<script src="js/raid/account.js"></script>
+<script src="js/raid/control.js"></script>
+<script src="js/raid/fun-q.js"></script>
+<script src="js/raid/fun-ox.js"></script>
+<script src="js/raid/fun.js"></script>
+<script src="js/raid/td-maps.js"></script>
+<script src="js/raid/td.js"></script>
+<script src="lessons/unit-set.js"></script>
+<script src="js/raid/cards.js"></script>
+<script src="js/raid/forge.js"></script>
+<script src="js/raid/grow.js"></script>
+<script src="js/raid/gem.js"></script>
+<script src="js/raid/titles.js"></script>
+<script src="js/raid/result.js"></script>
+<script src="js/raid/note.js"></script>
+<script src="js/raid/survey.js"></script>
+<script src="js/raid/feedback.js"></script>
+<script src="js/raid/usage.js"></script>
+<script src="js/raid/photo.js"></script>
+<script src="js/raid/sharecard.js"></script>
+<script src="js/raid/thrill.js"></script>
+<script src="js/raid/punch.js"></script>
+<script src="js/raid/bonus.js"></script>
+<script src="js/raid/campscene.js"></script>
+<script src="js/raid/camp.js"></script>
+<script src="js/raid/tcamp.js"></script>
+<script src="js/raid/student.js"></script>
+<script src="js/raid/bots.js"></script>
+<script src="js/raid/test.js"></script>
+<script src="js/raid/teacher.js"></script>
+<script src="js/raid/hall.js"></script>
+<script src="js/engine/xlsx-lite.js"></script>
+<script src="js/raid/prep.js"></script>
+<script src="js/raid/students.js"></script>
+<script src="js/raid/dash.js"></script>
+<script src="js/raid/sched.js"></script>
+<script src="js/raid/att.js"></script>
+<script src="js/raid/nav.js"></script>
+<script src="js/raid/app.js"></script>
+</body>
+</html>

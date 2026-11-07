@@ -15,4 +15,9 @@ const man = JSON.parse(read('manifest.webmanifest'));
 assert.strictEqual(man.display, 'standalone');
 for (const i of man.icons) assert.ok(fs.existsSync(path.join(root, i.src)), `아이콘 없음: ${i.src}`);
 assert.ok(man.icons.some((i) => i.purpose === 'maskable') && man.icons.some((i) => i.sizes === '512x512'));
+// 📲 체험판 전용 주소 (v0.9.16.2): trial/index.html = index.html 에서 만든 것 그대로 · 앱 정보는 trial/ 범위 · 실제 게임 앱과 id · 시작 주소가 다름
+assert.strictEqual(read('trial/index.html'), require('../tools/trial/page.js').build(read('index.html')), 'trial/index.html 이 index.html 과 다름 → node tools/trial/page.js 다시 실행');
+const tman = JSON.parse(read('trial/manifest.webmanifest'));
+assert.strictEqual(tman.scope, './'); assert.strictEqual(tman.start_url, './'); assert.ok(/체험판/.test(tman.short_name));
+for (const i of tman.icons) assert.ok(fs.existsSync(path.join(root, 'trial', i.src)), `체험판 아이콘 없음: ${i.src}`);
 console.log(`OK: PWA — 캐시 ${cache} · 미리 받는 파일 ${core.length + stat.length}개 · 스크립트 ${scripts.length}개 모두 캐시 · 아이콘 ${man.icons.length}개`);

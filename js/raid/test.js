@@ -215,8 +215,19 @@ DS.Test = (function () {
   async function trialEnd() {
     try { await DS.Gem.add(tme, 100, 'trial_gift', '🎁 체험판 선물', { free: true }); } catch (e) { /* 무시 */ }
     tme = Object.assign({}, (await DS.Account.me().catch(() => null)) || tme, { trial: true });
-    await DS.Camp.enter(tme); // 캠프 첫 수업 뒤 안내(B): 🏰 성채 · 🎯 허수아비 · ⛺ 책장 · 📮 우편함 · ⚒ 모루 를 하나씩 소개
-    DS.UI.toast('🏆 수업 끝! 🎁 체험 💎100 · 이제 캠프가 하나씩 열려요', 4200);
+    await DS.Camp.enter(tme); // 캠프 첫 수업 뒤 안내(B): 🏰 성채 · 🎯 허수아비 · ⛺ 책장 · 📮 우편함 · ⚒ 모루 를 하나씩 소개 (알림 겹침 없이 안내 상자 하나만)
+  }
+  // ≪ 메뉴화면 · 휴대폰 뒤로 (nav.js): 수업 → 캠프(수업은 멈춰 기다림 · 아치 문으로 이어서) · 성채/허수아비 → 캠프 · 캠프 → 첫 화면(처음부터)
+  function trialNav(id) {
+    if (!trial) { if (id === 'screen-splash' || id === 'screen-home') return true; if (confirm('첫 화면으로 갈까요?')) location.reload(); return true; }
+    if (id === 'screen-bonus') { const b = $('#bn-back'); if (b) b.click(); else DS.Camp.enter(tme); return true; }
+    if (id === 'screen-student' && where === 'raid') {
+      if (!confirm('캠프로 나갈까요?\n수업은 그대로 기다려요. 오른쪽 빛나는 문으로 다시 들어오면 이어서 해요.')) return true;
+      DS.Student.stop(); DS.Bots.stop(); where = 'camp'; ['#test-tv', '#test-fun'].forEach((q) => { const e = $(q); if (e) e.remove(); }); document.body.classList.remove('has-test-tv');
+      draw(true); DS.Camp.enter(tme); return true;
+    }
+    if (id === 'screen-camp' || id === 'screen-home') { if (confirm('첫 화면(이름 · 용사 고르기)으로 갈까요?\n체험판은 처음부터 다시 시작해요.')) location.reload(); return true; }
+    DS.Camp.enter(tme); return true;
   }
   const studsN = () => Object.values((R && R.players) || {}).filter((p) => !p.teacher).length;
   function aiDraw(force) {
@@ -267,5 +278,5 @@ DS.Test = (function () {
     DS.UI.toast('테스트를 끝냈어요. (기록은 저장하지 않아요)', 3000);
   }
   const active = () => !!real;
-  return { start, finish, active, join, setLook, trialBoot, CLS: CLS0, prep: (id) => (L && L.id === id ? prep : null) }; // 🧪 학습지 이미지 · 영상은 실제 서버에서 읽어 둔 것
+  return { start, finish, active, join, setLook, trialBoot, trialNav, CLS: CLS0, prep: (id) => (L && L.id === id ? prep : null) }; // 🧪 학습지 이미지 · 영상은 실제 서버에서 읽어 둔 것
 })();

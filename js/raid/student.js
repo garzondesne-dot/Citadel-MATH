@@ -289,7 +289,7 @@ DS.Student = (function () {
   const enhCls = (p) => { const t = p && DS.Gem && DS.Gem.enhTier ? DS.Gem.enhTier(Number(p.enh) || 0) : 0; return t ? ` enh enh-${t}` : ''; };
   // 👩‍🏫 교사 체험판 (2026-11-07 사용자 「전투는 종합실 레이드 화면 · 용사 수 줄이고 조화롭게」): 몬스터 가운데 · 나는 앞 가운데 · 친구 5명 V자 · 이름표 + 상태
   const raidOn = () => !!(test && test.raid);
-  const PARTY_AT = [[6, 10], [70, 10], [20, 70], [56, 70], [38, 104]];
+  const PARTY_AT = [[10, 92], [70, 92], [40, 96], [1, 8], [79, 8]]; // 2026-11-07 「용사랑 몬스터 겹침」: 몬스터 아래 띠에만 — 뒷줄 3 · 앞줄 양끝 2 · 나는 앞 가운데
   function partyHtml(stepId) {
     if (!raidOn()) return test ? `<div class="enc-friends">${Raid().activeIds(R).filter((u) => u !== me).slice(0, 4).map((u) => DS.Art.hero((R.players[u] || {}).hero || 0, 'idle', 'huff')).join('')}</div>` : '';
     const ids = Raid().activeIds(R).filter((u) => u !== me).sort().slice(0, PARTY_AT.length);

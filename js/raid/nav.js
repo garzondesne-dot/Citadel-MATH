@@ -53,9 +53,12 @@ DS.Nav = (function () {
     if (id === 'screen-bonus' && document.querySelector('#bn-back') && /교사/.test(document.querySelector('#bn-back').textContent)) { DS.TCamp.back(); return true; }
     return false;
   };
+  // 👩‍🏫 체험판 (2026-11-07): 화면을 새로 열면 메모리 저장소가 지워지므로 제자리에서 (test.js trialNav)
+  const trialNav = (id) => !!(DS.TRIAL && DS.Test && DS.Test.trialNav && DS.Test.trialNav(id));
   function leave() { // 화면 왼쪽 위 ≪ 뒤로 (지금 위치 = top)
     const id = current();
     if (id === 'screen-home' || leaving) return false;
+    if (DS.TRIAL) { trialNav(id); return true; }
     if (inPlace(id)) return true;
     if (!ask(id)) return false;
     const go = () => { if (embedded || !(history.state && history.state.cm === 'top')) reopen(); else { leaving = 'back'; history.back(); } }; // → popstate 에서 base 자리에 새로 연다
@@ -69,6 +72,7 @@ DS.Nav = (function () {
     const qOpen = !!document.querySelector('#quiz:not(.hidden)');
     const ov = document.querySelector('.pm-ov .pm-x') || (!qOpen && document.querySelector('.bn-fight #bf-x')); // 2026-11-05: 경주 결과 · (문제를 풀고 있지 않은) 성채 · 허수아비 전투 창이 떠 있으면 그 창부터 닫음
     if (ov) { ov.click(); history.pushState({ cm: 'top' }, ''); return; }
+    if (DS.TRIAL) { trialNav(id); history.pushState({ cm: 'top' }, ''); return; }
     if (id !== 'screen-home' && inPlace(id)) { history.pushState({ cm: 'top' }, ''); return; }
     if (id !== 'screen-home') { if (ask(id)) { const p = endHook(id); if (p) { leaving = true; p.then(reopen); } else reopen(); } else history.pushState({ cm: 'top' }, ''); return; }
     // 경고하는 동안은 막지 않으므로 그사이 한 번 더 누르면 앱이 꺼진다. 시간이 지나면 다시 막는다

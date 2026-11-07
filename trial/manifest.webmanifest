@@ -3,8 +3,8 @@
   "short_name": "던전 체험판",
   "description": "선생님이 학생이 되어 한 차시를 직접 해 보는 체험판 — 기록은 저장되지 않아요",
   "lang": "ko",
-  "id": "./?trial",
-  "start_url": "./index.html?trial",
+  "id": "./",
+  "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
@@ -12,17 +12,17 @@
   "theme_color": "#111f38",
   "icons": [
     {
-      "src": "icons/icon-192-m2.png",
+      "src": "../icons/icon-192-m2.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "icons/icon-512-m2.png",
+      "src": "../icons/icon-512-m2.png",
       "sizes": "512x512",
       "type": "image/png"
     },
     {
-      "src": "icons/icon-maskable-512-m2.png",
+      "src": "../icons/icon-maskable-512-m2.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"

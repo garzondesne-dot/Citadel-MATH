@@ -38,7 +38,7 @@ DS.Camp = (function () {
       const was = live; live = v;
       if (!document.getElementById('screen-camp').classList.contains('active')) return;
       watchRoom(); drawGate(); tutApply();
-      if (live && live.open && (!was || !was.open || was.code !== live.code) && liveSeen !== live.code) { liveSeen = live.code; showGate(); status(); DS.Sound.correct(); DS.UI.toast(`⚔ ${live.no ? `${live.no}차시 ` : ''}던전이 열렸어요! 오른쪽 빛나는 문을 눌러 들어가요`, 4200); }
+      if (live && live.open && (!was || !was.open || was.code !== live.code) && liveSeen !== live.code) { liveSeen = live.code; showGate(); status(); DS.Sound.correct(); if (tutMode !== 'A') DS.UI.toast(`⚔ ${live.no ? `${live.no}차시 ` : ''}던전이 열렸어요! 오른쪽 빛나는 문을 눌러 들어가요`, 4200); }
     }
     if (DS.Survey && !m.test) DS.Survey.watch(m, () => svDraw());
     if (riftStop) riftStop(); riftStop = m.test ? null : DS.Net.watch(`rift/${ck(m.c)}`, (v) => { const had = !!riftNow(); rifts = v || {}; if (document.getElementById('camp-gate')) drawGate(); if (!had && riftNow() && !(live && live.open)) DS.UI.toast(`⏳ ${riftNow().no}차시 이어하기 포털이 열렸어요! 오른쪽 문에서 남은 문제를 마저 해요`, 4200); });
@@ -87,7 +87,7 @@ DS.Camp = (function () {
   ];
   function tutClear() {
     tutMode = ''; const stg = document.querySelector('#camp .camp-stage'); const co = document.getElementById('tut-coach'); if (co) co.remove();
-    document.getElementById('camp').classList.remove('tut-a');
+    document.getElementById('camp').classList.remove('tut-a', 'tut-on');
     if (stg) { stg.classList.remove('tut-a', 'tut-b'); stg.querySelectorAll('.tut-spot, .tut-hide').forEach((e) => e.classList.remove('tut-spot', 'tut-hide')); }
   }
   function tutApply() {
@@ -95,6 +95,7 @@ DS.Camp = (function () {
     const mode = tutDecide();
     if (mode !== tutMode) { tutClear(); tutMode = mode; tutStep = 0; }
     if (!mode) return;
+    document.getElementById('camp').classList.add('tut-on'); // 안내 중엔 위 빨간 띠 · 겹치는 알림을 숨김 (2026-11-07 체험판 「하나도 안 읽혀」)
     let co = document.getElementById('tut-coach');
     if (!co) { co = document.createElement('div'); co.id = 'tut-coach'; co.className = 'tut-coach'; stg.appendChild(co); }
     const gate = document.getElementById('camp-gate');
@@ -140,7 +141,7 @@ DS.Camp = (function () {
     el.classList.toggle('open', on); el.classList.toggle('rift', !!rf); document.querySelector('#camp .camp-stage').classList.toggle('gate-rift', !!rf);
     const lb = el.querySelector('.camp-label');
     if (me && me.teacher) { const t = me.teacher; DS.CampScene.gate(document.querySelector('#camp .camp-stage'), !!t.code); el.classList.toggle('open', !!t.code); if (lb) lb.innerHTML = t.code ? '⚔ 수업 진행 · 리모컨' : '⚔ 새 수업 열기 (교사 메뉴)'; return; } // 🏛 교사 개인 캠프 (2026-11-05)
-    if (lb) lb.innerHTML = on ? `⚔ ${live.no ? `${live.no}차시 ` : ''}입장!${DS.TRIAL && DS.Lessons.get(live.lesson) ? `<small class="gate-sub">${esc(DS.Lessons.get(live.lesson).title)}</small>` : ''}` : rf ? `⏳ ${rf.no}차시 이어하기 D-${Math.max(1, Math.ceil((rf.until - Date.now()) / 86400e3))}` : '🔒 차시 던전'; el.setAttribute('aria-label', on ? `${live.no ? `${live.no}차시 ` : ''}${name} 입장` : rf ? `${rf.no}차시 이어하기` : '차시 던전 (닫힘)');
+    if (lb) lb.innerHTML = on ? (DS.TRIAL && DS.Lessons.get(live.lesson) ? `<span>⚔ ${live.no ? `${live.no}차시 ` : ''}입장!</span><small class="gate-sub">${esc(DS.Lessons.get(live.lesson).title)}</small>` : `⚔ ${live.no ? `${live.no}차시 ` : ''}입장!`) : rf ? `⏳ ${rf.no}차시 이어하기 D-${Math.max(1, Math.ceil((rf.until - Date.now()) / 86400e3))}` : '🔒 차시 던전'; el.setAttribute('aria-label', on ? `${live.no ? `${live.no}차시 ` : ''}${name} 입장` : rf ? `${rf.no}차시 이어하기` : '차시 던전 (닫힘)');
   }
   // 그림 칸 하나 (배치표 시트에서 열·행)
   const sheet = (s, col, row, cls, style = '') => `<i class="${cls}" style="background-image:url('${base()}${s.src}');background-size:${s.cols * 100}% ${(s.rows || 1) * 100}%;background-position:${s.cols > 1 ? (col / (s.cols - 1)) * 100 : 0}% ${(s.rows || 1) > 1 ? (row / (s.rows - 1)) * 100 : 0}%;${style}"></i>`;
@@ -178,6 +179,7 @@ DS.Camp = (function () {
     // v0.9.7.0: 이름표의 Lv 는 뺌 (사용자 — 캠프에서 이질적). 레벨은 아래 상태창에만
     newTitles();
     $('#camp-code').onclick = codeGate;
+    if (me.trial) { const cb = $('#camp-code'); if (cb) cb.hidden = true; } // 👩‍🏫 체험판: 코드 입장 필요 없음
     { const fb = $('#camp-fb'); if (fb) { if (me.teacher || me.test || me.trial) fb.hidden = true; else fb.onclick = () => DS.Feedback.open({ c: me.c, n: me.n, name: me.name }, { where: 'camp' }); } } // 💬 2026-11-06
     $('#camp-mail').onclick = () => pick('#camp-mail', () => { if (me.teacher) return DS.Control.run(() => DS.Dash.enter()); if (cues.mark) cues.mark('mail'); DS.Control.run(note); }); // 교사 = 📊 학급 대시보드
     $('#camp-tent').onclick = () => (DS.CampScene.objOn(document.querySelector('#camp .camp-stage'), 'tent', true), pick('#camp-tent', () => { if (cues.mark) cues.mark('tent'); DS.Control.run(shelf); setTimeout(() => DS.CampScene.objOn(document.querySelector('#camp .camp-stage'), 'tent', false), 1500); }));
@@ -286,7 +288,7 @@ DS.Camp = (function () {
       const fresh = DS.Bonus.newRooms(me, bonus || {}, Number(no) || 0).length, z = document.getElementById('camp-castle');
       if (z) { const old = z.querySelector('.cs-newb'); if (old) old.remove(); if (fresh) z.insertAdjacentHTML('beforeend', `<span class="cs-newb">NEW ${fresh}</span>`); }
       const nk = `citadel-castle-new-${k}-${me.n}`; let was = 0; try { was = Number(localStorage.getItem(nk)) || 0; localStorage.setItem(nk, String(fresh)); } catch (e) { /* 무시 */ }
-      if (fresh > was) DS.UI.toast(`🏰 성채던전에 새 방 ${fresh - was}개가 열렸어요!`, 3200);
+      if (fresh > was && !tutMode) DS.UI.toast(`🏰 성채던전에 새 방 ${fresh - was}개가 열렸어요!`, 3200);
     }
   }
   // 상태가 있을 때만 살아 움직임: 📮 새 결과 · ⚒ 만들 수 있는 카드 · ⛺ 새로 열린 차시 영상

@@ -10,14 +10,16 @@ DS.FIREBASE = {
   messagingSenderId: '434932944226',
   appId: '1:434932944226:web:0763464faf9dde9639b03b',
 };
-// 👩‍🏫 교사용 체험판 (2026-11-07 · 링크 = …/?trial): 이 탭 안에서만 · 아무것도 남기지 않음 → 브라우저 저장소를 메모리로 바꿔 끼움 (실제 게임 기록 · 로그인과 섞이지 않음)
-if (typeof location !== 'undefined' && /[?&]trial(=|&|$)/.test(location.search)) {
+// 👩‍🏫 교사용 체험판 (2026-11-07 · 링크 = …/trial/ · 예전 …/?trial 은 그리로 옮김): 이 탭 안에서만 · 아무것도 남기지 않음 → 브라우저 저장소를 메모리로 바꿔 끼움 (실제 게임 기록 · 로그인과 섞이지 않음)
+//   v0.9.16.2: 전용 주소 trial/ (tools/trial/page.js) — 앱 정보를 스크립트로 바꿔 끼우던 방식은 삼성 인터넷 · 옛 캐시에서 실제 게임 앱으로 설치됨 (사용자 「여전히 본판」)
+if (typeof location !== 'undefined' && (/\/trial\/(index\.html)?$/.test(location.pathname) || /[?&]trial(=|&|$)/.test(location.search))) {
+  if (!/\/trial\/(index\.html)?$/.test(location.pathname)) location.replace('trial/'); // 옛 링크 ?trial → 전용 주소
   const mem = () => { const m = new Map(); return { getItem: (k) => (m.has(String(k)) ? m.get(String(k)) : null), setItem: (k, v) => { m.set(String(k), String(v)); }, removeItem: (k) => { m.delete(String(k)); }, clear: () => m.clear(), key: (i) => Array.from(m.keys())[i] ?? null, get length() { return m.size; } }; };
   try { Object.defineProperty(window, 'localStorage', { value: mem(), configurable: true }); Object.defineProperty(window, 'sessionStorage', { value: mem(), configurable: true }); } catch (e) { /* 못 바꾸면 그대로 */ }
+  document.documentElement.classList.add('trial'); // CSS: 체험판 화면 다듬기
   DS.TRIAL = { lesson: 'set-06', lessons: ['set-06'], castle: 'eval-1', rooms: ['q04', 'q07'], cls: '체험' };
-  { const ln = document.querySelector('link[rel="manifest"]'); if (ln) ln.setAttribute('href', 'manifest-trial.webmanifest'); } // 📲 체험판 링크에서 「앱 설치」 = 체험판 앱 (시작 주소 ?trial · 이름 「던전 체험판」 · 실제 게임 앱과 따로)
 }
-DS.VERSION = 'citadel-0.9.16.1';
+DS.VERSION = 'citadel-0.9.16.2';
 DS.AUTHOR = '김찬우'; // 개발자 (2026-11-03 사용자 요청: 모든 화면 · 첫 화면에 새김)
 // 버전 꼬리표 (2026-11-03): 어느 화면에서든 왼쪽 아래 구석에 작게 — 학생 · 교사 · 전광판 화면에서 업데이트 됐는지 바로 확인
 if (typeof document !== 'undefined') {

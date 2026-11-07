@@ -1160,7 +1160,7 @@ body.forge-open .test-bar { display: none; } /* v0.9.3: 모루(한 화면)를 �
 
 /* ── 🧭 첫 수업 튜토리얼 (camp.js) ── A: 차시 던전만 · B: 하나씩 소개 */
 #screen-camp .camp-stage.tut-a .camp-anvil, #screen-camp .camp-stage.tut-a .camp-bonus, #screen-camp .camp-stage.tut-a .camp-prop { display: none; }
-#camp.tut-a .camp-forge, #camp.tut-a .camp-bar > span { display: none; }
+#camp.tut-a .camp-bar > span { display: none; } /* 2026-11-07: 📊 용사 상태창은 첫 안내 때도 보임 (체험판 피드백 「status 바 사라짐」) */
 #screen-camp .camp-stage .tut-hide { visibility: hidden; }
 .tut-coach { position: absolute; inset: 0; z-index: 20; pointer-events: none; }
 .tut-coach.block { pointer-events: auto; background: #00000040; }
@@ -2306,7 +2306,7 @@ body.tb-last-min::after { content: ''; position: fixed; inset: 0; z-index: 88; p
 @keyframes csGift { 50% { transform: translateY(-2px); box-shadow: 0 0 8px #ffd25a88; } }
 
 /* 👩‍🏫 교사 체험판 전투 = 종합실 레이드 배치 (2026-11-07): 몬스터 가운데 위 · 나는 앞 가운데 · 친구 5명 V자 */
-.scene.enc.trial-raid { height: 300px; }
+.scene.enc.trial-raid { height: 390px; } /* 2026-11-07: 몬스터(위) · 용사(아래 띠 190px) 안 겹치게 */
 .scene.enc.trial-raid .enc-mon { left: 50%; right: auto; bottom: auto; top: 30px; margin-left: -75px; width: 150px; }
 .scene.enc.trial-raid.boss .enc-mon { margin-left: -84px; width: 168px; top: 24px; }
 .scene.enc.trial-raid .enc-hero { left: calc(50% - 40px); bottom: 2px; z-index: 4; }
@@ -2340,3 +2340,19 @@ body.tb-last-min::after { content: ''; position: fixed; inset: 0; z-index: 88; p
 body:has(.trial-ai .ta-msg) #screen-student .wrap { padding-bottom: 170px; }
 body:has(.trial-ai) #ver-tag { display: none; }
 .camp-label .gate-sub { display: block; font-size: 10.5px; font-weight: 700; color: #ffd25a; white-space: nowrap; } /* 👩‍🏫 체험판: 관문에 수업 내용 */
+/* 2026-11-07 체험판 다듬기 (사용자 캡처): 관문 이름표 = 두 줄(입장! / 수업 내용) · 안내 상자는 ≪ 메뉴화면 · ⚙ 설정 아래 · 안내 중엔 빨간 띠 숨김 · 알림은 체험판 띠 위로 */
+#screen-camp .cs-v2 .camp-gate-z .camp-label:has(.gate-sub) { flex-direction: column; align-items: flex-end; gap: 0; text-align: right; padding: 2px 8px; border-radius: 8px; }
+#screen-camp .cs-v2 .camp-gate-z .camp-label .gate-sub { font-size: clamp(9.5px, 2.6vw, 11.5px); }
+#screen-camp .tut-box { top: 40px; }
+#camp.tut-on .stamp-bar { display: none; }
+body:has(#camp.tut-on) .gem-pop { top: auto; bottom: 86px; }
+body:has(.trial-ai .ta-pill) .toast { bottom: 72px; }
+body:has(.trial-ai .ta-pill) #camp { padding-bottom: 64px; }
+
+/* 👩‍🏫 체험판 전투 공간 (2026-11-07 사용자 「상단 이름 · 설명창 줄이거나 없애서 전투 공간 확보」): 위 카드 = 한 줄 (메뉴화면 버튼 옆 · 이름 + 단계 배지) */
+.trial #st-head { min-height: 0; padding: 3px 8px 3px 118px; margin-bottom: 4px; align-items: center; gap: 6px; }
+.trial #st-head > .art, .trial #st-head .muted, .trial #st-head br { display: none; }
+.trial #st-head b { font-size: 13px; }
+.trial #st-head .st-badge { padding: 1px 8px; font-size: 12px; }
+.trial #screen-student .wrap > .nav-back { display: flex; width: max-content; margin-bottom: -38px; }
+.trial #st-head { margin-top: 6px; min-height: 34px; }

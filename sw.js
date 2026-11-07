@@ -4,10 +4,10 @@
 //  - v0.9.6 차시별 다운로드: STATIC = 공통 그림만. 던전 배경 · 포털 · 몬스터는 그 차시에 들어갈 때 받고(DS.Art.lessonEnter), 지금 · 바로 전 차시 것만 남긴다
 //  - Firebase(다른 주소)는 건드리지 않는다. 수업 진행에는 인터넷이 필요하다
 // 새 버전을 낼 때 CACHE 이름을 'ds-' + DS.VERSION 과 맞춘다 (tests/pwa.test.js 가 확인)
-const CACHE = 'ds-citadel-0.9.16.1';
+const CACHE = 'ds-citadel-0.9.16.2';
 const ASSETS = 'ds-assets';
 const CORE = [
-  './', './index.html', './css/style.css', './manifest.webmanifest', './manifest-trial.webmanifest',
+  './', './index.html', './css/style.css', './manifest.webmanifest', './trial/', './trial/manifest.webmanifest',
   './js/config.js', './assets/manifest.js',
   './js/engine/ui.js', './js/engine/video.js', './js/engine/audio.js', './js/engine/sound-ui.js', './js/engine/setgen.js', './js/engine/quiz.js', './js/engine/hint.js', './js/engine/lessons.js', './js/engine/sheet-lesson.js',
   './lessons/set-02.js', './lessons/set-03.js', './lessons/set-04.js', './lessons/set-05.js', './lessons/set-06.js', './lessons/eval-1.js', './lessons/eval-2.js', './lessons/eval-3.js', './lessons/rubrics.js', './lessons/curriculum.js', './js/engine/art.js', './js/engine/fx.js', './js/engine/attack.js', './js/engine/qrcode.min.js', './js/engine/pwa.js',
@@ -49,5 +49,5 @@ self.addEventListener('fetch', (e) => {
   e.respondWith(caches.open(CACHE).then((c) => c.match(req, { ignoreSearch: req.mode === 'navigate' }).then((hit) => hit || fetch(req).then((res) => {
     if (res.ok && url.pathname.match(/\.(js|css|html|webmanifest)$|\/$/)) c.put(req, res.clone());
     return res;
-  }).catch(() => c.match('./index.html')))));
+  }).catch(() => c.match(/\/trial\//.test(url.pathname) ? './trial/' : './index.html')))));
 });
