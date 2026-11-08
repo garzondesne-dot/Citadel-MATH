@@ -16,12 +16,12 @@
 | b11-01 | 모순의 리바이어던 | 11차시 👑 보스 | 신규 | P2 | 대기 | 제작 대기 | — | [작업](tasks/b11-01-boss-undersea-leviathan.md) |
 | bg-11 | 🌊 모순의 수중 신전 배경 (테마 **확정**) | 11차시 배경 → `dg-09-underwater-v2` | 수정 (v1→v2) | P2 | — | 제작 대기 | — | [작업](tasks/bg-11-undersea-temple.md) |
 | m09-01 | 자물쇠 미믹 · **9차시 화풍 확인 대표** | 9차시 몬스터 줄 0 | 신규 | **P1** | 생성 완료 | 제작 대기 | — | [작업](tasks/m09-01-mon-vault-lock-mimic.md) |
-| m09-02 | 열쇠 유령 | 9차시 몬스터 줄 1 | 신규 | P2 | 대기 | 제작 대기 | — | [작업](tasks/m09-02-mon-vault-key-ghost.md) |
-| m09-03 | 사슬 기사 | 9차시 몬스터 줄 2 | 신규 | P2 | 대기 | 제작 대기 | — | [작업](tasks/m09-03-mon-vault-chain-knight.md) |
-| m09-04 | 봉인 석상 | 9차시 몬스터 줄 3 | 신규 | P2 | 대기 | 제작 대기 | — | [작업](tasks/m09-04-mon-vault-seal-statue.md) |
-| m09-05 | 뒤집개 박쥐 | 9차시 몬스터 줄 4 | 신규 | P2 | 대기 | 제작 대기 | — | [작업](tasks/m09-05-mon-vault-flip-bat.md) |
+| m09-02 | 열쇠 유령 | 9차시 몬스터 줄 1 | 신규 | P2 | 생성 완료 | 제작 대기 | — | [작업](tasks/m09-02-mon-vault-key-ghost.md) |
+| m09-03 | 사슬 기사 | 9차시 몬스터 줄 2 | 신규 | P2 | 생성 완료 | 제작 대기 | — | [작업](tasks/m09-03-mon-vault-chain-knight.md) |
+| m09-04 | 봉인 석상 | 9차시 몬스터 줄 3 | 신규 | P2 | 생성 완료 | 제작 대기 | — | [작업](tasks/m09-04-mon-vault-seal-statue.md) |
+| m09-05 | 뒤집개 박쥐 | 9차시 몬스터 줄 4 | 신규 | P2 | 생성 완료 | 제작 대기 | — | [작업](tasks/m09-05-mon-vault-flip-bat.md) |
 | b09-01 | 역과 대우의 문지기 | 9차시 👑 보스 | 신규 | P2 | 대기 | 제작 대기 | — | [작업](tasks/b09-01-boss-vault-gatekeeper.md) |
-| bg-09 | 🔑 열쇠와 자물쇠의 묘실 배경 (테마 **확정** 11-08) | 9차시 배경 → `dg-11-keyvault-v1` | 신규 | P2 | — | 제작 대기 | — | [작업](tasks/bg-09-key-vault.md) |
+| bg-09 | 🔑 열쇠와 자물쇠의 묘실 배경 (테마 **확정** 11-08) | 9차시 배경 → `dg-11-keyvault-v1` | 신규 | P2 | — | 생성 완료 | — | [작업](tasks/bg-09-key-vault.md) |
 | m10-01 | 천칭 가고일 · **10차시 화풍 확인 대표** | 10차시 몬스터 줄 0 | 신규 | **P1** | 생성 완료 | 제작 대기 | — | [작업](tasks/m10-01-mon-garden-scale-gargoyle.md) |
 | m10-02 | 필요 덩굴 | 10차시 몬스터 줄 1 | 신규 | P2 | 대기 | 제작 대기 | — | [작업](tasks/m10-02-mon-garden-need-vine.md) |
 | m10-03 | 충분 나비 | 10차시 몬스터 줄 2 | 신규 | P2 | 대기 | 제작 대기 | — | [작업](tasks/m10-03-mon-garden-enough-butterfly.md) |
