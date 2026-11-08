@@ -9,12 +9,12 @@
 | ID | 이름 | 용도 | 구분 | 우선 | 마스터 | 상태 | 배포됨 | 작업 |
 |---|---|---|---|---|---|---|---|---|
 | m11-01 | 모순 문어 · **화풍 확인 대표** | 11차시 몬스터 줄 0 | 신규 | **P1** | 생성 완료 | 제작 대기 | — | [작업](tasks/m11-01-mon-undersea-octopus.md) |
-| m11-02 | 역설 해파리 | 11차시 몬스터 줄 1 | 신규 | P2 | 대기 | 제작 대기 | — | [작업](tasks/m11-02-mon-undersea-jellyfish.md) |
-| m11-03 | 부등호 가오리 | 11차시 몬스터 줄 2 | 신규 | P2 | 대기 | 제작 대기 | — | [작업](tasks/m11-03-mon-undersea-manta.md) |
-| m11-04 | 거품 골렘 | 11차시 몬스터 줄 3 | 신규 | P2 | 대기 | 제작 대기 | — | [작업](tasks/m11-04-mon-undersea-bubble-golem.md) |
-| m11-05 | 산호 미믹 | 11차시 몬스터 줄 4 | 신규 | P2 | 대기 | 제작 대기 | — | [작업](tasks/m11-05-mon-undersea-coral-mimic.md) |
+| m11-02 | 역설 해파리 | 11차시 몬스터 줄 1 | 신규 | P2 | 생성 완료 | 제작 대기 | — | [작업](tasks/m11-02-mon-undersea-jellyfish.md) |
+| m11-03 | 부등호 가오리 | 11차시 몬스터 줄 2 | 신규 | P2 | 생성 완료 | 제작 대기 | — | [작업](tasks/m11-03-mon-undersea-manta.md) |
+| m11-04 | 거품 골렘 | 11차시 몬스터 줄 3 | 신규 | P2 | 생성 완료 | 제작 대기 | — | [작업](tasks/m11-04-mon-undersea-bubble-golem.md) |
+| m11-05 | 산호 미믹 | 11차시 몬스터 줄 4 | 신규 | P2 | 생성 완료 | 제작 대기 | — | [작업](tasks/m11-05-mon-undersea-coral-mimic.md) |
 | b11-01 | 모순의 리바이어던 | 11차시 👑 보스 | 신규 | P2 | 대기 | 제작 대기 | — | [작업](tasks/b11-01-boss-undersea-leviathan.md) |
-| bg-11 | 🌊 모순의 수중 신전 배경 (테마 **확정**) | 11차시 배경 → `dg-09-underwater-v2` | 수정 (v1→v2) | P2 | — | 제작 대기 | — | [작업](tasks/bg-11-undersea-temple.md) |
+| bg-11 | 🌊 모순의 수중 신전 배경 (테마 **확정**) | 11차시 배경 → `dg-09-underwater-v2` | 수정 (v1→v2) | P2 | — | 생성 완료 | — | [작업](tasks/bg-11-undersea-temple.md) |
 | m09-01 | 자물쇠 미믹 · **9차시 화풍 확인 대표** | 9차시 몬스터 줄 0 | 신규 | **P1** | 생성 완료 | 제작 대기 | — | [작업](tasks/m09-01-mon-vault-lock-mimic.md) |
 | m09-02 | 열쇠 유령 | 9차시 몬스터 줄 1 | 신규 | P2 | 생성 완료 | 제작 대기 | — | [작업](tasks/m09-02-mon-vault-key-ghost.md) |
 | m09-03 | 사슬 기사 | 9차시 몬스터 줄 2 | 신규 | P2 | 생성 완료 | 제작 대기 | — | [작업](tasks/m09-03-mon-vault-chain-knight.md) |
