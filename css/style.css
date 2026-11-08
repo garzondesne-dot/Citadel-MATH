@@ -2831,5 +2831,5 @@ html body .sc-gem, html body .sc-gem .sc-gn, html body .sc-gem b { font-weight: 
 .td-tw .td-blk { position: absolute; top: -34%; display: none; font-size: clamp(9px, 0.8vw, 13px); font-style: normal; color: #fff; background: #b8322ccc; padding: 0 5px; border-radius: 6px; white-space: nowrap; }
 .td-tw.blocking .td-blk { display: block; }
 .td-tw b { font-size: clamp(9px, 0.8vw, 13px) !important; opacity: .85; }
-.td-mon.t-n .art, .td-mon.t-f .art, .td-mon.t-v .art { transform: scale(0.42); } .td-mon.t-t .art { transform: scale(0.62); }
+.td-mon.t-n .art, .td-mon.t-f .art, .td-mon.t-v .art { transform: scale(0.6); } .td-mon.t-t .art { transform: scale(0.8); }
 .td-mon.t-v { animation: tdBat .6s ease-in-out infinite alternate; } @keyframes tdBat { to { margin-top: -40px; } }

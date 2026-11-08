@@ -125,7 +125,7 @@ DS.TD = (function () {
   //   점수 = 이기면 남은 생명 · 지면 −(남은 몬스터 체력 / 한 마리 체력) → 점수가 TARGET 이 되는 체력 (이분 탐색)
   //   → 실제 판은 기술 · 선생님 방패 · 응원 · 업그레이드 고르기에 따라 이기고 짐 (tests/td.test.js 로 ≈ 70%)
   //   경계 = 미리 돌린 판(기술 · 선생님 없음)이 아슬아슬하게 이기는 가장 센 체력 → × FACTOR (지도마다 · tests/td.test.js 로 ≈ 70%)
-  const FACTOR = { forest: 1.19, volcano: 1.18, ice: 1.13, desert: 1.19, crypt: 1.18 };
+  const FACTOR = { forest: 1.12, volcano: 1.12, ice: 1.08, desert: 1.10, crypt: 1.13 }; // 2026-11-08 개편 A(몬스터 떼 · 막기) 뒤 다시 맞춤
   function score(opt, hp0) { const S = create(Object.assign({}, opt, { hp0 })), R = rng('cal' + (opt.seed || 1)); run(S, (S) => S.towers.forEach((T) => { while (pending(T) > 0) upgrade(S, T.uid, auto(T, R)); })); return S.win ? S.life : -(S.left || 0) - 0.01; }
   function calibrate(opt, f) { let lo = 5, hi = 5000; for (let i = 0; i < 14; i++) { const mid = Math.sqrt(lo * hi); if (score(opt, mid) > 0) lo = mid; else hi = mid; } return Math.round(lo * (f != null ? f : FACTOR[opt.map.id] || 1.2)); }
   const auto = (T, R) => (T.fam === 'fire' || T.fam === 'frost' || T.fam === 'spark' ? 'c' : R() < 0.5 ? 'a' : 'b'); // 안 고르면 저절로 (12초)
