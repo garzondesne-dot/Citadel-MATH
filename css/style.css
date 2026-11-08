@@ -2821,3 +2821,15 @@ html body .sc-gem, html body .sc-gem .sc-gn, html body .sc-gem b { font-weight: 
 @keyframes nnRise { to { transform: translateY(-420px); opacity: 0; } }
 .nn-phone .nn-big { font-size: 56px; } .nn-phone .nn-big.win { font-size: 44px; } .nn-phone p { font-size: 15px; }
 .nn-h { width: clamp(64px, 7vw, 110px); } .nn-h .art { width: clamp(56px, 6vw, 96px); height: clamp(56px, 6vw, 96px); }
+/* 🏰 디펜스 개편 A (2026-11-08): 🔴 근접 / 🔵 원거리 받침 · 용사 1.6배 · 머리 위 ⚔ 처치 수 · 번호만 · ⛔ 막는 중 · 몬스터 떼(작게) · 박쥐 날기 */
+.td-tw .td-art .art { transform: scale(1.28); transform-origin: 50% 85%; } /* 옛 0.8 × 1.6 */
+.td-tw .td-base { position: absolute; left: 50%; top: 86%; width: calc(var(--u, 60px) * 0.9); height: calc(var(--u, 60px) * 0.36); transform: translate(-50%, -50%); border-radius: 50%; z-index: -1; }
+.td-tw.melee .td-base { background: radial-gradient(#e5534b55, #e5534b22 60%, transparent 70%); box-shadow: 0 0 0 3px #e5534bcc; }
+.td-tw.ranged .td-base { background: radial-gradient(#4a9cff55, #4a9cff22 60%, transparent 70%); box-shadow: 0 0 0 3px #4a9cffcc; }
+.td-tw.teacher .td-base { box-shadow: 0 0 0 3px #ffd25acc; }
+.td-tw .td-k { position: absolute; top: -18%; font: 700 clamp(10px, 0.9vw, 15px) var(--pixel, sans-serif); font-style: normal; color: #ffe27a; text-shadow: 0 0 3px #000, 0 0 3px #000; white-space: nowrap; }
+.td-tw .td-blk { position: absolute; top: -34%; display: none; font-size: clamp(9px, 0.8vw, 13px); font-style: normal; color: #fff; background: #b8322ccc; padding: 0 5px; border-radius: 6px; white-space: nowrap; }
+.td-tw.blocking .td-blk { display: block; }
+.td-tw b { font-size: clamp(9px, 0.8vw, 13px) !important; opacity: .85; }
+.td-mon.t-n .art, .td-mon.t-f .art, .td-mon.t-v .art { transform: scale(0.42); } .td-mon.t-t .art { transform: scale(0.62); }
+.td-mon.t-v { animation: tdBat .6s ease-in-out infinite alternate; } @keyframes tdBat { to { margin-top: -40px; } }
