@@ -68,12 +68,11 @@ DS.ASSETS = {
   monstersMirrorBoss: { src: 'monsters-mirrorboss-v2.webp', cols: 3, rows: 1, poses: { idle: 0, attack: 1, down: 2 }, names: ['대우의 거울 마왕'] },
   monstersCrown: { src: 'monsters-crown-v1.webp', cols: 3, rows: 10, poses: { idle: 0, attack: 1, down: 2 },
     names: ['에메랄드 왕관 슬라임', '루비 박쥐', '사파이어 뿔벌레', '자수정 뼈뱀', '버섯 전사', '자수정 눈알 문어', '이끼 골렘', '서리 왕관 늑대', '덩굴 미믹', '청록 수정룡'] },
-  // 던전 테마 10종: 던전 안 전투 배경(dg-) + 같은 번호의 포털(portal-, 2열: 활성 / 봉쇄). 차시 파일의 theme 으로 고른다
+  // 던전 테마 10종: 던전 안 전투 배경(dg-). 차시 파일의 theme 으로 고른다 (2026-11-08 요청 #8: 화면에 안 나오던 테마 포털 portal- 10장 · 특수 차원문 dportal- 3장은 assets/_old 로 옮김)
   dungeons: { ids: ['01-burrow', '02-deep-forest', '03-dimensional', '04-mine', '05-ruins', '06-frost', '07-volcano', '08-crypt', '09-underwater', '10-sky'],
     names: ['땅굴', '깊은 숲 성역', '차원 균열 지대', '폐광 갱도', '고대 유적 심장부', '빙결 동굴', '화산 심연', '망자의 지하 묘실', '수중 신전', '천공 성소'],
-    bg: (id) => ({ '03-dimensional': 'dg-03-dimensional-v2.webp', '04-mine': 'dg-04-mine-v2.webp' })[id] || `dg-${id}-v1.webp`, portal:  // v2 도트 배경이 온 테마만 바꿔 씀 (2026-11-03: 03 차원 균열)
-       (id) => `portal-${id}-v1.webp` },
-  // 특수 차원문 3종 (투명 배경 · 400×600): 보강던전(파랑) · 중단원던전(보라) · 대단원던전(빨강). 원본 무손실은 assets/img/dportal-*-v1.png
+    bg: (id) => ({ '03-dimensional': 'dg-03-dimensional-v2.webp', '04-mine': 'dg-04-mine-v2.webp' })[id] || `dg-${id}-v1.webp`  // v2 도트 배경이 온 테마만 바꿔 씀 (2026-11-03: 03 차원 균열)
+  },
   // 메달 (v0.9.1 · 사용자 제공 · 5열 × 2행): rank = 업적 · 성장 10종, dungeon = 던전 테마 01~10 정복
   medals: { rank: { src: 'medals-rank-v1.webp', cols: 5, rows: 2 }, dungeon: { src: 'medals-dungeon-v1.webp', cols: 5, rows: 2 } },
   // 교사 대기공간 배경 (v0.9.1 · 푸른 숲 성소, 사용자 제공)
@@ -92,7 +91,6 @@ DS.ASSETS = {
   // 🏰 타워 디펜스 지도 배경 (2026-11-06 사용자 그림 · 1672×941 · 템플릿 assets/templates/td · docs/ASSET-SPEC.md 6-11): 지도 id → 그림. 없으면 코드가 단색 + 이모지로 그림
   //   그림 위 가운데 어두운 상자(가로 4~12칸 · 세로 0~0.75칸) = 종합실 글자 자리 (css .td-art .td-top) · 그 둘레와 성 둘레엔 자리를 안 만듦 (td-maps.js blocked)
   td: { forest: 'td-forest-v1.webp', volcano: 'td-volcano-v1.webp', ice: 'td-ice-v1.webp', desert: 'td-desert-v1.webp', crypt: 'td-crypt-v1.webp' },
-  dportals: { bonus: 'dportal-bonus-v1.webp', mid: 'dportal-mid-v1.webp', big: 'dportal-big-v1.webp' },
   citadel: { room: 'citadel-room-v1.webp', boss: 'citadel-boss-v1.webp' }, // 🏰 성채던전 안 전투 배경 (2026-11-05 사용자 제공): room = 일반 방 · boss = 보스 방 (중단원 12번 · 대단원 17번) — 성채던전 개편(묶음 A) 때 연결
   fields: { forest: 'field-forest-v1.webp', lava: 'field-lava-v1.webp', ice: 'field-ice-v1.webp' }, // 전투 배경 (달빛 숲 유적 · 화산 대장간 · 빙결 신전)
   camp: {

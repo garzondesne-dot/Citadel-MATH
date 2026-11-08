@@ -145,7 +145,7 @@ ${a.ui.home ? `.home-props{display:contents}.home-props img{position:fixed;z-ind
   function lessonFiles(L) {
     if (!L) return [];
     const a = A(), out = new Set();
-    if (L.theme && a.dungeons) { out.add(a.dungeons.bg(L.theme)); out.add(a.dungeons.portal(L.theme)); }
+    if (L.theme && a.dungeons) { out.add(a.dungeons.bg(L.theme)); } // 2026-11-08 요청 #8: 테마 포털은 화면에 안 나와 미리 받지 않음
     Object.values(L.monsters || {}).forEach((m) => { const f = sheetFile(m.sprite); if (f) out.add(f); });
     if (L.boss && L.boss.sprite != null) { const f = sheetFile(L.boss.sprite); if (f) out.add(f); }
     return [...out];

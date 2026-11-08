@@ -914,3 +914,7 @@
 | 재도전 | 같은 꼴 · 새 숫자/문장 (U 범위 · 배수 · 약수 · 부등호 기준값 · 이차식 (x − h)² + k · 문장 표) · 학습지 그대로는 다시 안 나옴 |
 | 보스 | 👑 **부정의 수정 여왕** `monstersMirrorBoss8` = `monsters-mirrorboss-v3.webp` (선생님 그림 · 하늘색 기준선 지움 · demagenta + cut_grid 384) · `'mirrorboss8:0'` · 「대우의 거울 마왕」(monstersMirrorBoss)은 10차시(대우)용으로 둠 |
 | 검산 | `tests/lesson8.test.js` (문제 글을 읽어 따로 판정 · 재도전 24,300문항 · 확인 108,778개) · `tools/e2e/e2e77.js` (교사 폰 · 학생 폰 · 종합실 생각 열기 → 형성평가 격파) |
+
+## 🧹 안 쓰는 포털 그림 정리 (2026-11-08 요청 #8 · v0.9.24.1)
+- 테마 포털 10장(`portal-01~10-v1`) · 특수 차원문 3장(`dportal-bonus/mid/big-v1`) = 화면 어디에도 안 나옴 → `assets/_old/` 로 옮김 (약 1.3MB · README).
+- `art.js lessonFiles()` 의 포털 미리 받기 뺌 · `sw.js` 의 dportal-bonus 뺌 · 배치표 `dungeons.portal` · `dportals` 지움. `trim()` 의 옛 캐시 지우기(portal-)는 그대로.
