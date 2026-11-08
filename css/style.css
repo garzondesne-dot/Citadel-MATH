@@ -2770,3 +2770,5 @@ html body #screen-camp .btn.camp-back, html body #screen-bonus #bn-back.btn { bo
 /* ⚒ 모루 재료 · 연산 칸: 긴 한글 칸(「x는 ○○」 「○○이다」 「참·거짓?」)은 글자 길이만큼 넓게 — 좁은 44px 칸에서 옆 칸과 글자가 겹쳤음 (2026-11-08 사용자 캡처) */
 .fc-tile.mini.ko, .fc-tile.mini.long { width: auto !important; min-width: 44px; padding-left: 8px !important; padding-right: 8px !important; }
 body.forge-open #ver-tag { display: none !important; } /* 모루 화면에서는 버전 꼬리표 숨김 (2026-11-08) */
+/* 💎 마정석 칩 글자 가늘게 (2026-11-08 「폰트 너무 두꺼워」 · 도트 글꼴 가짜 굵게 끔) */
+html body .sc-gem, html body .sc-gem .sc-gn, html body .sc-gem b { font-weight: 400 !important; text-shadow: none !important; -webkit-text-stroke: 0 !important; }
