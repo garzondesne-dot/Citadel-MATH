@@ -347,10 +347,10 @@
     //    · 중단원: (평가1) 34 = 07 풀이 → 문제 4 · 36 = 11 풀이 → 문제 6 (교과서 숫자로 푼 예제 = 선생님 보충 설명용 · 교사가 켤 때만 보임)
     //    · 이번 v3 개념 설명은 영상 대신 PPT (2026-11-05 사용자 결정 · 「(06차시) 개념설명_v3.pptx」)
     videos: { c1: 'assets/video/v06-09-v2.mp4', m1: 'assets/video/v06-09-v2.mp4', // 2026-11-06 모션 방 새 판 (30초 · 좌변 · 우변 그림이 가운데로 합쳐짐)
-      c2: 'assets/video/v06-18.mp4', m2: 'assets/video/v06-18.mp4', b1: 'assets/video/v06-18.mp4',
-      c3: 'assets/video/v06-19.mp4', m3: 'assets/video/v06-19.mp4',
+      c2: 'assets/video/v06-18-v2.mp4', m2: 'assets/video/v06-18-v2.mp4', b1: 'assets/video/v06-18-v2.mp4',
+      c3: 'assets/video/v06-19-v2.mp4', m3: 'assets/video/v06-19-v2.mp4',
       c4: 'assets/video/v06-38.mp4', // 38 포함 관계와 교집합 · 합집합 (A ⊂ B ⇔ A ∩ B = A ⇔ A ∪ B = B · 30초 · 2026-11-06)
-      u4: 'assets/video/e1-34.mp4', u6: 'assets/video/e1-36.mp4',
+      u4: 'assets/video/e1-34.mp4', u6: 'assets/video/e1-36-v2.mp4',
       u7: 'assets/video/v06-39.mp4' }, // 39 문제 7 「~이 아니거나」 = 드모르간 (99 − 3 = 96 · 30초 · 2026-11-06)
     goal: '드모르간의 법칙을 이용한다 · 여집합 · 차집합의 원소의 개수를 구한다 · 집합 단원(중단원 마무리) 문제를 해결한다',
     defaultPct: 90,

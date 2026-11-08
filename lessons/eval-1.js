@@ -139,7 +139,7 @@
   }
 
   // 소문제마다 학습지 번호(ref) · 풀이 영상(video = 교과서 숫자로 푼 예제, 한 번 틀린 뒤 열림). 영상이 없는 문항(01 · 02 · 06 · 08 · 09 · 12)은 주문서 37~40 대기
-  const V = { '03': 'assets/video/v03-22.mp4', '04': 'assets/video/e1-32.mp4', '05': 'assets/video/e1-33.mp4', '07': 'assets/video/e1-34.mp4', '10': 'assets/video/e1-35.mp4', '11': 'assets/video/e1-36.mp4' };
+  const V = { '03': 'assets/video/v03-22.mp4', '04': 'assets/video/e1-32.mp4', '05': 'assets/video/e1-33.mp4', '07': 'assets/video/e1-34.mp4', '10': 'assets/video/e1-35.mp4', '11': 'assets/video/e1-36-v2.mp4' };
   const tagRefs = (arr, refs) => arr.map((q, i) => Object.assign(q, { ref: refs[i] }, V[refs[i].slice(0, 2)] ? { video: V[refs[i].slice(0, 2)] } : {}));
   // 🏰 성채던전 1층 (2026-11-05 사용자 확정): 방 하나 = 문항 하나 (12방) · no = 그 문항을 풀 수 있는 차시 (우리 반이 그 차시 수업을 열면 방이 열림)
   //   12번 = 👑 보스 방: 열린 방(보스 제외)의 60% 이상(올림)을 처치해야 열림 · 옛 7마리(e1~eb) 기록은 LEGACY 로 이어 셈
@@ -168,7 +168,7 @@
     theme: '08-crypt', // 보라 차원문 안 (묘실 배경)
     goal: '집합 단원 개념을 스스로 점검한다 · 틀린 문항으로 보충할 부분을 찾는다',
     // 🎬 (평가1) 32~36 — 교과서 숫자로 푼 예제 (모션그래픽 방 제작 · 2026-11-03)
-    videos: { q04: 'assets/video/e1-32.mp4', q05: 'assets/video/e1-33.mp4', q07: 'assets/video/e1-34.mp4', q10: 'assets/video/e1-35.mp4', q11: 'assets/video/e1-36.mp4' },
+    videos: { q04: 'assets/video/e1-32.mp4', q05: 'assets/video/e1-33.mp4', q07: 'assets/video/e1-34.mp4', q10: 'assets/video/e1-35.mp4', q11: 'assets/video/e1-36-v2.mp4' },
     steps: [],
     monsters: MONSTERS,
     rooms: ROOMS.map(({ id, no, title, boss, photo }) => ({ id, no, title, boss: !!boss, photo: !!photo })), // photo = 서술형 → 📷 사진 분석 전까지 잠금 (2026-11-05)
