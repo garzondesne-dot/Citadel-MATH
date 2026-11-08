@@ -23,12 +23,12 @@
 | b09-01 | 역과 대우의 문지기 | 9차시 👑 보스 | 신규 | P2 | 대기 | 제작 대기 | — | [작업](tasks/b09-01-boss-vault-gatekeeper.md) |
 | bg-09 | 🔑 열쇠와 자물쇠의 묘실 배경 (테마 **확정** 11-08) | 9차시 배경 → `dg-11-keyvault-v1` | 신규 | P2 | — | 생성 완료 | — | [작업](tasks/bg-09-key-vault.md) |
 | m10-01 | 천칭 가고일 · **10차시 화풍 확인 대표** | 10차시 몬스터 줄 0 | 신규 | **P1** | 생성 완료 | 제작 대기 | — | [작업](tasks/m10-01-mon-garden-scale-gargoyle.md) |
-| m10-02 | 필요 덩굴 | 10차시 몬스터 줄 1 | 신규 | P2 | 대기 | 제작 대기 | — | [작업](tasks/m10-02-mon-garden-need-vine.md) |
-| m10-03 | 충분 나비 | 10차시 몬스터 줄 2 | 신규 | P2 | 대기 | 제작 대기 | — | [작업](tasks/m10-03-mon-garden-enough-butterfly.md) |
-| m10-04 | 쌍둥이 구름 정령 | 10차시 몬스터 줄 3 | 신규 | P2 | 대기 | 제작 대기 | — | [작업](tasks/m10-04-mon-garden-twin-cloud.md) |
+| m10-02 | 필요 덩굴 | 10차시 몬스터 줄 1 | 신규 | P2 | 생성 완료 | 제작 대기 | — | [작업](tasks/m10-02-mon-garden-need-vine.md) |
+| m10-03 | 충분 나비 | 10차시 몬스터 줄 2 | 신규 | P2 | 생성 완료 | 제작 대기 | — | [작업](tasks/m10-03-mon-garden-enough-butterfly.md) |
+| m10-04 | 쌍둥이 구름 정령 | 10차시 몬스터 줄 3 | 신규 | P2 | 생성 완료 | 제작 대기 | — | [작업](tasks/m10-04-mon-garden-twin-cloud.md) |
 | m10-05 | 거울 웅덩이 두꺼비 | 10차시 몬스터 줄 4 | 신규 | P2 | 대기 | 제작 대기 | — | [작업](tasks/m10-05-mon-garden-mirror-toad.md) |
 | b10 | 대우의 거울 마왕 (기존 그림 재사용 · **확정**) | 10차시 👑 보스 | 유지 | — | — | 게임 적용 완료 | ✅ | — (만들지 않음 · `monsters-mirrorboss-v2.webp`) |
-| bg-10 | ⚖ 저울의 공중 정원 배경 (테마 **확정** 11-08) | 10차시 배경 → `dg-12-skygarden-v1` | 신규 | P2 | — | 제작 대기 | — | [작업](tasks/bg-10-sky-garden.md) |
+| bg-10 | ⚖ 저울의 공중 정원 배경 (테마 **확정** 11-08) | 10차시 배경 → `dg-12-skygarden-v1` | 신규 | P2 | — | 생성 완료 | — | [작업](tasks/bg-10-sky-garden.md) |
 | r-b02 | 2차시 보스 「숲의 수호자」 | 2차시 👑 | 수정 (v1→v2) | P4 | 대기 | 제작 대기 | — | [작업](tasks/r-b02-boss-v2.md) |
 | r-b03 | 3차시 보스 「포함의 성주」 | 3차시 👑 | 수정 | P4 | 대기 | 제작 대기 | — | [작업](tasks/r-b03-boss-v2.md) |
 | r-b04 | 4차시 보스 「서리 늑대」 | 4차시 👑 | 수정 | P4 | 대기 | 제작 대기 | — | [작업](tasks/r-b04-boss-v2.md) |
