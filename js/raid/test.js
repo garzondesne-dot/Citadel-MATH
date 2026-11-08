@@ -90,8 +90,13 @@ DS.Test = (function () {
   // 아래 막대: ◀ · 지금 단계 · 다음 ▶ · 끝내기
   function bar(on) {
     let el = $('#test-bar');
-    if (!on) { if (el) el.remove(); return; }
-    if (!el) { el = document.createElement('div'); el.id = 'test-bar'; el.className = 'test-bar'; document.body.appendChild(el); }
+    if (!on) { if (el) el.remove(); document.documentElement.style.removeProperty('--tbh'); return; }
+    if (!el) {
+      el = document.createElement('div'); el.id = 'test-bar'; el.className = 'test-bar'; document.body.appendChild(el);
+      // 2026-11-08 사용자 「체험판 다 풀었는데 제출 버튼이 없어」: 아래 막대 높이를 알려 → 학생 「⚔ 공격!」 줄이 막대 바로 위에 뜸
+      const sync = () => document.documentElement.style.setProperty('--tbh', `${el.offsetHeight}px`);
+      if (typeof ResizeObserver === 'function') new ResizeObserver(sync).observe(el); setTimeout(sync, 0);
+    }
     draw();
   }
   function draw(force) {

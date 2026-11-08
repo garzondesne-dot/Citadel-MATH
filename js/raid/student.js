@@ -536,6 +536,8 @@ DS.Student = (function () {
     if (sig === drawn && body.querySelector('.items')) { hpText(body, hp); return; }
     drawn = sig;
     // 🧹 2026-11-07 정돈판: 문제 = 「다듬은 양피지」 한 장 (장면은 위에 고정 · 문제가 길면 양피지 안에서만 스크롤) · ⚔ 공격! 은 아래 고정 줄
+    // 2026-11-08 사용자 「문제 체크할 때마다 위로 스크롤이 올라감」: 같은 문제를 다시 그릴 때는 양피지 · 화면 스크롤 자리를 그대로 둠
+    const keepKey = `form|${key}`, keep = body._keep === keepKey ? { p: (body.querySelector('.paper') || {}).scrollTop || 0, w: window.scrollY, b: body.scrollTop } : null; body._keep = keepKey;
     body.innerHTML = `<div class="panel framed st-fight">${scene(step, rec, hp, '', down ? '' : GAUGE)}
       <div class="paper"><div class="paper-h"><b>${step.special ? '⭐ ' : step.review ? '📖 ' : ''}${esc(step.title)}</b><small>${items.length > 1 ? `(1)~(${items.length}) 모두 풀고 공격` : '풀고 공격'}</small></div>
       ${down ? '<p class="paper-note ok">🎉 몬스터는 쓰러졌어요! 그래도 풀어서 공격하면 이펙트도 뜨고 경험치가 쌓여요.</p>' : ''}
@@ -544,6 +546,7 @@ DS.Student = (function () {
       <div class="items">${items.map((q, i) => itemHtml(q, i, prevWrong[i], null)).join('')}</div></div>
       ${dock(rec, `<button class="btn primary big dock-go" id="st-go"${ready ? '' : ' disabled'}>⚔ 공격!</button>`)}
       ${helpBtn()}</div>`;
+    if (keep) { const pp = body.querySelector('.paper'); if (pp) pp.scrollTop = keep.p; body.scrollTop = keep.b; window.scrollTo(0, keep.w); }
     bindTop();
     bindHelp();
     body.querySelectorAll('[data-pick]').forEach((b) => b.addEventListener('click', () => {

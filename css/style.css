@@ -2662,3 +2662,10 @@ body:not(:has(#test-tv)) #screen-student.st-battle > .wrap { padding-top: 0 !imp
 .fh2.atk-on { z-index: 18 !important; }
 /* 🔄 체험판 · 테스트 모드 새 판 단추 (2026-11-08) */
 .upd-bar { white-space: nowrap; position: fixed; left: 50%; top: 58px; transform: translateX(-50%); z-index: 9999; padding: 8px 16px; border: 2px solid var(--gold, #f4c75e); border-radius: 18px; background: #1e1812f0; color: #ffe39a; font: 14px var(--pixel, sans-serif); box-shadow: 0 4px 14px #000a; cursor: pointer; }
+
+/* 🧪 테스트 · 👩‍🏫 체험판 (2026-11-08): 아래 막대가 학생 「기회 · ⚔ 공격!」 줄을 가리지 않게 — 막대 바로 위로 · 문제지 아래 여백도 그만큼 */
+body:has(#test-bar) .st-dock { bottom: var(--tbh, 60px); }
+body:has(#test-bar) #screen-student.st-battle .wrap { padding-bottom: calc(86px + var(--tbh, 60px)); }
+/* ⚔ 공격! 단추 (2026-11-08): 위 줄의 border 덮어쓰기가 금빛 테두리 그림(border-image)까지 지워 어두운 바탕에 어두운 글씨였음 → 금빛 바탕을 직접 */
+.st-dock .dock-go { border-image: none !important; background: linear-gradient(#ffe08a, #e8a93a) !important; color: #3a2204 !important; text-shadow: 0 1px 0 #fff3c4 !important; border-radius: 10px; }
+.st-dock .dock-go:disabled { background: linear-gradient(#6a5a44, #4a3e30) !important; color: #c9b896 !important; text-shadow: none !important; }
