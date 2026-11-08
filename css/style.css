@@ -2660,3 +2660,5 @@ body:not(:has(#test-tv)) #screen-student.st-battle > .wrap { padding-top: 0 !imp
 @media (prefers-reduced-motion: reduce) { .cs-v2 .cs-obj.cs-lit { animation: none; opacity: .4; } }
 /* ⚔ 종합실 공격 재정비 (2026-11-08): DS.Attack.play 가 translate 로 움직임 — 공격 중인 용사는 몬스터 위로 */
 .fh2.atk-on { z-index: 18 !important; }
+/* 🔄 체험판 · 테스트 모드 새 판 단추 (2026-11-08) */
+.upd-bar { white-space: nowrap; position: fixed; left: 50%; top: 58px; transform: translateX(-50%); z-index: 9999; padding: 8px 16px; border: 2px solid var(--gold, #f4c75e); border-radius: 18px; background: #1e1812f0; color: #ffe39a; font: 14px var(--pixel, sans-serif); box-shadow: 0 4px 14px #000a; cursor: pointer; }

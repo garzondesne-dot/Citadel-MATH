@@ -14,13 +14,26 @@ DS.PWA = (function () {
   function init() {
     const btn = $('#btn-install'), tip = $('#install-tip');
     if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
-      navigator.serviceWorker.register('./sw.js').then((r) => { r.update().catch(() => {}); }).catch(() => { /* 등록 실패해도 수업은 그대로 */ });
+      // 🔄 2026-11-08 사용자 「🧪 테스트 · 체험판은 실시간 업데이트」: 열어 둔 채로도 5분마다 · 화면으로 돌아올 때 새 판을 확인
+      navigator.serviceWorker.register('./sw.js').then((r) => {
+        const up = () => r.update().catch(() => {}); up();
+        setInterval(up, 5 * 60e3); document.addEventListener('visibilitychange', () => { if (!document.hidden) up(); });
+      }).catch(() => { /* 등록 실패해도 수업은 그대로 */ });
       // v0.9.8.0: 앱 파일을 캐시에서 바로 쓰므로 새 판이 깔리면 → 첫 화면이면 바로 새로고침 · 수업 중이면 안내만 (다음에 열 때 적용)
+      //   👩‍🏫 체험판 · 🧪 테스트 모드: 기록이 남지 않는 연습이라 → 첫 화면이면 바로 새 판 · 진행 중이면 「새 판으로 처음부터」 단추 (누르면 바로)
       let had = !!navigator.serviceWorker.controller;
       navigator.serviceWorker.addEventListener('controllerchange', () => {
         if (!had) { had = true; return; }
-        const home = document.querySelector('#screen-home.active, #screen-login.active');
-        if (home) location.reload(); else if (DS.UI && DS.UI.toast) DS.UI.toast('🔄 새 판이 준비됐어요 — 앱을 다시 열면 적용돼요', 4000);
+        const trial = document.documentElement.classList.contains('trial'), test = !!(DS.Test && DS.Test.active && DS.Test.active());
+        const home = document.querySelector('#screen-home.active, #screen-login.active' + (trial ? ', #screen-splash.active' : ''));
+        if (home) { location.reload(); return; }
+        if (trial || test) {
+          if (document.getElementById('upd-bar')) return;
+          const b = document.createElement('button'); b.id = 'upd-bar'; b.type = 'button'; b.className = 'upd-bar';
+          b.textContent = '🔄 새 판 나옴 · 눌러서 처음부터'; b.onclick = () => location.reload();
+          document.body.appendChild(b); return;
+        }
+        if (DS.UI && DS.UI.toast) DS.UI.toast('🔄 새 판이 준비됐어요 — 앱을 다시 열면 적용돼요', 4000);
       });
     }
     if (!btn || standalone()) return;
