@@ -178,17 +178,18 @@ DS.App = (function () {
   // 🔑 크롬 비밀번호 저장 정리 (2026-11-03): 저장되는 곳은 딱 두 군데 — 학생(아이디 「1-3반 1번」 + 4자리) · 교사(아이디 + 비밀번호)
   //   학생 칸은 <form> 안에 숨은 아이디 칸(반·번호)과 짝지어 둔다. 로그인 = current-password · 가입/새 비번 = new-password
   //   그 밖의 숫자 칸(수업 코드 · 종합상황실 키)은 password 칸이 아니라서 크롬이 저장하지 않는다
+  // 🔑 크롬 · 안드로이드: 로그인 성공 뒤 「비밀번호 저장」 창을 확실히 띄움 (PasswordCredential · 2026-11-08). 아이폰 · 사파리는 없음 → 위 form 방식 그대로
+  const savePw = (id, password, name) => { try { if (window.PasswordCredential && navigator.credentials && id && password) navigator.credentials.store(new window.PasswordCredential({ id, password, name: name || id })).catch(() => {}); } catch (e) { /* 무시 */ } };
   const pinInput = (id, ph, kind = 'current-password') => `<input id="${id}" name="${kind === 'new-password' ? 'new-password' : 'password'}" type="password" inputmode="numeric" maxlength="4" pattern="[0-9]*" placeholder="${ph}" autocomplete="${kind}">`;
   const sForm = (c, n, inner) => `<form class="s-auth" autocomplete="on" onsubmit="return false"><input class="vh" type="text" name="username" autocomplete="username" tabindex="-1" aria-hidden="true" readonly value="${esc(`${c}반 ${n}번`)}">${inner}</form>`;
   function drawForm() {
     const f = $('#s-form'), c = () => $('#s-cls').value, n = () => Number($('#s-num').value);
-    const remember = () => {}; // 반·번호는 기억하지 않는다 (v0.8.3)
     if (sMode === 'login') {
       f.innerHTML = sForm(c(), n(), `<label>비밀번호 (숫자 4자리) ${pinInput('s-pin', '••••')}</label><button id="s-login" type="submit" class="btn primary big">🔑 로그인</button><button id="s-new" type="button" class="btn">처음이에요 · 가입</button>`);
       $('#s-login').onclick = go(async () => {
         const r = await A().login(c(), n(), $('#s-pin').value);
         if (r && r.needNewPin) { sMode = 'newpin'; drawForm(); return; }
-        remember(); DS.UI.toast('로그인했어요!'); studentAuth();
+        savePw(`${c()}반 ${n()}번`, $('#s-pin').value); DS.UI.toast('로그인했어요!'); studentAuth();
       });
       $('#s-new').onclick = () => { sMode = 'signup'; drawForm(); };
     } else if (sMode === 'signup') {
@@ -202,7 +203,7 @@ DS.App = (function () {
         const a = $('#s-p1').value, b = $('#s-p2').value;
         if (a !== b) throw Object.assign(new Error('두 비밀번호가 달라요.'), { user: true });
         await A().signUp(c(), n(), a, hero, fx);
-        remember(); DS.UI.toast('가입했어요! 비밀번호 4자리를 꼭 기억해요.', 3200); studentAuth();
+        savePw(`${c()}반 ${n()}번`, a); DS.UI.toast('가입했어요! 비밀번호 4자리를 꼭 기억해요.', 3200); studentAuth();
       });
       $('#s-back').onclick = () => { sMode = 'login'; drawForm(); };
     } else {
@@ -213,7 +214,7 @@ DS.App = (function () {
         const a = $('#s-p1').value, b = $('#s-p2').value;
         if (a !== b) throw Object.assign(new Error('두 비밀번호가 달라요.'), { user: true });
         await A().login(c(), n(), '0000', a);
-        remember(); DS.UI.toast('새 비밀번호로 바꿨어요!', 3000); studentAuth();
+        savePw(`${c()}반 ${n()}번`, a); DS.UI.toast('새 비밀번호로 바꿨어요!', 3000); studentAuth();
       });
     }
   }
@@ -260,6 +261,7 @@ DS.App = (function () {
       const box = b.closest('.t-auth'), id = box.querySelector('.t-id').value.trim(), pwd = box.querySelector('.t-pw').value;
       if (!id) throw Object.assign(new Error('교사 아이디를 넣어 주세요.'), { user: true });
       if (first) await A().teacherCreate(id, pwd); else await A().teacherLogin(id, pwd);
+      savePw(id, pwd, `교사 ${id}`);
       DS.UI.toast('교사 계정으로 로그인했어요.'); await teacherAuth(); await studentAuth();
       if (pendingTest) { const t = pendingTest; pendingTest = null; await DS.Test.start(t); }
     })));
