@@ -125,6 +125,8 @@ DS.Attack = (function () {
     const cx = M.x + M.w / 2, cy = M.y + M.h * 0.52, sp = DS.FX.spec(fx) || DS.FX.spec('flame');
     const fam = (DS.FX.famOf(fx) || { id: 'star' }).id, c1 = (ULT_COLOR[fam] || ULT_COLOR.star)[0];
     const cap = sp ? Math.min((W * 0.95) / sp.w, (Hh * 0.95) / sp.h) : 3, sMain = sp ? Math.max(0.8, Math.min(cap, (M.w * 1.6) / sp.w)) : 2;
+    // 🌑 2026-11-08 사용자 「필살기 쓸 때 이펙트 빼고 나머지는 어두워지게」: 장면 위 어둠막(이펙트 · 섬광 · 충격파는 그 위) 1.3초
+    const dim = document.createElement('i'); dim.className = 'ult-dim'; scene.appendChild(dim); setTimeout(() => dim.remove(), 1500);
     const fl = document.createElement('i'); fl.className = 'ult-aoe'; fl.style.setProperty('--c', c1); fl.style.setProperty('--x', `${cx}px`); fl.style.setProperty('--y', `${cy}px`); scene.appendChild(fl); setTimeout(() => fl.remove(), 700);
     const ring = document.createElement('i'), d = 2.2 * Math.hypot(Math.max(cx, W - cx), Math.max(cy, Hh - cy)); ring.className = 'ult-ring'; ring.style.cssText = `left:${cx}px;top:${cy}px;width:${d}px;height:${d}px;--c:${c1}`; scene.appendChild(ring); setTimeout(() => ring.remove(), 650);
     const Bb = monBox && monBox.isConnected ? body(monBox, scene) : null;

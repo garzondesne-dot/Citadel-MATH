@@ -233,7 +233,7 @@ DS.TD = (function () {
     const L = DS.Lessons && DS.Lessons.get(((h.R.meta || {}).lesson)) || null, ms = L ? Object.values(L.monsters || {}).map((x) => x.sprite).filter(Boolean) : [];
     h.spr = { n: ms[0] || 0, f: ms[1] || ms[0] || 0, t: ms[2] || ms[0] || 0, m: ms[3] || ms[1] || 0, b: (L && L.boss && L.boss.sprite) || ms[0] || 0 };
     h.S.towers.forEach((T) => { const p = T.teacher ? { nick: '선생님', hero: twOf(f).find((t) => t.T).hero } : h.R.players[T.uid] || {}, tw = twOf(f).find((t) => t.u === T.uid) || {};
-      const d = document.createElement('div'); d.className = `td-tw${T.teacher ? ' teacher' : ''}${p.enh ? ` enh enh-${DS.Gem && DS.Gem.enhTier ? DS.Gem.enhTier(Number(tw.enh) || 0) : 0}` : ''}`; d.style.cssText = pos(h, T.x, T.y);
+      const d = document.createElement('div'); d.className = `td-tw${T.teacher ? ' teacher' : ''}${p.enh && DS.Gem && DS.Gem.auraCls ? DS.Gem.auraCls(tw.enh) : ''}`; // ✨ 강화 오라 (2026-11-08) d.style.cssText = pos(h, T.x, T.y);
       d.innerHTML = `<i class="td-rg" style="width:${T.range * 2 * h.U}px;height:${T.range * 2 * h.U}px"></i>${DS.Art.hero(Number(tw.hero) || 0, 'idle', 'small')}<b>${esc(T.teacher ? '🧙 선생님' : p.nick || '')}${tw.enh ? ` <span class="enh-tag">+${tw.enh}</span>` : ''}</b><em class="td-up"></em>`;
       h.dom.appendChild(d); h.tw.set(T.uid, d); });
     loop();

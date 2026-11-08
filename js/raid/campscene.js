@@ -20,6 +20,7 @@ DS.CampScene = (function () {
   function press(stage, k) {
     const o = (C().objs || {})[k], img = stage && stage.querySelector(`.cs-obj-${k}:not(.cs-on):not(.cs-lit)`); if (!o || !img) return;
     stage.querySelectorAll(`.cs-obj-${k}:not(.cs-on)`).forEach((e) => { e.classList.remove('cs-press'); void e.offsetWidth; e.classList.add('cs-press'); setTimeout(() => e.classList.remove('cs-press'), 900); });
+    stage.querySelectorAll(`.cs-obj-${k}.cs-lit`).forEach((e) => e.classList.add('lit-on')); // 💡 2026-11-08: 평소 꺼진 창에 불이 켜지고 그대로
     if (o.door) { const sp = document.createElement('span'); sp.className = 'cs-spark cs-door'; sp.setAttribute('aria-hidden', 'true'); sp.style.left = `calc(${pct(o.x + (o.w * o.door[0]) / 100, W())} - 12px)`; sp.style.top = `calc(${pct(o.y + (o.w * (img.naturalHeight / (img.naturalWidth || 1)) * o.door[1]) / 100, H())} - 12px)`; stage.appendChild(sp); setTimeout(() => sp.remove(), 1300); }
     if (DS.Sound && DS.Sound.hit) DS.Sound.hit();
   }

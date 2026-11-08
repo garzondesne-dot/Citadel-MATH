@@ -2676,3 +2676,78 @@ body:has(#test-bar) #screen-student.st-battle .wrap { padding-bottom: calc(86px 
 .toast.show { transform: translate(-50%, 0); }
 .trial-pick .tp-ver { margin: 2px 0 0; text-align: center; font: 12px/1.3 var(--math); color: #c9b896; opacity: .9; letter-spacing: .02em; } /* 👩‍🏫 체험판 첫 화면 버전 (2026-11-08) */
 .trial .splash:has(.trial-pick) .splash-ver { display: none; } /* 고르기 칸에 가려 흐리게 비치던 첫 화면 버전 → 칸 안 .tp-ver 로 (2026-11-08) */
+
+/* ===== 2026-11-08 플레이 소감 묶음 (v0.9.23.0) ===== */
+/* ❤ 재도전 기회: 아래 줄 = 「재도전 ❤❤❤❤ 3/4」(도트 하트 · 크게) · 용사 머리 위 = 체력바 칸 (예전 느낌) */
+.st-dock .dock-tries { gap: 6px; padding: 4px 10px 4px 8px; border-radius: 12px; background: rgba(60, 14, 20, .55); box-shadow: inset 0 0 0 1.5px rgba(232, 52, 72, .55); }
+.st-dock .dock-tries .dt-l { font: 700 12px var(--math); color: #ffb4bd; letter-spacing: -.02em; }
+.st-dock .dock-tries .ch-row { display: inline-flex; gap: 3px; }
+.ch { display: inline-block; width: 22px; height: 20px; background-size: 300% 100%; background-repeat: no-repeat; image-rendering: pixelated; filter: drop-shadow(0 1px 0 #000a); }
+.ch.ch-0 { animation: chBeat 1.6s ease-in-out infinite; } .ch.ch-1 { filter: drop-shadow(0 0 4px #40e296); }
+@keyframes chBeat { 0%, 70%, 100% { transform: scale(1); } 80% { transform: scale(1.14); } }
+.st-dock .dock-tries .dt-n { font: 800 18px var(--math); color: #fff; } .st-dock .dock-tries .dt-n small { font-size: 12px; color: #c9b896; font-weight: 600; }
+.st-dock .dock-tries.low { box-shadow: inset 0 0 0 1.5px #ff4a5a, 0 0 10px rgba(255, 74, 90, .45); } /* 마지막 기회: 빨갛게 */
+.enc-hero .hp-tries { width: 96px; height: 14px; border-radius: 4px; }
+@media (max-width: 380px) { .ch { width: 18px; height: 16px; } .st-dock .dock-tries .dt-l { display: none; } }
+
+/* ✨ 강화 오라 1~10 (아이디 옆 「+N」 대신): 용사 실루엣을 감싸는 은은한 빛 + 발밑 빛 웅덩이(숨쉬듯) */
+.aura { --a1: #e8eef8; --a2: #ffffff; --ar: 3px; }
+.aura-1 { --a1: #e8eef8; --a2: #ffffff; --ar: 3px; }   /* 은은한 흰빛 */
+.aura-2 { --a1: #7dff9a; --a2: #e6ffe9; --ar: 4px; }   /* 새싹 초록 */
+.aura-3 { --a1: #6fd8ff; --a2: #e6f8ff; --ar: 4px; }   /* 맑은 하늘 */
+.aura-4 { --a1: #3a7bff; --a2: #cfe0ff; --ar: 5px; }   /* 깊은 바다 */
+.aura-5 { --a1: #b06bff; --a2: #f0e2ff; --ar: 5px; }   /* 보랏빛 신비 */
+.aura-6 { --a1: #ff7ac8; --a2: #ffe6f4; --ar: 6px; }   /* 벚꽃 분홍 */
+.aura-7 { --a1: #ffc23a; --a2: #fff3c0; --ar: 6px; }   /* 황금 태양 */
+.aura-8 { --a1: #ff4a3a; --a2: #ffd0b0; --ar: 7px; }   /* 진홍 불꽃 */
+.aura-9 { --a1: #8a6bff; --a2: #5ae8ff; --ar: 7px; }   /* 별빛 은하 (두 빛) */
+.aura-10 { --a1: #ff4d5e; --a2: #fff; --ar: 8px; }     /* 무지개 전설 */
+.aura .art.hv2 > b, .aura .art.hero:not(.hv2) { filter: drop-shadow(0 0 var(--ar) var(--a1)) drop-shadow(0 0 1px var(--a2)); }
+.aura-9 .art.hv2 > b, .aura-9 .art.hero:not(.hv2) { filter: drop-shadow(0 0 var(--ar) var(--a1)) drop-shadow(0 0 3px var(--a2)); }
+.aura-10 .art.hv2 > b, .aura-10 .art.hero:not(.hv2) { filter: none; }
+.aura-10 .art.hero { animation: enh-rainbow 3s linear infinite; }
+.aura::after { content: ''; position: absolute; left: 50%; bottom: 0; width: 76%; height: 16%; min-height: 8px; transform: translateX(-50%); border-radius: 50%; pointer-events: none; z-index: -1;
+  background: radial-gradient(ellipse, color-mix(in srgb, var(--a1) 70%, transparent), transparent 70%); animation: auraPool 3.2s ease-in-out infinite; }
+.aura-10::after { background: radial-gradient(ellipse, rgba(255, 255, 255, .7), transparent 70%); animation: auraPool 3.2s ease-in-out infinite, auraHue 3s linear infinite; }
+@keyframes auraPool { 0%, 100% { opacity: .45; transform: translateX(-50%) scale(.9); } 50% { opacity: .9; transform: translateX(-50%) scale(1.08); } }
+@keyframes auraHue { to { filter: hue-rotate(360deg); } }
+.enh-stage.aura::after { bottom: 6px; }
+.enh-1 .art.hero, .enh-2 .art.hero, .enh-3 .art.hero, .enh-4 .art.hero { filter: none; animation: none; } /* 예전 강화 빛은 끔 (오라로 대신) */
+
+/* 🌑 필살기: 이펙트 빼고 나머지는 어둡게 (장면 안 · 이펙트 z 20~23 아래) */
+.ult-dim { position: absolute; inset: 0; z-index: 19; pointer-events: none; background: radial-gradient(circle at 50% 45%, rgba(6, 4, 12, .66), rgba(6, 4, 12, .9)); animation: ultDim 1.5s ease-out forwards; }
+@keyframes ultDim { 0% { opacity: 0; } 12% { opacity: 1; } 75% { opacity: 1; } 100% { opacity: 0; } }
+
+/* 🖥 PC (종합실 · 교사 캠프): 용사를 크게 · 💎 상점 / 선생님 모습 창 = 스마트폰 크기 */
+@media (min-width: 1000px) {
+  .fh2 .art { width: clamp(88px, 6.6vw, 128px); height: clamp(88px, 6.6vw, 128px); }
+  .lb2-h .art { width: calc(var(--sz, 84px) * 1.35); height: calc(var(--sz, 84px) * 1.35); }
+  .modal > .quiz-box.set-box, .quiz-box.set-box { width: min(440px, 94vw) !important; max-width: 440px !important; max-height: min(88dvh, 860px) !important; }
+}
+
+/* 💎 상점 단추 둘레 네모 칸 없앰 (캠프 위 줄 테두리) */
+#screen-camp .camp-top.chip { border: 0 !important; background: none !important; box-shadow: none !important; }
+
+/* ◀ 메뉴화면 · 뒤로 단추 = 새 UI (2026-11-08 사용자 「옛 UI 가 곳곳에 · 황색은 안 보임 · ≪ 아이콘 써」): 둥근 단추 · 흰 고딕 글씨 · ≪ 도트 아이콘(ui.emoji ◀ → back) */
+.nav-back, #bn-back, .ui-back { height: 34px !important; padding: 0 14px 0 8px !important; gap: 4px; border: 0 !important; border-image: none !important; border-radius: 17px !important;
+  background: rgba(16, 12, 9, .78) !important; box-shadow: inset 0 0 0 2px rgba(176, 141, 87, .85), 0 3px 8px rgba(0, 0, 0, .45) !important; color: #fff !important; text-shadow: none !important; font: 700 14px var(--math) !important; letter-spacing: -.01em; }
+.nav-back .ui-ic, #bn-back .ui-ic, .ui-back .ui-ic { width: 20px; height: 20px; margin: 0 2px 0 0; vertical-align: middle; }
+.nav-back:active, #bn-back:active, .ui-back:active { transform: translateY(1px); }
+/* 💎 상점 칩 = 흰색 (2026-11-08) */
+.sc-gem { color: #fff !important; } .sc-gem .sc-gn { color: #fff !important; }
+.sc-gem i:not(.ui-ic) { background: #f6efe0 !important; color: #2a1d0a !important; }
+/* 🏰 성채 불빛 v2 (2026-11-08 사용자 「평소엔 불 꺼짐 → 누르면 켜짐」): 불빛 겹은 평소 0 · 누르면 번쩍 켜지고 그대로 (숨쉬기 없음) */
+.cs-v2 .cs-obj.cs-lit { opacity: 0; animation: none; transition: opacity .35s ease-out; }
+.cs-v2 .cs-obj.cs-lit.lit-on { opacity: 1; filter: drop-shadow(0 0 3px #ffd25a); }
+.cs-v2 .cs-obj-castle.cs-lit.cs-press { animation: csLitOn .6s ease-out 1 forwards !important; }
+@keyframes csLitOn { 0% { opacity: 0; transform: scale(1); } 30% { opacity: 1; transform: scale(1.04); filter: brightness(1.7) drop-shadow(0 0 5px #ffe7a0) drop-shadow(0 0 14px #ffb02e); } 100% { opacity: 1; transform: scale(1); filter: drop-shadow(0 0 3px #ffd25a); } }
+/* 🆕 성채 NEW 배지 → 게임 속 양피지 팻말 (2026-11-08 사용자 「따로 놀아 · 게임에 녹아들게」): 금빛 테두리 양피지 · 아래 꼬리 · 살짝 흔들림 */
+.cs-v2 .cs-newb, .tc-stage .cs-newb { top: 2%; right: 26%; padding: 3px 10px 4px; border-radius: 6px; background: linear-gradient(#f6e7c1, #dcc08a); color: #3a2208; font: 800 12px/1.2 var(--math); letter-spacing: -.01em;
+  box-shadow: 0 0 0 1.5px #8a6420, 0 0 0 3px rgba(26, 18, 10, .7), 0 0 12px rgba(255, 200, 90, .55); animation: newSway 2.6s ease-in-out infinite; transform-origin: 50% -40%; white-space: nowrap; }
+.cs-v2 .cs-newb::before, .tc-stage .cs-newb::before { content: '✦ '; color: #b8781a; }
+.cs-v2 .cs-newb::after, .tc-stage .cs-newb::after { content: ''; position: absolute; left: 50%; bottom: -6px; width: 10px; height: 10px; transform: translateX(-50%) rotate(45deg); background: #dcc08a; box-shadow: 1.5px 1.5px 0 #8a6420; z-index: -1; }
+@keyframes newSway { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg) translateY(-2px); } }
+#screen-camp .camp-back::before { content: none !important; } /* ≪ 도트 아이콘이 들어가므로 옛 ◀ 글자는 뺌 (2026-11-08) */
+#screen-camp .camp-back .ui-ic { width: 22px; height: 22px; margin: 0; }
+#screen-bonus #bn-back::before { content: none !important; } #screen-bonus #bn-back .ui-ic { width: 22px; height: 22px; margin: 0; }
+.st-dock .dock-tries { flex: none !important; } .st-dock .dock-go { flex: 1 1 auto !important; min-width: 0; } /* 재도전 하트 줄이 넓어져도 ⚔ 공격! 이 화면 밖으로 안 나가게 */

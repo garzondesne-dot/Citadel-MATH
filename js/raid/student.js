@@ -309,19 +309,22 @@ DS.Student = (function () {
   }
   // 1:1 대치: 왼쪽 내 용사(머리 위 = 남은 도전 기회 ●●●, 같이 움직임) vs 오른쪽 몬스터(아래 체력 칸)
   // cls: 'hit'(공격 성공 → 용사 돌진) · 'miss'(실패 → 축 처짐, 잠깐)
-  const enhCls = (p) => { const t = p && DS.Gem && DS.Gem.enhTier ? DS.Gem.enhTier(Number(p.enh) || 0) : 0; return t ? ` enh enh-${t}` : ''; };
+  const enhCls = (p) => (p && DS.Gem && DS.Gem.auraCls ? DS.Gem.auraCls(p.enh) : ''); // ✨ 강화 오라 1~10 (2026-11-08)
   // 🧪 테스트 · 👩‍🏫 체험판: 가상 친구 용사 (작은 줄)
   const partyHtml = () => (test ? `<div class="enc-friends">${Raid().activeIds(R).filter((u) => u !== me).slice(0, 4).map((u) => DS.Art.hero((R.players[u] || {}).hero || 0, 'idle', 'huff')).join('')}</div>` : '');
   const pipsOf = (rec) => Array.from({ length: rec.slots }, (_, i) => `<i class="${i < rec.left ? 'on' : ''}${i < Math.min(rec.left, rec.healed) ? ' heal' : ''}"></i>`).join('');
   const plate = () => `<span class="sc-plate">${esc(`${info0.num || myP().num || ''}번 ${info0.nick || myP().nick || ''}`)}</span>`;
   // 아래 고정 줄: 기회 ●●●● n · ⚔ 공격! (또는 지금 할 일 한 줄)
-  const dock = (rec, right) => `<div class="st-dock"><span class="dock-tries">기회 <span class="enc-tries">${pipsOf(rec)}</span> ${rec.left}</span>${right}</div>`;
+  // ❤ 재도전 기회 (2026-11-08 사용자 「남은 기회 이모티콘 · 더 잘 보이게 · 예전처럼 체력바 느낌」): 아래 줄 = 도트 하트(빨강 남음 · 초록 힐로 받음 · 회색 쓴 칸) + 「n / 전체」 · 용사 머리 위 = 체력바 칸
+  const heartsOf = (rec) => { const C = DS.ASSETS.chance; return Array.from({ length: rec.slots }, (_, i) => { const st = i < rec.left ? (i < Math.min(rec.left, rec.healed) ? 1 : 0) : 2; return `<i class="ch ch-${st}"${C ? ` style="background-image:url('${DS.ASSETS.base}${C.src}');background-position:${st * 50}% 0"` : ''}></i>`; }).join(''); };
+  const dock = (rec, right) => `<div class="st-dock"><span class="dock-tries${rec.left <= 1 ? ' low' : ''}" title="재도전 기회"><b class="dt-l">재도전</b><span class="ch-row">${heartsOf(rec)}</span><b class="dt-n">${rec.left}<small>/${rec.slots}</small></b></span>${right}</div>`;
+  const hpTries = (rec) => `<div class="enc-tries hp-tries" title="남은 재도전 기회">${pipsOf(rec)}</div>`;
   function scene(step, rec, hp, cls = '', gauge = '', banner = '') {
     const segs = Array.from({ length: rec.total }, (_, i) => `<i class="${i < rec.best ? 'gone' : ''}"></i>`).join('');
     const done = Raid().cleared(L, R, step.id);
     return `<div class="scene enc bg-scene th-${L.theme || ''} ${cls}${step.special ? ' special' : ''}">${scTop()}${hpBox(hp.left, hp.max, gauge)}
       ${partyHtml(step.id)}
-      <div class="enc-hero${enhCls(info0)}">${heroNow(pose2(done, cls), done ? 'pairhop' : cls === 'miss' ? 'slump' : 'huff')}<i class="shadow"></i>${plate()}</div>
+      <div class="enc-hero${enhCls(info0)}">${rec && rec.slots ? hpTries(rec) : ''}${heroNow(pose2(done, cls), done ? 'pairhop' : cls === 'miss' ? 'slump' : 'huff')}<i class="shadow"></i>${plate()}</div>
       <div class="enc-mon">${DS.Art.monster(L.monsters[step.id].sprite, done ? 'down' : 'idle', done ? '' : 'float')}<div class="segs" title="내가 맞힌 만큼 칸이 깨져요">${segs}</div></div>${banner}</div>`;
   }
   // 생각 시간: 틀린 칸이 있으면 해설은 읽을 수 있고 「다시 도전」만 잠깐 잠긴다 (수업 준비에서 0·5·10·15초, 기본 5초)
@@ -396,6 +399,8 @@ DS.Student = (function () {
     if (!pt || left <= 0) { if (old) old.remove(); return; }
     body.querySelectorAll('.enc-mon').forEach((m) => m.classList.add('petrified'));
     if (old) return;
+    // 📳 2026-11-08 사용자 「진필살기 쓸 때 학생 핸드폰도 모두 진동」: 새 석화(🌟 진필살기)가 막 시작됐으면 한 번 (반 전체 폰)
+    { const vk = `citadel-petri-vib-${code}-${step.id}-${pt.at}`; let done = false; try { done = !!sessionStorage.getItem(vk); sessionStorage.setItem(vk, '1'); } catch (e) { /* 무시 */ } if (!done && DS.Net.now() - (Number(pt.at) || 0) < 15000 && navigator.vibrate) navigator.vibrate([220, 90, 220, 90, 420]); }
     const by = (R.players || {})[pt.by] || {}, el = document.createElement('div'); el.className = 'petri-bn';
     el.innerHTML = `🗿 <b>석화 <span>${left}</span>초</b> — ${esc(by.nick || '친구')}의 진필살기! 지금 맞히면 <b>💎</b> (최대 ${PETRI_CAP})${sage ? '<br><small>💡 현자의 빛: 그림 힌트가 열렸어요</small>' : ''}`;
     const host = body.querySelector('.panel') || body; host.prepend(el);

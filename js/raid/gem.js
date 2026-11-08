@@ -59,6 +59,9 @@ DS.Gem = (function () {
   // 🔨 강화 +1 ~ +10 (캐릭터 하나 · 실패 없음 · 🌟 대성공 10% = 💎 절반 돌려받기 + 반짝)
   const ENH = [null, { g: 10 }, { g: 15 }, { g: 20 }, { g: 25 }, { g: 30 }, { g: 40 }, { g: 50, s: 1 }, { g: 60, s: 1 }, { g: 80, s: 2 }, { g: 100, s: 2 }];
   const ENH_MAX = 10, GREAT = 0.1;
+  // ✨ 강화 오라 1~10 (2026-11-08 사용자 「은은한 오라 · 1단계부터 10단계까지 색깔」): 강화 단계 = 오라 단계 (CSS .aura-1 ~ .aura-10)
+  const auraCls = (lv) => { const n = Math.max(0, Math.min(10, Math.floor(Number(lv) || 0))); return n ? ` aura aura-${n}` : ''; };
+  const AURA_NAMES = ['', '은은한 흰빛', '새싹 초록', '맑은 하늘', '깊은 바다', '보랏빛 신비', '벚꽃 분홍', '황금 태양', '진홍 불꽃', '별빛 은하', '무지개 전설'];
   const enhTier = (lv) => (lv >= 10 ? 4 : lv >= 7 ? 3 : lv >= 5 ? 2 : lv >= 3 ? 1 : 0); // 보이는 빛: 은빛(+3) · 금빛(+5) · 오라(+7) · 무지개(+10)
   async function mine(m) { return (m && m.c != null && m.n && !m.test ? await N().get(path(m)).catch(() => null) : null) || {}; }
   // 받기: n 개 · key 한 번만 (opt.upsert = 같은 key 는 늘어난 만큼만) · opt.free = 하루 한도 밖 → 실제로 받은 수
@@ -219,5 +222,5 @@ DS.Gem = (function () {
     await N().update(path(m), { total: (Number(d.total) || 0) + back, [`log/refund_${key}`]: { g: back, at: N().TS, why: '📚 도감 완성 → 💎 돌려받음', gift: true } });
     return back;
   }
-  return { PHOTO_HEROES, photoPassed, SCROLL_NEED, scrollOf, ENH, ENH_MAX, GREAT, enhTier, addScroll, enhance, watchGifts, giftList, chest, feathers, rareOf, convert, CONV, cardRefund, CARD_HEROES, G, SHOP, DAY_CAP, price, mine, add, gift, giftsSince, addDaily, medal, buy, sell, refundOf, REFUND, owns, itemKey, streak, today };
+  return { auraCls, AURA_NAMES, PHOTO_HEROES, photoPassed, SCROLL_NEED, scrollOf, ENH, ENH_MAX, GREAT, enhTier, addScroll, enhance, watchGifts, giftList, chest, feathers, rareOf, convert, CONV, cardRefund, CARD_HEROES, G, SHOP, DAY_CAP, price, mine, add, gift, giftsSince, addDaily, medal, buy, sell, refundOf, REFUND, owns, itemKey, streak, today };
 })();

@@ -11,7 +11,7 @@ DS.Hall = (function () {
   const MUTE = new Proxy({}, { get: () => () => {} });
   const Snd = () => (embed ? MUTE : DS.Sound);
   const cutHost = () => (embed ? { host: document.getElementById('screen-hall'), mute: true } : {});
-  const enhCls = (p) => { const t = p && DS.Gem && DS.Gem.enhTier ? DS.Gem.enhTier(Number(p.enh) || 0) : 0; return t ? ` enh enh-${t}` : ''; }; // 🔨 강화 빛 (+3 은 · +5 금 · +7 오라 · +10 무지개)
+  const enhCls = (p) => (p && DS.Gem && DS.Gem.auraCls ? DS.Gem.auraCls(p.enh) : ''); // ✨ 강화 오라 1~10 (2026-11-08) // 🔨 강화 빛 (+3 은 · +5 금 · +7 오라 · +10 무지개)
   const { esc, pretty } = DS.UI;
   const C = () => DS.Control, Raid = () => DS.Raid;
   let code = null, L = null, R = null, raw = null, stop = null, stopPrep = null, prep = {};
@@ -243,7 +243,7 @@ DS.Hall = (function () {
   // ── 가운데: 던전 단체 대기실 (수업 전 · 마무리) ─────────────
   function lobbyScene(finale) {
     const list = inClass().filter(([, p]) => !finale || true);
-    const sig = `lobby|${finale}|${list.map(([u, p]) => u + p.hero + (p.title || '')).join()}|${finale ? JSON.stringify([R.words, R.hide]) : ''}|${DS.ShareCard.klassReady(L, R)}`;
+    const sig = `lobby|${finale}|${list.map(([u, p]) => u + p.hero + (p.title || '')).join()}|${finale ? JSON.stringify([R.words, R.hide]) : ''}|${DS.ShareCard.klassReady(L, R)}|t${DS.Art.teacherHero(R)}`; // 2026-11-08 사용자 「교사 캠프에서 모습 바꿔도 던전 들어가면 그대로」: 선생님 모습이 바뀌면 다시 그림
     if (built === sig) return;
     built = sig;
     const n = list.length, size = n > 24 ? 62 : n > 16 ? 72 : 84, per = Math.max(1, Math.ceil(n / 3));
@@ -270,7 +270,7 @@ DS.Hall = (function () {
   }
   // 🏕 쉼터 (2026-11-04): 대기실 장면을 편안하게 — 따뜻한 불빛 · 가운데 모닥불 · 모두 둘러앉음 · 타이머 (선생님이 PC 로 퀴즈를 해도 뒤에 깔려 있음)
   function restScene() {
-    const list = inClass(), r = (R.state || {}).rest || {}, sig = `rest|${r.at}|${r.min}|${list.map(([u, p]) => u + p.hero).join()}`;
+    const list = inClass(), r = (R.state || {}).rest || {}, sig = `rest|${r.at}|${r.min}|${list.map(([u, p]) => u + p.hero).join()}|t${DS.Art.teacherHero(R)}`;
     if (built === sig) return;
     built = sig; clearInterval(bubbleT);
     const n = list.length, size = n > 24 ? 62 : n > 16 ? 72 : 84, per = Math.max(1, Math.ceil(n / 3)), c = DS.ASSETS.camp;

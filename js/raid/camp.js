@@ -155,7 +155,7 @@ DS.Camp = (function () {
   function render() {
     const c = C(), S = DS.CampScene;
     const chip = !me.teacher; // 🧹 2026-11-07 정돈판: 캠프 위 = 던전과 같게 「◀ · · · 💬 · 💎 n」 (선생님은 🧙 선생님 모습)
-    $('#camp').innerHTML = `<div class="camp-top${chip ? ' chip' : ''}">${chip && !me.test && !me.trial ? '<button class="sc-rb sm" id="camp-fb" aria-label="의견 보내기">💬</button>' : ''}${chip ? '<button class="sc-gem camp-set" id="camp-set" aria-label="💎 마정석 · 내 용사">💎 <b class="sc-gn">·</b><i>＋</i></button>' : '<button class="btn small camp-set" id="camp-set">🧙 선생님 모습</button>'}</div>
+    $('#camp').innerHTML = `<div class="camp-top${chip ? ' chip' : ''}">${chip && !me.test && !me.trial ? '<button class="sc-rb sm" id="camp-fb" aria-label="의견 보내기">💬</button>' : ''}${chip ? '<button class="sc-gem camp-set" id="camp-set" aria-label="💎 마정석 · 내 용사">💎 <b class="sc-gn">0</b><i>＋</i></button>' : '<button class="btn small camp-set" id="camp-set">🧙 선생님 모습</button>'}</div>
       ${stampToday() && !stampSeen() ? '<div class="stamp-bar" id="camp-stamp" title="누르면 닫혀요">📮 반드시 학습지 확인도장 받아가세요. <small>✕</small></div>' : ''}
       <div class="camp-stage cs-v2" style="background-image:url('${base()}${c.bg}');aspect-ratio:${c.size[0]} / ${c.size[1]}">
         ${S.layers()}
@@ -275,7 +275,7 @@ DS.Camp = (function () {
       <div class="st-next">🎁 <b>다음 보상</b> — ${nextReward(L, owned, seals)}</div>
       ${me.teacher ? '' : `<div class="st-go-row"><button class="btn primary big" id="camp-enter">${live && live.open ? `⚔ ${live.no ? `${DS.Lessons.noText(live.no)}차시 ` : ''}입장` : riftNow() ? `⏳ ${riftNow().no}차시 이어하기` : '🔒 수업 기다리는 중'}</button><button class="btn big" id="camp-me">🧙 내 용사</button></div>`}`; // 🧹 2026-11-07 정돈판: 능력치 · 장착 · 수집 줄 → 「🧙 내 용사」 창 안으로
     { const ce = el.querySelector('#camp-enter'); if (ce) ce.onclick = () => { const g = $('#camp-gate'); if (g) g.click(); }; const cm = el.querySelector('#camp-me'); if (cm) cm.onclick = () => settings({ tab: 'hero' }); }
-    document.querySelectorAll('#camp .sc-gn').forEach((e) => { e.textContent = L.gem != null ? L.gem : '·'; });
+    document.querySelectorAll('#camp .sc-gn').forEach((e) => { e.textContent = L.gem != null ? L.gem : 0; /* 2026-11-08: 「·」 는 도트 글꼴에 없어 네모(▯)로 보였음 */ });
     void st; void sealMax; void U; void heroOpen; void heroAll; void t; void earned;
     // 장면: 등불 · 깃발 · 상태 표시 (글씨 없이)
     const stage = document.querySelector('#camp .camp-stage'); // 2026-11-05: 성벽 등불(차시 층) 없앰
@@ -292,7 +292,7 @@ DS.Camp = (function () {
     if (DS.Bonus && !me.test) {
       if (DS.Bonus.loadLocks) await DS.Bonus.loadLocks(); // 🔒 잠긴 층(3층 대단원) 방은 NEW 에 안 셈
       const fresh = DS.Bonus.newRooms(me, bonus || {}, Number(no) || 0).length, z = document.getElementById('camp-castle');
-      if (z) { const old = z.querySelector('.cs-newb'); if (old) old.remove(); if (fresh) z.insertAdjacentHTML('beforeend', `<span class="cs-newb">NEW ${fresh}</span>`); }
+      if (z) { const old = z.querySelector('.cs-newb'); if (old) old.remove(); if (fresh) z.insertAdjacentHTML('beforeend', `<span class="cs-newb">새 방 ${fresh}</span>`); }
       const nk = `citadel-castle-new-${k}-${me.n}`; let was = 0; try { was = Number(localStorage.getItem(nk)) || 0; localStorage.setItem(nk, String(fresh)); } catch (e) { /* 무시 */ }
       if (fresh > was && !tutMode) DS.UI.toast(`🏰 성채던전에 새 방 ${fresh - was}개가 열렸어요!`, 3200);
     }
@@ -478,10 +478,10 @@ DS.Camp = (function () {
         <p class="muted small">⚔ 한 번 연 스킬은 <b>여러 용사가 동시에</b> 쓸 수 있고, 빼도 사라지지 않아요. ${T ? '' : '잠긴 스킬은 누르면 💎 조각 · 🏆 업적으로 열어요.'}</p>
         <div class="fx-fams">${DS.FX.FAMS.map((fam) => `<div class="fx-fam${fam.id === aff.id ? ' aff' : ''}"><b>${fam.name}${fam.id === aff.id ? ' ★' : ''}</b>${fam.ids.map(fxCell).join('')}</div>`).join('')}<div class="fx-fam sp"><b>🪶 특별</b>${DS.FX.ACHV.map(fxCell).join('')}<span></span></div></div>`; };
     // 🔨 강화 (2026-11-06 · 실패 없음 · 🌟 대성공 10% = 💎 절반 돌려받기): 단계가 오를수록 무기 빛 · 교실 TV 이름표 「+N」
-    const enhTab = () => { const lv = L.enh || 0, nx = DS.Gem.ENH[lv + 1], t = DS.Gem.enhTier(lv), nt = DS.Gem.enhTier(lv + 1), LOOK = ['', '은빛 무기', '금빛 무기', '황금 오라', '무지개 오라'];
-      return `<div class="enh-box"><div class="enh-stage${t ? ` enh enh-${t}` : ''}" id="enh-stage">${DS.Art.hero(hero, 'idle', 'huff')}<b class="enh-lv">+${lv}</b></div>
-        ${nx ? `<p>다음 <b>+${lv + 1}</b> · 💎 <b>${nx.g}</b>${nx.s ? ` + 📜 <b>${nx.s}</b>` : ''}${nt > t ? ` → ✨ <b>${LOOK[nt]}</b>` : ''}</p><button class="btn primary big" id="enh-go">🔨 쾅! 강화</button>` : '<p class="gold">🌈 최고 단계 +10 — 전설의 무기!</p>'}
-        <p class="muted small">실패 없음 · 🌟 대성공(10%)이면 낸 💎 의 절반을 돌려받아요 · +3 은빛 · +5 금빛 · +7 오라 (📜 필요) · +10 무지개 · 교실 TV 이름 옆에 「+${lv}」</p>
+    const enhTab = () => { const lv = L.enh || 0, nx = DS.Gem.ENH[lv + 1], t = DS.Gem.enhTier(lv), nt = DS.Gem.enhTier(lv + 1), LOOK = DS.Gem.AURA_NAMES || []; // ✨ 2026-11-08: 단계마다 오라 색
+      return `<div class="enh-box"><div class="enh-stage${DS.Gem.auraCls(lv)}" id="enh-stage">${DS.Art.hero(hero, 'idle', 'huff')}<b class="enh-lv">+${lv}</b></div>
+        ${nx ? `<p>다음 <b>+${lv + 1}</b> · 💎 <b>${nx.g}</b>${nx.s ? ` + 📜 <b>${nx.s}</b>` : ''}${LOOK[lv + 1] ? ` → ✨ <b>${LOOK[lv + 1]}</b> 오라` : ''}</p><button class="btn primary big" id="enh-go">🔨 쾅! 강화</button>` : '<p class="gold">🌈 최고 단계 +10 — 전설의 무기!</p>'}
+        <p class="muted small">실패 없음 · 🌟 대성공(10%)이면 낸 💎 의 절반을 돌려받아요 · 단계마다 용사 둘레에 은은한 오라 (+1 흰빛 → +10 무지개 · +7 부터 📜 필요) · 지금 ✨ <b>${LOOK[lv] || '없음'}</b></p>
         <div class="enh-table">${DS.Gem.ENH.slice(1).map((c, i) => `<span class="${i + 1 <= lv ? 'done' : ''}">+${i + 1}<small>💎${c.g}${c.s ? ` 📜${c.s}` : ''}</small></span>`).join('')}</div></div>`; };
     const recTab = () => { if (T || !ST) return ttlTab(); const U = DS.Unit ? DS.Unit.CARDS.length : 0, ho = L.heroes.filter((h) => h.open).length, md = Object.values(L.medal || {}).reduce((a, b) => a + (Number(b) || 0), 0);
       return `<p class="me-sec">🏆 업적</p><div class="me-ach"><span>🏆 업적<b>${ST.seals} / ${DS.Bonus ? DS.Bonus.UNLOCK[DS.Bonus.UNLOCK.length - 1] : 10}</b></span><span>📚 도감<b>${Object.keys(ST.cards).length} / ${U}</b></span><span>🧑 용사<b>${ho} / ${L.heroes.length}</b></span><span>🎖 메달<b>${md}</b></span></div>
