@@ -2794,3 +2794,30 @@ html body .sc-gem, html body .sc-gem .sc-gn, html body .sc-gem b { font-weight: 
 /* 🏰 성채로 들어가기 (2026-11-08): 문 쪽으로 빨려 들어가며 어두워짐 */
 .cs-v2.cs-enter { animation: csEnter .9s cubic-bezier(.55, 0, .9, .4) forwards; }
 @keyframes csEnter { 0% { transform: scale(1); filter: brightness(1); } 70% { filter: brightness(.7); } 100% { transform: scale(4.2); filter: brightness(0); } }
+/* 🙊 눈치 게임 (2026-11-08 · js/raid/nunchi.js) */
+.nn-wrap { position: relative; width: 100%; height: 100%; min-height: 340px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 12px; background: radial-gradient(ellipse at 50% 35%, #2b241e, #14110f 75%); color: #f3ecdc; overflow: hidden; border-radius: 10px; }
+.nn-top { display: flex; gap: 14px; align-items: baseline; justify-content: center; font-size: 15px; color: #ad9f8a; margin: 0; } .nn-top b { color: #ebb84f; font-size: 18px; }
+.nn-center { text-align: center; } .nn-center p { margin: 2px 0; color: #ad9f8a; font-size: clamp(14px, 2vw, 22px); }
+.nn-big { margin: 0; font: 700 clamp(48px, 11vw, 120px)/1 var(--pixel, sans-serif); color: #ebb84f; text-shadow: 0 4px 0 #000a; animation: nnPop .35s ease-out; }
+.nn-big.bad { color: #e5534b; } .nn-big.win { color: #ffe27a; font-size: clamp(40px, 8vw, 96px); }
+.nn-hint { color: #6cc6ea !important; animation: nnBlink 1s steps(2) infinite; }
+.nn-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 10px; width: 100%; }
+.nn-h { position: relative; width: 74px; display: flex; flex-direction: column; align-items: center; transition: transform .25s, opacity .3s; }
+.nn-h .art { width: 64px; height: 64px; } .nn-h.out { opacity: .4; filter: grayscale(.8); } .nn-h.pop { transform: translateY(-14px) scale(1.15); z-index: 2; }
+.nn-h.pop.clash { animation: nnShake .4s; }
+.nn-name { font-size: 11px; color: #f3ecdc; background: #0008; padding: 0 5px; border-radius: 6px; white-space: nowrap; }
+.nn-bub { position: absolute; top: -26px; background: #fff; color: #1a1228; font: 700 18px var(--pixel, sans-serif); padding: 1px 8px; border-radius: 10px; box-shadow: 0 2px 0 #0006; animation: nnPop .3s ease-out; }
+.nn-num { position: absolute; top: -18px; color: #62d394; font: 700 14px var(--pixel, sans-serif); }
+.nn-emos { position: absolute; inset: auto 0 0 0; height: 60%; pointer-events: none; }
+.nn-emo { position: absolute; bottom: -30px; font-size: 28px; font-style: normal; animation: nnRise 3.2s linear infinite; }
+.nn-phone { text-align: center; padding: 18px 12px; } .nn-phone .nn-top { margin-bottom: 10px; }
+.nn-btn { display: block; width: 100%; min-height: 46vh; margin: 8px 0; border: 0; border-radius: 22px; background: linear-gradient(#ffcf5a, #e09a1f); color: #2a1d0a; font: 700 clamp(64px, 26vw, 140px)/1 var(--pixel, sans-serif); box-shadow: 0 8px 0 #8a5a12, 0 12px 24px #0008; touch-action: manipulation; }
+.nn-btn:active { transform: translateY(6px); box-shadow: 0 2px 0 #8a5a12; }
+.nn-say { font-size: 20px; margin: 24px 0; }
+.nn-cheer { display: flex; gap: 10px; justify-content: center; margin-top: 12px; } .nn-cheer .btn { font-size: 26px; min-width: 64px; }
+@keyframes nnPop { from { transform: scale(.6); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes nnBlink { 50% { opacity: .35; } }
+@keyframes nnShake { 25% { transform: translate(-6px, -10px) rotate(-8deg); } 75% { transform: translate(6px, -10px) rotate(8deg); } }
+@keyframes nnRise { to { transform: translateY(-420px); opacity: 0; } }
+.nn-phone .nn-big { font-size: 56px; } .nn-phone .nn-big.win { font-size: 44px; } .nn-phone p { font-size: 15px; }
+.nn-h { width: clamp(64px, 7vw, 110px); } .nn-h .art { width: clamp(56px, 6vw, 96px); height: clamp(56px, 6vw, 96px); }

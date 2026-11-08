@@ -52,6 +52,11 @@ DS.Bots = (function () {
       });
       return;
     }
+    if (f.kind === 'nun') { // 🙊 눈치 (2026-11-08): 판이 시작되면 봇마다 1~9초 사이 한 번 누름 (가끔 겹쳐 「💥 동시!」)
+      if (f.phase !== 'play') return;
+      ids().forEach((u) => { if (!(f.alive || {})[u]) return; later(`nun|${f.g}|${f.round}|${u}`, rand(900, 9000), () => N().set(P(`nun/${f.g}/${f.round}/${u}`), N().TS).catch(() => {})); });
+      return;
+    }
     const left = (f.to || 0) - now; if (f.phase !== 'pick' || left < 800) return;
     ids().forEach((u) => {
       if (!(f.alive || {})[u]) return;

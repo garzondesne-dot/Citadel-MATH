@@ -109,6 +109,7 @@ DS.Fun = (function () {
   const studentsIn = (R) => Object.keys(R.players || {}).filter((u) => !R.players[u].teacher && (R.active || {})[u]);
   async function start(code, R, kind = 'bal', which = 'now', opt = {}) { // which (OX 타임): prev = 지난 차시 · now = 이번 차시 · opt = 🏰 디펜스 옵션 (테스트 모드)
     if (kind === 'td' && DS.TD) { await N().set(P(code, 'fv'), null).catch(() => {}); return DS.TD.start(code, R, opt); } // 🏰 타워 디펜스 (2026-11-07)
+    if (kind === 'nun' && DS.Nunchi) { await N().set(P(code, 'fv'), null).catch(() => {}); return DS.Nunchi.start(code, R); } // 🙊 눈치 게임 (2026-11-08)
     kind = KIND[kind] ? kind : 'bal';
     const k = KIND[kind], alive = studentsIn(R);
     if (kind !== 'quiz' && alive.length < MIN) throw Object.assign(new Error(`${k.name}은 ${MIN}명 이상일 때 할 수 있어요 (지금 ${alive.length}명)`), { user: true });
@@ -147,7 +148,7 @@ DS.Fun = (function () {
       try {
         const f = await N().get(P(code, 'fun')).catch(() => null), me = N().uid(), now = N().now();
         if (!f) { clearInterval(drivers[code]); delete drivers[code]; return; }
-        if (f.kind === 'td') return; // 🏰 타워 디펜스는 교실 TV 가 진행
+        if (f.kind === 'td' || f.kind === 'nun') return; // 🏰 디펜스 · 🙊 눈치는 교실 TV 가 진행
         if (f.drv && f.drv.u !== me && now - (f.drv.at || 0) < 4000) return; // 다른 기기가 맡고 있음
         if (f.phase === 'end' && f.kind === 'quiz' && !f.saved) { await N().set(P(code, `oxq/${f.g}`), { qs: arr(f.queue).slice(0, f.n), marks: f.marks || {}, lesson: f.lesson || null, at: f.g }).catch(() => {}); await N().set(P(code, 'fun/saved'), true).catch(() => {}); } // 📊 OX 타임 결과 → 개인 기록(ox) · 대시보드
         if (f.phase === 'end') { if (now - (f.endAt || now) > 60000) await stop(code); else if (!f.drv || f.drv.u !== me || now - f.drv.at > 1500) await N().set(P(code, 'fun/drv'), { u: me, at: now }); return; }
@@ -166,16 +167,18 @@ DS.Fun = (function () {
   const status = (R) => {
     const f = R.fun; if (!f) return '';
     if (f.kind === 'td') return '🏰 타워 디펜스';
+    if (f.kind === 'nun') return '🙊 눈치 게임';
     const n = Object.keys(f.alive || {}).length;
     if (f.kind === 'quiz') return `${K(f).short} · ${f.phase === 'end' ? '끝' : `${f.n} / ${Math.min(QN, arr(f.queue).length)}`}`;
     return `${K(f).short} · ${f.phase === 'end' ? `🏆 우승 ${arr(f.win).length}명` : `${f.n}판 · 생존 ${n}명`}`;
   };
-  const ctlHtml = (R) => (R.fun && R.fun.kind === 'td' && DS.TD ? DS.TD.ctlHtml(R) : R.fun
+  const ctlHtml = (R) => (R.fun && R.fun.kind === 'td' && DS.TD ? DS.TD.ctlHtml(R) : R.fun && R.fun.kind === 'nun' && DS.Nunchi ? DS.Nunchi.ctlHtml(R) : R.fun
     ? `<div class="fun-ctl"><span>${esc(status(R))}</span><button class="btn small" data-fun="stop">⏹ 게임 끝</button><button class="btn small" data-fun="again">🔄 새 게임</button></div>`
-    : `<div class="fun-ctl pick"><span class="muted small">쉬는 시간 놀이</span>${Object.entries(KIND).filter(([k]) => k !== 'quiz').map(([k, v]) => `<button class="btn small fun-btn k-${k}" data-fun="start:${k}" title="${esc(v.rule)}">${esc(v.short)}</button>`).join('')}<button class="btn small fun-btn k-quiz" data-oxq="prev" title="탈락 없는 복습 5문장">⭕ OX 지난</button><button class="btn small fun-btn k-quiz" data-oxq="now" title="이번 차시 점검 5문장">⭕ OX 오늘</button><button class="btn small fun-btn k-td" data-fun="start:td" title="반 모두 타워가 되어 성을 지켜요 (교실 TV 필요)">🏰 디펜스</button></div>`); // 2026-11-05: OX 타임은 쉼터 안에서만
+    : `<div class="fun-ctl pick"><span class="muted small">쉬는 시간 놀이</span>${Object.entries(KIND).filter(([k]) => k !== 'quiz').map(([k, v]) => `<button class="btn small fun-btn k-${k}" data-fun="start:${k}" title="${esc(v.rule)}">${esc(v.short)}</button>`).join('')}<button class="btn small fun-btn k-quiz" data-oxq="prev" title="탈락 없는 복습 5문장">⭕ OX 지난</button><button class="btn small fun-btn k-quiz" data-oxq="now" title="이번 차시 점검 5문장">⭕ OX 오늘</button><button class="btn small fun-btn k-nun" data-fun="start:nun" title="1부터 차례로 외치기 · 겹치면 탈락 (교실 TV 필요)">🙊 눈치</button><button class="btn small fun-btn k-td" data-fun="start:td" title="반 모두 타워가 되어 성을 지켜요 (교실 TV 필요)">🏰 디펜스</button></div>`); // 2026-11-05: OX 타임은 쉼터 안에서만
   function bind(el, code, R, opt) { // opt (🧪 테스트 모드): 🏰 디펜스 옵션을 돌려주는 함수
     if (R.fun) drive(code);
     if (R.fun && R.fun.kind === 'td' && DS.TD) DS.TD.bindCtl(el, code, R);
+    if (R.fun && R.fun.kind === 'nun' && DS.Nunchi) { DS.Nunchi.setCode(code); DS.Nunchi.bindCtl(el, code, R); }
     el.querySelectorAll('[data-fun]').forEach((b) => (b.onclick = () => DS.Control.run(async () => {
       const k = b.dataset.fun;
       if (k === 'stop') return stop(code);
@@ -285,6 +288,7 @@ DS.Fun = (function () {
   let hallSig = '';
   function hall(el, R, code) {
     if (R.fun && R.fun.kind === 'td' && DS.TD) { if (code) DS.TD.setCode(code); return DS.TD.hall(el, R); }
+    if (R.fun && R.fun.kind === 'nun' && DS.Nunchi) { if (code) DS.Nunchi.setCode(code); return DS.Nunchi.hall(el, R); }
     const f = norm(R.fun), sig = `${f.g}|${f.rk}|${f.phase}|${Object.keys(f.alive || {}).length}`;
     const voted = Object.keys(((R.fv || {})[f.rk]) || {}).filter((u) => (f.alive || {})[u]).length;
     if (hallSig === sig && el.querySelector('.fa-wrap')) { const v = el.querySelector('.fa-voted'); if (v) v.textContent = `고른 사람 ${voted} / ${Object.keys(f.alive || {}).length}`; return; }
@@ -301,6 +305,7 @@ DS.Fun = (function () {
   let phoneSig = '';
   function phone(body, R, me, code) {
     if (R.fun && R.fun.kind === 'td' && DS.TD) return DS.TD.phone(body, R, me, code);
+    if (R.fun && R.fun.kind === 'nun' && DS.Nunchi) return DS.Nunchi.phone(body, R, me, code);
     const f = norm(R.fun), alive = !!(f.alive || {})[me], mine = ((R.fv || {})[f.rk] || {})[me] || pend[`${f.g}|${f.rk}`] || '';
     const sig = `${f.g}|${f.rk}|${f.phase}|${alive}|${mine}`;
     if (phoneSig === sig && body.querySelector('.fa-wrap')) return;

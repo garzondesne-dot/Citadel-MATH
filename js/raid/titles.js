@@ -26,6 +26,7 @@ DS.Titles = (function () {
     { id: 'sovereign', name: '명제의 군주', tier: 'o', medal: ['rank', 9], cond: '🏰 성채던전 3층 👑 보스 방(17번) 처치', test: (d) => !!((((d.bonus || {})['eval-3'] || {}).q17 || {}).clear) }, // 2026-11-05 대단원 컨펌
     // 🎖 놀이 메달 · 🔁 연속 참여 (2026-11-05): gem/{반}/{번호}.medal · log
     { id: 'gambler', name: '쉼터의 승부사', tier: 'b', medal: ['rank', 4], cond: '🎖 쉼터 놀이 우승 메달 3개', test: (d) => Object.values(((d.gem || {}).medal) || {}).reduce((a, b) => a + (Number(b) || 0), 0) >= 3 },
+    { id: 'nunchi', name: '눈치 백단', tier: 'p', medal: ['rank', 4], cond: '🙊 눈치 게임 우승', test: (d) => (Number((((d.gem || {}).medal) || {}).nun) || 0) >= 1 }, // 2026-11-08
     { id: 'oxsurv', name: 'OX 서바이버', tier: 'p', medal: ['rank', 6], cond: '🎖 수학 OX 우승 메달 3개', test: (d) => (Number((((d.gem || {}).medal) || {}).ox) || 0) >= 3 },
     { id: 'steady', name: '꾸준한 용사', tier: 'b', medal: ['rank', 2], cond: '🔁 10차시 연속 참여', test: (d) => Object.keys(((d.gem || {}).log) || {}).some((k) => k.startsWith('streak10_')) },
     { id: 'quester', name: '출제자', tier: 'p', medal: ['rank', 3], cond: '✏ 출제 공방에서 만든 문제가 처음 출제됨', test: (d) => Object.keys(((d.gem || {}).log) || {}).some((k) => k.startsWith('quest_')) }, // 2026-11-07 6판

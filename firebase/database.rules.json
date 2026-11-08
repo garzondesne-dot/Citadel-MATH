@@ -166,6 +166,26 @@
         },
         "tdl": {
           ".write": "auth != null && (root.child('rooms/'+$code+'/meta/teacher').val() === auth.uid || (root.child('rooms/'+$code+'/hosts/'+auth.uid).isString() && root.child('rooms/'+$code+'/hosts/'+auth.uid).val() === root.child('secrets/'+$code+'/hallKey').val()))"
+        },
+        "nun": {
+          ".write": "auth != null && (root.child('rooms/'+$code+'/meta/teacher').val() === auth.uid || (root.child('rooms/'+$code+'/hosts/'+auth.uid).isString() && root.child('rooms/'+$code+'/hosts/'+auth.uid).val() === root.child('secrets/'+$code+'/hallKey').val()))",
+          "$g": {
+            "$round": {
+              "$uid": {
+                ".write": "auth != null && auth.uid === $uid && root.child('rooms/'+$code+'/players/'+$uid).exists() && root.child('rooms/'+$code+'/fun/kind').val() === 'nun' && root.child('rooms/'+$code+'/fun/g').val() + '' === $g && root.child('rooms/'+$code+'/fun/round').val() + '' === $round && root.child('rooms/'+$code+'/fun/phase').val() === 'play' && root.child('rooms/'+$code+'/fun/alive/'+$uid).exists() && !data.exists()",
+                ".validate": "newData.isNumber() && newData.val() <= now"
+              }
+            }
+          }
+        },
+        "nunE": {
+          ".write": "auth != null && (root.child('rooms/'+$code+'/meta/teacher').val() === auth.uid || (root.child('rooms/'+$code+'/hosts/'+auth.uid).isString() && root.child('rooms/'+$code+'/hosts/'+auth.uid).val() === root.child('secrets/'+$code+'/hallKey').val()))",
+          "$g": {
+            "$uid": {
+              ".write": "auth != null && auth.uid === $uid && root.child('rooms/'+$code+'/players/'+$uid).exists() && root.child('rooms/'+$code+'/fun/kind').val() === 'nun' && root.child('rooms/'+$code+'/fun/g').val() + '' === $g",
+              ".validate": "newData.hasChildren(['e', 'at']) && newData.child('e').isString() && newData.child('e').val().length <= 4 && newData.child('at').val() <= now"
+            }
+          }
         }
       }
     },
