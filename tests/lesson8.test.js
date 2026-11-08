@@ -87,7 +87,7 @@ function verify(mid, q, tag) {
 // (1) 순서 · 칸
 const order = L.steps.map((s) => s.id).join(',');
 check(order === 'c0,c1,m1,c2,m2,c3,m3,c4,m4,c5,m5,boss', `레이드 순서 ${order}`);
-check(L.no === 8 && L.theme === '04-mine' && Object.keys(L.videos).length === 0, '8차시 · 04 광산 · 영상 아직 비움');
+check(L.no === 8 && L.theme === '04-mine' && ['c1', 'c2', 'c3', 'c4', 'c5', 'm1', 'm2', 'm3', 'm4', 'm5'].every((k) => /^assets/video/v08-4[012].mp4$/.test(L.videos[k]) && require('fs').existsSync(require('path').join(__dirname, '..', L.videos[k]))), '8차시 · 04 광산 · 영상 40~42 연결 (파일 있음)');
 L.steps.forEach((s) => check(L.crops[s.id] && L.crops[s.id][0].h > 0.05, `칸 위치 ${s.id}`));
 check(DS.ASSETS.dungeons.ids.includes(L.theme), '테마가 배치표에 있음');
 const [sk, si] = L.boss.sprite.split(':'); check(sk === 'mirrorboss8' && DS.ASSETS.monstersMirrorBoss8 && DS.ASSETS.monstersMirrorBoss8.names[0] === '부정의 수정 여왕' && si === '0', '보스 = 부정의 수정 여왕 (mirrorboss8:0)');
