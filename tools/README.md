@@ -31,6 +31,10 @@
 - 꼬리표: `게임: 몬스터 n` · `게임: 보강던전 ①` · `게임: 보스` · 보강은 보라 상자 · 형성평가는 문항마다 풀이 공간 (사진용 답 칸 없음, 사용자 결정)
 - 완성본은 드라이브 「학습지 > 공통수학2 > 02 레이드학습지」에 「(0n차시) 레이드용_vN.pdf」 이름으로 사용자가 올린다
 
+## sprite/frames_to_sheet.py · check_frames.py — GPT 프레임 → 시트 (2026-11-08)
+
+`asset-handoff/` 에서 GPT 가 한 장에 한 프레임씩 만든 그림을 검수 · 합친다. `python3 tools/sprite/check_frames.py <ID>` (자동 검수 표) → `python3 tools/sprite/frames_to_sheet.py <out.webp> --cell 192 --rows <ID,…> [--png 확인.png]`. 규칙은 `asset-handoff/SPRITE_SPEC.md` 3절.
+
 ## sprite/templates_v0911.js — v0.9.11 그림 템플릿
 
 `node tools/sprite/templates_v0911.js` → `assets/templates/v0911/tpl-{punch,bat,chest,feather,arena}.png` (마젠타 칸 · 기준선 · 자리 표시). 프롬프트는 `docs/ASSET-SPEC.md` 6-7.
