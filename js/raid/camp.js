@@ -170,7 +170,7 @@ DS.Camp = (function () {
       <div class="camp-forge panel framed st-panel" id="camp-forge"><p class="muted small">용사 상태를 불러오는 중…</p></div>`;
     status();
     $('#camp-anvil').onclick = () => pick('#camp-anvil', () => (me.test ? DS.Forge.open(me, { preview: true, no: 99 }) : DS.Forge.open(me))); // 🧪 체험판: 모든 레시피
-    $('#camp-castle').onclick = () => { if (!picking) DS.CampScene.press(document.querySelector('#screen-camp .cs-v2'), 'castle'); setTimeout(() => { if (DS.CampScene.enter) DS.CampScene.enter(document.querySelector('#screen-camp .cs-v2'), 'castle'); }, 350); pick('#camp-castle', () => DS.Control.run(() => DS.Bonus.enter(me))); }; // 🏰 불빛 번쩍 · 통통 · 쿵 (2026-11-07)
+    $('#camp-castle').onclick = () => { if (!picking) DS.CampScene.press(document.querySelector('#screen-camp .cs-v2'), 'castle'); setTimeout(() => { if (DS.CampScene.enter) DS.CampScene.enter(document.querySelector('#screen-camp .cs-v2'), 'castle'); }, 600); pick('#camp-castle', () => DS.Control.run(() => DS.Bonus.enter(me)), 'castle'); }; // 🏰 불빛 번쩍 · 통통 · 쿵 (2026-11-07)
     $('#camp-gate').onclick = () => {
       if (me.teacher) { const t = me.teacher; return pick('#camp-gate', () => DS.Control.run(() => (t.code ? DS.Teacher.open(t.code, t.hallKey) : location.replace(`${location.pathname}?${DS.Net.mode === 'local' ? 'local&' : ''}role=teacher`))), 'portal'); }
       const rf = !(live && live.open) ? riftNow() : null;
@@ -208,12 +208,14 @@ DS.Camp = (function () {
     if (hero) {
       const a = el.getBoundingClientRect(), b = hero.getBoundingClientRect();
       const dx = (a.left + a.width / 2) - (b.left + b.width / 2);
+      const castle = pose === 'castle'; if (castle) pose = 'portal'; // 🏰 2026-11-08: 성채도 차원문처럼 문으로 걸어 들어감 (뒷모습 · 작아지며 사라짐)
       heroArt(pose);
       if (pose === 'portal') {
         // 차원문: 용사 몸 가운데가 포털 그림 정중앙에 닿을 때까지 걸어가며 작아지고 사라짐
         const pe = el.querySelector('.camp-portal') || el, p = pe.getBoundingClientRect(), h = hero.querySelector('.art').getBoundingClientRect();
-        hero.style.setProperty('--px', `${p.left + p.width / 2 - (h.left + h.width / 2)}px`);
-        hero.style.setProperty('--py', `${p.top + p.height / 2 - (h.top + h.height / 2)}px`);
+        const door = castle ? (DS.ASSETS.camp && DS.ASSETS.camp.objs && DS.ASSETS.camp.objs.castle && DS.ASSETS.camp.objs.castle.door) || [50, 92] : [50, 50]; // 성채 = 문 자리 (배치표 door)
+        hero.style.setProperty('--px', `${p.left + (p.width * door[0]) / 100 - (h.left + h.width / 2)}px`);
+        hero.style.setProperty('--py', `${p.top + (p.height * door[1]) / 100 - (h.top + h.height * 0.85)}px`);
         hero.classList.remove('face-left'); hero.classList.add('to-portal');
       } else {
         hero.style.setProperty('--dx', `${Math.max(-1, Math.min(1, dx / Math.abs(dx || 1))) * Math.min(Math.abs(dx) * 0.55, 160)}px`);
@@ -221,7 +223,7 @@ DS.Camp = (function () {
         hero.classList.toggle('face-left', dx < 0);
       }
     }
-    const wait = pose === 'portal' ? 1150 : el.id === 'camp-castle' ? 1300 : 700; // 🏰 성채: 문으로 빨려 들어가는 확대(0.35~1.25초)를 다 보고 // 차원문: 정중앙까지 걸어 들어가 사라지는 걸 다 보고
+    const wait = el.id === 'camp-castle' ? 1500 : pose === 'portal' ? 1150 : 700; // 🏰 성채: 문으로 빨려 들어가는 확대(0.35~1.25초)를 다 보고 // 차원문: 정중앙까지 걸어 들어가 사라지는 걸 다 보고
     setTimeout(() => { picking = false; then(); }, wait);
     setTimeout(() => { el.classList.remove('picked'); if (hero) { hero.classList.remove('dash', 'to-portal'); heroArt('sit', 'huff'); } }, 1300 + wait - 700);
   }
