@@ -13,6 +13,16 @@ DS.Attack = (function () {
   const ROUND = { witch: true, priest: true }; // 떠 있는 구슬: 날아가는 방향으로 돌리지 않음
   const wait = (ms) => new Promise((r) => setTimeout(r, ms));
   const rel = (el, box) => { const a = el.getBoundingClientRect(), b = box.getBoundingClientRect(); return { x: a.left - b.left, y: a.top - b.top, w: a.width, h: a.height }; };
+  // 🎯 보이는 몸통 (2026-11-08): 몬스터 칸에서 투명 여백을 뺀 상자 (배치표 bodies · 장면 기준 px) — 이펙트 · 묶기 · 돌진 도착점의 기준
+  function body(el, scene) {
+    const art = el && ((el.matches && el.matches('.art')) ? el : el.querySelector && (el.querySelector('.art.monster') || el.querySelector('.art'))) || el;
+    if (!art || !scene) return null;
+    const r = rel(art, scene); let f = ((A().bodies || {})[art.dataset && art.dataset.sh] || [])[Number(art.dataset && art.dataset.row)];
+    if (!f) f = art.classList && art.classList.contains('hero') ? [0.28, 0.12, 0.72, 0.98] : [0.18, 0.15, 0.82, 0.95];
+    if (art.classList && art.classList.contains('flip')) f = [1 - f[2], f[1], 1 - f[0], f[3]];
+    const b = { x0: r.x + r.w * f[0], y0: r.y + r.h * f[1], x1: r.x + r.w * f[2], y1: r.y + r.h * f[3] };
+    return Object.assign(b, { w: b.x1 - b.x0, h: b.y1 - b.y0, cx: (b.x0 + b.x1) / 2, cy: (b.y0 + b.y1) / 2 });
+  }
   const reduce = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
   function setPose(heroBox, hero, pose, cls = '') { const a = heroBox && heroBox.querySelector('.art'); if (a && DS.Art) a.outerHTML = DS.Art.hero(hero, pose, cls); }
   function shake(box, amp = 3, ms = 180) {
@@ -27,25 +37,28 @@ DS.Attack = (function () {
   function wave(box, x, y) { const e = document.createElement('i'); e.className = 'atk-wave'; e.style.left = `${x}px`; e.style.top = `${y}px`; box.appendChild(e); setTimeout(() => e.remove(), 650); }
   // 맞는 순간: 이펙트 · 멈칫 · 흔들림 · 밀림 · −1 (처치면 충격파 + 크게)
   async function impact(scene, monBox, fx, o = {}) {
-    const M = rel(monBox, scene), cx = M.x + M.w * 0.5, cy = M.y + M.h * 0.52, floor = M.y + M.h - 4;
-    const sp = DS.FX.spec(DS.FX.KINDS.includes(fx) ? fx : 'flame') || {};
-    if (o.ult) ultBlast(scene, monBox, fx); else DS.FX.play(scene, fx, { x: cx, y: cy, floor, s: o.s || 1.2, perfect: o.finish });
+    const B = body(monBox, scene), cx = B.cx, floor = B.y1;
+    const sp = DS.FX.spec(DS.FX.KINDS.includes(fx) ? fx : 'flame') || {}, shot = DS.FX.modeOf(fx) === 'shot';
+    if (o.ult) ultBlast(scene, monBox, fx); else if (!o.cast) DS.FX.place(scene, fx, { body: B, from: o.from, mode: shot && !o.from ? 'body' : undefined, mult: o.mult, perfect: o.finish });
     const hit = sp.hit || [0, 0.08, 0.18, 2];
-    await wait(Math.min(0.3, hit[0] || 0.06) * 1000);
+    await wait((shot && o.from ? Math.min(0.9, hit[0] || 0.3) : Math.min(0.3, hit[0] || 0.06)) * 1000); // 쏘는 기술은 탄이 닿는 순간까지
     if (!scene.isConnected) return;
+    if (o.onHit) o.onHit();
     knock(monBox, o.finish ? 24 : 12); shake(scene, Math.max(2, hit[3] || 2) * (o.finish ? 2 : 1.2), Math.max(0.14, hit[2] || 0.18) * (o.finish ? 2000 : 1000));
-    if (!o.noDmg) dmg(scene, cx, M.y + 6);
+    if (!o.noDmg) dmg(scene, cx, B.y0 + 6);
     if (o.finish) wave(scene, cx, floor);
     if (DS.Sound) { if (o.finish && DS.Sound.finish) DS.Sound.finish(); else if (DS.Sound.fxHit) DS.Sound.fxHit(fx); else if (DS.Sound.hit) DS.Sound.hit(); }
     await hitstop(scene, (o.finish ? 0.32 : Math.max(0.05, hit[1] || 0.08)) * 1000);
   }
   // 근접 돌진: heroBox 를 dx 만큼 (잔상 남김)
+  // from · to = 숫자(가로만) 또는 {x, y}
   function dash(scene, heroBox, from, to, ms, ghosts) {
+    const P = (v) => (typeof v === 'number' ? { x: v, y: 0 } : v || { x: 0, y: 0 }); from = P(from); to = P(to);
     return new Promise((res) => {
       const t0 = performance.now(); let lastG = 0;
       const f = (t) => {
-        const u = Math.min(1, (t - t0) / ms), e = 1 - Math.pow(1 - u, 2), x = from + (to - from) * e;
-        heroBox.style.translate = `${x.toFixed(1)}px 0`;
+        const u = Math.min(1, (t - t0) / ms), e = 1 - Math.pow(1 - u, 2), x = from.x + (to.x - from.x) * e, y = from.y + (to.y - from.y) * e;
+        heroBox.style.translate = `${x.toFixed(1)}px ${y.toFixed(1)}px`;
         if (ghosts && t - lastG > 45 && u < 0.95 && !reduce()) {
           lastG = t; const a = heroBox.querySelector('.art');
           if (a) { const r = rel(a, scene), g = document.createElement('div'); g.className = 'atk-ghost'; g.style.cssText += `left:${r.x}px;top:${r.y}px;width:${r.w}px;height:${r.h}px`; g.innerHTML = a.outerHTML; g.firstChild.style.width = '100%'; g.firstChild.style.height = '100%'; scene.appendChild(g); requestAnimationFrame(() => { g.style.opacity = '0'; }); setTimeout(() => g.remove(), 320); }
@@ -114,44 +127,72 @@ DS.Attack = (function () {
     const cap = sp ? Math.min((W * 0.95) / sp.w, (Hh * 0.95) / sp.h) : 3, sMain = sp ? Math.max(0.8, Math.min(cap, (M.w * 1.6) / sp.w)) : 2;
     const fl = document.createElement('i'); fl.className = 'ult-aoe'; fl.style.setProperty('--c', c1); fl.style.setProperty('--x', `${cx}px`); fl.style.setProperty('--y', `${cy}px`); scene.appendChild(fl); setTimeout(() => fl.remove(), 700);
     const ring = document.createElement('i'), d = 2.2 * Math.hypot(Math.max(cx, W - cx), Math.max(cy, Hh - cy)); ring.className = 'ult-ring'; ring.style.cssText = `left:${cx}px;top:${cy}px;width:${d}px;height:${d}px;--c:${c1}`; scene.appendChild(ring); setTimeout(() => ring.remove(), 650);
-    DS.FX.play(scene, fx, { x: cx, y: cy, floor: M.y + M.h * 0.9, s: sMain, flat: true });
+    const Bb = monBox && monBox.isConnected ? body(monBox, scene) : null;
+    if (Bb) DS.FX.place(scene, fx, { body: Bb, mode: DS.FX.modeOf(fx) === 'shot' ? 'body' : undefined, mult: 1.6, flat: true }); else DS.FX.play(scene, fx, { x: cx, y: cy, floor: M.y + M.h * 0.9, s: sMain, flat: true });
     [[0.17, 0.3], [0.83, 0.28], [0.2, 0.78], [0.8, 0.76]].forEach(([fx0, fy0], i) => setTimeout(() => { if (scene.isConnected) DS.FX.play(scene, fx, { x: W * fx0, y: Hh * fy0, floor: Hh * fy0 + 20, s: sMain * 0.6, flat: true }); }, 150 + i * 120));
     shake(scene, 6, 400); if (monBox) knock(monBox, 28);
     if (DS.Sound) { if (DS.Sound.fxHit) DS.Sound.fxHit(fx); setTimeout(() => DS.Sound.finish && DS.Sound.finish(), 180); }
     return hitstop(scene, 200).then(() => wait(650));
   }
+  // ⚔ 공격 한 번 (2026-11-08 재정비 · 사용자 「근접은 붙어서 · 원거리는 제자리에서 살짝 앞으로 · 시작점 도착점 정확히」)
+  //   ① 쏘는 기술(🔮 마법탄 · ⚡ 연쇄 번개 = FX.SHOT): 누구든 제자리 → 한 걸음 → 손에서 몸통까지 기술이 뻗음
+  //   ② 원거리 용사: 제자리 → 한 걸음 → 탄(손 → 몸통 가운데) → 닿은 자리에서 기술
+  //   ③ 근접 용사: 몬스터 보이는 몸통 옆(가까운 쪽 · 발끝 높이)까지 돌진 → 기술 → 제자리
+  //   o.onHit = 맞는 순간 부를 것 (종합실 데미지 숫자 · PERFECT) · o.noDmg · o.rest(끝 자세)
+  const handOf = (box, scene, dir) => { const a = box.querySelector('.art') || box, r = rel(a, scene); return { x: r.x + r.w * (dir > 0 ? 0.74 : 0.26), y: r.y + r.h * 0.5 }; };
   async function play(scene, o = {}) {
-    const { heroBox, monBox } = o, hero = Number(o.hero) || 0, fx = o.fx || 'flame', reso = DS.FX && DS.FX.resonates && DS.FX.resonates(hero, fx), s = (o.s || 1.2) * (reso ? 1.15 : 1) * (o.ultimate ? 1.25 : 1);
-    if (!scene || !heroBox || !monBox || !DS.FX) { if (DS.FX && !o.miss) DS.FX.play(scene, fx, { s }); return; }
-    const H = rel(heroBox, scene), M = rel(monBox, scene), rest = o.rest || 'think';
+    const { heroBox, monBox } = o, hero = Number(o.hero) || 0, fx = o.fx || 'flame', reso = DS.FX && DS.FX.resonates && DS.FX.resonates(hero, fx), mult = (reso ? 1.15 : 1) * (o.ultimate ? 1.25 : 1) * (o.mult || 1);
+    if (!scene || !heroBox || !monBox || !DS.FX) { if (DS.FX && !o.miss) DS.FX.play(scene, fx, { s: o.s || 1.2 }); return; }
+    if (getComputedStyle(scene).position === 'static') scene.style.position = 'relative';
+    heroBox.style.translate = '';
+    const H = rel(heroBox, scene), B = body(monBox, scene), rest = o.rest || 'think';
+    const hc = { x: H.x + H.w / 2, y: H.y + H.h }, dir = hc.x <= B.cx ? 1 : -1; // 용사가 몬스터 왼쪽이면 오른쪽으로 · 오른쪽이면 왼쪽으로
+    const shot = DS.FX.modeOf(fx) === 'shot', ranged = isRanged(hero), inPlace = shot || ranged;
+    const hitO = { mult, finish: o.finish || o.ultimate, noDmg: o.noDmg, ult: o.ultimate, onHit: o.onHit };
     if (reso) { heroBox.classList.add('atk-reso'); setTimeout(() => heroBox.classList.remove('atk-reso'), 1400); } // ★ 공명: 친화 결정석
     if (o.ultimate) await cutin(hero, fx);
-    if (isRanged(hero)) {
-      setPose(heroBox, hero, 'attack');
-      await wait(200);
-      if (DS.Sound && DS.Sound.launch) DS.Sound.launch();
-      const from = { x: H.x + H.w * 0.8, y: H.y + H.h * 0.5 }, to = { x: M.x + M.w * 0.42, y: M.y + M.h * 0.5 };
-      await fly(scene, projOf(hero), from, o.miss ? { x: M.x + M.w * 0.3, y: M.y - M.h * 0.35 } : to, o.ps || s * 1.15, o.miss);
+    if (inPlace) {
+      const gap = Math.hypot(B.cx - hc.x, B.cy - hc.y) || 1, k = Math.min(36, gap * 0.1) / gap, step = { x: (B.cx - hc.x) * k, y: (B.y1 - hc.y) * k * 0.5 }; // 한 걸음만
+      setPose(heroBox, hero, 'walk'); await dash(scene, heroBox, { x: 0, y: 0 }, step, 140, false);
       if (!scene.isConnected) return;
-      if (o.miss) { if (DS.Sound && DS.Sound.block) DS.Sound.block(); if (monBox.animate) monBox.animate([{ rotate: '0deg' }, { rotate: '-6deg' }, { rotate: '0deg' }], { duration: 300 }); }
-      else await impact(scene, monBox, fx, { s, finish: o.finish || o.ultimate, noDmg: o.noDmg, ult: o.ultimate });
-      await wait(o.ultimate ? 700 : 120);
+      setPose(heroBox, hero, 'attack'); await wait(120);
+      const from = handOf(heroBox, scene, dir);
+      if (o.miss) {
+        if (DS.Sound && DS.Sound.launch) DS.Sound.launch();
+        const pk = ranged ? projOf(hero) : null;
+        if (pk) await fly(scene, pk, from, { x: B.cx - dir * B.w * 0.2, y: B.y0 - B.h * 0.3 }, o.ps || Math.max(1, B.w / 110), true); else await wait(200);
+        if (DS.Sound && DS.Sound.block) DS.Sound.block(); if (monBox.animate) monBox.animate([{ rotate: '0deg' }, { rotate: `${-6 * dir}deg` }, { rotate: '0deg' }], { duration: 300 });
+      } else if (shot) {
+        if (DS.Sound && DS.Sound.launch) DS.Sound.launch();
+        await impact(scene, monBox, fx, Object.assign({ from }, hitO));
+      } else {
+        if (DS.Sound && DS.Sound.launch) DS.Sound.launch();
+        await fly(scene, projOf(hero), from, { x: B.cx, y: B.cy }, o.ps || Math.max(1, Math.min(2.4, B.w / 110)), false); // 도착점 = 보이는 몸통 가운데
+        if (!scene.isConnected) return;
+        await impact(scene, monBox, fx, hitO);
+      }
+      await wait(o.ultimate ? 700 : 160);
+      if (!scene.isConnected) return;
+      await dash(scene, heroBox, step, { x: 0, y: 0 }, 140, false);
     } else {
-      const reach = Math.max(0, M.x - (H.x + H.w * 0.55));
+      // 도착: 용사 손끝이 보이는 몸통 가장자리 안쪽 12% · 발끝 = 몬스터 발끝 높이 (장면 밖으로 안 나가게)
+      const R = scene.getBoundingClientRect(), edge = dir > 0 ? B.x0 + B.w * 0.12 : B.x1 - B.w * 0.12, hand0 = H.x + H.w * (dir > 0 ? 0.74 : 0.26);
+      const to = { x: edge - hand0, y: Math.max(-H.y, Math.min(R.height - (H.y + H.h), B.y1 - hc.y)) };
       setPose(heroBox, hero, 'walk');
       if (DS.Sound && DS.Sound.swing) DS.Sound.swing();
-      await dash(scene, heroBox, 0, reach, 230, true);
+      await dash(scene, heroBox, { x: 0, y: 0 }, to, 240, true);
       if (!scene.isConnected) return;
       setPose(heroBox, hero, 'attack');
       await wait(110);
-      if (o.miss) { if (DS.Sound && DS.Sound.block) DS.Sound.block(); knock(heroBox, -18); if (monBox.animate) monBox.animate([{ scale: '1' }, { scale: '1.08' }, { scale: '1' }], { duration: 260 }); shake(scene, 2, 120); await wait(200); }
-      else await impact(scene, monBox, fx, { s, finish: o.finish || o.ultimate, noDmg: o.noDmg, ult: o.ultimate });
+      if (o.miss) { if (DS.Sound && DS.Sound.block) DS.Sound.block(); await dash(scene, heroBox, to, { x: to.x - dir * 18, y: to.y }, 120, false); if (monBox.animate) monBox.animate([{ scale: '1' }, { scale: '1.08' }, { scale: '1' }], { duration: 260 }); shake(scene, 2, 120); await wait(140); }
+      else await impact(scene, monBox, fx, hitO);
       await wait(o.ultimate ? 700 : 140);
       if (!scene.isConnected) return;
       setPose(heroBox, hero, 'walk');
-      await dash(scene, heroBox, reach, 0, 220, false);
-      heroBox.style.translate = '';
+      const cur = (heroBox.style.translate || '0px 0px').split(' ').map(parseFloat);
+      await dash(scene, heroBox, { x: cur[0] || 0, y: cur[1] || 0 }, { x: 0, y: 0 }, 230, false);
     }
+    heroBox.style.translate = '';
     setPose(heroBox, hero, rest, rest === 'think' ? 'huff' : '');
   }
   const preload = (hero, fx) => { if (!DS.FX) return; DS.FX.preload(fx); const p = projOf(hero); if (p) DS.FX.preload(p); if (canUlt(fx, hero)) preloadFaces(); }; // 필살기 쓸 수 있으면 얼굴 그림도 미리
@@ -161,5 +202,5 @@ DS.Attack = (function () {
   const tierN = (fx) => { const t = DS.FX ? DS.FX.tierOf(fx) : -1; return typeof t === 'number' ? t : -1; };
   const canUlt = (fx, hero) => !!(DS.FX && tierN(fx) >= 2 && DS.FX.resonates(hero, fx));
   const canTrue = (fx, hero) => !!(DS.FX && tierN(fx) === 3 && DS.FX.resonates(hero, fx));
-  return { projOf, isRanged, play, impact, fly, preload, preloadFaces, shake, knock, cutin, canUlt, canTrue, ultBlast };
+  return { projOf, isRanged, body, play, impact, fly, preload, preloadFaces, shake, knock, cutin, canUlt, canTrue, ultBlast };
 })();

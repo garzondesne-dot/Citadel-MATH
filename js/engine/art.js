@@ -53,7 +53,7 @@ DS.Art = (function () {
     const sheet = SHEETS[k] || 'monsters', s = A()[sheet];
     const row = Number(i) % s.rows;
     // 오른쪽을 보고 그려진 몬스터는 좌우를 뒤집어 왼쪽(용사 쪽)을 보게 한다 (배치표 flip)
-    const html = cell(sheet, s.poses[pose] || 0, row, `monster${(s.flip || []).includes(row) ? ' flip' : ''}${hue ? ' hue' : ''} ${cls}`);
+    const html = cell(sheet, s.poses[pose] || 0, row, `monster${(s.flip || []).includes(row) ? ' flip' : ''}${hue ? ' hue' : ''} ${cls}`).replace('<i class=', `<i data-sh="${sheet}" data-row="${row}" class=`); // 🎯 data-sh · row = 보이는 몸통(배치표 bodies) 찾기
     return hue ? html.replace('style="', `style="--hue:${hue}deg;`) : html;
   }
   const card = (art, cls = '') => cell('cards', art % A().cards.cols, Math.floor(art / A().cards.cols) % A().cards.rows, `card-art ${cls}`);

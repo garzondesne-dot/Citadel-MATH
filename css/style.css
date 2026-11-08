@@ -2658,3 +2658,5 @@ body:not(:has(#test-tv)) #screen-student.st-battle > .wrap { padding-top: 0 !imp
 @keyframes csLitFlash { 0% { opacity: .3; transform: scale(1); } 30% { opacity: 1; transform: scale(1.04); filter: brightness(1.6) drop-shadow(0 0 4px #ffe7a0) drop-shadow(0 0 12px #ffb02e); } 100% { opacity: .3; transform: scale(1); filter: none; } }
 .cs-v2 > .cs-spark.cs-door { right: auto; z-index: 4; }
 @media (prefers-reduced-motion: reduce) { .cs-v2 .cs-obj.cs-lit { animation: none; opacity: .4; } }
+/* ⚔ 종합실 공격 재정비 (2026-11-08): DS.Attack.play 가 translate 로 움직임 — 공격 중인 용사는 몬스터 위로 */
+.fh2.atk-on { z-index: 18 !important; }

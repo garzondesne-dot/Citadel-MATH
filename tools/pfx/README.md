@@ -14,3 +14,6 @@
 5. 후보 갤러리: `gallery_gen.py` + `gallery_tpl.html` (meta.jsonl · fx/ · 용사 시트로 움직이는 비교 페이지)
 
 크레딧: pixelfx (MIT) · 일부는 Hugo Duprez · Sprite Fusion (MIT) 방식. 갤러리 폰트(Patch Pixel)는 쓰지 않는다.
+
+## 🎯 그림 실제 범위 (measure_bb.py · 2026-11-08)
+`python3 -I tools/pfx/measure_bb.py` — 몬스터 시트(대기 자세)의 보이는 몸통 `bodies` 와 이펙트 띠의 보이는 범위 `fxbb` 를 `assets/manifest.js` 끝에 다시 씀. 몬스터 · 이펙트 그림을 바꾸거나 새로 넣으면 꼭 다시 돌린다 (DS.Attack.body · DS.FX.place 가 이 값으로 자리를 잡음).

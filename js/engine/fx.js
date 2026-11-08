@@ -69,6 +69,42 @@ DS.FX = (function () {
     if (!opt.loop) setTimeout(() => el.remove(), dur * 1000 + 80);
     return el;
   }
+  // 🎯 자리 잡기 v3 (2026-11-08 사용자 「바닥 기술이 몸통 · 머리에서 터짐 · 묶기가 몸 밖으로 · 마력탄은 손에서」):
+  //   그림의 「보이는 부분」(배치표 fxbb · tools/pfx/measure_bb.py) 을 몬스터 「보이는 몸통」(bodies) 에 맞춘다
+  //   ground = 보이는 아래끝을 발끝에 · body = 보이는 가운데를 몸통 가운데에 · shot = 손 → 몸통까지 늘이고 기울여 쏨
+  const GROUND = ['flame', 'ring', 'fire', 'pillar', 'lightning', 'thunder', 'frost', 'spikes', 'ice', 'nova', 'mana', 'meteor', 'vortex', 'void', 'smite', 'hammer', 'quake', 'cyclone', 'leaf'];
+  const SHOT = ['orb', 'chain'];
+  const modeOf = (k) => (SHOT.includes(k) ? 'shot' : GROUND.includes(k) ? 'ground' : 'body');
+  const bbOf = (k, sp) => ((A().fxbb || {})[k]) || [0, 0, sp.w, sp.h];
+  // 상자에 띠 그림 (왼쪽 위 · 가로 · 세로 배율 따로 · 돌림)
+  function stripXY(box, sp, left, top, sx, sy, opt = {}) {
+    const el = document.createElement('i'); el.className = 'fx-spr';
+    const W = sp.w * sx, H = sp.h * sy, dur = sp.n / sp.fps;
+    el.style.cssText = `left:${left.toFixed(1)}px;top:${top.toFixed(1)}px;width:${W.toFixed(1)}px;height:${H.toFixed(1)}px;background-image:url('${url(sp)}');background-size:${(W * sp.n).toFixed(1)}px ${H.toFixed(1)}px;--fx-end:${(-W * sp.n).toFixed(1)}px;animation-duration:${dur.toFixed(3)}s;animation-timing-function:steps(${sp.n});z-index:${opt.z || 20};${opt.rot ? `transform-origin:${opt.ox.toFixed(1)}px ${opt.oy.toFixed(1)}px;transform:rotate(${opt.rot.toFixed(3)}rad);` : ''}`;
+    load(sp); box.appendChild(el); setTimeout(() => el.remove(), dur * 1000 + 80);
+    return el;
+  }
+  // place(상자, 종류, { body: {x0,y0,x1,y1} (상자 기준 px), from: {x,y} (shot 손 자리), mult, perfect, flat, mode }) → Promise(끝나면)
+  function place(box, kind, o = {}) {
+    if (!box) return Promise.resolve();
+    if (!KINDS.includes(kind) && !spec(kind)) kind = 'flame';
+    const sp = spec(kind), B = o.body; if (!sp || !B) return play(box, kind, o);
+    if (getComputedStyle(box).position === 'static') box.style.position = 'relative';
+    const bb = bbOf(kind, sp), bw = Math.max(1, bb[2] - bb[0]), bh = Math.max(1, bb[3] - bb[1]), bcx = (bb[0] + bb[2]) / 2, bcy = (bb[1] + bb[3]) / 2;
+    const w = B.x1 - B.x0, h = B.y1 - B.y0, cx = (B.x0 + B.x1) / 2, cy = (B.y0 + B.y1) / 2, mode = o.mode || modeOf(kind);
+    const t = tierOf(kind), tier = o.flat ? 1 : t === 's' ? TIER_SCALE[3] : TIER_SCALE[t] || 1, mult = (o.mult || 1) * (o.perfect ? 1.15 : 1);
+    // 크기: 몸통 폭에 맞춤 (바닥 기술은 조금 넓게) · 키는 몸통의 1.4배(바닥 1.9배)를 넘지 않게
+    let s = Math.min((w * (mode === 'ground' ? 1.15 : 1)) / bw, (h * (mode === 'ground' ? 1.9 : 1.4)) / bh);
+    s = clamp(s * tier * mult, 0.6, 8);
+    let el;
+    if (mode === 'shot' && o.from) {
+      const tx = sp.tx || bb[2], hit = { x: cx - w * 0.12, y: cy }, dx = hit.x - o.from.x, dy = hit.y - o.from.y, L = Math.max(20, Math.hypot(dx, dy));
+      const sx = L / Math.max(10, tx - sp.px), sy = clamp(Math.min(s, sx * 1.4), 0.6, 8);
+      el = stripXY(box, sp, o.from.x - sp.px * sx, o.from.y - bcy * sy, sx, sy, { z: 21, rot: Math.atan2(dy, dx), ox: sp.px * sx, oy: bcy * sy });
+    } else if (mode === 'ground') el = stripXY(box, sp, cx - bcx * s, B.y1 + h * 0.03 - bb[3] * s, s, s);
+    else el = stripXY(box, sp, cx - bcx * s, cy - bcy * s, s, s);
+    return new Promise((res) => setTimeout(() => res(el), (sp.n / sp.fps) * 1000));
+  }
   // 이펙트 한 번: 손에서 쏘는 것(tx)은 맞는 곳이 x 에 오도록 왼쪽으로, 바닥에 서는 것은 floor 에
   function play(box, kind, opt = {}) {
     if (!box) return Promise.resolve();
@@ -91,5 +127,5 @@ DS.FX = (function () {
     const drawIt = () => { g.clearRect(0, 0, cv.width, cv.height); g.imageSmoothingEnabled = false; const k = Math.min(cv.width / sp.w, cv.height / sp.h); g.drawImage(im, i * sp.w, 0, sp.w, sp.h, (cv.width - sp.w * k) / 2, (cv.height - sp.h * k) / 2, sp.w * k, sp.h * k); };
     if (im.complete && im.naturalWidth) drawIt(); else im.addEventListener('load', drawIt, { once: true });
   }
-  return { FAMS, TIER_NAMES, TIER_SCALE, AFFINITY, affOf, crystalOf, resonates, KINDS, BASE, SKILL, FANCY, LEGEND, ACHV, NAMES, BASE_OF, famOf, tierOf, usable, spec, strip, play, still, preload, load };
+  return { place, modeOf, GROUND, SHOT, FAMS, TIER_NAMES, TIER_SCALE, AFFINITY, affOf, crystalOf, resonates, KINDS, BASE, SKILL, FANCY, LEGEND, ACHV, NAMES, BASE_OF, famOf, tierOf, usable, spec, strip, play, still, preload, load };
 })();

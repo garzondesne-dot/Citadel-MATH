@@ -20,8 +20,10 @@ DS.Thrill = (function () {
     if (!mon || !DS.FX) return;
     const box = mon.closest('.scene, #raid') || mon.parentElement; if (!box) return;
     const art = (mon.matches && mon.matches('.art')) ? mon : (mon.querySelector && mon.querySelector('.art.monster, .art.hero')) || mon; // 2026-11-06 사용자 「보스 묶기가 정중앙이 아니라 살짝 위」: 체력 막대까지 든 칸 말고 몬스터 그림 기준
-    const a = art.getBoundingClientRect(), b = box.getBoundingClientRect();
-    DS.FX.play(box, big ? 'bind2' : 'bind', { x: a.left - b.left + a.width / 2, y: a.top - b.top + a.height * 0.6, s: Math.max(1, Math.min(4, a.width / 110)) * (big ? 1.3 : 1) });
+    // 2026-11-08 사용자 「묶기가 몸 밖으로 벗어남」: 칸(투명 여백 포함) 말고 보이는 몸통에 — 사슬의 보이는 가운데 = 몸통 가운데 · 폭 = 몸통 폭 (대묶기 1.15배)
+    const B = DS.Attack && DS.Attack.body ? DS.Attack.body(art, box) : null;
+    if (B) DS.FX.place(box, big ? 'bind2' : 'bind', { body: B, mode: 'body', mult: big ? 1.15 : 1, flat: true });
+    else { const a = art.getBoundingClientRect(), b = box.getBoundingClientRect(); DS.FX.play(box, big ? 'bind2' : 'bind', { x: a.left - b.left + a.width / 2, y: a.top - b.top + a.height * 0.6, s: Math.max(1, Math.min(4, a.width / 110)) * (big ? 1.3 : 1) }); }
     if (DS.Sound && DS.Sound.block) DS.Sound.block();
   }
   function perfect(streak, bind, opt = {}) {

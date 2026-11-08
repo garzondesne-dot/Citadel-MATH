@@ -457,35 +457,22 @@ DS.Hall = (function () {
       h.classList.remove('healing'); void h.offsetWidth; h.classList.add('healing'); setTimeout(() => h.classList.remove('healing'), 1300);
       Snd().correct();
     } else if (h && arena && m0) {
-      // v0.9.2 연습 공격(이미 다 맞힌 학생): 돌진 + 이펙트 + 머리 위 「✔ 이미 성공」 · 데미지 숫자 · PERFECT 흔들림 없음
+      // v0.9.2 연습 공격(이미 다 맞힌 학생): 공격 + 이펙트 + 「몬스터 묶기!」 · 데미지 숫자 · PERFECT 흔들림 없음
+      // 2026-11-08 재정비 (사용자 「근접 · 원거리 할 것 없이 가까이 가서 싸움 · 기술 따로 액션 따로 · 바닥 기술이 몸통에서」):
+      //   학생 폰과 같은 DS.Attack.play — 근접 = 보이는 몸통 옆까지 돌진 · 원거리 = 제자리 한 걸음 + 탄 · 🔮 쏘는 기술 = 손에서 몸통까지 · 이펙트 = 보이는 몸통 · 발끝 기준
       const prac = a.label === 'practice', ok = a.label !== 'fail', perfect = a.label === 'success';
-      const hr = h.getBoundingClientRect(), mr = m0.getBoundingClientRect(), ar = arena.getBoundingClientRect();
-      h.style.setProperty('--tx', `${(mr.left + mr.width / 2 - (hr.left + hr.width / 2)) * (ok ? 0.8 : 0.35)}px`);
-      h.style.setProperty('--ty', `${(mr.top + mr.height * 0.7 - (hr.top + hr.height / 2)) * (ok ? 0.8 : 0.35)}px`);
-      const hid = (R.players[a.u] || {}).hero || 0, ranged = !!(DS.Attack && DS.Attack.isRanged(hid)); // ⚔ 2026-11-06: 원거리 = 제자리에서 탄 · 근접 = 돌진
-      h.classList.remove('dash', 'swing'); void h.offsetWidth; h.classList.add(ok && !ranged ? 'dash' : 'swing');
-      pose(h, hid, 'attack', 820); // v0.9.3 (사용자 지적 ⑤): 돌진하는 동안 공격 자세 → 돌아오면 서 있는 자세
+      const hid = (R.players[a.u] || {}).hero || 0, p = (R.players[a.u] || {}).fx || 'flame';
       const hit = () => {
-        if (ok) {
-          Snd().hit();
-          const p = (R.players[a.u] || {}).fx || 'flame';
-          DS.FX.play(arena, p, { x: mr.left - ar.left + mr.width / 2, y: mr.top - ar.top + mr.height / 2, scale: Math.min(ar.width, ar.height) / (perfect ? 900 : 1150), perfect });
-          m0.classList.remove('flash'); void m0.offsetWidth; m0.classList.add('flash');
-          if (prac) { const t = document.createElement('span'); t.className = 'prac-tag'; t.textContent = '몬스터 묶기!'; if (DS.Thrill) DS.Thrill.bindFx(m0); h.appendChild(t); setTimeout(() => t.remove(), 1600); }
-          const fx = $('#rm-fx');
-          if (fx && a.dmg) { const d = document.createElement('span'); d.className = `dmg${perfect ? ' big' : ''}`; d.textContent = `−${a.dmg}`; d.style.left = `${55 + Math.random() * 25}%`; fx.appendChild(d); setTimeout(() => d.remove(), 1300); }
-          if (perfect) {
-            const t = document.createElement('div'); t.className = 'perfect'; t.textContent = 'PERFECT!'; arena.appendChild(t); setTimeout(() => t.remove(), 1300);
-            arena.classList.remove('shake'); void arena.offsetWidth; arena.classList.add('shake'); setTimeout(() => Snd().correct(), 120);
-          }
-        } else Snd().squish();
+        Snd().correct && perfect && setTimeout(() => Snd().correct(), 120);
+        m0.classList.remove('flash'); void m0.offsetWidth; m0.classList.add('flash');
+        if (prac) { const t = document.createElement('span'); t.className = 'prac-tag'; t.textContent = '몬스터 묶기!'; if (DS.Thrill) DS.Thrill.bindFx(m0); h.appendChild(t); setTimeout(() => t.remove(), 1600); }
+        const fx = $('#rm-fx');
+        if (fx && a.dmg) { const d = document.createElement('span'); d.className = `dmg${perfect ? ' big' : ''}`; d.textContent = `−${a.dmg}`; d.style.left = `${55 + Math.random() * 25}%`; fx.appendChild(d); setTimeout(() => d.remove(), 1300); }
+        if (perfect) { const t = document.createElement('div'); t.className = 'perfect'; t.textContent = 'PERFECT!'; arena.appendChild(t); setTimeout(() => t.remove(), 1300); }
       };
-      if (ranged) { // 탄: 용사 손 → 몬스터 (곡선 · 머리 돌림) · 빗나가면 위로 사라짐
-        const from = { x: hr.left - ar.left + hr.width * 0.7, y: hr.top - ar.top + hr.height * 0.45 }, to = { x: mr.left - ar.left + mr.width * 0.45, y: mr.top - ar.top + mr.height * 0.5 };
-        if (Snd().launch) Snd().launch();
-        setTimeout(() => DS.Attack.fly(arena, DS.Attack.projOf(hid), from, ok ? to : { x: to.x - mr.width * 0.3, y: mr.top - ar.top - 20 }, Math.max(1, Math.min(ar.width, ar.height) / 380), !ok).then(hit), 120);
-      } else setTimeout(hit, 330);
-      setTimeout(() => h.classList.remove('dash', 'swing'), 850);
+      const go = () => (h.isConnected && DS.Attack ? DS.Attack.play(arena, { heroBox: h, monBox: m0, hero: hid, fx: p, miss: !ok, finish: perfect, noDmg: true, rest: 'idle', onHit: hit }) : Promise.resolve()).catch((e) => console.warn('공격 연출', e));
+      h.classList.add('atk-on'); h._atk = (h._atk || Promise.resolve()).then(go).then(() => h.classList.remove('atk-on')); // 같은 용사의 공격은 차례로
+      if (!ok) Snd().squish();
     }
     setTimeout(() => { playing = false; play(); }, 350);
   }
@@ -655,7 +642,7 @@ DS.Hall = (function () {
     requestAnimationFrame(() => t.classList.add('go'));
     setTimeout(() => {
       Snd().hit(); setTimeout(() => Snd().correct(), 140);
-      if (ult && DS.Attack) DS.Attack.ultBlast(arena, m0, tFx()); else DS.FX.play(arena, tFx(), { x: mr.left - ar.left + mr.width / 2, y: mr.top - ar.top + mr.height / 2, scale: Math.min(ar.width, ar.height) / 700, perfect: true }); // 💥 필살기 = 광역
+      if (ult && DS.Attack) DS.Attack.ultBlast(arena, m0, tFx()); else DS.FX.place(arena, tFx(), { body: DS.Attack.body(m0, arena), mode: DS.FX.modeOf(tFx()) === 'shot' ? 'body' : undefined, perfect: true }); // 🎯 보이는 몸통 · 발끝 기준 (2026-11-08) // 💥 필살기 = 광역
       arena.classList.remove('shake'); void arena.offsetWidth; arena.classList.add('shake');
       const tag = document.createElement('div'); tag.className = `perfect ${kill ? 'vanish-txt' : 'demo-txt'}`; tag.textContent = kill ? '💥 소멸!' : '시연 · 데미지 없음'; arena.appendChild(tag); setTimeout(() => tag.remove(), 1600);
       if (kill) {
