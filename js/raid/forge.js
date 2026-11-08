@@ -41,7 +41,7 @@ DS.Forge = (function () {
   function render() {
     const el = $('#forge');
     // CSS 변수 안의 url() 은 style.css 기준으로 풀리므로 절대 주소로 넣는다
-    const abs = (k) => `url('${new URL(DS.ASSETS.base + DS.ASSETS.forgeC[k], location.href).href}')`;
+    const abs = (k) => `url('${new URL(DS.ASSETS.base + DS.ASSETS.forgeC[k], document.baseURI).href}')`;
     el.style.setProperty('--fc-mat', abs('material')); el.style.setProperty('--fc-op', abs('operator'));
     el.innerHTML = `<div class="fg-wrap${tab === 'forge' && no ? ' one' : ''}"><div class="fg-bg" style="background-image:linear-gradient(#17141055,#171410aa),url('${DS.ASSETS.base}${DS.ASSETS.forgeC.bg}')"></div>
       <div class="fg-hud"><b>⚒ 모루</b><span class="fg-pill">카드 1장 = 💎 ${DS.Gem ? DS.Gem.G.card : 3}</span><span class="fg-pill blue">📖 ${have().length} / ${opened().length}</span><button class="btn small" id="fg-x">✕ 닫기</button></div>
