@@ -166,7 +166,7 @@ DS.Camp = (function () {
         <div class="camp-hero">${DS.Art.hero(me.hero, 'sit', 'huff')}<i class="shadow"></i><div class="camp-plate"><span class="nm">${DS.Titles ? DS.Titles.nameHtml({ title: me.title || 'none', nick: me.name }, { num: false, size: 14 }) : esc(me.name)}</span></div></div>
         ${prop('dummy', '🎯', '복습 허수아비', '')}${prop('mail', '📮', '우편함', '')}
       </div>
-      <div class="camp-bar"><span id="camp-sv"></span><button class="btn small" id="camp-code">🚪 코드로 입장</button></div>
+      <div class="camp-bar"><span id="camp-sv"></span></div>
       <div class="camp-forge panel framed st-panel" id="camp-forge"><p class="muted small">용사 상태를 불러오는 중…</p></div>`;
     status();
     $('#camp-anvil').onclick = () => pick('#camp-anvil', () => (me.test ? DS.Forge.open(me, { preview: true, no: 99 }) : DS.Forge.open(me))); // 🧪 체험판: 모든 레시피
@@ -177,20 +177,18 @@ DS.Camp = (function () {
       if (rf) return pick('#camp-gate', () => DS.Control.run(() => DS.Bonus.enter(me, { train: true, rift: rf })), 'portal');
       if (live && live.open) { if (tutMode === 'A') { tutMark('a'); tutClear(); } return pick('#camp-gate', () => DS.Control.run(() => enterCode(live.code)), 'portal'); }
       nope('#camp-gate');
+      if (!me.trial) return setTimeout(codeGate, 350); // 2026-11-08: 「코드로 입장」 버튼 대신 — 닫힌 문을 누르면 코드 창
       if (live) DS.UI.toast('지난 던전은 닫혔어요. 선생님이 다음 수업을 열면 문에 다시 빛이 들어와요.', 3200);
       else DS.UI.toast('아직 열린 던전이 없어요. 선생님이 수업을 열면 오른쪽 문에 빛이 들어와요.', 3200);
     };
     // v0.9.7.0: 이름표의 Lv 는 뺌 (사용자 — 캠프에서 이질적). 레벨은 아래 상태창에만
     newTitles();
-    $('#camp-code').onclick = codeGate;
-    if (me.trial) { const cb = $('#camp-code'); if (cb) cb.hidden = true; } // 👩‍🏫 체험판: 코드 입장 필요 없음
     { const fb = $('#camp-fb'); if (fb) fb.onclick = () => DS.Feedback.open({ c: me.c, n: me.n, name: me.name }, { where: 'camp' }); } // 💬 2026-11-06 · 2026-11-07 캠프 위로
     $('#camp-mail').onclick = () => pick('#camp-mail', () => { if (me.teacher) return DS.Control.run(() => DS.Dash.enter()); if (cues.mark) cues.mark('mail'); DS.Control.run(() => (DS.Mail && !me.test ? DS.Mail.open(me, { onClose: () => status() }) : note())); }); // 교사 = 📊 학급 대시보드 · 2026-11-07 6판: 우편함 = 소식 + 보내기 (오답노트는 🎯 허수아비로)
     $('#camp-tent').onclick = () => (DS.CampScene.objOn(document.querySelector('#camp .camp-stage'), 'tent', true), pick('#camp-tent', () => { if (cues.mark) cues.mark('tent'); DS.Control.run(() => (DS.Quest && !me.teacher ? DS.Quest.open(me) : shelf())); setTimeout(() => DS.CampScene.objOn(document.querySelector('#camp .camp-stage'), 'tent', false), 1500); })); // ⛺ 텐트 = ✏ 출제 공방 (2026-11-07 6판 · 책장은 🎯 허수아비 차시 카드로)
     $('#camp-dummy').onclick = () => pick('#camp-dummy', () => DS.Control.run(() => DS.Bonus.enter(me, { train: true })));
     { const sb = $('#camp-stamp'); if (sb) { stampMarkSeen(); sb.onclick = () => sb.remove(); setTimeout(() => { if (sb.isConnected) sb.remove(); }, 15000); } } // 한 번 보여 주고 15초 뒤 · 누르면 닫힘
     $('#camp-set').onclick = () => (me.teacher ? settings({ teacher: true, onSave: async (v) => { me.hero = v.hero; me.fx = v.fx; me.title = v.title; const t = me.teacher; if (t.code) { try { await DS.Net.set(`rooms/${t.code}/state/tlook`, { hero: v.hero, fx: v.fx, at: DS.Net.TS }).catch(() => {}); /* 2026-11-06: 종합상황실도 쓸 수 있는 칸 → 수업 화면이 이 모습을 먼저 씀 */ const R0 = await DS.Net.get(`rooms/${t.code}/meta`); if (R0 && R0.teacher === DS.Net.uid()) await DS.Net.update(`rooms/${t.code}/players/${R0.teacher}`, { hero: v.hero, fx: v.fx }); } catch (e) { /* 다음 수업부터 */ } } render(); drawGate(); } }) : settings({ buy: true }));
-    if (me.teacher) { const cb = $('#camp-code'); if (cb) cb.hidden = true; }
     drawGate();
     animateFire();
     document.querySelectorAll('#camp .camp-prop').forEach((e) => e.classList.add('cs-int'));
@@ -404,7 +402,7 @@ DS.Camp = (function () {
   function codeGate() {
     let last = ''; try { last = (JSON.parse(localStorage.getItem('citadel-student')) || {}).code || ''; } catch (e) { /* 무시 */ }
     const el = document.createElement('div'); el.className = 'modal camp-modal';
-    el.innerHTML = `<div class="quiz-box framed"><h2>🌀 차원문</h2><p>선생님이 알려 준 <b>수업 코드 6자리</b>를 넣으면 던전 대기실로 넘어가요.</p>
+    el.innerHTML = `<div class="quiz-box framed"><h2>🌀 차원문</h2><p>아직 문이 닫혀 있어요. 선생님이 알려 준 <b>수업 코드 6자리</b>를 넣으면 던전 대기실로 넘어가요.</p>
       <input id="g-code" name="class-code" inputmode="numeric" maxlength="6" placeholder="6자리" autocomplete="off" data-1p-ignore data-lpignore="true" value="${esc(code0 || last)}">
       <div class="row"><button class="btn" id="g-x">✕ 닫기</button><button class="btn primary" id="g-go">⚔ 던전으로</button></div></div>`;
     document.body.appendChild(el);

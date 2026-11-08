@@ -2772,3 +2772,7 @@ html body #screen-camp .btn.camp-back, html body #screen-bonus #bn-back.btn { bo
 body.forge-open #ver-tag { display: none !important; } /* 모루 화면에서는 버전 꼬리표 숨김 (2026-11-08) */
 /* 💎 마정석 칩 글자 가늘게 (2026-11-08 「폰트 너무 두꺼워」 · 도트 글꼴 가짜 굵게 끔) */
 html body .sc-gem, html body .sc-gem .sc-gn, html body .sc-gem b { font-weight: 400 !important; text-shadow: none !important; -webkit-text-stroke: 0 !important; }
+/* 2026-11-08: 「코드로 입장」 뺌 → 상태창 줄 여백 없이 꽉 (#screen-camp) */
+#screen-camp .camp-bar { padding: 0 !important; margin: 0 auto !important; gap: 0 !important; justify-content: stretch !important; }
+#screen-camp .camp-bar > #camp-sv { flex: 1; margin: 0; }
+#screen-camp .camp-bar #camp-sv .sv-btn { width: 100%; margin: 0; }
