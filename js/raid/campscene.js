@@ -24,6 +24,13 @@ DS.CampScene = (function () {
     if (o.door) { const sp = document.createElement('span'); sp.className = 'cs-spark cs-door'; sp.setAttribute('aria-hidden', 'true'); sp.style.left = `calc(${pct(o.x + (o.w * o.door[0]) / 100, W())} - 12px)`; sp.style.top = `calc(${pct(o.y + (o.w * (img.naturalHeight / (img.naturalWidth || 1)) * o.door[1]) / 100, H())} - 12px)`; stage.appendChild(sp); setTimeout(() => sp.remove(), 1300); }
     if (DS.Sound && DS.Sound.hit) DS.Sound.hit();
   }
+  // 🏰 성채로 들어가기 (2026-11-08): 문을 중심으로 화면이 빨려 들어가듯 커지며 어두워짐 (0.9초) — 성채 화면이 뜨면 저절로 풀림
+  function enter(stage, k) {
+    const o = (C().objs || {})[k], img = stage && stage.querySelector(`.cs-obj-${k}`); if (!o || !img || !o.door) return;
+    const ox = pct(o.x + (o.w * o.door[0]) / 100, W()), oy = pct(o.y + (o.w * (img.naturalHeight / (img.naturalWidth || 1)) * o.door[1]) / 100, H());
+    stage.style.transformOrigin = `${ox} ${oy}`; stage.classList.remove('cs-enter'); void stage.offsetWidth; stage.classList.add('cs-enter');
+    setTimeout(() => { stage.classList.remove('cs-enter'); stage.style.transformOrigin = ''; }, 2600);
+  }
   // 누른 그림으로 바꾸기 (텐트: 책이 빛나며 나옴) — 미리 겹쳐 두고 켜기만 해서 깜빡임 없음
   const objOn = (stage, k, on) => { const e = stage && stage.querySelector(`.cs-obj-${k}.cs-on`); if (e) e.classList.toggle('show', !!on); };
   // 장면 겹: 차시 문 빛 · 윤곽선 · 깃발 (배경 위 · 오브젝트 아래)
@@ -78,5 +85,5 @@ DS.CampScene = (function () {
     try { localStorage.setItem(key, JSON.stringify(states)); } catch (e) { /* 무시 */ }
     return seen ? states.map((s, i) => (s !== 'off' && s !== seen[i] ? i : -1)).filter((i) => i >= 0) : [];
   }
-  return { objOn, press, zone, layers, lamps, flag, gate, intro, floorStates, freshLamps, box };
+  return { objOn, press, enter, zone, layers, lamps, flag, gate, intro, floorStates, freshLamps, box };
 })();

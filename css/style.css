@@ -2787,3 +2787,10 @@ html body .sc-gem, html body .sc-gem .sc-gn, html body .sc-gem b { font-weight: 
 .art.hv2[data-st="confuse"] { animation: stWob .5s ease-in-out infinite; }
 @keyframes stWob { 25% { transform: translateX(-2px) rotate(-2deg); } 75% { transform: translateX(2px) rotate(2deg); } }
 .art.hv2[data-st="sleep"] > b { filter: brightness(.8) saturate(.7); }
+/* 2026-11-08 「개념설명시 바깥 배경 흰색으로 통일」: 평소에도 학습지 둘레 = 흰 바탕 (금빛 그림자 뺌 · 제목은 진한 글자) */
+.h-concept, .h-sheet-ov, .h-concept .h-sheet, .h-sheet-ov .h-sheet { background: #fff !important; }
+.h-concept .h-sheet img, .h-sheet-ov .h-sheet img, .h-concept.split .h-sheet img { filter: none !important; }
+.h-concept .h-ctitle, .h-sheet-ov .h-ctitle, .h-concept .h-zoom-tip, .h-sheet-ov .h-zoom-tip { color: #2a2433 !important; text-shadow: none !important; }
+/* 🏰 성채로 들어가기 (2026-11-08): 문 쪽으로 빨려 들어가며 어두워짐 */
+.cs-v2.cs-enter { animation: csEnter .9s cubic-bezier(.55, 0, .9, .4) forwards; }
+@keyframes csEnter { 0% { transform: scale(1); filter: brightness(1); } 70% { filter: brightness(.7); } 100% { transform: scale(4.2); filter: brightness(0); } }

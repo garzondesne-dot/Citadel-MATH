@@ -170,7 +170,7 @@ DS.Camp = (function () {
       <div class="camp-forge panel framed st-panel" id="camp-forge"><p class="muted small">용사 상태를 불러오는 중…</p></div>`;
     status();
     $('#camp-anvil').onclick = () => pick('#camp-anvil', () => (me.test ? DS.Forge.open(me, { preview: true, no: 99 }) : DS.Forge.open(me))); // 🧪 체험판: 모든 레시피
-    $('#camp-castle').onclick = () => { if (!picking) DS.CampScene.press(document.querySelector('#screen-camp .cs-v2'), 'castle'); pick('#camp-castle', () => DS.Control.run(() => DS.Bonus.enter(me))); }; // 🏰 불빛 번쩍 · 통통 · 쿵 (2026-11-07)
+    $('#camp-castle').onclick = () => { if (!picking) DS.CampScene.press(document.querySelector('#screen-camp .cs-v2'), 'castle'); setTimeout(() => { if (DS.CampScene.enter) DS.CampScene.enter(document.querySelector('#screen-camp .cs-v2'), 'castle'); }, 350); pick('#camp-castle', () => DS.Control.run(() => DS.Bonus.enter(me))); }; // 🏰 불빛 번쩍 · 통통 · 쿵 (2026-11-07)
     $('#camp-gate').onclick = () => {
       if (me.teacher) { const t = me.teacher; return pick('#camp-gate', () => DS.Control.run(() => (t.code ? DS.Teacher.open(t.code, t.hallKey) : location.replace(`${location.pathname}?${DS.Net.mode === 'local' ? 'local&' : ''}role=teacher`))), 'portal'); }
       const rf = !(live && live.open) ? riftNow() : null;
@@ -221,7 +221,7 @@ DS.Camp = (function () {
         hero.classList.toggle('face-left', dx < 0);
       }
     }
-    const wait = pose === 'portal' ? 1150 : 700; // 차원문: 정중앙까지 걸어 들어가 사라지는 걸 다 보고
+    const wait = pose === 'portal' ? 1150 : el.id === 'camp-castle' ? 1300 : 700; // 🏰 성채: 문으로 빨려 들어가는 확대(0.35~1.25초)를 다 보고 // 차원문: 정중앙까지 걸어 들어가 사라지는 걸 다 보고
     setTimeout(() => { picking = false; then(); }, wait);
     setTimeout(() => { el.classList.remove('picked'); if (hero) { hero.classList.remove('dash', 'to-portal'); heroArt('sit', 'huff'); } }, 1300 + wait - 700);
   }
