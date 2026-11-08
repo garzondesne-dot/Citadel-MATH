@@ -3,7 +3,6 @@
 //   → 🏕 쉼터(디펜스 없음 · ⚖ 한 판) → 개념2 · 문제 2 → 👑 3문항 → 결과 → 내 캠프 💎 200 · 성채 1층 01~03 · 허수아비 3차시 · ≪ 메뉴화면
 //   node tools/e2e/e2e75.js <출력 폴더>   (로컬 서버 http://localhost:8765)
 const { chromium } = require('playwright');
-if (/DS\.TRIAL_OFF = true/.test(require('fs').readFileSync(require('path').join(__dirname, '..', '..', 'js', 'config.js'), 'utf8'))) { console.log('⏸ 체험판 중단 (js/config.js DS.TRIAL_OFF) — 건너뜀'); process.exit(0); }
 const OUT = process.argv[2] || '.', U = 'http://localhost:8765/trial/';
 (async () => {
   const b = await chromium.launch(); const ctx = await b.newContext({ viewport: { width: 390, height: 844 } }); const errs = [], log = [];

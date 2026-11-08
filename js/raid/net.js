@@ -1,6 +1,6 @@
 // 실시간 동기화 창구. 두 가지 방식이 같은 모양으로 동작한다.
 //  - firebase: Firebase Realtime Database (js/config.js 의 DS.FIREBASE 가 있을 때). 바뀌는 즉시 모든 기기에 밀어 준다
-//  - local   : 이 기기 안에서만 (localStorage + BroadcastChannel). 체험판(demo.html)·설정 전 시험용. 탭·창끼리 동기화
+//  - local   : 이 기기 안에서만 (localStorage + BroadcastChannel). 테스트 모드 · 설정 전 시험용. 탭·창끼리 동기화
 // 값은 경로로 다룬다: watch('rooms/123456', cb) · set · update · get · remove
 // 주의: Firebase 는 빈 배열을 저장하지 않으므로 학생 답(given)은 JSON 문자열로 저장한다 (DS.Net.pack / unpack)
 window.DS = window.DS || {};

@@ -6,7 +6,7 @@
 교실 협동 레이드(학생 폰 · 교사 폰 · 종합상황실) + DIMENSION SLASHER 엔진(문제 형식·검산). 제작: 김찬우 선생님 (공통수학2).
 현재 차시: 집합 3차시 「집합 사이의 포함 관계」 (학습과정 3차시 v4).
 
-- 체험판: `demo.html` (가상 학생과 한 화면에서) · 수업: `index.html`
+- 체험판(선생님용): `trial/` (교사 메뉴 🧪 테스트 모드 기준 · 3차시 · 이 탭 메모리에만) · 수업: `index.html`
 - 문서: [docs/HANDOVER.md](docs/HANDOVER.md) · [docs/DECISIONS.md](docs/DECISIONS.md) · [docs/PLAN.md](docs/PLAN.md) · [docs/firebase-setup.md](docs/firebase-setup.md)
 - 스탠드얼론 PWA: 폰에서 홈 화면에 설치해 앱처럼 실행
 - 테스트: `node tests/lesson.test.js`, `node tests/lesson2.test.js`, `node tests/model.test.js`, `node tests/pwa.test.js`, `node tests/account.test.js`, `node tests/curriculum.test.js`
