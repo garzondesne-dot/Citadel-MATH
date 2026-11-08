@@ -2751,3 +2751,9 @@ body:has(#test-bar) #screen-student.st-battle .wrap { padding-bottom: calc(86px 
 #screen-camp .camp-back .ui-ic { width: 22px; height: 22px; margin: 0; }
 #screen-bonus #bn-back::before { content: none !important; } #screen-bonus #bn-back .ui-ic { width: 22px; height: 22px; margin: 0; }
 .st-dock .dock-tries { flex: none !important; } .st-dock .dock-go { flex: 1 1 auto !important; min-width: 0; } /* 재도전 하트 줄이 넓어져도 ⚔ 공격! 이 화면 밖으로 안 나가게 */
+/* (2026-11-08) 단추 공통 그림(.btn 테두리 그림 · 나중에 들어오는 스타일)보다 앞서도록 한 단계 더 구체적으로 */
+html body .btn.nav-back, html body button.nav-back, html body #bn-back.btn { border: 0 !important; border-image: none !important; border-radius: 17px !important; background: rgba(16, 12, 9, .78) !important;
+  box-shadow: inset 0 0 0 2px rgba(176, 141, 87, .85), 0 3px 8px rgba(0, 0, 0, .45) !important; color: #fff !important; text-shadow: none !important; font: 700 14px var(--math) !important; image-rendering: auto !important; }
+html body #screen-camp .btn.camp-back, html body #screen-bonus #bn-back.btn { border-radius: 50% !important; font-size: 0 !important; }
+/* 황색 제목 → 밝은 크림색 (어두운 판 위에서 잘 보이게 · 2026-11-08 사용자 「황색은 눈에 잘 안 띄어」) */
+.framed > h2, .panel > h2, .framed h2.title, .quiz-box > h2 { color: #fff4dc !important; text-shadow: 0 2px 0 rgba(0, 0, 0, .6) !important; }
