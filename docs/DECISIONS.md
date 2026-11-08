@@ -918,3 +918,8 @@
 ## 🧹 안 쓰는 포털 그림 정리 (2026-11-08 요청 #8 · v0.9.24.1)
 - 테마 포털 10장(`portal-01~10-v1`) · 특수 차원문 3장(`dportal-bonus/mid/big-v1`) = 화면 어디에도 안 나옴 → `assets/_old/` 로 옮김 (약 1.3MB · README).
 - `art.js lessonFiles()` 의 포털 미리 받기 뺌 · `sw.js` 의 dportal-bonus 뺌 · 배치표 `dungeons.portal` · `dportals` 지움. `trim()` 의 옛 캐시 지우기(portal-)는 그대로.
+
+## ⛶ 체험판 위 TV 크게 보기 (2026-11-08 요청 #9 · v0.9.24.2)
+- 체험판(trial/) 위 「📺 교실 TV (종합상황실) · ⛶ 누르면 크게」 → 누르면 화면 가득 · 다시 아무 데나 누르면 위 TV + 아래 폰으로.
+- 투명 누름 막(`.tt-tap`) = 보기 전용 (조작은 아래 막대). 안드로이드 크롬 = requestFullscreen + `screen.orientation.lock('landscape')` · 아이폰 = 화면 가득 + 세로면 90° 돌림(16:9 유지 · 남는 곳 검정 · 안내 글도 같이 돌림) · PC = 전체 화면만. 뒤로 가기 · 제스처로 전체 화면을 나가면 `fullscreenchange` 로 원래대로.
+- 전체 화면에 들어가면 「아무 데나 누르면 돌아가요」 2초. 시험 `tools/e2e/e2e78.js <폴더> 390 844` · `1440 900`.

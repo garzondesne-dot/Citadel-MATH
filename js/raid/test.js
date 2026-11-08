@@ -225,9 +225,39 @@ DS.Test = (function () {
       if (box) box.remove(); document.body.classList.remove('has-test-tv'); return;
     }
     if (!box) {
-      box = document.createElement('div'); box.id = 'test-tv'; box.className = 'test-tv tv-hall'; box.innerHTML = '<div class="tt-in"></div><i class="tt-l">📺 교실 TV (종합상황실)</i>';
+      // ⛶ 2026-11-08 요청 #9: TV 를 누르면 가로 전체 화면 · 어디든 누르면 원래대로 (투명 누름 막 = 보기 전용 · 조작은 아래 막대)
+      //   안드로이드 크롬 = requestFullscreen + 가로 고정 · 아이폰(요소 전체 화면 없음) = 화면 가득 + 세로면 90° 돌림 · PC = 전체 화면만 · 16:9 유지(남는 곳 검정)
+      box = document.createElement('div'); box.id = 'test-tv'; box.className = 'test-tv tv-hall'; box.innerHTML = '<div class="tt-in"></div><button type="button" class="tt-tap" aria-label="교실 TV 크게 보기"></button><i class="tt-l">📺 교실 TV (종합상황실) · ⛶ 누르면 크게</i><i class="tt-hint">아무 데나 누르면 돌아가요</i>';
       document.body.appendChild(box); document.body.classList.add('has-test-tv');
-      const fit = () => { const w = Math.min(window.innerWidth, 900), k = w / 1280; box.style.width = `${w}px`; box.style.height = `${720 * k}px`; box.querySelector('.tt-in').style.transform = `scale(${k})`; document.body.style.setProperty('--tvh', `${720 * k}px`); };
+      let big = false, fsUsed = false;
+      const fit = () => {
+        const inn = box.querySelector('.tt-in');
+        if (big) {
+          const vw = window.innerWidth, vh = window.innerHeight, rot = vh > vw; // 세로 화면이면 돌림 (가로 고정이 된 안드로이드 · PC 는 돌리지 않음)
+          const W = rot ? vh : vw, H = rot ? vw : vh, k = Math.min(W / 1280, H / 720);
+          box.classList.toggle('rot', rot);
+          box.style.width = `${vw}px`; box.style.height = `${vh}px`;
+          inn.style.transform = rot ? `translate(${((vw + 720 * k) / 2).toFixed(1)}px, ${((vh - 1280 * k) / 2).toFixed(1)}px) rotate(90deg) scale(${k})` : `translate(${((vw - 1280 * k) / 2).toFixed(1)}px, ${((vh - 720 * k) / 2).toFixed(1)}px) scale(${k})`;
+          return;
+        }
+        const w = Math.min(window.innerWidth, 900), k = w / 1280; box.style.width = `${w}px`; box.style.height = `${720 * k}px`; inn.style.transform = `scale(${k})`; document.body.style.setProperty('--tvh', `${720 * k}px`);
+      };
+      const setBig = async (on) => {
+        if (on === big) return; big = on; box.classList.toggle('tv-big', on); if (!on) box.classList.remove('rot');
+        if (on) {
+          box.classList.remove('hint'); void box.offsetWidth; box.classList.add('hint'); setTimeout(() => box.classList.remove('hint'), 2000);
+          const req = box.requestFullscreen || box.webkitRequestFullscreen;
+          if (req) { try { await req.call(box); fsUsed = true; } catch (e) { fsUsed = false; } }
+          try { if (fsUsed && screen.orientation && screen.orientation.lock) await screen.orientation.lock('landscape'); } catch (e) { /* 안 되면 돌림으로 */ }
+        } else {
+          try { if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock(); } catch (e) { /* 무시 */ }
+          if (document.fullscreenElement || document.webkitFullscreenElement) { try { await (document.exitFullscreen || document.webkitExitFullscreen).call(document); } catch (e) { /* 무시 */ } }
+          fsUsed = false;
+        }
+        fit(); setTimeout(fit, 250); // 전체 화면 · 회전이 끝난 뒤 한 번 더
+      };
+      box.querySelector('.tt-tap').addEventListener('click', () => setBig(!big));
+      document.addEventListener('fullscreenchange', () => { if (big && fsUsed && !document.fullscreenElement) { fsUsed = false; setBig(false); } }); // 뒤로 가기 · 제스처로 나가도 맞춤
       fit(); window.addEventListener('resize', () => { if (box.isConnected) fit(); });
     }
     if (hs && !box.contains(hs)) { hs.classList.add('tv-embed'); box.querySelector('.tt-in').appendChild(hs); DS.Hall.enter(code, hallKey, { embed: true }).catch((e) => console.error(e)); }

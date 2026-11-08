@@ -2757,3 +2757,13 @@ html body .btn.nav-back, html body button.nav-back, html body #bn-back.btn { bor
 html body #screen-camp .btn.camp-back, html body #screen-bonus #bn-back.btn { border-radius: 50% !important; font-size: 0 !important; }
 /* 황색 제목 → 밝은 크림색 (어두운 판 위에서 잘 보이게 · 2026-11-08 사용자 「황색은 눈에 잘 안 띄어」) */
 .framed > h2, .panel > h2, .framed h2.title, .quiz-box > h2 { color: #fff4dc !important; text-shadow: 0 2px 0 rgba(0, 0, 0, .6) !important; }
+/* ⛶ 체험판 위 TV 크게 보기 (2026-11-08 요청 #9) */
+.test-tv .tt-tap { position: absolute; inset: 0; z-index: 2; background: none; border: 0; padding: 0; cursor: zoom-in; }
+.test-tv .tt-l { z-index: 3; }
+.test-tv .tt-hint { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 4; display: none; padding: 10px 18px; border-radius: 12px; background: rgba(10, 8, 6, .82); color: #fff; font: 700 16px var(--math); font-style: normal; pointer-events: none; }
+.test-tv.tv-big { position: fixed !important; inset: 0 !important; left: 0 !important; top: 0 !important; transform: none !important; z-index: 9990 !important; border: 0; background: #000; }
+.test-tv.tv-big .tt-tap { cursor: zoom-out; }
+.test-tv.tv-big .tt-l { display: none; }
+.test-tv.tv-big.hint .tt-hint { display: block; animation: ttHint 2s ease forwards; }
+@keyframes ttHint { 0%, 70% { opacity: 1; } 100% { opacity: 0; } }
+.test-tv .tt-hint { white-space: nowrap; } .test-tv.tv-big.rot .tt-hint { transform: translate(-50%, -50%) rotate(90deg); } /* 세로 폰을 돌려 보는 중이면 안내도 같이 돌림 */
