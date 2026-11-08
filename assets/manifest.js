@@ -84,6 +84,7 @@ DS.ASSETS = {
   //   bat 4칸(날갯짓 3 + 잡힘 1) · chest 3칸(닫힘 · 흔들림 · 열림) · punch 2칸(기본 · 맞은 순간) · feather 1 · arena 1 (배경 16:9)
   //   2026-11-05: 펀치 기계 → 🏁 경주(track) · 교실 TV 에 이모지 글꼴이 없어 박쥐 · 상자 · 깃털은 임시 도트(v0, Claude 가 코드로 그림) — 사용자 그림(v1)이 오면 교체
   //   icons = 아이콘 18칸 시트(6×3) · combo = 콤보 창 4칸 · track = 경주 트랙 배경 (null = CSS)
+  status: { src: 'status-v1.webp', cols: 6, rows: 8, dur: 0.6, kinds: ['stun', 'freeze', 'bind', 'burn', 'poison', 'shock', 'confuse', 'sleep'], names: ['기절', '빙결', '속박', '화상', '독', '감전', '혼란', '수면'] }, // 💫 상태이상 (2026-11-08 · tools/pfx/status_bake.py · 칸 80×80 = 용사 칸 + 머리 위 16px · DS.Status)
   thrill: { bat: { src: 'thrill-bat-v1.webp', frames: 4 }, chest: { src: 'thrill-chest-v1.webp', frames: 3 }, feather: { src: 'thrill-feather-v1.webp', frames: 1 }, track: { src: 'thrill-track-v1.webp', box: { name: [0.027, 0.183], start: 0.222, goal: 0.952, top: 0.19, bottom: 0.83 } }, combo: { src: 'thrill-combo-v1.webp', frames: 4 }, icons: 'ui.icons 40~57 (ui-icons-v4)' }, // 2026-11-05 사용자 그림 도착: 콤보 창 4단계 · 경주 트랙(종합상황실 큰 화면) · 아이콘 18 은 UI 아이콘 시트에 붙임,
   trophy: 'trophy-v1.webp', // 클리어 · 수업 끝 트로피 (사용자 제공, 투명 배경)
   note: { src: 'note-icons-v1.webp', cell: 128, names: ['x', 'none', 'ok', 'fill', 'star', 'badge', 'done', 'book'] }, // 📕 오답노트 아이콘 (v0.9.7.9 · 사용자 생성): 틀림 · 안 풂 · 맞힘 · 보충 · 도전 별 · 알림 배지(숫자는 코드) · 노트 완성 · 오답노트 책

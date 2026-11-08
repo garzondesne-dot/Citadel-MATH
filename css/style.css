@@ -2776,3 +2776,14 @@ html body .sc-gem, html body .sc-gem .sc-gn, html body .sc-gem b { font-weight: 
 #screen-camp .camp-bar { padding: 0 !important; margin: 0 auto !important; gap: 0 !important; justify-content: stretch !important; }
 #screen-camp .camp-bar > #camp-sv { flex: 1; margin: 0; }
 #screen-camp .camp-bar #camp-sv .sv-btn { width: 100%; margin: 0; }
+/* 💫 상태이상 오버레이 (2026-11-08 · DS.Status · 그림 = status-v1.webp 6프레임) */
+.art.hv2 > s.st-ov { position: absolute; bottom: 0; aspect-ratio: 1 / 1; text-decoration: none; pointer-events: none; z-index: 3; background-repeat: no-repeat; image-rendering: pixelated; background-position: 0% var(--sty); animation-name: stOv; animation-timing-function: steps(6); animation-iteration-count: infinite; }
+@keyframes stOv { from { background-position: 0% var(--sty); } to { background-position: 120% var(--sty); } }
+.art.hv2[data-st="burn"] > b { filter: sepia(.5) saturate(2.2) hue-rotate(-20deg) brightness(1.05); }
+.art.hv2[data-st="poison"] > b { filter: sepia(.4) saturate(1.6) hue-rotate(60deg); }
+.art.hv2[data-st="shock"] { animation: stShock .18s steps(2) infinite; } /* 용사 칸(b)은 자기 걷기 애니메이션이 있어 상자에 */
+@keyframes stShock { 50% { filter: brightness(1.8) contrast(1.3); } }
+.art.hv2[data-st="freeze"] > b { filter: saturate(.4) brightness(1.1) hue-rotate(160deg); }
+.art.hv2[data-st="confuse"] { animation: stWob .5s ease-in-out infinite; }
+@keyframes stWob { 25% { transform: translateX(-2px) rotate(-2deg); } 75% { transform: translateX(2px) rotate(2deg); } }
+.art.hv2[data-st="sleep"] > b { filter: brightness(.8) saturate(.7); }

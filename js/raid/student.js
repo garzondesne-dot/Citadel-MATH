@@ -368,6 +368,7 @@ DS.Student = (function () {
       DS.Sound.squish(); if (navigator.vibrate) navigator.vibrate(60);
       if (!stun) return;
       if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+      if (DS.Status) DS.Status.on(hb, 'stun', lock); // 💫 머리 위 별 (2026-11-08)
       const st = document.createElement('div'); st.className = 'stun'; st.innerHTML = `<b>💥 몬스터의 공격! ${lock}초 멈춤</b>`;
       document.body.appendChild(st); setTimeout(() => st.remove(), lock * 1000);
     }, 200);
@@ -439,9 +440,10 @@ DS.Student = (function () {
     const sig = `solve|${lk.id}|${lk.end}`; if (drawn === sig && body.querySelector('.sl-scene')) return; drawn = sig;
     const spr = step.kind === 'boss' ? L.boss.sprite : L.monsters[step.id].sprite, title = step.kind === 'boss' ? `👑 ${L.boss.title}` : step.title;
     body.innerHTML = `<div class="panel framed"><div class="scene enc bg-scene th-${L.theme || ''} sl-scene"><div class="scene-bar"><div><b>${esc(title)}</b><br><span class="muted small">📝 풀이 시간</span></div></div>
-        <div class="enc-hero frozen">${heroNow('idle', '')}<i class="shadow"></i><i class="sl-ice"></i></div><div class="enc-mon">${DS.Art.monster(spr, 'attack', '')}</div><i class="sl-frost"></i></div>
+        <div class="enc-hero frozen">${heroNow('idle', '')}<i class="shadow"></i></div><div class="enc-mon">${DS.Art.monster(spr, 'attack', '')}</div><i class="sl-frost"></i></div>
       <div class="sl-box"><b>❄ 꽁꽁 묶기!</b><p>몬스터가 얼음 마법을 썼어요 — <b>학습지에 먼저 다 풀어요</b></p><p class="sl-time">얼음이 깨지기까지 <b class="sl-left" data-sl-end="${lk.end}">${Math.ceil(lk.left / 1000)}초</b></p><small>시간이 끝나면 얼음이 깨지고 답을 넣을 수 있어요 · 다 푼 답을 그대로 옮겨 적으면 한 번에 퍼펙트!</small></div></div>`;
     const sc = body.querySelector('.sl-scene'), hb = body.querySelector('.enc-hero');
+    if (DS.Status) DS.Status.on(hb, 'freeze', 0); // 🧊 빙결 그림 (2026-11-08 · 옛 sl-ice 상자 대신)
     if (solveCast !== sig) { solveCast = sig; setTimeout(() => { if (!sc.isConnected) return; if (DS.FX) DS.FX.play(sc, 'nova', { scale: 0.7, perfect: true }); if (DS.Thrill) DS.Thrill.bindFx(hb, true); if (DS.Sound && DS.Sound.fxHit) DS.Sound.fxHit('nova'); }, 200); }
     clearTimeout(solveT); solveT = setTimeout(() => { drawn = ''; render(); const sc2 = document.querySelector('#st-body .scene'), h2 = sc2 && sc2.querySelector('.enc-hero'); if (sc2 && DS.FX && h2) { const a = h2.getBoundingClientRect(), b = sc2.getBoundingClientRect(); DS.FX.play(sc2, 'ice', { x: a.left - b.left + a.width / 2, y: a.top - b.top + a.height / 2, scale: 0.5 }); } if (DS.Sound && DS.Sound.correct) DS.Sound.correct(); DS.UI.toast('❄ 얼음이 깨졌어요 — 이제 답을 넣어요!'); }, lk.left + 250);
   }
