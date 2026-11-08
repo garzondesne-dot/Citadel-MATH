@@ -13,6 +13,16 @@ DS.Teacher = (function () {
   const keyHtml = () => `<b>${esc($('#t-key').textContent) || '—'}</b>`;
 
   async function create(lessonId, cls, opt = {}) {
+    // 2026-11-08: 한 반에 던전 하나만 — 이미 열린 던전이 있으면 닫을지 묻는다 (아니오 = 새 던전 안 만듦)
+    if (cls) {
+      const k = `live/${String(cls).replace(/[.#$/[\]]/g, '_')}`, lv = await DS.Net.get(k).catch(() => null);
+      if (lv && lv.open && lv.code && lv.code !== opt.resumeOf) {
+        const old = DS.Lessons.get(lv.lesson);
+        if (!window.confirm(`⚠ ${cls}반에 이미 열린 던전이 있어요.\n\n${old ? `${old.no ? `${DS.Lessons.noText(old.no)}차시 · ` : ''}${old.title || ''}` : ''} (코드 ${lv.code})\n\n[확인] 기존 던전을 닫고 새 던전을 열어요 (학생은 결과를 보고 내 캠프로)\n[취소] 새 던전을 만들지 않아요`)) return null;
+        await DS.Act.endClassAsk(lv.code).catch(() => {});
+        await DS.Net.remove(k).catch(() => {});
+      }
+    }
     const r = await DS.Act.createRoom(lessonId, cls, opt);
     try { localStorage.setItem('citadel-teacher', JSON.stringify({ code: r.code, hallKey: r.hallKey, uid: DS.Net.uid() })); } catch (e) { /* 무시 */ }
     try { const a = JSON.parse(localStorage.getItem('citadel-rooms')) || []; a.unshift({ code: r.code, cls: cls || '', lesson: lessonId, uid: DS.Net.uid(), at: Date.now() }); localStorage.setItem('citadel-rooms', JSON.stringify(a.slice(0, 30))); } catch (e) { /* 무시 */ } // 📋 만든 수업 목록
