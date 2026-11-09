@@ -149,7 +149,7 @@ function verifyUnit(mid, q, tag) {
 // (1) 순서
 const order = L.steps.map((s) => s.id).join(' ');
 check(order === 'c1 m1 c2 m2 c3 m3 c4 u4 u5 u6 u7 boss', `순서 ${order}`);
-check(L.no === 6 && L.theme === '01-burrow' && !L.bonus && L.sheet.includes('v3'), '차시 번호 · 테마 · 보강 삭제 · v3');
+check(L.no === 6 && L.theme === '01-burrow' && !L.bonus && L.sheet.includes('v4') && L.crops.u4[0].p === 1 && L.crops.u6[0].p === 2, '차시 번호 · 테마 · 보강 삭제 · 학습지 v4 칸');
 check(Object.keys(L.crops).length === 12 && L.steps.every((st) => L.crops[st.id]), '칸 위치 12칸 · 단계마다');
 check(Object.values(L.crops).every(([c]) => c.p >= 1 && c.p <= 2 && c.x >= 0 && c.y >= 0 && c.x + c.w <= 1 && c.y + c.h <= 1), '칸 위치가 쪽 안');
 check(!/명제/.test(L.steps.map((s) => s.title + (s.say || '')).join(' ')), '단계에 명제 없음 (집합 · 명제 안 섞음)');
@@ -273,4 +273,4 @@ for (let i = 0; i < 6; i++) { check(texts[i].size >= 5, `보스재도전 ${i + 1
 check(JSON.stringify(b1) === snap, '생성기가 학습지 문항을 건드리지 않음');
 
 if (fail) { console.error(`\n${fail}건 실패 (${count}건 중)`); process.exit(1); }
-console.log(`OK: 6차시 레이드용 v3 — 순서 · 학습지 ★ / 교과서 원문 첫 시도 · 재도전 소문제 ${n}개 독립 검산 · 형성평가 6문항 · 재도전 생성기 ${nb}문항 독립 검산 (${count}건) 통과`);
+console.log(`OK: 6차시 레이드용 v4 — 순서 · 학습지 ★ / 교과서 원문 첫 시도 · 재도전 소문제 ${n}개 독립 검산 · 형성평가 6문항 · 재도전 생성기 ${nb}문항 독립 검산 (${count}건) 통과`);

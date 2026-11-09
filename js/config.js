@@ -20,7 +20,7 @@ if (typeof location !== 'undefined' && (/\/trial\/(index\.html)?$/.test(location
   document.documentElement.classList.add('trial'); // CSS: 체험판 화면 다듬기
   DS.TRIAL = { lesson: 'set-03', lessons: ['set-03'], castle: 'eval-1', cls: '체험' }; // v2 (2026-11-07): 테스트 모드 기준 · 3차시
 }
-DS.VERSION = 'citadel-0.9.29.3';
+DS.VERSION = 'citadel-0.9.29.4';
 DS.AUTHOR = '김찬우'; // 개발자 (2026-11-03 사용자 요청: 모든 화면 · 첫 화면에 새김)
 DS.CREDIT = '모두의 던전™ · 만든 이 ' + DS.AUTHOR; // 2026-11-07 사용자: 「개발 김찬우」 → 이 문구 (첫 화면 · 버전 꼬리표)
 // 버전 꼬리표 (2026-11-03): 어느 화면에서든 왼쪽 아래 구석에 작게 — 학생 · 교사 · 전광판 화면에서 업데이트 됐는지 바로 확인
