@@ -677,6 +677,8 @@ DS.Student = (function () {
     const lastWrong = !prac && rec.lastWrong && rec.lastWrong.s === stage, cheer = !prac && !rec.done && !rec.fail && dns.includes(stage) ? '<p class="cr-more">💥 친구들은 이 졸개를 넘었어요! 힘내요</p>' : '';
     if (!photoLoaded && DS.Photo) { photoLoaded = true; DS.Photo.load().then(() => { drawn = ''; render(); }).catch(() => {}); }
     const wrBtn = !canPhoto ? '' : /* 🐞 #38: 한 판 더(연습) 중 · 뒤에도 보임 (채점은 학습지 숫자 그대로) */ wrOk === 'ok' ? '<p class="okc center">🌟 서술형 통과 — 진필살기!</p>' : phN >= DS.Photo.raidMax() ? '<p class="muted small center">📸 이 소레이드 사진은 다 썼어요</p>' : '<button class="btn big cr-write" id="cr-write">✍ 서술형으로 써서 📸 진필살기 도전</button>';
+    const pUsed = Raid().pracUsed(R, mid, me, rec), pLeft = Math.max(0, Raid().PRAC_MAX - pUsed); // 🔥 #39 한 판 더 3판
+    const pracBtn = pLeft > 0 ? `<button class="btn big cr-again" id="cr-prac">🔥 한 판 더! (연습 · ${pLeft}/${Raid().PRAC_MAX} 남음)</button>` : `<p class="cr-more cr-pend">🔥 연습 ${Raid().PRAC_MAX}번 끝!${wItem && rec.whyOk && !myHint ? ' 이제 💡 친구에게 힌트를 줘 볼까요?' : ''}</p>`;
     const hintBtn = wItem && rec.whyOk && !myHint ? '<button class="btn cr-hint" id="cr-hint">💡 힌트 주기 <small>근거 한 줄이 TV 에 떠요 · 한 번 · EXP +1</small></button>' : myHint ? '<p class="muted small center">💡 힌트를 줬어요 — 고마워요!</p>' : '';
     const hintsBox = wItem && hintBy.length && !rec.done ? `<details class="cr-hints"><summary>💡 친구 힌트 ${hintBy.length}개 <small>(누르면 펼침)</small></summary><p>${pretty(wItem.why.text)}</p><p class="muted small">${hintBy.slice(0, 5).map((p) => esc(p.nick || '')).join(' · ')}</p></details>` : '';
     let mainHtml;
@@ -708,8 +710,8 @@ DS.Student = (function () {
     }
     if (needWhy) mainHtml = `${story(says)}<div class="paper cr-why"><div class="paper-h"><b>💡 근거 한 줄</b><small>틀려도 괜찮아요 · 다시 골라요</small></div><p class="why-q">${pretty(wq.why.pre)} <b class="why-bl">____</b>${pretty(wq.why.post)}</p><div class="choices">${wq.why.choices.map((c, i) => `<button class="choice" data-why="${i}">${pretty(c)}</button>`).join('')}</div></div>`;
     else if (rec.fail) mainHtml = `<p class="paper-note">끝까지 못 맞혔어요 — 아래 풀이를 학습지에 옮겨 적고 🎯 복습 허수아비에서 다시 도전해요.</p>${story(rec.items.map((x) => x.say))}`;
-    else if (!prac && rec.done) mainHtml = `<p class="okc big-msg">${rec.perfect ? '🌟 퍼펙트 사슬!' : '🎉 대장 처치!'}</p>${story(says)}<p class="cr-more">✅ 다 풀었어요! 🔥 한 판 더 해 볼래요? 부담 없어요</p>${wrBtn}<button class="btn big cr-again" id="cr-prac">🔥 한 판 더! (연습)</button>${hintBtn}<p class="muted small cr-pnote">숫자만 바뀐 새 문제 · 틀려도 아무것도 안 줄어요 (기록 · 기회 · 💎 그대로) · 사슬 완성마다 경험치 +1 (데미지 0)</p>`;
-    else if (pDone) mainHtml = `<p class="okc">✔ 연습 사슬 완성! <b class="gold">+1 EXP</b></p>${story(says)}${wrBtn}<button class="btn big cr-again" id="cr-prac">🔥 한 판 더! (연습)</button>${hintBtn}<p class="muted small cr-pnote">숫자만 바뀐 새 문제 · 틀려도 아무것도 안 줄어요 (기록 · 기회 · 💎 그대로) · 맞히면 공격 이펙트가 나가요 (데미지 0)</p>`;
+    else if (!prac && rec.done) mainHtml = `<p class="okc big-msg">${rec.perfect ? '🌟 퍼펙트 사슬!' : '🎉 대장 처치!'}</p>${story(says)}<p class="cr-more">✅ 다 풀었어요! 🔥 한 판 더 해 볼래요? 부담 없어요</p>${wrBtn}${pracBtn}${hintBtn}<p class="muted small cr-pnote">숫자만 바뀐 새 문제 · 틀려도 아무것도 안 줄어요 (기록 · 기회 · 💎 그대로) · 사슬 완성마다 경험치 +1 (데미지 0)</p>`;
+    else if (pDone) mainHtml = `<p class="okc">✔ 연습 사슬 완성! <b class="gold">+1 EXP</b></p>${story(says)}${wrBtn}${pracBtn}${hintBtn}<p class="muted small cr-pnote">숫자만 바뀐 새 문제 · 틀려도 아무것도 안 줄어요 (기록 · 기회 · 💎 그대로) · 맞히면 공격 이펙트가 나가요 (데미지 0)</p>`;
     else if (rec.locked && !prac) mainHtml = `${story(says)}<div class="cr-lock"><b>🙋 선생님 확인을 기다려요</b><p>기회가 1칸 남았어요 — 학습지에 풀이를 정리해 두면 선생님이 와서 확인해 줘요.</p></div>`;
     else mainHtml = `${story(says)}<div class="paper"><div class="paper-h"><b>${esc(step.title)} · ${stage === pItems.length - 1 ? '👑 대장' : `졸개 ${'①②③④⑤⑥'[stage]}`}</b><small>${prac ? '연습 (숫자 바뀜 · 데미지 없음)' : '틀려도 숫자는 그대로'}</small></div>
         ${lastWrong ? '<p class="paper-note">✘ 다시 생각해 봐요 — 같은 문제예요</p>' : ''}<div class="items">${itemHtml(q, 0, lastWrong, null, cform.given)}</div></div>${prac ? wrBtn : ''}`; // #38: 연습 진행 중에도 📸 단추
@@ -733,7 +735,7 @@ DS.Student = (function () {
     const wb = $('#cr-write'); if (wb) wb.onclick = () => { writeMode[mid] = { peek: false }; drawn = ''; render(); };
     chargeBtn(body);
     const hb = $('#cr-hint'); if (hb) hb.onclick = () => DS.Control.run(async () => { hb.disabled = true; await DS.Act.giveHint(code, raw, mid); DS.Sound.clank(); DS.UI.toast('💡 힌트를 TV 에 띄웠어요 · EXP +1'); drawn = ''; render(); });
-    const pb = $('#cr-prac'); if (pb) pb.onclick = () => { chainPrac[mid] = Math.max(rec.pass || 0, chainPrac[mid] || 0) + 1; cform = null; drawn = ''; render(); };
+    const pb = $('#cr-prac'); if (pb) pb.onclick = () => DS.Control.run(async () => { pb.disabled = true; chainPrac[mid] = await DS.Act.pracStart(code, raw, mid); cform = null; drawn = ''; render(); }); // 🔥 #39 시작 = 셈
     const go = $('#cr-go');
     if (go) go.onclick = () => DS.Control.run(async () => {
       go.disabled = true; const g = q.type === 'number' ? Number(cform.given[0]) : cform.given[0];

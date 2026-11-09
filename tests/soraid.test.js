@@ -79,4 +79,13 @@ for (let i = 0; i < 8; i++) add('c', 1, false); d = X.chainDown(L, Q, 'u4'); che
     check(rb && /학습지|[0-9]/.test(rb.ask) && rb.steps[rb.steps.length - 1].key.includes(String(it[it.length - 1].answer).split(',')[0].replace('−', '−')) || id === 'u5', `${id} 마지막 기준 = 대장 답 ${it[it.length - 1].answer}`); }
   const T = X.newRoom('2', 'set-06', 'T', 1); T.heals = { u4: { a: { 0: '!true@5' }, b: { 0: '!tcut@6' }, c: { 0: '!tcut@7', 1: '_' } } };
   check(X.tcutN(T, 'u4') === 2 && X.isTcut('!tcut@1') && !X.isTcut('!true@1') && X.petrify(T, 'u4') && X.petrify(T, 'u4').by === 'a', '석화 = 첫 통과자 1번 · 다음은 금빛 컷인만 (셈 2)'); }
+// ⑧ 🔥 한 판 더 3판 (#39 · 2026-11-09): 첫 판 빼고 · 시작 기준(players/{나}/pr/{mid}) · 4번째 막힘 · 성채 · 허수아비는 그대로
+{ const Q = X.newRoom('121212', 'set-06', 'T', 1000); Q.active = { a: true }; Q.players = { a: {} }; Q.chain = { u4: {} };
+  check(X.PRAC_MAX === 3 && X.pracUsed(Q, 'u4', 'a', X.record(L, Q, 'u4', 'a')) === 0, '처음 = 0판 · 최대 3');
+  Q.players.a.pr = { u4: 1 }; check(X.pracUsed(Q, 'u4', 'a', X.record(L, Q, 'u4', 'a')) === 1, '한 판 더를 누르기만 해도 1 (시작 기준 · 도중에 그만둬도)');
+  Q.chain.u4.a = { 0: { s: 0, p: 2, g: [] } }; check(X.pracUsed(Q, 'u4', 'a', X.record(L, Q, 'u4', 'a')) === 2, '기록된 연습 판 번호가 더 크면 그 수 (예전 기록 · 다시 들어와도 유지)');
+  Q.players.a.pr = { u4: 3 }; check(X.pracUsed(Q, 'u4', 'a', X.record(L, Q, 'u4', 'a')) >= X.PRAC_MAX, '3판 시작 = 남은 0 → 4번째 막힘');
+  check(X.pracUsed(Q, 'u5', 'a', X.record(L, Q, 'u5', 'a')) === 0, '소레이드(문제)마다 따로');
+  const fs = require('fs'), path = require('path'), bon = fs.readFileSync(path.join(__dirname, '..', 'js/raid/bonus.js'), 'utf8');
+  check(!/PRAC_MAX|pracUsed|pracStart/.test(bon), '성채 · 복습 허수아비(bonus.js)의 한 판 더는 제한 없음 그대로'); }
 console.log(fail ? `❌ 소레이드 실패 ${fail}` : `✅ 소레이드: 확인 ${ok}개 · 실패 0`); if (fail) process.exit(1);

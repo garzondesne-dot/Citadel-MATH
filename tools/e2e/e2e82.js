@@ -1,4 +1,5 @@
 // 📸 #38 수업 소레이드: 「🔥 한 판 더」 중 · 뒤에도 ✍ 📸 단추가 보이는지 (2026-11-09) — node tools/e2e/e2e82.js <출력 폴더>
+//   + 🔥 #39 한 판 더 3판 (남은 횟수 · 3판 뒤 막힘)
 //   사진 채점 켬(gcfg/photo · 기준표 u4) → 학생 1명 대장까지 처치 → 📸 단추 → 한 판 더 → 연습 중 📸 단추 → 누르면 ✍ 쓰기 화면 → ✕ → 연습 판
 const { chromium } = require('playwright');
 const OUT = process.argv[2] || '.', U = 'http://localhost:8765/index.html?local';
@@ -24,11 +25,28 @@ const OUT = process.argv[2] || '.', U = 'http://localhost:8765/index.html?local'
     for (let s = 0; s < it.length; s++) await DS.Net.set(`rooms/${c}/chain/u4/${me}/${s}`, { s, p: 0, g: right(it[s]), at: DS.Net.TS }); }, code);
   await S.waitForTimeout(2500);
   const has = () => S.evaluate(() => ({ w: !!document.querySelector('#cr-write'), msg: (document.querySelector('#st-body .ch-wrap') || {}).innerText.slice(0, 80).split(String.fromCharCode(10)).join(' ') }));
+  await S.evaluate(() => document.querySelectorAll('.th-chest-ov, .bat-ov, .th-bat').forEach((e) => e.remove()));
   let h = await has(); ok(h.w, `대장 처치 뒤 📸 단추 (${h.msg})`);
-  await S.click('#cr-prac'); await S.waitForTimeout(1500); h = await has(); ok(h.w, `🔥 한 판 더 진행 중에도 📸 단추`);
+  await S.evaluate(() => document.querySelectorAll('.th-chest-ov, .bat-ov, .th-bat').forEach((e) => e.remove())); await S.click('#cr-prac'); await S.waitForTimeout(1500); h = await has(); ok(h.w, `🔥 한 판 더 진행 중에도 📸 단추`);
   await S.screenshot({ path: `${OUT}/82-prac-photo.png` });
   await S.click('#cr-write'); await S.waitForTimeout(1200); ok(await S.evaluate(() => !!document.querySelector('#wr-snap')), '연습 중에 눌러도 ✍ 쓰기 화면(📸 찍어서 채점)');
   await S.click('#wr-x'); await S.waitForTimeout(1200); ok(await S.evaluate(() => /연습/.test((document.querySelector('#st-body') || {}).innerText || '')), '✕ 닫으면 보던 연습 판');
+  // 🔥 #39 한 판 더 3판: 연습 판을 끝낼 때마다 「🔥 한 판 더 (n/3 남음)」 → 3판 시작 뒤 「연습 3번 끝!」
+  const pr = () => S.evaluate(() => ({ btn: (document.querySelector('#cr-prac') || {}).textContent || '', end: (document.querySelector('.cr-pend') || {}).textContent || '' }));
+  const finishPass = (p) => S.evaluate(async ([c, p]) => { const R = DS.Act.unpackRoom(await DS.Net.get(`rooms/${c}`)), L = DS.Lessons.get('set-06'), me = DS.Net.uid();
+    const right = (q) => (q.type === 'multi' ? q.answer : q.type === 'choice' ? q.answerIndex : q.answer), it = DS.Raid.chainItems(L, R, 'u4', me, p);
+    let k = Object.keys((((R.chain || {}).u4 || {})[me]) || {}).length;
+    for (let s2 = 0; s2 < it.length; s2++) { await DS.Net.set(`rooms/${c}/chain/u4/${me}/${k++}`, { s: s2, p, g: right(it[s2]), at: DS.Net.TS }); if (it[s2].why) await DS.Net.set(`rooms/${c}/chain/u4/${me}/${k++}`, { s: s2, p, g: it[s2].why.answer, w: 1, at: DS.Net.TS }); } }, [code, p]);
+  await finishPass(1); await S.waitForTimeout(1500);
+  let P = await pr(); ok(/2\/3 남음/.test(P.btn), `연습 1판 끝 → 단추 「${P.btn}」`);
+  const shut = () => S.evaluate(() => document.querySelectorAll('.th-chest-ov, .bat-ov, .th-bat').forEach((e) => e.remove()));
+  await shut(); await S.click('#cr-prac'); await S.waitForTimeout(900); await finishPass(2); await S.waitForTimeout(1500);
+  P = await pr(); ok(/1\/3 남음/.test(P.btn), `연습 2판 끝 → 「${P.btn}」`);
+  await shut(); await S.click('#cr-prac'); await S.waitForTimeout(900); await finishPass(3); await S.waitForTimeout(1500);
+  P = await pr(); ok(!P.btn && /연습 3번 끝/.test(P.end), `3판 끝 → 「${P.end}」 · 단추 없음`);
+  const used = await S.evaluate(async (c) => DS.Net.get(`rooms/${c}/players/${DS.Net.uid()}/pr/u4`), code);
+  ok(Number(used) === 3, `기록 players/나/pr/u4 = ${used}`);
+  await S.screenshot({ path: `${OUT}/82-prac3.png` });
   console.log(log.join('\n')); if (errs.length) console.log('오류:\n' + errs.join('\n'));
   await b.close(); process.exit(bad || errs.length ? 1 : 0);
 })();
