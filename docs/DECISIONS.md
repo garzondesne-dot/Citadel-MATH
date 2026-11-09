@@ -969,3 +969,7 @@
 - 시간이 끝나거나 선생님이 리모컨 「⚔ 등장!」 (선생님 「1분이어도 준비 완료가 많으면 수동으로」) → 실루엣에 색이 돌아오며 포효 → 지금 전투 그대로.
 - 없앤 것: 리모컨 「❄ 켜기 (60초)」 = 학생 얼리기 버튼 · 「❄ 꽁꽁 묶기」 화면 · TV 용사 얼음. 몬스터 공격 · 멈춤 · 공격 게이지 · ⛓ 묶기 · 각성 첫 공격 막기는 그대로.
 - Firebase 규칙: rooms/{code}/ready/{몬스터}/{uid} 추가 → 콘솔 다시 게시 필요.
+
+## 📋 Firebase 규칙 전달 방식 (2026-11-09 선생님)
+- 규칙(`firebase/database.rules.json`)이 바뀌면 파일 다운로드가 아니라 **복사 페이지**로 드린다: https://claude.ai/artifact/8d1rYHXCaErGi9ct49JdDU (「📋 규칙 전체 복사」 단추 → 콘솔 규칙 탭에 붙여 넣기 → 게시).
+- 갱신: `python3 tools/auto/rules_page.py <out.html>` → 같은 URL 로 Artifact 다시 게시 (다른 대화방은 url 을 넘겨서).
