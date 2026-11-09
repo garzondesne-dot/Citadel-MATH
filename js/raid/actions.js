@@ -200,7 +200,7 @@ DS.Act = (function () {
   // ✍ → 📸 진필살기 (2026-11-09 #26): 찰칵 = 예고(TV ⚡ 충전 중 게이지) · 통과 = 🌟 진필살기(스킬 상관없이 · 석화는 몬스터당 반 1번 · 다음은 금빛 컷인만 3명) · 몬스터가 이미 쓰러졌으면 ⚡ 충전 1개
   const snapStart = (code, mid) => N().set(P(code, `players/${N().uid()}/snap`), { mid, at: N().TS });
   async function snapEnd(code, packed, mid, res, peek) {
-    const R = unpackRoom(packed), me = N().uid(), p = (R.players || {})[me] || {}, n = (Number((p.ph || {})[mid]) || 0) + Math.max(1, ((res && res.scores) || []).length);
+    const R = unpackRoom(packed), me = N().uid(), p = (R.players || {})[me] || {}, used = res && (res.status === 'check' || res.status === 'appeal') ? Math.max(0, ((res.scores || []).length) - 1) : Math.max(res ? 1 : 0, ((res && res.scores) || []).length), n = (Number((p.ph || {})[mid]) || 0) + used; // ⏳ 선생님 확인으로 넘어간 장 · 창만 닫은 경우는 안 셈
     await N().update(P(code, `players/${me}`), { snap: null, [`ph/${mid}`]: n, ...(res && res.status === 'pass' ? { [`wr/${mid}`]: peek ? 'peek' : 'ok' } : {}) });
     if (!res || res.status !== 'pass' || peek) return null;
     return photoTrue(code, R, mid);

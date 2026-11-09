@@ -2945,3 +2945,5 @@ html body .sc-gem, html body .sc-gem .sc-gn, html body .sc-gem b { font-weight: 
 .cr-write { display: block; margin: 8px auto; background: linear-gradient(#fff3b0, #f2c14a) !important; color: #2a1a06 !important; font-weight: 700; }
 .cr-wbtns { gap: 6px; justify-content: center; flex-wrap: wrap; } .cr-writing .scout-img { display: block; width: 100%; background: #fff; border-radius: 6px; margin: 6px 0; }
 .st-charge { background: linear-gradient(#ffe08a, #e0a020) !important; color: #2a1a06 !important; animation: goPulse 1.1s ease-in-out infinite; }
+.h-wrok { position: absolute; right: 2%; top: 14%; z-index: 36; padding: 6px 14px; border-radius: 14px; background: #2a1e06e6; box-shadow: 0 0 0 2px #f2c14a, 0 0 16px #f2c14a88; color: #ffe08a; font-size: 22px; } .h-wrok b { font-size: 28px; color: #fff3b0; }
+.h-wrok.pop { animation: hHint .6s ease-out; }

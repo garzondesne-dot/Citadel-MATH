@@ -20,7 +20,7 @@ DS.Photo = (function () {
   // ready() = 켜짐 · 주소 있음 / ready(차시, 방) = 그 방 기준표도 켜짐 (결정 5: 시범 방만 열림)
   const ROOM0 = 2, COOL0 = 30, DAILY0 = 6, WARN_DAY0 = 150, WARN_MONTH0 = 3000, WON = 1.2; // 학생 하루 장 수 · 경고 기준(학교 전체 하루 · 이번 달) · 1장 ≈ 1.2원 (실측)
   const daily = () => Number((cfg || {}).daily) || DAILY0;
-  const raidMax = () => Number((cfg || {}).raid) || 1; // ⚔ 수업 소레이드 📸 진필살기 · 학생 한 명 · 소레이드 하나 장 수 (2026-11-09 #26 · 기본 1)
+  const raidMax = () => Number((cfg || {}).raid) || 2; // ⚔ 수업 소레이드 📸 진필살기 · 학생 한 명 · 소레이드 하나 장 수 (2026-11-09 #26 · 선생님: 흐린 첫 장 대비 기본 2 · ⏳ 선생님 확인으로 넘어간 장은 안 셈)
   const roomMax = () => Number((cfg || {}).room) || ROOM0; // A: 방 하나 하루 장 수
   const coolSec = () => ((cfg || {}).cool != null && (cfg || {}).cool !== '' ? Number(cfg.cool) : COOL0); // D: 결과 뒤 쉬는 초
   const ready = (lid, rid) => !!(cfg && cfg.on && cfg.url) && (!lid || !!(((rub || {})[lid] || {})[rid] || {}).on);
@@ -211,7 +211,7 @@ DS.Photo = (function () {
         if (url && !/^https:\/\/script\.google(usercontent)?\.com\//.test(url)) { DS.UI.toast('Apps Script 웹 앱 주소(https://script.google.com/…/exec)를 넣어 주세요.'); return; }
         if (on && !url) { DS.UI.toast('주소를 먼저 넣어 주세요.'); return; }
         const num = (id, lo, hi, d) => Math.max(lo, Math.min(hi, Math.round(Number(el.querySelector(id).value) || d)));
-        await N().update('gcfg/photo', { url, on, daily: num('#ph-daily', 1, 20, DAILY0), room: num('#ph-room', 1, 10, ROOM0), cool: Math.max(0, Math.min(600, Math.round(Number(el.querySelector('#ph-cool').value)))), raid: num('#ph-raid', 1, 5, 1), warnDay: num('#ph-wd', 10, 1000, WARN_DAY0), warnMonth: num('#ph-wm', 100, 50000, WARN_MONTH0) }); await load(true); U = await usage().catch(() => U); draw(); DS.UI.toast(on ? '📷 켰어요 — 기준표를 켠 방이 학생에게 열려요' : '💾 저장했어요');
+        await N().update('gcfg/photo', { url, on, daily: num('#ph-daily', 1, 20, DAILY0), room: num('#ph-room', 1, 10, ROOM0), cool: Math.max(0, Math.min(600, Math.round(Number(el.querySelector('#ph-cool').value)))), raid: num('#ph-raid', 1, 5, 2), warnDay: num('#ph-wd', 10, 1000, WARN_DAY0), warnMonth: num('#ph-wm', 100, 50000, WARN_MONTH0) }); await load(true); U = await usage().catch(() => U); draw(); DS.UI.toast(on ? '📷 켰어요 — 기준표를 켠 방이 학생에게 열려요' : '💾 저장했어요');
       });
       el.querySelector('#ph-ping').onclick = () => DS.Control.run(async () => {
         const url = el.querySelector('#ph-url').value.trim(); if (!url) { DS.UI.toast('주소를 먼저 넣어 주세요.'); return; }

@@ -434,7 +434,10 @@ DS.Hall = (function () {
   function hallChain() {
     const arena = $('#raid'); if (!arena || !L || !R) return;
     const st = Raid().stepOf(L, R), on = !!(st && st.kind === 'monster' && Raid().isChain && Raid().isChain(L, R, st.id));
-    let box = arena.querySelector('.h-chain'); if (!on) { if (box) box.remove(); crKey = ''; dnSeen = null; const hh = arena.querySelector('.h-hint'); if (hh) hh.remove(); return; }
+    let box = arena.querySelector('.h-chain'); if (!on) { if (box) box.remove(); crKey = ''; dnSeen = null; arena.querySelectorAll('.h-hint, .h-wrok').forEach((e) => e.remove()); return; }
+    // 🌟 서술형 통과 n명 (2026-11-09 선생님 보완 5): 석화 1명 · 금빛 컷인 3명 뒤에도 통과한 학생이 보이게
+    { const okN = Object.values(R.players || {}).filter((p) => !p.teacher && (p.wr || {})[st.id] === 'ok').length; let wb = arena.querySelector('.h-wrok');
+      if (!okN) { if (wb) wb.remove(); } else { if (!wb) { wb = document.createElement('div'); wb.className = 'h-wrok'; arena.appendChild(wb); } const t = `🌟 서술형 통과 <b>${okN}</b>명`; if (wb.innerHTML !== t) { wb.innerHTML = t; wb.classList.remove('pop'); void wb.offsetWidth; wb.classList.add('pop'); } } }
     // 💡 힌트 주기 (2026-11-09 #26): 첫 1명 = 맞힌 근거 문장 그대로 말풍선 · 나머지 = 👍 +n (숫자 정답 · 자유 입력 없음)
     { const wq = (Raid().chainItems(L, R, st.id, '_', 0) || []).find((x) => x.why), givers = Object.entries(R.players || {}).filter(([, p]) => !p.teacher && (p.hint || {})[st.id]).sort((a, b) => Number(a[1].hint[st.id]) - Number(b[1].hint[st.id]));
       let hh = arena.querySelector('.h-hint'), hk = `${st.id}|${givers.length}`;
