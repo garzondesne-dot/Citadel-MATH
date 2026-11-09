@@ -695,7 +695,7 @@ DS.Student = (function () {
     if (wm && rec.done) { // ✍ 바로 쓰기 (#38: 연습 중에 눌러도 · ✕ 닫으면 보던 연습 판으로): 나의 풀이 · 졸개 단계 · 채점 기준을 숨기고 원래 문제 + 📸 만 (📜 다시 보기 = ✍ 연습 쓰기)
       const img = scoutImg[mid];
       if (scoutImg[mid] === undefined) { scoutImg[mid] = null; DS.Net.get(`prep/${L.id}/img/${mid}`).then((u) => { if (u) { scoutImg[mid] = u; drawn = ''; render(); } }).catch(() => {}); }
-      body.innerHTML = `<div class="panel framed st-fight ch-wrap cr-writing">${scene(step, rec, hp, '', '')}<div class="paper"><div class="paper-h"><b>✍ ${esc(step.title)}</b><small>${wm.peek ? '✍ 연습 쓰기 (진필살기 없음)' : '게임 풀이를 보지 말고 처음부터 · 학습지 숫자 그대로'}</small></div>
+      body._keep = ''; body.innerHTML = `<div class="panel framed st-fight ch-wrap cr-writing">${scene(step, rec, hp, '', '')}<div class="paper"><div class="paper-h"><b>✍ ${esc(step.title)}</b><small>${wm.peek ? '✍ 연습 쓰기 (진필살기 없음)' : '게임 풀이를 보지 말고 처음부터 · 학습지 숫자 그대로'}</small></div>
         ${img ? `<img class="scout-img" src="${img}" alt="학습지 문제">` : `<p>${esc((((DS.Rubrics || {})[L.id] || {})[mid] || {}).ask || step.title)}</p>`}
         ${wm.peek ? story(rec.says) : ''}<p class="muted small">종이에 풀이를 처음부터 끝까지 쓰고 📸 찍어요 (이 소레이드 ${Math.max(0, DS.Photo.raidMax() - phN)}장 남음)</p></div>
         <div class="row cr-wbtns"><button class="btn primary big" id="wr-snap"${phN >= DS.Photo.raidMax() ? ' disabled' : ''}>📸 찍어서 채점</button>${wm.peek ? '' : '<button class="btn" id="wr-peek">📜 풀이 다시 보기</button>'}<button class="btn" id="wr-x">✕ 그만 쓰기</button></div></div>`;
@@ -727,9 +727,11 @@ DS.Student = (function () {
     else if (rec.locked && !prac) mainHtml = `${story(says)}<div class="cr-lock"><b>🙋 선생님 확인을 기다려요</b><p>기회가 1칸 남았어요 — 학습지에 풀이를 정리해 두면 선생님이 와서 확인해 줘요.</p></div>`;
     else mainHtml = `${story(says)}<div class="paper">${probBox}<div class="paper-h"><b>${esc(step.title)} · ${stage === pItems.length - 1 ? '👑 대장' : `졸개 ${'①②③④⑤⑥'[stage]}`}</b><small>${prac ? '연습 (숫자 바뀜 · 데미지 없음)' : '틀려도 숫자는 그대로'}</small></div>
         ${lastWrong ? '<p class="paper-note">✘ 다시 생각해 봐요 — 같은 문제예요</p>' : ''}<div class="items">${itemHtml(q, 0, lastWrong, null, cform.given)}</div></div>${prac ? wrBtn : ''}`; // #38: 연습 진행 중에도 📸 단추
+    const keepKey = `${key}|${needWhy ? 'w' : 'q'}`, keep = body._keep === keepKey ? { p: (body.querySelector('.paper') || {}).scrollTop || 0, w: window.scrollY, b: body.scrollTop } : null; body._keep = keepKey; // 🐞 2026-11-09: 답을 고르면 다시 그려도 스크롤 그대로 (같은 단계 안에서만)
     body.innerHTML = `<div class="panel framed st-fight ch-wrap">${scene(step, rec, hp, '', '')}
       <div class="cr-chips">${chips}</div>${cheer}${hintsBox}${mainHtml}
       ${prac ? dock(pDock, '') : rec.done || rec.fail || rec.locked ? dock(rec, '') : dock(rec, `<button class="btn primary big dock-go" id="cr-go"${ready ? '' : ' disabled'}>⚔ 공격!</button>`)}${helpBtn()}</div>`;
+    if (keep) { const pp = body.querySelector('.paper'); if (pp) pp.scrollTop = keep.p; body.scrollTop = keep.b; window.scrollTo(0, keep.w); }
     if (prac && !pDone && !needWhy && !pFail) body.querySelector('.st-dock').insertAdjacentHTML('beforeend', `<button class="btn primary big dock-go" id="cr-go"${ready ? '' : ' disabled'}>⚔ 연습 공격</button>`);
     bindTop(); bindHelp();
     body.querySelectorAll('[data-pick]').forEach((b) => b.addEventListener('click', () => {
