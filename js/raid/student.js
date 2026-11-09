@@ -760,7 +760,7 @@ DS.Student = (function () {
     else if (pFail) mainHtml = `<p class="paper-note">✘ 이번 연습 판은 기회를 다 썼어요 — 끝 (EXP 없음) · 아래 풀이를 보고 다시 해 봐요</p>${story(pItems.map((x) => x.say))}${tokPick}${pendTip}${hintBtn}`; // #40
     else if (pDone) mainHtml = `<p class="okc">✔ 연습 사슬 완성! <b class="gold">+1 EXP</b></p>${story(says)}${tokPick}${pendTip}${hintBtn}<p class="muted small cr-pnote">숫자만 바뀐 새 문제 · 판마다 연습 기회 4칸 (틀리면 줄어요 · 다 쓰면 그 판 끝) · 수업 기록 · 💎 그대로 · 맞히면 공격 이펙트가 나가요 (데미지 0)</p>`;
     else if (rec.locked && !prac) mainHtml = `${story(says)}<div class="cr-lock"><b>🙋 선생님 확인을 기다려요</b><p>기회가 1칸 남았어요 — 학습지에 풀이를 정리해 두면 선생님이 와서 확인해 줘요.</p></div>`;
-    else mainHtml = `${story(says)}<div class="paper">${probBox}<div class="paper-h"><b>${esc(step.title)} · ${stage === pItems.length - 1 ? '👑 대장' : `졸개 ${'①②③④⑤⑥'[stage]}`}</b><small>${prac ? '연습 (숫자 바뀜 · 데미지 없음)' : '틀려도 숫자는 그대로'}</small></div>
+    else mainHtml = `${probBox}${story(says)}<div class="paper"><div class="paper-h"><b>${esc(step.title)} · ${stage === pItems.length - 1 ? '👑 대장' : `졸개 ${'①②③④⑤⑥'[stage]}`}</b><small>${prac ? '연습 (숫자 바뀜 · 데미지 없음)' : '틀려도 숫자는 그대로'}</small></div>
         ${lastWrong ? '<p class="paper-note">✘ 다시 생각해 봐요 — 같은 문제예요</p>' : ''}<div class="items">${itemHtml(q, 0, lastWrong, null, cform.given)}</div></div>`;
     // ⚔ #50 ② 아래 칸 = 왼쪽 「⚔ 공격」(대장 뒤 = 「🔥 한 판 더」) · 오른쪽 「✍ 서술형 도전 📸」
     const goBtn = (t) => `<button class="btn primary big dock-go" id="cr-go"${ready ? '' : ' disabled'}>${t}</button>`;

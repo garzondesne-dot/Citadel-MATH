@@ -504,7 +504,7 @@ DS.Bonus = (function () {
         for (;;) {
           if (left <= 1 && left > 0 && !helped) { await chainHelp(items); if (!document.body.contains(el)) return null; }
           const isBoss = s === n - 1;
-          const ok = await DS.Quiz.ask({ name: mon.title, formula: isBoss ? '👑 대장' : `졸개 ${'①②③④⑤⑥'[s]}` }, items[s], { hint: false, tag: pracMode ? '🔥 한 판 더 (연습)' : pass ? '🔁 숫자 바뀐 사슬' : '🏰 성채 · ⚔ 소레이드', extra: canWrite() ? { label: '✍ 서술형 도전 📸', value: 'write' } : null });
+          const ok = await DS.Quiz.ask({ name: mon.title, formula: isBoss ? '👑 대장' : `졸개 ${'①②③④⑤⑥'[s]}` }, items[s], { hint: false, tag: pracMode ? '🔥 한 판 더 (연습)' : pass ? '🔁 숫자 바뀐 사슬' : '🏰 성채 · ⚔ 소레이드', extra: canWrite() ? { label: '✍ 서술형 도전 📸', value: 'write' } : null, pre: story(says) });
           if (!document.body.contains(el)) return null;
           if (ok === 'write') { goWrite(); return null; } // ✍ #50 ② 언제나
           if (ok) { solved[s] = true; says.push(items[s].say); } else { wrongSeen = true; anyWrong = true; left = Math.max(0, left - (isBoss ? 1 : 0.5)); }

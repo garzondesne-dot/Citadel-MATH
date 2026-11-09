@@ -34,6 +34,10 @@ const OUT = process.argv[2] || '.', U = 'http://localhost:8765/index.html?local'
   await S.screenshot({ path: `${OUT}/85-castle-win.png` });
   await S.waitForTimeout(1700); await S.click('#cf-prac'); await S.waitForTimeout(800);
   ok(await S.evaluate(() => /한 판 더/.test(document.querySelector('#quiz-card').textContent)), '🔥 한 판 더 → 숫자 바뀐 사슬 (연습)');
+  await S.evaluate(() => { const q = DS.Quiz.last; if (q.type === 'multi') { q.answer.forEach((k) => document.querySelectorAll('#quiz-choices .choice')[k].click()); document.querySelector('#quiz-choices .q-submit').click(); } else document.querySelectorAll('#quiz-choices .choice')[q.answerIndex].click(); });
+  await S.waitForTimeout(4000);
+  const ord = await S.evaluate(() => [...document.querySelectorAll('#quiz-q .cr-prob, #quiz-q .cr-story, #quiz-q .item-q, #quiz-q > *:not(.cr-prob):not(.cr-story)')].slice(0, 3).map((e) => e.className.split(' ')[0] || e.tagName));
+  ok(ord[0] === 'cr-prob' && ord[1] === 'cr-story', `성채 한 판 더 순서 = 문제 → 나의 풀이 → 문제 글 (${ord.join(' → ')})`);
   console.log(log.join('\n')); if (errs.length) console.log('오류:\n' + errs.join('\n'));
   await b.close(); process.exit(bad || errs.length ? 1 : 0);
 })();

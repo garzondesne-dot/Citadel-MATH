@@ -31,6 +31,11 @@ const OUT = process.argv[2] || '.', U = 'http://localhost:8765/index.html?local'
   const y1 = await sy(), on = await S.evaluate(() => document.querySelectorAll('#st-body [data-pick].on').length);
   ok(y0 > 50 && Math.abs(y1 - y0) < 5 && on > 0, `연습 판 답 고르기 → 스크롤 ${y0} → ${y1} (고른 칸 ${on})`);
   await S.screenshot({ path: `${OUT}/83-prac-scroll.png` });
+  // 📐 #51 한 판 더 배치 = 📜 문제 → 📜 나의 풀이 → 고르기 (졸개 ① 맞힌 뒤)
+  await S.evaluate(async (c) => { const R = DS.Act.unpackRoom(await DS.Net.get(`rooms/${c}`)), L = DS.Lessons.get('set-06'), me = DS.Net.uid(), it = DS.Raid.chainItems(L, R, 'u4', me, 1), k = Object.keys((((R.chain || {}).u4 || {})[me]) || {}).length; await DS.Net.set(`rooms/${c}/chain/u4/${me}/${k}`, { s: 0, p: 1, g: DS.Raid.chainAns(it[0]), at: DS.Net.TS }); }, code);
+  await S.waitForTimeout(2500);
+  const ord = await S.evaluate(() => [...document.querySelectorAll('#st-body .cr-prob, #st-body .cr-story, #st-body .paper .items')].map((e) => e.className.split(' ')[0]));
+  ok(ord.join(',') === 'cr-prob,cr-story,items', `한 판 더 순서 = 문제 → 나의 풀이 → 고르기 (${ord.join(' → ')})`);
   console.log(log.join('\n')); if (errs.length) console.log('오류:\n' + errs.join('\n'));
   await b.close(); process.exit(bad || errs.length ? 1 : 0);
 })();

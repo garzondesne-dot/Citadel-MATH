@@ -36,6 +36,7 @@ DS.Quiz = (function () {
   }
 
   // 문제를 띄우고 정답 여부를 Promise 로 돌려준다. 오답이면 해설을 보여 준 뒤 닫는다.
+  // opt.pre: 📜 문제 상자 바로 아래 · 문제 위에 넣을 html (#51 성채 한 판 더 = 문제 → 나의 풀이 → 고르기)
   // opt.tag: 머리말 (예: '✨ 연성 예제'), opt.teacher: 문제풀이모드 표시
   let pending = null; // 지금 열린 문제를 닫는 함수 (close)
   // ✕ 로 전투 창을 닫을 때: 열린 문제 창도 닫고 기다리던 쪽에 null 을 돌려줌 (2026-11-06 허수아비 ✕ 뒤 문제 창 남음 고침)
@@ -50,7 +51,7 @@ DS.Quiz = (function () {
       pending = { close: () => fin(null), drop: () => { settled = true; } };
       $('#quiz-card').textContent = (opt.tag ? opt.tag + ' · ' : '') + (card.name || '');
       $('#quiz-formula').innerHTML = pretty(card.formula || '');
-      $('#quiz-q').innerHTML = (prob.problem ? `<details class="cr-prob" open><summary>📜 문제 <small>(숫자가 바뀐 원문 · 눌러서 접기)</small></summary><p>${pretty(prob.problem)}</p></details>` : '') + (opt.ref ? `<span class="sheet-tag">📄 ${DS.UI.esc(opt.ref)}</span>` : '') + DS.UI.rich(prob.question); // 📜 #44 ⑤ · #48 성채 연습 사슬
+      $('#quiz-q').innerHTML = (prob.problem ? `<details class="cr-prob" open><summary>📜 문제 <small>(숫자가 바뀐 원문 · 눌러서 접기)</small></summary><p>${pretty(prob.problem)}</p></details>` : '') + (prob.problem && opt.pre ? opt.pre : '') + (opt.ref ? `<span class="sheet-tag">📄 ${DS.UI.esc(opt.ref)}</span>` : '') + DS.UI.rich(prob.question); // 📜 #44 ⑤ · #48 성채 연습 사슬
       // 💡 그림 힌트 (v0.9.7.4): opt.hint 이고 집합 문제면 버튼 → 벤 다이어그램 펼치기 · 접기 (중단원던전 층 보강 · 허수아비)
       if (opt.hint && DS.Hint && DS.Hint.svg(prob)) {
         const hq = $('#quiz-q'), draw = (open) => { const w = hq.querySelector('.hint-wrap'); if (w) w.remove(); hq.insertAdjacentHTML('beforeend', DS.Hint.html(prob, 'q', open)); hq.querySelector('[data-hint]').onclick = () => { DS.Sound.clank(); draw(!open); }; };
