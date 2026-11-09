@@ -2642,7 +2642,7 @@ body:not(:has(#test-tv)) #screen-student.st-battle > .wrap { padding-top: 0 !imp
 #screen-student.st-battle #st-body > .st-fight, #screen-student.st-battle #st-body > .panel:first-child { margin-top: 0 !important; }
 .rg.rg8 { grid-template-columns: repeat(4, 1fr); } .rg.rg8 .rg-b:disabled { opacity: .35; }
 /* 15: 교사 탭 로고 작게 · 오늘 수업 안내는 ⓘ */
-#screen-home:has(.role[data-role="teacher"].on) .home-title, #screen-home:has(.role[data-role="hall"].on) .home-title { transform: scale(.66); transform-origin: top center; margin-bottom: -44px !important; }
+#screen-home .home-title { transform: scale(.66); /* 2026-11-09 선생님 「모두의 던전 크기 맞춰 줘 · 작은 크기 기준」: 학생 · 교사 · 종합상황실 모두 같은 크기 */ transform-origin: top center; margin-bottom: -44px !important; }
 .td-empty { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; } .td-empty > b { color: var(--gold); flex: 1; } .td-i { cursor: help; color: var(--muted); border: 1px solid var(--line); border-radius: 50%; width: 20px; height: 20px; display: inline-grid; place-items: center; font-size: 12px; }
 /* 13: ⚒ 모루 — 도감 특전 3줄 · 카드 💎+3 · 완성 창 */
 .fg-perks { display: flex; flex-direction: column; gap: 6px; margin: 4px 0 10px; }
