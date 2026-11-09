@@ -646,7 +646,16 @@ DS.Student = (function () {
     };
   }
   // ⚔ 소레이드 화면 (2026-11-09 #18): 진행 칩 ①②③👑 · 지금 단계 문제 하나 · 「📜 나의 풀이」가 한 줄씩 쌓임 · 기회 반 칸 · 1칸 남으면 🙋 선생님 확인
-  let cform = null; const chainPrac = {}, writeMode = {}, probShut = {}; let photoLoaded = false; // ✍ writeMode[mid] = { peek } (2026-11-09 #26)
+  let cform = null; const chainPrac = {}, writeMode = {}, probShut = {};
+  // ✨ 모래 글씨 (#46 · 2026-11-09 선생님): 「📜 나의 풀이」에 새 줄이 생길 때만 · 모래 알갱이가 모이며 흐림 → 선명 → 금빛 반짝 (약 1.1초 · 한 번에 한 줄 · 겹치면 차례로)
+  //   이미 있던 줄 · 다시 들어온 첫 화면은 연출 없이 · 화면을 다시 그려도 이어서(시작 시각 기억 → 음수 지연) · CSS 만 (그림 없음)
+  const sandSeen = {}, sandAt = {}, SAND_MS = 1100;
+  function sandApply(body, key) {
+    const lis = [...body.querySelectorAll('.cr-story li')], n = lis.length, now = Date.now();
+    if (sandSeen[key] == null) { sandSeen[key] = n; return; }
+    if (n > sandSeen[key]) { let t = Math.max(now, ...Object.keys(sandAt).filter((k) => k.startsWith(key + '|')).map((k) => sandAt[k] + SAND_MS)); for (let i = sandSeen[key]; i < n; i++) { sandAt[`${key}|${i}`] = t; setTimeout(() => { if (DS.Sound && DS.Sound.sand) DS.Sound.sand(); }, Math.max(0, t - now)); t += SAND_MS; } sandSeen[key] = n; }
+    lis.forEach((li, i) => { const t0 = sandAt[`${key}|${i}`]; if (t0 == null || now - t0 > SAND_MS + 200) return; li.classList.add('sand'); li.style.animationDelay = `${t0 - now}ms`; li.style.setProperty('--sd', `${t0 - now}ms`); });
+  } let photoLoaded = false; // ✍ writeMode[mid] = { peek } (2026-11-09 #26)
   // ⚔ 소레이드 공격 모션 (2026-11-09 선생님 「졸개는 공격 모션 없이 판정만」): 답을 내면 화면을 다시 그린 뒤 일반 몬스터처럼 돌진 · 탄 · 빗나감
   //   모션이 끝날 때까지(약 1초) 실시간 갱신으로 화면을 다시 그리지 않음 (그리면 이펙트가 지워짐)
   let chainAtk = null, chainAtkUntil = 0;
@@ -739,6 +748,7 @@ DS.Student = (function () {
     chargeBtn(body);
     const hb = $('#cr-hint'); if (hb) hb.onclick = () => DS.Control.run(async () => { hb.disabled = true; await DS.Act.giveHint(code, raw, mid); DS.Sound.clank(); DS.UI.toast('💡 힌트를 TV 에 띄웠어요 · EXP +1'); drawn = ''; render(); });
     body.querySelectorAll('.cr-prob').forEach((d) => d.addEventListener('toggle', () => { probShut[d.dataset.pm] = !d.open; })); // 📜 접기 기억
+    sandApply(body, `${mid}|${prac ? pass : 0}`); // ✨ 모래 글씨
     const pb = $('#cr-prac'); if (pb) pb.onclick = () => DS.Control.run(async () => { pb.disabled = true; chainPrac[mid] = await DS.Act.pracStart(code, raw, mid); cform = null; drawn = ''; render(); }); // 🔥 #39 시작 = 셈
     const go = $('#cr-go');
     if (go) go.onclick = () => DS.Control.run(async () => {
