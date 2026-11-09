@@ -48,8 +48,8 @@ DS.Usage = (function () {
   function perStudent(days, today = day()) {
     const out = {}, d7 = addDays(today, -6), d14 = addDays(today, -13);
     Object.entries(days).forEach(([d, byN]) => Object.entries(byN || {}).forEach(([n, x]) => {
-      const o = (out[n] = out[n] || { now: 0, prev: 0, last: '' }), sv = (Number(x.r) || 0) + (Number(x.c) || 0) + (Number(x.f) || 0);
-      if (d >= d7 && d <= today) o.now += sv; else if (d >= d14 && d < d7) o.prev += sv;
+      const o = (out[n] = out[n] || { now: 0, prev: 0, last: '', pf: 0 }), sv = (Number(x.r) || 0) + (Number(x.c) || 0) + (Number(x.f) || 0);
+      if (d >= d7 && d <= today) { o.now += sv; o.pf += Number(x.pf) || 0; } else // pf = 🧹 폰에서 걸러진 사진 (2026-11-09) if (d >= d14 && d < d7) o.prev += sv;
       if ((x.v || sv || x.j) && d > o.last) o.last = d;
     }));
     return out;

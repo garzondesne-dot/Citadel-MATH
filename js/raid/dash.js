@@ -143,8 +143,8 @@ DS.Dash = (function () {
         </div>
         <div class="use-grid">${useBars(W, 'active', '🧑‍🎓 수업 밖 활동 학생 수', '명')}${useBars(W, 'solves', '🎯 수업 밖 문제 풀이 수', '회')}${useBars(W, 'visits', '🚪 접속 학생 수', '명')}</div>
         <div class="row"><h3 class="use-h">학생별 (최근 7일 수업 밖 풀이 순)</h3><button class="btn small" id="use-csv">📥 CSV</button></div>
-        <div class="tbl-wrap"><table class="dash-table use-table"><thead><tr><th>번호</th><th>이름</th><th>최근 7일</th><th>그 전 7일</th><th>증감</th><th>마지막 활동</th></tr></thead><tbody>
-        ${rows.map((r) => `<tr class="${idle(r.last) ? 'use-idle' : ''}"><td>${isAll() ? `${esc(r.c)}-` : ''}${r.n}</td><td>${esc(r.name)}</td><td><b>${r.now}</b></td><td>${r.prev}</td><td class="${r.now - r.prev > 0 ? 'up' : r.now - r.prev < 0 ? 'dn' : ''}">${r.now - r.prev > 0 ? '▲' : r.now - r.prev < 0 ? '▼' : '·'} ${Math.abs(r.now - r.prev)}</td><td>${r.last ? ymd(r.last) : '<span class="muted">-</span>'}${idle(r.last) ? ' <span class="use-tag">2주 넘게 없음</span>' : ''}</td></tr>`).join('')}</tbody></table></div>`;
+        <div class="tbl-wrap"><table class="dash-table use-table"><thead><tr><th>번호</th><th>이름</th><th>최근 7일</th><th>그 전 7일</th><th>증감</th><th>마지막 활동</th><th title="빈 종이 · 어두움 · 학습지가 아닌 사진 · 같은 사진 — AI 로 안 보내고 폰에서 걸러짐 (최근 7일)">🧹 걸러진 사진</th></tr></thead><tbody>
+        ${rows.map((r) => `<tr class="${idle(r.last) ? 'use-idle' : ''}"><td>${isAll() ? `${esc(r.c)}-` : ''}${r.n}</td><td>${esc(r.name)}</td><td><b>${r.now}</b></td><td>${r.prev}</td><td class="${r.now - r.prev > 0 ? 'up' : r.now - r.prev < 0 ? 'dn' : ''}">${r.now - r.prev > 0 ? '▲' : r.now - r.prev < 0 ? '▼' : '·'} ${Math.abs(r.now - r.prev)}</td><td>${r.last ? ymd(r.last) : '<span class="muted">-</span>'}${idle(r.last) ? ' <span class="use-tag">2주 넘게 없음</span>' : ''}</td><td>${r.pf ? `<b class="ngc">${r.pf}</b>` : ''}</td></tr>`).join('')}</tbody></table></div>`;
     },
     table() {
       const arrow = (k) => (sortKey === k ? (sortDir > 0 ? ' ▲' : ' ▼') : '');

@@ -57,6 +57,32 @@ DS.Photo = (function () {
     return c.toDataURL('image/jpeg', QUAL).split(',')[1];
   }
 
+  // 🧹 1차 거르기 (2026-11-09 선생님 「장난 사진은 AI 에 넘기지 말고」): 폰 안에서 바로 · 비용 0 · 장 수 안 깎임
+  //   ① 글씨 양(빈 종이 · 벽 · 책상) ② 밝기 · 흔들림 ④ 같은 사진 다시 보내기 · (③ 학습지 QR 은 학습지에 QR 을 넣은 뒤)
+  function precheck(src, rc) {
+    const s = 256 / Math.max(rc.w, rc.h), w = Math.max(16, Math.round(rc.w * s)), h = Math.max(16, Math.round(rc.h * s));
+    const c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d'); g.drawImage(src, rc.x, rc.y, rc.w, rc.h, 0, 0, w, h);
+    const d = g.getImageData(0, 0, w, h).data, n = w * h, y = new Float32Array(n);
+    let sum = 0, sat = 0; for (let i = 0; i < n; i++) { const r = d[i * 4], gg = d[i * 4 + 1], b = d[i * 4 + 2], mx = Math.max(r, gg, b), mn = Math.min(r, gg, b); y[i] = 0.299 * r + 0.587 * gg + 0.114 * b; sum += y[i]; sat += mx ? (mx - mn) / mx : 0; }
+    const mean = sum / n; sat /= n;
+    // 종이 밝기 = 16×16 칸마다 밝은 쪽(80%) → 그림자 · 기울어진 빛도 칸마다 따로 · 글씨 = 그 칸 종이보다 25 이상 어두운 점
+    const B = 16, bw = Math.ceil(w / B), bh = Math.ceil(h / B), loc = new Float32Array(bw * bh); let paperAll = [];
+    for (let by = 0; by < bh; by++) for (let bx = 0; bx < bw; bx++) { const v = []; for (let yy = by * B; yy < Math.min(h, by * B + B); yy++) for (let x = bx * B; x < Math.min(w, bx * B + B); x++) v.push(y[yy * w + x]); v.sort((a, b) => a - b); loc[by * bw + bx] = v[Math.floor(v.length * 0.8)]; paperAll.push(loc[by * bw + bx]); }
+    paperAll.sort((a, b) => a - b); const paper = paperAll[Math.floor(paperAll.length / 2)];
+    let ink = 0; for (let yy = 0; yy < h; yy++) for (let x = 0; x < w; x++) { const p0 = loc[Math.floor(yy / B) * bw + Math.floor(x / B)]; if (y[yy * w + x] < p0 - 25) ink++; }
+    const t = document.createElement('canvas'); t.width = 9; t.height = 8; const tg = t.getContext('2d'); tg.drawImage(src, rc.x, rc.y, rc.w, rc.h, 0, 0, 9, 8);
+    const td = tg.getImageData(0, 0, 9, 8).data; let hash = ''; for (let r = 0; r < 8; r++) for (let x = 0; x < 8; x++) { const a = td[(r * 9 + x) * 4] + td[(r * 9 + x) * 4 + 1], b = td[(r * 9 + x + 1) * 4] + td[(r * 9 + x + 1) * 4 + 1]; hash += a > b ? '1' : '0'; }
+    const inkR = ink / n, st = { mean: Math.round(mean), paper: Math.round(paper), sat: Math.round(sat * 100) / 100, ink: Math.round(inkR * 1000) / 10, hash };
+    if (paper < 110) return { err: mean < 45 ? 'dark' : 'notpaper', st }; // 밝은 바탕(종이)이 없음
+    if (sat > 0.35) return { err: 'notpaper', st };                     // 알록달록 (화면 · 얼굴 · 물건)
+    if (inkR < 0.0015) return { err: 'blank', st };                     // 글씨가 거의 없음 (빈 종이 · 아주 흐린 연필 · 심한 흔들림)
+    if (inkR > 0.45) return { err: 'notpaper', st };
+    return { ok: true, st };
+  }
+  const PRE_MSG = { dark: '🌑 너무 어두워요 — 밝은 곳에서 다시 찍어요', blank: '📄 글씨가 거의 안 보여요 — 빈 종이이거나 너무 흐려요 · 진하게 쓰고 밝은 곳에서 다시', notpaper: '🙈 학습지가 아닌 것 같아요 — 풀이를 쓴 종이만 보이게 찍어요', blur: '🌀 많이 흔들렸어요 — 폰을 멈추고 다시 찍어요', dup: '🔁 아까와 같은 사진이에요 — 풀이를 고친 뒤 새로 찍어요' };
+  const HKEY = 'citadel-ph-hash', hashes = () => { try { return JSON.parse(localStorage.getItem(HKEY)) || []; } catch (e) { return []; } };
+  const sameAs = (h) => hashes().some((x) => { let d = 0; for (let i = 0; i < 64; i++) if (x[i] !== h[i]) d++; return d <= 4; });
+  const keepHash = (h) => { try { localStorage.setItem(HKEY, JSON.stringify([h, ...hashes()].slice(0, 30))); } catch (e) { /* 무시 */ } };
   // 단계마다 ✅ 칭찬 · ✏ 힌트 (2026-11-06 사용자 「맞은 것은 칭찬도」) — 기준표 문장은 안 보이고 AI 가 학생에게 쓴 한 줄만
   const stepList = (steps) => { const xs = Object.values(steps || {}).filter((x) => x && x.note); return xs.length ? `<ul class="ph-steps">${xs.map((x) => `<li class="${x.earned ? 'ok' : 'no'}"><i>${x.earned ? '✅' : '✏'}</i><span>${esc(x.note)}</span></li>`).join('')}</ul>` : ''; };
   async function post(body) {
@@ -74,7 +100,7 @@ DS.Photo = (function () {
       let left = null, roomLeft = null, finished = false, coolUntil = 0; const rk = keyOf(ctx.lesson, ctx.room).replace(/[.#$/[\]]/g, '_');
       // D: 쉬는 시간 — 단추에 남은 초를 보여 주고 0 이 되면 누를 수 있게
       const coolBtn = (b, label) => { if (!b) return; const tick = () => { if (!document.body.contains(b)) return; const w = Math.ceil((coolUntil - Date.now()) / 1000); if (w > 0) { b.disabled = true; b.textContent = `${label} (${w}초 뒤)`; setTimeout(tick, 500); } else { b.disabled = false; b.textContent = label; } }; tick(); };
-      let lastRes = null; const scores = []; // 이번 창에서 받은 점수들 (📜 「점수가 오르면」 계산용)
+      let lastRes = null, lastHash = null; const scores = []; // 이번 창에서 받은 점수들 (📜 「점수가 오르면」 계산용)
       const close = (v) => { if (finished) return; finished = true; el.remove(); done(v ? Object.assign({ scores, steps: lastRes && lastRes.steps }, v) : scores.length ? { status: 'retry', scores, steps: lastRes && lastRes.steps } : null); };
       const head = (t) => `<div class="set-head"><h2>${t}</h2><button class="btn" data-x>✕ 닫기</button></div>`;
       const bindX = () => el.querySelectorAll('[data-x]').forEach((b) => (b.onclick = () => close(null)));
@@ -122,7 +148,15 @@ DS.Photo = (function () {
         el.querySelector('#ph-rot').onclick = () => { r = (r + 1) % 4; src = rotated(im, r); rc = { x: 0, y: 0, w: src.width, h: src.height }; paint(); };
         el.querySelector('#ph-all').onclick = () => { rc = { x: 0, y: 0, w: src.width, h: src.height }; paint(); };
         el.querySelector('#ph-re').onclick = () => intro();
-        el.querySelector('#ph-send').onclick = () => send(exportJpeg(src, rc));
+        el.querySelector('#ph-send').onclick = () => {
+          const ck0 = precheck(src, rc), why = !ck0.ok ? ck0.err : sameAs(ck0.st.hash) ? 'dup' : null;
+          if (why) { // 🧹 AI 에 안 넘김 · 장 수 안 깎임 · 기록만 (act.pf)
+            if (DS.Usage && DS.Usage.bump && m && !m.test) DS.Usage.bump(m, 'pf');
+            const bx = el.querySelector('.ph-pre') || (() => { const p = document.createElement('p'); p.className = 'ph-pre ph-err'; el.querySelector('.ph-stage').before(p); return p; })();
+            bx.textContent = `⚠ ${PRE_MSG[why]} (채점으로 보내지 않았어요 · 장 수는 그대로)`; if (DS.Sound && DS.Sound.squish) DS.Sound.squish(); return;
+          }
+          lastHash = ck0.st.hash; send(exportJpeg(src, rc));
+        };
         paint();
       };
       const send = async (image) => {
@@ -131,6 +165,7 @@ DS.Photo = (function () {
         const res = await post({ idToken: tok, c: m.c, n: m.n, lesson: ctx.lesson, room: ctx.room, ask: P.ask, answer: P.answer, ref: P.ref, params: P.params, image, media: 'image/jpeg' });
         if (finished) return;
         if (!res || !res.ok) { if (res && res.err === 'quota') left = 0; if (res && res.err === 'roomquota') roomLeft = 0; if (res && res.err === 'wait') coolUntil = Date.now() + (Number(res.sec) || coolSec()) * 1000; intro(`<p class="ph-err">⚠ ${esc(errMsg(res))}</p>`); return; }
+        if (lastHash) keepHash(lastHash);
         left = res.left != null ? res.left : left; roomLeft = res.roomLeft != null ? res.roomLeft : roomLeft; coolUntil = Date.now() + (res.cool != null ? Number(res.cool) : coolSec()) * 1000;
         result(res);
       };
@@ -269,5 +304,5 @@ DS.Photo = (function () {
     };
     draw();
   }
-  return { raidMax, load, ready, pack, grade, pendState, settings, board, pending, all, keyOf, day, usage, useHtml, daily };
+  return { precheck, raidMax, load, ready, pack, grade, pendState, settings, board, pending, all, keyOf, day, usage, useHtml, daily };
 })();
