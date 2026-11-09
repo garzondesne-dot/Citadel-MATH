@@ -198,8 +198,8 @@ DS.Account = (function () {
     // ☀ 심판의 빛 (2026-11-06): 🏰 성채 1층 · 2층 👑 보스 방을 모두 처치
     const bossA = !!(((bonus['eval-1'] || {}).q12 || {}).clear), bossB = !!(((bonus['eval-2'] || {}).q11 || {}).clear);
     if (DS.FX.ACHV) fx.push({ id: 'smite', tier: 's', open: bossA && bossB, cond: `🏰 성채 1 · 2층 보스 ${Number(bossA) + Number(bossB)} / 2` });
-    // 🧪 테스트 · 🎮 체험판 (2026-11-04 사용자 요청): 해금 요소 모두 열림 (용사 · 이펙트)
-    if (m && m.test) { heroes.forEach((h) => { h.open = true; }); fx.forEach((f) => { f.open = true; }); }
+    // 🎮 한 파일 체험판(DS.DEMO)만 해금 요소 모두 열림 · 🧪 테스트 모드는 잠금 그대로 + 💎 넉넉히 (2026-11-09 선생님 「해금 요소는 전부 잠가 두고」)
+    if (m && m.test && DS.DEMO) { heroes.forEach((h) => { h.open = true; }); fx.forEach((f) => { f.open = true; }); }
     return { heroes, fx, got, need: need.length, seals, gem: Number(gem.total) || 0, scroll: Number(gem.scroll) || 0, enh: Number(gem.enh) || 0, medal: gem.medal || {}, feather: fe };
   }
   async function logout() { cache = null; tsess(false); await N().signOut(); }

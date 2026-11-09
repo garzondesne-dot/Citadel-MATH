@@ -10,6 +10,8 @@ DS.Gem = (function () {
   const kk = (k) => String(k).replace(/[.#$/[\]]/g, '_');
   const DAY_CAP = 60; // 2026-11-06 경제 다시 맞춤: 30 → 50 (수학 풀이 보상을 올려서) · 2026-11-07 → 60 (보상 전체 +20%)
   const path = (m) => `gem/${ck(m.c)}/${m.n}`;
+  // 🧪 테스트 모드 (2026-11-09 선생님 「테스트 모드에서 마정석 많이 · 해금은 전부 잠가 두고」): 테스트 저장소(이 기기 안 · Firebase 아님)로 바꿔 낀 동안은 💎 · 📜 · 상점 · 강화가 진짜처럼 돎
+  const tst = (m) => !!(m && m.test && !(typeof DS !== 'undefined' && DS.Test && DS.Test.active && DS.Test.active()));
   const today = () => new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
   // 적립표 (확정안 · 한 곳에서 바꿈)
   // 2026-11-07 사용자 「보상 전체 +20%」: 새 용사 6 · 📐 수식 이펙트로 상점이 💎1,580 → 1,980 → 수입도 약 1.2배 (비율은 그대로 · tests/economy.test.js)
@@ -63,10 +65,10 @@ DS.Gem = (function () {
   const auraCls = (lv) => { const n = Math.max(0, Math.min(10, Math.floor(Number(lv) || 0))); return n ? ` aura aura-${n}` : ''; };
   const AURA_NAMES = ['', '은은한 흰빛', '새싹 초록', '맑은 하늘', '깊은 바다', '보랏빛 신비', '벚꽃 분홍', '황금 태양', '진홍 불꽃', '별빛 은하', '성스러운 후광'];
   const enhTier = (lv) => (lv >= 10 ? 4 : lv >= 7 ? 3 : lv >= 5 ? 2 : lv >= 3 ? 1 : 0); // 보이는 빛: 은빛(+3) · 금빛(+5) · 오라(+7) · 무지개(+10)
-  async function mine(m) { return (m && m.c != null && m.n && !m.test ? await N().get(path(m)).catch(() => null) : null) || {}; }
+  async function mine(m) { return (m && m.c != null && m.n && !tst(m) ? await N().get(path(m)).catch(() => null) : null) || {}; }
   // 받기: n 개 · key 한 번만 (opt.upsert = 같은 key 는 늘어난 만큼만) · opt.free = 하루 한도 밖 → 실제로 받은 수
   async function add(m, n, key, why, opt = {}) {
-    n = Math.max(0, Math.floor(Number(n) || 0)); if (!m || m.c == null || !m.n || m.test || !n || !key) return 0;
+    n = Math.max(0, Math.floor(Number(n) || 0)); if (!m || m.c == null || !m.n || tst(m) || !n || !key) return 0;
     const d = await mine(m), k = kk(key), had = ((d.log || {})[k] || {}).g || 0;
     if (had && !opt.upsert) return 0;
     let g = Math.max(0, n - had); if (!g) return 0;
@@ -83,7 +85,7 @@ DS.Gem = (function () {
   }
   // 📜 받기: key 한 번만 (upsert = 늘어난 만큼만) · 하루 한도 없음
   async function addScroll(m, n, key, why, opt = {}) {
-    n = Math.max(0, Math.floor(Number(n) || 0)); if (!m || m.c == null || !m.n || m.test || !n || !key) return 0;
+    n = Math.max(0, Math.floor(Number(n) || 0)); if (!m || m.c == null || !m.n || tst(m) || !n || !key) return 0;
     const d = await mine(m), k = `s_${kk(key)}`, had = ((d.log || {})[k] || {}).s || 0;
     if (had && !opt.upsert) return 0;
     const g = Math.max(0, n - had); if (!g) return 0;
@@ -93,7 +95,7 @@ DS.Gem = (function () {
   }
   // 🔨 강화 한 단계: 실패 없음 · 대성공 10% = 낸 💎 의 절반 돌려받기 → { lv, great, back }
   async function enhance(m, rnd = Math.random) {
-    if (!m || m.c == null || !m.n || m.test) throw Object.assign(new Error('학생 계정으로 강화할 수 있어요.'), { user: true });
+    if (!m || m.c == null || !m.n || tst(m)) throw Object.assign(new Error('학생 계정으로 강화할 수 있어요.'), { user: true });
     const d = await mine(m), lv = Number(d.enh) || 0; if (lv >= ENH_MAX) throw Object.assign(new Error('이미 +10 이에요!'), { user: true });
     const c = ENH[lv + 1], tot = Number(d.total) || 0, sc = Number(d.scroll) || 0;
     if (tot < c.g) throw Object.assign(new Error(`💎 조각이 ${c.g - tot}개 모자라요.`), { user: true });
@@ -114,7 +116,7 @@ DS.Gem = (function () {
   // 🎁 선물 알림 어디서나 (2026-11-06 사용자 A: 「선물 줬지? → 안 줬어요 · 우편함에 뭐가?」): 학생 계정 하나당 한 번 지켜봄 → 캠프 · 대기실 · 던전 어디서든 바로 큰 알림
   let giftStop = null, giftFor = '';
   function watchGifts(m) {
-    if (!m || m.c == null || !m.n || m.test || m.teacher || typeof localStorage === 'undefined') return;
+    if (!m || m.c == null || !m.n || tst(m) || m.teacher || typeof localStorage === 'undefined') return;
     const who = `${m.c}-${m.n}`; if (giftFor === who) return; giftFor = who; if (giftStop) giftStop();
     const K = `citadel-giftseen-${who}`;
     giftStop = N().watch(path(m), (d) => {
@@ -135,7 +137,7 @@ DS.Gem = (function () {
     return add(m, n, `${base}_${day}_${keys.length}`, why);
   }
   async function medal(m, kind) {
-    if (!m || m.c == null || !m.n || m.test) return 0;
+    if (!m || m.c == null || !m.n || tst(m)) return 0;
     const d = await mine(m), v = (Number(((d.medal || {})[kind])) || 0) + 1;
     await N().set(`${path(m)}/medal/${kk(kind)}`, v); return v;
   }
@@ -176,7 +178,7 @@ DS.Gem = (function () {
   // 🎁 보물 상자 (v0.9.11): gem/{반}/{번호}/chest = { day: { 날짜: 개수 }, dry(연속 못 받은 수업), cur(지금 수업 코드), got(지금 수업에서 받음), log: { 키: 결과 } } · feather = 🪶 깃털
   //   ctx = { code, mid, uid, streak3, force(🦇 박쥐 = 확정 · 하루 한도 밖) } → { tier, name, gem, feather } | null
   async function chest(m, ctx) {
-    if (!m || m.c == null || !m.n || m.test || !DS.Combo) return null;
+    if (!m || m.c == null || !m.n || tst(m) || !DS.Combo) return null;
     const d = await mine(m), c = d.chest || {}, day = today(), k = kk(`${ctx.code}_${ctx.mid}`);
     if ((c.log || {})[k]) return null; // 같은 처치는 한 번만 (새로 고쳐도 다시 안 굴림)
     let dry = Number(c.dry) || 0, cur = c.cur || '', got = !!c.got, firstKill = false;
@@ -199,7 +201,7 @@ DS.Gem = (function () {
   //   🪶 깃털 1 = 💎 10 · ⚒ 이미 만든 카드 중 💎 를 못 받은 카드 1장 = 💎 3 → 📮 우편함(선물 기록)으로
   const CONV = { v: '2026-11-07', feather: 10, card: 3 };
   async function convert(m, info = {}) {
-    if (!m || m.c == null || !m.n || m.test || m.teacher) return null;
+    if (!m || m.c == null || !m.n || tst(m) || m.teacher) return null;
     const d = await mine(m); if (d.conv) return null;
     const fe = Number(d.feather) || 0, log = d.log || {};
     const cards = Object.keys(info.cards || {}).filter((id) => (info.cards || {})[id]);
@@ -215,7 +217,7 @@ DS.Gem = (function () {
   }
   // 📚 도감 특전 용사를 💎 로 먼저 연 뒤 카드를 다 모으면 → 산 값 돌려받기 (한 번 · 📮 우편함)
   async function cardRefund(m, id) {
-    if (!m || m.c == null || !m.n || m.test || m.teacher) return 0;
+    if (!m || m.c == null || !m.n || tst(m) || m.teacher) return 0;
     const d = await mine(m), key = itemKey('hero', id), log = d.log || {};
     if (!(d.buy || {})[key] || log[`refund_${key}`]) return 0;
     const back = -Number((log[`buy_${key}`] || {}).g) || price('hero', id) || 0; if (!back) return 0;

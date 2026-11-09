@@ -8,7 +8,7 @@ window.DS = window.DS || {};
 DS.Test = (function () {
   const $ = (s) => document.querySelector(s);
   const { esc } = DS.UI;
-  const FRIENDS = 4;
+  const FRIENDS = 4, TEST_GEM = 9999, TEST_SCROLL = 30;
   let real = null, local = null, code = null, L = null, R = null, armed = '';
 
   let trial = null, tme = null, hallKey = ''; // 👩‍🏫 교사용 체험판 (2026-11-07 v2 · trial/): { name, hero } · tme = 메모리 저장소 안의 학생 계정 · hallKey = 위 TV 창(종합상황실) 열쇠
@@ -45,6 +45,8 @@ DS.Test = (function () {
       return;
     }
     if (demo) { where = 'raid'; bar(true); await openGate(); await join(code); return; }
+    // 💎 넉넉히 (2026-11-09 선생님 「테스트 모드에서 마정석 많이 · 해금 요소는 전부 잠가 두고」): 이 기기 테스트 저장소(시작마다 비움)에 💎 9,999 · 📜 30 → 상점 · 강화 · 홀리 방패까지 시험
+    if (DS.Gem) { try { await DS.Gem.add(ME(), TEST_GEM, 'test_gift', '🧪 테스트 선물', { free: true }); await DS.Gem.addScroll(ME(), TEST_SCROLL, 'test_scroll', '🧪 테스트 선물'); } catch (e) { /* 무시 */ } }
     where = 'camp'; bar(true);
     await DS.Camp.enter(ME());
     DS.UI.toast(`🧪 테스트 모드 · ${L.title} — 학생 캠프이에요. 곧 차원문이 열려요`, 3200);

@@ -434,7 +434,7 @@ DS.Camp = (function () {
     let L = T ? { heroes: Object.keys(DS.ASSETS.heroesV2.list).map((i) => ({ id: Number(i), open: true })), fx: DS.FX.KINDS.map((k) => ({ id: k, open: true })), seals: 0 } : await DS.Account.looks(me);
     // 💎 상점: 잠긴 것을 누르면 조각으로 해금 (확인 한 번)
     const shopBuy = async (it) => {
-      if (!it.shop || me.test) return false;
+      if (!it.shop || (me.test && !DS.Test.active())) return false; // 🧪 테스트 모드 = 이 기기 테스트 저장소에서 진짜처럼 사 봄
       if (L.gem < it.shop.price) { DS.UI.toast(`💎 조각이 ${it.shop.price - L.gem}개 모자라요 (지금 ${L.gem}개) · 레이드 · 복습 · 성채에서 모아요`, 3400); return true; }
       if (it.shop.scroll && (L.scroll || 0) < it.shop.scroll) { DS.UI.toast(`📜 서술 조각이 ${it.shop.scroll - (L.scroll || 0)}개 모자라요 — 🏰 성채 서술형 방에서 풀이 사진을 통과하면 모여요`, 3800); return true; }
       if (!confirm(`💎 ${it.shop.price}개${it.shop.scroll ? ` + 📜 ${it.shop.scroll}개` : ''}로 해금할까요? (남는 조각 ${L.gem - it.shop.price}개)`)) return true;
