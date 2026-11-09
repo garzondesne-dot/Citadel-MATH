@@ -2881,3 +2881,16 @@ html body .sc-gem, html body .sc-gem .sc-gn, html body .sc-gem b { font-weight: 
 .sc-pack .sc-min .art.monster { width: 100% !important; height: 100% !important; margin: 0 !important; }
 .sc-pack .m0 { left: 0; bottom: -4%; } .sc-pack .m1 { left: 30%; bottom: 8%; transform: scale(.9); z-index: -1; } .sc-pack .m2 { left: 55%; bottom: -10%; transform: scale(1.05); }
 .sc-pack .m1 .art { animation-delay: -.8s !important; } .sc-pack .m2 .art { animation-delay: -1.6s !important; }
+/* 🌫 #22 (2026-11-09 선생님 수업): 문제 그림이 언제나 먼저 · 실루엣과 겹치지 않게 */
+.scouting .h-scout { left: auto; right: 2%; top: 3%; transform: none; max-width: 47%; z-index: 40; }
+.scouting .h-scout .scout-img { max-height: 68vh; }
+.scouting #rm { transition: left .6s ease, transform .6s ease; }
+.scouting #rm.scout-sil { transform: translateX(-50%) scale(.8); transform-origin: 50% 100%; } /* 가운데 그대로 · 줄여서 오른쪽 그림(47%)과 안 겹침 */
+#rm.scout-sil .raid-bars { visibility: hidden; }
+#screen-student .scene.enc.scout-scene { height: 130px; min-height: 130px; overflow: hidden; }
+.scout-scene .enc-mon { bottom: 4px; } .scout-scene .enc-mon .art.monster { width: 104px; height: 104px; }
+.scout-scene .enc-hero { transform: scale(.72); transform-origin: 0 100%; }
+.scout-box { position: relative; z-index: 5; } .scout-box .scout-img { max-height: none; }
+.cr-more { margin: 6px 0; text-align: center; color: #ffe08a; font-weight: 700; }
+.cr-again { display: block; margin: 8px auto 2px; background: linear-gradient(#ff9a3c, #e0571f) !important; color: #fff !important; }
+.cr-pnote { text-align: center; margin: 0 8px 6px; }

@@ -401,6 +401,7 @@ DS.Hall = (function () {
     const arena = $('#raid'); if (!arena || !L || !R) return;
     const lk = Raid().solveLock(L, R, DS.Net.now()), on = !!(lk && lk.on), rd = on ? Raid().readyOf(R, lk.id).length : 0, all = Raid().activeIds(R).filter((u) => u !== (R.meta || {}).teacher).length;
     const key = on ? `${lk.id}|${lk.t0}|${lk.end}|${rd}|${all}` : '';
+    arena.classList.toggle('scouting', on); // 🌫 #22: 정찰 동안 = 학습지 그림 오른쪽 크게 · 실루엣 진형은 왼쪽으로 비켜 섬 (그림 위에 그리지 않음)
     const mon = $('#rm'); if (on && mon && !mon.classList.contains('scout-sil')) mon.classList.add('scout-sil'); // 화면을 다시 그려도 실루엣 유지
     if (on && mon && !mon.querySelector('.sc-pack')) DS.Art.scoutDeco(mon); // 🌫 진형(대장 + 졸개 3)
     if (key === slKey) return;
