@@ -26,12 +26,12 @@
 | wings | `outputs/wings/wings_sheet_1.png` | 초록 #00FF00 | **다시** → `guardwings` 로 대체 (평소 날개 없음 · 막을 때만 크게) |
 | **guardwings** | `outputs/guardwings/guardwings_sheet_1.png` (384×160 × 6칸) | 초록 #00FF00 | 생성 완료 (원본 시안 · 3회 시도 · **규격 미통과 / 선생님 검토 대기** · `outputs/AUDIT/questions.md` 참조) |
 | fx-awaken | `outputs/fx-awaken/fx-awaken_sheet_1.png` | 검정 | 대기 |
-| fx-shield | `outputs/fx-shield/fx-shield_sheet_1.png` → **r2 `fx-shield_sheet_1_r2.png`** | 초록 → **검정** (r2) | **다시** (홀리 에너지 방패 · 재주문서 2-1절) |
+| fx-shield | `outputs/fx-shield/fx-shield_sheet_1.png` → **r2 `fx-shield_sheet_1_r2.png`** | 초록 → **검정** (r2) | **채택 · 주문 취소** (선생님이 직접 받아 온 홀리 에너지 방패 · 2026-11-09) — 만들지 않음 |
 | cutin-guard | `outputs/cutin-guard/cutin-guard_1.png` | 불투명 | 대기 |
 
 ## 다음 할 일 (위에서부터)
 
-0. **(2026-11-09 재주문 · 먼저)** guardwings → fx-shield r2 (홀리 에너지 방패) → aura-10 r2 (홀리 후광)
+0. **(2026-11-09 재주문 · 먼저)** aura-10 r2 (홀리 후광) 만 — guardwings · fx-shield r2 는 선생님이 직접 받아 와서 **만들지 않음**
 1. aura-02 → 03 → 04 → 06 → 07 → 08 → 09 (각각 시트 + 입자)
 2. wings → fx-awaken → fx-shield → cutin-guard
 
