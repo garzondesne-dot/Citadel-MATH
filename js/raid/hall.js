@@ -70,7 +70,7 @@ DS.Hall = (function () {
   function ulHall() {
     const H = R.heals || {}, first = !ulSeen; if (first) ulSeen = {};
     const push = (it) => { if (!first && ulQ.length < 3) ulQ.push(it); else if (!first && it.kind === 'true') ulQ.unshift(it); };
-    Object.entries(H).forEach(([mid, byU]) => Object.entries(byU || {}).forEach(([u, byK]) => Object.entries(byK || {}).forEach(([k, v]) => { const key = `${mid}|${u}|${k}`; if ((v !== '!ult' && !Raid().isTrue(v) && !Raid().isTcut(v)) || ulSeen[key]) return; ulSeen[key] = true; push({ u, kind: Raid().isTrue(v) ? 'true' : Raid().isTcut(v) ? 'tcut' : 'ult' }); })));
+    Object.entries(H).forEach(([mid, byU]) => Object.entries(byU || {}).forEach(([u, byK]) => Object.entries(byK || {}).forEach(([k, v]) => { const key = `${mid}|${u}|${k}`; if ((v !== '!ult' && !Raid().isTrue(v) && !Raid().isTcut(v)) || ulSeen[key]) return; ulSeen[key] = true; push({ u, kind: Raid().isTrue(v) ? 'true' : Raid().isTcut(v) ? 'tcut' : 'ult', ...(Raid().isTcut(v) && (((Raid().stepOf(L, R) || {}).id !== mid) || Raid().cleared(L, R, mid)) ? { noBind: true } : {}) }); }))); // #42: 쓰러진 몬스터 · 지난 문제의 금빛 컷인은 지금 몬스터를 묶지 않음
     const step = Raid().stepOf(L, R);
     if (step && step.kind === 'monster' && DS.Attack) Raid().activeIds(R).forEach((u) => {
       const p = (R.players || {})[u] || {}, rec = Raid().record(L, R, step.id, u);

@@ -219,8 +219,9 @@ DS.Act = (function () {
   }
   async function photoTrue(code, R, mid) {
     const L = DS.Lessons.get(R.meta.lesson), me = N().uid(), step = L.steps[R.state.step], k = Raid.healsGiven(R, mid, me);
-    if (!step || step.id !== mid || Raid.cleared(L, R, mid)) { const c = Number(((R.players || {})[me] || {}).charge) || 0; await N().set(P(code, `players/${me}/charge`), c + 1); return 'charge'; }
-    if (!Raid.petrify(R, mid)) { await N().set(P(code, `heals/${mid}/${me}/${k}`), `!true@${N().now()}`); return 'true'; }
+    // 🌟 #42 (2026-11-09 선생님 「추천대로」): 몬스터가 이미 쓰러졌어도 그 자리에서 금빛 컷인 (충전 +1 없음 · 이미 쌓인 충전은 그대로 다음 몬스터에서) · 석화는 살아 있는 몬스터만
+    const alive = !!step && step.id === mid && !Raid.cleared(L, R, mid);
+    if (alive && !Raid.petrify(R, mid)) { await N().set(P(code, `heals/${mid}/${me}/${k}`), `!true@${N().now()}`); return 'true'; }
     if (Raid.tcutN(R, mid) < 3) { await N().set(P(code, `heals/${mid}/${me}/${k}`), `!tcut@${N().now()}`); return 'cut'; }
     return 'done';
   }

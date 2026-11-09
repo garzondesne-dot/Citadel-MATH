@@ -105,4 +105,7 @@ for (let i = 0; i < 8; i++) add('c', 1, false); d = X.chainDown(L, Q, 'u4'); che
   sub(1, last, false); r = X.record(L, Q, 'u4', 'a'); check(r.pLeft === 0 && r.pFail && r.pDoneN === 0, '0 = 그 판 끝 · 완성 아님(EXP 없음)');
   sub(1, last, true); r = X.record(L, Q, 'u4', 'a'); check(r.pFail && r.pDoneN === 0, '끝난 판에 정답을 내도 안 셈');
   sub(2, 0, false); r = X.record(L, Q, 'u4', 'a'); check(r.pass === 2 && r.pLeft === 3.5 && !r.pFail, `다음 판 = 새 4칸 (${r.pLeft})`); }
+// ⑩ 🌟 진필살기 즉발 (#42): 쓰러진 몬스터여도 금빛 컷인(충전 +1 없음) · 석화는 살아 있을 때만 — actions.js photoTrue 글 확인
+{ const src = require('fs').readFileSync(require('path').join(__dirname, '..', 'js/raid/actions.js'), 'utf8'), f = src.slice(src.indexOf('async function photoTrue'), src.indexOf('// 🛡 홀리 방패'));
+  check(!/charge`\), c \+ 1/.test(f) && /alive && !Raid\.petrify/.test(f) && /tcutN\(R, mid\) < 3/.test(f), '서술형 통과 = 쓰러졌어도 금빛 컷인 (충전 +1 없음 · 석화는 살아 있을 때만 · 컷인 3명)'); }
 console.log(fail ? `❌ 소레이드 실패 ${fail}` : `✅ 소레이드: 확인 ${ok}개 · 실패 0`); if (fail) process.exit(1);
