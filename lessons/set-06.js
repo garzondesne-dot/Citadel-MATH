@@ -170,6 +170,7 @@
   const minus = (A, B) => sorted(A.filter((x) => !B.includes(x)));
   const sup = (s) => String(s).replace(/\d/g, (d) => '⁰¹²³⁴⁵⁶⁷⁸⁹'[d]);
   const last = (n) => Number(String(n).slice(-1));
+  const gwaN = (n) => ([2, 4, 5, 9].includes(last(n)) ? `${n} 와` : `${n} 과`), lcmOf = (x, y) => { let a = x, b = y; while (b) [a, b] = [b, a % b]; return (x / a) * y; }; // #45 숫자 뒤 「과/와」 · 최소공배수
   const igaN = (n) => ([2, 4, 5, 9].includes(last(n)) ? `${n}가` : `${n}이`), ro = (n) => ([0, 3, 6].includes(last(n)) ? `${n}으로` : `${n}로`); // 숫자 뒤 조사
   const show = (x) => String(x).replace(/^-/, '−');
   const multi = (question, opts, want, solution, check) => {
@@ -279,13 +280,14 @@
       boss,
     ];
   }
-  function u7Chain(N, p, q, rem) {
-    const bad = range(1, N - 1).filter((x) => x % p === 0 && x % q === rem), n = N - 1 - bad.length;
+  function u7Chain(N, p, q, rem, r) { // #45 5단계: 전체 → 드모르간 → 가장 작은 원소 → 최소공배수 간격 → 개수
+    const bad = range(1, N - 1).filter((x) => x % p === 0 && x % q === rem), n = N - 1 - bad.length, L2 = lcmOf(p, q);
     return [
       sayOf(nq(`${N} 미만의 자연수는 모두 몇 개인가?`, N - 1, `1, 2, …, ${N - 1} → ${N - 1}개`, { step: 1 }), `${N} 미만의 자연수는 ${N - 1}개이다.`),
       sayOf(ch(`A = {${p}의 배수}, B = {${ro(q)} 나눈 나머지가 ${rem}} 일 때 「${p}의 배수가 아니거나 ${ro(q)} 나눈 나머지가 ${igaN(rem)} 아닌 수」의 집합은?`, ['(A ∩ B)ᶜ', '(A ∪ B)ᶜ', 'A ∩ Bᶜ'], '(A ∩ B)ᶜ', 'Aᶜ ∪ Bᶜ = (A ∩ B)ᶜ (드모르간)', { step: 2 }), `「A 가 아니거나 B 가 아닌」 수의 집합은 Aᶜ ∪ Bᶜ = (A ∩ B)ᶜ 이다.`),
-      sayOf(nq(`A ∩ B 의 원소는 몇 개인가?`, bad.length, `A ∩ B = ${st(bad)}`, { step: 3 }), `A ∩ B = ${st(bad)} 이므로 ${bad.length}개이다.`),
-      whyOf(sayOf(nq(`구하는 자연수의 개수는?`, n, `${N - 1} − ${bad.length} = ${n}`, { N, p, q, rem, step: 4 }), `그러므로 구하는 개수는 ${N - 1} − ${bad.length} = ${n} 이다.`), '∵ 여집합의 원소의 개수 = 전체의 개수 −', ['A ∩ B', 'A ∪ B', 'A'], ' 의 개수'), // #44 ④ 근거 줄 = 대장 뒤
+      sayOf(nq(`A ∩ B 의 가장 작은 원소는?`, bad[0], `${p}의 배수 중 ${ro(q)} 나눈 나머지가 ${rem}인 가장 작은 수 → ${bad[0]}`, { step: 3 }), `A ∩ B 의 가장 작은 원소는 ${bad[0]} 이다.`), // #45 옛 졸개3 → 둘로
+      sayOf(ch(`A ∩ B 의 원소는 몇씩 커지는가?`, r.shuffle([...new Set([L2, p, q, p + q, p * q])]).map(String), String(L2), `${gwaN(p)} ${q} 의 최소공배수 → ${L2}`, { step: 4 }), `${gwaN(p)} ${q} 의 최소공배수 ${L2} 씩 커지므로 A ∩ B = ${st(bad)} 이다.`),
+      whyOf(sayOf(nq(`구하는 자연수의 개수는?`, n, `${N - 1} − ${bad.length} = ${n}`, { N, p, q, rem, step: 5 }), `그러므로 구하는 개수는 ${N - 1} − ${bad.length} = ${n} 이다.`), '∵ 여집합의 원소의 개수 = 전체의 개수 −', ['A ∩ B', 'A ∪ B', 'A'], ' 의 개수'), // #44 ④ 근거 줄 = 대장 뒤
     ];
   }
   const RETRY_ARGS = { // 연습 판 숫자 (…Retry 와 같은 조건 · 교과서 숫자 빼기)
@@ -301,7 +303,7 @@
     u6: (T, a, b) => `어느 자전거 동아리 회원 ${T}명을 대상으로 두 코스 A와 B를 다녀온 경험이 있는 회원 수를 조사하였더니 A 코스는 ${a}명이고 B 코스는 ${b}명이었다. 두 코스 A와 B를 모두 다녀온 회원 수의 최댓값과 최솟값을 구하시오.`,
     u7: (N, p, q, rem) => `${N} 미만의 자연수 중에서 ${p}의 배수가 아니거나 ${ro(q)} 나누었을 때의 나머지가 ${igaN(rem)} 아닌 자연수의 개수를 구하시오.`,
   };
-  const CHAIN_FN = { u4: (a, r) => u4Chain(...a, r), u5: (a, r) => u5Chain(...a, r), u6: (a) => u6Chain(...a), u7: (a) => u7Chain(...a) };
+  const CHAIN_FN = { u4: (a, r) => u4Chain(...a, r), u5: (a, r) => u5Chain(...a, r), u6: (a) => u6Chain(...a), u7: (a, r) => u7Chain(...a, r) };
   const BOOK = { u4: [8, 4, 20], u5: [2, 4, 6], u6: [40, 28, 21], u7: [100, 7, 5, 3] };
   const chainOf = (id) => (pass, r) => { const args = pass === 0 ? BOOK[id] : RETRY_ARGS[id](r), items = CHAIN_FN[id](args, r); if (pass > 0) items.forEach((it) => { it.problem = PROB[id](...args); }); return items; };
   const CHAIN = { u4: chainOf('u4'), u5: chainOf('u5'), u6: chainOf('u6'), u7: chainOf('u7') };
@@ -441,7 +443,7 @@
     // 보강(bonus)은 2026-11-05 사용자 결정으로 삭제 — b1 · v2 명제 몬스터는 게임에 나오지 않음 (지난 기록 이어 셈용)
     items(id, seed, attempt) { return MONSTERS[id].make(attempt, DS.Rng(`${seed}|${id}|${attempt}`)); },
     chain: Object.keys(CHAIN), // ⚔ 소레이드 (방 version 3) · 단계 = chainItems
-    chainRaw: { u6: u6Chain, u5: u5Chain }, // 🧪 시험용 (#44: 문제 6 a ≤ b 경우 · 문제 5 보기 함정 검사)
+    chainRaw: { u6: u6Chain, u5: u5Chain, u7: u7Chain }, // 🧪 시험용 (#44: 문제 6 a ≤ b 경우 · 문제 5 보기 함정 검사)
     chainItems(id, seed, pass) { return CHAIN[id] ? CHAIN[id](pass, DS.Rng(`${seed}|${id}|chain|${pass}`)) : []; },
     WORDS: { TRUE, FALSE, NONE, NEG, SYL, PROP_EXTRA, NONE2, QD, QREP },
     next: { title: '8차시 · 명제와 조건 (7차시 = 6차시 이어서 · 설문 · 사진 채점)', ask: '「x 는 짝수이다」 는 참일까 거짓일까? x 가 정해지면?', link: '집합에서 배운 「모임」을 이용해 참 · 거짓을 가리는 문장(명제)과 조건, 진리집합을 배워요.' }, // 다음 수업

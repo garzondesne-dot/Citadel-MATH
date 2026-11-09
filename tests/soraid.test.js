@@ -10,7 +10,7 @@ const ans = (id) => L.chainItems(id, 's', 0).map((q) => (q.type === 'multi' ? q.
 check(ans('u4').join(' | ') === '1,2,4,8,4,8,12,16,20 | X ⊂ B 이고 X 와 A 는 서로소 | 12,16,20 | 8', `문제 4 ${ans('u4')}`);
 // #44 근거 줄 자리 = 그 근거를 쓰는 단계 뒤 (문제 4 · 6 · 7 = 대장 · 문제 5 = 졸개2) · 첫 판 완성 문장이 뒤 단계 답을 미리 보여 주지 않게
 { const at = (id) => L.chainItems(id, 's', 0).map((q, i) => (q.why ? i : -1)).filter((i) => i >= 0).join();
-  check(at('u4') === '3' && at('u5') === '1' && at('u6') === '3' && at('u7') === '3', `근거 줄 자리 u4 ${at('u4')} · u5 ${at('u5')} · u6 ${at('u6')} · u7 ${at('u7')}`); }
+  check(at('u4') === '3' && at('u5') === '1' && at('u6') === '3' && at('u7') === '4', `근거 줄 자리 u4 ${at('u4')} · u5 ${at('u5')} · u6 ${at('u6')} · u7 ${at('u7')}`); }
 // #41 문제 4 다시 짜기: 졸개1 = A 칸 · B 칸 두 묶음 (교과서 8 · 4 · 20 → A = {1, 2, 4, 8} · B = {4, 8, …, 20}) · 졸개3 근거 = 2³ · 대장 8
 { const u4 = L.chainItems('u4', 's', 0), g = u4[0].groups || [], cut = (g[0] || {}).n, pick = (lo, hi) => u4[0].answer.filter((i) => i >= lo && i < hi).map((i) => u4[0].options[i]).join(',');
   check(g.length === 2 && pick(0, cut) === '1,2,4,8' && pick(cut, cut + g[1].n) === '4,8,12,16,20' && /8의 약수/.test(g[0].label) && /20 이하의 4의 배수/.test(g[1].label), `졸개1 = A 칸 ${pick(0, cut)} · B 칸 ${pick(cut, 99)}`);
@@ -20,22 +20,27 @@ check(ans('u4').join(' | ') === '1,2,4,8,4,8,12,16,20 | X ⊂ B 이고 X 와 A �
 const setOf = (id, k) => { const q = L.chainItems(id, 's', 0)[k]; return q.answer.map((i) => q.options[i]).sort().join(','); };
 check(ans('u5')[0] === 'B ⊂ A' && setOf('u5', 1) === ['x = 4', 'x = x² + 2x'].sort().join(',') && ans('u5')[2] === '−1,0' && ans('u5')[3] === '−1,0,4', `문제 5 ${ans('u5')}`);
 check(ans('u6').join(' | ') === 'B ⊂ A | 21 | A ∪ B = U (곧 n(A ∪ B) = 40) | 9', `문제 6 ${ans('u6')}`);
-check(ans('u7').join(' | ') === '99 | (A ∩ B)ᶜ | 3 | 96', `문제 7 ${ans('u7')}`);
+check(ans('u7').join(' | ') === '99 | (A ∩ B)ᶜ | 28 | 35 | 96', `문제 7 ${ans('u7')}`); // #45 5단계 · 교과서 28 · 35 · 96
+check(L.chainItems('u7', 's', 0)[3].say === '7 과 5 의 최소공배수 35 씩 커지므로 A ∩ B = {28, 63, 98} 이다.', `문제 7 졸개4 문장 ${L.chainItems('u7', 's', 0)[3].say}`);
 // ② 연습 판: 숫자로 다시 계산
 for (let k = 1; k <= 50; k++) {
   const a = L.chainItems('u4', 's' + k, k), c1 = a[0].check || {}, num = (q, ix) => ix.map((i) => Number(String(q.options[i]).replace('−', '-')));
   const A0 = Array.from({ length: c1.p }, (_, i) => i + 1).filter((d) => c1.p % d === 0), B0 = Array.from({ length: Math.floor(c1.N / c1.q) }, (_, i) => (i + 1) * c1.q), D0 = B0.filter((x) => !A0.includes(x)), g0 = (a[0].groups || [{}])[0].n;
   const D = num(a[2], a[2].answer);
   check(num(a[0], a[0].answer.filter((i) => i < g0)).join() === A0.join() && num(a[0], a[0].answer.filter((i) => i >= g0)).join() === B0.join() && D.join() === D0.join() && a[3].answer === 2 ** D0.length && D0.length >= 2 && a[3].why.text.endsWith('2' + String(D0.length).replace(/\d/g, (x) => '⁰¹²³⁴⁵⁶⁷⁸⁹'[x])), `연습 u4 #${k} (독립 계산 p ${c1.p} · q ${c1.q} · N ${c1.N})`);
-  const u7 = L.chainItems('u7', 's' + k, k), q = u7[3].check, bad = Array.from({ length: q.N - 1 }, (_, i) => i + 1).filter((x) => x % q.p === 0 && x % q.q === q.rem).length;
-  check(u7[0].answer === q.N - 1 && u7[2].answer === bad && u7[3].answer === q.N - 1 - bad, `연습 u7 #${k}`);
+  const u7 = L.chainItems('u7', 's' + k, k), q = u7[4].check, B7 = Array.from({ length: q.N - 1 }, (_, i) => i + 1).filter((x) => x % q.p === 0 && x % q.q === q.rem), bad = B7.length;
+  { let g = q.p, h = q.q; while (h) [g, h] = [h, g % h]; const lc = q.p * q.q / g;
+    check(u7.length === 5 && u7[0].answer === q.N - 1 && u7[2].answer === B7[0] && u7[3].answer === String(lc) && new Set(u7[3].choices).size === u7[3].choices.length && u7[3].choices.filter((c) => c === String(lc)).length === 1
+      && B7.every((x, i) => !i || x - B7[i - 1] === lc) && u7[4].answer === q.N - 1 - bad && u7[4].why, `연습 u7 #${k} (가장 작은 ${B7[0]} · 간격 ${lc} · 함정 ≠ 정답 · 등차)`); }
   const u6 = L.chainItems('u6', 's' + k, k), w = u6[3].check; check(u6[0].answer === (w.a >= w.b ? 'B ⊂ A' : 'A ⊂ B') && u6[1].answer === Math.min(w.a, w.b) && /^A ∪ B = U/.test(u6[2].answer) && u6[3].answer === w.a + w.b - w.T && u6[3].why && u6.every((x) => x.problem && x.problem.includes(`${w.T}명`)), `연습 u6 #${k}`);
   { const q2 = L.chainItems('u5', 's' + k, k), c5 = q2[3].check, o = q2[1].options, ok = q2[1].answer.map((i) => o[i]).sort().join(',');
     check(ok === [`x = ${c5.b}`, `x = x² + ${c5.c}x`].sort().join(',') && o.length === 5 && new Set(o).size === 5 && !o.includes(`x = ${c5.d}`) && q2[0].problem && /B = \{x, /.test(q2[0].problem), `연습 u5 졸개2 보기 #${k} (정답 2개 · 「x = d」 없음 · 겹침 없음)`); }
   const u5 = L.chainItems('u5', 's' + k, k), v = u5[3].check, want = [1 - v.c, 0, v.b].sort((x, y) => x - y).join(','); check(u5[3].answer.map((i) => String(u5[3].options[i]).replace('−', '-')).join(',') === want, `연습 u5 #${k}`);
   check(L.chainItems('u4', 's' + k, k).every((x) => x.say), `연습 say #${k}`);
 }
-for (let k = 51; k <= 200; k++) { const a = L.chainItems('u4', 's' + k, k), c1 = a[0].check || {}, A0 = Array.from({ length: c1.p }, (_, i) => i + 1).filter((d) => c1.p % d === 0), B0 = Array.from({ length: Math.floor(c1.N / c1.q) }, (_, i) => (i + 1) * c1.q), D0 = B0.filter((x) => !A0.includes(x));
+for (let k = 51; k <= 200; k++) { { const u7 = L.chainItems('u7', 's' + k, k), q = u7[4].check, B7 = Array.from({ length: q.N - 1 }, (_, i) => i + 1).filter((x) => x % q.p === 0 && x % q.q === q.rem); let g = q.p, h = q.q; while (h) [g, h] = [h, g % h]; const lc = q.p * q.q / g;
+  check(u7[2].answer === B7[0] && u7[3].answer === String(lc) && new Set(u7[3].choices).size === u7[3].choices.length && B7.every((x, i) => !i || x - B7[i - 1] === lc) && u7[4].answer === q.N - 1 - B7.length, `연습 u7 #${k} (#45 연습 200)`); }
+  const a = L.chainItems('u4', 's' + k, k), c1 = a[0].check || {}, A0 = Array.from({ length: c1.p }, (_, i) => i + 1).filter((d) => c1.p % d === 0), B0 = Array.from({ length: Math.floor(c1.N / c1.q) }, (_, i) => (i + 1) * c1.q), D0 = B0.filter((x) => !A0.includes(x));
   check(a[3].answer === 2 ** D0.length && a[2].answer.map((i) => Number(a[2].options[i])).join() === D0.join() && a[0].groups.length === 2, `연습 u4 #${k} (#41 연습 200개)`); }
 // #44 ③ 문제 6 a ≤ b (작은 쪽이 A) · ⑤ 첫 판엔 원문 상자 없음
 { const v = L.chainRaw.u6(40, 18, 25); check(v[0].answer === 'A ⊂ B' && v[0].choices.includes('B ⊂ A') && v[1].answer === 18 && v[3].answer === 3 && v[0].say.startsWith('A ⊂ B 일 때'), 'a < b 이면 「A ⊂ B」 가 정답 (반대 포함은 함정)');
@@ -94,7 +99,7 @@ for (let i = 0; i < 8; i++) add('c', 1, false); d = X.chainDown(L, Q, 'u4'); che
   Q.state.pct = { u4: 50 }; d = X.chainDown(L, Q, 'u4'); check(d[1].max === 9, `기준% 50 · 18명 → 9 (${d[1].max})`); }
 // ⑦ ✍ → 📸 진필살기 (2026-11-09 #26): 채점 기준 = 소레이드 단계 · 학습지 숫자 · 다음 통과자 금빛 컷인 3명
 { for (const id of L.chain) { const rb = (DS.Rubrics['set-06'] || {})[id], it = X.chainItems(L, X.newRoom('1', 'set-06', 'T', 1), id, '_', 0);
-    check(rb && (rb.steps.length === it.length || (id === 'u6' && rb.steps.length === 3)) && rb.pass === rb.total - 1 && rb.raid, /* #44: 문제 6 은 4단계로 바뀌었지만 사진 채점 기준표는 그대로(3칸) */ `${id} 채점 기준 ${rb ? rb.steps.length : 0}칸 = 단계 ${it.length}칸 · 1점 빠져도 통과`);
+    check(rb && (rb.steps.length === it.length || (id === 'u6' && rb.steps.length === 3) || (id === 'u7' && rb.steps.length === 4)) && rb.pass === rb.total - 1 && rb.raid, /* #44: 문제 6 은 4단계로 바뀌었지만 사진 채점 기준표는 그대로(3칸) */ `${id} 채점 기준 ${rb ? rb.steps.length : 0}칸 = 단계 ${it.length}칸 · 1점 빠져도 통과`);
     check(rb && /학습지|[0-9]/.test(rb.ask) && rb.steps[rb.steps.length - 1].key.includes(String(it[it.length - 1].answer).split(',')[0].replace('−', '−')) || id === 'u5', `${id} 마지막 기준 = 대장 답 ${it[it.length - 1].answer}`); }
   const T = X.newRoom('2', 'set-06', 'T', 1); T.heals = { u4: { a: { 0: '!true@5' }, b: { 0: '!tcut@6' }, c: { 0: '!tcut@7', 1: '_' } } };
   check(X.tcutN(T, 'u4') === 2 && X.isTcut('!tcut@1') && !X.isTcut('!true@1') && X.petrify(T, 'u4') && X.petrify(T, 'u4').by === 'a', '석화 = 첫 통과자 1번 · 다음은 금빛 컷인만 (셈 2)'); }
