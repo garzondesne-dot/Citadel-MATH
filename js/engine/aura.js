@@ -37,9 +37,10 @@ DS.Aura = (function () {
     const i = lv >= 10 ? 6 : lv - 1, ay = `${((i / 9) * 100).toFixed(3)}%`, col = A().colors[lv - 1] || '#fff', b = art.querySelector(':scope > b');
     art.style.setProperty('--ay', ay); art.style.setProperty('--au', col);
     const delay = b ? (b.style.animationDelay || getComputedStyle(b).animationDelay || '0s') : '0s'; // ⭐ 날갯짓 = 용사 숨쉬기와 같은 박자 · 같은 시작
-    const back = `<span class="au-s au-g"></span><span class="au-s au-r"></span>${lv >= 10 && A().halo ? '<span class="au-s au-h"></span>' : ''}`; // ✨ 10단계 = 머리 뒤 홀리 후광 (2026-11-09 선생님 그림)
+    const holy = lv >= 10 && A().halo; // ✨ 10단계 = 머리 뒤 홀리 후광만 (2026-11-09 선생님 「7단계는 빼봐」 → 황금 고리 · 빛기둥 · 입자 없음 · 발밑 은은한 금빛만)
+    const back = holy ? '<span class="au-s au-g"></span><span class="au-s au-h"></span>' : `<span class="au-s au-g"></span><span class="au-s au-r"></span>`;
     const n = nOrb(lv, !!art.closest('#screen-hall')), dur = (3.4 - lv * 0.1).toFixed(2);
-    const front = `<span class="au-s au-r f"></span>${Array.from({ length: n }, (_, j) => `<span class="au-s au-o" style="--d:${dur}s;animation-delay:${(-dur * j / n).toFixed(2)}s"><span class="au-s"></span></span>`).join('')}`;
+    const front = holy ? '' : `<span class="au-s au-r f"></span>${Array.from({ length: n }, (_, j) => `<span class="au-s au-o" style="--d:${dur}s;animation-delay:${(-dur * j / n).toFixed(2)}s"><span class="au-s"></span></span>`).join('')}`;
     art.insertAdjacentHTML('afterbegin', back); art.insertAdjacentHTML('beforeend', front);
   }
   const scan = (root) => { if (!root || !root.querySelectorAll) return; if (root.matches && root.matches('.aura .art.hv2')) deco(root); root.querySelectorAll('.aura .art.hv2:not([data-au])').forEach(deco); };
