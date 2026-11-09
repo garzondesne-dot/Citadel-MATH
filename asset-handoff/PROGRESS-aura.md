@@ -24,7 +24,7 @@
 | ID | 파일 | 배경 | 상태 |
 |---|---|---|---|
 | wings | `outputs/wings/wings_sheet_1.png` | 초록 #00FF00 | **다시** → `guardwings` 로 대체 (평소 날개 없음 · 막을 때만 크게) |
-| **guardwings** | `outputs/guardwings/guardwings_sheet_1.png` (384×160 × 6칸) | 초록 #00FF00 | **대기 · 1순위** |
+| **guardwings** | `outputs/guardwings/guardwings_sheet_1.png` (384×160 × 6칸) | 초록 #00FF00 | 생성 완료 (원본 시안 · 3회 시도 · **규격 미통과 / 선생님 검토 대기** · `outputs/AUDIT/questions.md` 참조) |
 | fx-awaken | `outputs/fx-awaken/fx-awaken_sheet_1.png` | 검정 | 대기 |
 | fx-shield | `outputs/fx-shield/fx-shield_sheet_1.png` → **r2 `fx-shield_sheet_1_r2.png`** | 초록 → **검정** (r2) | **다시** (홀리 에너지 방패 · 재주문서 2-1절) |
 | cutin-guard | `outputs/cutin-guard/cutin-guard_1.png` | 불투명 | 대기 |
