@@ -1981,12 +1981,12 @@ input.sv-no { width: 64px !important; display: inline-block; padding: 2px 4px; }
 .bitem.spent { opacity: .6; border-style: dashed; } /* 👑 형성평가 기회를 다 쓴 문항 (2026-11-05) */
 
 /* 2026-11-05 사용자 그림: 🔥 콤보 창 4단계 (가운데 어두운 칸에 숫자) */
-.th-combo.fr { width: 112px; height: 58px; min-width: 0; padding: 25px 0 0; border: 0; border-radius: 0; box-shadow: none; background: transparent no-repeat; background-size: 400% 100%; image-rendering: pixelated; overflow: visible; }
-.th-combo.fr b { font-size: 16px; line-height: 1; color: #fff3c4 !important; background: none !important; -webkit-text-fill-color: currentColor; text-shadow: 0 0 6px #ff9a3a, 0 2px 0 #000; font-family: inherit; letter-spacing: 0; } .th-combo.fr span { font-size: 7px; display: block; line-height: 1.1; letter-spacing: 1px; }
-.th-combo.fr i { left: 22%; bottom: 8px; max-width: 56%; height: 2px; }
-.th-combo.fr.tier-none { filter: saturate(.5) brightness(.85); }
-.th-combo.fr.big { width: 224px; height: 116px; padding-top: 50px; } .th-combo.fr.big b { font-size: 31px; } .th-combo.fr.big span { font-size: 12px; } .th-combo.fr.big i { bottom: 18px; height: 4px; }
-.th-combo.fr.tier-crown { animation: none; filter: drop-shadow(0 0 10px #ffd70088); }
+.th-combo.th-fr { width: 112px; height: 58px; min-width: 0; padding: 25px 0 0; border: 0; border-radius: 0; box-shadow: none; background: transparent no-repeat; background-size: 400% 100%; image-rendering: pixelated; overflow: visible; }
+.th-combo.th-fr b { font-size: 16px; line-height: 1; color: #fff3c4 !important; background: none !important; -webkit-text-fill-color: currentColor; text-shadow: 0 0 6px #ff9a3a, 0 2px 0 #000; font-family: inherit; letter-spacing: 0; } .th-combo.th-fr span { font-size: 7px; display: block; line-height: 1.1; letter-spacing: 1px; }
+.th-combo.th-fr i { left: 22%; bottom: 8px; max-width: 56%; height: 2px; }
+.th-combo.th-fr.tier-none { filter: saturate(.5) brightness(.85); }
+.th-combo.th-fr.big { width: 224px; height: 116px; padding-top: 50px; } .th-combo.th-fr.big b { font-size: 31px; } .th-combo.th-fr.big span { font-size: 12px; } .th-combo.th-fr.big i { bottom: 18px; height: 4px; }
+.th-combo.th-fr.tier-crown { animation: none; filter: drop-shadow(0 0 10px #ffd70088); }
 /* 🏁 경주 트랙 그림 (종합상황실 큰 화면): 그림의 왼쪽 판 = 반 이름 · 출발선 · 결승선 · 달리는 칸 위치에 맞춤 */
 .rc-ov .rc-track.img, .rc-ov.big .rc-track.img { aspect-ratio: 16 / 9; width: min(100%, calc(78vh * 16 / 9)); margin: 0 auto; background-size: 100% 100%; image-rendering: pixelated; display: flex; flex-direction: column; padding: 10.7% 3.6% 9.4% 2.9%; box-sizing: border-box; }
 .rc-track.img .rc-start, .rc-track.img .rc-goal { display: none; }
@@ -2592,8 +2592,8 @@ body:has(#h-demo-ov.side) .h-dock { right: calc(36vw + 18px); }
 .sendrow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
 .sendrow .btn { position: relative; display: flex; flex-direction: column; align-items: center; margin: 0 !important; padding: 8px 2px !important; } .sendrow .btn i { font-style: normal; font-size: 20px; }
 .mail-old > summary { cursor: pointer; color: var(--muted); padding: 6px 2px; }
-.fr { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; } .fr .btn { margin: 0 !important; font-size: 12px !important; padding: 6px 2px !important; }
-.fr .btn.on { border-color: var(--gold); color: var(--gold); } .fr .btn.off { opacity: .4; }
+.gf-to { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; } .gf-to .btn { margin: 0 !important; font-size: 12px !important; padding: 6px 2px !important; } /* 2026-11-09 버그: 예전 이름 .fr 이 분수 · 콤보 창과 겹쳐 콤보 숫자가 창 밖으로 나감 */
+.gf-to .btn.on { border-color: var(--gold); color: var(--gold); } .gf-to .btn.off { opacity: .4; }
 .stepper { display: flex; align-items: center; justify-content: center; gap: 14px; } .stepper b { font-size: 24px; color: var(--cyan); min-width: 80px; text-align: center; } .stepper .btn { margin: 0 !important; width: 44px; }
 .phr { display: flex; gap: 6px; justify-content: center; } .phr .btn { margin: 0 !important; } .phr .btn.on { border-color: #62d394; color: #62d394; }
 .qs-mine { display: flex; align-items: center; gap: 6px; padding: 8px; border: 1.5px solid #3a3026; border-radius: 8px; margin-bottom: 5px; font-size: 14px; }

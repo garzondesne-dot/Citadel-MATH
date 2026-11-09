@@ -100,7 +100,7 @@ DS.Mail = (() => {
     const draw = () => {
       el.innerHTML = `<div class="quiz-box framed rs-box gift-box"><div class="quiz-head"><b>🎁 친구에게 선물</b><button class="btn small" id="gf-x">✕ 닫기</button></div>
         <p class="mail-sub"><b>누구에게?</b><span class="muted small">우리 반만 · 오늘 보낸 친구는 흐리게</span></p>
-        <div class="fr">${friends.map((n) => `<button class="btn small${n === to ? ' on' : ''}${sentTo.has(n) ? ' off' : ''}" data-to="${n}"${sentTo.has(n) ? ' disabled' : ''}>${n} ${esc(masks[n] || '')}</button>`).join('') || '<p class="muted small">명단이 없어요.</p>'}</div>
+        <div class="gf-to">${friends.map((n) => `<button class="btn small${n === to ? ' on' : ''}${sentTo.has(n) ? ' off' : ''}" data-to="${n}"${sentTo.has(n) ? ' disabled' : ''}>${n} ${esc(masks[n] || '')}</button>`).join('') || '<p class="muted small">명단이 없어요.</p>'}</div>
         <p class="mail-sub"><b>얼마?</b><span class="muted small">가진 💎 ${Number(gem.total) || 0}</span></p>
         <div class="stepper"><button class="btn" data-g="-1">−</button><b>💎 ${g}</b><button class="btn" data-g="1">＋</button></div>
         <p class="mail-sub"><b>한마디</b><span class="muted small">고르기만</span></p>

@@ -36,7 +36,7 @@ DS.Thrill = (function () {
     if (!c || c.n < 2) return '';
     const t = c.tier;
     const F = ((DS.ASSETS || {}).thrill || {}).combo, k = { fire: 0, bolt: 1, rainbow: 2, crown: 3 }[t && t.id] || 0; // 콤보 창 그림 (2026-11-05 · 4단계 · 5 아래는 1단계 창을 흐리게)
-    const fr = F ? ` fr" style="background-image:url('${DS.ASSETS.base}${F.src}');background-position:${(k / (F.frames - 1)) * 100}% 100%` : '';
+    const fr = F ? ` th-fr" style="background-image:url('${DS.ASSETS.base}${F.src}');background-position:${(k / (F.frames - 1)) * 100}% 100%` : '';
     return `<div class="th-combo${t ? ` tier-${t.id}` : ' tier-none'}${opt.big ? ' big' : ''}${c.paused ? ' paused' : ''}${fr}"><b>${F ? c.n : `${t ? t.icon : '🔥'} ${c.n}`}</b><span>COMBO</span><i style="width:${Math.round(c.left * 100)}%"></i></div>`;
   }
   // ⚡ 10 COMBO! · 👑 보스 2단계! 같은 큰 알림

@@ -20,7 +20,7 @@ if (typeof location !== 'undefined' && (/\/trial\/(index\.html)?$/.test(location
   document.documentElement.classList.add('trial'); // CSS: 체험판 화면 다듬기
   DS.TRIAL = { lesson: 'set-03', lessons: ['set-03'], castle: 'eval-1', cls: '체험' }; // v2 (2026-11-07): 테스트 모드 기준 · 3차시
 }
-DS.VERSION = 'citadel-0.9.37.7';
+DS.VERSION = 'citadel-0.9.37.8';
 // 🕶 익명 보기 (2026-11-09 #36 · 미래교육상 제출용): 주소 뒤 ?anon → 개발자 이름을 모든 화면에서 숨김 · 한 번 열면 그 탭 안에서 유지(sessionStorage · 체험판은 주소에 남음)
 DS.ANON = (() => { if (typeof location === 'undefined') return false; const q = /[?&]anon(=|&|$)/.test(location.search); try { if (q) sessionStorage.setItem('ds-anon', '1'); return q || sessionStorage.getItem('ds-anon') === '1'; } catch (e) { return q; } })();
 DS.AUTHOR = DS.ANON ? '' : '김찬우'; // 개발자 (2026-11-03 사용자 요청: 모든 화면 · 첫 화면에 새김)
