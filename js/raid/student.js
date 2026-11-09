@@ -451,6 +451,7 @@ DS.Student = (function () {
         ${img ? `<img class="scout-img" src="${img}" alt="학습지 칸">` : ''}
         <p class="sl-time">몬스터 등장까지 <b class="sl-left" data-sl-end="${lk.end}">${Math.ceil(lk.left / 1000)}초</b> <span class="muted small">· 선생님이 일찍 부를 수도 있어요</span></p>
         ${ready ? '<p class="okc">✋ 준비 완료! 몬스터가 나타나면 다 푼 답을 옮겨 적어요</p>' : '<button class="btn primary big" id="sc-ready">✋ 준비 완료</button>'}</div></div>`;
+    { const sm = body.querySelector('.enc-mon.scout-sil'); requestAnimationFrame(() => DS.Art.scoutDeco(sm)); } // 🌫 진형(대장 + 졸개 3)
     const rb = body.querySelector('#sc-ready');
     if (rb) rb.onclick = () => DS.Control.run(async () => { rb.disabled = true; await DS.Act.scoutReady(code, id); DS.Sound.clank(); drawn = ''; });
     clearTimeout(solveT); solveT = setTimeout(() => { drawn = ''; appearAt = Date.now(); render(); if (DS.Sound && DS.Sound.hit) DS.Sound.hit(); DS.UI.toast('⚔ 몬스터 등장! 이제 답을 넣어요'); }, lk.left + 250);

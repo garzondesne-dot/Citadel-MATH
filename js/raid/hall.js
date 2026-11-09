@@ -402,6 +402,7 @@ DS.Hall = (function () {
     const lk = Raid().solveLock(L, R, DS.Net.now()), on = !!(lk && lk.on), rd = on ? Raid().readyOf(R, lk.id).length : 0, all = Raid().activeIds(R).filter((u) => u !== (R.meta || {}).teacher).length;
     const key = on ? `${lk.id}|${lk.t0}|${lk.end}|${rd}|${all}` : '';
     const mon = $('#rm'); if (on && mon && !mon.classList.contains('scout-sil')) mon.classList.add('scout-sil'); // 화면을 다시 그려도 실루엣 유지
+    if (on && mon && !mon.querySelector('.sc-pack')) DS.Art.scoutDeco(mon); // 🌫 진형(대장 + 졸개 3)
     if (key === slKey) return;
     const was = slKey; slKey = key;
     let ban = arena.querySelector('.h-solve');
@@ -412,6 +413,7 @@ DS.Hall = (function () {
       ban.innerHTML = `<b>🌫 정찰 — 학습지를 먼저 풀어요</b>${img ? `<img class="scout-img" src="${img}" alt="">` : ''}<p>✋ 준비 완료 <b>${rd}</b> / ${all} · 등장까지 <b class="sl-left" data-sl-end="${lk.end}">${Math.ceil(lk.left / 1000)}초</b></p>`;
     } else {
       if (ban) ban.remove();
+      if (mon) DS.Art.scoutDeco(mon, false);
       if (mon && mon.classList.contains('scout-sil')) { mon.classList.remove('scout-sil'); mon.classList.remove('appear'); void mon.offsetWidth; mon.classList.add('appear'); if (Snd() && Snd().hit) Snd().hit(); }
     }
   }

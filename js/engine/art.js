@@ -56,6 +56,19 @@ DS.Art = (function () {
     const html = cell(sheet, s.poses[pose] || 0, row, `monster${(s.flip || []).includes(row) ? ' flip' : ''}${hue ? ' hue' : ''} ${cls}`).replace('<i class=', `<i data-sh="${sheet}" data-row="${row}" class=`); // 🎯 data-sh · row = 보이는 몸통(배치표 bodies) 찾기
     return hue ? html.replace('style="', `style="--hue:${hue}deg;`) : html;
   }
+  // 🌫 정찰 진형 (2026-11-09 #18 후속 · 방향 방 시안): 대장 = 뒤 가운데(붉은 기운 · 빨간 눈) + 졸개 3 이 앞(용사 쪽)에 뭉쳐 섬 · 모두 검은 실루엣
+  //   box = 대장 그림(.art.monster)이 든 칸 · 눈 자리 = 배치표 bodies(보이는 몸통) 위쪽 28% · 등장하면 scoutDeco(box, false) 로 지움
+  function scoutDeco(box, on = true) {
+    if (!box) return; box.querySelectorAll('.sc-deco').forEach((e) => e.remove()); box.classList.toggle('sc-lead', !!on);
+    const art = box.querySelector('.art.monster'); if (!on || !art) return;
+    const w = art.offsetWidth, h = art.offsetHeight, x0 = art.offsetLeft, y0 = art.offsetTop; if (!w || !h) return;
+    const b = ((A().bodies || {})[art.dataset.sh] || [])[Number(art.dataset.row)] || [0.15, 0.2, 0.85, 0.95], flip = art.classList.contains('flip');
+    const bx = flip ? 1 - (b[0] + b[2]) / 2 : (b[0] + b[2]) / 2, ex = x0 + w * (bx - (b[2] - b[0]) * 0.12), ey = y0 + h * (b[1] + (b[3] - b[1]) * 0.28);
+    const eyes = document.createElement('i'); eyes.className = 'sc-deco sc-eyes'; eyes.style.cssText = `left:${ex.toFixed(0)}px;top:${ey.toFixed(0)}px;--ew:${Math.max(4, Math.round(w * 0.035))}px`; box.appendChild(eyes);
+    const pack = document.createElement('div'); pack.className = 'sc-deco sc-pack'; pack.style.cssText = `left:${(x0 - w * 0.2).toFixed(0)}px;top:${(y0 + h * 0.6).toFixed(0)}px;width:${(w * 0.72).toFixed(0)}px;height:${(h * 0.4).toFixed(0)}px`;
+    const row = art.dataset.row, sh = art.dataset.sh, key = Object.keys(SHEETS).find((k) => SHEETS[k] === sh), n = key ? `${key}:${row}` : Number(row);
+    pack.innerHTML = [0, 1, 2].map((i) => `<span class="sc-min m${i}">${monster(n, 'idle', '')}</span>`).join(''); box.appendChild(pack);
+  }
   const card = (art, cls = '') => cell('cards', art % A().cards.cols, Math.floor(art / A().cards.cols) % A().cards.rows, `card-art ${cls}`);
   function css() { // 글꼴·프레임·배경을 배치표에서
     const a = A();
@@ -171,5 +184,5 @@ ${a.ui.home ? `.home-props{display:contents}.home-props img{position:fixed;z-ind
     const prev = L.no ? DS.Lessons.list.find((l) => l.no === L.no - 1) : null;
     setTimeout(() => trim([L, prev]), 5000);
   }
-  return { emojify, cell, hero, isV2, monster, card, install, pos, lessonFiles, prefetch, trim, lessonEnter, teacherHero, teacherFx, setTeacherHero, teacherLook, setTeacherLook };
+  return { emojify, cell, hero, isV2, monster, scoutDeco, card, install, pos, lessonFiles, prefetch, trim, lessonEnter, teacherHero, teacherFx, setTeacherHero, teacherLook, setTeacherLook };
 })();
