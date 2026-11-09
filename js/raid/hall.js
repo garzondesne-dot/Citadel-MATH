@@ -212,7 +212,7 @@ DS.Hall = (function () {
     if (Raid().isLobby(R) || Raid().isFinale(L, R)) return lobbyScene(Raid().isFinale(L, R));
     // v0.9.2: 개념 설명 = 왼쪽 개념 · 오른쪽 바로 이어지는 문제 (일반 문제 m 만 — ⭐ 스페셜 난입은 미리 보이지 않게). 문제 칸 이미지가 없으면 개념 하나만 크게
     const nx = L.steps[i + 1], prob = nx && nx.kind === 'monster' && !nx.special && !nx.review ? nx : null;
-    const img = (prep.img || {})[step.id], pimg = prob ? (prep.img || {})[prob.id] : null, split = !!(img && pimg);
+    const img = (prep.img || {})[step.img || step.id], pimg = prob ? (prep.img || {})[prob.id] : null, split = !!(img && pimg); // step.img = 다른 칸 그림 (🔁 전시 확인 = 'review' · 2026-11-09 #25)
     if (zoomStep !== i) { zoomStep = i; zoom = ''; }
     const key = `c${i}|${img ? img.length : 0}|${pimg ? pimg.length : 0}|${zoom}`;
     if (built === key) return;

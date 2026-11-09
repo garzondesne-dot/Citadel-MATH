@@ -213,7 +213,7 @@ DS.Student = (function () {
     if (step.kind === 'monster') { const pt = Raid().petrify(R, step.id); sage = !!(pt && DS.Net.now() < pt.until && !Raid().record(L, R, step.id, me).perfect); monsterView(body, step); petri(body, step); if (test || Raid().activeIds(R).length <= 6) othersFx(step, body); return; }
     if (step.kind === 'boss') return bossView(body);
     if (test) { // 테스트 모드: 개념 설명 = 학습지 이미지를 폰에 크게
-      const img = (test.prep.img || {})[step.id], sig = `concept|${step.id}|${img ? img.length : 0}`;
+      const img = (test.prep.img || {})[step.img || step.id], sig = `concept|${step.id}|${img ? img.length : 0}`;
       if (drawn === sig && body.querySelector('.t-concept')) return;
       drawn = sig;
       body.innerHTML = `<div class="panel framed t-concept"><p class="attend-tag">📣 ${step.kind === 'intro' ? '도입' : '개념 설명'}</p><h2>${esc(step.title)}</h2>

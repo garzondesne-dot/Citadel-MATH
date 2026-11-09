@@ -40,6 +40,13 @@ VENN2 = '''<svg width="190" height="92" viewBox="0 0 190 92"><rect x="4" y="4" w
 <circle cx="78" cy="46" r="30" fill="#dce8f8" fill-opacity=".85" stroke="#222" stroke-width="1.2"/><circle cx="112" cy="46" r="30" fill="#fbe7c4" fill-opacity=".75" stroke="#222" stroke-width="1.2"/>
 <text x="44" y="22" font-size="11" font-style="italic" font-family="DejaVu Serif">A</text><text x="140" y="22" font-size="11" font-style="italic" font-family="DejaVu Serif">B</text><text x="172" y="82" font-size="11" font-style="italic" font-family="DejaVu Serif">U</text><text x="95" y="50" font-size="8.5" text-anchor="middle">둘 다</text></svg>'''
 
+# 🔁 전시 확인 (2026-11-09 선생님 결정 #25): 학습목표 아래 · 생각 열기 위 · 지난 차시 핵심 1~3개를 빈칸으로 · ★ 없음(몬스터 아님)
+#   게임 = 도입 단계에서 이 칸 그림(crops 'review')만 TV · 폰에 띄우고 교사가 말로 묻는다 → 차시 파일 도입 step 에 img: 'review'
+#   칸 위치: crops_pdf.py 의 칸 이름 「review」 = 시작 글자 「전시 확인」 · 새 학습지를 만들 때 REVIEW 목록만 채운다 (비우면 칸 없음 · 6차시 v4 는 비움)
+REVIEW = []   # 예: ['A<sup>C</sup> = 「A 가 아닌 것 다 모여」 → U = {1, 2, 3, 4}, A = {1, 2} 일 때 A<sup>C</sup> = ' + BL['m'], …]
+def review_box(items):
+    if not items: return ''
+    return '<div class="box" style="margin:1.2mm 0 1.6mm"><b>🔁 전시 확인</b> <span class="mini">(지난 시간 — 먼저 말로 답해 봐요)</span>' + ''.join(f'<div class="q">{i + 1}) {t}</div>' for i, t in enumerate(items)) + '</div>'
 q = lambda s: f'<div class="q">{v(s)}</div>'
 P = lambda n, s, tag: f'<div class="q"><b class="ex">문제 {n})</b> {v(s)} {tag}</div>'
 
@@ -119,7 +126,7 @@ rng = f'공통수학2 Ⅱ. 집합과 명제 1. 집합 04. 드모르간의 법칙
 hd = header(f'{NO}차시', rng)
 goal = '<div class="goal"><b>학습목표</b> ① 드모르간의 법칙을 이해하고 이용할 수 있다. ② 여집합·차집합의 원소의 개수를 구할 수 있다. ③ 집합 단원(중단원 마무리) 문제를 해결할 수 있다.</div>'
 pg = lambda g, l, r, n: f'<div class="page">{hd}{g}<div class="cols"><div class="col">{l}</div><div class="col">{r}</div></div><div class="pno">- {NO}차시 ({n}/2) -</div></div>'
-html = f"<!DOCTYPE html><html><head><meta charset='utf-8'><title>학습과정 {NO}차시 레이드용 v4</title><style>{CSS}{EXTRA}</style></head><body>{pg(goal, p1_left, p1_right, 1)}{pg('', p2_left, p2_right, 2)}</body></html>"
+html = f"<!DOCTYPE html><html><head><meta charset='utf-8'><title>학습과정 {NO}차시 레이드용 v4</title><style>{CSS}{EXTRA}</style></head><body>{pg(goal + review_box(REVIEW), p1_left, p1_right, 1)}{pg('', p2_left, p2_right, 2)}</body></html>"
 open(OUT.replace('.pdf', '.html'), 'w', encoding='utf-8').write(html)
 with sync_playwright() as p:
     b = p.chromium.launch(); page = b.new_page(); page.set_content(html); page.wait_for_timeout(300)
