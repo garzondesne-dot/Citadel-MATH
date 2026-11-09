@@ -3003,3 +3003,5 @@ html body .sc-gem, html body .sc-gem .sc-gn, html body .sc-gem b { font-weight: 
 #screen-student.st-battle .wrap:has(.cr-dock) { padding-bottom: 140px; }
 body:has(#test-bar) #screen-student.st-battle .wrap:has(.cr-dock) { padding-bottom: calc(140px + var(--tbh, 60px)); }
 .q-extra-row { display: flex; justify-content: center; margin-top: 10px; } .q-extra-row .q-extra { background: linear-gradient(#e9f3ff, #b9d4f5); color: #12304f; border: 2px solid #2d4f78; }
+.cr-chips .cr-whyn { margin-left: 6px; font: 700 12px var(--math); color: #7a4a00; background: #fff1c2; border-radius: 8px; padding: 1px 6px; white-space: nowrap; } /* 🧩 #52 근거 줄 n/m */
+.cr-pad { height: 120px; } /* 🐞 2026-11-10: 아래 칸(두 줄)에 맨 끝 단추(💡 힌트 주기)가 가려 누를 수 없던 것 → 끝에 빈 자리 */

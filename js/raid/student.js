@@ -726,7 +726,7 @@ DS.Student = (function () {
     const tokPick = rec.done && rec.tokLeft > 0 && (!prac || pDone || pFail) ? `<p class="okc st-ask">남은 기회로 무엇을 할까요? <span class="muted small">(${rec.tokLeft}번)</span></p>
       <div class="heal-pick"><button class="btn primary big" id="st-bind">⛓ 몬스터 묶기<br><small>공격 ${Raid().BIND_TOKEN}초 늦춤</small></button><button class="btn big heal-btn" id="st-heal">💚 친구 힐<br><small>막힌 친구 기회 +1</small></button></div>` : '';
     const pendTip = pLeft > 0 ? '' : `<p class="cr-more">🔥 연습 ${Raid().PRAC_MAX}번 끝!${nextHint != null ? ' 이제 💡 친구에게 힌트를 줘 볼까요?' : ''}</p>`;
-    const hintBtn = (nextHint != null ? `<button class="btn cr-hint" id="cr-hint" data-s="${nextHint}">💡 힌트 주기${wSt.length > 1 ? ` (근거 줄 ${wSt.indexOf(nextHint) + 1})` : ''} <small>근거 한 줄이 TV 에 떠요 · 줄마다 한 번 · EXP +1</small></button>` : myHint ? '<p class="muted small center">💡 힌트를 줬어요 — 고마워요!</p>' : '') + (whyTag && (prac || rec.done) ? `<p class="muted small center cr-whyn">${whyTag}</p>` : '');
+    const hintBtn = (nextHint != null ? `<button class="btn cr-hint" id="cr-hint" data-s="${nextHint}">💡 힌트 주기${wSt.length > 1 ? ` (근거 줄 ${wSt.indexOf(nextHint) + 1})` : ''} <small>근거 한 줄이 TV 에 떠요 · 줄마다 한 번 · EXP +1</small></button>` : myHint ? '<p class="muted small center">💡 힌트를 줬어요 — 고마워요!</p>' : '') + (whyTag && !prac && rec.done ? `<p class="muted small center cr-whyn">${whyTag}</p>` : '');
     const hintsBox = wItem && hintBy.length && !rec.done ? `<details class="cr-hints"><summary>💡 친구 힌트 ${hintBy.length}개 <small>(누르면 펼침)</small></summary>${hintLines.map((x) => `<p>${pretty(rec.items[x.s].why.text)}</p><p class="muted small">${x.by.slice(0, 5).map((p) => esc(p.nick || '')).join(' · ')}</p>`).join('')}</details>` : '';
     let mainHtml;
     if (wm) { // ✍ #50: 대장 전에도 · 바로 쓰기 (#38: 연습 중에 눌러도 · ✕ 닫으면 보던 연습 판으로): 나의 풀이 · 졸개 단계 · 채점 기준을 숨기고 원래 문제 + 📸 만 (📜 다시 보기 = ✍ 연습 쓰기)
@@ -768,9 +768,10 @@ DS.Student = (function () {
     // ⚔ #50 ② 아래 칸 = 왼쪽 「⚔ 공격」(대장 뒤 = 「🔥 한 판 더」) · 오른쪽 「✍ 서술형 도전 📸」
     const goBtn = (t) => `<button class="btn primary big dock-go" id="cr-go"${ready ? '' : ' disabled'}>${t}</button>`;
     const dockL = needWhy ? '' : prac ? (pDone || pFail ? pracBtn : goBtn('⚔ 연습 공격')) : rec.done ? pracBtn : rec.fail ? '' : rec.locked ? '<span class="dock-wait">🙋 확인 기다림</span>' : goBtn('⚔ 공격!');
-    paint(body, `${key}|${needWhy ? 'w' : 'q'}`, `<div class="panel framed st-fight ch-wrap">${scene(step, rec, hp, '', '')}
-      <div class="cr-chips">${chips}</div>${cheer}${hintsBox}${mainHtml}
-      ${dock(prac && !pDone && !pFail ? pDock : rec, `<div class="cr-dbtns">${dockL}${wrBtn}</div>`).replace('class="st-dock"', 'class="st-dock cr-dock"')}${helpBtn()}</div>`);
+    const qView = !needWhy && !rec.fail && !(!prac && rec.done) && !pFail && !pDone && !(rec.locked && !prac); // 문제 화면 = 높이 고정(양피지 안에서 스크롤) · 끝난 화면 = 높이 자유(맨 끝 단추까지 스크롤 · 🐞 2026-11-10 힌트 단추가 아래 칸에 가려 못 누름)
+    paint(body, `${key}|${needWhy ? 'w' : 'q'}`, `<div class="panel framed st-fight ch-wrap${qView || needWhy ? '' : ' st-after'}">${scene(step, rec, hp, '', '')}
+      <div class="cr-chips">${chips}${prac && whyTag ? `<b class="cr-whyn">${whyTag}</b>` : ''}</div>${cheer}${hintsBox}${mainHtml}
+      ${dock(prac && !pDone && !pFail ? pDock : rec, `<div class="cr-dbtns">${dockL}${wrBtn}</div>`).replace('class="st-dock"', 'class="st-dock cr-dock"')}${helpBtn()}${qView || needWhy ? '' : '<div class="cr-pad"></div>'}</div>`); // cr-pad = 아래 칸(두 줄)에 맨 끝 단추가 가리지 않게
     bindTop(); bindHelp();
     body.querySelectorAll('[data-pick]').forEach((b) => b.addEventListener('click', () => {
       const v = b.dataset.pick.split('|')[1];
