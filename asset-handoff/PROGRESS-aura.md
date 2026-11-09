@@ -27,10 +27,12 @@
 | **guardwings** | `outputs/guardwings/guardwings_sheet_1.png` (384×160 × 6칸) | 초록 #00FF00 | 생성 완료 (원본 시안 · 3회 시도 · **규격 미통과 / 선생님 검토 대기** · `outputs/AUDIT/questions.md` 참조) |
 | fx-awaken | `outputs/fx-awaken/fx-awaken_sheet_1.png` | 검정 | 대기 |
 | fx-shield | `outputs/fx-shield/fx-shield_sheet_1.png` → **r2 `fx-shield_sheet_1_r2.png`** | 초록 → **검정** (r2) | **채택 · 주문 취소** (선생님이 직접 받아 온 홀리 에너지 방패 · 2026-11-09) — 만들지 않음 |
+| **halo-burst** | `outputs/halo-burst/halo-burst_sheet_1.png` (160×160 × 6칸) | 검정 | **대기 · 1순위** |
 | cutin-guard | `outputs/cutin-guard/cutin-guard_1.png` | 불투명 | 대기 |
 
 ## 다음 할 일 (위에서부터)
 
+-1. **(2026-11-09 새 주문 · 맨 먼저)** `tasks/ORDER-2026-11-09-halo-burst.md` — 10단계 후광 빛 입자 퍼짐 `halo-burst` (160×160 × 6칸 · 검정)
 0. **(2026-11-09)** 재주문 3종 모두 선생님이 직접 받아 옴 → guardwings · fx-shield r2 · aura-10 r2 **만들지 않음**
 1. aura-02 → 03 → 04 → 06 → 07 → 08 → 09 (각각 시트 + 입자)
 2. wings → fx-awaken → fx-shield → cutin-guard
