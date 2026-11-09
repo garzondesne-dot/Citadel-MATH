@@ -287,7 +287,7 @@ DS.Bonus = (function () {
     const seed = fo.quest ? fo.quest.seed : `${N().uid()}|${Date.now()}`; // ✏ 친구가 낸 문제 = 친구가 고른 숫자 그대로 (첫 판)
     let attempt = fo.quest ? 1 : first && !isField(L, mid) ? 0 : 1, left = TRIES; // 📕 수업 문제 복습은 처음부터 숫자를 바꿈
     const chainRoom = castle && !fo.quest && (L.chain || []).includes(mid); // ⚔ 소레이드 방 (2026-11-09 #23 · 혼자 · 성채용 규칙)
-    let pass = first ? 0 : 1, helped = false, says = [], bonusPhoto = false;
+    let pass = first ? 0 : 1, helped = false, says = [], bonusPhoto = false, chainMid = false, pracMode = false; // ✍ #50 chainMid = 사슬 도중 서술형 · 🔥 pracMode = 처치 뒤 한 판 더 (연습 · 보상 없음 · 3판)
     const n = chainRoom ? L.chainItems(mid, seed, pass).length : itemsOf(L, mid, seed, attempt).length;
     const solved = new Array(n).fill(false);
     const el = document.createElement('div'); el.className = 'bn-fight';
@@ -392,17 +392,18 @@ DS.Bonus = (function () {
     const photoStage = (items, fresh) => {
       const r0 = mine[L.id] && mine[L.id][mid] ? mine[L.id][mid] : rec, pend = r0.pend;
       const act = draw('', pend ? `<p class="gold">⏳ 선생님이 풀이를 확인하고 있어요. 확인되면 성채에 들어올 때 ${bonusPhoto ? '📷 보너스를 받아요' : '처치로 바뀌어요'}. 더 또렷한 사진을 다시 보내도 돼요.</p>` : bonusPhoto ? `<p class="okc">📷 <b>서술형 도전 (보너스)</b> — 방금 사슬의 풀이를 종이에 써서 찍어 올리면 💎 · 📜 서술 조각! <span class="muted small">(이 숫자 그대로 · 하루 3장)</span></p>` : `<p class="okc">${fresh ? '✔ <b>답을 맞혔어요!</b> ' : ''}이제 <b>종이에 쓴 풀이</b>를 📷 찍어 올리면 처치예요. <span class="muted small">(이 숫자 그대로 · 하루 3장)</span></p>`);
-      act.innerHTML = `<button class="btn primary big" id="bf-photo">📷 풀이 사진 올리기</button>${all() ? '<button class="btn" id="bf-pv">미리 보기: 통과로 보기</button>' : ''}<button class="btn" id="bf-later">나중에</button>`;
-      act.querySelector('#bf-later').onclick = () => { el.remove(); render(); };
-      const pv = act.querySelector('#bf-pv'); if (pv) pv.onclick = () => (bonusPhoto ? photoBonusWin() : win());
+      act.innerHTML = `<button class="btn primary big" id="bf-photo">📷 풀이 사진 올리기</button>${all() ? '<button class="btn" id="bf-pv">미리 보기: 통과로 보기</button>' : ''}<button class="btn" id="bf-later">${chainMid && !pend ? '⚔ 사슬로 돌아가기' : '나중에'}</button>`;
+      act.querySelector('#bf-later').onclick = () => { if (chainMid && !pend) { chainMid = false; chainRound(); return; } el.remove(); render(); };
+      const pv = act.querySelector('#bf-pv'); if (pv) pv.onclick = () => (chainMid ? midWin() : bonusPhoto ? photoBonusWin() : win());
       act.querySelector('#bf-photo').onclick = () => DS.Control.run(async () => {
         if (all()) { DS.UI.toast('미리 보기 · 테스트에서는 사진을 보내지 않아요 — 학생 계정으로 해 보세요.', 3000); return; }
         const res = await DS.Photo.grade(me, { lesson: L.id, room: mid, title: mon.title, items });
         if (!document.body.contains(el) || !res) return;
+        mine[L.id] = mine[L.id] || {}; // ✍ #50: 사슬 시작 전 · 도중 첫 사진이면 아직 기록이 없음
         const p = `bonus/${ck(me.c)}/${me.n}/${L.id}/${mid}`, cur = mine[L.id][mid] = mine[L.id][mid] || {};
         const sc = (res.scores || []).map(Number).filter((x) => !isNaN(x)), before = Number(cur.phBest) || 0, best = Math.max(before, ...sc, 0);
         if (best > before) { await N().update(p, { phBest: best, tries: cur.tries || 1 }).catch(() => {}); cur.phBest = best; }
-        if (res.status === 'pass') { const prevMax = Math.max(before, ...sc.slice(0, -1), 0), hadTry = before > 0 || sc.length > 1; photoWin = { score: Number(res.score) || 0, total: Number(res.total) || 0, up: hadTry && (Number(res.score) || 0) > prevMax }; await N().update(p, { clear: true, pend: null, ph: res.id, tries: cur.tries || 1, at: N().TS }).catch(() => {}); Object.assign(cur, { clear: true, ph: res.id }); delete cur.pend; return bonusPhoto ? photoBonusWin() : win(); }
+        if (res.status === 'pass') { const prevMax = Math.max(before, ...sc.slice(0, -1), 0), hadTry = before > 0 || sc.length > 1; photoWin = { score: Number(res.score) || 0, total: Number(res.total) || 0, up: hadTry && (Number(res.score) || 0) > prevMax }; await N().update(p, { clear: true, pend: null, ph: res.id, tries: cur.tries || 1, at: N().TS }).catch(() => {}); Object.assign(cur, { clear: true, ph: res.id }); delete cur.pend; return chainMid ? midWin() : bonusPhoto ? photoBonusWin() : win(); }
         if (res.status === 'check' || res.status === 'appeal') { await N().update(p, { pend: res.id, tries: cur.tries || 1 }).catch(() => {}); cur.pend = res.id; photoStage(items, false); }
       });
       return null;
@@ -474,8 +475,26 @@ DS.Bonus = (function () {
       DS.Sound.correct();
       const act = draw('', `${story(says)}<p class="okc"><b>📷 서술형 통과!</b> 보너스를 받았어요.</p>`);
       act.innerHTML = '<button class="btn primary" id="bf-out">성채 방 목록으로</button>'; act.querySelector('#bf-out').onclick = () => { el.remove(); render(); };
+      if (chainRoom) afterBtns(act); // 🔥 #50 서술형 뒤에도 한 판 더
       const show = headRewards(el.querySelector('.enc-hero'));
       if (DS.Gem && !preview && me && (!me.test || (DS.Test && DS.Test.active && DS.Test.active()))) { const g = await DS.Gem.add(me, DS.Gem.G.photo || 3, `photo_${L.id}_${mid}`, '📷 서술형 통과').catch(() => 0); if (g) show(`💎 +${g} 📷 서술형 통과`, 'gem'); await scrollWin(L.id, mid, photoWin, show); photoWin = null; }
+    };
+    // ✍ #50 ③ 사슬 도중 서술형 통과 = 남은 단계 모두 푼 것으로 (나의 풀이 채움 · 퍼펙트 아님) → 처치 (💎 · 📜 그대로)
+    const midWin = async () => { chainMid = false; anyWrong = true; cur.forEach((q, s) => { if (!solved[s]) { solved[s] = true; says.push(q.say); } }); await saveTry(true); return afterWin(); };
+    const canWrite = () => photoRoom && PHOTO_READY() && DS.Photo.ready(L.id, mid) && !(((mine[L.id] || {})[mid]) || {}).ph;
+    const goWrite = () => { chainMid = !solved.every(Boolean) && !pracMode; bonusPhoto = !chainMid; photoStage(cur, false); }; // 채점 = 지금 사슬의 숫자
+    // 🔥 #50 ① 처치 뒤 「한 판 더」 (성채 = 혼자 · 묶기 · 힐 없음): 숫자 바뀐 사슬 · 판마다 새 4칸 · 보상 · 기록 없음 · 누를 때만 시작 · 횟수 제한 없음 (#39 「성채 · 허수아비는 제한 없음 그대로」)
+    const afterBtns = (act) => {
+      if (!act) return;
+      act.insertAdjacentHTML('afterbegin', `<button class="btn primary cr-again" id="cf-prac">🔥 한 판 더 <small>(숫자 바뀐 사슬 · 연습)</small></button>${canWrite() ? '<button class="btn" id="cf-photo">✍ 서술형 도전 📸</button>' : ''}`);
+      const pb = act.querySelector('#cf-prac'); if (pb) { pb.disabled = true; setTimeout(() => { if (pb.isConnected) pb.disabled = false; }, 1500); pb.onclick = () => { pracMode = true; pass += 1; solved.fill(false); says = []; left = TRIES; helped = false; chainRound(); }; } // 대장을 잡은 손가락이 바로 누르지 않게 1.5초
+      const ph = act.querySelector('#cf-photo'); if (ph) ph.onclick = () => { bonusPhoto = true; chainMid = false; photoStage(cur, false); };
+    };
+    const afterWin = async () => { await win(); if (document.body.contains(el)) afterBtns(el.querySelector('#bf-act')); return null; };
+    const pracEnd = (ok, items) => {
+      const act = draw(ok ? '' : 'miss', `${chips()}${ok ? `${story(says)}<p class="okc">✔ 연습 사슬 완성! <span class="muted small">(연습 · 기록 · 💎 그대로)</span></p>` : `<p class="gold">이번 연습 판은 기회를 다 썼어요 (벌은 없어요).</p>${story(items.map((q) => q.say), '📜 정답과 풀이')}`}`);
+      act.innerHTML = '<button class="btn" id="bf-out">성채 방 목록으로</button>'; act.querySelector('#bf-out').onclick = () => { el.remove(); render(); };
+      afterBtns(act); return null;
     };
     const chainRound = async () => {
       roundNo++;
@@ -485,29 +504,27 @@ DS.Bonus = (function () {
         for (;;) {
           if (left <= 1 && left > 0 && !helped) { await chainHelp(items); if (!document.body.contains(el)) return null; }
           const isBoss = s === n - 1;
-          const ok = await DS.Quiz.ask({ name: mon.title, formula: isBoss ? '👑 대장' : `졸개 ${'①②③④⑤⑥'[s]}` }, items[s], { hint: false, tag: pass ? '🔁 숫자 바뀐 사슬' : '🏰 성채 · ⚔ 소레이드' });
+          const ok = await DS.Quiz.ask({ name: mon.title, formula: isBoss ? '👑 대장' : `졸개 ${'①②③④⑤⑥'[s]}` }, items[s], { hint: false, tag: pracMode ? '🔥 한 판 더 (연습)' : pass ? '🔁 숫자 바뀐 사슬' : '🏰 성채 · ⚔ 소레이드', extra: canWrite() ? { label: '✍ 서술형 도전 📸', value: 'write' } : null });
           if (!document.body.contains(el)) return null;
+          if (ok === 'write') { goWrite(); return null; } // ✍ #50 ② 언제나
           if (ok) { solved[s] = true; says.push(items[s].say); } else { wrongSeen = true; anyWrong = true; left = Math.max(0, left - (isBoss ? 1 : 0.5)); }
           const done = solved.every(Boolean);
           if (DS.Attack) { const sc = el.querySelector('.scene'); await DS.Attack.play(sc, { heroBox: sc && sc.querySelector('.enc-hero'), monBox: sc && sc.querySelector('.enc-mon'), hero: me.hero || 0, fx: me.fx || 'flame', miss: !ok, finish: ok && done, ultimate: ok && done && !anyWrong && DS.Attack.canUlt(me.fx || 'flame', me.hero || 0), s: 1.2 }); }
           if (!document.body.contains(el)) return null;
           draw('', `${chips()}${story(says)}${ok ? '' : `<p class="paper-note">✘ 다시 생각해 봐요 — 같은 문제예요 (기회 −${isBoss ? 1 : '½'})</p>`}`);
           if (ok) break;
-          if (left <= 0) return chainFail(items);
+          if (left <= 0) return pracMode ? pracEnd(false, items) : chainFail(items);
         }
       }
+      if (pracMode) return pracEnd(true, items);
       await saveTry(true);
-      await win();
-      if (photoRoom && PHOTO_READY() && DS.Photo.ready(L.id, mid) && !(mine[L.id][mid] || {}).ph && document.body.contains(el)) {
-        const act = el.querySelector('#bf-act');
-        if (act) { act.insertAdjacentHTML('afterbegin', '<button class="btn" id="cf-photo">📷 서술형 도전 (보너스)</button>'); act.querySelector('#cf-photo').onclick = () => { bonusPhoto = true; photoStage(cur, false); }; }
-      }
-      return null;
+      return afterWin();
     };
     if (chainRoom) {
       const act = draw('', `${chips()}<p>${first ? '교과서 단원 평가를 숫자만 바꾼 문제예요.' : '다시 들어오면 새 숫자의 사슬이 나와요.'} <b>졸개 ${n - 1}마리 → 👑 대장</b>을 차례로! 틀려도 같은 문제로 다시 · 기회 ${TRIES}칸 (졸개 −½ · 대장 −1) · 1칸 남으면 ${(L.chainVideo || {})[mid] ? '🎬 해설 영상' : '📜 풀이 첫 두 줄'}이 열려요.</p>`);
-      act.innerHTML = '<button class="btn primary big" id="bf-go">⚔ 전투 시작</button>';
+      act.innerHTML = `<button class="btn primary big" id="bf-go">⚔ 전투 시작</button>${canWrite() ? '<button class="btn" id="cf-photo">✍ 서술형 도전 📸</button>' : ''}`;
       act.querySelector('#bf-go').onclick = () => chainRound();
+      const ph0 = act.querySelector('#cf-photo'); if (ph0) ph0.onclick = () => { cur = L.chainItems(mid, seed, pass); goWrite(); };
       return;
     }
     const act = draw('', `<p>${castle ? (first ? '교과서 단원 평가를 숫자만 바꾼 문제예요. 서술형은 풀이를 학습지에 써요.' : '다시 들어오면 새 숫자로 나와요.') : mid === 'boss' ? (first ? '수업 때 형성평가 문제 그대로예요. 처치하면 🏆 업적!' : '세트를 바꿔 다시 도전해요.') : '📕 수업 때 문제를 숫자만 바꿨어요. 모두 맞히면 오답노트에 복습 완료!'} 기회 ${TRIES}번 — 틀린 소문제만 다시 풀어요.</p>`);

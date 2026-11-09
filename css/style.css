@@ -2990,3 +2990,17 @@ html body .sc-gem, html body .sc-gem .sc-gn, html body .sc-gem b { font-weight: 
 @keyframes sandDust { 0% { opacity: .95; transform: scale(1.3) translateY(-8px); } 60% { opacity: .55; transform: scale(1.02); } 100% { opacity: 0; transform: scale(.96); } }
 @media (prefers-reduced-motion: reduce) { .cr-story li.sand { animation: sandRm .3s ease-out both; } .cr-story li.sand::before { display: none; } @keyframes sandRm { from { opacity: 0; filter: blur(4px); } to { opacity: 1; filter: none; } } }
 .quiz-grp-h { flex-basis: 100%; width: 100%; margin: 8px 0 2px; font-weight: 700; font-size: 14px; color: #ebb84f; border-top: 1px dashed #b08d5788; padding-top: 6px; } /* 🔁 #48 성채 두 칸 고르기 */
+/* ⚔ #50 소레이드 아래 칸 (2026-11-10): 위 = 재도전 하트 · 아래 = 「⚔ 공격 / 🔥 한 판 더」 + 「✍ 서술형 도전 📸」 반반 */
+.st-dock.cr-dock { flex-wrap: wrap; row-gap: 6px; }
+.st-dock.cr-dock .dock-tries { flex: 1 1 100% !important; justify-content: center; }
+.cr-dbtns { flex: 1 1 100%; display: flex; gap: 8px; min-width: 0; }
+.st-dock .cr-dbtns > * { flex: 1 1 0 !important; min-width: 0; width: auto; margin: 0 !important; padding: 10px 6px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
+.cr-dbtns:empty { display: none; }
+.st-dock .cr-dbtns .dock-go { font-size: 16px !important; }
+.st-dock .cr-dbtns .dock-go small { font-size: 11px; opacity: .85; }
+.st-dock .dock-wr { margin: 0 !important; font-size: 15px !important; border-radius: 10px; background: linear-gradient(#e9f3ff, #b9d4f5) !important; color: #12304f !important; border: 3px solid #2d4f78 !important; box-shadow: 0 4px 0 #13263c !important; border-image: none !important; }
+.st-dock .dock-wr:disabled { background: linear-gradient(#5a6472, #3e4652) !important; color: #d6dde6 !important; }
+.st-dock .cr-dbtns .dock-wait { text-align: center; align-self: center; white-space: normal; }
+#screen-student.st-battle .wrap:has(.cr-dock) { padding-bottom: 140px; }
+body:has(#test-bar) #screen-student.st-battle .wrap:has(.cr-dock) { padding-bottom: calc(140px + var(--tbh, 60px)); }
+.q-extra-row { display: flex; justify-content: center; margin-top: 10px; } .q-extra-row .q-extra { background: linear-gradient(#e9f3ff, #b9d4f5); color: #12304f; border: 2px solid #2d4f78; }

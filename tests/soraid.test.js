@@ -132,4 +132,23 @@ for (let i = 0; i < 8; i++) add('c', 1, false); d = X.chainDown(L, Q, 'u4'); che
 // ⑩ 🌟 진필살기 즉발 (#42): 쓰러진 몬스터여도 금빛 컷인(충전 +1 없음) · 석화는 살아 있을 때만 — actions.js photoTrue 글 확인
 { const src = require('fs').readFileSync(require('path').join(__dirname, '..', 'js/raid/actions.js'), 'utf8'), f = src.slice(src.indexOf('async function photoTrue'), src.indexOf('// 🛡 홀리 방패'));
   check(!/charge`\), c \+ 1/.test(f) && /alive && !Raid\.petrify/.test(f) && /tcutN\(R, mid\) < 3/.test(f), '서술형 통과 = 쓰러졌어도 금빛 컷인 (충전 +1 없음 · 석화는 살아 있을 때만 · 컷인 3명)'); }
+// ⑪ ⚔ #50 (2026-11-10): 대장 처치 뒤 남은 기회 정수 칸 = ⛓ 묶기 · 💚 힐 · 힐 받으면 첫 판 +1칸 · 서술형 통과 = 남은 단계 모두 (퍼펙트 아님) · 저절로 한 판 더 없음
+{ const Q = X.newRoom('505050', 'set-06', 'T', 1000); Q.active = { a: true, b: true }; Q.players = { a: {}, b: {} }; Q.chain = { u4: { a: {}, b: {} } };
+  const it = X.chainItems(L, Q, 'u4', 'a', 0), n = it.length, ans = (q) => X.chainAns(q); let k = 0;
+  check(it.every((q) => DS.Quiz.grade(q, ans(q))), `정답 채우기(chainAns)가 모든 단계에서 정답 (${n}단계)`);
+  Q.chain.u4.a[k++] = { s: 0, p: 0, g: -999 }; it.forEach((q, s) => { Q.chain.u4.a[k++] = { s, p: 0, g: ans(q) }; });
+  let r = X.record(L, Q, 'u4', 'a'); check(r.done && r.left === 3.5 && r.tokens === 3 && r.tokLeft === 3 && r.canHeal && !r.perfect, `대장 처치 · 남은 3.5 → 묶기/힐 3번 (${r.tokens})`);
+  const ib = X.chainItems(L, Q, 'u4', 'b', 0); let kb = 0; for (let j = 0; j < 7; j++) Q.chain.u4.b[kb++] = { s: 0, p: 0, g: -999 }; // b: 졸개 ① 오답 7번 → 0.5 남음 · 잠김
+  let rb = X.record(L, Q, 'u4', 'b'); check(rb.left === 0.5 && rb.locked && X.healTarget(L, Q, 'u4', 'a', 0) === 'b', `막힌 친구 b (0.5 · 잠김) = 힐 받을 사람`);
+  Q.heals = { u4: { a: { 0: 'b' } } }; rb = X.record(L, Q, 'u4', 'b'); r = X.record(L, Q, 'u4', 'a');
+  check(rb.slots === 5 && rb.left === 1.5 && !rb.locked && rb.healed === 1 && r.tokLeft === 2, `💚 힐 → b 기회 +1칸 (${rb.left}/${rb.slots}) · a 남은 2번`);
+  Q.heals.u4.a[1] = '!bind@1'; r = X.record(L, Q, 'u4', 'a'); check(r.tokLeft === 1 && X.tokBinds(Q, 'u4', 'a').length === 1, '⛓ 묶기 1번 → 남은 1번');
+  check(X.healTarget(L, Q, 'u4', 'b', 0) !== 'a', '대장을 잡은 a 는 힐 받는 사람이 아님');
+  Q.chain.u4.b[kb++] = { s: 0, p: 0, g: ans(ib[0]) }; for (let s = 1; s < ib.length; s++) Q.chain.u4.b[kb++] = { s, p: 0, g: ans(ib[s]), ph: 1 };
+  rb = X.record(L, Q, 'u4', 'b'); check(rb.done && rb.byPh && !rb.perfect && rb.stage === ib.length && rb.says.length >= ib.length && rb.tokens === 1, `서술형 통과 = 남은 ${ib.length - 1}단계 처치 · 퍼펙트 아님 · 나의 풀이 채움 · 남은 1.5 → 1번`);
+  const F = X.newRoom('515151', 'set-06', 'T', 1000); F.active = { c: true }; F.players = { c: {} }; F.chain = { u4: { c: {} } }; const ic = X.chainItems(L, F, 'u4', 'c', 0); let kc = 0;
+  for (let j = 0; j < 8; j++) F.chain.u4.c[kc++] = { s: 0, p: 0, g: -999 }; check(X.record(L, F, 'u4', 'c').fail, '기회 0 = 못 맞힘');
+  ic.forEach((q, s) => { F.chain.u4.c[kc++] = { s, p: 0, g: ans(q), ph: 1 }; }); const rc = X.record(L, F, 'u4', 'c'); check(rc.done && !rc.fail && rc.tokens === 0, '못 맞힌 뒤에도 서술형 통과 = 처치 (묶기 · 힐 0번)');
+  const st = require('fs').readFileSync(require('path').join(__dirname, '..', 'js/raid/student.js'), 'utf8');
+  check(/pracArm\[ak\]/.test(st) && /1500 - \(Date\.now\(\) - pracArm/.test(st), '🔥 한 판 더 단추 = 나타난 뒤 1.5초 잠금 (저절로 넘어가지 않게)'); }
 console.log(fail ? `❌ 소레이드 실패 ${fail}` : `✅ 소레이드: 확인 ${ok}개 · 실패 0`); if (fail) process.exit(1);

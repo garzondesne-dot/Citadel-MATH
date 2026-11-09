@@ -202,6 +202,15 @@ DS.Act = (function () {
     await N().set(P(code, `chain/${mid}/${me}/${rec.nextK}`), { s, p: p || 0, g: g == null ? '' : g, ...(w ? { w: 1 } : {}), at: N().TS });
     return Raid.record(L, { ...R, chain: { ...(R.chain || {}), [mid]: { ...((R.chain || {})[mid] || {}), [me]: { ...(((R.chain || {})[mid] || {})[me] || {}), [rec.nextK]: { s, p: p || 0, g, ...(w ? { w: 1 } : {}) } } } } }, mid, me);
   }
+  // ✍ #50 ③ (2026-11-10): 졸개를 다 풀기 전에 서술형 사진 통과 = 남은 단계 모두 푼 것으로 (첫 판만 · 학습지 숫자 · 퍼펙트 아님) → 반 체력 데미지 = 남은 단계 수
+  async function chainPhotoFill(code, packed, mid) {
+    const R = unpackRoom(packed), L = DS.Lessons.get(R.meta.lesson), me = N().uid(), rec = Raid.record(L, R, mid, me);
+    if (!rec.chain || rec.done) return 0;
+    let k = rec.nextK; const patch = {};
+    for (let s = rec.stage; s < rec.n; s++) patch[`${k++}`] = { s, p: 0, g: Raid.chainAns(rec.items[s]), ph: 1, at: N().TS };
+    await N().update(P(code, `chain/${mid}/${me}`), patch);
+    return rec.n - rec.stage;
+  }
   // 💡 힌트 주기 (2026-11-09 #26): 근거 줄을 맞힌 학생만 · 소레이드마다 한 번 · players/{나}/hint/{mid} (규칙 바꿈 없음)
   async function giveHint(code, packed, mid) {
     const R = unpackRoom(packed), L = DS.Lessons.get(R.meta.lesson), me = N().uid(), rec = Raid.record(L, R, mid, me);
@@ -432,5 +441,5 @@ DS.Act = (function () {
     return out;
   }
 
-  return { pracStart, restMinDef, holyArm, holyUse, snapStart, snapEnd, useCharge, giveHint, chainSubmit, chainKnock, chainRelease, scoutReady, setSolve, saveEnd, resumeInfo, switchLesson, setSound, bossTry, openRooms, savePunch, finishOvertime, setPunchOff, punchOff, batTick, batAnswer, hit, endClassAsk, timeUp, extendTime, openRift, cutShort, setRest, setRestMin, markBossWin, prepLite, prepImg, hasImg, setVideoFile, setVideoOn, endClass, admitLate, getPrep, setImage, setVideo, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, heal, bossAnswer, unpackRoom, P };
+  return { chainPhotoFill, pracStart, restMinDef, holyArm, holyUse, snapStart, snapEnd, useCharge, giveHint, chainSubmit, chainKnock, chainRelease, scoutReady, setSolve, saveEnd, resumeInfo, switchLesson, setSound, bossTry, openRooms, savePunch, finishOvertime, setPunchOff, punchOff, batTick, batAnswer, hit, endClassAsk, timeUp, extendTime, openRift, cutShort, setRest, setRestMin, markBossWin, prepLite, prepImg, hasImg, setVideoFile, setVideoOn, endClass, admitLate, getPrep, setImage, setVideo, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, heal, bossAnswer, unpackRoom, P };
 })();
