@@ -702,13 +702,16 @@ DS.Student = (function () {
     const needWhy = prac && rec.pass === pass && rec.pWhy >= 0, wq = needWhy ? pItems[rec.pWhy] : null; // 💡 연습 판: 그 단계 뒤 근거 빈칸
     const pFail = prac && rec.pass === pass && rec.pFail, pDock = { left: prac && rec.pass === pass ? rec.pLeft : Raid().CHAIN_SLOTS || 4, slots: Raid().CHAIN_SLOTS || 4, healed: 0 }; // 🔥 #40 연습 판 기회 (판마다 새 4칸)
     const pDone = prac && stage >= pItems.length && !needWhy, q = pItems[Math.min(stage, pItems.length - 1)];
-    const wItem = rec.items.find((x) => x.why), hintBy = wItem ? Object.entries(R.players || {}).filter(([u, p]) => u !== me && ((p.hint || {})[mid])).map(([, p]) => p) : [], myHint = !!((myP().hint || {})[mid]); // 💡 친구 힌트
+    // 💡 친구 힌트 · 🧩 #52 ② 근거 줄 1~3개 (줄마다 힌트 1번 · 저장 이름 hintKeyOf)
+    const wSt = Raid().whyStages(rec.items), wItem = wSt.length ? rec.items[wSt[0]] : null, hk = (s) => Raid().hintKeyOf(rec.items, mid, s), hOf = (p, s) => !!((p.hint || {})[hk(s)]);
+    const hintLines = wSt.map((s) => ({ s, by: Object.entries(R.players || {}).filter(([u, p]) => u !== me && hOf(p, s)).map(([, p]) => p) })).filter((x) => x.by.length), hintBy = hintLines.flatMap((x) => x.by);
+    const nextHint = wSt.find((s) => (rec.whyDone || []).includes(s) && !hOf(myP(), s)), myHint = wSt.length > 0 && nextHint == null && wSt.some((s) => hOf(myP(), s)), whyTag = wSt.length > 1 ? `🧩 근거 줄 ${rec.whyN}/${rec.whyM}` : '';
     const key = `chain|${mid}|${pass}|${stage}|${rec.nextK}`;
     if (!cform || cform.key !== key) cform = { key, given: [q.type === 'multi' ? [] : q.type === 'number' ? 0 : null] };
     const ready = q.type === 'multi' ? cform.given[0].length > 0 : cform.given[0] != null;
     const dns = Raid().chainDown(L, R, mid).filter((d) => d.down).map((d) => d.k); // 💥 반이 쓰러뜨린 졸개
     const wm = writeMode[mid], phN = Number((myP().ph || {})[mid]) || 0, wrOk = (myP().wr || {})[mid], canPhoto = DS.Photo && DS.Photo.ready(L.id, mid); // ✍ #50 ② 언제나 (시작 전 · 졸개 도중 · 대장 뒤 · 한 판 더 중) // #47 테스트에서도 ✍ 📸 (진짜 중계소 · 기준표 켜진 문제) // 🐞 2026-11-09: sig 보다 먼저 (예전엔 뒤에 있어 소레이드 화면이 그려지지 않음 · v0.9.34.0~)
-    const sig = `${key}|${JSON.stringify(cform.given)}|${rec.locked}|${rec.fail}|${rec.done}|${pDone}|${hp.left}|${dns.join(',')}|${needWhy}|${rec.whyOk}|${hintBy.length}|${myHint}|${wm ? (wm.peek ? 'p' : 'w') : ''}|${phN}|${wrOk || ''}|${!!(DS.Photo && DS.Photo.ready(L.id, mid))}|${myP().charge || 0}|${rec.tokLeft}|${rec.slots}|${rec.left}`;
+    const sig = `${key}|${JSON.stringify(cform.given)}|${rec.locked}|${rec.fail}|${rec.done}|${pDone}|${hp.left}|${dns.join(',')}|${needWhy}|${rec.whyOk}|${rec.whyN}|${nextHint}|${hintBy.length}|${myHint}|${wm ? (wm.peek ? 'p' : 'w') : ''}|${phN}|${wrOk || ''}|${!!(DS.Photo && DS.Photo.ready(L.id, mid))}|${myP().charge || 0}|${rec.tokLeft}|${rec.slots}|${rec.left}`;
     if (sig === drawn && body.querySelector('.ch-wrap')) { hpText(body, hp); return; }
     if (chainAtkUntil > Date.now() && body.querySelector('.ch-wrap')) { hpText(body, hp); return; } // ⚔ 공격 모션 중엔 다시 그리지 않음 (끝나면 다시 그림)
     drawn = sig;
@@ -722,9 +725,9 @@ DS.Student = (function () {
     // ⛓ 💚 #50 ①: 대장 처치 뒤 남은 기회(정수 칸)로 묶기 · 힐 (일반 몬스터 결과 화면과 같은 방식) · 한 판 더 기회와 따로
     const tokPick = rec.done && rec.tokLeft > 0 && (!prac || pDone || pFail) ? `<p class="okc st-ask">남은 기회로 무엇을 할까요? <span class="muted small">(${rec.tokLeft}번)</span></p>
       <div class="heal-pick"><button class="btn primary big" id="st-bind">⛓ 몬스터 묶기<br><small>공격 ${Raid().BIND_TOKEN}초 늦춤</small></button><button class="btn big heal-btn" id="st-heal">💚 친구 힐<br><small>막힌 친구 기회 +1</small></button></div>` : '';
-    const pendTip = pLeft > 0 ? '' : `<p class="cr-more">🔥 연습 ${Raid().PRAC_MAX}번 끝!${wItem && rec.whyOk && !myHint ? ' 이제 💡 친구에게 힌트를 줘 볼까요?' : ''}</p>`;
-    const hintBtn = wItem && rec.whyOk && !myHint ? '<button class="btn cr-hint" id="cr-hint">💡 힌트 주기 <small>근거 한 줄이 TV 에 떠요 · 한 번 · EXP +1</small></button>' : myHint ? '<p class="muted small center">💡 힌트를 줬어요 — 고마워요!</p>' : '';
-    const hintsBox = wItem && hintBy.length && !rec.done ? `<details class="cr-hints"><summary>💡 친구 힌트 ${hintBy.length}개 <small>(누르면 펼침)</small></summary><p>${pretty(wItem.why.text)}</p><p class="muted small">${hintBy.slice(0, 5).map((p) => esc(p.nick || '')).join(' · ')}</p></details>` : '';
+    const pendTip = pLeft > 0 ? '' : `<p class="cr-more">🔥 연습 ${Raid().PRAC_MAX}번 끝!${nextHint != null ? ' 이제 💡 친구에게 힌트를 줘 볼까요?' : ''}</p>`;
+    const hintBtn = (nextHint != null ? `<button class="btn cr-hint" id="cr-hint" data-s="${nextHint}">💡 힌트 주기${wSt.length > 1 ? ` (근거 줄 ${wSt.indexOf(nextHint) + 1})` : ''} <small>근거 한 줄이 TV 에 떠요 · 줄마다 한 번 · EXP +1</small></button>` : myHint ? '<p class="muted small center">💡 힌트를 줬어요 — 고마워요!</p>' : '') + (whyTag && (prac || rec.done) ? `<p class="muted small center cr-whyn">${whyTag}</p>` : '');
+    const hintsBox = wItem && hintBy.length && !rec.done ? `<details class="cr-hints"><summary>💡 친구 힌트 ${hintBy.length}개 <small>(누르면 펼침)</small></summary>${hintLines.map((x) => `<p>${pretty(rec.items[x.s].why.text)}</p><p class="muted small">${x.by.slice(0, 5).map((p) => esc(p.nick || '')).join(' · ')}</p>`).join('')}</details>` : '';
     let mainHtml;
     if (wm) { // ✍ #50: 대장 전에도 · 바로 쓰기 (#38: 연습 중에 눌러도 · ✕ 닫으면 보던 연습 판으로): 나의 풀이 · 졸개 단계 · 채점 기준을 숨기고 원래 문제 + 📸 만 (📜 다시 보기 = ✍ 연습 쓰기)
       const img = scoutImg[mid];
@@ -783,7 +786,7 @@ DS.Student = (function () {
     })));
     const wb = $('#cr-write'); if (wb) wb.onclick = () => { writeMode[mid] = { peek: false }; drawn = ''; render(); };
     chargeBtn(body);
-    const hb = $('#cr-hint'); if (hb) hb.onclick = () => DS.Control.run(async () => { hb.disabled = true; await DS.Act.giveHint(code, raw, mid); DS.Sound.clank(); DS.UI.toast('💡 힌트를 TV 에 띄웠어요 · EXP +1'); drawn = ''; render(); });
+    const hb = $('#cr-hint'); if (hb) hb.onclick = () => DS.Control.run(async () => { hb.disabled = true; await DS.Act.giveHint(code, raw, mid, Number(hb.dataset.s)); DS.Sound.clank(); DS.UI.toast('💡 힌트를 TV 에 띄웠어요 · EXP +1'); drawn = ''; render(); });
     body.querySelectorAll('.cr-prob').forEach((d) => d.addEventListener('toggle', () => { probShut[d.dataset.pm] = !d.open; })); // 📜 접기 기억
     sandApply(body, `${mid}|${prac ? pass : 0}`); // ✨ 모래 글씨
     const pb = $('#cr-prac');

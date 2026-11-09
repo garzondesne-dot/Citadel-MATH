@@ -156,4 +156,18 @@ for (let i = 0; i < 8; i++) add('c', 1, false); d = X.chainDown(L, Q, 'u4'); che
   const raw = (st.match(/body\.innerHTML = `<div class="panel framed st-fight/g) || []).length, painted = (st.match(/paint\(body, `[^`]+`, `<div class="panel framed st-fight/g) || []).length;
   check(raw === 0 && painted >= 4, `전투 화면 직접 그리기 ${raw}곳 · paint ${painted}곳 (문제 · 소레이드 · 쓰기 · 결과)`);
   check(/dataset\.paint === tag/.test(st) && /pp\.scrollTop = keep\.p/.test(st), 'paint = 같은 화면이면 양피지 · 창 스크롤 그대로'); }
+// ⑬ 🧩 #52 ② 근거 줄 여러 개 (2026-11-10): 줄마다 자기 단계 뒤 빈칸 · 🧩 n/m · 모두 맞혀야 whyAll · 힌트 저장 이름 = 첫 줄 mid · 둘째부터 mid@단계 · 1줄 차시는 그대로
+{ const W = Object.assign({}, L, { chainItems: (mid, seed, pass) => { const it = L.chainItems(mid, seed, pass); if (mid === 'u4' && !it[0].why) it[0].why = { pre: '∵ 테스트', post: '', choices: ['가', '나'], answer: 0, text: '∵ 테스트 가' }; return it; } });
+  const Q = X.newRoom('525252', 'set-06', 'T', 1000); Q.active = { a: true }; Q.players = { a: {} }; Q.chain = { u4: { a: {} } }; const m = Q.chain.u4.a; let k = 0;
+  const it0 = X.chainItems(W, Q, 'u4', 'a', 0), ws = X.whyStages(it0); check(ws.length === 2 && ws[0] === 0 && ws[1] === it0.length - 1, `근거 줄 2개 자리 ${ws}`);
+  check(X.hintKeyOf(it0, 'u4', ws[0]) === 'u4' && X.hintKeyOf(it0, 'u4', ws[1]) === `u4@${ws[1]}`, '힌트 저장 이름: 첫 줄 = u4 (예전과 같음) · 둘째 = u4@단계');
+  check(X.whyStages(X.chainItems(L, Q, 'u4', 'a', 0)).length === 1 && X.hintKeyOf(X.chainItems(L, Q, 'u4', 'a', 0), 'u4', X.whyStages(X.chainItems(L, Q, 'u4', 'a', 0))[0]) === 'u4', '1줄 차시 = 예전 그대로 (hint/u4)');
+  it0.forEach((q, s) => { m[k++] = { s, p: 0, g: right(q) }; }); let r = X.record(W, Q, 'u4', 'a'); check(r.done && r.whyM === 2 && r.whyN === 0 && !r.whyAll && r.says.length === it0.length + 2, `첫 판 = 근거 줄 2개 모두 완성 문장 (말 ${r.says.length}) · 🧩 0/2`);
+  const P1 = X.chainItems(W, Q, 'u4', 'a', 1); m[k++] = { s: 0, p: 1, g: right(P1[0]) }; r = X.record(W, Q, 'u4', 'a'); check(r.pWhy === 0 && r.pStage === 1, '한 판 더: 졸개 ① 뒤 근거 빈칸 (다음 단계 안 나옴)');
+  m[k++] = { s: 1, p: 1, g: right(P1[1]) }; r = X.record(W, Q, 'u4', 'a'); check(r.pStage === 1, '근거 빈칸을 고르기 전엔 다음 단계 답이 안 먹힘');
+  m[k++] = { s: 0, p: 1, g: 1, w: 1 }; r = X.record(W, Q, 'u4', 'a'); check(r.pWhy === 0 && r.pLeft === 4, '근거 빈칸 오답 = 기회 안 깎임 · 다시 고름');
+  m[k++] = { s: 0, p: 1, g: 0, w: 1 }; r = X.record(W, Q, 'u4', 'a'); check(r.pWhy < 0 && r.whyN === 1 && r.whyOk && !r.whyAll && r.whyDone.join() === '0', `근거 줄 1 맞힘 → 🧩 1/2 (${r.whyN}/${r.whyM})`);
+  for (let s2 = 1; s2 < P1.length; s2++) m[k++] = { s: s2, p: 1, g: right(P1[s2]) }; r = X.record(W, Q, 'u4', 'a'); check(r.pWhy === ws[1] && r.pDoneN === 0, '대장 뒤 근거 빈칸 = 둘째 줄 (사슬 완성은 빈칸 뒤)');
+  m[k++] = { s: ws[1], p: 1, g: 0, w: 1 }; r = X.record(W, Q, 'u4', 'a'); check(r.whyN === 2 && r.whyAll && r.pDoneN === 1, '근거 줄 2 맞힘 → 🧩 2/2 · whyAll · 연습 사슬 완성');
+  const src = require('fs').readFileSync(require('path').join(__dirname, '..', 'js/raid/result.js'), 'utf8'); check(/rc\.whyAll \? 2/.test(src) && /ladW/.test(src), '🪜 사다리 🧩 = 근거 줄 모두 · 기록 ladW = 맞힌 줄/전체'); }
 console.log(fail ? `❌ 소레이드 실패 ${fail}` : `✅ 소레이드: 확인 ${ok}개 · 실패 0`); if (fail) process.exit(1);

@@ -212,11 +212,13 @@ DS.Act = (function () {
     return rec.n - rec.stage;
   }
   // 💡 힌트 주기 (2026-11-09 #26): 근거 줄을 맞힌 학생만 · 소레이드마다 한 번 · players/{나}/hint/{mid} (규칙 바꿈 없음)
-  async function giveHint(code, packed, mid) {
-    const R = unpackRoom(packed), L = DS.Lessons.get(R.meta.lesson), me = N().uid(), rec = Raid.record(L, R, mid, me);
+  async function giveHint(code, packed, mid, s) { // 🧩 #52 ②: 근거 줄마다 1번 (s = 근거 줄이 붙은 단계 · 없으면 맞혔고 아직 안 준 첫 줄)
+    const R = unpackRoom(packed), L = DS.Lessons.get(R.meta.lesson), me = N().uid(), rec = Raid.record(L, R, mid, me), mine = (((R.players || {})[me] || {}).hint) || {};
     if (!rec.whyOk) fail('💡 근거 줄을 먼저 맞혀야 힌트를 줄 수 있어요 (🔥 한 판 더)');
-    if ((((R.players || {})[me] || {}).hint || {})[mid]) fail('이 소레이드에서는 이미 힌트를 줬어요');
-    await N().set(P(code, `players/${me}/hint/${mid}`), N().TS);
+    const k0 = s != null ? s : rec.whyDone.find((x) => !mine[Raid.hintKeyOf(rec.items, mid, x)]);
+    if (k0 == null || !rec.whyDone.includes(k0)) fail('이 근거 줄을 먼저 맞혀야 힌트를 줄 수 있어요');
+    const key = Raid.hintKeyOf(rec.items, mid, k0); if (mine[key]) fail('이 근거 줄은 이미 힌트를 줬어요');
+    await N().set(P(code, `players/${me}/hint/${key}`), N().TS); return k0;
   }
   // ✍ → 📸 진필살기 (2026-11-09 #26): 찰칵 = 예고(TV ⚡ 충전 중 게이지) · 통과 = 🌟 진필살기(스킬 상관없이 · 석화는 몬스터당 반 1번 · 다음은 금빛 컷인만 3명) · 몬스터가 이미 쓰러졌으면 ⚡ 충전 1개
   const snapStart = (code, mid) => N().set(P(code, `players/${N().uid()}/snap`), { mid, at: N().TS });

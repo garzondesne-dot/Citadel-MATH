@@ -50,14 +50,14 @@ DS.Dash = (function () {
       .sort((a, b) => a.no - b.no);
     const studs = ns.map((n) => {
       const rec = records[n] || {}, went = held.filter((l) => rec[l.id]);
-      let ok = 0, tot = 0, bo = 0, bt = 0, fixed = 0, perf = 0, hints = 0, hg = 0, lad = {}, oxo = 0, oxt = 0;
+      let ok = 0, tot = 0, bo = 0, bt = 0, fixed = 0, perf = 0, hints = 0, hg = 0, lad = {}, ladW = {}, oxo = 0, oxt = 0;
       const conc = {}, std = {}, mis = {}; // 📚 성취기준별 첫 시도 · 🔎 오개념 (2026-11-03)
       went.forEach((l) => {
         const r = rec[l.id];
         Object.entries(r.conc || {}).forEach(([c, v]) => { ok += v[0]; tot += v[1]; const key = `${l.id}|${c}`; conc[key] = { name: (r.names || {})[c] || c, lesson: l, ok: v[0], total: v[1] };
           const sd = DS.Standards ? DS.Standards.of(l.id, c, l.no) : null; if (sd) { std[sd] = std[sd] || [0, 0]; std[sd][0] += v[0]; std[sd][1] += v[1]; } });
         if (DS.Mis && r.mis) DS.Mis.merge(mis, r.mis);
-        hg += Number(r.hg) || 0; Object.entries(r.lad || {}).forEach(([m, v]) => { lad[m] = Math.max(lad[m] || 0, Number(v) || 0); }); bo += Math.min(Number(r.boss) || 0, Number(r.bossN) || 0); bt += Number(r.bossN) || 0; if (r.ox) { oxo += Number(r.ox[0]) || 0; oxt += Number(r.ox[1]) || 0; } /* ⭐ 도전 문항은 따로 (옛 기록은 boss 에 섞여 있어 bossN 까지만 · v0.9.7.9) */ fixed += Number(r.fixed) || 0; perf += Number(r.perfects) || 0; hints += Number(r.hints) || 0; // 💡 그림 힌트 (v0.9.7.4 · 성적 아님)
+        hg += Number(r.hg) || 0; Object.entries(r.lad || {}).forEach(([m, v]) => { lad[m] = Math.max(lad[m] || 0, Number(v) || 0); }); Object.entries(r.ladW || {}).forEach(([m, v]) => { ladW[m] = v; }); // 🧩 #52 bo += Math.min(Number(r.boss) || 0, Number(r.bossN) || 0); bt += Number(r.bossN) || 0; if (r.ox) { oxo += Number(r.ox[0]) || 0; oxt += Number(r.ox[1]) || 0; } /* ⭐ 도전 문항은 따로 (옛 기록은 boss 에 섞여 있어 bossN 까지만 · v0.9.7.9) */ fixed += Number(r.fixed) || 0; perf += Number(r.perfects) || 0; hints += Number(r.hints) || 0; // 💡 그림 힌트 (v0.9.7.4 · 성적 아님)
       });
       const total = Number((xp[n] || {}).total || 0), lv = DS.Grow ? DS.Grow.level(total) : { lv: 1, title: '' };
       const seals = DS.Bonus ? DS.Bonus.seals(bonus[n]).length : 0;
@@ -65,7 +65,7 @@ DS.Dash = (function () {
       const left = DS.Note ? held.reduce((a, l) => { const L = DS.Lessons.get(l.id); return L && L.boss && !L.eval ? a + DS.Note.lesson(L, rec[l.id], (bonus[n] || {})[l.id]).left : a; }, 0) : 0; // 📕 남은 문제
       const tries = Object.values(bonus[n] || {}).reduce((a, l) => a + Object.values(l || {}).reduce((b, m) => b + (Number((m || {}).tries) || 0), 0), 0);
       return { n, name: byN[n], rec, went: went.length, heldN: held.length, part: pct(went.length, held.length), boss: pct(bo, bt), bossRaw: [bo, bt], first: pct(ok, tot), firstRaw: [ok, tot],
-        fixed, perf, hints, hg, lad, ladN: Object.values(lad).reduce((a, v) => a + v, 0), seals, tries, left, ox: pct(oxo, oxt), bon: bonus[n] || {}, cards: Object.keys(cards[n] || {}).length, xp: total, lv: lv.lv, lvTitle: lv.title, conc, std, mis };
+        fixed, perf, hints, hg, lad, ladW, ladN: Object.values(lad).reduce((a, v) => a + v, 0), seals, tries, left, ox: pct(oxo, oxt), bon: bonus[n] || {}, cards: Object.keys(cards[n] || {}).length, xp: total, lv: lv.lv, lvTitle: lv.title, conc, std, mis };
     });
     return { held, studs };
   }
@@ -161,7 +161,7 @@ DS.Dash = (function () {
         ${sorted().map((s) => `<tr>${isAll() ? `<td>${esc(s.cls)}</td>` : ''}<td>${s.n}</td><td><button class="linkish" data-who="${s.key}">${esc(s.name)}</button></td>${data.held.map((l) => lessonCell(s, l)).join('')}
           <td class="dash-c ${s.left ? 'nt-left' : 'ok'}">${s.left ? `❗ ${s.left}` : '✔'}</td>
           <td class="dash-c ${heat(s.part)}">${s.went}/${s.heldN}</td><td class="dash-c ${heat(s.boss)}">${show(s.boss)}</td><td class="dash-c ${heat(s.first)}">${show(s.first)}</td><td class="dash-c ${heat(s.ox)}">${show(s.ox)}</td>
-          <td>${s.fixed}</td><td>${s.hints || ''}</td><td>${s.hg || ''}</td><td title="👣 1 대장 처치 · 🧩 2 근거 줄 · ✍ 4 서술형 통과">${Object.entries(s.lad || {}).map(([m, v]) => `<span class="lad">${m.replace(/^u/, '')}${v >= 4 ? '✍' : v >= 2 ? '🧩' : '👣'}</span>`).join(' ')}</td><td>${s.seals}</td><td>${s.tries}</td><td>${s.cards}</td><td>Lv.${s.lv}</td></tr>`).join('')}</table></div>
+          <td>${s.fixed}</td><td>${s.hints || ''}</td><td>${s.hg || ''}</td><td title="👣 1 대장 처치 · 🧩 2 근거 줄 · ✍ 4 서술형 통과">${Object.entries(s.lad || {}).map(([m, v]) => `<span class="lad">${m.replace(/^u/, '')}${v >= 4 ? '✍' : v >= 2 ? '🧩' : '👣'}${v < 2 && (s.ladW || {})[m] ? `<small>🧩${(s.ladW || {})[m]}</small>` : ''}</span>`).join(' ')}</td><td>${s.seals}</td><td>${s.tries}</td><td>${s.cards}</td><td>Lv.${s.lv}</td></tr>`).join('')}</table></div>
         <button class="btn" id="dash-csv">📥 표 내려받기 (엑셀에서 열리는 CSV)</button>`;
     },
     rank() {
