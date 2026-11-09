@@ -192,12 +192,18 @@ check(X.online(R2, 'a') && !X.online(R2, 'b'), '접속 표시');
   { const m3 = {}; X.atkTrack(m3, { t: 1, per: 20 }, 'a'); const a1 = X.atkTrack(m3, { t: 20, per: 20 }, 'a'); const a2 = X.atkTrack(m3, { t: 40, per: 20 }, 'a'); X.atkTrack(m3, { t: 2, per: 20 }, 'b'); const b1 = X.atkTrack(m3, { t: 21, per: 20 }, 'b');
     check(a1.first && !a2.first && b1.first, '다음 몬스터(새 열쇠)는 다시 첫 공격');
     const m4 = {}; X.atkTrack(m4, { t: 1, per: 20 }, 'c'); X.atkTrack(m4, { t: 20, per: 20 }, 'c'); X.atkTrack(m4, { t: 5, per: 20 }, 'c'); const c2 = X.atkTrack(m4, { t: 20, per: 20 }, 'c'); check(c2.strike && !c2.first, '⛓ 묶기로 시계가 처음으로 돌아가도 두 번 막지 않음'); }
-  // ⭐ 각성 막는 학생: +10 접속 학생 중 단계 번호로 돌아가며 · 교사 · +9 · 접속 안 한 학생 제외 · 없으면 null
-  { const R0 = { meta: { teacher: 'T' }, active: { a: true, b: true, c: true, d: false, T: true }, players: { a: { num: 1, enh: 10 }, b: { num: 2, enh: 9 }, c: { num: 3, enh: 10 }, d: { num: 4, enh: 10 }, T: { num: 0, enh: 10 } }, state: { step: 0 } };
-    check(X.guardian(null, R0) === 'a', '각성 1번째 = 번호 순 첫 학생');
-    check(X.guardian(null, { ...R0, state: { step: 1 } }) === 'c', '다음 단계 = 다음 각성 학생 (돌아가며)');
-    check(X.guardian(null, { ...R0, state: { step: 2 } }) === 'a', '한 바퀴 돌면 처음으로');
-    check(X.guardian(null, { ...R0, players: { ...R0.players, a: { num: 1, enh: 3 }, c: { num: 3 } } }) === null, '각성 학생 없으면 null (지금과 같음)'); }
+  // 🛡 홀리 방패: 켠 학생(hg) · 이번 공격 주기 안 · 교사 · 접속 안 함 · 이미 쓴 몬스터 제외 / 막은 시각 묶음 · 석화
+  { const now = 100000, R0 = { meta: { teacher: 'T' }, active: { a: true, b: true, c: true, d: false, T: true },
+      players: { a: { num: 1, enh: 10, hg: { mid: 'm1', at: now - 5000 } }, b: { num: 2, enh: 10, hg: { mid: 'm1', at: now - 60000 } }, c: { num: 3, enh: 10, hg: { mid: 'm2', at: now - 1000 } }, d: { num: 4, enh: 10, hg: { mid: 'm1', at: now - 1000 } }, T: { num: 0, hg: { mid: 'm1', at: now } } } };
+    check(X.holyArmed(R0, 'm1', now, 20).join() === 'a', `켠 용사 = 이번 주기 안 · 접속 중 · 학생만 (${X.holyArmed(R0, 'm1', now, 20).join()})`);
+    check(X.holyArmed(R0, 'm1', now, null).join() === 'a,b', '주기 무시하면 오래 켜 둔 학생도');
+    const R1 = { ...R0, players: { ...R0.players, a: { ...R0.players.a, holy: { m1: now } }, b: { ...R0.players.b, holy: { m1: now + 1200 } }, c: { ...R0.players.c, holy: { m1: now + 30000 } } } };
+    check(X.holyArmed(R1, 'm1', now, 20).length === 0, '이미 막은 몬스터에서는 다시 안 켜짐 (몬스터마다 한 번)');
+    const hs = X.holyTimes(R1, 'm1');
+    check(hs.length === 2 && hs[0].by.join() === 'a,b', `같은 공격을 둘이 막으면 한 번 (효과 같음) · 나중 공격은 따로 (${JSON.stringify(hs)})`);
+    const st = X.stone(R1, 'm1'); check(st && st.holy && st.at === now + 30000 && st.until === now + 30000 + X.HOLY_SEC * 1000, '석화 = 가장 늦은 막기 + 10초');
+    check(X.HOLY_SEC === 10, '홀리 방패 석화 10초');
+    check(X.stone({ players: {} }, 'm1') === null, '막기 · 진필살기 없으면 석화 없음'); }
   tr = X.atkTrack(memo, { t: 30, per: 40 }, 'k'); check(!tr.strike && Math.abs(tr.p - 0.25) < 1e-9, '느려진 주기는 이번 바퀴부터 (게이지 그대로 이어짐)');
   tr = X.atkTrack(memo, { t: 18, per: 40 }, 'k'); check(!tr.strike && tr.p >= 0, '묶기로 시계가 뒤로 가도 게이지가 음수가 되지 않음');
   Q.state.step = L.steps.findIndex((st) => st.kind === 'boss'); c = X.atkClock(L, Q, 70000);

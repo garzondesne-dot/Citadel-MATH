@@ -310,18 +310,40 @@ DS.Raid = (function () {
     if (p >= 1) { const first = memo.start === 0 && !memo.hit; memo.hit = true; memo.start += c.per; return { p: 0, strike: true, first }; } // first = 이 몬스터의 첫 공격 (⭐ 각성 막기)
     return { p, strike: false };
   }
-  // ⭐ +10 각성 「첫 공격 막기」 (2026-11-09 선생님 · 반 전체): 접속한 학생 중 강화 +10 이 있으면 몬스터(보스 포함)마다 첫 공격 1번은 반 모두 안 멈춤
-  //   막는 학생 = 각성 학생들 가운데 단계 번호로 돌아가며 1명 (모든 기기가 같은 학생) · 없으면 null = 지금과 같음
-  function guardian(L, R) {
-    const t = teacherUid(R), ids = activeIds(R).filter((u) => u !== t && Number(((R.players || {})[u] || {}).enh) >= 10);
-    if (!ids.length) return null;
-    const i = Math.max(0, Number((R.state || {}).step) || 0);
-    return ids[i % ids.length];
+  // 🛡 홀리 방패 (2026-11-09 선생님 · +10 각성): 그 몬스터 문제를 다 통과한 +10 학생 폰에 버튼 → 누르면 「다음 공격을 막습니다」(한 번 더 = 끔)
+  //   players/{uid}/hg = { mid, at } (켬) · players/{uid}/holy/{mid} = 막은 시각 (몬스터마다 한 번) — 학생 자기 칸이라 규칙 안 바꿈
+  //   공격이 오면 켜 둔 용사가 1명 이상 = 반 전체 안 멈춤 + 🗿 석화 HOLY_SEC 초 (그동안 맞히면 데미지당 💎1) · 여럿이 같이 켜도 효과는 같음 (눈치 싸움)
+  //   「다음 공격」만: 켠 시각이 이번 공격 주기 안(per 초 + 여유)이어야 함 → 폰이 꺼져 못 지운 켬이 계속 막지 않게
+  const HOLY_SEC = 10;
+  const holyUsed = (R, mid, uid) => Number(((((R.players || {})[uid] || {}).holy) || {})[mid]) || 0;
+  function holyCan(L, R, uid) {
+    const step = stepOf(L, R), p = (R.players || {})[uid] || {};
+    if (!step || step.kind !== 'monster' || !L.monsters[step.id] || Number(p.enh) < 10 || holyUsed(R, step.id, uid) || cleared(L, R, step.id)) return false;
+    return isChain(L, R, step.id) ? !!chainRecord(L, R, step.id, uid).done : !!record(L, R, step.id, uid).perfect;
+  }
+  const holyOn = (R, mid, uid) => { const h = ((R.players || {})[uid] || {}).hg; return !!(h && h.mid === mid && !holyUsed(R, mid, uid)); };
+  function holyArmed(R, mid, now, per) {
+    const t = teacherUid(R);
+    return activeIds(R).filter((u) => u !== t && holyOn(R, mid, u) && (per == null || now - Number(R.players[u].hg.at || 0) <= per * 1000 + 3000));
+  }
+  // 막은 시각들 (같은 공격을 여럿이 막으면 3초 안 = 한 번) → 석화 · 공격 시계 멈춤 계산
+  function holyTimes(R, mid) {
+    const ts = keys(R.players).map((u) => holyUsed(R, mid, u)).filter(Boolean).sort((a, b) => a - b), out = [];
+    ts.forEach((t) => { if (!out.length || t - out[out.length - 1].at > 3000) out.push({ at: t, by: [] }); });
+    keys(R.players).forEach((u) => { const t = holyUsed(R, mid, u); const c = out.find((o) => t && t >= o.at && t - o.at <= 3000); if (c) c.by.push(u); });
+    return out;
+  }
+  // 🗿 지금 몬스터를 굳힌 것 (진필살기 20초 · 홀리 방패 10초 중 가장 늦게 시작한 것) — 표시 · 💎 보상용 (진필살기 「한 번」 판단은 petrify 그대로)
+  function stone(R, mid) {
+    const pt = petrify(R, mid), hs = holyTimes(R, mid), h = hs.length ? hs[hs.length - 1] : null;
+    const ho = h ? { by: h.by[0], all: h.by, at: h.at, until: h.at + HOLY_SEC * 1000, holy: true } : null;
+    if (!pt) return ho; if (!ho) return pt;
+    return ho.at > pt.at ? ho : pt;
   }
   // ⏳ 보스 타임바: 마감 = 교시 끝 (+5분 연장 한 번) · null = 제한 없음
   const deadline = (R) => { const d = R && ((R.state && R.state.deadline) || (R.meta && R.meta.deadline)); return d ? d + (Number((R.state || {}).extend) || 0) * 60e3 : null; }; // state.deadline = 수업 시작 때 잡은 50분 (2026-11-06)
   const timeLeft = (R, now) => { const d = deadline(R); return d == null ? null : Math.max(0, d - now); };
   // 던전 진행: 지나온 단계 / 전체 (마무리 = 끝)
   const progress = (L, R) => { const i = (R.state || {}).step ?? -1, n = L.steps.length; return Math.max(0, Math.min(1, (i + (isEnd(L, R) || bossHp(L, R).won ? 1 : 0)) / n)); };
-  return { isTcut, tcutN, chainDown, isChain, chainItems, chainSubs, CHAIN_SLOTS, readyOf, NEWR, variantOf, BIND_TOKEN, tokBinds, solveLock, BOSS_TRIES, bossItem, bossTries, bossState, bossFirst, bossAnswered, skipped, deadline, timeLeft, progress, ATK, soloAtk, BIND_PER, BIND_MAX, bindOf, bindTotal, atkClock, atkTrack, guardian, RETRIES, HEAL_MAX, healsOf, healsGiven, healsTo, healsReceived, healTarget, ultUsed, perfStreak, TRUE_SEC, isTrue, petrify, LIVE_MS, lateIds, liveOpen, roomDone, inClass, activeIds, teacherUid, num, newRoom, stepOf, isLobby, isEnd, isFinale, isClosed, focusOn, restOn, sheetOn, videoOn, autoFocus, fullMarks, canLobby, online, seedOf, itemsFor, attemptsOf, gradeAttempt, record, resultLabel, headcount, pctOf, monsterHp, waiting, allSubmitted, cleared, mastery, bossHp, helpList };
+  return { isTcut, tcutN, chainDown, isChain, chainItems, chainSubs, CHAIN_SLOTS, readyOf, NEWR, variantOf, BIND_TOKEN, tokBinds, solveLock, BOSS_TRIES, bossItem, bossTries, bossState, bossFirst, bossAnswered, skipped, deadline, timeLeft, progress, ATK, soloAtk, BIND_PER, BIND_MAX, bindOf, bindTotal, atkClock, atkTrack, HOLY_SEC, holyUsed, holyCan, holyOn, holyArmed, holyTimes, stone, RETRIES, HEAL_MAX, healsOf, healsGiven, healsTo, healsReceived, healTarget, ultUsed, perfStreak, TRUE_SEC, isTrue, petrify, LIVE_MS, lateIds, liveOpen, roomDone, inClass, activeIds, teacherUid, num, newRoom, stepOf, isLobby, isEnd, isFinale, isClosed, focusOn, restOn, sheetOn, videoOn, autoFocus, fullMarks, canLobby, online, seedOf, itemsFor, attemptsOf, gradeAttempt, record, resultLabel, headcount, pctOf, monsterHp, waiting, allSubmitted, cleared, mastery, bossHp, helpList };
 })();

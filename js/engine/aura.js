@@ -22,7 +22,7 @@ DS.Aura = (function () {
 .au-w{left:calc(50% - var(--p)*48);bottom:calc(var(--p)*16);width:calc(var(--p)*96);height:calc(var(--p)*48);background:${u(a.wings)} 0 0/400% 100% no-repeat;animation:auF 1.28s steps(4) infinite;filter:drop-shadow(0 0 calc(var(--p)*1.5) #fff3c0aa);z-index:0}
 .au-o{left:50%;bottom:calc(var(--p)*20);width:0;height:0;animation:auO var(--d) linear infinite;z-index:3}
 .au-o>.au-s{left:calc(var(--p)*-6);top:calc(var(--p)*-6);width:calc(var(--p)*12);height:calc(var(--p)*12);background:${u(a.orbs)} 0 var(--ay)/400% 1000% no-repeat;animation:auF .6s steps(4) infinite;filter:drop-shadow(0 0 2px var(--au))}
-.au-h{left:calc(50% - var(--p)*35);bottom:calc(var(--p)*17);width:calc(var(--p)*56);height:calc(var(--p)*56);background:${u(a.halo)} 0 0/400% 100% no-repeat;animation:auF 1s steps(4) infinite;z-index:0}
+.au-h{left:calc(50% - var(--p)*41);bottom:calc(var(--p)*-1);width:calc(var(--p)*82);height:calc(var(--p)*82);background:${u(a.halo)} 0 0/400% 100% no-repeat;animation:auF 1s steps(4) infinite;z-index:0}
 .art.hv2.au>b{z-index:1}
 @keyframes auF{to{background-position-x:133.333%}}
 @keyframes auO{${st.join('')}}
@@ -60,7 +60,7 @@ DS.Aura = (function () {
     const art = host.querySelector('.art'); if (!art) return 0;
     const hr = host.getBoundingClientRect(), ar = art.getBoundingClientRect(); if (!ar.width) return 0;
     const fit = host.closest('.scene'), fh = fit ? fit.getBoundingClientRect().height : 0; // 📱 폰 전투 장면 = 방패가 장면 높이 안에 (위 상태줄을 덮지 않게)
-    const p = fh ? Math.min(ar.width * 0.0155, (fh * 1.05) / 170) : ar.width * 0.0155, cx = ar.left - hr.left + ar.width / 2 - 7 * p, by = hr.bottom - ar.bottom; // 날개 · 방패 중심 = 용사 몸통 (칸 가운데보다 7도트 왼쪽)
+    const p = fh ? Math.min(ar.width * 0.0155, (fh * 1.05) / 170) : ar.width * 0.0155, cx = ar.left - hr.left + ar.width / 2, by = hr.bottom - ar.bottom; // 날개 · 방패 중심 = 용사 머리 가운데 = 상자 가운데 (art.js 가 머리를 상자 가운데에 둠)
     if (getComputedStyle(host).position === 'static') host.style.position = 'relative';
     const old = host.querySelector('.gd-fx'); if (old) old.remove();
     const u = (f) => `url('${base()}${f}')`, mk = (f, w, h, bot, z) => { const e = document.createElement('span'); e.className = 'gd-fx'; e.style.cssText = `position:absolute;pointer-events:none;image-rendering:pixelated;left:${cx - (w * p) / 2}px;bottom:${by + bot * p}px;width:${w * p}px;height:${h * p}px;background:${u(f)} 0 0/600% 100% no-repeat;opacity:0;z-index:${z}`; host.appendChild(e); return e; };

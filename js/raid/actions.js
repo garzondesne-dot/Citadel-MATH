@@ -212,6 +212,9 @@ DS.Act = (function () {
     if (Raid.tcutN(R, mid) < 3) { await N().set(P(code, `heals/${mid}/${me}/${k}`), `!tcut@${N().now()}`); return 'cut'; }
     return 'done';
   }
+  // 🛡 홀리 방패 (2026-11-09): 켜기 / 끄기 (한 번 더 = 끔) · 막은 순간 = 내 칸에 막은 시각 + 켬 지움 (학생 자기 칸 · 규칙 안 바꿈)
+  async function holyArm(code, mid, on) { const me = N().uid(); await N().set(P(code, `players/${me}/hg`), on ? { mid: String(mid), at: N().now() } : null); }
+  async function holyUse(code, mid) { const me = N().uid(); await N().update(P(code, `players/${me}`), { [`holy/${mid}`]: N().now(), hg: null }); }
   async function useCharge(code, packed) { // ⚡ 저장해 둔 진필살기 → 지금 몬스터
     const R = unpackRoom(packed), L = DS.Lessons.get(R.meta.lesson), me = N().uid(), step = L.steps[R.state.step], c = Number(((R.players || {})[me] || {}).charge) || 0;
     if (!c) fail('⚡ 충전된 진필살기가 없어요'); if (!step || step.kind !== 'monster' || Raid.cleared(L, R, step.id)) fail('지금 싸우는 몬스터가 있을 때 쓸 수 있어요');
@@ -417,5 +420,5 @@ DS.Act = (function () {
     return out;
   }
 
-  return { snapStart, snapEnd, useCharge, giveHint, chainSubmit, chainKnock, chainRelease, scoutReady, setSolve, saveEnd, resumeInfo, switchLesson, setSound, bossTry, openRooms, savePunch, finishOvertime, setPunchOff, punchOff, batTick, batAnswer, hit, endClassAsk, timeUp, extendTime, openRift, cutShort, setRest, setRestMin, markBossWin, prepLite, prepImg, hasImg, setVideoFile, setVideoOn, endClass, admitLate, getPrep, setImage, setVideo, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, heal, bossAnswer, unpackRoom, P };
+  return { holyArm, holyUse, snapStart, snapEnd, useCharge, giveHint, chainSubmit, chainKnock, chainRelease, scoutReady, setSolve, saveEnd, resumeInfo, switchLesson, setSound, bossTry, openRooms, savePunch, finishOvertime, setPunchOff, punchOff, batTick, batAnswer, hit, endClassAsk, timeUp, extendTime, openRift, cutShort, setRest, setRestMin, markBossWin, prepLite, prepImg, hasImg, setVideoFile, setVideoOn, endClass, admitLate, getPrep, setImage, setVideo, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, heal, bossAnswer, unpackRoom, P };
 })();

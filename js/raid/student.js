@@ -357,13 +357,30 @@ DS.Student = (function () {
     if (c.paused) { if (g) g.classList.add('bound'); return; }
     const tr = Raid().atkTrack(atkMemo, c, `${code}|${(R.state || {}).step}|${c.kind}`);
     if (g) { g.querySelector('i').style.width = `${(tr.p * 100).toFixed(1)}%`; g.classList.toggle('hot', tr.p > 0.8); g.classList.remove('bound'); }
-    if (tr.strike) { const gu = tr.first ? Raid().guardian(L, R) : null; if (gu) guardStrike(gu); else monsterStrike(c.lock, !!g); }
+    holyBtn(c);
+    if (tr.strike) { const hg = c.kind === 'monster' ? Raid().holyArmed(R, c.mid, DS.Net.now(), c.per) : []; if (hg.length) guardStrike(hg, c.mid); else monsterStrike(c.lock, !!g); if (!hg.includes(me) && Raid().holyOn(R, c.mid, me)) DS.Act.holyArm(code, c.mid, false).catch(() => {}); /* 주기가 지난 켬 = 끔 */ }
   }
-  // ⭐ 각성 막기 (2026-11-09 선생님 · 반 전체): 첫 공격은 아무도 안 멈춤 · 막은 학생 폰 = 내 용사가 날개 · 방패 연출 · 다른 폰 = 알림만
-  function guardStrike(gu) {
-    const sc = document.querySelector('#st-body .scene'), mon = sc && sc.querySelector('.art.monster'), hb = sc && sc.querySelector('.enc-hero'), nick = ((R.players || {})[gu] || {}).nick || '친구', mine = gu === me;
+  // 🛡 홀리 방패 버튼 (2026-11-09 선생님): +10 각성 · 이 몬스터 문제 다 통과 → 「누르면 다음 공격을 막아요」 · 한 번 더 = 끔 · 몬스터마다 한 번
+  //   켠 용사는 TV 에 「🛡 준비」로 보임 (눈치 싸움 · 여럿이 같이 켜도 효과는 같음)
+  let hbKey = '';
+  function holyBtn(c) {
+    const sc = document.querySelector('#st-body .scene'); if (!sc) { hbKey = ''; return; }
+    const mid = c && c.kind === 'monster' ? c.mid : null, on = !!(mid && Raid().holyOn(R, mid, me)), can = !!(mid && (on || Raid().holyCan(L, R, me)));
+    const key = can ? `${mid}|${on}` : '', old = sc.querySelector('.holy-btn');
+    if (key === hbKey && (!!old === can)) return; hbKey = key;
+    if (!can) { if (old) old.remove(); return; }
+    const b = old || document.createElement('button'); b.className = `holy-btn${on ? ' on' : ''}`; b.type = 'button';
+    b.innerHTML = on ? '🛡 <b>준비됨</b><small>다음 공격을 막습니다 · 누르면 끄기</small>' : '🛡 <b>홀리 방패</b><small>누르면 다음 공격을 막아요</small>';
+    b.onclick = async () => { b.disabled = true; try { await DS.Act.holyArm(code, mid, !on); DS.Sound.clank(); if (navigator.vibrate) navigator.vibrate(30); } catch (e) { DS.UI.toast('잠깐 뒤 다시 눌러 주세요'); } b.disabled = false; };
+    if (!old) sc.appendChild(b);
+  }
+  // 🛡 홀리 방패 막기: 켠 용사가 있으면 반 전체 안 멈춤 · 내가 켰으면 내 용사 날개 · 방패 + 막은 기록(→ 🗿 석화 10초) · 다른 폰 = 알림만
+  function guardStrike(us, mid) {
+    const sc = document.querySelector('#st-body .scene'), mon = sc && sc.querySelector('.art.monster'), hb = sc && sc.querySelector('.enc-hero'), mine = us.includes(me);
+    const names = us.filter((u) => u !== me).map((u) => esc(((R.players || {})[u] || {}).nick || '친구'));
+    if (mine) DS.Act.holyUse(code, mid).catch(() => {});
     const tell = () => {
-      const st = document.createElement('div'); st.className = 'stun guard'; st.innerHTML = `<b>🛡 ${mine ? '내' : esc(nick) + '의'} 각성 방패! 안 멈춰요</b>`;
+      const st = document.createElement('div'); st.className = 'stun guard'; st.innerHTML = `<b>🛡 ${mine ? `내${names.length ? ' · ' + names.join(' · ') : ''}` : names.join(' · ') + '의'} 홀리 방패! 안 멈춰요</b>`;
       document.body.appendChild(st); setTimeout(() => st.remove(), 1600);
       DS.Sound.correct(); if (navigator.vibrate) navigator.vibrate(mine ? [60, 40, 120] : 40);
     };
@@ -409,7 +426,7 @@ DS.Student = (function () {
   // 🗿 석화 (🌟 진필살기 · 2026-11-06): 남은 초 띠 · 몬스터 회색 · 끝나면 다시 그림
   let petriT = null;
   function petri(body, step) {
-    const pt = Raid().petrify(R, step.id), left = pt ? Math.ceil((pt.until - DS.Net.now()) / 1000) : 0;
+    const pt = Raid().stone(R, step.id), left = pt ? Math.ceil((pt.until - DS.Net.now()) / 1000) : 0; // 🗿 진필살기 · 🛡 홀리 방패
     const old = body.querySelector('.petri-bn');
     if (!pt || left <= 0) { if (old) old.remove(); return; }
     body.querySelectorAll('.enc-mon').forEach((m) => m.classList.add('petrified'));
@@ -417,14 +434,14 @@ DS.Student = (function () {
     // 📳 2026-11-08 사용자 「진필살기 쓸 때 학생 핸드폰도 모두 진동」: 새 석화(🌟 진필살기)가 막 시작됐으면 한 번 (반 전체 폰)
     { const vk = `citadel-petri-vib-${code}-${step.id}-${pt.at}`; let done = false; try { done = !!sessionStorage.getItem(vk); sessionStorage.setItem(vk, '1'); } catch (e) { /* 무시 */ } if (!done && DS.Net.now() - (Number(pt.at) || 0) < 15000 && navigator.vibrate) navigator.vibrate([220, 90, 220, 90, 420]); }
     const by = (R.players || {})[pt.by] || {}, el = document.createElement('div'); el.className = 'petri-bn';
-    el.innerHTML = `🗿 <b>석화 <span>${left}</span>초</b> — ${esc(by.nick || '친구')}의 진필살기! 지금 맞히면 <b>💎</b> (최대 ${PETRI_CAP})${sage ? '<br><small>💡 현자의 빛: 그림 힌트가 열렸어요</small>' : ''}`;
+    el.innerHTML = `🗿 <b>석화 <span>${left}</span>초</b> — ${pt.holy ? `🛡 ${(pt.all || [pt.by]).map((u) => esc(((R.players || {})[u] || {}).nick || '친구')).join(' · ')}의 홀리 방패` : `${esc(by.nick || '친구')}의 진필살기`}! 지금 맞히면 <b>💎</b> (최대 ${PETRI_CAP})${sage ? '<br><small>💡 현자의 빛: 그림 힌트가 열렸어요</small>' : ''}`;
     const host = body.querySelector('.panel') || body; host.prepend(el);
     clearInterval(petriT); petriT = setInterval(() => { const s = Math.ceil((pt.until - DS.Net.now()) / 1000), sp = el.querySelector('span'); if (s <= 0 || !el.isConnected) { clearInterval(petriT); el.remove(); drawn = ''; render(); return; } if (sp) sp.textContent = s; }, 500);
   }
   // 석화 중 공격 성공 → 데미지(늘어난 맞힌 소문제 수) × 💎1 · 석화 한 번에 학생당 최대 PETRI_CAP (하루 한도 안)
   const PETRI_CAP = 3;
   function petriGem(mid, gain) {
-    const pt = Raid().petrify(R, mid); if (!pt || DS.Net.now() >= pt.until || !DS.Gem || !real()) return;
+    const pt = Raid().stone(R, mid); if (!pt || DS.Net.now() >= pt.until || !DS.Gem || !real()) return;
     const k = `citadel-petri-${code}-${mid}-${pt.at}`; let had = 0; try { had = Number(localStorage.getItem(k)) || 0; } catch (e) { /* 무시 */ }
     const tot = Math.min(PETRI_CAP, had + gain); if (tot <= had) return;
     try { localStorage.setItem(k, String(tot)); } catch (e) { /* 무시 */ }

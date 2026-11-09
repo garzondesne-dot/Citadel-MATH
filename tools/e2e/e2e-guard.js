@@ -1,4 +1,4 @@
-// ⭐ 각성 첫 공격 막기 (2026-11-09): +10 학생이 있으면 몬스터 첫 공격 = 날개 · 방패 연출 · 아무도 안 멈춤 → 두 번째 공격은 원래대로 멈춤
+// 🛡 홀리 방패 (2026-11-09): +10 학생이 켜 두면 다음 공격 = 날개 · 방패 연출 · 아무도 안 멈춤 · TV 「🛡 준비」 · 석화 10초 → 그다음 공격은 원래대로
 // 사용: python3 -m http.server 8765 (저장소 폴더) 띄운 뒤 node tools/e2e/e2e21.js <출력 폴더>
 const { chromium } = require('playwright');
 const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
@@ -31,17 +31,26 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   await S1.waitForTimeout(1500);
   console.log('step kind:', await kind());
   await S1.evaluate(() => { window.DS_ATK = { monster: [6, 1], boss: [6, 2] }; }); await H.evaluate(() => { window.DS_ATK = { monster: [6, 1], boss: [6, 2] }; });
+  const mid = await T.evaluate(async () => { const R = DS.Act.unpackRoom(await DS.Net.get(`rooms/${DS.Teacher.code()}`)); return DS.Raid.stepOf(DS.Lessons.get(R.meta.lesson), R).id; });
+  await S1.bringToFront();
+  console.log('button before arm (not passed yet):', !!(await S1.$('.holy-btn')));
+  await S1.evaluate(async ([c, m]) => { await DS.Act.holyArm(c, m, true); }, [code, mid]); // 시험용: 통과 조건 건너뛰고 켜기
+  await S1.waitForTimeout(800);
+  console.log('button on:', await S1.$eval('.holy-btn', (b) => b.className + ' | ' + b.textContent).catch(() => 'none'));
+  await S1.screenshot({ path: `${OUT}/h-phone-armed.png` });
+  await H.waitForTimeout(400); console.log('TV mark:', await H.$$eval('.fh2 .hg-mark', (a) => a.length)); await H.screenshot({ path: `${OUT}/h-hall-armed.png` });
   await S1.bringToFront();
   await S1.waitForSelector('.gd-fx', { timeout: 9000 }).catch(() => null);
   console.log('phone guard fx:', (await S1.$$('.gd-fx')).length);
   for (const [i, t] of [300, 500, 400, 300, 400].entries()) { await S1.waitForTimeout(t); await Promise.all([S1.screenshot({ path: `${OUT}/g-phone-${i}.png` }), H.screenshot({ path: `${OUT}/g-hall-${i}.png` })]); }
-  console.log('phone stun on first:', await S1.$$eval('.stun:not(.guard)', (a) => a.length), 'guard note:', await S1.$$eval('.stun.guard', (a) => a.length));
-  await H.bringToFront();
-  console.log('hall guard banner:', !!(await H.$('.atk-banner.guard')), 'hall fx:', (await H.$$('.gd-fx')).length);
-  await H.screenshot({ path: `${OUT}/g-hall.png` });
-  await S1.bringToFront();
-  await S1.waitForSelector('.stun:not(.guard)', { timeout: 9000 }).catch(() => null);
-  console.log('second attack stun:', !!(await S1.$('.stun:not(.guard)')));
+  console.log('phone stun on block:', await S1.$$eval('.stun:not(.guard)', (a) => a.length));
+  await S1.waitForTimeout(800);
+  console.log('used recorded:', await S1.evaluate(async ([c, m]) => { const p = await DS.Net.get(`rooms/${c}/players/${DS.Net.uid()}`); return JSON.stringify({ holy: p.holy, hg: p.hg || null }); }, [code, mid]));
+  console.log('phone petri banner:', await S1.$eval('.petri-bn', (e) => e.textContent).catch(() => 'none'));
+  console.log('hall petri:', await H.$eval('.h-petri', (e) => e.textContent).catch(() => 'none'), '| mark gone:', (await H.$$('.fh2 .hg-mark')).length === 0, '| button gone:', !(await S1.$('.holy-btn')));
+  await H.screenshot({ path: `${OUT}/h-hall-petri.png` });
+  await S1.waitForSelector('.stun:not(.guard)', { timeout: 25000 }).catch(() => null);
+  console.log('next attack stun (after 10s stone):', !!(await S1.$('.stun:not(.guard)')));
   console.log('errors:', errs.length ? errs : 'none');
   await b.close();
 })();

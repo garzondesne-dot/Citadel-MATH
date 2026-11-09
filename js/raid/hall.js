@@ -88,14 +88,14 @@ DS.Hall = (function () {
   // 🗿 석화 남은 초 (교실 TV 위쪽 큰 띠) · 몬스터 회색
   let petriEnd = 0, petriT = null;
   function petriHall(step) {
-    const pt = step && step.kind === 'monster' ? Raid().petrify(R, step.id) : null, arena = $('#raid'), m0 = $('#rm');
+    const pt = step && step.kind === 'monster' ? Raid().stone(R, step.id) : null, arena = $('#raid'), m0 = $('#rm'); // 🗿 진필살기 · 🛡 홀리 방패 석화
     const on = !!(pt && DS.Net.now() < pt.until);
     if (m0) m0.classList.toggle('petrified', on);
     let bn = document.querySelector('.h-petri');
     if (!on) { if (bn) bn.remove(); clearInterval(petriT); petriEnd = 0; return; }
     if (bn && petriEnd === pt.until) return;
     petriEnd = pt.until; if (!bn && arena) { bn = document.createElement('div'); bn.className = 'h-petri'; arena.appendChild(bn); }
-    const by = (R.players || {})[pt.by] || {}, draw = () => { const s = Math.ceil((pt.until - DS.Net.now()) / 1000); if (!bn || !bn.isConnected) return; if (s <= 0) { bn.remove(); clearInterval(petriT); if (m0) m0.classList.remove('petrified'); return; } bn.innerHTML = `🗿 석화 <b>${s}</b>초 <small>${esc(by.nick || '')}의 🌟 진필살기 — 몬스터 공격 멈춤 · 지금 맞히면 💎!</small>`; };
+    const by = (R.players || {})[pt.by] || {}, draw = () => { const s = Math.ceil((pt.until - DS.Net.now()) / 1000); if (!bn || !bn.isConnected) return; if (s <= 0) { bn.remove(); clearInterval(petriT); if (m0) m0.classList.remove('petrified'); return; } bn.innerHTML = `🗿 석화 <b>${s}</b>초 <small>${pt.holy ? `🛡 ${(pt.all || [pt.by]).map((u) => esc(((R.players || {})[u] || {}).nick || '')).join(' · ')}의 홀리 방패 — 지금 맞히면 💎!` : `${esc(by.nick || '')}의 🌟 진필살기 — 몬스터 공격 멈춤 · 지금 맞히면 💎!</small>`}`; };
     draw(); clearInterval(petriT); petriT = setInterval(draw, 500);
   }
   function gritHall(p) {
@@ -490,22 +490,30 @@ DS.Hall = (function () {
     const tr = Raid().atkTrack(atkMemo, c, `${code}|${(R.state || {}).step}|${c.kind}`);
     bar.style.width = `${(tr.p * 100).toFixed(1)}%`; g.classList.toggle('hot', tr.p > 0.8); g.classList.remove('bound');
     txt.textContent = `⏱ ${Math.max(0, Math.ceil((1 - tr.p) * c.per))}${c.bind ? ` · ⛓ ${c.bind}초` : ''}`; // 2026-11-07 비교 6: 「HP ▬ n / N ⏱ 20」 (빠름 · 단계 글자 없음)
-    if (tr.strike) hallStrike(c, tr.first ? Raid().guardian(L, R) : null);
+    hallHolyMark(c);
+    if (tr.strike) { const hg = Raid().holyArmed(R, c.mid, DS.Net.now(), c.per); hallStrike(c, hg.length ? hg : null); }
   }
-  // ⭐ 각성 막기 (2026-11-09): 이 몬스터의 첫 공격 + 반에 +10 학생 → 그 용사가 날개 · 방패로 막음 · 반 전체 안 멈춤 (피격 · 헉헉 없음)
-  function hallGuard(c, gu) {
-    const arena = $('#raid'), m = $('#rm'), h = document.getElementById(`fh-${gu}`), nick = ((R.players || {})[gu] || {}).nick || '친구';
+  // 🛡 홀리 방패 켠 용사 = TV 에 표시 (발밑 방패 · 머리 위 「🛡 준비」) → 서로 알고 눈치 싸움 (2026-11-09 선생님)
+  let hgKey = '';
+  function hallHolyMark(c) {
+    const on = c && c.kind === 'monster' ? Raid().holyArmed(R, c.mid, DS.Net.now(), null) : [], key = on.join();
+    if (key === hgKey && document.querySelectorAll('.fh2 .hg-mark').length === on.length) return; hgKey = key;
+    document.querySelectorAll('.fh2').forEach((h) => { const u = h.id.slice(3), want = on.includes(u), has = h.querySelector('.hg-mark'); h.classList.toggle('hg-on', want); if (want && !has) h.insertAdjacentHTML('beforeend', '<b class="hg-mark">🛡 준비</b>'); if (!want && has) has.remove(); });
+  }
+  // 🛡 홀리 방패 막기 (2026-11-09): 켠 용사 모두 날개 · 방패 (여럿이어도 효과 같음) · 반 전체 안 멈춤 (피격 · 헉헉 없음) → 석화 10초
+  function hallGuard(c, us) {
+    const arena = $('#raid'), m = $('#rm'), names = us.map((u) => esc(((R.players || {})[u] || {}).nick || '친구')).join(' · ');
     const hit = () => {
-      const b = document.createElement('div'); b.className = 'atk-banner guard'; b.innerHTML = `🛡 ${esc(nick)}의 각성 방패! <small>이번 공격은 멈추지 않아요</small>`; arena.appendChild(b); setTimeout(() => b.remove(), 1800);
+      const b = document.createElement('div'); b.className = 'atk-banner guard'; b.innerHTML = `🛡 ${names}의 홀리 방패! <small>막았다! 몬스터 ${Raid().HOLY_SEC}초 석화</small>`; arena.appendChild(b); setTimeout(() => b.remove(), 1800);
       Snd().hit(); setTimeout(() => Snd().correct(), 160);
     };
-    const ms = h && DS.Aura && DS.Aura.guard ? DS.Aura.guard(h, hit) : 0;
+    let ms = 0; us.forEach((u, k) => { const h = document.getElementById(`fh-${u}`); const t = h && DS.Aura && DS.Aura.guard ? DS.Aura.guard(h, k === 0 ? hit : null) : 0; if (t && !ms) ms = t; });
     setTimeout(() => { if (m) { m.classList.remove('lunge-big'); void m.offsetWidth; m.classList.add('lunge-big'); setTimeout(() => m.classList.remove('lunge-big'), 700); } }, Math.max(0, (ms || 300) - 300));
     if (!ms) setTimeout(hit, 300);
   }
   function hallStrike(c, gu) {
     const arena = $('#raid'), m = $('#rm'); if (!arena) return;
-    if (gu) return hallGuard(c, gu);
+    if (gu) return hallGuard(c, gu); // gu = 홀리 방패 켠 용사들
     if (m) { m.classList.remove('lunge-big'); void m.offsetWidth; m.classList.add('lunge-big'); setTimeout(() => m.classList.remove('lunge-big'), 700); }
     setTimeout(() => {
       arena.classList.remove('atk-hit'); void arena.offsetWidth; arena.classList.add('atk-hit'); setTimeout(() => arena.classList.remove('atk-hit'), 800);
