@@ -141,21 +141,24 @@
   // ⚔ 소레이드 방 (2026-11-09 요청 #23 · 선생님 「추천대로 진행」): q07 ~ q12 = 졸개(소문제) … 👑 대장(마지막) · 혼자 하는 성채용
   //   pass 0 = 위 첫 시도 숫자 · pass ≥ 1 = 숫자 바뀐 사슬 (각 방 r 생성기와 같은 조건) · say = 「📜 나의 풀이」 한 줄 (6차시 CHAIN 말투)
   const sayOf = (q, say) => Object.assign(q, { say }), show = (x) => String(x).replace(/^-/, '−');
+  // 🔁 #48 (2026-11-09 선생님 「#48 진행」): 성채 1층 소레이드 4방 = 7차시 문제 4~7 새 꼴 (근거 줄 없음 · 첫 판 숫자 = 성채 것)
+  const multi2 = (question, parts, solution, check) => { const show = (x) => String(x).replace(/^-/, '−'), options = [], answer = [], groups = []; parts.forEach(({ label, opts, want }) => { const o = opts.map(show), w = want.map(show), base = options.length; o.forEach((x, k) => { options.push(x); if (w.includes(x)) answer.push(base + k); }); groups.push({ label, n: o.length }); }); return { type: 'multi', question, options, answer, groups, solution, check }; };
+  const gwa = (n) => ([2, 4, 5, 9].includes(last(n)) ? `${n} 와` : `${n} 과`);
   function c07(p, q, N, r) {
-    const A = divs(p), B = mults(q, N), D = minus(B, A), U = union(A, B);
+    const A = divs(p), B = mults(q, N), D = minus(B, A), U = union(A, B), n = D.length;
     return [
-      sayOf(multi(`A = {x | x는 ${p}의 약수} 의 원소를 모두 고르시오.`, fill(r, A, range(1, Math.max(12, p + 3)), Math.min(10, A.length + 4)), A, `${p}의 약수 → ${st(A)}`, { p, step: 1 }), `A = ${st(A)} 이다.`),
-      sayOf(multi(`B = {x | x는 ${N} 이하의 ${q}의 배수} 의 원소를 모두 고르시오.`, fill(r, B, range(1, N + 4), Math.min(12, B.length + 4)), B, `${N} 이하의 ${q}의 배수 → ${st(B)}`, { q, N, step: 2 }), `B = ${st(B)} 이다.`),
-      sayOf(multi(`A ∩ X = ∅ 이고 B ∪ X = B 일 때, X 에 들어갈 수 있는 원소를 모두 고르시오.`, U, D, `B ∪ X = B → X ⊂ B · A ∩ X = ∅ → A 의 원소는 안 됨 → B − A = ${st(D)}`, { step: 3 }),
-        `B ∪ X = B 이므로 X ⊂ B, A ∩ X = ∅ 이므로 X 는 A 와 서로소이다. 따라서 X ⊂ B − A = ${st(D)} 이다.`),
-      sayOf(nm(`집합 X 의 개수는?`, 2 ** D.length, `B − A 의 원소 ${D.length}개로 만들 수 있는 부분집합 → 2${sup(D.length)} = ${2 ** D.length}`, { p, q, N, step: 4 }), `그러므로 집합 X 의 개수는 2${sup(D.length)} = ${2 ** D.length} 이다.`),
+      sayOf(multi2('A 와 B 의 원소를 각각 모두 고르시오.', [{ label: `A = {x | x는 ${p}의 약수}`, opts: fill(r, A, range(1, Math.max(12, p + 3)), Math.min(10, A.length + 4)), want: A }, { label: `B = {x | x는 ${N} 이하의 ${q}의 배수}`, opts: fill(r, B, range(1, N + 4), Math.min(12, B.length + 4)), want: B }], `${p}의 약수 → ${st(A)} · ${N} 이하의 ${q}의 배수 → ${st(B)}`, { p, q, N, step: 1 }), `A = ${st(A)}, B = ${st(B)} 이다.`),
+      sayOf(ch('B ∪ X = B, A ∩ X = ∅ 이 뜻하는 것은?', ['X ⊂ B 이고 X 와 A 는 서로소', 'B ⊂ X 이고 X ⊂ A', 'X ⊂ A 이고 X 와 B 는 서로소'], 'X ⊂ B 이고 X 와 A 는 서로소', 'B ∪ X = B → X ⊂ B · A ∩ X = ∅ → 서로소', { step: 2 }), 'B ∪ X = B 이므로 X ⊂ B, A ∩ X = ∅ 이므로 X 와 A 는 서로소이다.'),
+      sayOf(multi(`A ∩ X = ∅ 이고 B ∪ X = B 일 때, X 에 들어갈 수 있는 원소를 모두 고르시오.`, U, D, `X ⊂ B 이고 A 와 서로소 → B − A = ${st(D)}`, { step: 3 }), `따라서 X ⊂ B − A = ${st(D)} 이다.`),
+      sayOf(nm(`집합 X 의 개수는?`, 2 ** n, `B − A 의 원소 ${n}개로 만들 수 있는 부분집합 → 2${sup(n)} = ${2 ** n}`, { p, q, N, step: 4 }), `그러므로 집합 X 의 개수는 2${sup(n)} = ${2 ** n} 이다.`),
     ];
   }
   function c08(c, b, d, r) {
-    const want = sorted([1 - c, 0, b]), opts = fill(r, [...want, d], range(-5, 9), 9);
+    const want = sorted([1 - c, 0, b]), opts = fill(r, [...want, d], range(-5, 9), 9), show = (x) => String(x).replace(/^-/, '−');
+    const eq = r.shuffle([`x = ${b}`, `x = x² + ${c}x`, `x² + ${c}x = ${b}`, `x² + ${c}x = ${d}`, 'x = 2x']); // #48 = 7차시 문제 5 꼴 (「x = d」 넣지 않음)
     return [
       sayOf(ch(`A = {x² + ${c}x, ${b}, ${d}}, B = {x, ${d}} 에서 A ∩ B = B 이면 두 집합 A, B 사이의 관계는?`, ['B ⊂ A', 'A ⊂ B', 'A ∩ B = ∅'], 'B ⊂ A', 'A ∩ B 가 B 전체 → B 의 원소가 모두 A 에 있음 → B ⊂ A', { step: 1 }), `A ∩ B = B 이므로 B ⊂ A, 곧 x 는 A 의 원소이다 (x ≠ ${d}).`),
-      sayOf(ch(`x = ${b} 일 때 B ⊂ A 가 될 수 있는가?`, ['가능하다 (○)', '불가능하다 (✕)'], '가능하다 (○)', `x = ${b} 이면 B = {${b}, ${d}} 이고 ${b}, ${d} 가 모두 A 에 있음 → 가능`, { step: 2 }), `x = ${b} 이면 B = {${b}, ${d}} ⊂ A 이므로 가능하다.`),
+      sayOf(multi(`B ⊂ A 가 성립하기 위해 맞는 식을 모두 고르시오.`, eq, [`x = ${b}`, `x = x² + ${c}x`], `x 는 A 의 원소 → x = ${b} 또는 x = x² + ${c}x`, { step: 2 }), `x 는 A 의 원소이므로 x = ${b} 또는 x = x² + ${c}x 이다.`),
       sayOf(multi(`x = x² + ${c}x 를 만족시키는 x 를 모두 고르시오.`, opts, [0, 1 - c], `x² + ${c - 1 === 1 ? '' : c - 1}x = 0 → x(x + ${c - 1}) = 0 → x = 0, ${show(1 - c)}`, { step: 3 }), `x = x² + ${c}x 에서 x² + ${c - 1 === 1 ? '' : c - 1}x = 0 이므로 x = 0 또는 x = ${show(1 - c)} 이다.`),
       sayOf(multi(`A ∩ B = B 를 만족시키는 정수 x 를 모두 고르시오.`, opts, want, `x = ${b} · 0 · ${show(1 - c)} 모두 가능`, { c, b, d, step: 4 }), `그러므로 x = ${want.map(show).join(', ')} 이다.`),
     ];
@@ -185,20 +188,23 @@
       sayOf(nm(`n(Aᶜ ∩ Bᶜ) 의 값은?`, N - u, `${N} − ${u} = ${N - u}`, { N, k, m, step: 4 }), `그러므로 n(Aᶜ ∩ Bᶜ) = n(U) − n(A ∪ B) = ${N} − ${u} = ${N - u} 이다.`),
     ];
   }
-  function c11(T, a, b) {
+  function c11(T, a, b) { // #48 = 7차시 문제 6 꼴 4단계
+    const inc = a >= b ? 'B ⊂ A' : 'A ⊂ B', rev = a >= b ? 'A ⊂ B' : 'B ⊂ A', mx = Math.min(a, b), mn = a + b - T;
     return [
-      sayOf(nm(`동아리 회원 ${T}명 중 A 코스 ${a}명, B 코스 ${b}명일 때 n(A) + n(B) 의 값은?`, a + b, `${a} + ${b} = ${a + b}`, { step: 1 }), `n(A) + n(B) = ${a} + ${b} = ${a + b} 이다.`),
-      sayOf(nm(`두 코스를 모두 다녀온 회원 수의 최댓값은?`, Math.min(a, b), `B ⊂ A 일 때 n(A ∩ B) 가 가장 큼 → ${Math.min(a, b)}`, { step: 2 }), `B ⊂ A 일 때 n(A ∩ B) 가 가장 크므로 최댓값은 ${Math.min(a, b)} 이다.`),
-      sayOf(nm(`두 코스를 모두 다녀온 회원 수의 최솟값은?`, a + b - T, `n(A ∪ B) = ${T} 일 때 가장 작음 → ${a + b} − ${T} = ${a + b - T}`, { T, a, b, step: 3 }), `그러므로 n(A ∪ B) = ${T} 일 때 최솟값은 ${a + b} − ${T} = ${a + b - T} 이다.`),
+      sayOf(ch(`동아리 회원 ${T}명 중 A 코스 ${a}명, B 코스 ${b}명일 때 두 코스를 모두 다녀온 회원 수가 가장 많을 때는?`, [inc, rev, 'A ∩ B = ∅', 'A ∪ B = U'], inc, `작은 쪽이 큰 쪽 안에 쏙 들어갈 때 A ∩ B 가 가장 큼`, { step: 1 }), `${inc} 일 때 두 코스를 모두 다녀온 회원 수가 가장 많다.`),
+      sayOf(nm(`두 코스를 모두 다녀온 회원 수의 최댓값은?`, mx, `${inc} 이면 n(A ∩ B) = ${mx}`, { step: 2 }), `그러므로 최댓값은 ${mx} 이다.`),
+      sayOf(ch(`두 코스를 모두 다녀온 회원 수가 가장 적을 때는?`, [`A ∪ B = U (곧 n(A ∪ B) = ${T})`, 'A ∩ B = ∅', 'B ⊂ A', 'A ⊂ B'], `A ∪ B = U (곧 n(A ∪ B) = ${T})`, `n(A ∪ B) 가 가장 클 때(= ${T})`, { step: 3 }), `A ∪ B = U, 곧 n(A ∪ B) = ${T} 일 때 가장 적다.`),
+      sayOf(nm(`두 코스를 모두 다녀온 회원 수의 최솟값은?`, mn, `${a} + ${b} − ${T} = ${mn}`, { T, a, b, step: 4 }), `그러므로 최솟값은 ${a} + ${b} − ${T} = ${mn} 이다.`),
     ];
   }
-  function c12(N, p, q, rem) {
-    const bad = range(1, N - 1).filter((x) => x % p === 0 && x % q === rem), n = N - 1 - bad.length;
+  function c12(N, p, q, rem, r) { // #48 = 7차시 문제 7 꼴 5단계
+    const bad = range(1, N - 1).filter((x) => x % p === 0 && x % q === rem), n = N - 1 - bad.length, L2 = lcm(p, q);
     return [
       sayOf(nm(`${N} 미만의 자연수는 모두 몇 개인가?`, N - 1, `1, 2, …, ${N - 1} → ${N - 1}개`, { step: 1 }), `${N} 미만의 자연수는 ${N - 1}개이다.`),
       sayOf(ch(`A = {${p}의 배수}, B = {${ro(q)} 나눈 나머지가 ${rem}} 일 때 「${p}의 배수가 아니거나 ${ro(q)} 나눈 나머지가 ${iga(rem)} 아닌 수」의 집합은?`, ['(A ∩ B)ᶜ', '(A ∪ B)ᶜ', 'A ∩ Bᶜ'], '(A ∩ B)ᶜ', 'Aᶜ ∪ Bᶜ = (A ∩ B)ᶜ (드모르간)', { step: 2 }), `「A 가 아니거나 B 가 아닌」 수의 집합은 Aᶜ ∪ Bᶜ = (A ∩ B)ᶜ 이다.`),
-      sayOf(nm(`A ∩ B 의 원소는 몇 개인가?`, bad.length, `A ∩ B = ${st(bad)}`, { step: 3 }), `A ∩ B = ${st(bad)} 이므로 ${bad.length}개이다.`),
-      sayOf(nm(`구하는 자연수의 개수는?`, n, `${N - 1} − ${bad.length} = ${n}`, { N, p, q, rem, step: 4 }), `그러므로 구하는 개수는 ${N - 1} − ${bad.length} = ${n} 이다.`),
+      sayOf(nm(`A ∩ B 의 가장 작은 원소는?`, bad[0], `${p}의 배수 중 ${ro(q)} 나눈 나머지가 ${rem}인 가장 작은 수 → ${bad[0]}`, { step: 3 }), `A ∩ B 의 가장 작은 원소는 ${bad[0]} 이다.`),
+      sayOf(ch(`A ∩ B 의 원소는 몇씩 커지는가?`, r.shuffle([...new Set([L2, p, q, p + q, p * q])]).map(String), String(L2), `${gwa(p)} ${q} 의 최소공배수 → ${L2}`, { step: 4 }), `${gwa(p)} ${q} 의 최소공배수 ${L2} 씩 커지므로 A ∩ B = ${st(bad)} 이다.`),
+      sayOf(nm(`구하는 자연수의 개수는?`, n, `${N - 1} − ${bad.length} = ${n}`, { N, p, q, rem, step: 5 }), `그러므로 구하는 개수는 ${N - 1} − ${bad.length} = ${n} 이다.`),
     ];
   }
   const CARGS = { // 숫자 바뀐 사슬 (각 방 r 생성기와 같은 조건 · 첫 시도 숫자 빼기 · 집합 원소가 겹치지 않게)
@@ -209,13 +215,21 @@
     q11: (r) => { for (;;) { const T = r.int(30, 50), a = r.int(Math.ceil(T / 2), T - 3), b = r.int(Math.ceil(T / 3), T - 5); if (T === 50 && a === 34 && b === 27) continue; if (a + b > T + 2 && b < a) return [T, a, b]; } },
     q12: (r) => { for (;;) { const N = r.pick([50, 60, 80, 100]), p = r.int(3, 8), q = r.int(3, 6), rem = r.int(1, q - 1); if (N === 100 && p === 6 && q === 4 && rem === 2) continue; const k = range(1, N - 1).filter((x) => x % p === 0 && x % q === rem).length; if (k >= 2 && k <= 8) return [N, p, q, rem]; } },
   };
+  // 📜 #48 · #44 ⑤ 한 판 더(숫자 바뀐 사슬) = 문제 카드 맨 위 원문 문제 (첫 판 없음)
+  const PROB = {
+    q07: (p, q, N) => `두 집합 A = {x | x는 ${p}의 약수}, B = {x | x는 ${N} 이하의 ${q}의 배수}에 대하여 A ∩ X = ∅ 과 B ∪ X = B 를 만족시키는 집합 X 의 개수를 구하시오.`,
+    q08: (c, b, d) => `두 집합 A = {x² + ${c}x, ${b}, ${d}}, B = {x, ${d}}에 대하여 A ∩ B = B 를 만족시키는 정수 x 를 모두 구하시오.`,
+    q11: (T, a, b) => `동아리 회원 ${T}명 중 A 코스를 다녀온 회원은 ${a}명, B 코스는 ${b}명이다. 두 코스를 모두 다녀온 회원 수의 최댓값과 최솟값을 구하시오.`,
+    q12: (N, p, q, rem) => `${N} 미만의 자연수 중에서 ${p}의 배수가 아니거나 ${ro(q)} 나누었을 때의 나머지가 ${iga(rem)} 아닌 자연수의 개수를 구하시오.`,
+  };
+  const withProb = (id, fn, book) => (pass, r) => { const args = pass === 0 ? book : CARGS[id](r), items = fn(...args, r); if (pass > 0 && PROB[id]) items.forEach((it) => { it.problem = PROB[id](...args); }); return items; };
   const CHAIN = {
-    q07: (pass, r) => c07(...(pass === 0 ? [6, 3, 18] : CARGS.q07(r)), r),
-    q08: (pass, r) => c08(...(pass === 0 ? [3, 5, 7] : CARGS.q08(r)), r),
+    q07: withProb('q07', c07, [6, 3, 18]),
+    q08: withProb('q08', c08, [3, 5, 7]),
     q09: (pass, r) => c09(...(pass === 0 ? [6, 4, 10] : CARGS.q09(r)), r),
     q10: (pass, r) => c10(...(pass === 0 ? [40, 8, 32] : CARGS.q10(r)), r),
-    q11: (pass, r) => c11(...(pass === 0 ? [50, 34, 27] : CARGS.q11(r))),
-    q12: (pass, r) => c12(...(pass === 0 ? [100, 6, 4, 2] : CARGS.q12(r))),
+    q11: withProb('q11', c11, [50, 34, 27]),
+    q12: withProb('q12', c12, [100, 6, 4, 2]),
   };
   const CHAIN_VIDEO = { q07: 'assets/video/e1-34.mp4', q10: 'assets/video/e1-35.mp4', q11: 'assets/video/e1-36-v3.mp4' }; // 기회 1칸 남으면 여는 해설 영상 (없는 방 = 📜 풀이 첫 두 줄)
 

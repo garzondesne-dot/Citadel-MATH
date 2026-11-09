@@ -119,10 +119,10 @@ for (const b of L.rooms) {
 
 // ── ⚔ 소레이드 방 q07 ~ q12 (요청 #23): 첫 판 = 방향 방 독립 검산값 · 연습 판 200개 = 마지막 단계 check 의 숫자로 따로 세어 맞춤 ──
 {
-  const ans = (q) => (q.type === 'multi' ? q.answer.map((i) => toNum(q.options[i])).sort((a, b) => a - b) : q.type === 'choice' ? q.choices[q.answerIndex] : q.answer);
+  const ans = (q) => (q.type === 'multi' ? (q.options.every((o) => toNum(o) != null && !Number.isNaN(toNum(o))) ? q.answer.map((i) => toNum(q.options[i])).sort((a, b) => a - b) : q.answer.map((i) => q.options[i]).sort()) : q.type === 'choice' ? q.choices[q.answerIndex] : q.answer);
   const want0 = {
-    q07: [[1, 2, 3, 6], [3, 6, 9, 12, 15, 18], [9, 12, 15, 18], 16], q08: ['B ⊂ A', '가능하다 (○)', [-2, 0], [-2, 0, 5]],
-    q09: ['(A₆ ∩ A₄) ∪ (A₆ ∩ A₁₀)', '8개, 3개', 1, 10], q10: ['(A ∪ B)ᶜ', 'n(A) = 5, n(B) = 6', 8, 32], q11: [61, 27, 11], q12: [99, '(A ∩ B)ᶜ', 8, 91],
+    q07: [[1, 2, 3, 3, 6, 6, 9, 12, 15, 18], 'X ⊂ B 이고 X 와 A 는 서로소', [9, 12, 15, 18], 16], q08: ['B ⊂ A', ['x = 5', 'x = x² + 3x'], [-2, 0], [-2, 0, 5]], // #48 = 7차시 문제 4 · 5 꼴
+    q09: ['(A₆ ∩ A₄) ∪ (A₆ ∩ A₁₀)', '8개, 3개', 1, 10], q10: ['(A ∪ B)ᶜ', 'n(A) = 5, n(B) = 6', 8, 32], q11: ['B ⊂ A', 27, 'A ∪ B = U (곧 n(A ∪ B) = 50)', 11], q12: [99, '(A ∩ B)ᶜ', 6, '12', 91], // #48 = 문제 6 · 7 꼴 (가장 작은 6 · lcm 12 · 함정 24)
   };
   check(JSON.stringify(L.chain) === JSON.stringify(['q07', 'q08', 'q09', 'q10', 'q11', 'q12']), '소레이드 방 = q07 ~ q12');
   for (const id of L.chain) {
@@ -136,6 +136,10 @@ for (const b of L.rooms) {
       if (id === 'q08') { const good = R(-20, 20).filter((x) => { if (x === v.d) return false; const Aset = [x * x + v.c * x, v.b, v.d]; return Aset.includes(x) && new Set(Aset).size === 3; }); check(eq(ans(last), good), `q08 #${k} x 직접 대입 ${good}`); }
       if (id === 'q09') { const S = (m) => R(1, 100).filter((x) => x % m === 0), t = S(v.a).filter((x) => S(v.b).includes(x) || S(v.c).includes(x)).length; check(last.answer === t, `q09 #${k} 직접 셈 ${t}`); check(new Set(c[1].choices).size === c[1].choices.length, `q09 #${k} 보기 겹침 없음`); }
       if (id === 'q10') { const A = R(1, v.N).filter((x) => x % v.k === 0), B = R(1, v.N).filter((x) => v.m % x === 0), t = R(1, v.N).filter((x) => !A.includes(x) && !B.includes(x)).length; check(last.answer === t && c[2].answer === v.N - t, `q10 #${k} 직접 셈 ${t}`); check(new Set(c[1].choices).size === c[1].choices.length, `q10 #${k} 보기 겹침 없음`); }
+      if (id === 'q07') { const A = R(1, v.p).filter((x) => v.p % x === 0), B = R(1, v.N).filter((x) => x % v.q === 0), g = c[0].groups || [], h = g[0] ? g[0].n : 0, pick = (lo, hi) => c[0].answer.filter((i) => i >= lo && i < hi).map((i) => toNum(c[0].options[i])); check(g.length === 2 && eq(pick(0, h), A) && eq(pick(h, 999), B) && c[1].answer === 'X ⊂ B 이고 X 와 A 는 서로소' && (c[0].problem || '').includes(`${v.p}의 약수`), `q07 #${k} 졸개1 두 칸 · 졸개2 · 📜 문제`); }
+      if (id === 'q08') { const o = c[1].options; check(eq(c[1].answer.map((i) => o[i]).sort(), [`x = ${v.b}`, `x = x² + ${v.c}x`].sort()) && o.length === 5 && new Set(o).size === 5 && !o.includes(`x = ${v.d}`) && (c[0].problem || '').includes(`${v.d}}`), `q08 #${k} 졸개2 맞는 식 2개 · 함정 ≠ 정답 · 「x = d」 없음`); }
+      if (id === 'q11') { check(c[0].answer === (v.a >= v.b ? 'B ⊂ A' : 'A ⊂ B') && /^A ∪ B = U/.test(c[2].answer) && c.length === 4 && c[0].problem, `q11 #${k} 4단계 · 포함 · A ∪ B = U`); }
+      if (id === 'q12') { const B7 = R(1, v.N - 1).filter((x) => x % v.p === 0 && x % v.q === v.rem); let g2 = v.p, h2 = v.q; while (h2) [g2, h2] = [h2, g2 % h2]; const lc = v.p * v.q / g2; check(c.length === 5 && c[2].answer === B7[0] && c[3].answer === String(lc) && new Set(c[3].choices).size === c[3].choices.length && c[3].choices.filter((x) => x === String(lc)).length === 1 && B7.every((x, i) => !i || x - B7[i - 1] === lc) && c[0].problem, `q12 #${k} 가장 작은 ${B7[0]} · 간격 ${lc} · 함정 ≠ 정답 · 등차`); }
       if (id === 'q11') { let mx = -1, mn = 1e9; for (let i = 0; i <= Math.min(v.a, v.b); i++) if (v.a + v.b - i <= v.T) { mx = Math.max(mx, i); mn = Math.min(mn, i); } check(c[1].answer === mx && last.answer === mn, `q11 #${k} 겹침 직접 셈`); }
       if (id === 'q12') { const t = R(1, v.N - 1).filter((x) => x % v.p !== 0 || x % v.q !== v.rem).length; check(last.answer === t, `q12 #${k} 직접 셈 ${t}`); }
     }

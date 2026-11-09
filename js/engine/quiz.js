@@ -50,7 +50,7 @@ DS.Quiz = (function () {
       pending = { close: () => fin(null), drop: () => { settled = true; } };
       $('#quiz-card').textContent = (opt.tag ? opt.tag + ' · ' : '') + (card.name || '');
       $('#quiz-formula').innerHTML = pretty(card.formula || '');
-      $('#quiz-q').innerHTML = (opt.ref ? `<span class="sheet-tag">📄 ${DS.UI.esc(opt.ref)}</span>` : '') + DS.UI.rich(prob.question);
+      $('#quiz-q').innerHTML = (prob.problem ? `<details class="cr-prob" open><summary>📜 문제 <small>(숫자가 바뀐 원문 · 눌러서 접기)</small></summary><p>${pretty(prob.problem)}</p></details>` : '') + (opt.ref ? `<span class="sheet-tag">📄 ${DS.UI.esc(opt.ref)}</span>` : '') + DS.UI.rich(prob.question); // 📜 #44 ⑤ · #48 성채 연습 사슬
       // 💡 그림 힌트 (v0.9.7.4): opt.hint 이고 집합 문제면 버튼 → 벤 다이어그램 펼치기 · 접기 (중단원던전 층 보강 · 허수아비)
       if (opt.hint && DS.Hint && DS.Hint.svg(prob)) {
         const hq = $('#quiz-q'), draw = (open) => { const w = hq.querySelector('.hint-wrap'); if (w) w.remove(); hq.insertAdjacentHTML('beforeend', DS.Hint.html(prob, 'q', open)); hq.querySelector('[data-hint]').onclick = () => { DS.Sound.clank(); draw(!open); }; };
@@ -200,7 +200,9 @@ DS.Quiz = (function () {
         setTimeout(() => inp.focus(), 50);
       } else if (t === 'multi') {
         const on = new Set();
+        const gStart = {}; if (prob.groups) { let b0 = 0; prob.groups.forEach((g) => { gStart[b0] = g.label; b0 += g.n; }); } // 🔁 #48 두 칸 고르기 (A 칸 · B 칸)
         prob.options.forEach((o, i) => {
+          if (gStart[i] != null) { const h = document.createElement('div'); h.className = 'quiz-grp-h math'; h.innerHTML = pretty(gStart[i]); box.appendChild(h); }
           const b = document.createElement('button');
           b.className = 'choice multi';
           // 보기가 숫자뿐이면 번호(①…)를 붙이지 않는다 (① 1 처럼 헷갈림). 그 밖에는 ①~⑳ (9번째부터 undefined 가 뜨던 것 수정)
