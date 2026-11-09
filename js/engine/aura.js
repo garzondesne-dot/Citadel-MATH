@@ -23,6 +23,8 @@ DS.Aura = (function () {
 .au-o{left:50%;bottom:calc(var(--p)*20);width:0;height:0;animation:auO var(--d) linear infinite;z-index:3}
 .au-o>.au-s{left:calc(var(--p)*-6);top:calc(var(--p)*-6);width:calc(var(--p)*12);height:calc(var(--p)*12);background:${u(a.orbs)} 0 var(--ay)/400% 1000% no-repeat;animation:auF .6s steps(4) infinite;filter:drop-shadow(0 0 2px var(--au))}
 .au-h{left:calc(50% - var(--p)*41);bottom:calc(var(--p)*-1);width:calc(var(--p)*82);height:calc(var(--p)*82);background:${u(a.halo)} 0 0/400% 100% no-repeat;animation:auF 1s steps(4) infinite;z-index:0}
+.au-hb{left:calc(50% - var(--p)*41);bottom:calc(var(--p)*-1);width:calc(var(--p)*82);height:calc(var(--p)*82);background:${a.haloBurst ? u(a.haloBurst) : 'none'} 0 0/600% 100% no-repeat;animation:auF6 1.2s steps(6) infinite;z-index:0;opacity:.95}
+@keyframes auF6{to{background-position-x:120%}}
 .art.hv2.au>b{z-index:1}
 @keyframes auF{to{background-position-x:133.333%}}
 @keyframes auO{${st.join('')}}
@@ -38,7 +40,7 @@ DS.Aura = (function () {
     art.style.setProperty('--ay', ay); art.style.setProperty('--au', col);
     const delay = b ? (b.style.animationDelay || getComputedStyle(b).animationDelay || '0s') : '0s'; // ⭐ 날갯짓 = 용사 숨쉬기와 같은 박자 · 같은 시작
     const holy = lv >= 10 && A().halo; // ✨ 10단계 = 머리 뒤 홀리 후광만 (2026-11-09 선생님 「7단계는 빼봐」 → 황금 고리 · 빛기둥 · 입자 없음 · 발밑 은은한 금빛만)
-    const back = holy ? '<span class="au-s au-g"></span><span class="au-s au-h"></span>' : `<span class="au-s au-g"></span><span class="au-s au-r"></span>`;
+    const back = holy ? `<span class="au-s au-g"></span>${A().haloBurst ? '<span class="au-s au-hb"></span>' : ''}<span class="au-s au-h"></span>` : `<span class="au-s au-g"></span><span class="au-s au-r"></span>`;
     const n = nOrb(lv, !!art.closest('#screen-hall')), dur = (3.4 - lv * 0.1).toFixed(2);
     const front = holy ? '' : `<span class="au-s au-r f"></span>${Array.from({ length: n }, (_, j) => `<span class="au-s au-o" style="--d:${dur}s;animation-delay:${(-dur * j / n).toFixed(2)}s"><span class="au-s"></span></span>`).join('')}`;
     art.insertAdjacentHTML('afterbegin', back); art.insertAdjacentHTML('beforeend', front);
