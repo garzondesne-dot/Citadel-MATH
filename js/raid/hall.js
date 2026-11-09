@@ -459,6 +459,12 @@ DS.Hall = (function () {
         hh.innerHTML = `<b>💡 ${esc(p0.nick || '')}의 힌트</b><span>${pretty(wq.why.text)}</span>${givers.length > 1 ? `<i class="h-hint-up">👍 +${givers.length - 1}</i>` : ''}`;
         hh.classList.remove('pop'); void hh.offsetWidth; hh.classList.add('pop'); if (fresh && Snd() && Snd().clank) Snd().clank();
       } else if (!givers.length && hh) hh.remove();
+      if (hh && givers.length) { // 💬 2026-11-09 선생님 「말풍선이 아니라 왼쪽 위에 뜸」: 힌트를 준 첫 학생 용사 머리 위 말풍선 (용사를 못 찾으면 왼쪽 위 그대로)
+        const fh = arena.querySelector(`#fh-${givers[0][0]}`), ar = arena.getBoundingClientRect();
+        if (fh && ar.width) { const r = fh.getBoundingClientRect(), x = r.left - ar.left + r.width / 2, y = r.top - ar.top; const k2 = `${Math.round(x)}|${Math.round(y)}`;
+          if (hh.dataset.pos !== k2) { hh.dataset.pos = k2; hh.classList.add('bub'); hh.style.left = `${Math.max(ar.width * 0.17, Math.min(ar.width * 0.83, x))}px`; hh.style.top = `${Math.max(120, y - 6)}px`; hh.style.setProperty('--tx', `${Math.round(x - Math.max(ar.width * 0.17, Math.min(ar.width * 0.83, x)))}px`); } }
+        else if (hh.classList.contains('bub')) { hh.classList.remove('bub'); hh.style.left = hh.style.top = ''; delete hh.dataset.pos; }
+      }
     }
     // 💥 졸개 쓰러짐: 정찰이 끝난 뒤 대장 앞에 졸개(색) · 반 기준% 가 넘은 졸개는 쓰러짐 + 띠
     const mon = $('#rm'), dn = Raid().chainDown(L, R, st.id), downs = dn.filter((d) => d.down).map((d) => d.k), dk = `${st.id}|${downs.join(',')}`;
