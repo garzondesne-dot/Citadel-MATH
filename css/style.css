@@ -149,7 +149,7 @@ input:focus, select:focus { outline: none; border-color: var(--gold); }
 /* 학생 폰 전투 장면: 던전 배경 앞에 몬스터 한 마리 (배경 그림은 배치표 scene) */
 .scene { position: relative; height: 220px; margin: 0 0 8px; border: 2px solid var(--line); overflow: hidden; display: flex; align-items: flex-end; justify-content: center; }
 .scene::after { content: ''; position: absolute; bottom: 14px; left: 50%; width: 140px; height: 20px; transform: translateX(-50%); background: radial-gradient(closest-side, #000c, transparent); }
-.scene .art.monster { width: 160px; height: 160px; margin-bottom: 18px; position: relative; z-index: 1; filter: drop-shadow(0 6px 8px #000c); }
+.scene .art.monster { width: 160px; height: 160px; margin-bottom: 18px; position: relative; z-index: 1; filter: drop-shadow(0 3px 0 #0007); }
 .scene-bar { position: absolute; top: 0; left: 0; right: 0; z-index: 2; display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; padding: 6px 8px 18px; background: linear-gradient(#1a1612e6, #1a161200); font-size: 14px; }
 .scene-bar .power { font-size: 20px; }
 .scene-bar .muted { color: #c9d4f0; }
@@ -294,7 +294,7 @@ input:focus, select:focus { outline: none; border-color: var(--gold); }
 .attend .attend-tag { color: var(--gold); margin: 0; }
 .attend h2 { font-size: 24px; }
 .scene.special { box-shadow: inset 0 0 0 3px #a77bff; }
-.scene.special .art.monster { filter: drop-shadow(0 6px 8px #000c) hue-rotate(200deg) saturate(1.4); }
+.scene.special .art.monster { filter: drop-shadow(0 3px 0 #0007) hue-rotate(200deg) saturate(1.4); }
 .scene.hit .art.monster { animation: flashRW 0.5s 2; }
 .scene.miss .art.monster { animation: shake 0.3s 2; }
 .segs { position: absolute; left: 8px; right: 8px; bottom: 6px; z-index: 2; display: flex; gap: 3px; }
@@ -388,8 +388,8 @@ input:focus, select:focus { outline: none; border-color: var(--gold); }
 @keyframes dash { 40% { transform: translateX(var(--to, 520px)) scale(1.15); } 55% { transform: translateX(calc(var(--to, 520px) - 20px)) scale(1.15); } 100% { transform: none; } }
 @keyframes swingMiss { 35% { transform: translateX(160px); } 45% { transform: translateX(160px) rotate(-12deg); } 55% { transform: translateX(160px) rotate(10deg); } 100% { transform: none; } }
 .raid-mon { position: absolute; right: 6%; bottom: 8%; width: min(42vh, 360px); height: min(42vh, 360px); }
-.raid-mon .art.monster { width: 100%; height: 100%; filter: drop-shadow(0 10px 12px #000c); }
-.raid.special .raid-mon .art.monster { filter: drop-shadow(0 10px 12px #000c) hue-rotate(200deg) saturate(1.4); }
+.raid-mon .art.monster { width: 100%; height: 100%; filter: drop-shadow(0 4px 0 #0007); }
+.raid.special .raid-mon .art.monster { filter: drop-shadow(0 4px 0 #0007) hue-rotate(200deg) saturate(1.4); }
 .raid.boss .raid-mon { width: min(52vh, 440px); height: min(52vh, 440px); }
 .raid-mon.flash .art.monster { animation: flashRW 0.45s; }
 #rm-fx { position: absolute; inset: 0; pointer-events: none; }
@@ -449,7 +449,7 @@ html, body { overscroll-behavior-y: none; } /* 아래로 당겨 새로고침 막
 @keyframes huff { 0%, 100% { transform: scale(1, 1); } 45% { transform: scale(1.04, 0.93) translateY(2px); } 60% { transform: scale(0.98, 1.04); } }
 .jump { animation: jump 0.7s cubic-bezier(.3, .7, .4, 1) infinite; }
 @keyframes jump { 0%, 100% { transform: translateY(0) scale(1.04, 0.94); } 15% { transform: translateY(0) scale(1); } 50% { transform: translateY(-34%) scale(0.97, 1.05); } }
-i.shadow { display: block; position: absolute; left: 50%; bottom: -4px; width: 70%; height: 12px; transform: translateX(-50%); background: radial-gradient(ellipse, #000b 0, #0000 70%); z-index: -1; pointer-events: none; }
+i.shadow { display: block; position: absolute; left: 50%; bottom: -4px; width: 70%; height: 12px; transform: translateX(-50%); background: radial-gradient(ellipse, #0009 0 58%, #0000 60%); image-rendering: pixelated; /* #33 딱 떨어지는 도트 그림자 */ z-index: -1; pointer-events: none; }
 .face-l { transform: scaleX(-1); }
 .stamp-bar { background: linear-gradient(90deg, #7a1010, #b3200f, #7a1010); color: #fff; font-weight: 700; text-align: center; padding: 8px 10px; border: 2px solid #ffcf5a; margin: 8px 0; }
 .stamp-bar.big { font-size: 28px; }
@@ -558,8 +558,8 @@ i.shadow { display: block; position: absolute; left: 50%; bottom: -4px; width: 7
 .raid2.shake { animation: quake 0.35s 2; }
 .raid2-mon { position: absolute; left: 50%; top: 9%; width: min(46vh, 440px); height: min(46vh, 440px); transform: translateX(-50%); z-index: 2; }
 .raid2.boss .raid2-mon { width: min(54vh, 520px); height: min(54vh, 520px); top: 7%; }
-.raid2-mon .art.monster { width: 100%; height: 100%; filter: drop-shadow(0 12px 14px #000c); }
-.raid2.special .raid2-mon .art.monster { filter: drop-shadow(0 12px 14px #000c) hue-rotate(200deg) saturate(1.4); }
+.raid2-mon .art.monster { width: 100%; height: 100%; filter: drop-shadow(0 4px 0 #0007); }
+.raid2.special .raid2-mon .art.monster { filter: drop-shadow(0 4px 0 #0007) hue-rotate(200deg) saturate(1.4); }
 .raid2-mon.flash .art.monster { animation: flashRW 0.45s; }
 .raid2-shadow { position: absolute; left: 50%; top: 52%; width: min(36vh, 340px); height: 34px; transform: translateX(-50%); background: radial-gradient(ellipse, #000a, transparent 70%); z-index: 1; }
 .fh2 { position: absolute; transform: translate(-50%, -100%); display: flex; flex-direction: column; align-items: center; z-index: 4; }
@@ -726,9 +726,9 @@ body.forge-open { overflow: hidden; }
 .scene.enc.hit .enc-hero { animation: encDash .7s ease-in-out; }
 @keyframes encDash { 40% { transform: translateX(130%) scale(1.1); } 55% { transform: translateX(118%) scale(1.1); } 100% { transform: none; } }
 .enc-mon { position: absolute; right: 6%; bottom: 10px; display: flex; flex-direction: column; align-items: center; z-index: 1; }
-.enc-mon .art.monster { width: 150px; height: 150px; margin: 0; filter: drop-shadow(0 6px 8px #000c); }
+.enc-mon .art.monster { width: 150px; height: 150px; margin: 0; filter: drop-shadow(0 3px 0 #0007); }
 .scene.enc .segs { position: static; margin-top: 2px; width: 150px; }
-.scene.enc.special .enc-mon .art.monster { filter: drop-shadow(0 6px 8px #000c) hue-rotate(200deg) saturate(1.4); }
+.scene.enc.special .enc-mon .art.monster { filter: drop-shadow(0 3px 0 #0007) hue-rotate(200deg) saturate(1.4); }
 .scene.enc.hit .enc-mon .art.monster { animation: flashRW 0.5s 2; }
 .scene.enc.miss .enc-mon .art.monster { animation: none; }
 /* 모닥불 차원문(차시 포털) · 설정 */
@@ -1141,9 +1141,9 @@ body.forge-open .test-bar { display: none; } /* v0.9.3: 모루(한 화면)를 �
 .sh-row { display: flex; justify-content: space-between; align-items: center; gap: 6px; padding: 4px 0; border-top: 1px dashed #ffffff22; font-size: 14px; }
 /* v0.9.6 몬스터 색 변형 ('extra:3@h150' → --hue) — 보강던전 · 돌려쓰기 보스 */
 .art.monster.hue { filter: hue-rotate(var(--hue)) saturate(1.15); }
-.scene .art.monster.hue, .enc-mon .art.monster.hue { filter: drop-shadow(0 6px 8px #000c) hue-rotate(var(--hue)) saturate(1.15); }
-.raid-mon .art.monster.hue { filter: drop-shadow(0 10px 12px #000c) hue-rotate(var(--hue)) saturate(1.15); }
-.raid2-mon .art.monster.hue { filter: drop-shadow(0 12px 14px #000c) hue-rotate(var(--hue)) saturate(1.15); }
+.scene .art.monster.hue, .enc-mon .art.monster.hue { filter: drop-shadow(0 3px 0 #0007) hue-rotate(var(--hue)) saturate(1.15); }
+.raid-mon .art.monster.hue { filter: drop-shadow(0 4px 0 #0007) hue-rotate(var(--hue)) saturate(1.15); }
+.raid2-mon .art.monster.hue { filter: drop-shadow(0 4px 0 #0007) hue-rotate(var(--hue)) saturate(1.15); }
 
 /* ── 캠프 배치 (2026-11-03 사용자가 배경에 직접 그린 위치 · 폰 4:3 화면 기준 %) ──
    A 보강던전 · B 책장 · C 우편함 · D 모루 · E 모닥불(+용사) · F 차시던전 · G 허수아비. 따로 얹은 나무는 뺌 */

@@ -59,12 +59,15 @@ DS.FX = (function () {
   const load = (sp) => { const u = url(sp); if (!imgs[u]) { const im = new Image(); im.src = u; imgs[u] = im; } return imgs[u]; };
   const preload = (ks) => [].concat(ks || []).forEach((k) => { const sp = spec(k) || ((A().fx2 || {}).proj || {})[k]; if (sp) load(sp); });
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+  // 🔲 #33 도트 패치 (2026-11-09): 배율 = 0.25 단위 · 자리 · 칸 크기 = 정수 픽셀 → 도트가 번지거나 1px 흔들리지 않고 옆 칸이 비치지 않음
+  const q4 = (s) => Math.max(0.25, Math.round(s * 4) / 4);
+  const px = (v) => Math.round(v);
 
   // 띠 그림 하나를 상자 위에 (x, y = 맞는 점). sp = 칸 정보, s = 화면 배율. 돌려주는 값: 요소 (끝나면 저절로 지워짐)
   function strip(box, sp, x, y, s, opt = {}) {
     const el = document.createElement('i'); el.className = 'fx-spr' + (opt.loop ? ' loop' : '');
-    const W = sp.w * s, H = sp.h * s, dur = sp.n / sp.fps;
-    el.style.cssText = `left:${(x - sp.px * s).toFixed(1)}px;top:${(y - sp.py * s).toFixed(1)}px;width:${W.toFixed(1)}px;height:${H.toFixed(1)}px;background-image:url('${url(sp)}');background-size:${(W * sp.n).toFixed(1)}px ${H.toFixed(1)}px;--fx-end:${(-W * sp.n).toFixed(1)}px;animation-duration:${dur.toFixed(3)}s;animation-timing-function:steps(${sp.n});${opt.z ? `z-index:${opt.z};` : ''}`;
+    s = q4(s); const W = px(sp.w * s), H = px(sp.h * s), dur = sp.n / sp.fps;
+    el.style.cssText = `left:${px(x - sp.px * s)}px;top:${px(y - sp.py * s)}px;width:${W}px;height:${H}px;background-image:url('${url(sp)}');background-size:${W * sp.n}px ${H}px;--fx-end:${-W * sp.n}px;animation-duration:${dur.toFixed(3)}s;animation-timing-function:steps(${sp.n});${opt.z ? `z-index:${opt.z};` : ''}`;
     load(sp); box.appendChild(el);
     if (!opt.loop) setTimeout(() => el.remove(), dur * 1000 + 80);
     return el;
@@ -79,8 +82,8 @@ DS.FX = (function () {
   // 상자에 띠 그림 (왼쪽 위 · 가로 · 세로 배율 따로 · 돌림)
   function stripXY(box, sp, left, top, sx, sy, opt = {}) {
     const el = document.createElement('i'); el.className = 'fx-spr';
-    const W = sp.w * sx, H = sp.h * sy, dur = sp.n / sp.fps;
-    el.style.cssText = `left:${left.toFixed(1)}px;top:${top.toFixed(1)}px;width:${W.toFixed(1)}px;height:${H.toFixed(1)}px;background-image:url('${url(sp)}');background-size:${(W * sp.n).toFixed(1)}px ${H.toFixed(1)}px;--fx-end:${(-W * sp.n).toFixed(1)}px;animation-duration:${dur.toFixed(3)}s;animation-timing-function:steps(${sp.n});z-index:${opt.z || 20};${opt.rot ? `transform-origin:${opt.ox.toFixed(1)}px ${opt.oy.toFixed(1)}px;transform:rotate(${opt.rot.toFixed(3)}rad);` : ''}`;
+    const W = px(sp.w * sx), H = px(sp.h * sy), dur = sp.n / sp.fps;
+    el.style.cssText = `left:${px(left)}px;top:${px(top)}px;width:${W}px;height:${H}px;background-image:url('${url(sp)}');background-size:${W * sp.n}px ${H}px;--fx-end:${-W * sp.n}px;animation-duration:${dur.toFixed(3)}s;animation-timing-function:steps(${sp.n});z-index:${opt.z || 20};${opt.rot ? `transform-origin:${opt.ox.toFixed(1)}px ${opt.oy.toFixed(1)}px;transform:rotate(${opt.rot.toFixed(3)}rad);` : ''}`;
     load(sp); box.appendChild(el); setTimeout(() => el.remove(), dur * 1000 + 80);
     return el;
   }
@@ -95,11 +98,11 @@ DS.FX = (function () {
     const t = tierOf(kind), tier = o.flat ? 1 : t === 's' ? TIER_SCALE[3] : TIER_SCALE[t] || 1, mult = (o.mult || 1) * (o.perfect ? 1.15 : 1);
     // 크기: 몸통 폭에 맞춤 (바닥 기술은 조금 넓게) · 키는 몸통의 1.4배(바닥 1.9배)를 넘지 않게
     let s = Math.min((w * (mode === 'ground' ? 1.15 : 1)) / bw, (h * (mode === 'ground' ? 1.9 : 1.4)) / bh);
-    s = clamp(s * tier * mult, 0.6, 8);
+    s = q4(clamp(s * tier * mult, 0.6, 8)); // #33 0.25 단위
     let el;
     if (mode === 'shot' && o.from) {
       const tx = sp.tx || bb[2], hit = { x: cx - w * 0.12, y: cy }, dx = hit.x - o.from.x, dy = hit.y - o.from.y, L = Math.max(20, Math.hypot(dx, dy));
-      const sx = L / Math.max(10, tx - sp.px), sy = clamp(Math.min(s, sx * 1.4), 0.6, 8);
+      const sx = L / Math.max(10, tx - sp.px), sy = q4(clamp(Math.min(s, sx * 1.4), 0.6, 8)); // 길이(sx)는 몸통까지 닿게 그대로
       el = stripXY(box, sp, o.from.x - sp.px * sx, o.from.y - bcy * sy, sx, sy, { z: 21, rot: Math.atan2(dy, dx), ox: sp.px * sx, oy: bcy * sy });
     } else if (mode === 'ground') el = stripXY(box, sp, cx - bcx * s, B.y1 + h * 0.03 - bb[3] * s, s, s);
     else el = stripXY(box, sp, cx - bcx * s, cy - bcy * s, s, s);
@@ -127,5 +130,5 @@ DS.FX = (function () {
     const drawIt = () => { g.clearRect(0, 0, cv.width, cv.height); g.imageSmoothingEnabled = false; const k = Math.min(cv.width / sp.w, cv.height / sp.h); g.drawImage(im, i * sp.w, 0, sp.w, sp.h, (cv.width - sp.w * k) / 2, (cv.height - sp.h * k) / 2, sp.w * k, sp.h * k); };
     if (im.complete && im.naturalWidth) drawIt(); else im.addEventListener('load', drawIt, { once: true });
   }
-  return { place, modeOf, GROUND, SHOT, FAMS, TIER_NAMES, TIER_SCALE, AFFINITY, affOf, crystalOf, resonates, KINDS, BASE, SKILL, FANCY, LEGEND, ACHV, NAMES, BASE_OF, famOf, tierOf, usable, spec, strip, play, still, preload, load };
+  return { q4, place, modeOf, GROUND, SHOT, FAMS, TIER_NAMES, TIER_SCALE, AFFINITY, affOf, crystalOf, resonates, KINDS, BASE, SKILL, FANCY, LEGEND, ACHV, NAMES, BASE_OF, famOf, tierOf, usable, spec, strip, play, still, preload, load };
 })();

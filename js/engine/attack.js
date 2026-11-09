@@ -73,7 +73,8 @@ DS.Attack = (function () {
     const sp = ((A().fx2 || {}).proj || {})[key];
     if (!sp) return wait(200);
     const el = DS.FX.strip(scene, sp, from.x, from.y, s, { loop: true, z: 21 }); el.classList.add('atk-proj');
-    el.style.transformOrigin = `${(sp.px * s).toFixed(1)}px ${(sp.py * s).toFixed(1)}px`;
+    if (DS.FX.q4) s = DS.FX.q4(s); // #33 strip 과 같은 배율
+    el.style.transformOrigin = `${Math.round(sp.px * s)}px ${Math.round(sp.py * s)}px`;
     const dist = Math.hypot(to.x - from.x, to.y - from.y), lift = Math.min(60, dist * 0.22), cx = (from.x + to.x) / 2, cy = Math.min(from.y, to.y) - lift;
     const ms = miss ? 320 : Math.max(260, Math.min(460, dist * 1.4)), t0 = performance.now();
     return new Promise((res) => {
@@ -81,7 +82,7 @@ DS.Attack = (function () {
         const u = Math.min(1, (t - t0) / ms), v = 1 - u;
         const x = v * v * from.x + 2 * v * u * cx + u * u * to.x, y = v * v * from.y + 2 * v * u * cy + u * u * to.y;
         const tx = 2 * v * (cx - from.x) + 2 * u * (to.x - cx), ty = 2 * v * (cy - from.y) + 2 * u * (to.y - cy);
-        el.style.left = `${(x - sp.px * s).toFixed(1)}px`; el.style.top = `${(y - sp.py * s).toFixed(1)}px`;
+        el.style.left = `${Math.round(x - sp.px * s)}px`; el.style.top = `${Math.round(y - sp.py * s)}px`; // #33 정수 픽셀
         if (!ROUND[key]) el.style.transform = `rotate(${Math.atan2(ty, tx).toFixed(3)}rad)`;
         if (miss) el.style.opacity = String(1 - Math.max(0, u - 0.5) * 2);
         if (u < 1 && scene.isConnected) requestAnimationFrame(f); else { el.remove(); res(); }

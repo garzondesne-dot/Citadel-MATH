@@ -114,20 +114,20 @@ ${(a.dungeons ? a.dungeons.ids : []).map((id) => `.bg-scene.th-${id}{background-
     const k = a.ui.kit, p = a.ui.panel, u = (f) => `url('${a.base}${f}')`, n = k.slice;
     const img = (f, w) => `border-style:solid!important;border-color:transparent!important;border-width:${w}!important;border-image:${u(f)} ${n} fill / ${w} stretch!important;background:none!important;border-radius:0!important;image-rendering:pixelated`;
     return `.framed{border:${p.w}px solid transparent!important;border-image:${u(p.src)} ${p.slice} fill / ${p.w}px stretch!important;background:none!important;image-rendering:pixelated}
-.btn{${img(k.btn, '9px')};color:#eef2ff;text-shadow:1px 1px 0 #000;padding:1px 6px;box-shadow:0 3px 8px #0007}
+.btn{${img(k.btn, '9px')};color:#eef2ff;text-shadow:1px 1px 0 #000;padding:1px 6px;box-shadow:0 3px 0 #0008}
 .btn.big{padding:5px}.btn.small{border-width:6px!important;border-image-width:6px!important;padding:0 4px}
 .btn:active:not(:disabled){border-image-source:${u(k.press)}!important;transform:translateY(1px)}
 .btn.primary,.btn.on,.btn.help.on{border-image-source:${u(k.gold)}!important;color:#3a2204!important;text-shadow:0 1px 0 #ffefb0!important;font-weight:700}
 .btn.primary:active:not(:disabled),.btn.on:active{border-image-source:${u(k.goldPress)}!important}
 .btn:disabled{border-image-source:${u(k.off)}!important;color:#9aa0ad!important;opacity:.75}
 .btn.boss{color:#e3d2ff}
-.role{${img(k.btn, '11px')};color:#eef2ff;padding:1px 0;min-height:92px;justify-content:center;box-shadow:0 3px 8px #0008}
+.role{${img(k.btn, '11px')};color:#eef2ff;padding:1px 0;min-height:92px;justify-content:center;box-shadow:0 3px 0 #0009}
 .role.on{border-image-source:${u(k.gold)}!important;color:#3a2204!important}
 .role b{white-space:nowrap;font-size:clamp(12px,3.7vw,16px);text-shadow:1px 1px 0 #000}.role.on b{text-shadow:0 1px 0 #ffefb0}
 input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea{${img(k.input, '7px')};padding:3px 4px;color:#eef2ff}
 .tab{${img(k.tab, '8px 8px 0')};border-image-slice:${n} ${n} 0 fill!important;color:#b9c4e6!important;padding:2px 4px 6px}
 .tabs .tab{padding:2px 8px 6px}.tab.on{border-image-source:${u(k.tabOn)}!important;color:#ffd35a!important}
-.ic-bar .icb{${img(k.icbtn, '7px')};box-shadow:0 2px 6px #0007}.ic-bar .icb.on{border-image-source:${u(k.gold)}!important;box-shadow:0 0 10px #ffd35a88}
+.ic-bar .icb{${img(k.icbtn, '7px')};box-shadow:0 2px 0 #0008}.ic-bar .icb.on{border-image-source:${u(k.gold)}!important;box-shadow:0 0 10px #ffd35a88}
 .ui-ic{display:inline-block;width:1.2em;height:1.2em;vertical-align:-.25em;margin:0 .08em;background:${u(a.ui.icons.src)} 0 0/${a.ui.icons.cols * 100}% ${a.ui.icons.rows * 100}% no-repeat;image-rendering:pixelated;flex:none}
 .ui-x{border:7px solid transparent!important;border-image:${u(k.icbtn)} ${n} fill / 7px stretch!important;background:none!important;color:#ffd35a!important;text-shadow:1px 1px 0 #000;image-rendering:pixelated;border-radius:0!important;font-size:18px!important}
 .nav-back,#bn-back,.ui-back{${img(k.btn, '7px')};color:#e9eefc!important;padding:0 8px!important}
