@@ -469,7 +469,7 @@ DS.Student = (function () {
     // 🔥 끈기의 일격: 두 번 넘게 틀린 뒤 드디어 다 맞힘 (연출만)
     const grit = !!(fx && !prac && t.attempt >= 2 && rec.perfectAt === t.attempt);
     if (finish) setTimeout(() => { const sc = body.querySelector('.scene'); if (sc) { sc.classList.add('fin-flash'); DS.FX.play(sc, myP().fx || 'flame', { perfect: true, scale: 0.6 }); } DS.Sound.correct(); }, atk ? 1300 : 500);
-    const head = prac ? `몬스터 묶기 ${t.correct}/${t.total} — 지금까지 <b>${Raid().bindOf(L, R, mid, me)}초</b> 묶음 <span class="small muted">(최대 ${Raid().BIND_MAX}초)</span>` : { success: '⚔ 공격 성공!', partial: `⚔ 부분 성공 (${t.correct}/${t.total})`, fail: '💨 공격 실패…' }[label];
+    const head = prac && rec.v3 ? (t.correct === t.total ? `✔ 새 문제 해결! <span class="small muted">기회는 그대로</span>` : `✏ 틀린 부분이 있습니다. 고쳐 보세요. <span class="small muted">(기회 −1)</span>`) : prac ? `몬스터 묶기 ${t.correct}/${t.total} — 지금까지 <b>${Raid().bindOf(L, R, mid, me)}초</b> 묶음 <span class="small muted">(최대 ${Raid().BIND_MAX}초)</span>` : { success: '⚔ 공격 성공!', partial: `⚔ 부분 성공 (${t.correct}/${t.total})`, fail: '💨 공격 실패…' }[label];
     const done = Raid().cleared(L, R, mid);
     // ⚡ 수업 필살기 (2026-11-06 확정 ①): 첫 시도 퍼펙트 + 묶기 2번 퍼펙트 = 3연속 · 특화 Ⅳ 전설 스킬 · 마지막 기회가 남아 있을 때
     // 🌟 진필살기 (2026-11-06 확정): 3연속 퍼펙트 + 특화 Ⅳ · 마지막 기회 · 이 몬스터가 아직 안 굳었을 때 (반 전체 한 번)
@@ -481,17 +481,21 @@ DS.Student = (function () {
     const banner = `${finish ? '<div class="fin-me sc-banner">⚔ 마무리 일격!</div>' : ''}${grit ? `<div class="fin-me grit sc-banner${finish ? ' second' : ''}">🔥 끈기의 일격!</div>` : ''}`;
     const resLine = prac ? head : label === 'success' ? `✔ ${t.correct} / ${t.total} 성공!` : label === 'partial' ? `◐ ${t.correct} / ${t.total} 부분 성공` : `✘ ${t.correct} / ${t.total} — 다시 도전해요`;
     body.innerHTML = `<div class="panel framed st-fight st-after">${scene(step, rec, hp, atk ? '' : fx, '', banner)}
-      <div class="st-res res-${prac ? 'success' : label}"><b>${esc(step.title)} · ${resLine}</b></div>
+      <div class="st-res res-${prac && !(rec.v3 && rec.fix) ? 'success' : label}"><b>${esc(step.title)} · ${resLine}</b>${t.total > 1 ? `<div class="mk-chips">${t.marks.map((m, i) => `<span class="${m ? 'ok' : 'ng'}">(${i + 1}) ${m ? '✔' : '✘'}</span>`).join('')}</div>` : ''}</div>
       <details class="paper-fold"><summary>▸ ${esc(step.title)} 다시 보기</summary><div class="paper"><div class="marks">${items.map((q, i) => `<div class="mark ${t.marks[i] ? 'ok' : 'ng'}"><b>(${i + 1})</b> ${t.marks[i] ? '✔' : '✘'} <span class="math">${pretty(itemText(q))}</span>${t.marks[i] ? '' : `<br><span class="sol-line math">${pretty(solOf(q))}</span>`}</div>`).join('')}</div></div></details>
       ${ult ? `<p class="okc">🌟 <b>3연속 퍼펙트!</b> 전설 스킬이 진짜 힘을 깨웠어요</p><p>마지막 기회로 <b>진필살기</b>를 쓸까요?</p>
         <div class="heal-pick"><button class="btn primary big ult-go true" id="st-ult">🌟 ${esc(String(DS.FX.NAMES[myP().fx] || '').replace(/^\S+\s/, ''))}<br><small>진필살기</small></button><button class="btn big heal-btn" id="st-party">💚 파티 힐<br><small>못 맞힌 친구 모두 +1</small></button></div>
         <p class="muted small">진필살기 = 몬스터가 ${Raid().TRUE_SEC}초 돌로 굳음 (공격 멈춤) + 못 맞힌 친구 모두 기회 +1 · 💡 힌트 + 그동안 맞힌 친구에게 💎 · 파티 힐 = 기회 +1 만</p>`
+        : rec.v3 && rec.perfect && rec.tokLeft > 0 ? `<p class="okc st-ask">✔ 해결! 무엇을 할까요? <span class="muted small">(${rec.tokLeft}번)</span></p>
+        <div class="heal-pick"><button class="btn primary big" id="st-bind">⛓ 몬스터 묶기<br><small>공격 ${Raid().BIND_TOKEN}초 늦춤</small></button><button class="btn big heal-btn" id="st-heal">💚 친구 힐<br><small>막힌 친구 기회 +1</small></button></div>`
+        : rec.v3 && rec.perfect && rec.canRetry ? (rec.fix ? `<p>✏ <b>✘ 칸을 고쳐서</b> 다시 내요 <span class="muted small">(같은 문제 · 남은 기회 ${rec.left}번)</span></p><button class="btn primary big" id="st-retry">✏ 고쳐서 다시</button>`
+          : `<p>다음 새 문제에 도전! <span class="muted small">(숫자가 바뀐 문제 · 맞히면 기회 그대로 + 묶기/힐 · 틀리면 기회 −1 · 남은 기회 ${rec.left}번)</span></p><button class="btn primary big" id="st-retry">▶ 다음 문제</button>`)
         : rec.perfect && rec.canRetry ? `<p class="muted small st-ask">남은 기회 <b>${rec.left}</b>번 · 무엇을 할까요?</p>
         <div class="heal-pick"><button class="btn primary big" id="st-retry">몬스터 묶기</button><button class="btn big heal-btn" id="st-heal">💚 친구 힐</button></div>
         <p class="muted small">몬스터 묶기 = 숫자 바뀐 문제를 맞힌 만큼 몬스터 공격을 늦춤 (1개 1초 · 최대 ${Raid().BIND_MAX}초) · 친구 힐 = 기회가 필요한 친구에게 도전 기회 한 칸</p>`
-        : done && rec.canRetry ? `<p class="okc big-msg">🎉 몬스터 격파!</p><p>틀린 소문제를 다시 풀어 볼까요? <span class="muted small">(남은 기회 ${rec.left}번 · 숫자가 모두 바뀌어요 · 고친 만큼 경험치가 더 쌓여요)</span></p><button class="btn primary big" id="st-retry">🔄 다시 도전</button>`
+        : done && rec.canRetry ? `<p class="okc big-msg">🎉 몬스터 격파!</p><p>틀린 소문제를 다시 풀어 볼까요? <span class="muted small">(남은 기회 ${rec.left}번 · ${rec.v3 ? '같은 문제에서 ✘ 칸을 고쳐요' : '숫자가 모두 바뀌어요'} · 고친 만큼 경험치가 더 쌓여요)</span></p><button class="btn primary big" id="st-retry">🔄 다시 도전</button>`
         : done ? '<p class="okc big-msg">🎉 몬스터 격파! 다음 신호를 기다려요.</p>'
-        : rec.canRetry ? `<p>다시 해 보겠습니까? <span class="muted small">(남은 기회 ${rec.left}번 · 숫자가 모두 바뀌어요)</span></p><button class="btn primary big" id="st-retry">🔄 다시 도전</button>`
+        : rec.canRetry ? `<p>다시 해 보겠습니까? <span class="muted small">(남은 기회 ${rec.left}번 · ${rec.v3 ? '같은 문제에서 ✘ 칸을 고쳐요' : '숫자가 모두 바뀌어요'})</span></p><button class="btn primary big" id="st-retry">🔄 다시 도전</button>`
         : `<p class="muted">${rec.perfect ? '멋져요! 기회를 모두 썼어요. 다른 용사들을 기다려요.' : '재도전 기회를 모두 썼어요. 해설을 보며 학습지에 정리해요.'} 데미지 <b>${rec.best}</b></p>`}
       ${test && (test.prep.img || {})[mid] ? '<button class="btn small" id="st-sheet">📄 학습지 보기 (문제 해설)</button>' : ''}
       ${dock(rec, done && !rec.canRetry ? '<span class="dock-wait">다음 단계를 기다려요</span>' : '')}
@@ -502,7 +506,7 @@ DS.Student = (function () {
     if (atk) { const sc = body.querySelector('.scene'); if (sc) DS.Attack.play(sc, { heroBox: sc.querySelector('.enc-hero'), monBox: sc.querySelector('.enc-mon'), hero: myP().hero || 0, fx: myP().fx || 'flame', miss: label === 'fail' && !prac, s: grit ? 1.3 : 1, rest: done ? 'win' : 'idle', noDmg: prac, ultimate: autoUlt, finish: grit }).then(() => { if (prac && t.correct > 0 && DS.Thrill && sc.isConnected) DS.Thrill.bindFx(sc.querySelector('.enc-mon .art.monster') || sc.querySelector('.enc-mon')); }); } // ⛓ 묶기 공격 = 사슬 이펙트
     else if (fx && !done) setTimeout(() => { const a = body.querySelector('.enc-hero .art'); if (a) a.outerHTML = heroNow('idle', fx === 'miss' ? 'slump' : 'huff'); }, 650);
     const rb = $('#st-retry');
-    if (rb) { thinkTimer(rb, `${mid}|${t.attempt}`, rec.perfect ? '몬스터 묶기' : '🔄 다시 도전'); rb.onclick = () => { retrying = `${mid}|${rec.nextAttempt}`; form = null; DS.Sound.clank(); render(); }; }
+    if (rb) { thinkTimer(rb, `${mid}|${t.attempt}`, rec.v3 ? rb.textContent : rec.perfect ? '몬스터 묶기' : '🔄 다시 도전'); rb.onclick = () => { retrying = `${mid}|${rec.nextAttempt}`; form = null; DS.Sound.clank(); render(); }; }
     const ub = $('#st-ult');
     if (ub) ub.onclick = () => DS.Control.run(async () => {
       ub.disabled = true; await DS.Act.heal(code, raw, mid, { true: true }); drawn = '';
@@ -516,6 +520,8 @@ DS.Student = (function () {
       heroFx = { pose: 'heal', until: Date.now() + 1600 }; setTimeout(() => heroFlash('heal', 1400), 60); healPop('💚 파티 힐 — 못 맞힌 친구 모두 +1!');
       if (DS.Grow && real()) DS.Grow.add(acc(), { heal: 1 }, `party_${code}_${mid}`).catch(() => {});
     });
+    const bb = $('#st-bind'); // 🔁 v3: 새 문제 해결 1번 = ⛓ 묶기 3초
+    if (bb) bb.onclick = () => DS.Control.run(async () => { bb.disabled = true; await DS.Act.heal(code, raw, mid, { bind: true }); DS.Sound.correct(); drawn = ''; healPop(`⛓ 몬스터 묶기 +${Raid().BIND_TOKEN}초!`); });
     const hb = $('#st-heal');
     if (hb) hb.onclick = () => DS.Control.run(async () => {
       hb.disabled = true;
@@ -535,7 +541,8 @@ DS.Student = (function () {
   function fightForm(body, step, rec, hp) {
     const mid = step.id, attempt = rec.nextAttempt, key = `${mid}|${attempt}`;
     const items = Raid().itemsFor(L, R, mid, me, attempt);
-    if (!form || form.key !== key) form = { key, given: items.map((q) => (q.type === 'multi' ? [] : q.type === 'number' ? 0 : q.type === 'text' ? '' : null)) };
+    const sameQ = rec.v3 && rec.last && (!rec.perfect || rec.fix) && Array.isArray(rec.last.given) && rec.last.given.length === items.length; // 🔁 v3: 같은 문제 → 지난 답을 채워 두고 ✘ 칸만 고치기
+    if (!form || form.key !== key) form = { key, given: sameQ ? JSON.parse(JSON.stringify(rec.last.given)).map((g, i) => (g == null ? (items[i].type === 'multi' ? [] : items[i].type === 'number' ? 0 : items[i].type === 'text' ? '' : null) : g)) : items.map((q) => (q.type === 'multi' ? [] : q.type === 'number' ? 0 : q.type === 'text' ? '' : null)) };
     const prevWrong = rec.last ? rec.last.marks.map((m) => !m) : [];
     const ready = items.every((q, i) => (q.type === 'multi' ? form.given[i].length > 0 : q.type === 'text' ? String(form.given[i] || '').trim() !== '' : form.given[i] != null));
     const down = Raid().cleared(L, R, mid); // v0.9.2: 체력 0 → 쓰러졌어도 계속 풀고 공격할 수 있다
@@ -548,7 +555,7 @@ DS.Student = (function () {
     body.innerHTML = `<div class="panel framed st-fight">${scene(step, rec, hp, '', down ? '' : GAUGE)}
       <div class="paper"><div class="paper-h"><b>${step.special ? '⭐ ' : step.review ? '📖 ' : ''}${esc(step.title)}</b><small>${items.length > 1 ? `(1)~(${items.length}) 모두 풀고 공격` : '풀고 공격'}</small></div>
       ${down ? '<p class="paper-note ok">🎉 몬스터는 쓰러졌어요! 그래도 풀어서 공격하면 이펙트도 뜨고 경험치가 쌓여요.</p>' : ''}
-      ${attempt && rec.perfect ? `<p class="paper-note">⛓ 몬스터 묶기 — 맞힌 소문제 1개마다 반 전체의 몬스터 공격이 1초 늦어져요 (최대 ${Raid().BIND_MAX}초)</p>` : attempt ? `<p class="paper-note">🔄 재도전 ${attempt} — 숫자가 모두 바뀌었어요 · 지난번 틀린 문항은 <b class="ngc">✘</b></p>` : ''}
+      ${attempt && rec.v3 ? `<p class="paper-note">${rec.perfect ? (rec.fix ? '✏ 같은 문제 — ✘ 칸을 고쳐서 다시 내요 (맞히면 묶기 · 힐 한 번)' : '🆕 새 문제 (숫자가 바뀌었어요) — 맞히면 기회 그대로 + 묶기 · 힐 한 번 · 틀리면 기회 −1') : '🔄 같은 문제 다시 — 지난 답이 채워져 있어요 · ✘ 문항만 고쳐요'}</p>` : attempt && rec.perfect ? `<p class="paper-note">⛓ 몬스터 묶기 — 맞힌 소문제 1개마다 반 전체의 몬스터 공격이 1초 늦어져요 (최대 ${Raid().BIND_MAX}초)</p>` : attempt ? `<p class="paper-note">🔄 재도전 ${attempt} — 숫자가 모두 바뀌었어요 · 지난번 틀린 문항은 <b class="ngc">✘</b></p>` : ''}
       ${L.monsters[mid].note ? `<p class="paper-note">💡 ${esc(L.monsters[mid].note)}</p>` : ''}
       <div class="items">${items.map((q, i) => itemHtml(q, i, prevWrong[i], null)).join('')}</div></div>
       ${dock(rec, `<button class="btn primary big dock-go" id="st-go"${ready ? '' : ' disabled'}>⚔ 공격!</button>`)}

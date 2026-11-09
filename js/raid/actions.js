@@ -355,6 +355,7 @@ DS.Act = (function () {
       await N().set(P(code, `heals/${mid}/${me}/${Raid.healsGiven(R, mid, me)}`), opt.ult ? '!ult' : '*');
       return opt.ult ? '!ult' : '*';
     }
+    if (opt.bind) { const v = `!bind@${N().now()}`; await N().set(P(code, `heals/${mid}/${me}/${Raid.healsGiven(R, mid, me)}`), v); return v; } // 🔁 v3: ⛓ 몬스터 묶기 (새 문제 해결 1번 = 3초)
     const to = Raid.healTarget(L, R, mid, me);
     await N().set(P(code, `heals/${mid}/${me}/${Raid.healsGiven(R, mid, me)}`), to || '_');
     return to;

@@ -23,7 +23,7 @@ DS.Raid = (function () {
 
   function newRoom(code, lessonId, teacher, now, pct, thero = 7, tfx) { // thero: 선생님 모습 (2026-11-04: 모든 용사) · tfx: 선생님 시연 이펙트
     return {
-      meta: { lesson: lessonId, created: now, teacher, version: 2, code, ...(pct ? { pct } : {}) },
+      meta: { lesson: lessonId, created: now, teacher, version: 3, code, ...(pct ? { pct } : {}) },
       hosts: { [teacher]: true },
       state: { step: -1, stepAt: now, headcount: 0 },
       players: { [teacher]: { num: 0, nick: '선생님', hero: Number.isFinite(Number(thero)) ? Number(thero) : 7, at: now, teacher: true, ...(tfx ? { fx: String(tfx) } : {}) } },
@@ -45,7 +45,21 @@ DS.Raid = (function () {
 
   // ── 문제·답 ──────────────────────────────────────────────
   const seedOf = (R, uid) => `${(R.meta || {}).code}|${uid}`;
-  const itemsFor = (L, R, mid, uid, attempt) => L.items(mid, seedOf(R, uid), attempt);
+  // 🔁 재도전 규칙 v3 (2026-11-09 선생님): 방 meta.version ≥ 3 → 문제(숫자)는 「다 맞혔을 때만」 바뀜
+  //   틀린 학생 = 같은 문제 그대로 다시 · 퍼펙트 뒤 = 새 문제 → 맞히면 다음 새 문제 · 틀리면 같은 문제를 고쳐서 다시 (기회 −1)
+  //   옛 방(version 2)은 예전대로 시도마다 숫자가 바뀜 (지난 수업 기록이 다시 채점되지 않게)
+  const NEWR = (R) => Number((R.meta || {}).version || 0) >= 3;
+  function variantOf(L, R, mid, uid, attempt) {
+    if (!NEWR(R) || !attempt) return attempt;
+    const seed = seedOf(R, uid); let v = 0;
+    for (const t of attemptsOf(R, mid, uid)) {
+      if (t.attempt >= attempt) break;
+      const items = L.items(mid, seed, v), ok = items.length > 0 && items.every((q, i) => t.given != null && t.given[i] != null && DS.Quiz.grade(q, t.given[i]));
+      if (ok) v = t.attempt + 1;
+    }
+    return v;
+  }
+  const itemsFor = (L, R, mid, uid, attempt) => L.items(mid, seedOf(R, uid), variantOf(L, R, mid, uid, attempt));
   const attemptsOf = (R, mid, uid) => {
     const a = (((R.subs || {})[mid]) || {})[uid] || {};
     return keys(a).map(Number).sort((x, y) => x - y).map((k) => ({ attempt: k, given: a[k] }));
@@ -99,7 +113,16 @@ DS.Raid = (function () {
     const allRight = !!last && last.correct === last.total;
     const perfectAt = tries.findIndex((t) => t.total > 0 && t.correct === t.total), practice = perfectAt >= 0 && tries.length - 1 > perfectAt;
     // 기회 = 기본 4 + 받은 힐(최대 2) · 쓴 기회 = 시도 + 내가 준 힐
-    const slots = RETRIES + 1 + healsReceived(R, mid, uid, L), used = tries.length + healsGiven(R, mid, uid), left = Math.max(0, slots - used);
+    //   🔁 v3: 퍼펙트 뒤 새 문제를 맞히면 기회를 안 씀 (대신 💚 힐 / ⛓ 묶기 한 번) · 틀리면 기회 −1 · 힐 · 묶기는 기회를 안 씀
+    const slots = RETRIES + 1 + healsReceived(R, mid, uid, L);
+    if (NEWR(R)) {
+      const prac = perfectAt >= 0 ? tries.slice(perfectAt + 1) : [], ok = prac.filter((t) => t.total > 0 && t.correct === t.total).length;
+      const used = (perfectAt >= 0 ? perfectAt + 1 : tries.length) + (prac.length - ok), left = Math.max(0, slots - used), tokens = ok, tokLeft = Math.max(0, tokens - healsGiven(R, mid, uid));
+      const fix = perfectAt >= 0 && !!last && prac.length > 0 && last.correct < last.total; // 방금 새 문제를 틀림 → 같은 문제 고치기
+      return { tries, best, total, last, allRight, perfectAt, perfect: perfectAt >= 0, practice, submitted: tries.length > 0, slots, left, healed: healsReceived(R, mid, uid, L), v3: true, tokens, tokLeft, fix,
+        canRetry: tries.length > 0 && left > 0, canHeal: tokLeft > 0, nextAttempt: tries.length };
+    }
+    const used = tries.length + healsGiven(R, mid, uid), left = Math.max(0, slots - used);
     return { tries, best, total, last, allRight, perfectAt, perfect: perfectAt >= 0, practice, submitted: tries.length > 0, slots, left, healed: healsReceived(R, mid, uid, L),
       canRetry: tries.length > 0 && left > 0, canHeal: perfectAt >= 0 && left > 0, nextAttempt: tries.length };
   }
@@ -197,7 +220,10 @@ DS.Raid = (function () {
   // 🟪 혼자 하는 중단원던전 공격 (2026-11-04 버그 고침): 레이드 값 [가장 빠름, 가장 느림, 멈춤] 중 「가장 느림마다 멈춤」 = 45초마다 1초
   //   (0.9.6.6 에서 ATK 가 세 칸이 된 뒤 중단원던전이 앞 두 칸을 [간격, 멈춤]으로 읽어 「20초마다 45초 멈춤」이 되던 것)
   const soloAtk = (cfg) => { const a = (cfg || ATK).monster; return a.length >= 3 ? { per: a[1], lock: a[2] } : { per: a[0], lock: a[1] }; };
+  const BIND_TOKEN = 3; // 🔁 v3: 새 문제 해결 1번 = ⛓ 묶기 3초 (반 전체 상한은 DS.Combo 창 상한)
+  const tokBinds = (R, mid, uid) => Object.values(healsOf(R, mid)[uid] || {}).filter((v) => typeof v === 'string' && v.startsWith('!bind')).map((v) => Number(v.split('@')[1]) || 0);
   function bindOf(L, R, mid, uid) {
+    if (NEWR(R)) return tokBinds(R, mid, uid).length * BIND_TOKEN;
     const r = record(L, R, mid, uid); if (!r.perfect) return 0;
     return Math.min(BIND_MAX, r.tries.slice(r.perfectAt + 1).reduce((a, t) => a + t.correct, 0) * BIND_PER);
   }
@@ -243,5 +269,5 @@ DS.Raid = (function () {
   const timeLeft = (R, now) => { const d = deadline(R); return d == null ? null : Math.max(0, d - now); };
   // 던전 진행: 지나온 단계 / 전체 (마무리 = 끝)
   const progress = (L, R) => { const i = (R.state || {}).step ?? -1, n = L.steps.length; return Math.max(0, Math.min(1, (i + (isEnd(L, R) || bossHp(L, R).won ? 1 : 0)) / n)); };
-  return { solveLock, BOSS_TRIES, bossItem, bossTries, bossState, bossFirst, bossAnswered, skipped, deadline, timeLeft, progress, ATK, soloAtk, BIND_PER, BIND_MAX, bindOf, bindTotal, atkClock, atkTrack, RETRIES, HEAL_MAX, healsOf, healsGiven, healsTo, healsReceived, healTarget, ultUsed, perfStreak, TRUE_SEC, isTrue, petrify, LIVE_MS, lateIds, liveOpen, roomDone, inClass, activeIds, teacherUid, num, newRoom, stepOf, isLobby, isEnd, isFinale, isClosed, focusOn, restOn, sheetOn, videoOn, autoFocus, fullMarks, canLobby, online, seedOf, itemsFor, attemptsOf, gradeAttempt, record, resultLabel, headcount, pctOf, monsterHp, waiting, allSubmitted, cleared, mastery, bossHp, helpList };
+  return { NEWR, variantOf, BIND_TOKEN, tokBinds, solveLock, BOSS_TRIES, bossItem, bossTries, bossState, bossFirst, bossAnswered, skipped, deadline, timeLeft, progress, ATK, soloAtk, BIND_PER, BIND_MAX, bindOf, bindTotal, atkClock, atkTrack, RETRIES, HEAL_MAX, healsOf, healsGiven, healsTo, healsReceived, healTarget, ultUsed, perfStreak, TRUE_SEC, isTrue, petrify, LIVE_MS, lateIds, liveOpen, roomDone, inClass, activeIds, teacherUid, num, newRoom, stepOf, isLobby, isEnd, isFinale, isClosed, focusOn, restOn, sheetOn, videoOn, autoFocus, fullMarks, canLobby, online, seedOf, itemsFor, attemptsOf, gradeAttempt, record, resultLabel, headcount, pctOf, monsterHp, waiting, allSubmitted, cleared, mastery, bossHp, helpList };
 })();

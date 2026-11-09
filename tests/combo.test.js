@@ -12,7 +12,7 @@ const right = (p) => (p.type === 'blanks' ? p.items.map((i) => i.answer) : p.typ
 const wrong = (p) => (p.type === 'blanks' ? p.items.map((i) => p.options.find((o) => o !== i.answer)) : p.type === 'number' ? p.answer + 1 : p.type === 'choice' ? (p.answerIndex + 1) % p.choices.length : p.type === 'multi' ? [] : null);
 const answer = (R, mid, u, a, k) => X.itemsFor(L, R, mid, u, a).map((q, i) => (i < k ? right(q) : wrong(q)));
 const room = (k) => {
-  const R = X.newRoom('777777', 'set-03', 'T', 0);
+  const R = X.newRoom('777777', 'set-03', 'T', 0); R.meta.version = 2; // 옛 재도전 규칙 (연습 공격 묶기) — v3 는 tests/model.test.js
   const ids = Array.from({ length: k }, (_, i) => `u${String(i + 1).padStart(2, '0')}`);
   ids.forEach((u, i) => { R.players[u] = { num: i + 1, nick: u, hero: 0, at: 0 }; });
   R.active = Object.fromEntries(ids.map((u) => [u, true])); R.state.headcount = k; R.subs = {}; R.hits = {};

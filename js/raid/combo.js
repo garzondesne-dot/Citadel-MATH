@@ -50,7 +50,7 @@ DS.Combo = (function () {
       Object.entries(hits[u] || {}).forEach(([k, h]) => {
         if (!h || typeof h.at !== 'number') return;
         const ac = typeof h.ac === 'number' ? h.ac : h.at;
-        let mm = /^m_(.+)_(\d)$/.exec(k);
+        let mm = /^m_(.+)_(\d+)$/.exec(k); // 🔁 v3: 시도 번호가 10 넘을 수 있음
         if (mm) {
           const mid = mm[1], a = Number(mm[2]); if (!L.monsters[mid]) return;
           const rec = recs[mid] || (recs[mid] = Raid().record(L, R, mid, u));
@@ -79,7 +79,7 @@ DS.Combo = (function () {
         if (e.a === 0) streak[e.u] = e.pf ? (streak[e.u] || 0) + 1 : 0;
         if (e.pf) { e.streak = streak[e.u]; e.bind = PF_BIND[Math.min(e.streak, 3) - 1]; binds.push({ at: e.at, sec: e.bind, m: e.m, why: 'pf', u: e.u }); inc = 1; }
         if (e.fx) inc = 1;
-        if (e.prac) { const pk = `${e.u}|${e.m}`, had = prac[pk] || 0, s = Math.min(PRAC_MAX - had, e.correct * PRAC_PER); if (s > 0) { prac[pk] = had + s; binds.push({ at: e.at, sec: s, m: e.m, why: 'prac', u: e.u }); e.bind = s; } }
+        if (e.prac && !(Raid().NEWR && Raid().NEWR(R))) { /* 🔁 v3: 묶기는 학생이 고른 ⛓ 로만 (아래) */ const pk = `${e.u}|${e.m}`, had = prac[pk] || 0, s = Math.min(PRAC_MAX - had, e.correct * PRAC_PER); if (s > 0) { prac[pk] = had + s; binds.push({ at: e.at, sec: s, m: e.m, why: 'prac', u: e.u }); e.bind = s; } }
       } else if (e.kind === 'b') {
         if (e.set === 1 && e.n === 0) {
           bstreak[e.u] = e.ok ? (bstreak[e.u] || 0) + 1 : 0;
@@ -95,6 +95,7 @@ DS.Combo = (function () {
       [10, 20, 30].forEach((t) => { if (before < t && cur >= t) { binds.push({ at: e.at, sec: TIER_BIND[t], m: e.m, why: `tier${t}` }); marks.push({ at: e.at, n: t, m: e.m }); } });
       e.combo = cur;
     });
+    if (Raid().NEWR && Raid().NEWR(R)) Object.entries(R.heals || {}).forEach(([m, byU]) => Object.entries(byU || {}).forEach(([u]) => Raid().tokBinds(R, m, u).forEach((at) => { if (at <= now) binds.push({ at, sec: Raid().BIND_TOKEN, m, why: 'tok', u }); }))); // ⛓ 새 문제 해결 = 3초
     const live = cur, liveUsers = [...chain];
     if (cur > best) { best = cur; bestUsers = [...chain]; }
     return { ev, streak, bstreak, binds, marks, cur: live, curUsers: liveUsers, lastAc, best, bestUsers, bestAt };

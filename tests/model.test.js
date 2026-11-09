@@ -4,6 +4,8 @@
 const load = require('./load');
 const DS = load(['js/engine/ui.js', 'js/engine/setgen.js', 'js/engine/quiz.js', 'js/engine/lessons.js', 'lessons/set-03.js', 'js/raid/model.js', 'js/raid/combo.js']);
 const L = DS.Lessons.get('set-03'), X = DS.Raid, S = DS.SetGen;
+// 2026-11-09: 새 방은 재도전 규칙 v3 (meta.version 3) → 아래 기존 시험은 옛 방(version 2) 규칙으로 · v3 는 맨 아래 따로
+const newRoom3 = X.newRoom; X.newRoom = (...a) => { const r = newRoom3(...a); r.meta.version = 2; return r; };
 let fail = 0;
 const check = (c, m) => { if (!c) { fail++; console.error('FAIL:', m); } };
 const right = (p) => (p.type === 'blanks' ? p.items.map((i) => i.answer) : p.type === 'subsets' ? S.allSubsets(p.base) : p.type === 'choice' ? p.answerIndex : p.answer);
@@ -221,6 +223,21 @@ check(X.online(R2, 'a') && !X.online(R2, 'b'), '접속 표시');
   Q.bossAns = { b: { 1: L.boss.sets[1].map((q, i) => (i === 0 ? right(q) : wrong(q))), 2: L.boss.sets[2].map((q, i) => (i === 1 ? right(q) : null)) } };
   const Sb = X.bossState(L, Q, 'b');
   check(Sb[0].ok && Sb[0].first && Sb[1].ok && !Sb[1].first && !Sb[2].ok, `예전 세트 1 · 2 기록 = 시도 0 · 1 ${JSON.stringify(Sb.slice(0, 3))}`);
+}
+// 🔁 재도전 규칙 v3 (2026-11-09 선생님): 틀리면 같은 문제 · 퍼펙트 뒤 새 문제 맞히면 기회 그대로 + 힐/묶기 1번 · 틀리면 기회 −1 · 같은 문제 고치기
+{
+  const V = newRoom3('333333', 'set-03', 'T', 1000), sub = (u, a, k) => { (((V.subs = V.subs || {}).m4 = V.subs.m4 || {})[u] = V.subs.m4[u] || {})[a] = answer(V, 'm4', u, a, k); };
+  V.active = { a: true, b: true }; V.players = { a: { num: 1 }, b: { num: 2 } }; V.state.headcount = 2;
+  const n = X.itemsFor(L, V, 'm4', 'a', 0).length, same = (u, x, y) => JSON.stringify(X.itemsFor(L, V, 'm4', u, x).map((q) => q.prompt || q.text || JSON.stringify(q))) === JSON.stringify(X.itemsFor(L, V, 'm4', u, y).map((q) => q.prompt || q.text || JSON.stringify(q)));
+  check(V.meta.version === 3, 'v3: 새 방 = version 3');
+  sub('b', 0, 1); check(same('b', 0, 1), 'v3: 틀린 뒤 재도전 = 같은 문제');
+  sub('b', 1, 2); check(same('b', 0, 2) && X.record(L, V, 'm4', 'b').left === 2, 'v3: 두 번 틀려도 같은 문제 · 기회 2 남음');
+  sub('a', 0, n); let r = X.record(L, V, 'm4', 'a'); check(r.perfect && r.left === 3 && !same('a', 0, 1), 'v3: 퍼펙트 뒤 다음 문제 = 숫자 바뀜 · 기회 3');
+  sub('a', 1, n); r = X.record(L, V, 'm4', 'a'); check(r.left === 3 && r.tokens === 1 && r.canHeal && !same('a', 1, 2), 'v3: 새 문제 맞힘 = 기회 그대로 · 힐/묶기 1번 · 그다음 또 새 문제');
+  sub('a', 2, n - 1); r = X.record(L, V, 'm4', 'a'); check(r.left === 2 && r.fix && same('a', 2, 3), 'v3: 새 문제 틀림 = 기회 −1 · 같은 문제 고치기');
+  sub('a', 3, n); r = X.record(L, V, 'm4', 'a'); check(r.left === 2 && r.tokens === 2 && !r.fix && r.best === n, 'v3: 고쳐서 맞힘 = 기회 그대로 · 힐/묶기 2번 · 데미지 그대로');
+  ((V.heals = {}).m4 = {}).a = { 0: '!bind@5000', 1: 'b' }; r = X.record(L, V, 'm4', 'a');
+  check(r.tokLeft === 0 && !r.canHeal && r.left === 2 && X.bindOf(L, V, 'm4', 'a') === X.BIND_TOKEN && X.record(L, V, 'm4', 'b').left === 3, 'v3: 묶기 1 · 힐 1 = 쓴 만큼 줄고 기회는 안 씀 · 힐 받은 b 기회 +1');
 }
 if (fail) { console.error(`\n${fail}건 실패`); process.exit(1); }
 // 🟪 중단원던전 공격 = 45초마다 1초 멈춤 (2026-11-04: 「20초마다 45초 멈춤」 버그 다시 나오지 않게)
