@@ -211,7 +211,7 @@ DS.Student = (function () {
     if (Raid().isEnd(L, R)) return endView(body);
     const step = Raid().stepOf(L, R);
     if (step.kind === 'monster') { const pt = Raid().petrify(R, step.id); sage = !!(pt && DS.Net.now() < pt.until && !Raid().record(L, R, step.id, me).perfect); monsterView(body, step); petri(body, step); if (test || Raid().activeIds(R).length <= 6) othersFx(step, body); return; }
-    if (step.kind === 'boss') return bossView(body);
+    if (step.kind === 'boss') { bossView(body); petri(body, { id: 'boss' }); return; } // 🗿 보스도 홀리 방패 석화
     if (test) { // 테스트 모드: 개념 설명 = 학습지 이미지를 폰에 크게
       const img = (test.prep.img || {})[step.img || step.id], sig = `concept|${step.id}|${img ? img.length : 0}`;
       if (drawn === sig && body.querySelector('.t-concept')) return;
@@ -358,14 +358,14 @@ DS.Student = (function () {
     const tr = Raid().atkTrack(atkMemo, c, `${code}|${(R.state || {}).step}|${c.kind}`);
     if (g) { g.querySelector('i').style.width = `${(tr.p * 100).toFixed(1)}%`; g.classList.toggle('hot', tr.p > 0.8); g.classList.remove('bound'); }
     holyBtn(c);
-    if (tr.strike) { const hg = c.kind === 'monster' ? Raid().holyArmed(R, c.mid, DS.Net.now(), c.per) : []; if (hg.length) guardStrike(hg, c.mid); else monsterStrike(c.lock, !!g); if (!hg.includes(me) && Raid().holyOn(R, c.mid, me)) DS.Act.holyArm(code, c.mid, false).catch(() => {}); /* 주기가 지난 켬 = 끔 */ }
+    if (tr.strike) { const hg = c.kind === 'monster' || c.kind === 'boss' ? Raid().holyArmed(R, c.mid, DS.Net.now(), c.per) : []; if (hg.length) guardStrike(hg, c.mid); else monsterStrike(c.lock, !!g); if (!hg.includes(me) && Raid().holyOn(R, c.mid, me)) DS.Act.holyArm(code, c.mid, false).catch(() => {}); /* 주기가 지난 켬 = 끔 */ }
   }
   // 🛡 홀리 방패 버튼 (2026-11-09 선생님): +10 각성 · 이 몬스터 문제 다 통과 → 「누르면 다음 공격을 막아요」 · 한 번 더 = 끔 · 몬스터마다 한 번
   //   켠 용사는 TV 에 「🛡 준비」로 보임 (눈치 싸움 · 여럿이 같이 켜도 효과는 같음)
   let hbKey = '';
   function holyBtn(c) {
     const sc = document.querySelector('#st-body .scene'); if (!sc) { hbKey = ''; return; }
-    const mid = c && c.kind === 'monster' ? c.mid : null, on = !!(mid && Raid().holyOn(R, mid, me)), can = !!(mid && (on || Raid().holyCan(L, R, me)));
+    const mid = c && (c.kind === 'monster' || c.kind === 'boss') ? c.mid : null, on = !!(mid && Raid().holyOn(R, mid, me)), can = !!(mid && (on || Raid().holyCan(L, R, me)));
     const key = can ? `${mid}|${on}` : '', old = sc.querySelector('.holy-btn');
     if (key === hbKey && (!!old === can)) return; hbKey = key;
     if (!can) { if (old) old.remove(); return; }
@@ -809,6 +809,7 @@ DS.Student = (function () {
       DS.Act.hit(code, raw, `b1_${i}_${a}`, { ok }); // ✨ 보스 문항 퍼펙트(첫 시도) · 🔥 콤보
       if (!ok && thinkSec() > 0) bossThink = Date.now() + thinkSec() * 1000;
       DS.UI.toast(ok ? `✔ ${i + 1}번 도달! 보스에게 데미지` : st.left - 1 > 0 ? `✘ ${i + 1}번은 아직… 🤔 ${thinkSec()}초 생각하고 숫자가 바뀐 문제로 다시! (기회 ${st.left - 1})` : `✘ ${i + 1}번 기회를 모두 썼어요 — 해설을 보며 학습지에 정리해요`, 2800);
+      if (ok) petriGem('boss', 1); // 🗿 석화 중 도달 = 💎1
       if (ok) { DS.Sound.slash(); setTimeout(() => DS.Sound.hit(), 160); const sc = document.querySelector('#st-body .scene'); if (sc) DS.FX.play(sc, myP().fx || 'flame', { scale: 0.32 }); } else DS.Sound.squish();
       // ⚡ 형성평가 퍼펙트 (2026-11-06): 모든 문항을 첫 시도에 맞힘 + 특화 Ⅳ 전설 스킬 → 마지막 문항에서 필살기 (형성평가는 맞히면 그 문항이 끝나서 「세트 2 · 3」 퍼펙트는 없음)
       if (ok && a === 0 && DS.Attack && DS.Attack.canUlt(myP().fx, myP().hero)) { const fr = Raid().bossState(L, R, me).map((x, k) => (k === i ? true : x.first)); if (fr.length && fr.every(Boolean)) setTimeout(() => DS.Attack.cutin(myP().hero || 0, myP().fx), 300); }

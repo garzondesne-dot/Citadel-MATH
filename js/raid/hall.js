@@ -88,7 +88,7 @@ DS.Hall = (function () {
   // 🗿 석화 남은 초 (교실 TV 위쪽 큰 띠) · 몬스터 회색
   let petriEnd = 0, petriT = null;
   function petriHall(step) {
-    const pt = step && step.kind === 'monster' ? Raid().stone(R, step.id) : null, arena = $('#raid'), m0 = $('#rm'); // 🗿 진필살기 · 🛡 홀리 방패 석화
+    const pt = step && step.kind === 'monster' ? Raid().stone(R, step.id) : step && step.kind === 'boss' ? Raid().stone(R, 'boss') : null, arena = $('#raid'), m0 = $('#rm'); // 🗿 진필살기 · 🛡 홀리 방패 석화
     const on = !!(pt && DS.Net.now() < pt.until);
     if (m0) m0.classList.toggle('petrified', on);
     let bn = document.querySelector('.h-petri');
@@ -496,7 +496,7 @@ DS.Hall = (function () {
   // 🛡 홀리 방패 켠 용사 = TV 에 표시 (발밑 방패 · 머리 위 「🛡 준비」) → 서로 알고 눈치 싸움 (2026-11-09 선생님)
   let hgKey = '';
   function hallHolyMark(c) {
-    const on = c && c.kind === 'monster' ? Raid().holyArmed(R, c.mid, DS.Net.now(), null) : [], key = on.join();
+    const on = c && (c.kind === 'monster' || c.kind === 'boss') ? Raid().holyArmed(R, c.mid, DS.Net.now(), null) : [], key = on.join();
     if (key === hgKey && document.querySelectorAll('.fh2 .hg-mark').length === on.length) return; hgKey = key;
     document.querySelectorAll('.fh2').forEach((h) => { const u = h.id.slice(3), want = on.includes(u), has = h.querySelector('.hg-mark'); h.classList.toggle('hg-on', want); if (want && !has) h.insertAdjacentHTML('beforeend', '<b class="hg-mark">🛡 준비</b>'); if (!want && has) has.remove(); });
   }

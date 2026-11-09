@@ -310,16 +310,21 @@ DS.Raid = (function () {
     if (p >= 1) { const first = memo.start === 0 && !memo.hit; memo.hit = true; memo.start += c.per; return { p: 0, strike: true, first }; } // first = 이 몬스터의 첫 공격 (⭐ 각성 막기)
     return { p, strike: false };
   }
-  // 🛡 홀리 방패 (2026-11-09 선생님 · +10 각성): 그 몬스터 문제를 다 통과한 +10 학생 폰에 버튼 → 누르면 「다음 공격을 막습니다」(한 번 더 = 끔)
+  // 🛡 홀리 방패 (2026-11-09 선생님 · +10 각성): 그 몬스터 문제를 ✨ 퍼펙트(첫 시도에 다 맞힘)로 푼 +10 학생 폰에 버튼 → 누르면 「다음 공격을 막습니다」(한 번 더 = 끔)
   //   players/{uid}/hg = { mid, at } (켬) · players/{uid}/holy/{mid} = 막은 시각 (몬스터마다 한 번) — 학생 자기 칸이라 규칙 안 바꿈
+  //   일반 몬스터 · 👑 보스 모두 (보스 mid = 'boss')
   //   공격이 오면 켜 둔 용사가 1명 이상 = 반 전체 안 멈춤 + 🗿 석화 HOLY_SEC 초 (그동안 맞히면 데미지당 💎1) · 여럿이 같이 켜도 효과는 같음 (눈치 싸움)
   //   「다음 공격」만: 켠 시각이 이번 공격 주기 안(per 초 + 여유)이어야 함 → 폰이 꺼져 못 지운 켬이 계속 막지 않게
   const HOLY_SEC = 10;
   const holyUsed = (R, mid, uid) => Number(((((R.players || {})[uid] || {}).holy) || {})[mid]) || 0;
   function holyCan(L, R, uid) {
     const step = stepOf(L, R), p = (R.players || {})[uid] || {};
-    if (!step || step.kind !== 'monster' || !L.monsters[step.id] || Number(p.enh) < 10 || holyUsed(R, step.id, uid) || cleared(L, R, step.id)) return false;
-    return isChain(L, R, step.id) ? !!chainRecord(L, R, step.id, uid).done : !!record(L, R, step.id, uid).perfect;
+    if (!step || Number(p.enh) < 10) return false;
+    if (step.kind === 'boss') return !!L.boss && !holyUsed(R, 'boss', uid) && !bossHp(L, R).won && (() => { const f = bossFirst(L, R, uid); return f.length > 0 && f.every(Boolean); })(); // 👑 보스 = 형성평가 모든 문항 첫 시도 정답 (2026-11-09 「일반 · 보스도 사용 가능」)
+    if (step.kind !== 'monster' || !L.monsters[step.id] || holyUsed(R, step.id, uid) || cleared(L, R, step.id)) return false;
+    // ✨ 퍼펙트일 때만 (2026-11-09 선생님 「퍼펙트하면 발동 · 너무 남발되겠다」): 일반 = 첫 시도에 다 맞힘 · 소레이드 = 틀림 없이 사슬 완성
+    if (isChain(L, R, step.id)) { const cr = chainRecord(L, R, step.id, uid); return !!(cr.done && cr.perfect); }
+    const rec = record(L, R, step.id, uid); return !!rec.perfect && rec.perfectAt === 0;
   }
   const holyOn = (R, mid, uid) => { const h = ((R.players || {})[uid] || {}).hg; return !!(h && h.mid === mid && !holyUsed(R, mid, uid)); };
   function holyArmed(R, mid, now, per) {

@@ -182,6 +182,12 @@ check(X.online(R2, 'a') && !X.online(R2, 'b'), '접속 표시');
   Q.subs = { m4: { a: { 0: answer(Q, 'm4', 'a', 0, 4), 1: answer(Q, 'm4', 'a', 1, 3), 2: answer(Q, 'm4', 'a', 2, 4) }, b: { 0: answer(Q, 'm4', 'b', 0, 2), 1: answer(Q, 'm4', 'b', 1, 4) } } };
   check(X.bindOf(L, Q, 'm4', 'a') === 4, `a: 다 맞힌 뒤 3 + 4 = 7 → 최대 4초 (${X.bindOf(L, Q, 'm4', 'a')})`);
   check(X.bindOf(L, Q, 'm4', 'b') === 0, 'b: 처음 다 맞힌 시도는 묶기가 아님');
+  { const pl = Q.players; Q.players = { a: { num: 1, enh: 10 }, b: { num: 2, enh: 10 } };
+    check(X.holyCan(L, Q, 'a') === true, '🛡 a: +10 · 첫 시도 퍼펙트 → 홀리 방패 버튼');
+    check(X.holyCan(L, Q, 'b') === false, '🛡 b: 재도전에서 다 맞힘 = 퍼펙트 아님 → 버튼 없음 (남발 방지)');
+    Q.players.a.enh = 9; check(X.holyCan(L, Q, 'a') === false, '🛡 +9 는 없음'); Q.players.a.enh = 10;
+    Q.players.a.holy = { m4: 1 }; check(X.holyCan(L, Q, 'a') === false, '🛡 이 몬스터에서 이미 씀 → 없음');
+    Q.players = pl; }
   c = X.atkClock(L, Q, 50000); const hp = X.monsterHp(L, Q, 'm4');
   check(c.bind === 4 && c.t === 46 && Math.abs(c.per - (20 + 25 * (1 - hp.left / hp.max))) < 1e-9 && c.per > 20, `묶기 4초 · 체력이 닳아 주기가 길어짐 ${JSON.stringify(c)}`);
   // atkTrack: 바퀴가 차면 공격 · 주기가 바뀌어도 거꾸로 튀지 않음
