@@ -111,6 +111,7 @@ p3_left = f'''
 {P(7, "100 미만의 자연수 중에서 7의 배수가 아니거나 5로 나누었을 때의 나머지가 3이 아닌 자연수의 개수를 구하시오.", T("12") + " " + GAME("소레이드 · 졸개 4 + 대장"))}
 <div class="q"><span class="stp">①</span>{S}{v("U")} = 100 미만의 자연수 → {v("n(U)")} = {BL["s"]} &nbsp;({v("A")} = 7의 배수, {v("B")} = 5로 나눈 나머지가 3)</div>
 <div class="q"><span class="stp">②</span>{S}「{v("A")}가 아니거나 {v("B")}가 아닌」 = {v("A")}{C} ∪ {v("B")}{C} = ( {BL["m"]} ){C} ← 드모르간!</div>
+<div class="q why">💡 ∵ 드모르간의 법칙 : {v("(A ∩ B)")}{C} = {v("A")}{C} ( &nbsp;&nbsp;&nbsp; ) {v("B")}{C} &nbsp;(∪ 또는 ∩) — 괄호를 풀면 기호가 바뀐다</div>
 <div class="q"><span class="stp">③</span>{S}{v("A ∩ B")}의 가장 작은 원소 = {BL["s"]}</div>
 <div class="q"><span class="stp">④</span>{S}7과 5의 최소공배수 {BL["s"]}씩 커짐 → {v("A ∩ B")} = {{ {BL["s"]}, {BL["s"]}, {BL["s"]} }}</div>
 <div class="q"><span class="stp">👑</span>{S}구하는 개수 = {v("n(U) − n(A ∩ B)")} = {BL["m"]}</div>
@@ -148,7 +149,7 @@ T3 = f'''<div class="page" style="font-size:9.4pt"><h3 style="margin-top:0">교�
 <tr><td>4 (교07)</td><td><b>대장 뒤</b> · 원소가 {v("n")}개인 집합의 부분집합의 개수는 <u>2<sup>{v("n")}</sup></u></td><td>2<sup><i>n</i></sup> 꼴 ✔ · {v("n")}² · 2{v("n")}</td><td>① {v("A")} 원소나열 ② {v("B")} 원소나열 ③ {v("X ⊂ B")} · {v("A")}와 서로소 → {v("B − A")} ④ 2<sup><i>n</i></sup>으로 개수</td></tr>
 <tr><td>5 (교08)</td><td><b>졸개2 뒤</b> · {v("B ⊂ A")} 이면 {v("B")} 의 원소 {v("x")} 는 {v("A")} 의 <u>원소</u></td><td>원소 ✔ · 부분집합 · 여집합</td><td>① {v("A ∩ B = B → B ⊂ A")} ② {v("x = 4")} 확인 ③ {v("x² + x = 0")} 풀기 ④ 모든 {v("x")} 정리</td></tr>
 <tr><td>6 (교11)</td><td><b>대장 뒤</b> · {v("n(A ∩ B) = n(A) + n(B) −")} <u>{v("n(A ∪ B)")}</u></td><td>{v("n(A ∪ B)")} ✔ · {v("n(U)")} · {v("n(A ∩ B)")}</td><td>① {v("n(A) + n(B)")} ② 최댓값 = {v("B ⊂ A")}일 때 ③ 최솟값 = {v("n(A ∪ B)")} = 40일 때</td></tr>
-<tr><td>7 (교12)</td><td><b>대장 뒤</b> · 여집합의 원소의 개수 = 전체의 개수 − <u>{v("A ∩ B")}</u>의 개수</td><td>{v("A ∩ B")} ✔ · {v("A ∪ B")} · {v("A")}</td><td>① {v("n(U)")} ② 드모르간 {v("(A ∩ B)")}{C} ③ {v("A ∩ B")} 원소 ④ 빼기</td></tr></table>
+<tr><td>7 (교12)</td><td><b>졸개2 뒤</b> · 드모르간의 법칙 : {v("(A ∩ B)")}{C} = {v("A")}{C} <u>∪</u> {v("B")}{C}<br><b>대장 뒤</b> · 여집합의 원소의 개수 = 전체의 개수 − <u>{v("A ∩ B")}</u>의 개수</td><td>∪ ✔ · ∩ · −<br>{v("A ∩ B")} ✔ · {v("A ∪ B")} · {v("A")}</td><td>① {v("n(U)")} ② 드모르간 {v("(A ∩ B)")}{C} ③ {v("A ∩ B")} 원소 ④ 빼기</td></tr></table>
 
 <div class="box"><b>게임 규칙 (DECISIONS 추가)</b><br>
 · 첫 판: 💡 줄은 완성 문장으로 「📜 나의 풀이」에 쌓임 · 🔥 한 판 더: 💡 줄이 「∵ ____」 → 보기 고르기<br>
@@ -163,7 +164,7 @@ def build(no, rng, pages, extra=''):
     pg = lambda g, l, r, n: f'<div class="page">{hd}{g}<div class="cols"><div class="col">{l}</div><div class="col">{r}</div></div><div class="pno">- {no}차시 ({n}/{N}) -</div></div>'
     return f"<!DOCTYPE html><html><head><meta charset='utf-8'><title>학습과정 {no}차시 레이드용</title><style>{CSS}{EXTRA}</style></head><body>" + ''.join(pg(g, l, r, i + 1) for i, (g, l, r) in enumerate(pages)) + extra + "</body></html>"
 html6 = build(6, '공통수학2 Ⅱ. 집합과 명제 1. 집합 04. 드모르간의 법칙 · 원소의 개수 (6차시) · 레이드용 v5', [(goal6, p1_left, SUMMARY + '<div class="mini">문제 4~7 (중단원 마무리) · 형성평가 = 7차시 학습지</div>' + MEMO + '<div class="stampwrap"><div class="stamp"><span>확인 도장</span></div></div>')])
-html7 = build(7, '공통수학2 Ⅱ. 집합과 명제 1. 집합 · 중단원 마무리 소레이드 (7차시) · 레이드용 v3', [(goal7, p4blk, p1_r2), ('', p2_mid, p3_left), ('', FA6, MEMO)], T3)
+html7 = build(7, '공통수학2 Ⅱ. 집합과 명제 1. 집합 · 중단원 마무리 소레이드 (7차시) · 레이드용 v4', [(goal7, p4blk, p1_r2), ('', p2_mid, p3_left), ('', FA6, MEMO)], T3)
 OUT7 = sys.argv[3] if len(sys.argv) > 3 else OUT.replace('06', '07')
 with sync_playwright() as p:
     b = p.chromium.launch()

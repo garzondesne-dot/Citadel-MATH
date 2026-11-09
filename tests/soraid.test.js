@@ -10,7 +10,7 @@ const ans = (id) => L.chainItems(id, 's', 0).map((q) => (q.type === 'multi' ? q.
 check(ans('u4').join(' | ') === '1,2,4,8,4,8,12,16,20 | X ⊂ B 이고 X 와 A 는 서로소 | 12,16,20 | 8', `문제 4 ${ans('u4')}`);
 // #44 근거 줄 자리 = 그 근거를 쓰는 단계 뒤 (문제 4 · 6 · 7 = 대장 · 문제 5 = 졸개2) · 첫 판 완성 문장이 뒤 단계 답을 미리 보여 주지 않게
 { const at = (id) => L.chainItems(id, 's', 0).map((q, i) => (q.why ? i : -1)).filter((i) => i >= 0).join();
-  check(at('u4') === '3' && at('u5') === '1' && at('u6') === '3' && at('u7') === '4', `근거 줄 자리 u4 ${at('u4')} · u5 ${at('u5')} · u6 ${at('u6')} · u7 ${at('u7')}`); }
+  check(at('u4') === '3' && at('u5') === '1' && at('u6') === '3' && at('u7') === '1,4', /* #53 v4: 문제 7 = 졸개2 뒤 드모르간 + 대장 뒤 */ `근거 줄 자리 u4 ${at('u4')} · u5 ${at('u5')} · u6 ${at('u6')} · u7 ${at('u7')}`); }
 // #41 문제 4 다시 짜기: 졸개1 = A 칸 · B 칸 두 묶음 (교과서 8 · 4 · 20 → A = {1, 2, 4, 8} · B = {4, 8, …, 20}) · 졸개3 근거 = 2³ · 대장 8
 { const u4 = L.chainItems('u4', 's', 0), g = u4[0].groups || [], cut = (g[0] || {}).n, pick = (lo, hi) => u4[0].answer.filter((i) => i >= lo && i < hi).map((i) => u4[0].options[i]).join(',');
   check(g.length === 2 && pick(0, cut) === '1,2,4,8' && pick(cut, cut + g[1].n) === '4,8,12,16,20' && /8의 약수/.test(g[0].label) && /20 이하의 4의 배수/.test(g[1].label), `졸개1 = A 칸 ${pick(0, cut)} · B 칸 ${pick(cut, 99)}`);
@@ -170,4 +170,10 @@ for (let i = 0; i < 8; i++) add('c', 1, false); d = X.chainDown(L, Q, 'u4'); che
   for (let s2 = 1; s2 < P1.length; s2++) m[k++] = { s: s2, p: 1, g: right(P1[s2]) }; r = X.record(W, Q, 'u4', 'a'); check(r.pWhy === ws[1] && r.pDoneN === 0, '대장 뒤 근거 빈칸 = 둘째 줄 (사슬 완성은 빈칸 뒤)');
   m[k++] = { s: ws[1], p: 1, g: 0, w: 1 }; r = X.record(W, Q, 'u4', 'a'); check(r.whyN === 2 && r.whyAll && r.pDoneN === 1, '근거 줄 2 맞힘 → 🧩 2/2 · whyAll · 연습 사슬 완성');
   const src = require('fs').readFileSync(require('path').join(__dirname, '..', 'js/raid/result.js'), 'utf8'); check(/rc\.whyAll \? 2/.test(src) && /ladW/.test(src), '🪜 사다리 🧩 = 근거 줄 모두 · 기록 ladW = 맞힌 줄/전체'); }
+// ⑭ 📄 #53 7차시 v4 (2026-11-10): 문제 7 졸개2 뒤 근거 줄 = 드모르간 (∪ ✔ · ∩ · −) · 첫 판 완성 문장 · 연습 판도 같은 줄 · 칸 u7 = ✍ 위까지 (💡 한 줄만큼 길어짐)
+{ const it = L.chainItems('u7', 's', 0), w = it[1].why; check(w && w.choices.join() === '∪,∩,−' && w.answer === 0 && w.text === '∵ 드모르간의 법칙 : (A ∩ B)ᶜ = Aᶜ ∪ Bᶜ', `문제 7 졸개2 근거 줄 「${w && w.text}」`);
+  check(/드모르간의 법칙에 의해 Aᶜ ∪ Bᶜ = \(A ∩ B\)ᶜ/.test(it[1].say), '#52 ① 졸개2 나의 풀이 = 드모르간의 법칙에 의해');
+  for (let k = 1; k <= 30; k++) { const p = L.chainItems('u7', `x${k}`, k); check(p[1].why && p[1].why.text === w.text && p[4].why, `연습 판 ${k}: 근거 줄 2개 그대로`); }
+  check(X.whyStages(it).length === 2, '문제 7 = 근거 줄 2개 (🧩 n/2)');
+  check(L.crops.u7[0].p === 3 && Math.abs(L.crops.u7[0].h - 0.3523) < 1e-6 && /7차시 레이드용 v4/.test(L.sheet), `칸 u7 v4 h ${L.crops.u7[0].h} · 판 ${L.sheet}`); }
 console.log(fail ? `❌ 소레이드 실패 ${fail}` : `✅ 소레이드: 확인 ${ok}개 · 실패 0`); if (fail) process.exit(1);
