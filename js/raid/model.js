@@ -234,11 +234,12 @@ DS.Raid = (function () {
     const st = R.state || {}, step = stepOf(L, R); if (!step || st.closed || !L || !['monster', 'boss'].includes(step.kind)) return null;
     const id = step.kind === 'boss' ? 'boss' : step.id, mon = step.kind === 'boss' ? L.boss || {} : (L.monsters || {})[id] || {};
     const man = (st.solveOn || {})[id], base = st.solve != null ? Number(st.solve) : (R.meta || {}).solve != null ? Number(R.meta.solve) : 60;
-    const sec = man ? Number(man.sec) : man === 0 ? 0 : mon.evalQ ? base : 0;
+    const sec = man ? Number(man.sec) : man === 0 ? 0 : (NEWR(R) || mon.evalQ) ? base : 0; // 🌫 v3 (2026-11-09 #17): 모든 몬스터 · 보스 앞에 정찰 (기본 60초 · 선생님 「⚔ 등장!」으로 일찍)
     if (!(sec > 0)) return null;
     const t0 = man && man.at ? Number(man.at) : st.stepAt != null ? Number(st.stepAt) : now, end = Math.min(t0 + sec * 1000, Number((st.solveEnd || {})[id]) || Infinity);
     return { id, sec, t0, end, left: Math.max(0, end - now), on: now < end };
   }
+  const readyOf = (R, id) => keys(((R.ready || {})[id]) || {}).filter((u) => (R.active || {})[u]); // 🌫 정찰 「✋ 준비 완료」 누른 학생
   function atkClock(L, R, now, cfg) {
     const st = R.state || {}, step = stepOf(L, R); if (!step || st.closed) return null;
     const kind = step.kind === 'monster' && L.monsters[step.id] && !cleared(L, R, step.id) ? 'monster' : step.kind === 'boss' && !bossHp(L, R).won ? 'boss' : null;
@@ -269,5 +270,5 @@ DS.Raid = (function () {
   const timeLeft = (R, now) => { const d = deadline(R); return d == null ? null : Math.max(0, d - now); };
   // 던전 진행: 지나온 단계 / 전체 (마무리 = 끝)
   const progress = (L, R) => { const i = (R.state || {}).step ?? -1, n = L.steps.length; return Math.max(0, Math.min(1, (i + (isEnd(L, R) || bossHp(L, R).won ? 1 : 0)) / n)); };
-  return { NEWR, variantOf, BIND_TOKEN, tokBinds, solveLock, BOSS_TRIES, bossItem, bossTries, bossState, bossFirst, bossAnswered, skipped, deadline, timeLeft, progress, ATK, soloAtk, BIND_PER, BIND_MAX, bindOf, bindTotal, atkClock, atkTrack, RETRIES, HEAL_MAX, healsOf, healsGiven, healsTo, healsReceived, healTarget, ultUsed, perfStreak, TRUE_SEC, isTrue, petrify, LIVE_MS, lateIds, liveOpen, roomDone, inClass, activeIds, teacherUid, num, newRoom, stepOf, isLobby, isEnd, isFinale, isClosed, focusOn, restOn, sheetOn, videoOn, autoFocus, fullMarks, canLobby, online, seedOf, itemsFor, attemptsOf, gradeAttempt, record, resultLabel, headcount, pctOf, monsterHp, waiting, allSubmitted, cleared, mastery, bossHp, helpList };
+  return { readyOf, NEWR, variantOf, BIND_TOKEN, tokBinds, solveLock, BOSS_TRIES, bossItem, bossTries, bossState, bossFirst, bossAnswered, skipped, deadline, timeLeft, progress, ATK, soloAtk, BIND_PER, BIND_MAX, bindOf, bindTotal, atkClock, atkTrack, RETRIES, HEAL_MAX, healsOf, healsGiven, healsTo, healsReceived, healTarget, ultUsed, perfStreak, TRUE_SEC, isTrue, petrify, LIVE_MS, lateIds, liveOpen, roomDone, inClass, activeIds, teacherUid, num, newRoom, stepOf, isLobby, isEnd, isFinale, isClosed, focusOn, restOn, sheetOn, videoOn, autoFocus, fullMarks, canLobby, online, seedOf, itemsFor, attemptsOf, gradeAttempt, record, resultLabel, headcount, pctOf, monsterHp, waiting, allSubmitted, cleared, mastery, bossHp, helpList };
 })();

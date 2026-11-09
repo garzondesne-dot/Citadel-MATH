@@ -186,6 +186,14 @@
               ".validate": "newData.hasChildren(['e', 'at']) && newData.child('e').isString() && newData.child('e').val().length <= 4 && newData.child('at').val() <= now"
             }
           }
+        },
+        "ready": {
+          "$id": {
+            "$uid": {
+              ".write": "auth != null && auth.uid === $uid && root.child('rooms/'+$code+'/active/'+$uid).val() === true",
+              ".validate": "newData.isNumber() && newData.val() <= now"
+            }
+          }
         }
       }
     },

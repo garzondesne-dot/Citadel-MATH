@@ -395,22 +395,24 @@ DS.Hall = (function () {
   // 👾 몬스터 공격 (학생 폰과 같은 시계 DS.Raid.atkClock): 체력바 바로 밑 게이지 → 다 차면 큰 공격 연출 + 용사 전원 피격 · 헉헉
   let atkT = null, atkMemo = {};
   // ❄ 📝 풀이 시간 (2026-11-06): 종합실 = 몬스터의 「꽁꽁 묶기」 → 용사 모두 얼어붙음 + 남은 초 · 끝나면 얼음이 깨짐
+  // 🌫 정찰 단계 (2026-11-09 #17 · 옛 「❄ 꽁꽁 묶기」): 몬스터 = 검은 실루엣(숨쉬기) · 학습지 그 칸 크게 · ✋ 준비 완료 n / 전체 · 남은 시간 → 끝나면 색이 돌아오며 포효
   let slKey = '';
   function hallSolve() {
     const arena = $('#raid'); if (!arena || !L || !R) return;
-    const lk = Raid().solveLock(L, R, DS.Net.now()), on = !!(lk && lk.on), key = on ? `${lk.id}|${lk.t0}|${lk.end}` : '';
+    const lk = Raid().solveLock(L, R, DS.Net.now()), on = !!(lk && lk.on), rd = on ? Raid().readyOf(R, lk.id).length : 0, all = Raid().activeIds(R).filter((u) => u !== (R.meta || {}).teacher).length;
+    const key = on ? `${lk.id}|${lk.t0}|${lk.end}|${rd}|${all}` : '';
+    const mon = $('#rm'); if (on && mon && !mon.classList.contains('scout-sil')) mon.classList.add('scout-sil'); // 화면을 다시 그려도 실루엣 유지
     if (key === slKey) return;
     const was = slKey; slKey = key;
     let ban = arena.querySelector('.h-solve');
     if (on) {
-      arena.querySelectorAll('.fh2').forEach((h) => h.classList.add('frozen'));
-      if (!ban) { ban = document.createElement('div'); ban.className = 'h-solve'; arena.appendChild(ban); }
-      ban.innerHTML = `❄ 꽁꽁 묶기! <b class="sl-left" data-sl-end="${lk.end}">${Math.ceil(lk.left / 1000)}초</b><small>학습지에 먼저 다 풀어요 — 얼음이 깨지면 공격!</small>`;
-      if (!was || was.split('|')[0] !== lk.id) { const m0 = $('#rm'), ar = arena.getBoundingClientRect(); if (DS.FX) DS.FX.play(arena, 'nova', { x: ar.width / 2, y: ar.height * 0.72, scale: Math.min(ar.width, ar.height) / 420, perfect: true }); if (m0 && DS.Attack) DS.Attack.knock(m0, -10); [...arena.querySelectorAll('.fh2')].slice(0, 6).forEach((h, k) => setTimeout(() => DS.Thrill && DS.Thrill.bindFx(h.querySelector('.art') || h), 250 + k * 90)); if (Snd() && Snd().fxHit) Snd().fxHit('nova'); }
+      const st = Raid().stepOf(L, R) || {}, img = (prep.img || {})[st.kind === 'boss' ? 'boss' : st.id] || (prep.img || {})[st.id];
+      if (mon) mon.classList.add('scout-sil');
+      if (!ban) { ban = document.createElement('div'); ban.className = 'h-solve h-scout'; arena.appendChild(ban); }
+      ban.innerHTML = `<b>🌫 정찰 — 학습지를 먼저 풀어요</b>${img ? `<img class="scout-img" src="${img}" alt="">` : ''}<p>✋ 준비 완료 <b>${rd}</b> / ${all} · 등장까지 <b class="sl-left" data-sl-end="${lk.end}">${Math.ceil(lk.left / 1000)}초</b></p>`;
     } else {
       if (ban) ban.remove();
-      const fz = [...arena.querySelectorAll('.fh2.frozen')]; fz.forEach((h) => h.classList.remove('frozen'));
-      if (was && fz.length && DS.FX) { const ar = arena.getBoundingClientRect(); fz.slice(0, 8).forEach((h, k) => setTimeout(() => { const r = h.getBoundingClientRect(); DS.FX.play(arena, 'ice', { x: r.left - ar.left + r.width / 2, y: r.top - ar.top + r.height / 2, scale: 0.45 }); }, k * 70)); if (Snd() && Snd().correct) Snd().correct(); }
+      if (mon && mon.classList.contains('scout-sil')) { mon.classList.remove('scout-sil'); mon.classList.remove('appear'); void mon.offsetWidth; mon.classList.add('appear'); if (Snd() && Snd().hit) Snd().hit(); }
     }
   }
   function hallAtk() {

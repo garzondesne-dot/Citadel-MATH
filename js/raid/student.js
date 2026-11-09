@@ -435,21 +435,36 @@ DS.Student = (function () {
     });
   }
   // ❄ 📝 풀이 시간 (2026-11-06 사용자 「60초간 큰 기술을 써서 학생들이 꽁꽁 묶이는 이펙트」): 아직 안 낸 학생은 시간이 끝날 때까지 입력 잠금 → 학습지에 먼저
-  let solveT = null, solveCast = '';
+  let solveT = null;
+  // 🌫 정찰 단계 (2026-11-09 #17 · 옛 「❄ 꽁꽁 묶기」 자리): 몬스터는 검은 실루엣 · 입력 · 체력바 없음 · 학습지 그 칸을 먼저 풀고 「✋ 준비 완료」
+  //   시간이 끝나거나 선생님이 「⚔ 등장!」 → 색이 돌아오며 포효 → 지금 전투 그대로
+  const scoutImg = {};
   function frozenView(body, step, lk) {
-    const sig = `solve|${lk.id}|${lk.end}`; if (drawn === sig && body.querySelector('.sl-scene')) return; drawn = sig;
+    const id = lk.id, ready = Raid().readyOf(R, id).includes(me), sig = `scout|${id}|${lk.end}|${ready}|${scoutImg[id] ? 1 : 0}`;
+    if (drawn === sig && body.querySelector('.scout-scene')) return; drawn = sig;
     const spr = step.kind === 'boss' ? L.boss.sprite : L.monsters[step.id].sprite, title = step.kind === 'boss' ? `👑 ${L.boss.title}` : step.title;
-    body.innerHTML = `<div class="panel framed"><div class="scene enc bg-scene th-${L.theme || ''} sl-scene"><div class="scene-bar"><div><b>${esc(title)}</b><br><span class="muted small">📝 풀이 시간</span></div></div>
-        <div class="enc-hero frozen">${heroNow('idle', '')}<i class="shadow"></i></div><div class="enc-mon">${DS.Art.monster(spr, 'attack', '')}</div><i class="sl-frost"></i></div>
-      <div class="sl-box"><b>❄ 꽁꽁 묶기!</b><p>몬스터가 얼음 마법을 썼어요 — <b>학습지에 먼저 다 풀어요</b></p><p class="sl-time">얼음이 깨지기까지 <b class="sl-left" data-sl-end="${lk.end}">${Math.ceil(lk.left / 1000)}초</b></p><small>시간이 끝나면 얼음이 깨지고 답을 넣을 수 있어요 · 다 푼 답을 그대로 옮겨 적으면 한 번에 퍼펙트!</small></div></div>`;
-    const sc = body.querySelector('.sl-scene'), hb = body.querySelector('.enc-hero');
-    if (DS.Status) DS.Status.on(hb, 'freeze', 0); // 🧊 빙결 그림 (2026-11-08 · 옛 sl-ice 상자 대신)
-    if (solveCast !== sig) { solveCast = sig; setTimeout(() => { if (!sc.isConnected) return; if (DS.FX) DS.FX.play(sc, 'nova', { scale: 0.7, perfect: true }); if (DS.Thrill) DS.Thrill.bindFx(hb, true); if (DS.Sound && DS.Sound.fxHit) DS.Sound.fxHit('nova'); }, 200); }
-    clearTimeout(solveT); solveT = setTimeout(() => { drawn = ''; render(); const sc2 = document.querySelector('#st-body .scene'), h2 = sc2 && sc2.querySelector('.enc-hero'); if (sc2 && DS.FX && h2) { const a = h2.getBoundingClientRect(), b = sc2.getBoundingClientRect(); DS.FX.play(sc2, 'ice', { x: a.left - b.left + a.width / 2, y: a.top - b.top + a.height / 2, scale: 0.5 }); } if (DS.Sound && DS.Sound.correct) DS.Sound.correct(); DS.UI.toast('❄ 얼음이 깨졌어요 — 이제 답을 넣어요!'); }, lk.left + 250);
+    const img = scoutImg[id] || (test && (test.prep.img || {})[step.id]) || null;
+    if (!img && scoutImg[id] === undefined) { scoutImg[id] = null; DS.Net.get(`prep/${L.id}/img/${step.kind === 'boss' ? 'boss' : step.id}`).then((u) => { if (u) { scoutImg[id] = u; drawn = ''; render(); } }).catch(() => {}); }
+    body.innerHTML = `<div class="panel framed"><div class="scene enc bg-scene th-${L.theme || ''} sl-scene scout-scene"><div class="scene-bar"><div><b>${esc(title)}</b><br><span class="muted small">🌫 정찰 중 — 몬스터가 아직 모습을 드러내지 않았어요</span></div></div>
+        <div class="enc-hero">${heroNow('idle', '')}<i class="shadow"></i></div><div class="enc-mon scout-sil">${DS.Art.monster(spr, 'idle', '')}</div></div>
+      <div class="sl-box scout-box"><b>🌫 학습지 「${esc(title.replace(/^👑 /, ''))}」를 먼저 풀어 보세요</b>
+        ${img ? `<img class="scout-img" src="${img}" alt="학습지 칸">` : ''}
+        <p class="sl-time">몬스터 등장까지 <b class="sl-left" data-sl-end="${lk.end}">${Math.ceil(lk.left / 1000)}초</b> <span class="muted small">· 선생님이 일찍 부를 수도 있어요</span></p>
+        ${ready ? '<p class="okc">✋ 준비 완료! 몬스터가 나타나면 다 푼 답을 옮겨 적어요</p>' : '<button class="btn primary big" id="sc-ready">✋ 준비 완료</button>'}</div></div>`;
+    const rb = body.querySelector('#sc-ready');
+    if (rb) rb.onclick = () => DS.Control.run(async () => { rb.disabled = true; await DS.Act.scoutReady(code, id); DS.Sound.clank(); drawn = ''; });
+    clearTimeout(solveT); solveT = setTimeout(() => { drawn = ''; appearAt = Date.now(); render(); if (DS.Sound && DS.Sound.hit) DS.Sound.hit(); DS.UI.toast('⚔ 몬스터 등장! 이제 답을 넣어요'); }, lk.left + 250);
+  }
+  let appearAt = 0, scoutWas = null;
+  // 정찰이 끝난 첫 화면: 실루엣에 색이 돌아오며 포효 (선생님 「⚔ 등장!」 · 시간 끝 둘 다)
+  function scoutAppear(id) {
+    if (scoutWas !== id) return; scoutWas = null; clearTimeout(solveT);
+    if (Date.now() - appearAt > 1500) { appearAt = Date.now(); if (DS.Sound && DS.Sound.hit) DS.Sound.hit(); DS.UI.toast('⚔ 몬스터 등장! 이제 답을 넣어요'); }
+    setTimeout(() => { const m = document.querySelector('#st-body .enc-mon'); if (m) { m.classList.remove('appear'); void m.offsetWidth; m.classList.add('appear'); } }, 60);
   }
   function monsterView(body, step) {
     const mid = step.id, rec = Raid().record(L, R, mid, me), hp = Raid().monsterHp(L, R, mid);
-    { const lk = Raid().solveLock(L, R, DS.Net.now()); if (lk && lk.on && !rec.submitted) return frozenView(body, step, lk); }
+    { const lk = Raid().solveLock(L, R, DS.Net.now()); if (lk && lk.on && !rec.submitted) { scoutWas = lk.id; return frozenView(body, step, lk); } scoutAppear(mid); }
     healNotice(mid);
     const wantRetry = retrying === `${mid}|${rec.nextAttempt}` && rec.canRetry;
     if (!rec.submitted || wantRetry) return fightForm(body, step, rec, hp);
@@ -634,7 +649,7 @@ DS.Student = (function () {
 
   // ── 보스: 형성평가 1~7번 (2026-11-05 사용자 (나): 문항마다 첫 시도 = 학습지 그대로 · 재도전 3번은 숫자 · 문자가 바뀐 새 문제) ──
   function bossView(body) {
-    { const lk = Raid().solveLock(L, R, DS.Net.now()); if (lk && lk.on && !Raid().bossAnswered(R, me)) return frozenView(body, Raid().stepOf(L, R), lk); } // ❄ 형성평가도 선생님이 켜면
+    { const lk = Raid().solveLock(L, R, DS.Net.now()); if (lk && lk.on && !Raid().bossAnswered(R, me)) { scoutWas = lk.id; return frozenView(body, Raid().stepOf(L, R), lk); } scoutAppear('boss'); } // ❄ 형성평가도 선생님이 켜면
     const S = Raid().bossState(L, R, me), hp = Raid().bossHp(L, R), N0 = Raid().BOSS_TRIES;
     const lab = (s) => (s.ok ? '✔ 도달' : !s.n ? '풀기' : s.left ? `✘ 다시 · 기회 ${s.left}` : '해설 보기');
     body.innerHTML = `<div class="panel framed">

@@ -154,8 +154,10 @@ DS.Control = (function () {
   function solveHtml(L, R) {
     const st = Raid().stepOf(L, R); if (!st || !['monster', 'boss'].includes(st.kind) || Raid().isClosed(R)) return '';
     const lk = Raid().solveLock(L, R, DS.Net.now()), base = (R.state || {}).solve != null ? Number(R.state.solve) : (R.meta || {}).solve != null ? Number(R.meta.solve) : 60;
-    return `<div class="sl-row">${lk && lk.on ? `<span>📝 풀이 시간 ❄ <b class="sl-left" data-sl-end="${lk.end}">${Math.ceil(lk.left / 1000)}초</b></span><button class="btn small primary" data-sl="now">▶ 지금 풀기</button><button class="btn small" data-sl="add">+30초</button>`
-      : `<span>📝 풀이 시간</span><button class="btn small" data-sl="on">❄ 켜기 (${base}초)</button><span class="muted small">중단원 문항 기본</span><button class="btn small" data-sl="dn">−30</button><b>${base}초</b><button class="btn small" data-sl="up">+30</button>`}</div>`;
+    // 🌫 2026-11-09 #17: 「❄ 학생 60초 얼리기」 버튼은 없앰 → 몬스터마다 정찰 (기본 60초) · 준비 완료가 많으면 「⚔ 등장!」
+    const rd = lk ? Raid().readyOf(R, lk.id).length : 0, all = Raid().activeIds(R).filter((u) => u !== (R.meta || {}).teacher).length;
+    return `<div class="sl-row">${lk && lk.on ? `<span>🌫 정찰 <b class="sl-left" data-sl-end="${lk.end}">${Math.ceil(lk.left / 1000)}초</b> · ✋ 준비 <b>${rd}</b> / ${all}</span><button class="btn small primary" data-sl="now">⚔ 등장!</button><button class="btn small" data-sl="add">+30초</button>`
+      : `<span>🌫 정찰 시간</span><button class="btn small" data-sl="dn">−30</button><b>${base}초</b><button class="btn small" data-sl="up">+30</button><span class="muted small">다음 몬스터부터</span>`}</div>`;
   }
   const bindSolve = (el, code, R, L) => el.querySelectorAll('[data-sl]').forEach((b) => (b.onclick = () => run(async () => {
     const k = b.dataset.sl, base = (R.state || {}).solve != null ? Number(R.state.solve) : (R.meta || {}).solve != null ? Number(R.meta.solve) : 60;

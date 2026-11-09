@@ -2846,3 +2846,13 @@ html body .sc-gem, html body .sc-gem .sc-gn, html body .sc-gem b { font-weight: 
 /* 💡 힌트 단추: 두껍고 튀던 검정 2px 테두리 → 얇은 갈색 1px · 은은한 바탕 (2026-11-09) */
 .paper .hint-btn { border: 1px solid #8a6a3a88 !important; background: rgba(255, 248, 228, .55) !important; width: 30px !important; height: 30px !important; }
 .paper .hint-btn::before { font-size: 15px; }
+/* 🌫 정찰 단계 (2026-11-09 #17): 검은 실루엣 · 숨쉬기 → 등장(색이 돌아오며 포효) */
+.scout-sil .art.monster, #rm.scout-sil .art { filter: brightness(0) drop-shadow(0 0 6px #8a6aff66); animation: scoutBreath 2.4s ease-in-out infinite; }
+@keyframes scoutBreath { 50% { transform: scale(1.03, .97); } }
+.scout-sil .hp-bar, #rm.scout-sil ~ .rh-hp { visibility: hidden; }
+.enc-mon.appear .art.monster, #rm.appear .art { animation: scoutAppear 2.2s ease-out; }
+@keyframes scoutAppear { 0% { filter: brightness(0); transform: scale(.9); } 35% { filter: brightness(1.8); transform: scale(1.12) translateX(-4px); } 45% { transform: scale(1.1) translateX(4px); } 60% { filter: brightness(1.2); transform: scale(1.05); } 100% { filter: none; transform: none; } }
+.scout-box { text-align: center; } .scout-box .scout-img { display: block; width: 100%; max-height: 42vh; object-fit: contain; margin: 8px 0; background: #fff; border-radius: 6px; }
+.h-scout { display: flex; flex-direction: column; align-items: center; gap: 6px; max-width: 46%; }
+.h-scout .scout-img { max-width: 100%; max-height: 40vh; object-fit: contain; background: #fff; border-radius: 8px; box-shadow: 0 6px 24px #000a; }
+.h-scout p { margin: 0; }
