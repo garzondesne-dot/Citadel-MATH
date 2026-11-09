@@ -151,4 +151,9 @@ for (let i = 0; i < 8; i++) add('c', 1, false); d = X.chainDown(L, Q, 'u4'); che
   ic.forEach((q, s) => { F.chain.u4.c[kc++] = { s, p: 0, g: ans(q), ph: 1 }; }); const rc = X.record(L, F, 'u4', 'c'); check(rc.done && !rc.fail && rc.tokens === 0, '못 맞힌 뒤에도 서술형 통과 = 처치 (묶기 · 힐 0번)');
   const st = require('fs').readFileSync(require('path').join(__dirname, '..', 'js/raid/student.js'), 'utf8');
   check(/pracArm\[ak\]/.test(st) && /1500 - \(Date\.now\(\) - pracArm/.test(st), '🔥 한 판 더 단추 = 나타난 뒤 1.5초 잠금 (저절로 넘어가지 않게)'); }
+// ⑫ 🧷 스크롤 재발 막기 (2026-11-10): 전투 화면(문제 · 소레이드 · 서술형 쓰기 · 결과)은 모두 paint() 로 그림 — body.innerHTML 을 직접 쓰면 답을 고를 때 스크롤이 맨 위로 (11-08 고침 → 11-09 소레이드에서 재발)
+{ const st = require('fs').readFileSync(require('path').join(__dirname, '..', 'js/raid/student.js'), 'utf8');
+  const raw = (st.match(/body\.innerHTML = `<div class="panel framed st-fight/g) || []).length, painted = (st.match(/paint\(body, `[^`]+`, `<div class="panel framed st-fight/g) || []).length;
+  check(raw === 0 && painted >= 4, `전투 화면 직접 그리기 ${raw}곳 · paint ${painted}곳 (문제 · 소레이드 · 쓰기 · 결과)`);
+  check(/dataset\.paint === tag/.test(st) && /pp\.scrollTop = keep\.p/.test(st), 'paint = 같은 화면이면 양피지 · 창 스크롤 그대로'); }
 console.log(fail ? `❌ 소레이드 실패 ${fail}` : `✅ 소레이드: 확인 ${ok}개 · 실패 0`); if (fail) process.exit(1);
