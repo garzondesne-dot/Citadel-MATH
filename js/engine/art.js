@@ -30,19 +30,40 @@ DS.Art = (function () {
   };
   // 선생님 모습 (2026-11-03): 수업 방의 선생님 용사 → 없으면 이 기기에서 고른 모습(교사 메뉴) → 기본 7 현자
   const TKEY = 'citadel-thero';
+  // 🧙 #32 (2026-11-09 선생님 「교사 캠프 가면 교사 모습 · 스킬이 자꾸 초기화 · 서버에 저장」): 선생님 계정 칸 gcfg/teacher
+  //   { look: { hero, fx, title, socket, at, room? }, sound: { sfx, bgm, vol }, restMin } — 교사 폰 · 종합상황실 · 교사 캠프 · 수업 방 어디서든 같은 값
+  //   읽기 = 로그인한 누구나(모습은 수업 화면에 어차피 보임) · 쓰기 = 교사(admins) · look 만 종합상황실(그 방 hallKey 호스트)도
+  let TCFG = null;
+  const tcfg = () => TCFG || {};
+  const at = (o) => Number((o && o.at) || 0);
+  const srvLook = (R) => { const l = tcfg().look, tl = R && R.state && R.state.tlook; if (!l) return null; return tl && at(tl) > at(l) ? null : l; }; // 수업 방에서 더 나중에 바꿨으면 그쪽
+  async function loadTeacherCfg() {
+    if (!window.DS || !DS.Net || !DS.Net.get) return tcfg();
+    try { const v = await DS.Net.get('gcfg/teacher'); if (v && typeof v === 'object') { TCFG = v; if (v.look) setLocalLook(v.look); } } catch (e) { /* 규칙 게시 전 · 오프라인 → 이 기기 값 */ }
+    return tcfg();
+  }
+  async function saveTeacherCfg(sub, val) {
+    TCFG = { ...tcfg(), [sub]: val };
+    if (!window.DS || !DS.Net || !DS.Net.set) return;
+    try { await DS.Net.set(`gcfg/teacher/${sub}`, val); } catch (e) { /* 권한 없음(규칙 게시 전) → 이 기기에만 */ }
+  }
   function teacherHero(R) {
-    const tl = R && R.state && R.state.tlook; if (tl && tl.hero != null && Number.isFinite(Number(tl.hero))) return Number(tl.hero); // 2026-11-06: 수업 중 바꾼 모습 (교사 폰 · 종합상황실 ⚙ → state/tlook · 종합상황실도 쓸 수 있는 칸)
+    const tl = R && R.state && R.state.tlook, sl = srvLook(R);
+    if (sl && sl.hero != null && Number.isFinite(Number(sl.hero))) return Number(sl.hero);
+    if (tl && tl.hero != null && Number.isFinite(Number(tl.hero))) return Number(tl.hero); // 2026-11-06: 수업 중 바꾼 모습 (교사 폰 · 종합상황실 ⚙ → state/tlook · 종합상황실도 쓸 수 있는 칸)
     const t = R && R.meta && R.players && R.players[R.meta.teacher];
     if (t && t.hero != null) return Number(t.hero);
     try { const raw = localStorage.getItem(TKEY), v = Number(raw); if (raw !== null && raw !== '' && A().heroesV2 && A().heroesV2.list[v]) return v; } catch (e) { /* 무시 */ } // 2026-11-04: 교사는 모든 용사
     return A().heroes.teacher;
   }
-  const teacherFx = (R) => ((R && R.state && R.state.tlook && R.state.tlook.fx) || (R && R.meta && R.players && (R.players[R.meta.teacher] || {}).fx) || 'twinkle');
+  const teacherFx = (R) => ((srvLook(R) || {}).fx || (R && R.state && R.state.tlook && R.state.tlook.fx) || (R && R.meta && R.players && (R.players[R.meta.teacher] || {}).fx) || 'twinkle');
   const setTeacherHero = (n) => { try { localStorage.setItem(TKEY, String(n)); } catch (e) { /* 무시 */ } };
   // 선생님 이펙트 · 호칭 (2026-11-04 · 교사 캠프 ⚙ 설정 · 모두 열림 · 이 기기에 저장)
   const TLOOK = 'citadel-tlook';
-  const teacherLook = () => { let v = {}; try { v = JSON.parse(localStorage.getItem(TLOOK) || '{}') || {}; } catch (e) { /* 무시 */ } return { hero: teacherHero(), fx: v.fx || 'twinkle', title: v.title || 'none', socket: v.socket || {} }; };
-  const setTeacherLook = (o) => { try { const v = JSON.parse(localStorage.getItem(TLOOK) || '{}') || {}; localStorage.setItem(TLOOK, JSON.stringify({ ...v, fx: o.fx || v.fx, title: o.title || v.title, socket: o.socket || v.socket || {} })); } catch (e) { /* 무시 */ } if (o.hero != null) setTeacherHero(o.hero); };
+  const teacherLook = () => { let v = {}; try { v = JSON.parse(localStorage.getItem(TLOOK) || '{}') || {}; } catch (e) { /* 무시 */ } const sl = tcfg().look || {}; return { hero: teacherHero(), fx: sl.fx || v.fx || 'twinkle', title: sl.title || v.title || 'none', socket: sl.socket || v.socket || {} }; };
+  function setLocalLook(o) { try { const v = JSON.parse(localStorage.getItem(TLOOK) || '{}') || {}; localStorage.setItem(TLOOK, JSON.stringify({ ...v, fx: o.fx || v.fx, title: o.title || v.title, socket: o.socket || v.socket || {} })); } catch (e) { /* 무시 */ } if (o.hero != null) setTeacherHero(o.hero); }
+  // opt.room = 종합상황실이 저장할 때 그 방 코드 (규칙이 그 방 hallKey 호스트인지 확인)
+  const setTeacherLook = (o, opt = {}) => { setLocalLook(o); const cur = teacherLook(); const look = { hero: o.hero != null ? Number(o.hero) : cur.hero, fx: o.fx || cur.fx, title: o.title || cur.title, socket: o.socket || cur.socket || {}, at: Date.now() }; if (opt.room) look.room = String(opt.room); TCFG = { ...tcfg(), look }; return saveTeacherCfg('look', { ...look, at: window.DS && DS.Net && DS.Net.TS ? DS.Net.TS : look.at }); };
   // n = 숫자(기본 시트) 또는 'extra:3' · 'new:5' · 'crown:7' (추가 시트)
   const SHEETS = { extra: 'monstersExtra', new: 'monstersNew', crown: 'monstersCrown', rift: 'monstersRift', riftboss: 'monstersRiftBoss', mirror: 'monstersMirror', mirrorboss: 'monstersMirrorBoss', mirrorboss8: 'monstersMirrorBoss8', castle1: 'monstersCastle1', castle2: 'monstersCastle2', castleboss: 'monstersCastleBoss', castle3: 'monstersCastle3', castleboss2: 'monstersCastleBoss2' };
   // 몬스터 번호: 2 · 'extra:3' · 'crown:9' … 끝에 '@h150' 을 붙이면 색 변형 (hue-rotate 150°, v0.9.6 — 보강 · 돌려쓰기 보스용, 그림 0)
@@ -185,5 +206,5 @@ ${a.ui.home ? `.home-props{display:contents}.home-props img{position:fixed;z-ind
     const prev = L.no ? DS.Lessons.list.find((l) => l.no === L.no - 1) : null;
     setTimeout(() => trim([L, prev]), 5000);
   }
-  return { emojify, cell, hero, isV2, monster, scoutDeco, card, install, pos, lessonFiles, prefetch, trim, lessonEnter, teacherHero, teacherFx, setTeacherHero, teacherLook, setTeacherLook };
+  return { emojify, cell, hero, isV2, monster, scoutDeco, card, install, pos, lessonFiles, prefetch, trim, lessonEnter, teacherHero, teacherFx, setTeacherHero, teacherLook, setTeacherLook, loadTeacherCfg, saveTeacherCfg, teacherCfg: tcfg };
 })();

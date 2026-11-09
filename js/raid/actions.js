@@ -49,8 +49,10 @@ DS.Act = (function () {
     for (let i = 0; i < 20; i++) { code = String(100000 + Math.floor(Math.random() * 900000)); if (!(await N().get(P(code, 'meta')))) break; }
     let pct = null;
     try { pct = await N().get(prepPath(lessonId, 'pct')); } catch (e) { /* 준비 안 했으면 차시 기본값 */ }
+    if (DS.Art && DS.Art.loadTeacherCfg) await DS.Art.loadTeacherCfg(); // 🧙 #32 선생님 모습 · 소리 = 서버 gcfg/teacher
     const room = Raid.newRoom(code, lessonId, N().uid(), N().now(), pct, DS.Art ? DS.Art.teacherHero() : 7, DS.Art && DS.Art.teacherLook ? DS.Art.teacherLook().fx : undefined);
     if (cls) room.meta.cls = String(cls);
+    { const sd = DS.Art && DS.Art.teacherCfg ? DS.Art.teacherCfg().sound : null; if (sd && typeof sd === 'object') room.state.sound = { sfx: sd.sfx !== false, bgm: sd.bgm !== false, vol: sd.vol === 'low' ? 'low' : 'mid' }; } // 🔊 #32 지난번 종합실 소리 그대로
     if (opt.slot) room.meta.slot = { key: String(opt.slot.key), p: Number(opt.slot.p), from: Number(opt.slot.from), to: Number(opt.slot.to), ...(opt.slot.extra ? { extra: true } : {}) };
     // ⏳ 보스 타임바 (2026-11-05 사용자): 교시 끝 = 문 닫힘 (opt.noLimit = 시간 제한 끄기 · 시험 · 시연)
     const dl = opt.noLimit || !DS.Sched ? null : opt.slot ? DS.Sched.periodEnd(Number(opt.slot.from), Number(opt.slot.p)) : DS.Sched.periodEnd(N().now());
@@ -132,7 +134,7 @@ DS.Act = (function () {
   const setThink = (lessonId, sec) => N().set(prepPath(lessonId, 'think'), Number(sec));
   // 📄 문제 화면: 종합상황실에 지금 문제의 학습지 이미지를 크게 (교사 해설용, 레이드는 뒤에서 계속)
   const setSheet = (code, on) => N().set(P(code, 'state/sheet'), on ? true : null);
-  const setSound = (code, v) => N().set(P(code, 'state/sound'), { sfx: !!v.sfx, bgm: !!v.bgm, vol: v.vol === 'low' ? 'low' : 'mid' }); // 🔇 2026-11-06: 교사 리모컨 → 종합실 효과음 · 배경음
+  const setSound = async (code, v) => { const sd = { sfx: !!v.sfx, bgm: !!v.bgm, vol: v.vol === 'low' ? 'low' : 'mid' }; await N().set(P(code, 'state/sound'), sd); if (DS.Art && DS.Art.saveTeacherCfg) await DS.Art.saveTeacherCfg('sound', sd); }; // 🧙 #32 다음 수업도 이 소리 // 🔇 2026-11-06: 교사 리모컨 → 종합실 효과음 · 배경음
   async function setVideoOn(code, stepId) { // 🎬 큰 화면에 설명 영상 (null = 닫기) · 🔥 콤보 시계 멈춤 (v0.9.11)
     const st = (await N().get(P(code, 'state'))) || {};
     await N().update(P(code, 'state'), { video: stepId || null, ...cp(st, { video: stepId || null }) });
@@ -153,7 +155,8 @@ DS.Act = (function () {
     if (!on && st.rest) await N().update(P(code, 'state'), { rest: null, pauseMs: (st.pauseMs || 0) + Math.max(0, N().now() - (st.rest.at || N().now())), ...cp(st, { rest: null }) });
     if (!on && DS.Fun) await DS.Fun.stop(code).catch(() => {}); // 쉼터가 끝나면 ⚖ 밸런스 게임도 끝
   }
-  const setRestMin = (code, min) => N().set(P(code, 'state/rest/min'), Math.max(1, Math.min(20, Math.round(Number(min) || 5))));
+  const restMinDef = () => { const m = Number(DS.Art && DS.Art.teacherCfg ? DS.Art.teacherCfg().restMin : 0); return m >= 1 && m <= 20 ? m : 5; }; // 🧙 #32 쉼터 분 = 지난번 값
+  const setRestMin = async (code, min) => { const m = Math.max(1, Math.min(20, Math.round(Number(min) || 5))); await N().set(P(code, 'state/rest/min'), m); if (DS.Art && DS.Art.saveTeacherCfg) await DS.Art.saveTeacherCfg('restMin', m); };
   const setPct = (code, mid, pct) => N().set(P(code, `state/pct/${mid}`), Math.max(10, Math.min(100, Math.round(pct))));
   // 미제출 학생 빼고 판정 (결석·폰 고장)
   const skip = (code, mid, uids) => N().update(P(code, `state/skip/${mid}`), Object.fromEntries(uids.map((u) => [u, true])));
@@ -182,6 +185,7 @@ DS.Act = (function () {
     if (id && o.now) patch[`solveEnd/${id}`] = N().TS;
     if (id && o.add) { const lk = Raid.solveLock(L, R, N().now()); if (lk && lk.on) { if (Number(o.add) < 0 && lk.left <= -Number(o.add) * 1000) patch[`solveEnd/${id}`] = N().TS; else patch[`solveOn/${id}`] = { sec: Math.max(1, Math.round((lk.end - lk.t0) / 1000 + Number(o.add))), at: lk.t0 }; } } // 줄이기: 남은 시간보다 많이 줄이면 바로 등장
     if (Object.keys(patch).length) await N().update(P(code, 'state'), patch);
+    if (patch.solve != null && L && L.id) await N().set(prepPath(L.id, 'solve'), patch.solve).catch(() => {}); // 🧙 #32 풀이 시간 = 다음 수업에도 (차시 준비 칸)
   }
   // ⚔ 소레이드 (2026-11-09 #18): 단계 답 한 개 · 선생님 「✔ 풀어주기」
   async function chainSubmit(code, packed, mid, s, p, g, w) { // w = 1 → 💡 근거 빈칸 답 (2026-11-09 #26)
@@ -419,5 +423,5 @@ DS.Act = (function () {
     return out;
   }
 
-  return { holyArm, holyUse, snapStart, snapEnd, useCharge, giveHint, chainSubmit, chainKnock, chainRelease, scoutReady, setSolve, saveEnd, resumeInfo, switchLesson, setSound, bossTry, openRooms, savePunch, finishOvertime, setPunchOff, punchOff, batTick, batAnswer, hit, endClassAsk, timeUp, extendTime, openRift, cutShort, setRest, setRestMin, markBossWin, prepLite, prepImg, hasImg, setVideoFile, setVideoOn, endClass, admitLate, getPrep, setImage, setVideo, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, heal, bossAnswer, unpackRoom, P };
+  return { restMinDef, holyArm, holyUse, snapStart, snapEnd, useCharge, giveHint, chainSubmit, chainKnock, chainRelease, scoutReady, setSolve, saveEnd, resumeInfo, switchLesson, setSound, bossTry, openRooms, savePunch, finishOvertime, setPunchOff, punchOff, batTick, batAnswer, hit, endClassAsk, timeUp, extendTime, openRift, cutShort, setRest, setRestMin, markBossWin, prepLite, prepImg, hasImg, setVideoFile, setVideoOn, endClass, admitLate, getPrep, setImage, setVideo, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, heal, bossAnswer, unpackRoom, P };
 })();

@@ -239,6 +239,9 @@
           "$slot": {
             ".validate": "newData.isString() && newData.val().length < 300 && (newData.val() === 'file' || newData.val().beginsWith('https://youtu.be/') || newData.val().beginsWith('https://www.youtube.com/') || newData.val().beginsWith('https://youtube.com/') || newData.val().beginsWith('https://m.youtube.com/') || newData.val().beginsWith('https://drive.google.com/'))"
           }
+        },
+        "solve": {
+          ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 300"
         }
       }
     },
@@ -482,6 +485,18 @@
       "giftOn": {
         "$c": {
           ".validate": "newData.isBoolean()"
+        }
+      },
+      "teacher": {
+        "look": {
+          ".write": "auth != null && newData.child('room').isString() && newData.child('room').val().matches(/^[0-9]{6}$/) && root.child('rooms/'+newData.child('room').val()+'/hosts/'+auth.uid).isString() && root.child('rooms/'+newData.child('room').val()+'/hosts/'+auth.uid).val() === root.child('secrets/'+newData.child('room').val()+'/hallKey').val()",
+          ".validate": "newData.hasChildren(['hero', 'fx', 'at']) && newData.child('hero').isNumber() && newData.child('fx').isString() && newData.child('fx').val().length <= 20 && (!newData.child('title').exists() || (newData.child('title').isString() && newData.child('title').val().length <= 40))"
+        },
+        "sound": {
+          ".validate": "newData.hasChildren(['sfx', 'bgm', 'vol']) && newData.child('sfx').isBoolean() && newData.child('bgm').isBoolean() && (newData.child('vol').val() === 'low' || newData.child('vol').val() === 'mid')"
+        },
+        "restMin": {
+          ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 20"
         }
       }
     },

@@ -31,6 +31,7 @@ DS.Teacher = (function () {
   C().onTimeUp('teacher', (now) => { if (!R || !L || !code || !document.getElementById('screen-teacher').classList.contains('active')) return; const d = Raid().deadline(R); if (d && now >= d && !Raid().isClosed(R)) DS.Act.timeUp(code, R, L).catch(() => {}); });
   C().onTimeUp('teacher-bat', () => { if (R && L && code && document.getElementById('screen-teacher').classList.contains('active')) DS.Act.batTick(code, R, L).catch(() => {}); }); // 🦇 황금 박쥐 (v0.9.11)
   async function open(c, hallKey) {
+    if (DS.Art.loadTeacherCfg) await DS.Art.loadTeacherCfg(); // 🧙 #32 선생님 설정 = 서버 gcfg/teacher
     const R0 = await DS.Net.get(`rooms/${c}`);
     if (!R0 || !R0.meta) throw Object.assign(new Error('수업을 찾을 수 없어요.'), { user: true });
     if (R0.meta.teacher !== DS.Net.uid()) throw Object.assign(new Error('이 기기에서 만든 수업이 아니에요.'), { user: true });

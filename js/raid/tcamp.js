@@ -26,6 +26,7 @@ DS.TCamp = (function () {
     hall = !!o.hall;
     if (!hall && !(await DS.Account.isAdmin())) throw Object.assign(new Error('교사 계정으로 로그인해야 해요.'), { user: true });
     code = o.code || ''; hallKey = o.hallKey || ''; R = null; L = null; wasLobby = null; shownHero = null;
+    if (DS.Art.loadTeacherCfg) await DS.Art.loadTeacherCfg(); // 🧙 #32 선생님 모습 · 스킬 · 호칭 = 서버 gcfg/teacher
     DS.UI.show('screen-tcamp'); DS.UI.wake.on(); // 교사 캠프 · 종합상황실 캠프도 화면 켜 둠
     document.getElementById('screen-tcamp').classList.toggle('tc-hallmode', hall);
     if (!hall) DS.Scene.save({ role: 'tcamp', code, hallKey }); // 종합상황실 기기는 장면을 종합상황실로 둔다 (새로고침 → 종합상황실)
@@ -53,7 +54,7 @@ DS.TCamp = (function () {
       <div class="tc-bar" id="tc-bar"></div>`;
     if (code && window.QRCode) { const q = $('#tc-qr'); q.innerHTML = ''; new QRCode(q, { text: studentUrl(), width: hall ? 380 : 320, height: hall ? 380 : 320, correctLevel: QRCode.CorrectLevel ? QRCode.CorrectLevel.M : undefined }); }
     // ⚙ 설정 (2026-11-04): 선생님 모습 · 이펙트 · 호칭 — 모두 열림. 수업 방이 있으면 그 방 선생님 용사 · 이펙트도 바로 바꿈
-    $('#tc-set').onclick = () => DS.Control.run(() => DS.Camp.settings({ teacher: true, onSave: async (v) => {
+    $('#tc-set').onclick = () => DS.Control.run(() => DS.Camp.settings({ teacher: true, room: hall ? code : '', onSave: async (v) => {
       if (code) { await DS.Net.set(`rooms/${code}/state/tlook`, { hero: v.hero, fx: v.fx, at: DS.Net.TS }).catch(() => {}); } /* 2026-11-06: 종합상황실도 쓸 수 있는 칸 → 던전(수업 화면)에 바로 반영 */ if (code && R && R.meta && R.meta.teacher === DS.Net.uid()) { try { await DS.Net.update(`rooms/${code}/players/${R.meta.teacher}`, { hero: v.hero, fx: v.fx }); } catch (e) { /* 권한 없음 */ } } DS.UI.toast('선생님 모습을 바꿨어요 — 지금 수업 화면에도 바로 보여요');
       shownHero = null; tHero(); const p = document.querySelector('.tc-hero .camp-plate'); if (p) p.outerHTML = plate();
     } }));

@@ -524,7 +524,7 @@ DS.Camp = (function () {
       el.querySelectorAll('[data-ttl]').forEach((b) => (b.onclick = () => { if (b.classList.contains('lock')) { DS.UI.toast(`🔒 ${b.title}`, 2600); return; } title = b.dataset.ttl; DS.Sound.clank(); draw(); }));
       el.querySelector('#set-x').onclick = () => el.remove();
       el.querySelector('#set-ok').onclick = () => DS.Control.run(async () => { const fx = fxNow();
-        if (T) { DS.Art.setTeacherLook({ hero, fx, title, socket: sock }); el.remove(); DS.UI.toast('선생님 모습을 바꿨어요!'); if (opt.onSave) await opt.onSave({ hero, fx, title }); return; }
+        if (T) { await DS.Art.setTeacherLook({ hero, fx, title, socket: sock }, { room: opt.room }); /* 🧙 #32 서버에도 */ el.remove(); DS.UI.toast('선생님 모습을 바꿨어요!'); if (opt.onSave) await opt.onSave({ hero, fx, title }); return; }
         if (me.test) DS.Test.setLook(hero, fx); else { await DS.Account.setLook(hero, fx); await DS.Account.setSocket(sock); if (title !== (me.title || 'none')) await DS.Account.setTitle(title); }
         me.title = title; me.hero = hero; me.fx = fx; me.socket = sock; el.remove();
         if (opt.onSave) { await opt.onSave({ hero, fx, title }); DS.UI.toast('저장했어요! 지금 던전에도 바로 적용돼요.'); return; } // 던전 안: 수업 방의 내 용사 · 스킬도 바로

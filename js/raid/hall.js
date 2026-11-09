@@ -20,6 +20,7 @@ DS.Hall = (function () {
   async function enter(c, key, opt = {}) {
     embed = !!opt.embed;
     await DS.Act.joinHall(c, key);
+    if (DS.Art.loadTeacherCfg) await DS.Art.loadTeacherCfg(); // 🧙 #32 선생님 모습 = 서버 gcfg/teacher
     if (code !== c) { hxSeen = lvSeen = ulSeen = hthSeen = null; lvQ = []; ulQ = []; sndKey = ''; try { if (Snd()) { Snd().setSfx(localStorage.getItem('ds-sfx-off') !== '1', false); Snd().setBgm(localStorage.getItem('ds-bgm-off') !== '1', false); } } catch (e) { /* 무시 */ } } // 2026-11-06 검증: 다음 수업으로 넘어가면 「본 것」 기록 · 리모컨 소리 설정을 새로 (+EXP · 필살기 컷인이 안 나오거나 음소거가 이어지던 것)
     code = c; hallKey = String(key); camped = false; L = null; R = null; built = '';
     if (!atkT) atkT = setInterval(hallAtk, 200);

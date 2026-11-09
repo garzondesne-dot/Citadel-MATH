@@ -72,8 +72,8 @@ DS.Control = (function () {
     return `<div class="ic-bar">${b('data-rest', '🏕', '쉼터', '쉼터 — 잠깐 쉬기 (기본 5분)')}${vid ? b(`data-video="${st.id}"`, '🎬', von ? '닫기' : '영상', von ? '설명 영상 닫기' : '설명 영상 틀기 (큰 화면)', von) : ''}${fight ? b('data-sheet', '📄', Raid().sheetOn(R) ? '레이드' : '문제', Raid().sheetOn(R) ? '레이드 화면으로' : '문제 화면 (학습지 해설)', Raid().sheetOn(R)) : ''}${b('data-focus', '🔴', '집중', Raid().focusOn(R) ? '집중모드 끄기' : '집중모드 켜기 (학생 폰 잠깐 멈춤)', Raid().focusOn(R))}${fight && demo ? b('id="h-demo"', '🎮', '시연', st.kind === 'boss' ? '시연: 형성평가 풀어 보기' : '시연: 문제 풀어 보기') : ''}</div>`;
   }
   const bindRest = (el, code, R) => {
-    el.querySelectorAll('[data-rest]').forEach((b) => (b.onclick = () => run(() => Act().setRest(code, !Raid().restOn(R), 5))));
-    el.querySelectorAll('[data-rest-min]').forEach((b) => (b.onclick = () => run(() => Act().setRestMin(code, (((R.state || {}).rest || {}).min || 5) + Number(b.dataset.restMin)))));
+    el.querySelectorAll('[data-rest]').forEach((b) => (b.onclick = () => run(() => Act().setRest(code, !Raid().restOn(R), Act().restMinDef ? Act().restMinDef() : 5))));
+    el.querySelectorAll('[data-rest-min]').forEach((b) => (b.onclick = () => run(() => Act().setRestMin(code, (((R.state || {}).rest || {}).min || (Act().restMinDef ? Act().restMinDef() : 5)) + Number(b.dataset.restMin)))));
     if (DS.Fun && Raid().restOn(R)) DS.Fun.bind(el, code, R); // ⚖ 밸런스 게임 (v0.9.7.7)
     el.querySelectorAll('[data-oxq]').forEach((b) => (b.onclick = () => run(async () => { // ⭕ OX 타임 (v0.9.8.1): 쉼터처럼 멈춤 → 탈락 없는 OX 5문장
       if (!DS.Fun) return; if (!Raid().restOn(R)) await Act().setRest(code, true, 5, { quiz: true }); else await DS.Net.set(`rooms/${code}/state/rest/quiz`, true).catch(() => {}); await DS.Fun.start(code, R, 'quiz', b.dataset.oxq);
