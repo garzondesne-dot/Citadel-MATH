@@ -434,7 +434,17 @@ DS.Hall = (function () {
   function hallChain() {
     const arena = $('#raid'); if (!arena || !L || !R) return;
     const st = Raid().stepOf(L, R), on = !!(st && st.kind === 'monster' && Raid().isChain && Raid().isChain(L, R, st.id));
-    let box = arena.querySelector('.h-chain'); if (!on) { if (box) box.remove(); crKey = ''; dnSeen = null; return; }
+    let box = arena.querySelector('.h-chain'); if (!on) { if (box) box.remove(); crKey = ''; dnSeen = null; const hh = arena.querySelector('.h-hint'); if (hh) hh.remove(); return; }
+    // 💡 힌트 주기 (2026-11-09 #26): 첫 1명 = 맞힌 근거 문장 그대로 말풍선 · 나머지 = 👍 +n (숫자 정답 · 자유 입력 없음)
+    { const wq = (Raid().chainItems(L, R, st.id, '_', 0) || []).find((x) => x.why), givers = Object.entries(R.players || {}).filter(([, p]) => !p.teacher && (p.hint || {})[st.id]).sort((a, b) => Number(a[1].hint[st.id]) - Number(b[1].hint[st.id]));
+      let hh = arena.querySelector('.h-hint'), hk = `${st.id}|${givers.length}`;
+      if (wq && givers.length && (!hh || hh.dataset.k !== hk)) {
+        const fresh = !hh || hh.dataset.mid !== st.id; if (!hh) { hh = document.createElement('div'); hh.className = 'h-hint'; arena.appendChild(hh); }
+        hh.dataset.k = hk; hh.dataset.mid = st.id; const p0 = givers[0][1];
+        hh.innerHTML = `<b>💡 ${esc(p0.nick || '')}의 힌트</b><span>${pretty(wq.why.text)}</span>${givers.length > 1 ? `<i class="h-hint-up">👍 +${givers.length - 1}</i>` : ''}`;
+        hh.classList.remove('pop'); void hh.offsetWidth; hh.classList.add('pop'); if (fresh && Snd() && Snd().clank) Snd().clank();
+      } else if (!givers.length && hh) hh.remove();
+    }
     // 💥 졸개 쓰러짐: 정찰이 끝난 뒤 대장 앞에 졸개(색) · 반 기준% 가 넘은 졸개는 쓰러짐 + 띠
     const mon = $('#rm'), dn = Raid().chainDown(L, R, st.id), downs = dn.filter((d) => d.down).map((d) => d.k), dk = `${st.id}|${downs.join(',')}`;
     if (mon && !mon.classList.contains('scout-sil')) {

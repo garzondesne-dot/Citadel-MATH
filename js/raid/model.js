@@ -116,25 +116,26 @@ DS.Raid = (function () {
     const items = chainItems(L, R, mid, uid, 0), n = items.length, subs = chainSubs(R, mid, uid);
     const ok = !!((((R.chainOk || {})[mid]) || {})[uid]);
     let stage = 0, cost = 0, wrong = 0, lastWrong = null; const says = [];
-    let pass = 0, pStage = 0, pItems = null, pSays = [], pDoneN = 0; // pDoneN = 연습 사슬 완성 횟수 (🔥 1번당 EXP +1 · 2026-11-09 선생님)
+    let pass = 0, pStage = 0, pItems = null, pSays = [], pDoneN = 0, pWhy = -1, whyOk = false; // 💡 pWhy = 연습 판에서 근거 빈칸을 기다리는 단계 · whyOk = 근거 줄을 한 번이라도 맞힘(💡 힌트 주기 열림) // pDoneN = 연습 사슬 완성 횟수 (🔥 1번당 EXP +1 · 2026-11-09 선생님)
     subs.forEach((t) => {
       const raw0 = t.g, it0 = !t.p ? items[stage] : null; // 저장소는 빈 배열을 지움 · 배열을 객체로 줄 수도 → 고르기 답은 늘 배열로
       const fixG = (q, g) => (q && q.type === 'multi' ? (Array.isArray(g) ? g : g && typeof g === 'object' ? Object.values(g) : []) : g);
       const given = fixG(it0, raw0);
       if (!t.p) {
         if (stage >= n || cost >= CHAIN_SLOTS || t.s !== stage) return;
-        if (DS.Quiz.grade(items[stage], given)) { says.push(items[stage].say || ''); stage += 1; lastWrong = null; }
+        if (DS.Quiz.grade(items[stage], given)) { says.push(items[stage].say || ''); if (items[stage].why) says.push(items[stage].why.text); stage += 1; lastWrong = null; } // 💡 첫 판 = 근거 줄을 완성 문장으로
         else { cost += stage === n - 1 ? 1 : 0.5; wrong += 1; lastWrong = { s: stage, given }; }
       } else {
-        if (t.p !== pass) { pass = t.p; pStage = 0; pSays = []; pItems = chainItems(L, R, mid, uid, pass); }
-        if (t.s !== pStage || pStage >= pItems.length) return;
-        if (DS.Quiz.grade(pItems[pStage], fixG(pItems[pStage], raw0))) { pSays.push(pItems[pStage].say || ''); pStage += 1; if (pStage >= pItems.length) pDoneN += 1; }
+        if (t.p !== pass) { pass = t.p; pStage = 0; pSays = []; pWhy = -1; pItems = chainItems(L, R, mid, uid, pass); }
+        if (t.w) { const q = pItems[t.s]; if (t.s === pWhy && q && q.why && Number(raw0) === q.why.answer) { pSays.push(q.why.text); pWhy = -1; whyOk = true; if (pStage >= pItems.length) pDoneN += 1; } return; } // 💡 근거 빈칸 (틀려도 벌 없음 · 다시 고름)
+        if (pWhy >= 0 || t.s !== pStage || pStage >= pItems.length) return;
+        if (DS.Quiz.grade(pItems[pStage], fixG(pItems[pStage], raw0))) { pSays.push(pItems[pStage].say || ''); if (pItems[pStage].why) pWhy = pStage; pStage += 1; if (pStage >= pItems.length && pWhy < 0) pDoneN += 1; }
       }
     });
     const left = Math.max(0, CHAIN_SLOTS - cost), done = stage >= n, fail = !done && left <= 0;
     const locked = !done && !fail && left <= 1 && !ok;
     return { chain: true, items, n, stage, cost, left, slots: CHAIN_SLOTS, wrong, lastWrong, says, done, fail, locked, ok, perfect: done && wrong === 0, perfectAt: done && wrong === 0 ? 0 : -1,
-      best: stage, total: n, submitted: subs.length > 0, tries: [], last: null, allRight: done, practice: pass > 0, pass, pStage, pSays, pItems, pDoneN,
+      best: stage, total: n, submitted: subs.length > 0, tries: [], last: null, allRight: done, practice: pass > 0, pass, pStage, pSays, pItems, pDoneN, pWhy, whyOk,
       healed: 0, canRetry: false, canHeal: false, nextAttempt: subs.length, nextK: subs.length ? subs[subs.length - 1].k + 1 : 0 };
   }
   const CHAIN_SLOTS = 4;

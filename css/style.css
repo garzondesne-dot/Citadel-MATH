@@ -2928,3 +2928,10 @@ html body .sc-gem, html body .sc-gem .sc-gn, html body .sc-gem b { font-weight: 
 /* 📄 2026-11-09 선생님 「개념 · 문제 설명 때 학습지가 아래 조작 막대(h-dock)와 겹침」: 학습지 칸 아래에 막대 높이만큼 비워 위로 올림 */
 #screen-hall:not(.tv-embed) .h-arena > .h-concept, #screen-hall:not(.tv-embed) .h-sheet-ov { padding-bottom: 104px !important; }
 #screen-hall:not(.tv-embed) .h-concept.wfull, #screen-hall:not(.tv-embed) .h-sheet-ov.wfull { padding-bottom: 100px !important; }
+/* 💡 근거 줄 · 힌트 (2026-11-09 #26) */
+.cr-why .why-q { font-size: 17px; line-height: 1.6; } .cr-why .why-bl { display: inline-block; min-width: 3em; border-bottom: 2px solid #c9a24a; text-align: center; color: #c9a24a; }
+.cr-hint { display: block; margin: 6px auto; background: linear-gradient(#ffe9a0, #f2c14a) !important; color: #2a1a06 !important; } .cr-hint small { display: block; font-size: 11px; font-weight: 400; }
+.cr-hints { margin: 6px 8px; padding: 6px 10px; border-radius: 10px; background: #2a2414; box-shadow: inset 0 0 0 1px #c9a24a88; } .cr-hints summary { cursor: pointer; color: #ffe08a; font-weight: 700; } .cr-hints p { margin: 6px 0 0; }
+.h-hint { position: absolute; left: 2%; top: 22%; z-index: 35; max-width: 34%; padding: 10px 14px; border-radius: 14px; background: #fff8dc; color: #2a1a06; box-shadow: 0 0 0 3px #f2c14a, 0 8px 24px #000a; font-size: 22px; line-height: 1.4; }
+.h-hint b { display: block; font-size: 18px; color: #8a5a00; } .h-hint .h-hint-up { position: absolute; right: -10px; top: -14px; padding: 2px 10px; border-radius: 12px; background: #3fae5a; color: #fff; font-style: normal; font-weight: 700; font-size: 18px; }
+.h-hint.pop { animation: hHint .6s ease-out; } @keyframes hHint { 0% { transform: scale(.6); opacity: 0; } 60% { transform: scale(1.06); opacity: 1; } 100% { transform: none; } }

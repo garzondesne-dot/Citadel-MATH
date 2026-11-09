@@ -184,11 +184,18 @@ DS.Act = (function () {
     if (Object.keys(patch).length) await N().update(P(code, 'state'), patch);
   }
   // ⚔ 소레이드 (2026-11-09 #18): 단계 답 한 개 · 선생님 「✔ 풀어주기」
-  async function chainSubmit(code, packed, mid, s, p, g) {
+  async function chainSubmit(code, packed, mid, s, p, g, w) { // w = 1 → 💡 근거 빈칸 답 (2026-11-09 #26)
     const R = unpackRoom(packed), L = DS.Lessons.get(R.meta.lesson), me = N().uid(), rec = Raid.record(L, R, mid, me);
     if (!p && (rec.locked || rec.fail || rec.done)) fail(rec.locked ? '🙋 선생님 확인을 기다려요' : '이 문제는 끝났어요');
-    await N().set(P(code, `chain/${mid}/${me}/${rec.nextK}`), { s, p: p || 0, g: g == null ? '' : g, at: N().TS });
-    return Raid.record(L, { ...R, chain: { ...(R.chain || {}), [mid]: { ...((R.chain || {})[mid] || {}), [me]: { ...(((R.chain || {})[mid] || {})[me] || {}), [rec.nextK]: { s, p: p || 0, g } } } } }, mid, me);
+    await N().set(P(code, `chain/${mid}/${me}/${rec.nextK}`), { s, p: p || 0, g: g == null ? '' : g, ...(w ? { w: 1 } : {}), at: N().TS });
+    return Raid.record(L, { ...R, chain: { ...(R.chain || {}), [mid]: { ...((R.chain || {})[mid] || {}), [me]: { ...(((R.chain || {})[mid] || {})[me] || {}), [rec.nextK]: { s, p: p || 0, g, ...(w ? { w: 1 } : {}) } } } } }, mid, me);
+  }
+  // 💡 힌트 주기 (2026-11-09 #26): 근거 줄을 맞힌 학생만 · 소레이드마다 한 번 · players/{나}/hint/{mid} (규칙 바꿈 없음)
+  async function giveHint(code, packed, mid) {
+    const R = unpackRoom(packed), L = DS.Lessons.get(R.meta.lesson), me = N().uid(), rec = Raid.record(L, R, mid, me);
+    if (!rec.whyOk) fail('💡 근거 줄을 먼저 맞혀야 힌트를 줄 수 있어요 (🔥 한 판 더)');
+    if ((((R.players || {})[me] || {}).hint || {})[mid]) fail('이 소레이드에서는 이미 힌트를 줬어요');
+    await N().set(P(code, `players/${me}/hint/${mid}`), N().TS);
   }
   const chainKnock = (code, mid, k) => N().set(P(code, `state/chainDown/${mid}/${k}`), true); // 💥 리모컨 「쓰러뜨리기」 (state 아래 · 규칙 바꿈 없음)
   const chainRelease = (code, mid, uid) => N().set(P(code, `chainOk/${mid}/${uid}`), true);
@@ -388,5 +395,5 @@ DS.Act = (function () {
     return out;
   }
 
-  return { chainSubmit, chainKnock, chainRelease, scoutReady, setSolve, saveEnd, resumeInfo, switchLesson, setSound, bossTry, openRooms, savePunch, finishOvertime, setPunchOff, punchOff, batTick, batAnswer, hit, endClassAsk, timeUp, extendTime, openRift, cutShort, setRest, setRestMin, markBossWin, prepLite, prepImg, hasImg, setVideoFile, setVideoOn, endClass, admitLate, getPrep, setImage, setVideo, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, heal, bossAnswer, unpackRoom, P };
+  return { giveHint, chainSubmit, chainKnock, chainRelease, scoutReady, setSolve, saveEnd, resumeInfo, switchLesson, setSound, bossTry, openRooms, savePunch, finishOvertime, setPunchOff, punchOff, batTick, batAnswer, hit, endClassAsk, timeUp, extendTime, openRift, cutShort, setRest, setRestMin, markBossWin, prepLite, prepImg, hasImg, setVideoFile, setVideoOn, endClass, admitLate, getPrep, setImage, setVideo, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, heal, bossAnswer, unpackRoom, P };
 })();

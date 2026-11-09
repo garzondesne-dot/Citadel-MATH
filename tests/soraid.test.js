@@ -27,7 +27,7 @@ const sub = (u, s, good, p = 0) => { const it = p ? L.chainItems('u4', X.chainSu
   const m = ((R.chain = R.chain || {}).u4 = R.chain.u4 || {}); const a = (m[u] = m[u] || {}); a[Object.keys(a).length] = { s, p, g: good ? right(q) : wrongOf(q) }; };
 check(X.isChain(L, R, 'u4') && X.monsterHp(L, R, 'u4').max === Math.floor(2 * 4 * (L.defaultPct || 90) / 100), '반 체력 = 인원 × 단계 4 × 기준%');
 sub('a', 0, true); sub('a', 1, true); sub('a', 2, true); sub('a', 3, true); let r = X.record(L, R, 'u4', 'a');
-check(r.done && r.perfect && r.best === 4 && r.says.length === 4 && /그러므로/.test(r.says[3]), '퍼펙트: 4단계 · 나의 풀이 4줄 · 마지막 「그러므로」');
+check(r.done && r.perfect && r.best === 4 && r.says.length === 5 && /^∵ X 는 B − A 의 부분집합/.test(r.says[3]) && /그러므로/.test(r.says[4]), '퍼펙트: 4단계 · 나의 풀이 4줄 + 💡 근거 줄(완성 문장) · 마지막 「그러므로」');
 sub('b', 0, false); r = X.record(L, R, 'u4', 'b'); check(r.left === 3.5 && r.stage === 0 && !r.locked, '졸개 오답 = 0.5칸 · 같은 단계');
 sub('b', 0, true); sub('b', 1, true); sub('b', 2, true); sub('b', 3, false); sub('b', 3, false); r = X.record(L, R, 'u4', 'b');
 check(r.left === 1.5 && r.stage === 3 && !r.locked, '대장 오답 = 1칸씩');
@@ -37,10 +37,16 @@ sub('b', 3, false); r = X.record(L, R, 'u4', 'b'); check(r.fail && !r.done && r.
 check(X.monsterHp(L, R, 'u4').dmg === 7, '반 체력 피해 = 4 + 3');
 // ④ 🔥 연습 사슬 EXP (2026-11-09 선생님: 사슬 완성 1번당 +1)
 const psub = (u, p, s, good) => { const q = X.chainItems(L, R, 'u4', u, p)[s]; const a = R.chain.u4[u]; a[Object.keys(a).length] = { s, p, g: good ? right(q) : wrongOf(q) }; };
-psub('a', 1, 0, false); [0, 1, 2, 3].forEach((s) => psub('a', 1, s, true)); r = X.record(L, R, 'u4', 'a');
+const pwhy = (u, p, g) => { const a = R.chain.u4[u]; a[Object.keys(a).length] = { s: 2, p, g, w: 1 }; };
+psub('a', 1, 0, false); [0, 1, 2].forEach((s) => psub('a', 1, s, true)); r = X.record(L, R, 'u4', 'a');
+check(r.pWhy === 2 && !r.whyOk, '💡 연습 판: ③ 맞힌 뒤 근거 빈칸을 기다림');
+psub('a', 1, 3, true); r = X.record(L, R, 'u4', 'a'); check(r.pStage === 3, '💡 근거를 안 고르면 다음 단계는 안 받음');
+pwhy('a', 1, 1); r = X.record(L, R, 'u4', 'a'); check(r.pWhy === 2 && !r.whyOk, '💡 근거 오답 = 그대로 (벌 없음)');
+pwhy('a', 1, 0); r = X.record(L, R, 'u4', 'a'); check(r.pWhy === -1 && r.whyOk && /부분집합/.test(r.pSays[r.pSays.length - 1]), '💡 근거 정답 = 「∵ …」 한 줄 · 힌트 주기 열림');
+psub('a', 1, 3, true); r = X.record(L, R, 'u4', 'a');
 check(r.pDoneN === 1 && r.left === 4 && r.best === 4 && r.perfect, '연습 1판 완성(중간 오답 있어도) = 1 · 기회 · 기록 그대로');
 [0, 1].forEach((s) => psub('a', 2, s, true)); r = X.record(L, R, 'u4', 'a'); check(r.pDoneN === 1, '연습 2판 반만 = 그대로 1');
-[2, 3].forEach((s) => psub('a', 2, s, true)); r = X.record(L, R, 'u4', 'a'); check(r.pDoneN === 2, '연습 2판 완성 = 2');
+psub('a', 2, 2, true); pwhy('a', 2, 0); psub('a', 2, 3, true); r = X.record(L, R, 'u4', 'a'); check(r.pDoneN === 2, '연습 2판 완성 = 2');
 check(DS.Grow && DS.Grow.XP ? DS.Grow.XP.chainPrac === 1 : true, 'EXP 표 chainPrac = 1');
 // ⑤ 🌫 정찰 시간 줄이기 (2026-11-09 리모컨 −30초): solveOn sec 줄이면 끝 시각이 당겨지고 · 이미 지난 시간보다 짧으면 바로 등장
 { const S = X.newRoom('777777', 'set-06', 'T', 1000); S.state.step = L.steps.findIndex((s) => s.id === 'u4'); S.state.stepAt = 1000;
