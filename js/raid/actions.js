@@ -197,6 +197,7 @@ DS.Act = (function () {
   async function chainSubmit(code, packed, mid, s, p, g, w) { // w = 1 → 💡 근거 빈칸 답 (2026-11-09 #26)
     const R = unpackRoom(packed), L = DS.Lessons.get(R.meta.lesson), me = N().uid(), rec = Raid.record(L, R, mid, me);
     if (p > Raid.PRAC_MAX) fail(`🔥 연습은 ${Raid.PRAC_MAX}번까지예요`); // #39
+    if (p && !w && rec.pass === p && rec.pFail) fail('이번 연습 판은 기회를 다 썼어요'); // #40
     if (!p && (rec.locked || rec.fail || rec.done)) fail(rec.locked ? '🙋 선생님 확인을 기다려요' : '이 문제는 끝났어요');
     await N().set(P(code, `chain/${mid}/${me}/${rec.nextK}`), { s, p: p || 0, g: g == null ? '' : g, ...(w ? { w: 1 } : {}), at: N().TS });
     return Raid.record(L, { ...R, chain: { ...(R.chain || {}), [mid]: { ...((R.chain || {})[mid] || {}), [me]: { ...(((R.chain || {})[mid] || {})[me] || {}), [rec.nextK]: { s, p: p || 0, g, ...(w ? { w: 1 } : {}) } } } } }, mid, me);

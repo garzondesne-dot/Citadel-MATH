@@ -37,6 +37,9 @@ const OUT = process.argv[2] || '.', U = 'http://localhost:8765/index.html?local'
     const right = (q) => (q.type === 'multi' ? q.answer : q.type === 'choice' ? q.answerIndex : q.answer), it = DS.Raid.chainItems(L, R, 'u4', me, p);
     let k = Object.keys((((R.chain || {}).u4 || {})[me]) || {}).length;
     for (let s2 = 0; s2 < it.length; s2++) { await DS.Net.set(`rooms/${c}/chain/u4/${me}/${k++}`, { s: s2, p, g: right(it[s2]), at: DS.Net.TS }); if (it[s2].why) await DS.Net.set(`rooms/${c}/chain/u4/${me}/${k++}`, { s: s2, p, g: it[s2].why.answer, w: 1, at: DS.Net.TS }); } }, [code, p]);
+  // 🔥 #40 연습 판 오답 → 연습 기회 3.5/4 (첫 판 기회와 따로)
+  await S.evaluate(async (c) => { const R = DS.Act.unpackRoom(await DS.Net.get(`rooms/${c}`)), me = DS.Net.uid(), k = Object.keys((((R.chain || {}).u4 || {})[me]) || {}).length; await DS.Net.set(`rooms/${c}/chain/u4/${me}/${k}`, { s: 0, p: 1, g: -999, at: DS.Net.TS }); }, code);
+  await S.waitForTimeout(1500); ok(await S.evaluate(() => /3\.5/.test((document.querySelector('.dt-n') || {}).textContent || '')), `연습 오답 → 아래 기회 「${await S.evaluate(() => (document.querySelector('.dt-n') || {}).textContent)}」`);
   await finishPass(1); await S.waitForTimeout(1500);
   let P = await pr(); ok(/2\/3 남음/.test(P.btn), `연습 1판 끝 → 단추 「${P.btn}」`);
   const shut = () => S.evaluate(() => document.querySelectorAll('.th-chest-ov, .bat-ov, .th-bat').forEach((e) => e.remove()));

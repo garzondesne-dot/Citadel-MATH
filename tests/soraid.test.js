@@ -88,4 +88,21 @@ for (let i = 0; i < 8; i++) add('c', 1, false); d = X.chainDown(L, Q, 'u4'); che
   check(X.pracUsed(Q, 'u5', 'a', X.record(L, Q, 'u5', 'a')) === 0, '소레이드(문제)마다 따로');
   const fs = require('fs'), path = require('path'), bon = fs.readFileSync(path.join(__dirname, '..', 'js/raid/bonus.js'), 'utf8');
   check(!/PRAC_MAX|pracUsed|pracStart/.test(bon), '성채 · 복습 허수아비(bonus.js)의 한 판 더는 제한 없음 그대로'); }
+// ⑨ 🔥 한 판 더도 오답이면 기회 깎임 (#40 · 2026-11-09 · #22 바꿈): 판마다 새 4칸 · 졸개 0.5 · 대장 1 · 0 = 그 판 끝(EXP 없음) · 잠김 없음 · 근거 빈칸 오답은 안 깎음
+{ const Q = X.newRoom('343434', 'set-06', 'T', 1000); Q.active = { a: true }; Q.players = { a: {} }; Q.chain = { u4: {} };
+  const it0 = X.chainItems(L, Q, 'u4', 'a', 0), m = (Q.chain.u4.a = {}); let k = 0;
+  it0.forEach((q, i) => { m[k++] = { s: i, p: 0, g: right(q) }; });
+  const P1 = X.chainItems(L, Q, 'u4', 'a', 1), sub = (p, s2, good, w) => { const q = X.chainItems(L, Q, 'u4', 'a', p)[s2]; m[k++] = { s: s2, p, g: w ? (good ? q.why.answer : 99) : good ? right(q) : wrongOf(q), ...(w ? { w: 1 } : {}) }; };
+  let r = X.record(L, Q, 'u4', 'a'); check(r.done && r.left === 4, '첫 판 다 맞힘 · 기회 4 그대로');
+  sub(1, 0, false); r = X.record(L, Q, 'u4', 'a'); check(r.pLeft === 3.5 && r.left === 4 && !r.locked, `연습 졸개 오답 → 연습 기회 3.5 (첫 판 기회는 그대로 · 잠김 없음) ${r.pLeft}`);
+  sub(1, 0, true); const wi = P1.findIndex((q) => q.why); r = X.record(L, Q, 'u4', 'a');
+  if (P1[0].why) { sub(1, 0, false, true); r = X.record(L, Q, 'u4', 'a'); check(r.pLeft === 3.5, '근거 빈칸 오답 = 안 깎음'); sub(1, 0, true, true); }
+  else check(wi >= 0, '연습 판에 근거 빈칸 있음');
+  r = X.record(L, Q, 'u4', 'a'); const last = P1.length - 1;
+  for (let i = r.pStage; i < last; i++) { const q = P1[i]; sub(1, i, true); if (q.why) sub(1, i, true, true); }
+  sub(1, last, false); r = X.record(L, Q, 'u4', 'a'); check(r.pLeft === 2.5, `연습 대장 오답 → −1 (${r.pLeft})`);
+  sub(1, last, false); sub(1, last, false); r = X.record(L, Q, 'u4', 'a'); check(r.pLeft === 0.5 && !r.pFail && !r.locked, `0.5 남아도 잠김 없이 계속 (${r.pLeft})`);
+  sub(1, last, false); r = X.record(L, Q, 'u4', 'a'); check(r.pLeft === 0 && r.pFail && r.pDoneN === 0, '0 = 그 판 끝 · 완성 아님(EXP 없음)');
+  sub(1, last, true); r = X.record(L, Q, 'u4', 'a'); check(r.pFail && r.pDoneN === 0, '끝난 판에 정답을 내도 안 셈');
+  sub(2, 0, false); r = X.record(L, Q, 'u4', 'a'); check(r.pass === 2 && r.pLeft === 3.5 && !r.pFail, `다음 판 = 새 4칸 (${r.pLeft})`); }
 console.log(fail ? `❌ 소레이드 실패 ${fail}` : `✅ 소레이드: 확인 ${ok}개 · 실패 0`); if (fail) process.exit(1);
