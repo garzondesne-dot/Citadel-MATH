@@ -49,7 +49,8 @@ DS.Hall = (function () {
   // 🆙 몬스터가 쓰러질 때 공격한 용사들 머리 위 +EXP · 🎉 레벨업 알림 (2026-11-05 · 좋은 순간만 크게 · 레벨 목록 · 순위는 안 보임)
   // 🔉 종합실 구석 소리 단추 (2026-11-09 #24): 🔇 / 작게 / 보통 · 이 PC 에 기억 · 리모컨으로도 바뀜
   function hallVol() {
-    if (!Snd() || !Snd().setLevel) return;
+    { const old = document.getElementById('h-vol'); if (old) old.remove(); return; } // 2026-11-09 선생님: 아래 가운데 소리 단추 없앰 · 왼쪽 가운데 🔊 탭만 (아래는 예전 코드)
+    if (!Snd() || !Snd().setLevel) return; // eslint-disable-line no-unreachable
     let b = document.getElementById('h-vol'); const host = document.getElementById('screen-hall') || document.body;
     if (!b) { b = document.createElement('div'); b.id = 'h-vol'; host.appendChild(b); b.onclick = (e) => { const v = e.target.closest('[data-lv]'); if (!v) return; Snd().setLevel(v.dataset.lv); if (v.dataset.lv !== 'off' && Snd().clank) Snd().clank(); hallVol(); }; }
     const lv = Snd().level, k = `v|${lv}`; if (b.dataset.k === k) return; b.dataset.k = k;
