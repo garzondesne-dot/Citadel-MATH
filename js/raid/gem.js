@@ -15,7 +15,14 @@ DS.Gem = (function () {
   const today = () => new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
   // 💎 오늘 남은 한도 (2026-11-09 #27): 한도에 걸려 덜 받을 때 학생이 이유를 알게 · 💎 칩 옆에 작게
   const dayLeft = (d) => Math.max(0, DAY_CAP - ((((d || {}).day) || {})[today()] || 0));
-  function showLeft(d) { if (typeof document === 'undefined') return; const n = dayLeft(d); document.querySelectorAll('.sc-gem').forEach((b) => { let s = b.querySelector('.sc-day'); if (!s) { s = document.createElement('small'); s.className = 'sc-day'; b.appendChild(s); } s.textContent = `오늘 +${n}`; s.classList.toggle('out', n <= 0); b.title = `오늘 더 받을 수 있는 💎 ${n}개 (하루 ${DAY_CAP}개까지 · 선물 · 업적은 따로)`; }); }
+  // 2026-11-09 선생님: 칩 옆 「오늘 +n」은 「오늘 n개 준다」로 읽혀서 뺌 → 💎 상점(내 용사 창) 안에 「오늘 받은 💎 a / 100」 · 10개 이하 남으면 팝업 한 번
+  function showLeft(d) { if (typeof document === 'undefined') return; const n = dayLeft(d), got = DAY_CAP - n; document.querySelectorAll('#me-day').forEach((e) => { e.innerHTML = `오늘 받은 💎 <b>${got}</b> / ${DAY_CAP} <small>(하루 한도 · ${n > 0 ? `${n}개 더 받을 수 있어요` : '내일 다시 받아요'} · 선생님 선물 · 업적은 따로)</small>`; e.classList.toggle('out', n <= 10); }); }
+  function capAlert(m, d) { // 한도가 10개 이하로 남으면 그날 한 번 팝업
+    if (typeof document === 'undefined') return; const n = dayLeft(d); if (n > 10) return;
+    const k = `ds-gemcap-${m.c}-${m.n}-${today()}-${n <= 0 ? 0 : 10}`; try { if (localStorage.getItem(k)) return; localStorage.setItem(k, '1'); } catch (e) { /* 저장 못 해도 띄움 */ }
+    const e = document.createElement('div'); e.className = 'gem-cap-pop'; e.innerHTML = n <= 0 ? `<b>💎 오늘 한도를 다 받았어요!</b><small>하루 ${DAY_CAP}개까지 · 내일 다시 모아요 (선생님 선물 · 업적은 따로)</small>` : `<b>💎 오늘 받을 수 있는 마정석이 ${n}개 남았어요</b><small>하루 ${DAY_CAP}개까지 · 내일 다시 채워져요</small>`;
+    document.body.appendChild(e); setTimeout(() => e.classList.add('go'), 3800); setTimeout(() => e.remove(), 4400);
+  }
   // 적립표 (확정안 · 한 곳에서 바꿈)
   // 2026-11-07 사용자 「보상 전체 +20%」: 새 용사 6 · 📐 수식 이펙트로 상점이 💎1,580 → 1,980 → 수입도 약 1.2배 (비율은 그대로 · tests/economy.test.js)
   const G = {
@@ -83,7 +90,7 @@ DS.Gem = (function () {
       [`log/${k}`]: { g: had + g, at: N().TS, why: String(why || '').slice(0, 40) },
       ...(opt.free ? {} : { [`day/${day}`]: used + g }),
     });
-    pop(g, why);
+    pop(g, why); if (!opt.free) capAlert(m, { day: { [day]: used + g } }); // 한도 밖(선물 · 업적)은 알림 없음
     return g;
   }
   // 📜 받기: key 한 번만 (upsert = 늘어난 만큼만) · 하루 한도 없음
@@ -227,5 +234,5 @@ DS.Gem = (function () {
     await N().update(path(m), { total: (Number(d.total) || 0) + back, [`log/refund_${key}`]: { g: back, at: N().TS, why: '📚 도감 완성 → 💎 돌려받음', gift: true } });
     return back;
   }
-  return { dayLeft, showLeft, auraCls, AURA_NAMES, PHOTO_HEROES, photoPassed, SCROLL_NEED, scrollOf, ENH, ENH_MAX, GREAT, enhTier, addScroll, enhance, watchGifts, giftList, chest, feathers, rareOf, convert, CONV, cardRefund, CARD_HEROES, G, SHOP, DAY_CAP, price, mine, add, gift, giftsSince, addDaily, medal, buy, sell, refundOf, REFUND, owns, itemKey, streak, today };
+  return { dayLeft, showLeft, capAlert, auraCls, AURA_NAMES, PHOTO_HEROES, photoPassed, SCROLL_NEED, scrollOf, ENH, ENH_MAX, GREAT, enhTier, addScroll, enhance, watchGifts, giftList, chest, feathers, rareOf, convert, CONV, cardRefund, CARD_HEROES, G, SHOP, DAY_CAP, price, mine, add, gift, giftsSince, addDaily, medal, buy, sell, refundOf, REFUND, owns, itemKey, streak, today };
 })();

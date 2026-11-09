@@ -57,7 +57,7 @@ DS.Camp = (function () {
   // 한 화면에 전체가 보이므로 차원문이 열리면 반짝 강조만
   // ⏳ 이어하기 (2026-11-05): rift/{반}/{차시} = { code, lesson, no, until } — 기한 안 · 아직 완주 안 한 것 중 가장 최근
   let rifts = null, riftStop = null;
-  const riftNow = () => { const now = Date.now(); const list = Object.values(rifts || {}).filter((r) => r && r.until > now && !((r.done || {})[me && me.n])); return list.sort((a, b) => (b.at || 0) - (a.at || 0))[0] || null; };
+  const riftNow = () => null; // ⏳ 이어하기 포털(빨간 던전) 없앰 (2026-11-09 선생님 「이제 의미 없으니 삭제 · 수업은 선생님이 이어가기」) — 예전에 열린 포털도 안 보임
   function showGate() { const g = document.getElementById('camp-gate'); if (g) { g.classList.remove('flash'); void g.offsetWidth; g.classList.add('flash'); } }
   // ── 🧭 첫 수업 튜토리얼 (2026-11-03 사용자 확정) ──────────────────────
   //   A 입장: 튜토리얼을 본 적 없고 (수업 중이거나 수업 기록이 아직 없는) 학생 → 모루 · 보강던전 · 소품을 숨기고 차시 던전만, 들어가는 법 안내
@@ -276,7 +276,6 @@ DS.Camp = (function () {
       ${me.teacher ? '' : `<div class="st-go-row"><button class="btn primary big" id="camp-enter">${live && live.open ? `⚔ ${live.no ? `${DS.Lessons.noText(live.no)}차시 ` : ''}입장` : riftNow() ? `⏳ ${riftNow().no}차시 이어하기` : '🔒 수업 기다리는 중'}</button><button class="btn big" id="camp-me">🧙 내 용사</button></div>`}`; // 🧹 2026-11-07 정돈판: 능력치 · 장착 · 수집 줄 → 「🧙 내 용사」 창 안으로
     { const ce = el.querySelector('#camp-enter'); if (ce) ce.onclick = () => { const g = $('#camp-gate'); if (g) g.click(); }; const cm = el.querySelector('#camp-me'); if (cm) cm.onclick = () => settings({ tab: 'hero' }); }
     document.querySelectorAll('#camp .sc-gn').forEach((e) => { e.textContent = L.gem != null ? L.gem : 0; /* 2026-11-08: 「·」 는 도트 글꼴에 없어 네모(▯)로 보였음 */ });
-    if (DS.Gem && DS.Gem.showLeft && !me.teacher) DS.Gem.mine(me).then(DS.Gem.showLeft).catch(() => {}); // 💎 오늘 남은 한도
     void st; void sealMax; void U; void heroOpen; void heroAll; void t; void earned;
     // 장면: 등불 · 깃발 · 상태 표시 (글씨 없이)
     const stage = document.querySelector('#camp .camp-stage'); // 2026-11-05: 성벽 등불(차시 층) 없앰
@@ -490,13 +489,14 @@ DS.Camp = (function () {
     const ttlTab = () => `<p class="muted small">얻은 ${got.length}개 · 고른 호칭이 이름 앞에 붙어요</p><div class="ttl-grid">${[{ id: 'none', name: '달지 않기', tier: 'w', cond: '' }, ...DS.Titles.all()].map((t) => { const has = t.id === 'none' || got.includes(t.id); return `<button class="ttl-pick ${DS.Titles.TIER[t.tier].cls}${t.id === title ? ' on' : ''}${has ? '' : ' lock'}" data-ttl="${t.id}" title="${esc(t.cond || '')}">${has ? DS.Titles.medal(t, 22) : '🔒'}<span>${esc(t.name)}</span>${has ? '' : `<small>${esc(t.cond)}</small>`}</button>`; }).join('')}</div>`;
     const draw = () => { const sb = el.querySelector('.set-box'), keep = sb ? sb.scrollTop : 0;
       const bn = buyN(), bsum = bn.hero + bn.gem + bn.enh, bd = (n) => (n ? `<i class="set-bd">${n}</i>` : '');
-      el.innerHTML = `<div class="quiz-box framed set-box"><div class="set-head">${T ? '<h2>🧙 선생님 모습</h2>' : `<h2 class="me-h"><span>🧙 내 용사</span><b class="g">💎 ${L.gem}</b><b class="s">📜 ${L.scroll || 0}</b></h2>`}<button class="btn" id="set-x" aria-label="닫기">✕</button></div>
+      el.innerHTML = `<div class="quiz-box framed set-box"><div class="set-head">${T ? '<h2>🧙 선생님 모습</h2>' : `<h2 class="me-h"><span>🧙 내 용사</span><b class="g">💎 ${L.gem}</b><b class="s">📜 ${L.scroll || 0}</b></h2><p class="me-day" id="me-day"></p>`}<button class="btn" id="set-x" aria-label="닫기">✕</button></div>
         ${!T && bsum ? `<p class="me-buy">💎 지금 살 수 있는 것 <b>${bsum}개</b> · 탭 위 파란 숫자</p>` : ''}
         <div class="set-tabs">${[['hero', `🧙 용사${bd(bn.hero)}`], ['gem', `⚔ 스킬${bd(bn.gem)}`], ...(T ? [] : [['enh', `🔨 강화${bd(bn.enh)}`]]), ['ttl', T ? `🏅 호칭 <small>${got.length}</small>` : '🏅 기록']].map(([k, n]) => `<button data-tab="${k}" class="${tab === k ? 'on' : ''}">${n}</button>`).join('')}</div>
         ${tab === 'gem' || (T && tab === 'hero') ? preview() : ''}
         ${tab === 'hero' ? heroTab() : tab === 'gem' ? gemTab() : tab === 'enh' && !T ? enhTab() : recTab()}
         <div class="set-foot"><button class="btn primary big" id="set-ok">💾 저장</button></div>
-      </div>`; // 2026-11-07 정돈판: 위 = 제목 · 💎 · 📜 · ✕ / 아래 = 💾 저장 (늘 보임)
+      </div>`;
+      if (!T && DS.Gem && DS.Gem.showLeft) DS.Gem.mine(me).then(DS.Gem.showLeft).catch(() => {}); // 💎 오늘 받은 한도 (상점 안 · 2026-11-09) // 2026-11-07 정돈판: 위 = 제목 · 💎 · 📜 · ✕ / 아래 = 💾 저장 (늘 보임)
       { const sb2 = el.querySelector('.set-box'); if (sb2) sb2.scrollTop = keep; }
       el.querySelectorAll('canvas[data-still]').forEach((c) => DS.FX.still(c, c.dataset.still));
       { const ap = el.querySelector('#ap'); if (ap) ap.onclick = demo; }

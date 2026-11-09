@@ -169,7 +169,7 @@ DS.Act = (function () {
     if (done && cls && DS.Sched && DS.Sched.advance) await DS.Sched.advance(cls, Le.id).catch(() => {}); // 교사만 (종합실이면 교사 기기가 나중에 채움)
     if (R.meta.slot && R.meta.slot.extra && R.meta.slot.key) await N().remove(`sched/extra/${R.meta.slot.key}`).catch(() => {}); // ➕ 보충 칸 = 수업이 끝나면 사라짐
     if (cls) { const lv = await N().get(`live/${ck(cls)}`).catch(() => null); if (lv && lv.code === code) await N().set(`live/${ck(cls)}/open`, false); }
-    if (opt.rift && cls) await openRift(code, unpackRoom(R), opt.days || 7);
+    // ⏳ 이어하기 포털(빨간 던전)은 2026-11-09 선생님 결정으로 없앰 — 수업은 선생님이 「지난 수업 이어서」로 이어감 (openRift 는 남겨 둠 · 부르지 않음)
   }
   // ⏸ 수업 끝 (저장) (2026-11-06 사용자 「세이브 기능처럼 선생님이 수업 중간에 끝내는 기능 · 수업 끝 상시 배치」): 지금 단계를 저장하고 끝냄
   //   → 다음에 같은 반 · 같은 차시를 열면 교사 메뉴에 「▶ 지난 수업 이어서」 · 저장 = 방 state.savedStop (종합실도) + prep/{차시}/resume/{반} (교사)
@@ -246,8 +246,7 @@ DS.Act = (function () {
   async function endClassAsk(code) {
     const raw = await N().get(P(code)); if (!raw || !raw.meta) return;
     const R = unpackRoom(raw), L = DS.Lessons.get(R.meta.lesson);
-    const rift = cutShort(L, R) && R.meta.cls ? window.confirm(`⏳ 시간이 부족했나요?\n\n[확인] 이어하기 던전을 7일 동안 열어요 — 학생들이 캠프에서 남은 문제 · 형성평가를 마저 해요\n[취소] 그냥 끝내기`) : false;
-    return endClass(code, { rift });
+    void L; void R; return endClass(code, {}); // ⏳ 「이어하기 던전 열까요?」 물음 없앰 (2026-11-09) — 이어서 하려면 선생님 「지난 수업 이어서」
   }
   // ⏳ 교시 끝 (보스가 문을 닫음): 남은 단계가 있으면 이어하기 7일 자동 · 이미 마무리 · 보스를 이겼으면 평소처럼 끝 (여러 기기가 불러도 한 번)
   async function timeUp(code, R, L) {

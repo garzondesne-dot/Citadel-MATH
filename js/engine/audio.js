@@ -81,7 +81,9 @@ DS.Sound = (function () {
   const preload = () => { const c = sfxCfg(); if (c) c.keys.forEach(load); };
   // 🎵 배경음: 성채 · 허수아비에서만 · 작게 · 소리 끄기 · 화면 숨김이면 멈춤
   let bgmEl = null, bgmKey = null;
+  // 🎵 배경음 없앰 (2026-11-09 선생님 「안 어울려 · 효과음은 놔두고 다 지워」): 부르는 곳은 그대로 두고 아무것도 틀지 않음 (틀던 것은 멈춤)
   function bgm(k) {
+    if (bgmEl) { bgmEl.pause(); bgmEl = null; } bgmKey = null; return; // eslint-disable-line no-unreachable
     if (typeof Audio === 'undefined') return;
     if (bgmKey === k && bgmEl) { if (!bgmOff && bgmEl.paused && !document.hidden) bgmEl.play().catch(() => {}); return; }
     if (bgmEl) { bgmEl.pause(); bgmEl = null; } bgmKey = k || null;
@@ -105,7 +107,7 @@ DS.Sound = (function () {
     get vol() { return vol; },
     // 🔇 / 작게 / 보통 한 번에 (종합실 구석 · 리모컨)
     setLevel(l, keep = true) { if (l === 'off') { this.setSfx(false, keep); this.setBgm(false, keep); return; } this.setVol(l, keep); this.setSfx(true, keep); this.setBgm(true, keep); },
-    get level() { return sfxOff && bgmOff ? 'off' : vol; },
+    get level() { return sfxOff ? 'off' : vol; }, // 🎵 배경음 없음 → 효과음만으로
     get sfxOn() { return !sfxOff; },
     get bgmOn() { return !bgmOff; },
     onChange(f) { listeners.push(f); },
@@ -117,7 +119,7 @@ DS.Sound = (function () {
     finish() { sample('finish', 0.95, () => { noise({ dur: 0.45, vol: 0.5, freq: 4500, sweepTo: 400 }); tone({ type: 'sine', f0: 75, f1: 30, dur: 0.45, vol: 0.6 }); }); },
     coin() { sample('coin', 0.7, () => tone({ type: 'square', f0: 1320, f1: 1980, dur: 0.12, vol: 0.08 })); },
     levelup() { sample('levelup', 0.85, () => [523, 659, 784, 1047].forEach((f, i) => tone({ type: 'triangle', f0: f, dur: 0.45, vol: 0.18, delay: i * 0.12 }))); },
-    get muted() { return sfxOff && bgmOff; },
+    get muted() { return sfxOff; },
 
     card() { noise({ dur: 0.06, vol: 0.15, freq: 5000 }); },
     tick() { tone({ type: 'square', f0: 1300, f1: 1250, dur: 0.025, vol: 0.05 }); }, // 🥊 펀치 기계 숫자 돌기 (v0.9.11)

@@ -2957,7 +2957,9 @@ html body .sc-gem, html body .sc-gem .sc-gn, html body .sc-gem b { font-weight: 
 .h-wrok { position: absolute; right: 2%; top: 14%; z-index: 36; padding: 6px 14px; border-radius: 14px; background: #2a1e06e6; box-shadow: 0 0 0 2px #f2c14a, 0 0 16px #f2c14a88; color: #ffe08a; font-size: 22px; } .h-wrok b { font-size: 28px; color: #fff3b0; }
 .h-wrok.pop { animation: hHint .6s ease-out; }
 
-.sc-gem .sc-day { display: block; font-size: 9px; line-height: 1; color: #cfe8ff; opacity: .85; margin-top: 1px; white-space: nowrap; } .sc-gem .sc-day.out { color: #ff9a8a; } /* 💎 오늘 남은 한도 (#27) */
+.me-day { margin: 2px 0 6px; font-size: 13px; color: #cfe8ff; } .me-day small { color: var(--muted); font-size: 11px; } .me-day.out b { color: #ff9a8a; } /* 💎 오늘 받은 한도 (#27 · 상점 안) */
+.gem-cap-pop { position: fixed; left: 50%; top: 22%; transform: translate(-50%, 0); z-index: 9500; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 12px 18px; border-radius: 12px; background: #1b1408f2; border: 2px solid #ffd25a; box-shadow: 0 0 20px #ffd25a55; color: #fff3c0; text-align: center; animation: capIn .3s ease-out; transition: opacity .5s; pointer-events: none; max-width: 86vw; }
+.gem-cap-pop b { font-size: 16px; } .gem-cap-pop small { font-size: 12px; color: #e8dcc0; } .gem-cap-pop.go { opacity: 0; } @keyframes capIn { from { transform: translate(-50%, -12px); opacity: 0; } }
 
 /* 🏰 디펜스 보완 (2026-11-09 선생님): 몬스터 발밑 그림자 · 왼쪽 적을 칠 때 용사 뒤집기 */
 .td-mon { --s: .55; } .td-mon.t-t { --s: .7; } .td-mon.t-m { --s: .85; } .td-mon.t-b { --s: 1.15; } .td-mon.t-f { --s: .5; }
