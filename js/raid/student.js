@@ -621,8 +621,8 @@ DS.Student = (function () {
     const lastWrong = !prac && rec.lastWrong && rec.lastWrong.s === stage;
     let mainHtml;
     if (rec.fail) mainHtml = `<p class="paper-note">끝까지 못 맞혔어요 — 아래 풀이를 학습지에 옮겨 적고 🎯 복습 허수아비에서 다시 도전해요.</p>${story(rec.items.map((x) => x.say))}`;
-    else if (!prac && rec.done) mainHtml = `<p class="okc big-msg">${rec.perfect ? '🌟 퍼펙트 사슬!' : '🎉 대장 처치!'}</p>${story(says)}<p class="cr-more">✅ 다 풀었어요! 🔥 한 판 더 해 볼래요? 부담 없어요</p><button class="btn big cr-again" id="cr-prac">🔥 한 판 더! (연습)</button><p class="muted small cr-pnote">숫자만 바뀐 새 문제 · 틀려도 아무것도 안 줄어요 (기록 · 기회 · 💎 그대로) · 맞히면 공격 이펙트가 나가요 (데미지 0)</p>`;
-    else if (pDone) mainHtml = `<p class="okc">✔ 연습 사슬 완성!</p>${story(says)}<button class="btn big cr-again" id="cr-prac">🔥 한 판 더! (연습)</button><p class="muted small cr-pnote">숫자만 바뀐 새 문제 · 틀려도 아무것도 안 줄어요 (기록 · 기회 · 💎 그대로) · 맞히면 공격 이펙트가 나가요 (데미지 0)</p>`;
+    else if (!prac && rec.done) mainHtml = `<p class="okc big-msg">${rec.perfect ? '🌟 퍼펙트 사슬!' : '🎉 대장 처치!'}</p>${story(says)}<p class="cr-more">✅ 다 풀었어요! 🔥 한 판 더 해 볼래요? 부담 없어요</p><button class="btn big cr-again" id="cr-prac">🔥 한 판 더! (연습)</button><p class="muted small cr-pnote">숫자만 바뀐 새 문제 · 틀려도 아무것도 안 줄어요 (기록 · 기회 · 💎 그대로) · 사슬 완성마다 경험치 +1 (데미지 0)</p>`;
+    else if (pDone) mainHtml = `<p class="okc">✔ 연습 사슬 완성! <b class="gold">+1 EXP</b></p>${story(says)}<button class="btn big cr-again" id="cr-prac">🔥 한 판 더! (연습)</button><p class="muted small cr-pnote">숫자만 바뀐 새 문제 · 틀려도 아무것도 안 줄어요 (기록 · 기회 · 💎 그대로) · 맞히면 공격 이펙트가 나가요 (데미지 0)</p>`;
     else if (rec.locked && !prac) mainHtml = `${story(says)}<div class="cr-lock"><b>🙋 선생님 확인을 기다려요</b><p>기회가 1칸 남았어요 — 학습지에 풀이를 정리해 두면 선생님이 와서 확인해 줘요.</p></div>`;
     else mainHtml = `${story(says)}<div class="paper"><div class="paper-h"><b>${esc(step.title)} · ${stage === pItems.length - 1 ? '👑 대장' : `졸개 ${'①②③④⑤⑥'[stage]}`}</b><small>${prac ? '연습 (숫자 바뀜 · 데미지 없음)' : '틀려도 숫자는 그대로'}</small></div>
         ${lastWrong ? '<p class="paper-note">✘ 다시 생각해 봐요 — 같은 문제예요</p>' : ''}<div class="items">${itemHtml(q, 0, lastWrong, null, cform.given)}</div></div>`;
@@ -644,7 +644,7 @@ DS.Student = (function () {
       go.disabled = true; const g = q.type === 'number' ? Number(cform.given[0]) : cform.given[0];
       const r2 = await DS.Act.chainSubmit(code, raw, mid, stage, pass, g); cform = null; drawn = '';
       const okNow = prac ? (r2.pass === pass && r2.pStage > stage) : r2.stage > stage, sc = body.querySelector('.scene');
-      if (okNow) { DS.Sound.slash(); setTimeout(() => DS.Sound.hit(), 160); if (sc && DS.FX) DS.FX.play(sc, myP().fx || 'flame', { perfect: !prac && r2.done && r2.perfect, scale: !prac && r2.done ? 0.6 : 0.3 }); DS.UI.toast(stage === pItems.length - 1 ? (prac ? '✔ 연습 사슬 완성!' : r2.perfect ? '🌟 퍼펙트 사슬!' : '👑 대장 처치!') : `✔ 졸개 ${'①②③④⑤⑥'[stage]} 처치!`); }
+      if (okNow) { DS.Sound.slash(); setTimeout(() => DS.Sound.hit(), 160); if (sc && DS.FX) DS.FX.play(sc, myP().fx || 'flame', { perfect: !prac && r2.done && r2.perfect, scale: !prac && r2.done ? 0.6 : 0.3 }); DS.UI.toast(stage === pItems.length - 1 ? (prac ? '✔ 연습 사슬 완성! 🔥 경험치 +1' : r2.perfect ? '🌟 퍼펙트 사슬!' : '👑 대장 처치!') : `✔ 졸개 ${'①②③④⑤⑥'[stage]} 처치!`); }
       else { DS.Sound.squish(); if (!prac) DS.UI.toast(r2.locked ? '🙋 기회 1칸 — 선생님 확인을 기다려요' : r2.fail ? '기회를 다 썼어요' : `✘ 틀렸어요 · 기회 −${stage === n - 1 ? 1 : 0.5}`); }
       render();
     });

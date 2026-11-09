@@ -35,4 +35,11 @@ sub('b', 3, false); r = X.record(L, R, 'u4', 'b'); check(r.left === 0.5 && r.loc
 (R.chainOk = { u4: { b: true } }); r = X.record(L, R, 'u4', 'b'); check(!r.locked && r.ok, '선생님 풀어주기 → 잠김 풀림');
 sub('b', 3, false); r = X.record(L, R, 'u4', 'b'); check(r.fail && !r.done && r.best === 3, '마지막 칸까지 틀림 = 못 맞힘 · 데미지 3');
 check(X.monsterHp(L, R, 'u4').dmg === 7, '반 체력 피해 = 4 + 3');
+// ④ 🔥 연습 사슬 EXP (2026-11-09 선생님: 사슬 완성 1번당 +1)
+const psub = (u, p, s, good) => { const q = X.chainItems(L, R, 'u4', u, p)[s]; const a = R.chain.u4[u]; a[Object.keys(a).length] = { s, p, g: good ? right(q) : wrongOf(q) }; };
+psub('a', 1, 0, false); [0, 1, 2, 3].forEach((s) => psub('a', 1, s, true)); r = X.record(L, R, 'u4', 'a');
+check(r.pDoneN === 1 && r.left === 4 && r.best === 4 && r.perfect, '연습 1판 완성(중간 오답 있어도) = 1 · 기회 · 기록 그대로');
+[0, 1].forEach((s) => psub('a', 2, s, true)); r = X.record(L, R, 'u4', 'a'); check(r.pDoneN === 1, '연습 2판 반만 = 그대로 1');
+[2, 3].forEach((s) => psub('a', 2, s, true)); r = X.record(L, R, 'u4', 'a'); check(r.pDoneN === 2, '연습 2판 완성 = 2');
+check(DS.Grow && DS.Grow.XP ? DS.Grow.XP.chainPrac === 1 : true, 'EXP 표 chainPrac = 1');
 console.log(fail ? `❌ 소레이드 실패 ${fail}` : `✅ 소레이드: 확인 ${ok}개 · 실패 0`); if (fail) process.exit(1);
