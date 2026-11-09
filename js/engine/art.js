@@ -78,7 +78,7 @@ DS.Art = (function () {
 ${a.fonts.gothic ? `@font-face{font-family:'DS Gothic';src:url('${a.fonts.gothic}') format('woff2');font-display:swap}
 @font-face{font-family:'DS Gothic';font-weight:700;src:url('${a.fonts.gothicBold}') format('woff2');font-display:swap}` : ''}
 ${a.ui && a.ui.panel ? '' : `.framed{border:14px solid transparent;border-image:url('${a.base}${a.frame.src}') ${a.frame.slice} / 14px stretch}`}
-.bg-dungeon{background:#12100d}.bg-dungeon::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(#1a161200 55%,#1a161266),url('${a.base}${a.background.src}') center top/cover no-repeat}
+.bg-dungeon{background:#12100d}.bg-dungeon::before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(#1a161200 55%,#1a161266),url('${a.base}${a.background.src}') center top/cover no-repeat}${a.background.wide ? `@media (min-aspect-ratio: 4/3) and (min-width: 900px){.bg-dungeon::before{background:linear-gradient(#1a161200 60%,#1a161244),url('${a.base}${a.background.wide}') center/cover no-repeat}}` : ''}
 .bg-scene{background-image:linear-gradient(#1a161266,#1a161211 40%,#1a1612dd),url('${a.base}${(a.scene || a.background).src}');background-size:cover;background-position:center 65%}
 ${a.brand ? `.brand-head{background:url('${a.base}${a.brand.header}') center/contain no-repeat;aspect-ratio:960/461}
 ${a.brand.splash ? '' : `.splash{background-image:url('${a.base}${a.brand.title}')}`}

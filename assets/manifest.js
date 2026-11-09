@@ -41,7 +41,7 @@ DS.ASSETS = {
   monsters: { src: 'monsters-v2.webp', cols: 3, rows: 3, poses: { idle: 0, attack: 1, down: 2 }, names: ['수정 슬라임', '바위 골렘', '성채 드래곤'], flip: [1] }, // flip: 오른쪽을 보고 그려진 줄 (용사는 왼쪽에 선다)
   cards: { src: 'cards-v4.webp', cols: 4, rows: 2 }, // 카드 그림 8칸: 0 소속 · 1 개수 · 2 공집합 · 3 포함 · 4 반례 · 5 같음 · 6 부분집합 목록 · 7 개수의 비밀
   frame: { src: 'frame-v2.webp', slice: 140 },
-  background: { src: 'menu-bg-v3b.webp' }, // 2026-11-04 돌 아치 던전 (옛 dungeon.webp) · 2026-11-09 같은 그림 다시 압축 (1.2MB → 0.25MB · v3 → v3b)
+  background: { src: 'menu-bg-v3b.webp', wide: 'menu-bg-wide-v1.webp' }, // 🖥 wide = PC(가로 화면) 전용 가로판 (2026-11-09 선생님 그림 「달빛 아래 고성 테라스」) // 2026-11-04 돌 아치 던전 (옛 dungeon.webp) · 2026-11-09 같은 그림 다시 압축 (1.2MB → 0.25MB · v3 → v3b)
   scene: { src: 'dungeon.webp' }, // 학생 폰 전투 장면: 몬스터 등 뒤 배경 (던전마다 바꿀 수 있게 따로 둠)
   // ── 2026-10-31 사용자 제공 추가 에셋 (아직 화면에 안 씀 — 쓰기 시작할 때 sw.js STATIC 에 넣는다). 자세한 설명: docs/ASSETS.md
   heroesExtra: { src: 'heroes-extra-v1.webp', cols: 4, rows: 8, poses: { idle: 0, walk: 1, attack: 2, fall: 3 }, count: 8,

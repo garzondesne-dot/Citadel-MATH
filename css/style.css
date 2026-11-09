@@ -2969,3 +2969,5 @@ html body .sc-gem, html body .sc-gem .sc-gn, html body .sc-gem b { font-weight: 
 .td-sw { margin: 6px 0; padding: 6px 8px; border-radius: 8px; background: #2a2318; border: 1px solid #ffd25a66; font-size: 14px; line-height: 1.5; } .td-sw.in { border-color: #7dffa8; background: #1d2a20; } .td-sw .btn { margin-left: 6px; } /* 🔁 자리 교환 */
 /* 🖥 PC 첫 화면 배경 (2026-11-09 선생님 「열화가 심해」): 세로 그림(941px)을 넓은 화면에 키울 때 흐리게 섞지 않고 도트 그대로 → 또렷하게 · 폰(줄어듦)은 그대로 */
 @media (min-width: 900px) { .bg-dungeon::before { image-rendering: pixelated; } }
+/* 🖥 PC 첫 화면 = 가로 배경(달빛 아래 고성 테라스) · 메뉴를 넓게 (2026-11-09) — 폰 · 세로 화면은 그대로 */
+@media (min-aspect-ratio: 4/3) and (min-width: 900px) { #screen-home .wrap { max-width: 820px; } }
