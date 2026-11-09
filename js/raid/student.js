@@ -647,6 +647,15 @@ DS.Student = (function () {
   }
   // ⚔ 소레이드 화면 (2026-11-09 #18): 진행 칩 ①②③👑 · 지금 단계 문제 하나 · 「📜 나의 풀이」가 한 줄씩 쌓임 · 기회 반 칸 · 1칸 남으면 🙋 선생님 확인
   let cform = null; const chainPrac = {}, writeMode = {}; let photoLoaded = false; // ✍ writeMode[mid] = { peek } (2026-11-09 #26)
+  // ⚔ 소레이드 공격 모션 (2026-11-09 선생님 「졸개는 공격 모션 없이 판정만」): 답을 내면 화면을 다시 그린 뒤 일반 몬스터처럼 돌진 · 탄 · 빗나감
+  //   모션이 끝날 때까지(약 1초) 실시간 갱신으로 화면을 다시 그리지 않음 (그리면 이펙트가 지워짐)
+  let chainAtk = null, chainAtkUntil = 0;
+  function chainAttack() {
+    const a = chainAtk; chainAtk = null; if (!a || !DS.Attack) return;
+    const body = $('#st-body'), sc = body && body.querySelector('.scene'); if (!sc) return;
+    chainAtkUntil = Date.now() + 1400;
+    DS.Attack.play(sc, { heroBox: sc.querySelector('.enc-hero'), monBox: sc.querySelector('.enc-mon'), hero: myP().hero || 0, fx: myP().fx || 'flame', miss: !a.ok, s: a.big ? 1.2 : 0.85, rest: 'idle', noDmg: a.prac || !a.ok }).catch(() => {}).then(() => { chainAtkUntil = 0; drawn = ''; render(); });
+  }
   function chainView(body, step, rec, hp) {
     const mid = step.id, n = rec.n, prac = rec.done && chainPrac[mid] != null;
     const pass = prac ? chainPrac[mid] : 0, pItems = prac ? Raid().chainItems(L, R, mid, me, pass) : rec.items;
@@ -661,6 +670,7 @@ DS.Student = (function () {
     const wm = writeMode[mid], phN = Number((myP().ph || {})[mid]) || 0, wrOk = (myP().wr || {})[mid], canPhoto = !test && rec.done && DS.Photo && DS.Photo.ready(L.id, mid); // 🐞 2026-11-09: sig 보다 먼저 (예전엔 뒤에 있어 소레이드 화면이 그려지지 않음 · v0.9.34.0~)
     const sig = `${key}|${JSON.stringify(cform.given)}|${rec.locked}|${rec.fail}|${rec.done}|${pDone}|${hp.left}|${dns.join(',')}|${needWhy}|${rec.whyOk}|${hintBy.length}|${myHint}|${wm ? (wm.peek ? 'p' : 'w') : ''}|${phN}|${wrOk || ''}|${!!(DS.Photo && DS.Photo.ready(L.id, mid))}|${myP().charge || 0}`;
     if (sig === drawn && body.querySelector('.ch-wrap')) { hpText(body, hp); return; }
+    if (chainAtkUntil > Date.now() && body.querySelector('.ch-wrap')) { hpText(body, hp); return; } // ⚔ 공격 모션 중엔 다시 그리지 않음 (끝나면 다시 그림)
     drawn = sig;
     const chips = pItems.map((_, i) => `<span class="cr-chip ${i < stage || (!prac && rec.done) ? 'ok' : i === stage ? 'now' : ''}${!prac && dns.includes(i) ? ' down' : ''}">${!prac && dns.includes(i) ? '💀' : ''}${i === pItems.length - 1 ? '👑' : '①②③④⑤⑥'[i]}${i < stage || (!prac && rec.done) ? '✔' : i === stage ? '⚔' : ''}</span>`).join('<i>›</i>');
     const story = (arr) => (arr.length ? `<div class="cr-story"><b>📜 나의 풀이</b><ol>${arr.map((t) => `<li>${pretty(t)}</li>`).join('')}</ol></div>` : '');
@@ -728,10 +738,11 @@ DS.Student = (function () {
     if (go) go.onclick = () => DS.Control.run(async () => {
       go.disabled = true; const g = q.type === 'number' ? Number(cform.given[0]) : cform.given[0];
       const r2 = await DS.Act.chainSubmit(code, raw, mid, stage, pass, g); cform = null; drawn = '';
-      const okNow = prac ? (r2.pass === pass && r2.pStage > stage) : r2.stage > stage, sc = body.querySelector('.scene');
-      if (okNow) { DS.Sound.slash(); setTimeout(() => DS.Sound.hit(), 160); if (sc && DS.FX) DS.FX.play(sc, myP().fx || 'flame', { perfect: !prac && r2.done && r2.perfect, scale: !prac && r2.done ? 0.6 : 0.3 }); DS.UI.toast(stage === pItems.length - 1 ? (prac ? '✔ 연습 사슬 완성! 🔥 경험치 +1' : r2.perfect ? '🌟 퍼펙트 사슬!' : '👑 대장 처치!') : `✔ 졸개 ${'①②③④⑤⑥'[stage]} 처치!`); }
-      else { DS.Sound.squish(); if (!prac) DS.UI.toast(r2.locked ? '🙋 기회 1칸 — 선생님 확인을 기다려요' : r2.fail ? '기회를 다 썼어요' : `✘ 틀렸어요 · 기회 −${stage === n - 1 ? 1 : 0.5}`); }
-      render();
+      const okNow = prac ? (r2.pass === pass && r2.pStage > stage) : r2.stage > stage;
+      chainAtk = { ok: okNow, big: !prac && r2.done, perfect: !prac && r2.done && r2.perfect, prac }; // ⚔ 2026-11-09 선생님 「졸개 공격도 모션」: 다시 그린 뒤 돌진 · 탄 (아래 render 뒤)
+      if (okNow) { if (!DS.Attack) { DS.Sound.slash(); setTimeout(() => DS.Sound.hit(), 160); } DS.UI.toast(stage === pItems.length - 1 ? (prac ? '✔ 연습 사슬 완성! 🔥 경험치 +1' : r2.perfect ? '🌟 퍼펙트 사슬!' : '👑 대장 처치!') : `✔ 졸개 ${'①②③④⑤⑥'[stage]} 처치!`); }
+      else { if (!DS.Attack) DS.Sound.squish(); if (!prac) DS.UI.toast(r2.locked ? '🙋 기회 1칸 — 선생님 확인을 기다려요' : r2.fail ? '기회를 다 썼어요' : `✘ 틀렸어요 · 기회 −${stage === n - 1 ? 1 : 0.5}`); }
+      render(); chainAttack();
     });
   }
   // ref: 첫 시도면 '문제 1 (2)' 처럼 학습지 문항 이름 → 문제 위에 작은 꼬리표 (같은 문제를 학습지에서 바로 찾게)
