@@ -1,7 +1,7 @@
 // ⚔ 소레이드 (2026-11-09 요청 #18): 6차시 문제 4~7 징검다리 · 개별 진행 · 졸개 오답 0.5 · 대장 오답 1 · 남은 1칸 = 잠김 → 풀어주기 · 반 전체 체력
 //   + 단계 정답 독립 검산 (교과서 숫자 · 연습 판 200개)
 const load = require('./load');
-const DS = load(['js/engine/ui.js', 'js/engine/setgen.js', 'js/engine/quiz.js', 'js/engine/lessons.js', 'lessons/set-06.js', 'js/raid/model.js']);
+const DS = load(['js/engine/ui.js', 'js/engine/setgen.js', 'js/engine/quiz.js', 'js/engine/lessons.js', 'lessons/set-06.js', 'lessons/rubrics.js', 'js/raid/model.js']);
 const L = DS.Lessons.get('set-06'), X = DS.Raid; let fail = 0, ok = 0;
 const check = (c, m) => { if (c) ok++; else { fail++; console.log('FAIL:', m); } };
 const right = (q) => (q.type === 'multi' ? q.answer : q.type === 'choice' ? q.answerIndex : q.answer), wrongOf = (q) => (q.type === 'multi' ? [] : q.type === 'choice' ? (q.answerIndex + 1) % q.choices.length : q.answer + 1);
@@ -62,4 +62,10 @@ check(DS.Grow && DS.Grow.XP ? DS.Grow.XP.chainPrac === 1 : true, 'EXP 표 chainP
   Q.state.chainDown = { u4: { 1: true } }; d = X.chainDown(L, Q, 'u4'); check(d[1].down && !d[2].down, '리모컨 쓰러뜨리기 = ② 쓰러짐');
 for (let i = 0; i < 8; i++) add('c', 1, false); d = X.chainDown(L, Q, 'u4'); check(d[0].all === 2, '기회 다 쓴 학생은 머릿수에서 뺌');
   check(X.chainDown(L, Q, 'm1').length === 0, '보통 몬스터 = 졸개 없음'); }
+// ⑦ ✍ → 📸 진필살기 (2026-11-09 #26): 채점 기준 = 소레이드 단계 · 학습지 숫자 · 다음 통과자 금빛 컷인 3명
+{ for (const id of L.chain) { const rb = (DS.Rubrics['set-06'] || {})[id], it = X.chainItems(L, X.newRoom('1', 'set-06', 'T', 1), id, '_', 0);
+    check(rb && rb.steps.length === it.length && rb.pass === rb.total && rb.raid, `${id} 채점 기준 ${rb ? rb.steps.length : 0}칸 = 단계 ${it.length}칸 · 모든 단계 통과`);
+    check(rb && /학습지|[0-9]/.test(rb.ask) && rb.steps[rb.steps.length - 1].key.includes(String(it[it.length - 1].answer).split(',')[0].replace('−', '−')) || id === 'u5', `${id} 마지막 기준 = 대장 답 ${it[it.length - 1].answer}`); }
+  const T = X.newRoom('2', 'set-06', 'T', 1); T.heals = { u4: { a: { 0: '!true@5' }, b: { 0: '!tcut@6' }, c: { 0: '!tcut@7', 1: '_' } } };
+  check(X.tcutN(T, 'u4') === 2 && X.isTcut('!tcut@1') && !X.isTcut('!true@1') && X.petrify(T, 'u4') && X.petrify(T, 'u4').by === 'a', '석화 = 첫 통과자 1번 · 다음은 금빛 컷인만 (셈 2)'); }
 console.log(fail ? `❌ 소레이드 실패 ${fail}` : `✅ 소레이드: 확인 ${ok}개 · 실패 0`); if (fail) process.exit(1);

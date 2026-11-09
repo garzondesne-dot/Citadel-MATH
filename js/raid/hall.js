@@ -68,7 +68,7 @@ DS.Hall = (function () {
   function ulHall() {
     const H = R.heals || {}, first = !ulSeen; if (first) ulSeen = {};
     const push = (it) => { if (!first && ulQ.length < 3) ulQ.push(it); else if (!first && it.kind === 'true') ulQ.unshift(it); };
-    Object.entries(H).forEach(([mid, byU]) => Object.entries(byU || {}).forEach(([u, byK]) => Object.entries(byK || {}).forEach(([k, v]) => { const key = `${mid}|${u}|${k}`; if ((v !== '!ult' && !Raid().isTrue(v)) || ulSeen[key]) return; ulSeen[key] = true; push({ u, kind: Raid().isTrue(v) ? 'true' : 'ult' }); })));
+    Object.entries(H).forEach(([mid, byU]) => Object.entries(byU || {}).forEach(([u, byK]) => Object.entries(byK || {}).forEach(([k, v]) => { const key = `${mid}|${u}|${k}`; if ((v !== '!ult' && !Raid().isTrue(v) && !Raid().isTcut(v)) || ulSeen[key]) return; ulSeen[key] = true; push({ u, kind: Raid().isTrue(v) ? 'true' : Raid().isTcut(v) ? 'tcut' : 'ult' }); })));
     const step = Raid().stepOf(L, R);
     if (step && step.kind === 'monster' && DS.Attack) Raid().activeIds(R).forEach((u) => {
       const p = (R.players || {})[u] || {}, rec = Raid().record(L, R, step.id, u);
@@ -82,8 +82,8 @@ DS.Hall = (function () {
   }
   function ulNext() {
     const it = ulQ.shift(); if (!it || !DS.Attack) { ulBusy = false; return; } ulBusy = true;
-    const p = (R.players || {})[it.u] || {}, gold = it.kind === 'true';
-    DS.Attack.cutin(p.hero || 0, p.fx || 'flame', { gold, ...cutHost() }).then(() => { try { const arena = $('#raid'), m0 = $('#rm'); if (arena && m0) { DS.Attack.ultBlast(arena, m0, p.fx || 'flame'); setTimeout(() => { if (!DS.Thrill) return; if (gold) DS.Thrill.petrify(m0.querySelector('.art.monster') || m0); else if (!it.noBind) DS.Thrill.chain(m0, DS.Combo ? DS.Combo.ULT_BIND : 15, 'ult'); }, 500); } } catch (e) { console.error(e); } }).catch(() => {}).finally(() => setTimeout(ulNext, gold ? 1800 : 1400)); // 중간에 오류가 나도 다음 필살기가 막히지 않게
+    const p = (R.players || {})[it.u] || {}, gold = it.kind === 'true' || it.kind === 'tcut'; // 🌟 tcut = 📸 진필살기 다음 통과자 (금빛 컷인만)
+    DS.Attack.cutin(p.hero || 0, p.fx || 'flame', { gold, ...cutHost() }).then(() => { try { const arena = $('#raid'), m0 = $('#rm'); if (arena && m0) { DS.Attack.ultBlast(arena, m0, p.fx || 'flame'); setTimeout(() => { if (!DS.Thrill) return; if (it.kind === 'true') DS.Thrill.petrify(m0.querySelector('.art.monster') || m0); else if (!it.noBind) DS.Thrill.chain(m0, DS.Combo ? DS.Combo.ULT_BIND : 15, 'ult'); }, 500); } } catch (e) { console.error(e); } }).catch(() => {}).finally(() => setTimeout(ulNext, gold ? 1800 : 1400)); // 중간에 오류가 나도 다음 필살기가 막히지 않게
   }
   // 🗿 석화 남은 초 (교실 TV 위쪽 큰 띠) · 몬스터 회색
   let petriEnd = 0, petriT = null;
@@ -321,7 +321,7 @@ DS.Hall = (function () {
     const out = {};
     Raid().activeIds(R).forEach((u) => {
       if (step.kind === 'boss') { const m = Raid().mastery(L, R, u).filter(Boolean).length; const n = Raid().bossTries(L, R, u).length; out[u] = { n, dmg: m }; }
-      else { const rec = Raid().record(L, R, step.id, u); out[u] = { n: rec.tries.length, dmg: rec.best, label: Raid().resultLabel(rec.last), prac: rec.practice, h: Object.values(Raid().healsOf(R, step.id)[u] || {}).filter((v) => v !== '!ult').length }; /* 2026-11-06 검증: ⚡ 필살기 칸은 「💚 응원」으로 세지 않음 (필살기 컷인만) */ }
+      else { const rec = Raid().record(L, R, step.id, u); out[u] = { n: rec.tries.length, dmg: rec.best, label: Raid().resultLabel(rec.last), prac: rec.practice, h: Object.values(Raid().healsOf(R, step.id)[u] || {}).filter((v) => v !== '!ult' && !Raid().isTcut(v)).length }; /* 2026-11-06 검증: ⚡ 필살기 칸은 「💚 응원」으로 세지 않음 (필살기 컷인만) */ }
     });
     return out;
   }
@@ -466,8 +466,19 @@ DS.Hall = (function () {
     const num = (u) => ((R.players || {})[u] || {}).num;
     box.innerHTML = cols.map((c, i) => `<div class="hc-col${i === n ? ' done' : i === n - 1 ? ' boss' : ''}"><b>${i === n ? '🏁 완료' : i === n - 1 ? '👑 대장' : `졸개 ${'①②③④⑤⑥'[i]}`}</b><div>${c.map(([u, r]) => `<span class="hc-p${r.locked ? ' need' : ''}${r.perfect ? ' pf' : ''}">${r.locked ? '🙋' : r.perfect ? '🌟' : ''}${num(u)}</span>`).join('')}</div></div>`).join('');
   }
+  // 📸 ⚡ 진필살기 충전 중 (2026-11-09 #26): 학생이 찰칵(서술형 사진)을 누르면 금빛 게이지 · 동시 3명 · 나머지 +n명 · 채점이 끝나면 사라짐 (실패 연출 없음)
+  let snapSeen = {};
+  function snapHall() {
+    const arena = $('#raid'); if (!arena || !R) return;
+    const now = DS.Net.now(), on = Object.entries(R.players || {}).filter(([, p]) => p.snap && now - Number(p.snap.at || 0) < 180e3).sort((a, b) => Number(a[1].snap.at) - Number(b[1].snap.at));
+    let box = arena.querySelector('.h-snap'); if (!on.length) { if (box) box.remove(); snapSeen = {}; return; }
+    on.forEach(([u, p]) => { const k = `${u}|${p.snap.at}`; if (!snapSeen[k]) { snapSeen[k] = 1; if (Snd() && Snd().clank) Snd().clank(); } });
+    const key = on.map(([u, p]) => `${u}${p.snap.at}`).join(); if (box && box.dataset.k === key) return;
+    if (!box) { box = document.createElement('div'); box.className = 'h-snap'; arena.appendChild(box); } box.dataset.k = key;
+    box.innerHTML = on.slice(0, 3).map(([, p]) => `<div class="hs-row"><b>⚡ ${esc(p.nick || '')} 진필살기 충전 중…</b><i style="animation-delay:-${((now - Number(p.snap.at)) / 1000).toFixed(1)}s"></i></div>`).join('') + (on.length > 3 ? `<div class="hs-more">+${on.length - 3}명</div>` : '');
+  }
   function hallAtk() {
-    comboHall(); hallSolve(); hallChain();
+    comboHall(); hallSolve(); hallChain(); snapHall();
     const g = document.getElementById('rh-atk'); if (!g || !L || !R) return;
     const c = Raid().atkClock(L, R, DS.Net.now(), window.DS_ATK || null);
     const bar = g.querySelector('i'), txt = g.querySelector('span');

@@ -97,7 +97,7 @@ t('로그인 토큰 · 다른 학생 · 기준표 없음 · 꺼짐 · 모양', (
   assert.strictEqual(world().post({ ...REQ, idToken: 'bad' }).err, 'auth');
   assert.strictEqual(world().post({ ...REQ, idToken: 'other' }).err, 'who');
   assert.strictEqual(world().post({ ...REQ, room: 'q99' }).err, 'rubric');
-  assert.deepStrictEqual(Object.entries(RUB).flatMap(([l, rs]) => Object.entries(rs).filter(([, r]) => r.on).map(([id]) => l + '/' + id)), ['eval-1/q07', 'eval-1/q11'], '시범 = 1층 07 · 11 (결정 5)');
+  assert.deepStrictEqual(Object.entries(RUB).flatMap(([l, rs]) => Object.entries(rs).filter(([, r]) => r.on).map(([id]) => l + '/' + id)), ['set-06/u4', 'set-06/u5', 'set-06/u6', 'set-06/u7', 'eval-1/q07', 'eval-1/q11'], '시범 = 1층 07 · 11 (결정 5) + 7차시 소레이드 4 (2026-11-09 #26 · 📸 진필살기)');
   assert.strictEqual(world({ props: { ENABLED: '0' } }).post(REQ).err, 'off');
   assert.strictEqual(world().post({ ...REQ, image: '' }).err, 'bad');
   const w = world(); w.post({ ...REQ, idToken: 'bad' }); assert.strictEqual(w.calls.claude.length, 0, '확인 전에는 Claude 를 부르지 않음');
@@ -115,12 +115,13 @@ t('Claude 실패 → 장 수 되돌림 · 붐빔은 3번까지 다시', () => {
 });
 t('기준표: 7문항 · 배점 합 = total · pass ≤ total', () => {
   const all = Object.entries(RUB).flatMap(([l, rs]) => Object.entries(rs).map(([id, r]) => [l + '/' + id, r]));
-  assert.deepStrictEqual(all.map((x) => x[0]), ['eval-1/q07', 'eval-1/q11', 'eval-2/q07', 'eval-2/q10', 'eval-3/q15', 'eval-3/q16', 'eval-3/q17']);
+  assert.deepStrictEqual(all.map((x) => x[0]), ['set-06/u4', 'set-06/u5', 'set-06/u6', 'set-06/u7', 'eval-1/q07', 'eval-1/q11', 'eval-2/q07', 'eval-2/q10', 'eval-3/q15', 'eval-3/q16', 'eval-3/q17']);
   all.forEach(([k, r]) => { assert.strictEqual(r.steps.reduce((a, s) => a + s.pts, 0), r.total, k); assert.ok(r.pass <= r.total, k); assert.strictEqual(new Set(r.steps.map((s) => s.id)).size, r.steps.length, k); });
   // 게임의 서술형 방(photo: true)과 같은지
   const reg = []; DS.Lessons = { register: (L) => reg.push(L) };
   ['eval-1', 'eval-2', 'eval-3'].forEach((f) => require(path.join(__dirname, '../lessons', f + '.js')));
   const rooms = reg.flatMap((L) => (L.rooms || []).filter((r) => r.photo).map((r) => L.id + '/' + r.id));
-  assert.deepStrictEqual(rooms, all.map((x) => x[0]));
+  assert.deepStrictEqual(rooms, all.filter((x) => !x[1].raid).map((x) => x[0])); // ⚔ raid = 수업 소레이드 기준표 (성채 방 아님 · 2026-11-09 #26)
+  assert.deepStrictEqual(all.filter((x) => x[1].raid).map((x) => x[0]), ['set-06/u4', 'set-06/u5', 'set-06/u6', 'set-06/u7'], '7차시 소레이드 4개 = 졸개 + 👑 단계');
 });
 console.log(`\n📷 사진 채점 중계소 모의 시험 ${ok}개 통과`);

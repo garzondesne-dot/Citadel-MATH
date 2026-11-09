@@ -197,6 +197,28 @@ DS.Act = (function () {
     if ((((R.players || {})[me] || {}).hint || {})[mid]) fail('이 소레이드에서는 이미 힌트를 줬어요');
     await N().set(P(code, `players/${me}/hint/${mid}`), N().TS);
   }
+  // ✍ → 📸 진필살기 (2026-11-09 #26): 찰칵 = 예고(TV ⚡ 충전 중 게이지) · 통과 = 🌟 진필살기(스킬 상관없이 · 석화는 몬스터당 반 1번 · 다음은 금빛 컷인만 3명) · 몬스터가 이미 쓰러졌으면 ⚡ 충전 1개
+  const snapStart = (code, mid) => N().set(P(code, `players/${N().uid()}/snap`), { mid, at: N().TS });
+  async function snapEnd(code, packed, mid, res, peek) {
+    const R = unpackRoom(packed), me = N().uid(), p = (R.players || {})[me] || {}, n = (Number((p.ph || {})[mid]) || 0) + Math.max(1, ((res && res.scores) || []).length);
+    await N().update(P(code, `players/${me}`), { snap: null, [`ph/${mid}`]: n, ...(res && res.status === 'pass' ? { [`wr/${mid}`]: peek ? 'peek' : 'ok' } : {}) });
+    if (!res || res.status !== 'pass' || peek) return null;
+    return photoTrue(code, R, mid);
+  }
+  async function photoTrue(code, R, mid) {
+    const L = DS.Lessons.get(R.meta.lesson), me = N().uid(), step = L.steps[R.state.step], k = Raid.healsGiven(R, mid, me);
+    if (!step || step.id !== mid || Raid.cleared(L, R, mid)) { const c = Number(((R.players || {})[me] || {}).charge) || 0; await N().set(P(code, `players/${me}/charge`), c + 1); return 'charge'; }
+    if (!Raid.petrify(R, mid)) { await N().set(P(code, `heals/${mid}/${me}/${k}`), `!true@${N().now()}`); return 'true'; }
+    if (Raid.tcutN(R, mid) < 3) { await N().set(P(code, `heals/${mid}/${me}/${k}`), `!tcut@${N().now()}`); return 'cut'; }
+    return 'done';
+  }
+  async function useCharge(code, packed) { // ⚡ 저장해 둔 진필살기 → 지금 몬스터
+    const R = unpackRoom(packed), L = DS.Lessons.get(R.meta.lesson), me = N().uid(), step = L.steps[R.state.step], c = Number(((R.players || {})[me] || {}).charge) || 0;
+    if (!c) fail('⚡ 충전된 진필살기가 없어요'); if (!step || step.kind !== 'monster' || Raid.cleared(L, R, step.id)) fail('지금 싸우는 몬스터가 있을 때 쓸 수 있어요');
+    await N().set(P(code, `players/${me}/charge`), c - 1);
+    const k = Raid.healsGiven(R, step.id, me);
+    await N().set(P(code, `heals/${step.id}/${me}/${k}`), Raid.petrify(R, step.id) ? `!tcut@${N().now()}` : `!true@${N().now()}`);
+  }
   const chainKnock = (code, mid, k) => N().set(P(code, `state/chainDown/${mid}/${k}`), true); // 💥 리모컨 「쓰러뜨리기」 (state 아래 · 규칙 바꿈 없음)
   const chainRelease = (code, mid, uid) => N().set(P(code, `chainOk/${mid}/${uid}`), true);
   const scoutReady = (code, id) => N().set(P(code, `ready/${id}/${N().uid()}`), N().TS); // 🌫 정찰 ✋ 준비 완료 (2026-11-09 #17)
@@ -395,5 +417,5 @@ DS.Act = (function () {
     return out;
   }
 
-  return { giveHint, chainSubmit, chainKnock, chainRelease, scoutReady, setSolve, saveEnd, resumeInfo, switchLesson, setSound, bossTry, openRooms, savePunch, finishOvertime, setPunchOff, punchOff, batTick, batAnswer, hit, endClassAsk, timeUp, extendTime, openRift, cutShort, setRest, setRestMin, markBossWin, prepLite, prepImg, hasImg, setVideoFile, setVideoOn, endClass, admitLate, getPrep, setImage, setVideo, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, heal, bossAnswer, unpackRoom, P };
+  return { snapStart, snapEnd, useCharge, giveHint, chainSubmit, chainKnock, chainRelease, scoutReady, setSolve, saveEnd, resumeInfo, switchLesson, setSound, bossTry, openRooms, savePunch, finishOvertime, setPunchOff, punchOff, batTick, batAnswer, hit, endClassAsk, timeUp, extendTime, openRift, cutShort, setRest, setRestMin, markBossWin, prepLite, prepImg, hasImg, setVideoFile, setVideoOn, endClass, admitLate, getPrep, setImage, setVideo, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, heal, bossAnswer, unpackRoom, P };
 })();

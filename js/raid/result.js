@@ -57,17 +57,18 @@ DS.Result = (function () {
     const words = !!((R.words || {})[uid] || {}).t;
     const oxm = Object.values(R.oxq || {}).map((q) => String(((q || {}).marks || {})[uid] || '')).join(''), ox = oxm ? [(oxm.match(/o/g) || []).length, oxm.length] : null; // ⭕ OX 타임 (v0.9.8.1)
     const order = Object.keys(conc).filter((c) => conc[c].total);
+    const me0 = (R.players || {})[uid] || {}, lad = Object.fromEntries((L.chain || []).map((mid) => { const rc = X.isChain(L, R, mid) ? X.record(L, R, mid, uid) : null; return [mid, !rc ? 0 : (me0.wr || {})[mid] === 'ok' ? 4 : rc.whyOk ? 2 : rc.done ? 1 : 0]; }).filter(([, v]) => v)); // 🪜 서술형 사다리 (👣 1 대장 처치 · 🧩 2 근거 줄 · ✍ 4 서술형 통과 · 2026-11-09 #26)
     const hg = Object.keys((((R.players || {})[uid] || {}).hint) || {}).length; // 💡 힌트 준 횟수 (2026-11-09 #26 · 소레이드마다 1번 · EXP +1)
     const weak = order.map((c) => ({ c, r: conc[c].ok / conc[c].total })).filter((x) => x.r < 0.8).sort((a, b) => a.r - b.r).slice(0, 2).map((x) => x.c);
     const parts = { join: 1, submit: submits, correct: best + mast.filter(Boolean).length, fixed: fixed + bossFixed, bossWin: bossWin ? 1 : 0, perfect: perfect ? 1 : 0, chainPrac, hintGive: hg }; // 마지막 한마디 EXP 는 한마디를 남길 때 따로 (v0.8.1)
     const hp = X.bossHp(L, R), bossShare = hp.max ? Math.min(100, Math.round((100 * mast.filter(Boolean).length) / hp.max)) : 0;
-    return { ox, mis, lesson: L.id, no: L.no || 0, title: L.title, mons, boss: { set1, mast, bossM, tried: bossTried, hp: L.boss.hpItems, won: hp.won, share: bossShare }, conc, titles, weak, parts, perfects, hg, fixed: fixed + bossFixed, fixEx,
+    return { ox, mis, lesson: L.id, no: L.no || 0, title: L.title, mons, boss: { set1, mast, bossM, tried: bossTried, hp: L.boss.hpItems, won: hp.won, share: bossShare }, conc, titles, weak, parts, perfects, hg, lad, fixed: fixed + bossFixed, fixEx,
       words: words ? String(((R.words || {})[uid] || {}).t) : '' };
   }
   // 저장용 요약 (records/{반}/{번호}/{차시})
   const summary = (r, code) => ({ at: (DS.Net || {}).TS || Date.now(), code: String(code || ''), no: r.no,
     conc: Object.fromEntries(Object.entries(r.conc).map(([c, v]) => [c, [v.ok, v.total]])), names: r.titles,
-    miss: r.mons.filter((m) => m.miss).map((m) => m.id), weak: r.weak, ...(Object.keys(r.mis || {}).length ? { mis: r.mis } : {}), ...(r.hg ? { hg: r.hg } : {}), boss: r.boss.mast.slice(0, r.boss.hp).filter(Boolean).length, bossN: r.boss.hp, bossX: r.boss.mast.slice(r.boss.hp).filter(Boolean).length, bossM: r.boss.bossM, mons: Object.fromEntries(r.mons.map((m) => [m.id, m.st])), ...(r.ox ? { ox: r.ox } : {}), won: !!r.boss.won, fixed: r.fixed || 0, perfects: r.perfects || 0, xp: DS.Grow ? DS.Grow.sum(r.parts) : 0, ...(DS.Student && DS.Student.hintCount && DS.Student.hintCount(code) ? { hints: DS.Student.hintCount(code) } : {}) }); // 💡 그림 힌트를 펼친 소문제 수 (v0.9.7.4 · 성적 아님)
+    miss: r.mons.filter((m) => m.miss).map((m) => m.id), weak: r.weak, ...(Object.keys(r.mis || {}).length ? { mis: r.mis } : {}), ...(r.hg ? { hg: r.hg } : {}), ...(r.lad && Object.keys(r.lad).length ? { lad: r.lad } : {}), boss: r.boss.mast.slice(0, r.boss.hp).filter(Boolean).length, bossN: r.boss.hp, bossX: r.boss.mast.slice(r.boss.hp).filter(Boolean).length, bossM: r.boss.bossM, mons: Object.fromEntries(r.mons.map((m) => [m.id, m.st])), ...(r.ox ? { ox: r.ox } : {}), won: !!r.boss.won, fixed: r.fixed || 0, perfects: r.perfects || 0, xp: DS.Grow ? DS.Grow.sum(r.parts) : 0, ...(DS.Student && DS.Student.hintCount && DS.Student.hintCount(code) ? { hints: DS.Student.hintCount(code) } : {}) }); // 💡 그림 힌트를 펼친 소문제 수 (v0.9.7.4 · 성적 아님)
 
   const dots = (ok, total) => Array.from({ length: Math.min(total, 10) }, (_, i) => `<i class="${i < Math.round((ok / total) * Math.min(total, 10)) ? 'on' : ''}"></i>`).join('');
   // 🔎 자주 하는 실수 한 줄 (오개념 기록 · 점수 아님)

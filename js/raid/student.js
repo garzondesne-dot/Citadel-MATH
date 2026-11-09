@@ -557,6 +557,13 @@ DS.Student = (function () {
   const itemText = (q) => (q.type === 'blanks' ? q.items.map((it) => `${it.left} □ ${it.right}`).join('   ') : DS.UI.plain(q.question));
   const solOf = (q) => q.solution || (q.type === 'text' ? `정답: ${q.answers.join(' / ')}` : '');
 
+  // ⚡ 저장해 둔 📸 진필살기 (2026-11-09 #26): 지금 몬스터에 쓰기
+  function chargeBtn(body) {
+    const c = Number(myP().charge) || 0, st = Raid().stepOf(L, R); if (!c || !st || st.kind !== 'monster' || Raid().cleared(L, R, st.id)) return;
+    const dock = body.querySelector('.st-dock') || body.querySelector('.panel'); if (!dock || dock.querySelector('#st-charge')) return;
+    dock.insertAdjacentHTML('beforeend', `<button class="btn st-charge" id="st-charge">⚡ 충전된 진필살기 쓰기 (${c})</button>`);
+    dock.querySelector('#st-charge').onclick = () => DS.Control.run(async () => { await DS.Act.useCharge(code, raw); DS.UI.toast('🌟 진필살기!'); drawn = ''; render(); });
+  }
   // ⚔ #24 (2026-11-09 1-4반 「다 적고 공격을 안 누름」): 칸을 다 채우면 players/{나}/draft = 그 시도 · 리모컨이 「입력 다 함 · 공격 안 누름」으로 봄 (바뀔 때만 씀)
   let draftKey = '';
   function draftMark(k) { if (test || !code || !me || draftKey === (k || '')) return; draftKey = k || ''; DS.Net.set(`rooms/${code}/players/${me}/draft`, k || null).catch(() => {}); }
@@ -582,7 +589,7 @@ DS.Student = (function () {
       <div class="items">${items.map((q, i) => itemHtml(q, i, prevWrong[i], null)).join('')}</div></div>
       ${dock(rec, `<button class="btn primary big dock-go${ready ? ' go-pulse' : ''}" id="st-go"${ready ? '' : ' disabled'}>⚔ 공격!</button>`)}
       ${helpBtn()}</div>`;
-    draftMark(ready && form.touched ? key : null); // ⚔ #24 (숫자 칸은 0 으로 시작하니 한 번이라도 고친 뒤에만): 다 채웠는데 공격을 안 누름 → 리모컨에 표시
+    chargeBtn(body); draftMark(ready && form.touched ? key : null); // ⚔ #24 (숫자 칸은 0 으로 시작하니 한 번이라도 고친 뒤에만): 다 채웠는데 공격을 안 누름 → 리모컨에 표시
     if (keep) { const pp = body.querySelector('.paper'); if (pp) pp.scrollTop = keep.p; body.scrollTop = keep.b; window.scrollTo(0, keep.w); }
     bindTop();
     bindHelp();
@@ -610,7 +617,7 @@ DS.Student = (function () {
     };
   }
   // ⚔ 소레이드 화면 (2026-11-09 #18): 진행 칩 ①②③👑 · 지금 단계 문제 하나 · 「📜 나의 풀이」가 한 줄씩 쌓임 · 기회 반 칸 · 1칸 남으면 🙋 선생님 확인
-  let cform = null; const chainPrac = {};
+  let cform = null; const chainPrac = {}, writeMode = {}; let photoLoaded = false; // ✍ writeMode[mid] = { peek } (2026-11-09 #26)
   function chainView(body, step, rec, hp) {
     const mid = step.id, n = rec.n, prac = rec.done && chainPrac[mid] != null;
     const pass = prac ? chainPrac[mid] : 0, pItems = prac ? Raid().chainItems(L, R, mid, me, pass) : rec.items;
@@ -622,18 +629,43 @@ DS.Student = (function () {
     if (!cform || cform.key !== key) cform = { key, given: [q.type === 'multi' ? [] : q.type === 'number' ? 0 : null] };
     const ready = q.type === 'multi' ? cform.given[0].length > 0 : cform.given[0] != null;
     const dns = Raid().chainDown(L, R, mid).filter((d) => d.down).map((d) => d.k); // 💥 반이 쓰러뜨린 졸개
-    const sig = `${key}|${JSON.stringify(cform.given)}|${rec.locked}|${rec.fail}|${rec.done}|${pDone}|${hp.left}|${dns.join(',')}|${needWhy}|${rec.whyOk}|${hintBy.length}|${myHint}`;
+    const sig = `${key}|${JSON.stringify(cform.given)}|${rec.locked}|${rec.fail}|${rec.done}|${pDone}|${hp.left}|${dns.join(',')}|${needWhy}|${rec.whyOk}|${hintBy.length}|${myHint}|${wm ? (wm.peek ? 'p' : 'w') : ''}|${phN}|${wrOk || ''}|${!!(DS.Photo && DS.Photo.ready(L.id, mid))}|${myP().charge || 0}`;
     if (sig === drawn && body.querySelector('.ch-wrap')) { hpText(body, hp); return; }
     drawn = sig;
     const chips = pItems.map((_, i) => `<span class="cr-chip ${i < stage || (!prac && rec.done) ? 'ok' : i === stage ? 'now' : ''}${!prac && dns.includes(i) ? ' down' : ''}">${!prac && dns.includes(i) ? '💀' : ''}${i === pItems.length - 1 ? '👑' : '①②③④⑤⑥'[i]}${i < stage || (!prac && rec.done) ? '✔' : i === stage ? '⚔' : ''}</span>`).join('<i>›</i>');
     const story = (arr) => (arr.length ? `<div class="cr-story"><b>📜 나의 풀이</b><ol>${arr.map((t) => `<li>${pretty(t)}</li>`).join('')}</ol></div>` : '');
     const lastWrong = !prac && rec.lastWrong && rec.lastWrong.s === stage, cheer = !prac && !rec.done && !rec.fail && dns.includes(stage) ? '<p class="cr-more">💥 친구들은 이 졸개를 넘었어요! 힘내요</p>' : '';
+    if (!photoLoaded && DS.Photo) { photoLoaded = true; DS.Photo.load().then(() => { drawn = ''; render(); }).catch(() => {}); }
+    const wm = writeMode[mid], phN = Number((myP().ph || {})[mid]) || 0, wrOk = (myP().wr || {})[mid], canPhoto = !test && rec.done && DS.Photo && DS.Photo.ready(L.id, mid);
+    const wrBtn = !canPhoto || prac ? '' : wrOk === 'ok' ? '<p class="okc center">🌟 서술형 통과 — 진필살기!</p>' : phN >= DS.Photo.raidMax() ? '<p class="muted small center">📸 이 소레이드 사진은 다 썼어요</p>' : '<button class="btn big cr-write" id="cr-write">✍ 서술형으로 써서 📸 진필살기 도전</button>';
     const hintBtn = wItem && rec.whyOk && !myHint ? '<button class="btn cr-hint" id="cr-hint">💡 힌트 주기 <small>근거 한 줄이 TV 에 떠요 · 한 번 · EXP +1</small></button>' : myHint ? '<p class="muted small center">💡 힌트를 줬어요 — 고마워요!</p>' : '';
     const hintsBox = wItem && hintBy.length && !rec.done ? `<details class="cr-hints"><summary>💡 친구 힌트 ${hintBy.length}개 <small>(누르면 펼침)</small></summary><p>${pretty(wItem.why.text)}</p><p class="muted small">${hintBy.slice(0, 5).map((p) => esc(p.nick || '')).join(' · ')}</p></details>` : '';
     let mainHtml;
+    if (wm && rec.done && !prac) { // ✍ 바로 쓰기: 나의 풀이 · 졸개 단계 · 채점 기준을 숨기고 원래 문제 + 📸 만 (📜 다시 보기 = ✍ 연습 쓰기)
+      const img = scoutImg[mid];
+      if (scoutImg[mid] === undefined) { scoutImg[mid] = null; DS.Net.get(`prep/${L.id}/img/${mid}`).then((u) => { if (u) { scoutImg[mid] = u; drawn = ''; render(); } }).catch(() => {}); }
+      body.innerHTML = `<div class="panel framed st-fight ch-wrap cr-writing">${scene(step, rec, hp, '', '')}<div class="paper"><div class="paper-h"><b>✍ ${esc(step.title)}</b><small>${wm.peek ? '✍ 연습 쓰기 (진필살기 없음)' : '게임 풀이를 보지 말고 처음부터 · 학습지 숫자 그대로'}</small></div>
+        ${img ? `<img class="scout-img" src="${img}" alt="학습지 문제">` : `<p>${esc((((DS.Rubrics || {})[L.id] || {})[mid] || {}).ask || step.title)}</p>`}
+        ${wm.peek ? story(rec.says) : ''}<p class="muted small">종이에 풀이를 처음부터 끝까지 쓰고 📸 찍어요 (이 소레이드 ${Math.max(0, DS.Photo.raidMax() - phN)}장 남음)</p></div>
+        <div class="row cr-wbtns"><button class="btn primary big" id="wr-snap"${phN >= DS.Photo.raidMax() ? ' disabled' : ''}>📸 찍어서 채점</button>${wm.peek ? '' : '<button class="btn" id="wr-peek">📜 풀이 다시 보기</button>'}<button class="btn" id="wr-x">✕ 그만 쓰기</button></div></div>`;
+      bindTop();
+      $('#wr-x').onclick = () => { delete writeMode[mid]; drawn = ''; render(); };
+      const pk = $('#wr-peek'); if (pk) pk.onclick = () => { if (!confirm('📜 풀이를 보면 이번 도전은 「✍ 연습 쓰기」가 돼요 (진필살기 없음). 볼까요?')) return; wm.peek = true; drawn = ''; render(); };
+      $('#wr-snap').onclick = () => DS.Control.run(async () => {
+        const ws = $('#wr-snap'); ws.disabled = true; await DS.Act.snapStart(code, mid); if (DS.Sound && DS.Sound.clank) DS.Sound.clank();
+        const items = [{ question: (((DS.Rubrics || {})[L.id] || {})[mid] || {}).ask || step.title, answer: rec.items[rec.items.length - 1].answer, solution: rec.says.join(' / '), check: Object.assign({}, ...rec.items.map((x) => x.check || {})) }]; // 학습지 숫자 · 단계별 기대 중간값
+        const res = await DS.Photo.grade(acc(), { lesson: L.id, room: mid, title: step.title, items });
+        const out = await DS.Act.snapEnd(code, raw, mid, res, wm.peek);
+        if (res && res.status === 'pass') { delete writeMode[mid]; DS.UI.toast(wm.peek ? '✍ 연습 쓰기 통과! (진필살기 없음)' : out === 'true' ? '🌟 진필살기 발동! 몬스터가 돌로 굳어요' : out === 'cut' ? '🌟 금빛 컷인! (석화는 이미 친구가)' : out === 'charge' ? '⚡ 진필살기 충전 1개 — 다음 몬스터에서 써요' : '🌟 서술형 통과!', 4200); }
+        else if (res && res.steps) { const miss = Object.values(res.steps).map((x, i) => (x && !x.earned ? (i === rec.items.length - 1 ? '👑' : '①②③④⑤⑥'[i]) : null)).filter(Boolean); if (miss.length) DS.UI.toast(`✏ 빠진 단계: ${miss.join(' · ')} — 그 졸개만 다시 고쳐 써요 (충전 유지)`, 4500); }
+        drawn = ''; render();
+      });
+      chargeBtn(body);
+      return;
+    }
     if (needWhy) mainHtml = `${story(says)}<div class="paper cr-why"><div class="paper-h"><b>💡 근거 한 줄</b><small>틀려도 괜찮아요 · 다시 골라요</small></div><p class="why-q">${pretty(wq.why.pre)} <b class="why-bl">____</b>${pretty(wq.why.post)}</p><div class="choices">${wq.why.choices.map((c, i) => `<button class="choice" data-why="${i}">${pretty(c)}</button>`).join('')}</div></div>`;
     else if (rec.fail) mainHtml = `<p class="paper-note">끝까지 못 맞혔어요 — 아래 풀이를 학습지에 옮겨 적고 🎯 복습 허수아비에서 다시 도전해요.</p>${story(rec.items.map((x) => x.say))}`;
-    else if (!prac && rec.done) mainHtml = `<p class="okc big-msg">${rec.perfect ? '🌟 퍼펙트 사슬!' : '🎉 대장 처치!'}</p>${story(says)}<p class="cr-more">✅ 다 풀었어요! 🔥 한 판 더 해 볼래요? 부담 없어요</p><button class="btn big cr-again" id="cr-prac">🔥 한 판 더! (연습)</button>${hintBtn}<p class="muted small cr-pnote">숫자만 바뀐 새 문제 · 틀려도 아무것도 안 줄어요 (기록 · 기회 · 💎 그대로) · 사슬 완성마다 경험치 +1 (데미지 0)</p>`;
+    else if (!prac && rec.done) mainHtml = `<p class="okc big-msg">${rec.perfect ? '🌟 퍼펙트 사슬!' : '🎉 대장 처치!'}</p>${story(says)}<p class="cr-more">✅ 다 풀었어요! 🔥 한 판 더 해 볼래요? 부담 없어요</p>${wrBtn}<button class="btn big cr-again" id="cr-prac">🔥 한 판 더! (연습)</button>${hintBtn}<p class="muted small cr-pnote">숫자만 바뀐 새 문제 · 틀려도 아무것도 안 줄어요 (기록 · 기회 · 💎 그대로) · 사슬 완성마다 경험치 +1 (데미지 0)</p>`;
     else if (pDone) mainHtml = `<p class="okc">✔ 연습 사슬 완성! <b class="gold">+1 EXP</b></p>${story(says)}<button class="btn big cr-again" id="cr-prac">🔥 한 판 더! (연습)</button>${hintBtn}<p class="muted small cr-pnote">숫자만 바뀐 새 문제 · 틀려도 아무것도 안 줄어요 (기록 · 기회 · 💎 그대로) · 맞히면 공격 이펙트가 나가요 (데미지 0)</p>`;
     else if (rec.locked && !prac) mainHtml = `${story(says)}<div class="cr-lock"><b>🙋 선생님 확인을 기다려요</b><p>기회가 1칸 남았어요 — 학습지에 풀이를 정리해 두면 선생님이 와서 확인해 줘요.</p></div>`;
     else mainHtml = `${story(says)}<div class="paper"><div class="paper-h"><b>${esc(step.title)} · ${stage === pItems.length - 1 ? '👑 대장' : `졸개 ${'①②③④⑤⑥'[stage]}`}</b><small>${prac ? '연습 (숫자 바뀜 · 데미지 없음)' : '틀려도 숫자는 그대로'}</small></div>
@@ -655,6 +687,8 @@ DS.Student = (function () {
       if (r2.pWhy < 0) { DS.Sound.correct(); DS.UI.toast('💡 근거 완성!'); } else { DS.Sound.squish(); DS.UI.toast('다시 골라 봐요 — 벌은 없어요'); }
       render();
     })));
+    const wb = $('#cr-write'); if (wb) wb.onclick = () => { writeMode[mid] = { peek: false }; drawn = ''; render(); };
+    chargeBtn(body);
     const hb = $('#cr-hint'); if (hb) hb.onclick = () => DS.Control.run(async () => { hb.disabled = true; await DS.Act.giveHint(code, raw, mid); DS.Sound.clank(); DS.UI.toast('💡 힌트를 TV 에 띄웠어요 · EXP +1'); drawn = ''; render(); });
     const pb = $('#cr-prac'); if (pb) pb.onclick = () => { chainPrac[mid] = Math.max(rec.pass || 0, chainPrac[mid] || 0) + 1; cform = null; drawn = ''; render(); };
     const go = $('#cr-go');

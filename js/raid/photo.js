@@ -20,6 +20,7 @@ DS.Photo = (function () {
   // ready() = 켜짐 · 주소 있음 / ready(차시, 방) = 그 방 기준표도 켜짐 (결정 5: 시범 방만 열림)
   const ROOM0 = 2, COOL0 = 30, DAILY0 = 6, WARN_DAY0 = 150, WARN_MONTH0 = 3000, WON = 1.2; // 학생 하루 장 수 · 경고 기준(학교 전체 하루 · 이번 달) · 1장 ≈ 1.2원 (실측)
   const daily = () => Number((cfg || {}).daily) || DAILY0;
+  const raidMax = () => Number((cfg || {}).raid) || 1; // ⚔ 수업 소레이드 📸 진필살기 · 학생 한 명 · 소레이드 하나 장 수 (2026-11-09 #26 · 기본 1)
   const roomMax = () => Number((cfg || {}).room) || ROOM0; // A: 방 하나 하루 장 수
   const coolSec = () => ((cfg || {}).cool != null && (cfg || {}).cool !== '' ? Number(cfg.cool) : COOL0); // D: 결과 뒤 쉬는 초
   const ready = (lid, rid) => !!(cfg && cfg.on && cfg.url) && (!lid || !!(((rub || {})[lid] || {})[rid] || {}).on);
@@ -73,8 +74,8 @@ DS.Photo = (function () {
       let left = null, roomLeft = null, finished = false, coolUntil = 0; const rk = keyOf(ctx.lesson, ctx.room).replace(/[.#$/[\]]/g, '_');
       // D: 쉬는 시간 — 단추에 남은 초를 보여 주고 0 이 되면 누를 수 있게
       const coolBtn = (b, label) => { if (!b) return; const tick = () => { if (!document.body.contains(b)) return; const w = Math.ceil((coolUntil - Date.now()) / 1000); if (w > 0) { b.disabled = true; b.textContent = `${label} (${w}초 뒤)`; setTimeout(tick, 500); } else { b.disabled = false; b.textContent = label; } }; tick(); };
-      const scores = []; // 이번 창에서 받은 점수들 (📜 「점수가 오르면」 계산용)
-      const close = (v) => { if (finished) return; finished = true; el.remove(); done(v ? Object.assign({ scores }, v) : scores.length ? { status: 'retry', scores } : null); };
+      let lastRes = null; const scores = []; // 이번 창에서 받은 점수들 (📜 「점수가 오르면」 계산용)
+      const close = (v) => { if (finished) return; finished = true; el.remove(); done(v ? Object.assign({ scores, steps: lastRes && lastRes.steps }, v) : scores.length ? { status: 'retry', scores, steps: lastRes && lastRes.steps } : null); };
       const head = (t) => `<div class="set-head"><h2>${t}</h2><button class="btn" data-x>✕ 닫기</button></div>`;
       const bindX = () => el.querySelectorAll('[data-x]').forEach((b) => (b.onclick = () => close(null)));
       const intro = (msg = '') => {
@@ -134,7 +135,7 @@ DS.Photo = (function () {
         result(res);
       };
       const result = (res) => {
-        scores.push(Number(res.score) || 0);
+        lastRes = res; scores.push(Number(res.score) || 0);
         const sc = `<div class="ph-score ${res.status}"><b class="ph-num">0</b> / ${res.total}<span>통과 ${res.pass}점</span></div>`;
         const fb = (res.feedback ? `<p class="ph-fb">💬 ${esc(res.feedback)}</p>` : '') + stepList(res.steps);
         if (res.status === 'pass') {
@@ -198,7 +199,7 @@ DS.Photo = (function () {
         <p class="muted small">설치 · 결정은 docs/PHOTO-PREP.md · API 키는 Apps Script 스크립트 속성에만 (여기 넣지 않아요) · 사진은 저장되지 않아요</p>
         <div class="ph-set"><label>웹 앱 주소 <input id="ph-url" type="url" placeholder="https://script.google.com/macros/s/…/exec" value="${esc(cfg.url || '')}"></label>
           <label class="ph-on"><input type="checkbox" id="ph-on"${cfg.on ? ' checked' : ''}> 학생에게 켜기 (끄면 서술형 방이 다시 잠겨요)</label>
-          <div class="ph-lim"><label>학생 하루 <input id="ph-daily" type="number" min="1" max="20" value="${daily()}"> 장 · 방 하나 하루 <input id="ph-room" type="number" min="1" max="10" value="${roomMax()}"> 장 · 다음 사진까지 <input id="ph-cool" type="number" min="0" max="600" value="${coolSec()}"> 초</label><label>⚠ 경고: 학교 전체 하루 <input id="ph-wd" type="number" min="10" max="1000" value="${Number(cfg.warnDay) || WARN_DAY0}"> 장 · 이번 달 <input id="ph-wm" type="number" min="100" max="50000" value="${Number(cfg.warnMonth) || WARN_MONTH0}"> 장 넘으면</label></div>
+          <div class="ph-lim"><label>학생 하루 <input id="ph-daily" type="number" min="1" max="20" value="${daily()}"> 장 · 방 하나 하루 <input id="ph-room" type="number" min="1" max="10" value="${roomMax()}"> 장 · 다음 사진까지 <input id="ph-cool" type="number" min="0" max="600" value="${coolSec()}"> 초 · 수업 소레이드 📸 <input id="ph-raid" type="number" min="1" max="5" value="${raidMax()}"> 장</label><label>⚠ 경고: 학교 전체 하루 <input id="ph-wd" type="number" min="10" max="1000" value="${Number(cfg.warnDay) || WARN_DAY0}"> 장 · 이번 달 <input id="ph-wm" type="number" min="100" max="50000" value="${Number(cfg.warnMonth) || WARN_MONTH0}"> 장 넘으면</label></div>
           <div class="row"><button class="btn primary" id="ph-save">💾 저장</button><button class="btn" id="ph-ping">🔌 연결 확인</button></div></div>
         ${useHtml(U)}
         <h3>채점 기준표 <small class="muted">올림 ${up} / ${q.length} · 켠 방만 학생에게 열려요 (시범 = 1층 07 · 11)</small></h3>
@@ -210,7 +211,7 @@ DS.Photo = (function () {
         if (url && !/^https:\/\/script\.google(usercontent)?\.com\//.test(url)) { DS.UI.toast('Apps Script 웹 앱 주소(https://script.google.com/…/exec)를 넣어 주세요.'); return; }
         if (on && !url) { DS.UI.toast('주소를 먼저 넣어 주세요.'); return; }
         const num = (id, lo, hi, d) => Math.max(lo, Math.min(hi, Math.round(Number(el.querySelector(id).value) || d)));
-        await N().update('gcfg/photo', { url, on, daily: num('#ph-daily', 1, 20, DAILY0), room: num('#ph-room', 1, 10, ROOM0), cool: Math.max(0, Math.min(600, Math.round(Number(el.querySelector('#ph-cool').value)))), warnDay: num('#ph-wd', 10, 1000, WARN_DAY0), warnMonth: num('#ph-wm', 100, 50000, WARN_MONTH0) }); await load(true); U = await usage().catch(() => U); draw(); DS.UI.toast(on ? '📷 켰어요 — 기준표를 켠 방이 학생에게 열려요' : '💾 저장했어요');
+        await N().update('gcfg/photo', { url, on, daily: num('#ph-daily', 1, 20, DAILY0), room: num('#ph-room', 1, 10, ROOM0), cool: Math.max(0, Math.min(600, Math.round(Number(el.querySelector('#ph-cool').value)))), raid: num('#ph-raid', 1, 5, 1), warnDay: num('#ph-wd', 10, 1000, WARN_DAY0), warnMonth: num('#ph-wm', 100, 50000, WARN_MONTH0) }); await load(true); U = await usage().catch(() => U); draw(); DS.UI.toast(on ? '📷 켰어요 — 기준표를 켠 방이 학생에게 열려요' : '💾 저장했어요');
       });
       el.querySelector('#ph-ping').onclick = () => DS.Control.run(async () => {
         const url = el.querySelector('#ph-url').value.trim(); if (!url) { DS.UI.toast('주소를 먼저 넣어 주세요.'); return; }
@@ -268,5 +269,5 @@ DS.Photo = (function () {
     };
     draw();
   }
-  return { load, ready, pack, grade, pendState, settings, board, pending, all, keyOf, day, usage, useHtml, daily };
+  return { raidMax, load, ready, pack, grade, pendState, settings, board, pending, all, keyOf, day, usage, useHtml, daily };
 })();
