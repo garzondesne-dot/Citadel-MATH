@@ -2925,3 +2925,6 @@ html body .sc-gem, html body .sc-gem .sc-gn, html body .sc-gem b { font-weight: 
 .old-row { margin: 4px 0; padding: 5px 8px; border-radius: 8px; background: #3a2a10; color: #ffd27a; font-size: 14px; }
 .draft-row { margin: 4px 0; padding: 6px 8px; border-radius: 8px; background: #3a1a1a; color: #ffb3a0; font-size: 15px; box-shadow: 0 0 0 1px #ff7a5a; }
 .dock-go.go-pulse:not([disabled]) { animation: goPulse 1.1s ease-in-out infinite; } @keyframes goPulse { 50% { transform: scale(1.04); box-shadow: 0 0 0 4px #ffe08a, 0 0 22px #ffcf4a; } } /* ⚔ #24 다 채우면 반짝 */
+/* 📄 2026-11-09 선생님 「개념 · 문제 설명 때 학습지가 아래 조작 막대(h-dock)와 겹침」: 학습지 칸 아래에 막대 높이만큼 비워 위로 올림 */
+#screen-hall:not(.tv-embed) .h-arena > .h-concept, #screen-hall:not(.tv-embed) .h-sheet-ov { padding-bottom: 104px !important; }
+#screen-hall:not(.tv-embed) .h-concept.wfull, #screen-hall:not(.tv-embed) .h-sheet-ov.wfull { padding-bottom: 100px !important; }
