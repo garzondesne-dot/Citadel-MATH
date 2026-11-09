@@ -22,6 +22,7 @@ DS.Aura = (function () {
 .au-w{left:calc(50% - var(--p)*48);bottom:calc(var(--p)*16);width:calc(var(--p)*96);height:calc(var(--p)*48);background:${u(a.wings)} 0 0/400% 100% no-repeat;animation:auF 1.28s steps(4) infinite;filter:drop-shadow(0 0 calc(var(--p)*1.5) #fff3c0aa);z-index:0}
 .au-o{left:50%;bottom:calc(var(--p)*20);width:0;height:0;animation:auO var(--d) linear infinite;z-index:3}
 .au-o>.au-s{left:calc(var(--p)*-6);top:calc(var(--p)*-6);width:calc(var(--p)*12);height:calc(var(--p)*12);background:${u(a.orbs)} 0 var(--ay)/400% 1000% no-repeat;animation:auF .6s steps(4) infinite;filter:drop-shadow(0 0 2px var(--au))}
+.au-h{left:calc(50% - var(--p)*35);bottom:calc(var(--p)*17);width:calc(var(--p)*56);height:calc(var(--p)*56);background:${u(a.halo)} 0 0/400% 100% no-repeat;animation:auF 1s steps(4) infinite;z-index:0}
 .art.hv2.au>b{z-index:1}
 @keyframes auF{to{background-position-x:133.333%}}
 @keyframes auO{${st.join('')}}
@@ -33,10 +34,10 @@ DS.Aura = (function () {
     const box = art.closest('.aura'); const lv = box ? lvOf(box) : 0; if (!lv) return;
     const w = art.getBoundingClientRect().width; if (w && w < 40) return; // 아주 작은 용사(목록 줄)는 예전 빛
     style(); art.dataset.au = lv; art.classList.add('au'); box.classList.add('au-on');
-    const i = lv - 1, ay = `${((i / 9) * 100).toFixed(3)}%`, col = A().colors[i] || '#fff', b = art.querySelector(':scope > b');
+    const i = lv >= 10 ? 6 : lv - 1, ay = `${((i / 9) * 100).toFixed(3)}%`, col = A().colors[lv - 1] || '#fff', b = art.querySelector(':scope > b');
     art.style.setProperty('--ay', ay); art.style.setProperty('--au', col);
     const delay = b ? (b.style.animationDelay || getComputedStyle(b).animationDelay || '0s') : '0s'; // ⭐ 날갯짓 = 용사 숨쉬기와 같은 박자 · 같은 시작
-    const back = `<span class="au-s au-g"></span><span class="au-s au-r"></span>`;
+    const back = `<span class="au-s au-g"></span><span class="au-s au-r"></span>${lv >= 10 && A().halo ? '<span class="au-s au-h"></span>' : ''}`; // ✨ 10단계 = 머리 뒤 홀리 후광 (2026-11-09 선생님 그림)
     const n = nOrb(lv, !!art.closest('#screen-hall')), dur = (3.4 - lv * 0.1).toFixed(2);
     const front = `<span class="au-s au-r f"></span>${Array.from({ length: n }, (_, j) => `<span class="au-s au-o" style="--d:${dur}s;animation-delay:${(-dur * j / n).toFixed(2)}s"><span class="au-s"></span></span>`).join('')}`;
     art.insertAdjacentHTML('afterbegin', back); art.insertAdjacentHTML('beforeend', front);

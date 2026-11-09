@@ -61,7 +61,7 @@ DS.Gem = (function () {
   const ENH_MAX = 10, GREAT = 0.1;
   // ✨ 강화 오라 1~10 (2026-11-08 사용자 「은은한 오라 · 1단계부터 10단계까지 색깔」): 강화 단계 = 오라 단계 (CSS .aura-1 ~ .aura-10)
   const auraCls = (lv) => { const n = Math.max(0, Math.min(10, Math.floor(Number(lv) || 0))); return n ? ` aura aura-${n}` : ''; };
-  const AURA_NAMES = ['', '은은한 흰빛', '새싹 초록', '맑은 하늘', '깊은 바다', '보랏빛 신비', '벚꽃 분홍', '황금 태양', '진홍 불꽃', '별빛 은하', '무지개 전설'];
+  const AURA_NAMES = ['', '은은한 흰빛', '새싹 초록', '맑은 하늘', '깊은 바다', '보랏빛 신비', '벚꽃 분홍', '황금 태양', '진홍 불꽃', '별빛 은하', '성스러운 후광'];
   const enhTier = (lv) => (lv >= 10 ? 4 : lv >= 7 ? 3 : lv >= 5 ? 2 : lv >= 3 ? 1 : 0); // 보이는 빛: 은빛(+3) · 금빛(+5) · 오라(+7) · 무지개(+10)
   async function mine(m) { return (m && m.c != null && m.n && !m.test ? await N().get(path(m)).catch(() => null) : null) || {}; }
   // 받기: n 개 · key 한 번만 (opt.upsert = 같은 key 는 늘어난 만큼만) · opt.free = 하루 한도 밖 → 실제로 받은 수

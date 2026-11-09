@@ -2705,14 +2705,13 @@ body:has(#test-bar) #screen-student.st-battle .wrap { padding-bottom: calc(86px 
 .aura-7 { --a1: #ffc23a; --a2: #fff3c0; --ar: 6px; }   /* 황금 태양 */
 .aura-8 { --a1: #ff4a3a; --a2: #ffd0b0; --ar: 7px; }   /* 진홍 불꽃 */
 .aura-9 { --a1: #8a6bff; --a2: #5ae8ff; --ar: 7px; }   /* 별빛 은하 (두 빛) */
-.aura-10 { --a1: #ff4d5e; --a2: #fff; --ar: 8px; }     /* 무지개 전설 */
+.aura-10 { --a1: #ffd86a; --a2: #fffbe6; --ar: 8px; }  /* 성스러운 후광 (2026-11-09 무지개 → 홀리) */
 .aura .art.hv2 > b, .aura .art.hero:not(.hv2) { filter: drop-shadow(0 0 var(--ar) var(--a1)) drop-shadow(0 0 1px var(--a2)); }
 .aura-9 .art.hv2 > b, .aura-9 .art.hero:not(.hv2) { filter: drop-shadow(0 0 var(--ar) var(--a1)) drop-shadow(0 0 3px var(--a2)); }
-.aura-10 .art.hv2 > b, .aura-10 .art.hero:not(.hv2) { filter: none; }
-.aura-10 .art.hero { animation: enh-rainbow 3s linear infinite; }
+.aura-10 .art.hv2 > b, .aura-10 .art.hero:not(.hv2) { filter: drop-shadow(0 0 var(--ar) var(--a1)) drop-shadow(0 0 2px var(--a2)); }
 .aura::after { content: ''; position: absolute; left: 50%; bottom: 0; width: 76%; height: 16%; min-height: 8px; transform: translateX(-50%); border-radius: 50%; pointer-events: none; z-index: -1;
   background: radial-gradient(ellipse, color-mix(in srgb, var(--a1) 70%, transparent), transparent 70%); animation: auraPool 3.2s ease-in-out infinite; }
-.aura-10::after { background: radial-gradient(ellipse, rgba(255, 255, 255, .7), transparent 70%); animation: auraPool 3.2s ease-in-out infinite, auraHue 3s linear infinite; }
+.aura-10::after { background: radial-gradient(ellipse, rgba(255, 240, 190, .75), transparent 70%); }
 @keyframes auraPool { 0%, 100% { opacity: .45; transform: translateX(-50%) scale(.9); } 50% { opacity: .9; transform: translateX(-50%) scale(1.08); } }
 @keyframes auraHue { to { filter: hue-rotate(360deg); } }
 .enh-stage.aura::after { bottom: 6px; }

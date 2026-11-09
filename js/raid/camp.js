@@ -481,7 +481,7 @@ DS.Camp = (function () {
     const enhTab = () => { const lv = L.enh || 0, nx = DS.Gem.ENH[lv + 1], t = DS.Gem.enhTier(lv), nt = DS.Gem.enhTier(lv + 1), LOOK = DS.Gem.AURA_NAMES || []; // ✨ 2026-11-08: 단계마다 오라 색
       return `<div class="enh-box"><div class="enh-stage${DS.Gem.auraCls(lv)}" id="enh-stage">${DS.Art.hero(hero, 'idle', 'huff')}<b class="enh-lv">+${lv}</b></div>
         ${nx ? `<p>다음 <b>+${lv + 1}</b> · 💎 <b>${nx.g}</b>${nx.s ? ` + 📜 <b>${nx.s}</b>` : ''}${LOOK[lv + 1] ? ` → ✨ <b>${LOOK[lv + 1]}</b> 오라` : ''}</p><button class="btn primary big" id="enh-go">🔨 쾅! 강화</button>` : '<p class="gold">🌈 최고 단계 +10 — 전설의 무기!</p>'}
-        <p class="muted small">실패 없음 · 🌟 대성공(10%)이면 낸 💎 의 절반을 돌려받아요 · 단계마다 용사 둘레에 은은한 오라 (+1 흰빛 → +10 무지개 · +7 부터 📜 필요) · 지금 ✨ <b>${LOOK[lv] || '없음'}</b></p>
+        <p class="muted small">실패 없음 · 🌟 대성공(10%)이면 낸 💎 의 절반을 돌려받아요 · 단계마다 용사 둘레에 은은한 오라 (+1 흰빛 → +10 성스러운 후광 · +7 부터 📜 필요) · 지금 ✨ <b>${LOOK[lv] || '없음'}</b></p>
         <div class="enh-table">${DS.Gem.ENH.slice(1).map((c, i) => `<span class="${i + 1 <= lv ? 'done' : ''}">+${i + 1}<small>💎${c.g}${c.s ? ` 📜${c.s}` : ''}</small></span>`).join('')}</div></div>`; };
     const recTab = () => { if (T || !ST) return ttlTab(); const U = DS.Unit ? DS.Unit.CARDS.length : 0, ho = L.heroes.filter((h) => h.open).length, md = Object.values(L.medal || {}).reduce((a, b) => a + (Number(b) || 0), 0);
       return `<p class="me-sec">🏆 업적</p><div class="me-ach"><span>🏆 업적<b>${ST.seals} / ${DS.Bonus ? DS.Bonus.UNLOCK[DS.Bonus.UNLOCK.length - 1] : 10}</b></span><span>📚 도감<b>${Object.keys(ST.cards).length} / ${U}</b></span><span>🧑 용사<b>${ho} / ${L.heroes.length}</b></span><span>🎖 메달<b>${md}</b></span></div>

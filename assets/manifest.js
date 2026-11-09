@@ -86,7 +86,7 @@ DS.ASSETS = {
   //   icons = 아이콘 18칸 시트(6×3) · combo = 콤보 창 4칸 · track = 경주 트랙 배경 (null = CSS)
   // ✨ 강화 오라 그림 (2026-11-09 선생님 「B 날개로 오라랑 같이 진행」 · GPT 생성 → tools/sprite/aura_pack.py · 용사와 같은 도트 굵기)
   //   ring = 칸 80×80 · 4칸 × 10줄(단계) · 고리 바닥 y 78 / orbs = 칸 12 · 4칸 × 10줄 / wings = 칸 96×48 · 4칸 (⭐ +10 각성 · 한 쌍 · 외곽선)
-  aura: { ring: 'aura-ring-v2.webp', orbs: 'aura-orbs-v2.webp', wings: 'aura-wings-v1.webp', guardWings: 'aura-guardwings-v1.webp', guardShield: 'aura-guardshield-v1.webp', colors: ['#fff7d6', '#7be06a', '#5ec8ff', '#2fe0d0', '#b48cff', '#ff9cc4', '#ffd25a', '#ff5a3c', '#8f9cff', '#ff8af0'] },
+  aura: { ring: 'aura-ring-v2.webp', orbs: 'aura-orbs-v2.webp', wings: 'aura-wings-v1.webp', guardWings: 'aura-guardwings-v1.webp', guardShield: 'aura-guardshield-v1.webp', halo: 'aura-halo-v1.webp', colors: ['#fff7d6', '#7be06a', '#5ec8ff', '#2fe0d0', '#b48cff', '#ff9cc4', '#ffd25a', '#ff5a3c', '#8f9cff', '#ffe9a0'] },
   status: { src: 'status-v1.webp', cols: 6, rows: 8, dur: 0.6, kinds: ['stun', 'freeze', 'bind', 'burn', 'poison', 'shock', 'confuse', 'sleep'], names: ['기절', '빙결', '속박', '화상', '독', '감전', '혼란', '수면'] }, // 💫 상태이상 (2026-11-08 · tools/pfx/status_bake.py · 칸 80×80 = 용사 칸 + 머리 위 16px · DS.Status)
   thrill: { bat: { src: 'thrill-bat-v1.webp', frames: 4 }, chest: { src: 'thrill-chest-v1.webp', frames: 3 }, feather: { src: 'thrill-feather-v1.webp', frames: 1 }, track: { src: 'thrill-track-v1.webp', box: { name: [0.027, 0.183], start: 0.222, goal: 0.952, top: 0.19, bottom: 0.83 } }, combo: { src: 'thrill-combo-v1.webp', frames: 4 }, icons: 'ui.icons 40~57 (ui-icons-v4)' }, // 2026-11-05 사용자 그림 도착: 콤보 창 4단계 · 경주 트랙(종합상황실 큰 화면) · 아이콘 18 은 UI 아이콘 시트에 붙임,
   trophy: 'trophy-v1.webp', // 클리어 · 수업 끝 트로피 (사용자 제공, 투명 배경)
