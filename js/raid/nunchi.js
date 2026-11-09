@@ -63,7 +63,7 @@ DS.Nunchi = (() => {
       try {
         const f = await N().get(P(code, 'fun')).catch(() => null), me = N().uid(), now = N().now();
         if (!f || f.kind !== 'nun') { clearInterval(timer); timer = null; return; }
-        if (f.phase === 'end') return;
+        if (f.phase === 'end') { if (now - (f.endAt || now) > (T().endHold || 15000) && (!f.drv || f.drv.u === me || now - (f.drv.at || 0) > 3000) && DS.Fun) await DS.Fun.stop(code); return; } // 2026-11-09: 끝 화면 15초 뒤 저절로 닫힘
         if (f.drv && f.drv.u !== me && now - (f.drv.at || 0) < 3000) return;
         const presses = f.phase === 'play' ? (await N().get(P(code, `nun/${f.g}/${f.round}`)).catch(() => null)) || {} : {};
         const nx = step(f, presses, now);
@@ -132,8 +132,8 @@ DS.Nunchi = (() => {
   // 카운트다운 · 「긴장감」 · 말풍선 꺼짐은 시간으로 바뀜 → 0.4초마다 마지막 화면을 다시 그림 (바뀐 게 없으면 sig 로 건너뜀)
   let lastH = null, lastP = null;
   setInterval(() => {
-    if (lastH && lastH[0].isConnected && (lastH[1].fun || {}).kind === 'nun') hall(...lastH, true);
-    if (lastP && lastP[0].isConnected && (lastP[1].fun || {}).kind === 'nun') phone(...lastP, true);
+    if (lastH && lastH[0].isConnected && lastH[0].querySelector('.nn-wrap')) hall(...lastH, true); else lastH = null; // 2026-11-09: 놀이가 끝나 다른 화면이 되면 다시 그리지 않음
+    if (lastP && lastP[0].isConnected && lastP[0].querySelector('.nn-phone')) phone(...lastP, true); else lastP = null;
   }, 400);
   const hall0 = hall, phone0 = phone;
   hall = (el, R, tick) => { if (!tick) lastH = [el, R]; return hall0(el, R); };
