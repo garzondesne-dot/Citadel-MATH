@@ -194,6 +194,19 @@
               ".validate": "newData.isNumber() && newData.val() <= now"
             }
           }
+        },
+        "chain": {
+          "$mid": {
+            "$uid": {
+              "$k": {
+                ".write": "auth != null && auth.uid === $uid && !data.exists() && root.child('rooms/'+$code+'/active/'+$uid).val() === true && $k.matches(/^([0-9]|[1-9][0-9])$/)",
+                ".validate": "newData.hasChildren(['s', 'p']) && newData.child('s').isNumber() && newData.child('p').isNumber() && newData.child('at').val() === now"
+              }
+            }
+          }
+        },
+        "chainOk": {
+          ".write": "auth != null && (root.child('rooms/'+$code+'/meta/teacher').val() === auth.uid || (root.child('rooms/'+$code+'/hosts/'+auth.uid).isString() && root.child('rooms/'+$code+'/hosts/'+auth.uid).val() === root.child('secrets/'+$code+'/hallKey').val()))"
         }
       }
     },

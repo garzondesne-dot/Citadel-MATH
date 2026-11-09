@@ -415,8 +415,22 @@ DS.Hall = (function () {
       if (mon && mon.classList.contains('scout-sil')) { mon.classList.remove('scout-sil'); mon.classList.remove('appear'); void mon.offsetWidth; mon.classList.add('appear'); if (Snd() && Snd().hit) Snd().hit(); }
     }
   }
+  // ⚔ 소레이드 진행판 (2026-11-09 #18): ①②③👑 칸마다 그 단계 학생 번호 · 🙋 = 선생님 확인 필요 · 맨 위 체력바는 반 전체 그대로
+  let crKey = '';
+  function hallChain() {
+    const arena = $('#raid'); if (!arena || !L || !R) return;
+    const st = Raid().stepOf(L, R), on = !!(st && st.kind === 'monster' && Raid().isChain && Raid().isChain(L, R, st.id));
+    let box = arena.querySelector('.h-chain'); if (!on) { if (box) box.remove(); crKey = ''; return; }
+    const ids = Raid().activeIds(R).filter((u) => u !== (R.meta || {}).teacher), recs = ids.map((u) => [u, Raid().record(L, R, st.id, u)]), n = recs[0] ? recs[0][1].n : 0;
+    const cols = Array.from({ length: n + 1 }, (_, i) => recs.filter(([, r]) => (i === n ? r.done : !r.done && r.stage === i)));
+    const key = JSON.stringify(cols.map((c) => c.map(([u, r]) => u + (r.locked ? '!' : r.perfect ? '*' : ''))));
+    if (key === crKey && box) return; crKey = key;
+    if (!box) { box = document.createElement('div'); box.className = 'h-chain'; arena.appendChild(box); }
+    const num = (u) => ((R.players || {})[u] || {}).num;
+    box.innerHTML = cols.map((c, i) => `<div class="hc-col${i === n ? ' done' : i === n - 1 ? ' boss' : ''}"><b>${i === n ? '🏁 완료' : i === n - 1 ? '👑 대장' : `졸개 ${'①②③④⑤⑥'[i]}`}</b><div>${c.map(([u, r]) => `<span class="hc-p${r.locked ? ' need' : ''}${r.perfect ? ' pf' : ''}">${r.locked ? '🙋' : r.perfect ? '🌟' : ''}${num(u)}</span>`).join('')}</div></div>`).join('');
+  }
   function hallAtk() {
-    comboHall(); hallSolve();
+    comboHall(); hallSolve(); hallChain();
     const g = document.getElementById('rh-atk'); if (!g || !L || !R) return;
     const c = Raid().atkClock(L, R, DS.Net.now(), window.DS_ATK || null);
     const bar = g.querySelector('i'), txt = g.querySelector('span');

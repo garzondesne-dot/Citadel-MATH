@@ -2856,3 +2856,19 @@ html body .sc-gem, html body .sc-gem .sc-gn, html body .sc-gem b { font-weight: 
 .h-scout { display: flex; flex-direction: column; align-items: center; gap: 6px; max-width: 46%; }
 .h-scout .scout-img { max-width: 100%; max-height: 40vh; object-fit: contain; background: #fff; border-radius: 8px; box-shadow: 0 6px 24px #000a; }
 .h-scout p { margin: 0; }
+/* ⚔ 소레이드 (2026-11-09 #18) */
+.cr-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; justify-content: center; margin: 8px 0; }
+.cr-chips i { color: var(--muted, #ad9f8a); font-style: normal; }
+.cr-chip { padding: 2px 10px; border-radius: 12px; background: #0004; box-shadow: inset 0 0 0 1px #b08d5788; font-size: 14px; }
+.cr-chip.ok { background: #62d39433; color: #a8f0c4; } .cr-chip.now { background: #ebb84f; color: #2a1d0a; font-weight: 700; }
+.cr-story { background: #fbf3df; color: #1b130a; border-radius: 8px; padding: 8px 12px; margin: 6px 0; box-shadow: inset 0 0 0 1px #8a6a3a66; }
+.cr-story b { font-size: 13px; color: #6b4a1e; } .cr-story ol { margin: 4px 0 0; padding-left: 1.3em; display: grid; gap: 2px; font-size: 14px; line-height: 1.5; }
+.cr-lock { background: #e5534b22; border: 1px solid #e5534b88; border-radius: 8px; padding: 10px; text-align: center; margin: 6px 0; }
+.ch.half { -webkit-mask: linear-gradient(90deg, #000 50%, #0005 50%); mask: linear-gradient(90deg, #000 50%, #0005 50%); }
+.cr-ctl { display: grid; gap: 4px; padding: 6px 8px; border: 1px solid #b08d5766; border-radius: 8px; margin: 6px 0; }
+.cr-ctl p { margin: 0; } .cr-need { color: #ffb4ae; } .cr-lockrow { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+.h-chain { position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%); display: flex; gap: 6px; z-index: 6; max-width: 96%; }
+.hc-col { min-width: 84px; background: #14110fcc; border: 1px solid #b08d5788; border-radius: 8px; padding: 4px 6px; text-align: center; }
+.hc-col b { display: block; font-size: clamp(11px, 1vw, 15px); color: #ebb84f; } .hc-col.boss b { color: #ff8f86; } .hc-col.done b { color: #62d394; }
+.hc-col div { display: flex; flex-wrap: wrap; gap: 3px; justify-content: center; margin-top: 3px; }
+.hc-p { font-size: clamp(10px, .9vw, 14px); padding: 0 5px; border-radius: 8px; background: #ffffff1a; color: #f3ecdc; } .hc-p.need { background: #e5534b; color: #fff; animation: nnBlink 1s steps(2) infinite; } .hc-p.pf { background: #ebb84f55; }

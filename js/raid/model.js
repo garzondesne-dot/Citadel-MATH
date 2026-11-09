@@ -105,7 +105,41 @@ DS.Raid = (function () {
   // 학생의 기록: 시도별 결과 · 가장 많이 맞힌 수(=데미지) · 남은 재도전
   // v0.9.2 연습 공격: 다 맞힌 뒤에도 남은 기회만큼 숫자 바뀐 문제를 풀 수 있다 (데미지는 가장 많이 맞힌 수라 늘지 않음 = 0)
   //   perfectAt = 처음 다 맞힌 시도 번호(-1 = 아직) · practice = 마지막 시도가 다 맞힌 뒤의 연습인지
+  // ⚔ 소레이드 (2026-11-09 #18 · 방 version 3 · 차시 L.chain 에 든 문제): 학생마다 졸개 ① → … → 👑 대장을 자기 속도로
+  //   저장 chain/{mid}/{uid}/{k} = { s: 단계, p: 판(0 = 진짜 · 1~ = 숫자 바뀐 연습), g: 답(pack) } · 틀려도 같은 숫자
+  //   기회 4칸: 졸개 오답 0.5 · 대장 오답 1 · 남은 기회 ≤ 1 이면 잠김 → 선생님 chainOk/{mid}/{uid} = true (✔ 풀어주기) 뒤 마지막 칸 · 0 이하 = 못 맞힘
+  //   데미지(반 전체 체력) = 맞힌 단계 수 (졸개 · 대장 모두 1) · 퍼펙트 = 한 번도 안 틀리고 대장까지
+  const isChain = (L, R, mid) => NEWR(R) && !!L && Array.isArray(L.chain) && L.chain.includes(mid) && typeof L.chainItems === 'function';
+  const chainItems = (L, R, mid, uid, pass) => L.chainItems(mid, seedOf(R, uid), pass || 0);
+  const chainSubs = (R, mid, uid) => { const a = (((R.chain || {})[mid]) || {})[uid] || {}; return keys(a).map(Number).sort((x, y) => x - y).map((k) => ({ k, ...(a[k] || {}) })); };
+  function chainRecord(L, R, mid, uid) {
+    const items = chainItems(L, R, mid, uid, 0), n = items.length, subs = chainSubs(R, mid, uid);
+    const ok = !!((((R.chainOk || {})[mid]) || {})[uid]);
+    let stage = 0, cost = 0, wrong = 0, lastWrong = null; const says = [];
+    let pass = 0, pStage = 0, pItems = null, pSays = [];
+    subs.forEach((t) => {
+      const raw0 = t.g, it0 = !t.p ? items[stage] : null; // 저장소는 빈 배열을 지움 · 배열을 객체로 줄 수도 → 고르기 답은 늘 배열로
+      const fixG = (q, g) => (q && q.type === 'multi' ? (Array.isArray(g) ? g : g && typeof g === 'object' ? Object.values(g) : []) : g);
+      const given = fixG(it0, raw0);
+      if (!t.p) {
+        if (stage >= n || cost >= CHAIN_SLOTS || t.s !== stage) return;
+        if (DS.Quiz.grade(items[stage], given)) { says.push(items[stage].say || ''); stage += 1; lastWrong = null; }
+        else { cost += stage === n - 1 ? 1 : 0.5; wrong += 1; lastWrong = { s: stage, given }; }
+      } else {
+        if (t.p !== pass) { pass = t.p; pStage = 0; pSays = []; pItems = chainItems(L, R, mid, uid, pass); }
+        if (t.s !== pStage || pStage >= pItems.length) return;
+        if (DS.Quiz.grade(pItems[pStage], fixG(pItems[pStage], raw0))) { pSays.push(pItems[pStage].say || ''); pStage += 1; }
+      }
+    });
+    const left = Math.max(0, CHAIN_SLOTS - cost), done = stage >= n, fail = !done && left <= 0;
+    const locked = !done && !fail && left <= 1 && !ok;
+    return { chain: true, items, n, stage, cost, left, slots: CHAIN_SLOTS, wrong, lastWrong, says, done, fail, locked, ok, perfect: done && wrong === 0, perfectAt: done && wrong === 0 ? 0 : -1,
+      best: stage, total: n, submitted: subs.length > 0, tries: [], last: null, allRight: done, practice: pass > 0, pass, pStage, pSays, pItems,
+      healed: 0, canRetry: false, canHeal: false, nextAttempt: subs.length, nextK: subs.length ? subs[subs.length - 1].k + 1 : 0 };
+  }
+  const CHAIN_SLOTS = 4;
   function record(L, R, mid, uid) {
+    if (isChain(L, R, mid)) return chainRecord(L, R, mid, uid);
     const tries = attemptsOf(R, mid, uid).map((t) => ({ ...t, ...gradeAttempt(L, R, mid, uid, t.attempt, t.given) }));
     const best = tries.reduce((m, t) => Math.max(m, t.correct), 0);
     const total = L.monsters[mid] ? itemsFor(L, R, mid, uid, 0).length : 0;
@@ -133,7 +167,7 @@ DS.Raid = (function () {
   const pctOf = (L, R, mid) => { const p = ((R.state || {}).pct || {})[mid]; return p != null ? p : ((R.meta || {}).pct || L.defaultPct || 90); };
   const skipped = (R, mid) => ((R.state || {}).skip || {})[mid] || {};
   function monsterHp(L, R, mid) {
-    const n = L.monsters[mid] ? itemsFor(L, R, mid, '_', 0).length : 0;
+    const n = isChain(L, R, mid) ? chainItems(L, R, mid, '_', 0).length : L.monsters[mid] ? itemsFor(L, R, mid, '_', 0).length : 0; // ⚔ 소레이드 = 인원 × 단계 수 × 기준%
     const pct = pctOf(L, R, mid);
     const max = Math.floor((headcount(R) * n * pct) / 100);
     const dmg = activeIds(R).reduce((a, u) => a + record(L, R, mid, u).best, 0);
@@ -270,5 +304,5 @@ DS.Raid = (function () {
   const timeLeft = (R, now) => { const d = deadline(R); return d == null ? null : Math.max(0, d - now); };
   // 던전 진행: 지나온 단계 / 전체 (마무리 = 끝)
   const progress = (L, R) => { const i = (R.state || {}).step ?? -1, n = L.steps.length; return Math.max(0, Math.min(1, (i + (isEnd(L, R) || bossHp(L, R).won ? 1 : 0)) / n)); };
-  return { readyOf, NEWR, variantOf, BIND_TOKEN, tokBinds, solveLock, BOSS_TRIES, bossItem, bossTries, bossState, bossFirst, bossAnswered, skipped, deadline, timeLeft, progress, ATK, soloAtk, BIND_PER, BIND_MAX, bindOf, bindTotal, atkClock, atkTrack, RETRIES, HEAL_MAX, healsOf, healsGiven, healsTo, healsReceived, healTarget, ultUsed, perfStreak, TRUE_SEC, isTrue, petrify, LIVE_MS, lateIds, liveOpen, roomDone, inClass, activeIds, teacherUid, num, newRoom, stepOf, isLobby, isEnd, isFinale, isClosed, focusOn, restOn, sheetOn, videoOn, autoFocus, fullMarks, canLobby, online, seedOf, itemsFor, attemptsOf, gradeAttempt, record, resultLabel, headcount, pctOf, monsterHp, waiting, allSubmitted, cleared, mastery, bossHp, helpList };
+  return { isChain, chainItems, chainSubs, CHAIN_SLOTS, readyOf, NEWR, variantOf, BIND_TOKEN, tokBinds, solveLock, BOSS_TRIES, bossItem, bossTries, bossState, bossFirst, bossAnswered, skipped, deadline, timeLeft, progress, ATK, soloAtk, BIND_PER, BIND_MAX, bindOf, bindTotal, atkClock, atkTrack, RETRIES, HEAL_MAX, healsOf, healsGiven, healsTo, healsReceived, healTarget, ultUsed, perfStreak, TRUE_SEC, isTrue, petrify, LIVE_MS, lateIds, liveOpen, roomDone, inClass, activeIds, teacherUid, num, newRoom, stepOf, isLobby, isEnd, isFinale, isClosed, focusOn, restOn, sheetOn, videoOn, autoFocus, fullMarks, canLobby, online, seedOf, itemsFor, attemptsOf, gradeAttempt, record, resultLabel, headcount, pctOf, monsterHp, waiting, allSubmitted, cleared, mastery, bossHp, helpList };
 })();

@@ -183,6 +183,14 @@ DS.Act = (function () {
     if (id && o.add) { const lk = Raid.solveLock(L, R, N().now()); if (lk && lk.on) patch[`solveOn/${id}`] = { sec: Math.round((lk.end - lk.t0) / 1000 + Number(o.add)), at: lk.t0 }; }
     if (Object.keys(patch).length) await N().update(P(code, 'state'), patch);
   }
+  // ⚔ 소레이드 (2026-11-09 #18): 단계 답 한 개 · 선생님 「✔ 풀어주기」
+  async function chainSubmit(code, packed, mid, s, p, g) {
+    const R = unpackRoom(packed), L = DS.Lessons.get(R.meta.lesson), me = N().uid(), rec = Raid.record(L, R, mid, me);
+    if (!p && (rec.locked || rec.fail || rec.done)) fail(rec.locked ? '🙋 선생님 확인을 기다려요' : '이 문제는 끝났어요');
+    await N().set(P(code, `chain/${mid}/${me}/${rec.nextK}`), { s, p: p || 0, g: g == null ? '' : g, at: N().TS });
+    return Raid.record(L, { ...R, chain: { ...(R.chain || {}), [mid]: { ...((R.chain || {})[mid] || {}), [me]: { ...(((R.chain || {})[mid] || {})[me] || {}), [rec.nextK]: { s, p: p || 0, g } } } } }, mid, me);
+  }
+  const chainRelease = (code, mid, uid) => N().set(P(code, `chainOk/${mid}/${uid}`), true);
   const scoutReady = (code, id) => N().set(P(code, `ready/${id}/${N().uid()}`), N().TS); // 🌫 정찰 ✋ 준비 완료 (2026-11-09 #17)
   async function saveEnd(code) {
     const raw = await N().get(P(code)); if (!raw || !raw.meta) return;
@@ -379,5 +387,5 @@ DS.Act = (function () {
     return out;
   }
 
-  return { scoutReady, setSolve, saveEnd, resumeInfo, switchLesson, setSound, bossTry, openRooms, savePunch, finishOvertime, setPunchOff, punchOff, batTick, batAnswer, hit, endClassAsk, timeUp, extendTime, openRift, cutShort, setRest, setRestMin, markBossWin, prepLite, prepImg, hasImg, setVideoFile, setVideoOn, endClass, admitLate, getPrep, setImage, setVideo, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, heal, bossAnswer, unpackRoom, P };
+  return { chainSubmit, chainRelease, scoutReady, setSolve, saveEnd, resumeInfo, switchLesson, setSound, bossTry, openRooms, savePunch, finishOvertime, setPunchOff, punchOff, batTick, batAnswer, hit, endClassAsk, timeUp, extendTime, openRift, cutShort, setRest, setRestMin, markBossWin, prepLite, prepImg, hasImg, setVideoFile, setVideoOn, endClass, admitLate, getPrep, setImage, setVideo, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, heal, bossAnswer, unpackRoom, P };
 })();

@@ -316,7 +316,7 @@ DS.Student = (function () {
   const plate = () => `<span class="sc-plate">${esc(`${info0.num || myP().num || ''}번 ${info0.nick || myP().nick || ''}`)}</span>`;
   // 아래 고정 줄: 기회 ●●●● n · ⚔ 공격! (또는 지금 할 일 한 줄)
   // ❤ 재도전 기회 (2026-11-08 사용자 「남은 기회 이모티콘 · 더 잘 보이게 · 예전처럼 체력바 느낌」): 아래 줄 = 도트 하트(빨강 남음 · 초록 힐로 받음 · 회색 쓴 칸) + 「n / 전체」 · 용사 머리 위 = 체력바 칸
-  const heartsOf = (rec) => { const C = DS.ASSETS.chance; return Array.from({ length: rec.slots }, (_, i) => { const st = i < rec.left ? (i < Math.min(rec.left, rec.healed) ? 1 : 0) : 2; return `<i class="ch ch-${st}"${C ? ` style="background-image:url('${DS.ASSETS.base}${C.src}');background-position:${st * 50}% 0"` : ''}></i>`; }).join(''); };
+  const heartsOf = (rec) => { const C = DS.ASSETS.chance; return Array.from({ length: rec.slots }, (_, i) => { const st = i < rec.left ? (i < Math.min(rec.left, rec.healed) ? 1 : 0) : 2; return `<i class="ch ch-${st}${rec.left - i > 0 && rec.left - i < 1 ? ' half' : ''}"${C ? ` style="background-image:url('${DS.ASSETS.base}${C.src}');background-position:${st * 50}% 0"` : ''}></i>`; }).join(''); };
   const dock = (rec, right) => `<div class="st-dock"><span class="dock-tries${rec.left <= 1 ? ' low' : ''}" title="재도전 기회"><b class="dt-l">재도전</b><span class="ch-row">${heartsOf(rec)}</span><b class="dt-n">${rec.left}<small>/${rec.slots}</small></b></span>${right}</div>`;
   const hpTries = (rec) => `<div class="enc-tries hp-tries" title="남은 재도전 기회">${pipsOf(rec)}</div>`;
   function scene(step, rec, hp, cls = '', gauge = '', banner = '') {
@@ -465,6 +465,7 @@ DS.Student = (function () {
   function monsterView(body, step) {
     const mid = step.id, rec = Raid().record(L, R, mid, me), hp = Raid().monsterHp(L, R, mid);
     { const lk = Raid().solveLock(L, R, DS.Net.now()); if (lk && lk.on && !rec.submitted) { scoutWas = lk.id; return frozenView(body, step, lk); } scoutAppear(mid); }
+    if (rec.chain) return chainView(body, step, rec, hp); // ⚔ 소레이드 (2026-11-09 #18)
     healNotice(mid);
     const wantRetry = retrying === `${mid}|${rec.nextAttempt}` && rec.canRetry;
     if (!rec.submitted || wantRetry) return fightForm(body, step, rec, hp);
@@ -600,6 +601,52 @@ DS.Student = (function () {
       const given = items.map((q, i) => (q.type === 'blanks' ? form.given[i] : q.type === 'number' ? Number(form.given[i]) : form.given[i]));
       try { await DS.Act.submit(code, raw, mid, attempt, given); retrying = ''; form = null; dirty = true; } catch (e) { DS.UI.toast(e.message); }
     };
+  }
+  // ⚔ 소레이드 화면 (2026-11-09 #18): 진행 칩 ①②③👑 · 지금 단계 문제 하나 · 「📜 나의 풀이」가 한 줄씩 쌓임 · 기회 반 칸 · 1칸 남으면 🙋 선생님 확인
+  let cform = null; const chainPrac = {};
+  function chainView(body, step, rec, hp) {
+    const mid = step.id, n = rec.n, prac = rec.done && chainPrac[mid] != null;
+    const pass = prac ? chainPrac[mid] : 0, pItems = prac ? Raid().chainItems(L, R, mid, me, pass) : rec.items;
+    const stage = prac ? (rec.pass === pass ? rec.pStage : 0) : rec.stage, says = prac ? (rec.pass === pass ? rec.pSays : []) : rec.says;
+    const pDone = prac && stage >= pItems.length, q = pItems[Math.min(stage, pItems.length - 1)];
+    const key = `chain|${mid}|${pass}|${stage}|${rec.nextK}`;
+    if (!cform || cform.key !== key) cform = { key, given: [q.type === 'multi' ? [] : q.type === 'number' ? 0 : null] };
+    const ready = q.type === 'multi' ? cform.given[0].length > 0 : cform.given[0] != null;
+    const sig = `${key}|${JSON.stringify(cform.given)}|${rec.locked}|${rec.fail}|${rec.done}|${pDone}|${hp.left}`;
+    if (sig === drawn && body.querySelector('.ch-wrap')) { hpText(body, hp); return; }
+    drawn = sig;
+    const chips = pItems.map((_, i) => `<span class="cr-chip ${i < stage || (!prac && rec.done) ? 'ok' : i === stage ? 'now' : ''}">${i === pItems.length - 1 ? '👑' : '①②③④⑤⑥'[i]}${i < stage || (!prac && rec.done) ? '✔' : i === stage ? '⚔' : ''}</span>`).join('<i>›</i>');
+    const story = (arr) => (arr.length ? `<div class="cr-story"><b>📜 나의 풀이</b><ol>${arr.map((t) => `<li>${pretty(t)}</li>`).join('')}</ol></div>` : '');
+    const lastWrong = !prac && rec.lastWrong && rec.lastWrong.s === stage;
+    let mainHtml;
+    if (rec.fail) mainHtml = `<p class="paper-note">끝까지 못 맞혔어요 — 아래 풀이를 학습지에 옮겨 적고 🎯 복습 허수아비에서 다시 도전해요.</p>${story(rec.items.map((x) => x.say))}`;
+    else if (!prac && rec.done) mainHtml = `<p class="okc big-msg">${rec.perfect ? '🌟 퍼펙트 사슬!' : '🎉 대장 처치!'}</p>${story(says)}<button class="btn big" id="cr-prac">🔁 숫자 바뀐 새 사슬로 연습</button><p class="muted small">연습은 데미지 없이 실력만 쌓여요</p>`;
+    else if (pDone) mainHtml = `<p class="okc">✔ 연습 사슬 완성!</p>${story(says)}<button class="btn big" id="cr-prac">🔁 또 새 사슬</button>`;
+    else if (rec.locked && !prac) mainHtml = `${story(says)}<div class="cr-lock"><b>🙋 선생님 확인을 기다려요</b><p>기회가 1칸 남았어요 — 학습지에 풀이를 정리해 두면 선생님이 와서 확인해 줘요.</p></div>`;
+    else mainHtml = `${story(says)}<div class="paper"><div class="paper-h"><b>${esc(step.title)} · ${stage === pItems.length - 1 ? '👑 대장' : `졸개 ${'①②③④⑤⑥'[stage]}`}</b><small>${prac ? '연습 (숫자 바뀜 · 데미지 없음)' : '틀려도 숫자는 그대로'}</small></div>
+        ${lastWrong ? '<p class="paper-note">✘ 다시 생각해 봐요 — 같은 문제예요</p>' : ''}<div class="items">${itemHtml(q, 0, lastWrong, null, cform.given)}</div></div>`;
+    body.innerHTML = `<div class="panel framed st-fight ch-wrap">${scene(step, rec, hp, '', '')}
+      <div class="cr-chips">${chips}</div>${mainHtml}
+      ${prac || rec.done || rec.fail || rec.locked ? dock(rec, '') : dock(rec, `<button class="btn primary big dock-go" id="cr-go"${ready ? '' : ' disabled'}>⚔ 공격!</button>`)}${helpBtn()}</div>`;
+    if (prac && !pDone) body.querySelector('.st-dock').insertAdjacentHTML('beforeend', `<button class="btn primary big dock-go" id="cr-go"${ready ? '' : ' disabled'}>⚔ 연습 공격</button>`);
+    bindTop(); bindHelp();
+    body.querySelectorAll('[data-pick]').forEach((b) => b.addEventListener('click', () => {
+      const v = b.dataset.pick.split('|')[1];
+      if (q.type === 'multi') { const st = new Set(cform.given[0]); const nn = Number(v); if (st.has(nn)) st.delete(nn); else st.add(nn); cform.given[0] = [...st].sort((a, b2) => a - b2); }
+      else if (q.type === 'choice') cform.given[0] = Number(v); else cform.given[0] = [v];
+      DS.Sound.clank(); render();
+    }));
+    DS.UI.dial(body, () => cform.given[0], (i, v) => { cform.given[0] = v; drawn = ''; });
+    const pb = $('#cr-prac'); if (pb) pb.onclick = () => { chainPrac[mid] = Math.max(rec.pass || 0, chainPrac[mid] || 0) + 1; cform = null; drawn = ''; render(); };
+    const go = $('#cr-go');
+    if (go) go.onclick = () => DS.Control.run(async () => {
+      go.disabled = true; const g = q.type === 'number' ? Number(cform.given[0]) : cform.given[0];
+      const r2 = await DS.Act.chainSubmit(code, raw, mid, stage, pass, g); cform = null; drawn = '';
+      const okNow = prac ? (r2.pass === pass && r2.pStage > stage) : r2.stage > stage, sc = body.querySelector('.scene');
+      if (okNow) { DS.Sound.slash(); setTimeout(() => DS.Sound.hit(), 160); if (sc && DS.FX) DS.FX.play(sc, myP().fx || 'flame', { perfect: !prac && r2.done && r2.perfect, scale: !prac && r2.done ? 0.6 : 0.3 }); DS.UI.toast(stage === pItems.length - 1 ? (prac ? '✔ 연습 사슬 완성!' : r2.perfect ? '🌟 퍼펙트 사슬!' : '👑 대장 처치!') : `✔ 졸개 ${'①②③④⑤⑥'[stage]} 처치!`); }
+      else { DS.Sound.squish(); if (!prac) DS.UI.toast(r2.locked ? '🙋 기회 1칸 — 선생님 확인을 기다려요' : r2.fail ? '기회를 다 썼어요' : `✘ 틀렸어요 · 기회 −${stage === n - 1 ? 1 : 0.5}`); }
+      render();
+    });
   }
   // ref: 첫 시도면 '문제 1 (2)' 처럼 학습지 문항 이름 → 문제 위에 작은 꼬리표 (같은 문제를 학습지에서 바로 찾게)
   // 💡 그림 힌트 (v0.9.7.4): 집합 문제면 문제 아래 버튼 → 벤 다이어그램 (학생 폰 · 몬스터만 · 종합상황실 시연에는 안 보임) · 처음 펼칠 때 한 번 센다(결과 기록 hints)

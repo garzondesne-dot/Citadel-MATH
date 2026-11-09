@@ -80,6 +80,11 @@ DS.Bots = (function () {
         if (DS.Raid.isFinale(L, R) && Math.random() < 0.7) later(`say|${u}`, rand(3000, 15000), () => N().set(P(`words/${u}`), { t: WORDS[i % WORDS.length], n: 1 }));
       }
       if (!st) return;
+      if (st.kind === 'monster' && DS.Raid.isChain && DS.Raid.isChain(L, R, st.id)) { // ⚔ 소레이드: 단계 하나씩 (70% 맞힘)
+        const rec = DS.Raid.record(L, R, st.id, u);
+        if (!rec.done && !rec.fail && !rec.locked) later(`ch|${st.id}|${u}|${rec.nextK}`, rand(3000, 9000) * slow, () => { const q = rec.items[rec.stage]; const g = DS.Bots.given(q, Math.random() < 0.7); N().set(P(`chain/${st.id}/${u}/${rec.nextK}`), { s: rec.stage, p: 0, g: q.type === 'number' ? Number(Array.isArray(g) ? g[0] : g) : g, at: N().TS }); });
+        return;
+      }
       if (st.kind === 'monster') {
         const rec = DS.Raid.record(L, R, st.id, u);
         const a = rec.nextAttempt;

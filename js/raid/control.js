@@ -166,6 +166,18 @@ DS.Control = (function () {
     else if (k === 'on') await Act().setSolve(code, R, L, { on: true, onSec: base || 60 });
     else await Act().setSolve(code, R, L, { sec: Math.max(0, base + (k === 'up' ? 30 : -30)) });
   })));
+  // ⚔ 소레이드 리모컨 (2026-11-09 #18): 🙋 확인 필요(남은 기회 1칸 · 잠김) → 「✔ 풀어주기」 · 학생별 지금 단계
+  function chainHtml(L, R) {
+    const st = Raid().stepOf(L, R); if (!st || st.kind !== 'monster' || !Raid().isChain(L, R, st.id)) return '';
+    const ids = Raid().activeIds(R).filter((u) => u !== (R.meta || {}).teacher), recs = ids.map((u) => [u, Raid().record(L, R, st.id, u)]);
+    const nm = (u) => { const p = (R.players || {})[u] || {}; return `${p.num != null ? `${p.num} ` : ''}${p.nick || ''}`; }, mark = (r) => (r.done ? (r.perfect ? '🌟' : '👑✔') : r.fail ? '✘' : r.stage === r.n - 1 ? '👑' : '①②③④⑤⑥'[r.stage]);
+    const lock = recs.filter(([, r]) => r.locked);
+    const n = recs[0] ? recs[0][1].n : 0, by = Array.from({ length: n + 1 }, (_, i) => recs.filter(([, r]) => (i === n ? r.done : !r.done && r.stage === i)).length);
+    return `<div class="cr-ctl"><p><b>⚔ 소레이드</b> ${by.map((c, i) => `<span>${i === n ? '완료' : i === n - 1 ? '👑' : '①②③④⑤⑥'[i]} ${c}</span>`).join(' · ')}</p>
+      ${lock.length ? `<p class="cr-need"><b>🙋 확인 필요 ${lock.length}</b></p>${lock.map(([u, r]) => `<div class="cr-lockrow"><span>${esc(nm(u))} · ${r.stage === n - 1 ? '👑 대장' : `졸개 ${'①②③④⑤⑥'[r.stage]}`}에서 막힘</span><button class="btn small primary" data-crok="${u}">✔ 풀어주기</button></div>`).join('')}` : ''}
+      <details><summary>학생별 단계</summary><p class="small">${recs.map(([u, r]) => `${esc(nm(u))} ${mark(r)}`).join(' · ')}</p></details></div>`;
+  }
+  const bindChain = (el, code, R, L) => el.querySelectorAll('[data-crok]').forEach((b) => (b.onclick = () => run(async () => { const st = Raid().stepOf(L, R); await Act().chainRelease(code, st.id, b.dataset.crok); DS.UI.toast('✔ 마지막 칸을 풀어 줬어요'); })));
   // ⏸ 수업 끝 (저장) — 진행 중이면 늘 (교사 리모컨 · 종합실)
   const saveBtn = (R) => (!Raid().isLobby(R) && !Raid().isClosed(R) ? '<button class="btn t-save" data-saveend>⏸ 수업 끝 (저장)</button>' : '');
   const bindSave = (el, code, R, L) => el.querySelectorAll('[data-saveend]').forEach((b) => (b.onclick = () => run(async () => {
@@ -215,5 +227,5 @@ DS.Control = (function () {
     host.appendChild(e); setTimeout(() => e.remove(), 2400);
   }
   const xpOf = (rec) => (rec && rec.tries ? rec.tries.length * 2 + (Number(rec.best) || 0) * 2 : 0); // 제출 2 + 맞힌 소문제 2 (EXP 표와 같게)
-  return { solveHtml, bindSolve, saveBtn, bindSave, lessonBtn, bindLesson, remoteGrid, xpFloat, xpOf, tbarHtml, onTimeUp, bindExtend, hm, iconBar, restBtn, bindRest, restLeft, restEnd, mmss, name, run, wordsHtml, bindWords, stepName, nextName, stepTitles, FINALE, forward, back, pctHtml, bindPct, focusBtn, bindFocus, sheetBtn, bindSheet, videoBtn, bindVideo, esc };
+  return { chainHtml, bindChain, solveHtml, bindSolve, saveBtn, bindSave, lessonBtn, bindLesson, remoteGrid, xpFloat, xpOf, tbarHtml, onTimeUp, bindExtend, hm, iconBar, restBtn, bindRest, restLeft, restEnd, mmss, name, run, wordsHtml, bindWords, stepName, nextName, stepTitles, FINALE, forward, back, pctHtml, bindPct, focusBtn, bindFocus, sheetBtn, bindSheet, videoBtn, bindVideo, esc };
 })();
