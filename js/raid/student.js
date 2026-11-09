@@ -19,7 +19,7 @@ DS.Student = (function () {
   let info0 = null, focusWas = false, cleared0 = false, locked = false;
   let heroFx = null, heroFxT = null, heroBack = ['idle', 'huff']; // v2 용사 잠깐 동작 (힐 받음 · 힐 쓰기) · 끝나면 돌아갈 자세
   let test = null;
-  const real = () => !test || !!test.real; // 👩‍🏫 교사 체험판 (2026-11-07): 테스트 화면 + 실제 학생처럼 기록 · 💎 · EXP (메모리 저장소라 남지 않음)          // 🧪 테스트 모드: { prep: 학습지 이미지, exit() } — 이 기기 안에서만, 집중모드 대신 학습지 이미지
+  const real = () => true; // 🧪 #47 (2026-11-09 선생님 「테스트 모드 = 학생과 같은 과정」): 테스트 · 체험판도 학생과 같은 길 (💎 · EXP · 기록 · 필살기 · 상자) — 기록은 테스트 저장소(이 기기 · 시작마다 비움) · 체험판은 메모리
   async function enter(c, info, opt = {}) {
     test = opt.test || null;
     cleared0 = false; resulted = false; drawn = ''; shown = ''; form = null; retrying = ''; bossSet = 1; othersSeen = {};
@@ -547,7 +547,7 @@ DS.Student = (function () {
         : `<p class="muted">${rec.perfect ? '멋져요! 기회를 모두 썼어요. 다른 용사들을 기다려요.' : '재도전 기회를 모두 썼어요. 해설을 보며 학습지에 정리해요.'} 데미지 <b>${rec.best}</b></p>`}
       ${test && (test.prep.img || {})[mid] ? '<button class="btn small" id="st-sheet">📄 학습지 보기 (문제 해설)</button>' : ''}
       ${dock(rec, done && !rec.canRetry ? '<span class="dock-wait">다음 단계를 기다려요</span>' : '')}
-      ${test ? '' : helpBtn()}</div>`;
+      ${helpBtn()}</div>`; // #47 테스트에서도 🙋 도움 요청
     bindHelp(); bindTop();
     const sb = $('#st-sheet'); if (sb) sb.onclick = () => sheetModal(step);
     // v0.9.3 (⑤): 공격 자세는 잠깐만 → 다시 서 있는 자세 (격파됐으면 승리 자세 그대로)
@@ -677,7 +677,7 @@ DS.Student = (function () {
     if (!cform || cform.key !== key) cform = { key, given: [q.type === 'multi' ? [] : q.type === 'number' ? 0 : null] };
     const ready = q.type === 'multi' ? cform.given[0].length > 0 : cform.given[0] != null;
     const dns = Raid().chainDown(L, R, mid).filter((d) => d.down).map((d) => d.k); // 💥 반이 쓰러뜨린 졸개
-    const wm = writeMode[mid], phN = Number((myP().ph || {})[mid]) || 0, wrOk = (myP().wr || {})[mid], canPhoto = !test && rec.done && DS.Photo && DS.Photo.ready(L.id, mid); // 🐞 2026-11-09: sig 보다 먼저 (예전엔 뒤에 있어 소레이드 화면이 그려지지 않음 · v0.9.34.0~)
+    const wm = writeMode[mid], phN = Number((myP().ph || {})[mid]) || 0, wrOk = (myP().wr || {})[mid], canPhoto = rec.done && DS.Photo && DS.Photo.ready(L.id, mid); // #47 테스트에서도 ✍ 📸 (진짜 중계소 · 기준표 켜진 문제) // 🐞 2026-11-09: sig 보다 먼저 (예전엔 뒤에 있어 소레이드 화면이 그려지지 않음 · v0.9.34.0~)
     const sig = `${key}|${JSON.stringify(cform.given)}|${rec.locked}|${rec.fail}|${rec.done}|${pDone}|${hp.left}|${dns.join(',')}|${needWhy}|${rec.whyOk}|${hintBy.length}|${myHint}|${wm ? (wm.peek ? 'p' : 'w') : ''}|${phN}|${wrOk || ''}|${!!(DS.Photo && DS.Photo.ready(L.id, mid))}|${myP().charge || 0}`;
     if (sig === drawn && body.querySelector('.ch-wrap')) { hpText(body, hp); return; }
     if (chainAtkUntil > Date.now() && body.querySelector('.ch-wrap')) { hpText(body, hp); return; } // ⚔ 공격 모션 중엔 다시 그리지 않음 (끝나면 다시 그림)

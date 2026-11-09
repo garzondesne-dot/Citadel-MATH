@@ -25,13 +25,16 @@ DS.Test = (function () {
     // 1) 학습지 이미지 · 영상 링크는 실제 서버에서 읽기만 (체험판은 파일 안에 든 개념 카드)
     if (opt.prep) prep = opt.prep;
     else { try { prep = (await DS.Net.get(`prep/${lessonId}`)) || {}; } catch (e) { prep = {}; } }
+    let photoCfg = null, photoRub = null; // 📷 #47 사진 채점 설정 · 기준표도 실제 서버에서 읽어 테스트 저장소에 (채점은 진짜 중계소)
+    if (!trial && !demo) { try { [photoCfg, photoRub] = await Promise.all([DS.Net.get('gcfg/photo'), DS.Net.get('photo_rubric')]); } catch (e) { /* 없음 */ } }
     // 2) 이 기기 안의 테스트 저장소로 바꿔 끼움 (실제 수업 · 계정에는 손대지 않음)
     real = DS.Net.impl;
     local = DS.Net.LocalNet('citadel-test-db');
     DS.Net.use(local);
     local.wipe();
     await local.init(); local.setUid('test-teacher');
-    if (trial && prep && typeof prep === 'object') await local.set(`prep/${lessonId}`, prep).catch(() => {}); // 👩‍🏫 체험판: 위 TV(종합상황실)도 학습지 그림 · 영상을 읽게 (메모리 저장소라 용량 걱정 없음 · 교사 테스트는 localStorage 라 넣지 않음)
+    if (trial && prep && typeof prep === 'object') await local.set(`prep/${lessonId}`, prep).catch(() => {});
+    if (photoCfg) await local.set('gcfg/photo', photoCfg).catch(() => {}); if (photoRub) await local.set('photo_rubric', photoRub).catch(() => {}); if (DS.Photo && DS.Photo.load) DS.Photo.load(true).catch(() => {}); // 👩‍🏫 체험판: 위 TV(종합상황실)도 학습지 그림 · 영상을 읽게 (메모리 저장소라 용량 걱정 없음 · 교사 테스트는 localStorage 라 넣지 않음)
     look = demo ? { hero: demo.hero ?? 16, fx: demo.fx || 'flame' } : { hero: 0, fx: 'flame' };
     if (trial) { // 👩‍🏫 메모리 저장소 안에 진짜 학생 계정 하나 (기록 · 💎 · EXP · 오답노트 · 성채가 실제처럼 · 탭을 닫으면 사라짐)
       look = { hero: trial.hero, fx: DS.FX.affOf(trial.hero).ids[0] };
@@ -288,5 +291,6 @@ DS.Test = (function () {
     DS.UI.toast('테스트를 끝냈어요. (기록은 저장하지 않아요)', 3000);
   }
   const active = () => !!real;
-  return { start, finish, active, join, setLook, trialBoot, trialNav, CLS: CLS0, prep: (id) => (L && L.id === id ? prep : null) }; // 🧪 학습지 이미지 · 영상은 실제 서버에서 읽어 둔 것
+  const testing = () => !!real && !trial && !demo, realToken = () => (real && real.idToken ? real.idToken() : Promise.resolve(null)); // 📷 #47 테스트 사진 = 교사 로그인 토큰으로 진짜 중계소
+  return { testing, realToken, start, finish, active, join, setLook, trialBoot, trialNav, CLS: CLS0, prep: (id) => (L && L.id === id ? prep : null) }; // 🧪 학습지 이미지 · 영상은 실제 서버에서 읽어 둔 것
 })();

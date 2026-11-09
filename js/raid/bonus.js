@@ -101,7 +101,7 @@ DS.Bonus = (function () {
     quests = train && DS.Quest && m && !m.test && !preview ? await DS.Quest.friends(m, no).catch(() => []) : [];
     mathOpen = !!(gemD && DS.Gem.photoPassed && DS.Gem.photoPassed(gemD)); // 🧑‍🎓 수식 책사 남 · 여 열렸나
     if (DS.Photo) await DS.Photo.load(true).catch(() => null); // 📷 gcfg/photo · photo_rubric
-    if (!preview && me && !me.test) await photoSync().catch(() => {}); // ⏳ 선생님 확인 결과 → 처치 / 다시
+    if (!preview && me) await photoSync().catch(() => {}); // #47 테스트도 학생과 같게 // ⏳ 선생님 확인 결과 → 처치 / 다시
     await loadLocks(); isAdm = all() && DS.Account ? await DS.Account.isAdmin().catch(() => false) : false; // 📕 오답노트 (null = 미리 보기 · 테스트: 표시 안 함)
     DS.UI.show('screen-bonus');
     if (DS.Sound && DS.Sound.bgm) DS.Sound.bgm(train || rift ? 'bgm-dummy' : 'bgm-castle'); // 🎵 2026-11-06: 성채 · 허수아비 배경음 (작게)
@@ -110,7 +110,7 @@ DS.Bonus = (function () {
   }
   // 📜 서술 조각 (2026-11-06): 통과 1 · 만점 +1 · 같은 방 이전 점수보다 올라서 통과 +1 (방마다 한 번씩)
   async function scrollWin(lid, rid, w, show) {
-    if (!DS.Gem || !DS.Gem.addScroll || !me || me.test) return 0;
+    if (!DS.Gem || !DS.Gem.addScroll || !me || (me.test && !(DS.Test && DS.Test.active && DS.Test.active()))) return 0; // #47 테스트 모드(테스트 저장소)도 받음
     let n = 0; const k = `${lid}_${rid}`;
     const first = await DS.Gem.addScroll(me, 1, `ph_${k}`, '서술형 통과').catch(() => 0); n += first;
     if (first && !mathOpen) { mathOpen = true; setTimeout(() => DS.UI.toast('🧑‍🎓 새 용사 해금! 「수식 책사(남) · (여)」 — 💎 상점에서 골라 보세요', 5000), 1200); }
@@ -419,7 +419,7 @@ DS.Bonus = (function () {
       // 🎁 받은 보상 = 내 용사 머리 위에 줄줄이 (2026-11-05 사용자: 팝업에 가릴 수 있어 오래 · 8초)
       const host = el.querySelector('.enc-hero'), show = headRewards(host);
       if (xp) show(`+${xp} EXP`, 'xp');
-      if (DS.Gem && !preview && me && !me.test) { // 💎 (2026-11-05) — 차례로 받아 실제로 받은 만큼만 표시 (이미 받았거나 오늘 한도면 안 뜸)
+      if (DS.Gem && !preview && me && (!me.test || (DS.Test && DS.Test.active && DS.Test.active()))) { // 💎 (2026-11-05) · #47 테스트도 — 차례로 받아 실제로 받은 만큼만 표시 (이미 받았거나 오늘 한도면 안 뜸)
         const G = DS.Gem.G, gm = async (n, k, why, o) => { const g = await DS.Gem.add(me, n, k, why, o).catch(() => 0); if (g) show(`💎 +${g} ${why}`, 'gem'); };
         if (!clearedBefore) {
           if (castle) { await gm((L.rooms.find((r) => r.id === mid) || {}).boss ? G.roomBoss : G.room, `room_${L.id}_${mid}`, '성채 방 처치'); await gm(G.first, 'firstcastle', '성채 첫 방'); if (roundNo === 1 && !anyWrong && G.roomFirst) await gm(G.roomFirst, `roomfirst_${L.id}_${mid}`, '첫 판에 처치'); }
@@ -475,7 +475,7 @@ DS.Bonus = (function () {
       const act = draw('', `${story(says)}<p class="okc"><b>📷 서술형 통과!</b> 보너스를 받았어요.</p>`);
       act.innerHTML = '<button class="btn primary" id="bf-out">성채 방 목록으로</button>'; act.querySelector('#bf-out').onclick = () => { el.remove(); render(); };
       const show = headRewards(el.querySelector('.enc-hero'));
-      if (DS.Gem && !preview && me && !me.test) { const g = await DS.Gem.add(me, DS.Gem.G.photo || 3, `photo_${L.id}_${mid}`, '📷 서술형 통과').catch(() => 0); if (g) show(`💎 +${g} 📷 서술형 통과`, 'gem'); await scrollWin(L.id, mid, photoWin, show); photoWin = null; }
+      if (DS.Gem && !preview && me && (!me.test || (DS.Test && DS.Test.active && DS.Test.active()))) { const g = await DS.Gem.add(me, DS.Gem.G.photo || 3, `photo_${L.id}_${mid}`, '📷 서술형 통과').catch(() => 0); if (g) show(`💎 +${g} 📷 서술형 통과`, 'gem'); await scrollWin(L.id, mid, photoWin, show); photoWin = null; }
     };
     const chainRound = async () => {
       roundNo++;

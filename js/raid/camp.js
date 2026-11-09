@@ -282,14 +282,14 @@ DS.Camp = (function () {
     DS.CampScene.flag(stage, sealed.includes('eval-1') ? 'gold' : ''); // 🏰 성채 1층 보스 처치 = 금빛 깃발
     cues(rec, owned, Number(no) || 0);
     // 📕 오답노트 배지: 남은 문제(틀림 + 안 풂) 수는 📮 우편함 한 곳에만 (0 이면 금색 도장) · 🎯 허수아비엔 작은 점 (2026-11-05 정신없음 줄이기)
-    if (DS.Note && !me.test) {
+    if (DS.Note && (!me.test || (DS.Test && DS.Test.active && DS.Test.active()))) { // #47
       const held = await DS.Net.get(`held/${k}`).catch(() => null), nt = DS.Note.all(rec || {}, bonus || {}, no, held);
       // 2026-11-07 6판: 남은 복습 수 = 🎯 허수아비 위 · 📮 우편함 = 안 읽은 소식 수
       const d = document.getElementById('camp-dummy'); if (d) { const old = d.querySelector('.nt-badge'); if (old) old.remove(); if (nt.list.length) d.insertAdjacentHTML('beforeend', DS.Note.badge(nt.left)); }
       const z = document.getElementById('camp-mail'); if (z && DS.Mail) { const un = await DS.Mail.unread(me).catch(() => 0), old = z.querySelector('.ml-badge'); if (old) old.remove(); if (un) z.insertAdjacentHTML('beforeend', `<span class="ml-badge">${un}</span>`); }
     }
     // 🏰 성채던전 NEW (2026-11-05): 진도를 나가 새로 열린 방 수 → 파란 배지 · 늘었으면 한 번 안내
-    if (DS.Bonus && !me.test) {
+    if (DS.Bonus && (!me.test || (DS.Test && DS.Test.active && DS.Test.active()))) { // #47
       if (DS.Bonus.loadLocks) await DS.Bonus.loadLocks(); // 🔒 잠긴 층(3층 대단원) 방은 NEW 에 안 셈
       const fresh = DS.Bonus.newRooms(me, bonus || {}, Number(no) || 0).length, z = document.getElementById('camp-castle');
       if (z) { const old = z.querySelector('.cs-newb'); if (old) old.remove(); if (fresh) z.insertAdjacentHTML('beforeend', `<span class="cs-newb">새 방 ${fresh}</span>`); }
@@ -358,7 +358,7 @@ DS.Camp = (function () {
     const g = DS.Grow ? await DS.Grow.mine(me).catch(() => null) : null;
     // 📕 오답노트 (v0.9.7.9): 차시마다 문제 칩 · 남은 문제 → 중단원던전 그 층에서 보충
     let ntHtml = '';
-    if (DS.Note && !me.test) {
+    if (DS.Note && (!me.test || (DS.Test && DS.Test.active && DS.Test.active()))) { // #47
       const [bon, no, held] = await Promise.all([DS.Net.get(`bonus/${ck(me.c)}/${me.n}`).catch(() => null), DS.Net.get(`unlock/${ck(me.c)}`).catch(() => 0), DS.Net.get(`held/${ck(me.c)}`).catch(() => null)]);
       const nt = DS.Note.all(rec, bon || {}, no, held);
       if (nt.list.length) ntHtml = `<div class="nt-box${nt.left ? ' open' : ''}"><p class="nt-h">${DS.Note.icon('book')} <b>오답노트</b> ${nt.left ? `<span class="nt-cnt">❗ 남은 문제 ${nt.left}</span>` : `<span class="nt-cnt ok">${DS.Note.icon('done')} 노트 완성!</span>`}</p>
@@ -418,7 +418,7 @@ DS.Camp = (function () {
   }
   // v0.9.2: 호칭은 자동으로 달지 않는다 → 새로 얻은 호칭만 알려 주고 ⚙ 설정에서 스스로 고르게 (레벨 칭호는 알리지 않음)
   async function newTitles() {
-    if (!DS.Titles || me.test) return;
+    if (!DS.Titles || (me.test && !(DS.Test && DS.Test.active && DS.Test.active()))) return; // #47
     const k = `citadel-ttl-seen-${me.c}-${me.n}`;
     let seen = null; try { seen = JSON.parse(localStorage.getItem(k)); } catch (e) { /* 무시 */ }
     const got = DS.Titles.earned(await DS.Titles.data(me).catch(() => ({}))).filter((t) => !/^lv\d/.test(t.id));

@@ -52,12 +52,17 @@ function handle_(q) {
   const s = (v, n) => typeof v === 'string' && v.length > 0 && v.length <= n;
   if (!s(q.idToken, 4000) || q.c == null || !q.n || !s(q.lesson, 40) || !s(q.room, 40) || !s(q.image, IMG_MAX)) return { ok: false, err: 'bad' };
   const media = q.media === 'image/png' ? 'image/png' : 'image/jpeg';
-  const c = String(q.c).replace(/[.#$/[\]]/g, '_'), n = String(Number(q.n));
+  let c = String(q.c).replace(/[.#$/[\]]/g, '_'), n = String(Number(q.n));
   // ② 누구인지 (Firebase 로그인 토큰 → uid → 그 반 · 번호 계정과 같은지)
   const uid = verify_(q.idToken);
   if (!uid) return { ok: false, err: 'auth' };
-  const acc = db_('get', `accounts/${c}/${n}`);
-  if (!acc || acc.uid !== uid) return { ok: false, err: 'who' };
+  if (q.test === true) { // 🧪 교사 테스트 모드 (2026-11-09 #47): 교사(admins) 토큰만 · 장 수는 「_test」 칸 · 채점 기록은 안 남김
+    if (db_('get', `admins/${uid}`) !== true) return { ok: false, err: 'who' };
+    c = '_test'; n = '1';
+  } else {
+    const acc = db_('get', `accounts/${c}/${n}`);
+    if (!acc || acc.uid !== uid) return { ok: false, err: 'who' };
+  }
   // ③ 채점 기준표 (교사가 올린 것만 · 학생이 보낸 기준표는 받지 않음)
   const rub = db_('get', `photo_rubric/${q.lesson}/${q.room}`);
   if (!rub || !rub.on || !rub.steps) return { ok: false, err: 'rubric' };
@@ -82,7 +87,7 @@ function handle_(q) {
   if (status === 'check') { const l2 = give_(c, n, day, rk, false); if (l2) now = l2; } // 결정 2: 선생님 확인은 장 수를 안 깎음
   const rec = { at: { '.sv': 'timestamp' }, status, score, total, pass, steps: rows, ans: String(g.final_answer || '').slice(0, 80), conf: g.confidence || 'low', flags, fb: String(g.feedback || '').slice(0, 300), ask: String(q.ask || '').slice(0, 400), right: String(q.answer == null ? '' : q.answer).slice(0, 80), model: cfg('MODEL', 'claude-haiku-5-5'), tok: g.usage || null };
   const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-  db_('put', `photo/${c}/${n}/${q.lesson}_${q.room}/${id}`, rec); // 사진(q.image)은 저장하지 않음
+  if (q.test !== true) db_('put', `photo/${c}/${n}/${q.lesson}_${q.room}/${id}`, rec); // 사진(q.image)은 저장하지 않음 · 🧪 테스트는 기록 안 남김
   return { ok: true, id, status, score, total, pass, steps: rows, feedback: rec.fb, left: now.left, roomLeft: now.roomLeft, cool: lim_().cool };
 }
 
