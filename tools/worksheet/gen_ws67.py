@@ -78,43 +78,44 @@ SUMMARY = f'''
 
 p4blk = f'''
 {P(4, "두 집합 A = {x | x는 8의 약수}, B = {x | x는 20 이하의 4의 배수}에 대하여 A ∩ X = ∅과 B ∪ X = B를 만족시키는 집합 X의 개수를 구하시오.", T("07") + "<br>" + GAME("소레이드 · 졸개 3 + 대장"))}
-<div class="q"><span class="stp">①</span>{S}{v("A")} = {BL["l"]}</div>
-<div class="q"><span class="stp">②</span>{S}{v("B")} = {BL["l"]}</div>
-<div class="q"><span class="stp">③</span>{v("B ∪ X = B → X ⊂ B")}, {v("A ∩ X = ∅ → X")}는 {v("A")}와 서로소<br>&nbsp;&nbsp;&nbsp;&nbsp;→ {S}{v("X")}에 들어갈 수 있는 원소 = {v("B − A")} = {BL["l"]}</div>
-<div class="q why">💡 ∵ {v("X")}는 {v("B − A")}의 {BL["m"]}이므로 개수 = 2<sup>(원소의 개수)</sup></div>
+<div class="q"><span class="stp">①</span>{S}{v("A")} = {BL["l"]}, &nbsp;{S}{v("B")} = {BL["l"]}</div>
+<div class="q"><span class="stp">②</span>{S}{v("B ∪ X = B")} 이면 ( {v("X ⊂ B")} / {v("B ⊂ X")} ), {v("A ∩ X = ∅")} 이면 {v("X")}와 {v("A")}는 ( 서로소 / 같은 집합 )</div>
+<div class="q"><span class="stp">③</span>{S}{v("X")}에 들어갈 수 있는 원소 = {v("B − A")} = {BL["l"]}</div>
 <div class="q"><span class="stp">👑</span>{S}{v("X")}의 개수 = 2<sup>□</sup> = {BL["s"]}</div>
-<div class="wr" style="flex:1;min-height:110mm;font-size:9pt">✍ <b>서술형 쓰기</b> — 대장을 이기면 게임 풀이를 보지 말고 <b>처음부터</b> 써 보기 (<b>학습지 숫자 그대로</b>) → 📸 찍으면 🌟 <b>진필살기</b> 도전</div>
-
+<div class="q why">💡 ∵ 원소가 {v("n")}개인 집합의 부분집합의 개수는 {BL["m"]}</div>
+<div class="wr" style="flex:1;min-height:95mm;font-size:9pt">✍ <b>서술형 쓰기</b> — 대장을 이기면 게임 풀이를 보지 말고 <b>처음부터</b> 써 보기 (<b>학습지 숫자 그대로</b>) → 📸 찍으면 🌟 <b>진필살기</b> 도전</div>
 '''
 
 p1_r2 = f'''
 {P(5, "두 집합 A = {x² + 2x, 4, 6}, B = {x, 6}에 대하여 A ∩ B = B를 만족시키는 모든 정수 x의 값을 구하시오.", T("08") + " " + GAME("소레이드 · 졸개 3 + 대장"))}
 <div class="q"><span class="stp">①</span>{S}{v("A ∩ B = B")} 이면 ( {v("B ⊂ A")} / {v("A ⊂ B")} ) → {v("x")}는 {v("A")}의 원소 (단, {v("x ≠ 6")})</div>
-<div class="q why">💡 ∵ {v("x")}는 {v("A")}의 원소이므로 {v("x = 4")} 또는 {v("x")} = {BL["m"]}</div>
-<div class="q"><span class="stp">②</span>{S}{v("x = 4")} 일 수 있다 ( ○ / × )</div>
+<div class="q"><span class="stp">②</span>{S}{v("B ⊂ A")}가 되는 식을 모두 고르기 : {CB}{v("x = 4")} &nbsp;{CB}{v("x = x² + 2x")} &nbsp;{CB}{v("x² + 2x = 4")} &nbsp;{CB}{v("x² + 2x = 6")} &nbsp;{CB}{v("x = 2x")}</div>
+<div class="q why">💡 ∵ {v("B ⊂ A")} 이면 {v("B")}의 원소 {v("x")}는 {v("A")}의 {BL["m"]}</div>
 <div class="q"><span class="stp">③</span>{S}{v("x = x² + 2x → x² + x = 0 → x")} = {BL["s"]}, {BL["s"]}</div>
 <div class="q"><span class="stp">👑</span>{S}{v("x")}의 값 모두 : {BL["l"]}</div>
-<div class="wr" style="flex:1;min-height:110mm;font-size:9pt">✍ <b>서술형 쓰기</b> — 대장을 이기면 게임 풀이를 보지 말고 <b>처음부터</b> 써 보기 (<b>학습지 숫자 그대로</b>) → 📸 찍으면 🌟 <b>진필살기</b> 도전</div>
+<div class="wr" style="flex:1;min-height:95mm;font-size:9pt">✍ <b>서술형 쓰기</b> — 대장을 이기면 게임 풀이를 보지 말고 <b>처음부터</b> 써 보기 (<b>학습지 숫자 그대로</b>) → 📸 찍으면 🌟 <b>진필살기</b> 도전</div>
 '''
 
 p2_mid = f'''
-{P(6, "어느 자전거 동아리 회원 40명을 대상으로 두 코스 A와 B를 다녀온 경험이 있는 회원 수를 조사하였더니 A 코스는 28명이고 B 코스는 21명이었다. 두 코스 A와 B를 모두 다녀온 회원 수의 최댓값과 최솟값을 구하시오.", T("11") + "<br>" + GAME("소레이드 · 졸개 2 + 대장"))}
+{P(6, "어느 자전거 동아리 회원 40명을 대상으로 두 코스 A와 B를 다녀온 경험이 있는 회원 수를 조사하였더니 A 코스는 28명이고 B 코스는 21명이었다. 두 코스 A와 B를 모두 다녀온 회원 수의 최댓값과 최솟값을 구하시오.", T("11") + "<br>" + GAME("소레이드 · 졸개 3 + 대장"))}
 <div style="text-align:center">{VENN2}</div>
-<div class="q"><span class="stp">①</span>{S}{v("n(A) + n(B)")} = 28 + 21 = {BL["s"]} &nbsp;→ {v("n(A ∩ B)")} = 이 수 − {v("n(A ∪ B)")}</div>
-<div class="q"><span class="stp">②</span>{S}최댓값 : {v("B")}가 {v("A")} 안에 쏙 → {v("n(A ∩ B)")} = 작은 쪽 = {BL["s"]}명</div>
-<div class="q why">💡 ∵ {v("n(A ∩ B)")}는 {v("n(A ∪ B)")}가 가장 ( 클 / 작을 ) 때 가장 작다</div>
-<div class="q"><span class="stp">👑</span>{S}최솟값 : {v("n(A ∪ B)")} = 전체 40 → {BL["s"]} − 40 = {BL["s"]}명</div>
-<div class="wr" style="flex:1;min-height:110mm;font-size:9pt">✍ <b>서술형 쓰기</b> — 대장을 이기면 게임 풀이를 보지 말고 <b>처음부터</b> 써 보기 (<b>학습지 숫자 그대로</b>) → 📸 찍으면 🌟 <b>진필살기</b> 도전</div>
+<div class="q"><span class="stp">①</span>{S}모두 다녀온 회원이 <b>가장 많을</b> 때 : ( {v("B ⊂ A")} / {v("A ⊂ B")} / {v("A ∩ B = ∅")} / {v("A ∪ B = U")} )</div>
+<div class="q"><span class="stp">②</span>{S}최댓값 = {BL["s"]}명</div>
+<div class="q"><span class="stp">③</span>{S}모두 다녀온 회원이 <b>가장 적을</b> 때 : ( {v("A ∪ B = U")} / {v("A ∩ B = ∅")} / {v("B ⊂ A")} / {v("A ⊂ B")} )</div>
+<div class="q"><span class="stp">👑</span>{S}최솟값 = 28 + 21 − {BL["s"]} = {BL["s"]}명</div>
+<div class="q why">💡 ∵ {v("n(A ∩ B) = n(A) + n(B) −")} {BL["m"]}</div>
+<div class="wr" style="flex:1;min-height:95mm;font-size:9pt">✍ <b>서술형 쓰기</b> — 대장을 이기면 게임 풀이를 보지 말고 <b>처음부터</b> 써 보기 (<b>학습지 숫자 그대로</b>) → 📸 찍으면 🌟 <b>진필살기</b> 도전</div>
 '''
 
 p3_left = f'''
-{P(7, "100 미만의 자연수 중에서 7의 배수가 아니거나 5로 나누었을 때의 나머지가 3이 아닌 자연수의 개수를 구하시오.", T("12") + " " + GAME("소레이드 · 졸개 3 + 대장"))}
+{P(7, "100 미만의 자연수 중에서 7의 배수가 아니거나 5로 나누었을 때의 나머지가 3이 아닌 자연수의 개수를 구하시오.", T("12") + " " + GAME("소레이드 · 졸개 4 + 대장"))}
 <div class="q"><span class="stp">①</span>{S}{v("U")} = 100 미만의 자연수 → {v("n(U)")} = {BL["s"]} &nbsp;({v("A")} = 7의 배수, {v("B")} = 5로 나눈 나머지가 3)</div>
 <div class="q"><span class="stp">②</span>{S}「{v("A")}가 아니거나 {v("B")}가 아닌」 = {v("A")}{C} ∪ {v("B")}{C} = ( {BL["m"]} ){C} ← 드모르간!</div>
-<div class="q"><span class="stp">③</span>{S}{v("A ∩ B")} = 7의 배수 중 5로 나눈 나머지가 3 = {{ {BL["s"]}, {BL["s"]}, {BL["s"]} }}</div>
-<div class="q why">💡 ∵ 여집합의 원소의 개수 = 전체의 개수 − {BL["m"]}의 개수</div>
+<div class="q"><span class="stp">③</span>{S}{v("A ∩ B")}의 가장 작은 원소 = {BL["s"]}</div>
+<div class="q"><span class="stp">④</span>{S}7과 5의 최소공배수 {BL["s"]}씩 커짐 → {v("A ∩ B")} = {{ {BL["s"]}, {BL["s"]}, {BL["s"]} }}</div>
 <div class="q"><span class="stp">👑</span>{S}구하는 개수 = {v("n(U) − n(A ∩ B)")} = {BL["m"]}</div>
-<div class="wr" style="flex:1;min-height:110mm;font-size:9pt">✍ <b>서술형 쓰기</b> — 대장을 이기면 게임 풀이를 보지 말고 <b>처음부터</b> 써 보기 (<b>학습지 숫자 그대로</b>) → 📸 찍으면 🌟 <b>진필살기</b> 도전</div>
+<div class="q why">💡 ∵ 여집합의 원소의 개수 = 전체의 개수 − {BL["m"]}의 개수</div>
+<div class="wr" style="flex:1;min-height:95mm;font-size:9pt">✍ <b>서술형 쓰기</b> — 대장을 이기면 게임 풀이를 보지 말고 <b>처음부터</b> 써 보기 (<b>학습지 숫자 그대로</b>) → 📸 찍으면 🌟 <b>진필살기</b> 도전</div>
 '''
 
 W = lambda h: f'<div style="height:{h}mm"></div>'
@@ -139,7 +140,7 @@ FA7 = f'''
 <div class="add mini">🏰 <b>더 해 보고 싶다면</b> — 캠프 🎯 허수아비에서 소레이드 다시 · ✍ 서술형 → 📸 · 성채던전 1층 | 다음 시간 = 명제와 조건 (8차시)</div>
 <div class="stampwrap" style="margin-top:auto"><div class="stamp"><span>확인 도장</span></div></div>'''
 T3 = f'''<div class="page" style="font-size:9.4pt"><h3 style="margin-top:0">교사용 · 6 · 7차시 나누기 + 소레이드 정리 (학생 배부 X)</h3>
-<div class="box"><b>나눈 방식 (형평성: 문제 · 숫자 · 형성평가 하나도 안 바꿈)</b> — 6차시 v4를 둘로 나눔 · 6차시 = STEP 1~3 + 중단원 마무리 · 집합 한 장 정리 (1쪽) · 7차시 = 문제 4~7(소레이드 형태로만 바꿈) + 형성평가 6문항 그대로<br>
+<div class="box"><b>나눈 방식 (형평성: 문제 · 숫자 · 형성평가 하나도 안 바꿈)</b> — 6차시 v4를 둘로 나눔 · 6차시 = STEP 1~3 + 중단원 마무리 · 집합 한 장 정리 (1쪽) · 7차시 = 문제 4~7(소레이드 형태로만 바꿈 · v3 = 게임 단계에 맞춤) + 형성평가 6문항 그대로<br>
 바뀐 곳 = 문제 4~7에 노란 💡 근거 줄 · ✍ 「서술형 쓰기」 칸(학습지 숫자 그대로 → 📸 진필살기) — 근거 줄은 새 문제가 아니라 풀이 단계의 「왜」 한 줄<br>
 <b>서술형 사다리</b> — 같은 소레이드를 만날 때마다 게임이 덜 도와줌 (잠금 아님 · 대장 처치 뒤 언제나 ✍ 바로 쓰기)<br>
 1칸 👣 따라가기(첫 판 · 비약 그대로) → 2칸 🧩 💡 근거 줄(🔥 한 판 더 · 보기 고르기 → 💡 힌트 주기) → 4칸 ✍ 직접 쓰기(폰에서 풀이 숨김 → 📸 → 🌟 진필살기) · 3칸 🧱 조각 맞추기는 캠프(나중)</div>
@@ -153,7 +154,7 @@ T3 = f'''<div class="page" style="font-size:9.4pt"><h3 style="margin-top:0">교�
 · 첫 판: 💡 줄은 완성 문장으로 「📜 나의 풀이」에 쌓임 · 🔥 한 판 더: 💡 줄이 「∵ ____」 → 보기 고르기<br>
 · 💡 힌트 주기: 💡 줄을 맞힌 학생 → 묶기 · 힐 옆 세 번째 단추(기회 1 · EXP +1) → 종합상황실 말풍선에 맞힌 보기 문장 그대로 (줄마다 첫 1명 · 나머지 「👍 +n」 · 소레이드당 최대 3)<br>
 · ✍ 바로 쓰기: 대장 처치 뒤 언제나 → 폰에서 나의 풀이 · 졸개 · 채점 기준 숨김 → 📸 찰칵 = 진필살기 예고(TV 「⚡ ○○ 충전 중…」) → 통과 = 🌟 진필살기(스킬 상관없이 · 석화는 몬스터당 반 1번) · 아직 = 실패 연출 없이 빠진 졸개만 다시<br>
-· 「📜 풀이 다시 보기」를 누르면 그 도전은 「✍ 연습 쓰기」(💎 · 기록 그대로 · 진필살기 없음) · 수업 사진 학생당 1장(설정)</div></div>'''
+· 「📜 풀이 다시 보기」를 누르면 그 도전은 「✍ 연습 쓰기」(💎 · 기록 그대로 · 진필살기 없음) · 수업 사진 학생당 2장(설정)</div></div>'''
 
 goal6 = '<div class="goal"><b>학습목표</b> ① 드모르간의 법칙을 이해하고 이용할 수 있다. ② 여집합·차집합의 원소의 개수를 구할 수 있다. <span class="mini">(③ 중단원 마무리 문제 = 7차시)</span></div>'
 goal7 = '<div class="goal"><b>학습목표</b> ③ 집합 단원(중단원 마무리) 문제를 해결할 수 있다. <span class="mini">(6차시 학습지를 둘로 나눈 뒷부분 · 문제 · 숫자 그대로)</span></div>'
@@ -162,7 +163,7 @@ def build(no, rng, pages, extra=''):
     pg = lambda g, l, r, n: f'<div class="page">{hd}{g}<div class="cols"><div class="col">{l}</div><div class="col">{r}</div></div><div class="pno">- {no}차시 ({n}/{N}) -</div></div>'
     return f"<!DOCTYPE html><html><head><meta charset='utf-8'><title>학습과정 {no}차시 레이드용</title><style>{CSS}{EXTRA}</style></head><body>" + ''.join(pg(g, l, r, i + 1) for i, (g, l, r) in enumerate(pages)) + extra + "</body></html>"
 html6 = build(6, '공통수학2 Ⅱ. 집합과 명제 1. 집합 04. 드모르간의 법칙 · 원소의 개수 (6차시) · 레이드용 v5', [(goal6, p1_left, SUMMARY + '<div class="mini">문제 4~7 (중단원 마무리) · 형성평가 = 7차시 학습지</div>' + MEMO + '<div class="stampwrap"><div class="stamp"><span>확인 도장</span></div></div>')])
-html7 = build(7, '공통수학2 Ⅱ. 집합과 명제 1. 집합 · 중단원 마무리 소레이드 (7차시) · 레이드용 v2', [(goal7, p4blk, p1_r2), ('', p2_mid, p3_left), ('', FA6, MEMO)], T3)
+html7 = build(7, '공통수학2 Ⅱ. 집합과 명제 1. 집합 · 중단원 마무리 소레이드 (7차시) · 레이드용 v3', [(goal7, p4blk, p1_r2), ('', p2_mid, p3_left), ('', FA6, MEMO)], T3)
 OUT7 = sys.argv[3] if len(sys.argv) > 3 else OUT.replace('06', '07')
 with sync_playwright() as p:
     b = p.chromium.launch()
