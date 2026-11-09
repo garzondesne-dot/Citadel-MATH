@@ -19,6 +19,8 @@ const OUT = process.argv[2] || '.', U = 'http://localhost:8765/index.html?local'
   ok(await S.isVisible('#bf-act #cf-photo'), '시작 전: ⚔ 전투 시작 옆 ✍ 서술형 도전 📸');
   await S.click('#bf-go'); await S.waitForTimeout(800);
   ok(await S.isVisible('#quiz .q-extra'), '문제 창(졸개 ①) 안: ✍ 서술형 도전 📸');
+  await S.waitForTimeout(300); const qs = await S.evaluate(() => [...document.querySelectorAll('#quiz-q .sym-t, #quiz-choices .sym-t')].map((e) => e.dataset.st)); ok(qs.length > 0, `📖 기호 톡: 성채 문제 창 기호 (${qs.join(' ')})`);
+  if (qs.length) { await S.evaluate(() => document.querySelector('#quiz-q .sym-t, #quiz-choices .sym-t').click()); await S.waitForTimeout(300); ok(await S.isVisible('.st-bub'), '성채 문제 창에서 톡 → 말풍선'); await S.mouse.click(5, 5); await S.waitForTimeout(200); }
   // 졸개 ① 맞힘
   await S.evaluate(() => { const q = DS.Quiz.last; if (q.type === 'multi') { q.answer.forEach((k) => document.querySelectorAll('#quiz-choices .choice')[k].click()); document.querySelector('#quiz-choices .q-submit').click(); } else if (q.type === 'choice' || !q.type) document.querySelectorAll('#quiz-choices .choice')[q.answerIndex].click(); });
   await S.waitForTimeout(4000);

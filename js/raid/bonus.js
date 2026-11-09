@@ -280,6 +280,7 @@ DS.Bonus = (function () {
   }
   // ── 1:1 전투 ───────────────────────────────────────────
   async function fight(L, mid, fo = {}) {
+    if (DS.SymTalk) DS.SymTalk.setCtx(preview || all() ? null : me, L.id); // 📖 #54 기호 톡 기록 = 성채 층 · 허수아비 차시
     const mon = monOf(L, mid), castle = !!L.rooms, photoRoom = castle && !!((L.rooms || []).find((r) => r.id === mid) || {}).photo, rec = Object.assign({}, castle ? roomRec(mine, L, mid) : (mine[L.id] || {})[mid] || {}), prep = await prepOf(L.id);
     if (castle && me && !all()) seenAdd(me, `${L.id}/${mid}`); // NEW 끔
     const first = !rec.tries && !rec.clear, clearedBefore = !!rec.clear, sealedBefore = seals(mine).includes(L.id);

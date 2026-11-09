@@ -222,3 +222,8 @@
 - 고침: `js/raid/student.js` `paint(body, tag, html)` 하나로 모음 — 지금 떠 있는 화면의 `data-paint` 가 같은 tag 면 양피지 · 몸통 · 창 스크롤을 되돌림. 문제 · 소레이드 · ✍ 쓰기 · 결과 화면이 모두 이걸 씀.
 - 지킴: `tests/soraid.test.js` ⑫ 가 `body.innerHTML = \`<div class="panel framed st-fight` 직접 쓰기가 0 곳인지 확인 · `tools/e2e/e2e83.js` 가 연습 판에서 실제 스크롤 확인.
 - 규칙(제안): **새 학생 전투 화면을 만들면 `paint()` 로 그린다.** 다시 그릴 때 사라지는 상태(스크롤 · 펼침 · 입력)는 화면마다 따로 고치지 말고 공용 함수 한 곳에.
+
+## 📖 기호 톡 (2026-11-10 #54) — `js/engine/symtalk.js`
+- 문구 = `docs/SYMBOL-TALK.md` 표 그대로(`tests/symtalk.test.js` 가 한 글자씩 비교 · 문구를 고치면 둘 다). 명제 단원 기호를 더하면 ROWS 에 줄 추가 + `pick()` 문맥 규칙.
+- 화면 코드는 손대지 않음: MutationObserver 가 `#st-body`(수업 · 소레이드 · 형성평가 · ✍ 쓰기) · `#quiz`(성채 · 허수아비 문제 창) · `.bn-fight` 나의 풀이 글자에 점선 칸(`.sym-t`)을 씌움 → 새 화면도 이 안에 그리면 저절로 됨.
+- 톡 = document 캡처 단계에서 가로채 말풍선(보기 단추 안 기호를 눌러도 그 보기는 안 고름) · 기록 `xp/{반}/{번호}/st/{차시}/{기호}` (자기 칸 · 규칙 변경 없음 · 테스트 · 미리 보기는 안 셈) · 대시보드 「📖 기호 톡」.

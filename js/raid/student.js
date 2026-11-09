@@ -193,6 +193,7 @@ DS.Student = (function () {
   function bindHelp() {}
 
   function render() {
+    if (DS.SymTalk) DS.SymTalk.setCtx(Object.assign(acc(), { test: !!test }), L && L.id); // 📖 #54 기호 톡 기록 = 이 차시 (테스트는 안 셈)
     if (Raid().isClosed(R)) return toCamp();
     if (!R.players || !R.players[me]) { $('#st-body').innerHTML = '<div class="panel"><p>입장 정보가 없어요. 처음 화면에서 다시 입장해 주세요.</p></div>'; return; }
     header();

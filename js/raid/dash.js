@@ -25,7 +25,7 @@ DS.Dash = (function () {
     const k = A().classKey(c);
     const [records, xp, cards, bonus] = await Promise.all(['records', 'xp', 'cards', 'bonus'].map((p) => DS.Net.get(`${p}/${k}`).catch(() => null)));
     const d = build(roster[c] || {}, records || {}, xp || {}, cards || {}, bonus || {});
-    d.studs.forEach((st) => { st.cls = c; st.key = `${c}|${st.n}`; st.held = d.held; });
+    d.studs.forEach((st) => { st.cls = c; st.key = `${c}|${st.n}`; st.held = d.held; st.symt = (((xp || {})[st.n]) || {}).st || {}; }); // 📖 #54 기호 톡 횟수
     if (d.held.length) DS.Net.update(`held/${k}`, Object.fromEntries(d.held.map((l) => [l.id, true]))).catch(() => {}); // 📕 옛 수업도 「한 차시」로 (학생 오답노트 불참 판단 · v0.9.7.9)
     return d;
   }
@@ -76,17 +76,18 @@ DS.Dash = (function () {
   function render() {
     const el = $('#dash-body'); if (!el) return;
     const classes = Object.keys(roster).sort();
-    const TABS = [['table', '① 한눈에 표'], ['rank', '② 랭킹'], ['watch', '③ 주의 학생'], ['weak', '④ 개념별 약점'], ['std', '⑤ 성취기준'], ['mis', '⑥ 오개념'], ['memo', '⑦ 세특 메모'], ['sv', '📝 설문'], ['use', '📈 활용 추이'], ['photo', '📷 서술형']];
+    const TABS = [['table', '① 한눈에 표'], ['rank', '② 랭킹'], ['watch', '③ 주의 학생'], ['weak', '④ 개념별 약점'], ['std', '⑤ 성취기준'], ['mis', '⑥ 오개념'], ['memo', '⑦ 세특 메모'], ['sv', '📝 설문'], ['use', '📈 활용 추이'], ['photo', '📷 서술형'], ['sym', '📖 기호 톡']];
     el.innerHTML = `<div class="panel framed"><h2>📊 학급 대시보드 <span class="muted small">교사만 · 학생 화면과 종합상황실에는 나오지 않아요</span></h2>
         <div class="tabs st-cls">${classes.length > 1 ? `<button class="tab${isAll() ? ' on' : ''}" data-cls="${ALL}">🏫 전체</button>` : ''}${classes.map((c) => `<button class="tab${c === cls ? ' on' : ''}" data-cls="${esc(c)}">${esc(c)}</button>`).join('') || '<span class="muted">명단이 없어요 — 학생 관리에서 먼저 올려 주세요</span>'}</div>
         <div class="tabs dash-tabs">${TABS.map(([k, t]) => `<button class="tab${k === tab ? ' on' : ''}" data-tab="${k}">${t}</button>`).join('')}</div></div>
-      <div class="panel framed dash-main">${!cls ? '' : !data ? '<p class="muted">불러오는 중…</p>' : !data.held.length && tab !== 'sv' && tab !== 'use' && tab !== 'photo' ? '<p class="muted">아직 저장된 수업 기록이 없어요. (학생이 수업 끝 결과를 보면 저장돼요)</p>' : VIEW[tab]()}</div>`;
+      <div class="panel framed dash-main">${!cls ? '' : !data ? '<p class="muted">불러오는 중…</p>' : !data.held.length && tab !== 'sv' && tab !== 'use' && tab !== 'photo' && tab !== 'sym' ? '<p class="muted">아직 저장된 수업 기록이 없어요. (학생이 수업 끝 결과를 보면 저장돼요)</p>' : VIEW[tab]()}</div>`;
     el.querySelectorAll('[data-cls]').forEach((b) => (b.onclick = () => { cls = b.dataset.cls; words = null; useData = null; useFor = ''; load(); }));
     el.querySelectorAll('[data-tab]').forEach((b) => (b.onclick = () => { tab = b.dataset.tab; render(); }));
     el.querySelectorAll('[data-sort]').forEach((b) => (b.onclick = () => { const k = b.dataset.sort; sortDir = sortKey === k ? -sortDir : (k === 'n' || k === 'name' ? 1 : -1); sortKey = k; render(); }));
     el.querySelectorAll('[data-who]').forEach((b) => (b.onclick = () => detail(b.dataset.who)));
     const csv = el.querySelector('#dash-csv'); if (csv) csv.onclick = downloadCsv;
     if (tab === 'sv') svBind(el);
+    if (tab === 'sym') { const sl = el.querySelector('#sym-l'); if (sl) sl.onchange = () => { symL = sl.value; render(); }; }
     if (tab === 'use') useBind(el);
     if (tab === 'photo') { const h = el.querySelector('#ph-board'); if (h && DS.Photo) DS.Photo.board(h, { cls: isAll() ? '' : cls, roster }).catch((e) => { h.textContent = e.message || '불러오지 못했어요'; }); }
     el.querySelectorAll('[data-copy]').forEach((b) => (b.onclick = () => copy(b.dataset.copy === 'all' ? data.studs.map((s) => `${who(s)}: ${memo(s)}`).join('\n\n') : memo(data.studs.find((s) => s.key === b.dataset.copy)))));
@@ -275,6 +276,17 @@ DS.Dash = (function () {
   }
   const bar = (n, max) => `<i class="sv-bar" style="width:${max ? Math.round((100 * n) / max) : 0}%"></i>`;
   const sign = (d) => (d == null ? '-' : `${d > 0 ? '+' : ''}${d.toFixed(2)}`);
+  // 📖 기호 톡 (#54 · 2026-11-10): 학생이 많이 누른 기호 순위 (반 · 차시 거르기) · 벌 · 보상 없음 · 헷갈리는 기호 = 다음 수업 짚을 곳
+  let symL = '';
+  VIEW.sym = function () {
+    if (!DS.SymTalk) return '<p class="muted">기호 톡 모듈이 없어요.</p>';
+    const studs = (data && data.studs) || [], lids = [...new Set(studs.flatMap((s) => Object.keys(s.symt || {})))].sort();
+    const name = (lid) => { const l = DS.Lessons.get(lid); return l ? (l.eval ? `🏰 ${l.title || lid}` : `${DS.Lessons.noText(l.no)}차시`) : lid; };
+    const list = DS.SymTalk.rank(Object.fromEntries(studs.map((s, i) => [i, { st: s.symt }])), symL), max = list.length ? list[0].n : 0;
+    return `<p class="muted small">학생이 문제 속 기호를 톡 눌러 뜻을 본 횟수 · 많이 누른 기호 = 헷갈리는 기호 (다음 수업 짚을 곳) · 벌 · 보상 없음 · 테스트는 안 셈</p>
+      <label>차시 <select id="sym-l"><option value="">모두</option>${lids.map((l) => `<option value="${esc(l)}"${l === symL ? ' selected' : ''}>${esc(name(l))}</option>`).join('')}</select></label>
+      ${list.length ? `<table class="r-table">${list.map((r, i) => `<tr><td>${i + 1}</td><td class="math"><b>${DS.UI.pretty(r.sym)}</b></td><td class="muted small">${esc(r.easy)}</td><td style="min-width:120px">${bar(r.n, max)} <b>${r.n}</b>번</td><td class="muted small">${r.who}명</td></tr>`).join('')}</table>` : '<p class="muted">아직 누른 기록이 없어요.</p>'}`;
+  };
   VIEW.sv = function () {
     if (!DS.Survey) return '<p class="muted">설문 모듈이 없어요.</p>';
     if (svFor !== svClasses().join(',') || !sv) { if (svFor !== svClasses().join(',')) svLoad(); return '<p class="muted">설문 불러오는 중…</p>'; }
