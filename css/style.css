@@ -2982,3 +2982,4 @@ html body .sc-gem, html body .sc-gem .sc-gn, html body .sc-gem b { font-weight: 
 /* 🖥 PC 첫 화면 = 가로 배경(달빛 아래 고성 테라스) · 메뉴를 넓게 (2026-11-09) — 폰 · 세로 화면은 그대로 */
 @media (min-aspect-ratio: 4/3) and (min-width: 900px) { #screen-home .wrap { max-width: 820px; } }
 .pick-grp { margin-top: 8px; padding: 6px 8px 8px; border: 1.5px dashed #b08d57aa; border-radius: 8px; } .pick-grp-h { display: block; font-size: 14px; margin-bottom: 4px; color: #6a4a12; } /* 🔁 #41 두 칸 고르기 */
+.cr-prob { margin: 0 0 8px; padding: 6px 10px; border: 2px solid #8a6a3a; border-radius: 8px; background: #fffaf0; color: #2b1d0e; } .cr-prob summary { cursor: pointer; font-weight: 700; } .cr-prob summary small { font-weight: 400; color: #7a6a55; } .cr-prob p { margin: 6px 0 2px; line-height: 1.5; } /* 📜 #44 한 판 더 원문 문제 */

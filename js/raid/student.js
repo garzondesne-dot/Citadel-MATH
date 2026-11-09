@@ -646,7 +646,7 @@ DS.Student = (function () {
     };
   }
   // ⚔ 소레이드 화면 (2026-11-09 #18): 진행 칩 ①②③👑 · 지금 단계 문제 하나 · 「📜 나의 풀이」가 한 줄씩 쌓임 · 기회 반 칸 · 1칸 남으면 🙋 선생님 확인
-  let cform = null; const chainPrac = {}, writeMode = {}; let photoLoaded = false; // ✍ writeMode[mid] = { peek } (2026-11-09 #26)
+  let cform = null; const chainPrac = {}, writeMode = {}, probShut = {}; let photoLoaded = false; // ✍ writeMode[mid] = { peek } (2026-11-09 #26)
   // ⚔ 소레이드 공격 모션 (2026-11-09 선생님 「졸개는 공격 모션 없이 판정만」): 답을 내면 화면을 다시 그린 뒤 일반 몬스터처럼 돌진 · 탄 · 빗나감
   //   모션이 끝날 때까지(약 1초) 실시간 갱신으로 화면을 다시 그리지 않음 (그리면 이펙트가 지워짐)
   let chainAtk = null, chainAtkUntil = 0;
@@ -709,13 +709,14 @@ DS.Student = (function () {
       chargeBtn(body);
       return;
     }
-    if (needWhy) mainHtml = `${story(says)}<div class="paper cr-why"><div class="paper-h"><b>💡 근거 한 줄</b><small>틀려도 괜찮아요 · 다시 골라요</small></div><p class="why-q">${pretty(wq.why.pre)} <b class="why-bl">____</b>${pretty(wq.why.post)}</p><div class="choices">${wq.why.choices.map((c, i) => `<button class="choice" data-why="${i}">${pretty(c)}</button>`).join('')}</div></div>`;
+    const probText = prac ? (pItems[0] || {}).problem : null, probBox = probText ? `<details class="cr-prob"${probShut[mid] ? '' : ' open'} data-pm="${esc(mid)}"><summary>📜 문제 <small>(숫자가 바뀐 원문 · 눌러서 접기)</small></summary><p>${pretty(probText)}</p></details>` : ''; // 📜 #44 ⑤ 한 판 더 = 바뀐 숫자의 원문 문제 (모든 단계 · 접기)
+    if (needWhy) mainHtml = `${probBox}${story(says)}<div class="paper cr-why"><div class="paper-h"><b>💡 근거 한 줄</b><small>틀려도 괜찮아요 · 다시 골라요</small></div><p class="why-q">${pretty(wq.why.pre)} <b class="why-bl">____</b>${pretty(wq.why.post)}</p><div class="choices">${wq.why.choices.map((c, i) => `<button class="choice" data-why="${i}">${pretty(c)}</button>`).join('')}</div></div>`;
     else if (rec.fail) mainHtml = `<p class="paper-note">끝까지 못 맞혔어요 — 아래 풀이를 학습지에 옮겨 적고 🎯 복습 허수아비에서 다시 도전해요.</p>${story(rec.items.map((x) => x.say))}`;
     else if (!prac && rec.done) mainHtml = `<p class="okc big-msg">${rec.perfect ? '🌟 퍼펙트 사슬!' : '🎉 대장 처치!'}</p>${story(says)}<p class="cr-more">✅ 다 풀었어요! 🔥 한 판 더 해 볼래요? 부담 없어요</p>${wrBtn}${pracBtn}${hintBtn}<p class="muted small cr-pnote">숫자만 바뀐 새 문제 · 판마다 연습 기회 4칸 (틀리면 줄어요 · 다 쓰면 그 판 끝) · 수업 기록 · 💎 그대로 · 사슬 완성마다 경험치 +1 (데미지 0)</p>`;
     else if (pFail) mainHtml = `<p class="paper-note">✘ 이번 연습 판은 기회를 다 썼어요 — 끝 (EXP 없음) · 아래 풀이를 보고 다시 해 봐요</p>${story(pItems.map((x) => x.say))}${wrBtn}${pracBtn}${hintBtn}`; // #40
     else if (pDone) mainHtml = `<p class="okc">✔ 연습 사슬 완성! <b class="gold">+1 EXP</b></p>${story(says)}${wrBtn}${pracBtn}${hintBtn}<p class="muted small cr-pnote">숫자만 바뀐 새 문제 · 판마다 연습 기회 4칸 (틀리면 줄어요 · 다 쓰면 그 판 끝) · 수업 기록 · 💎 그대로 · 맞히면 공격 이펙트가 나가요 (데미지 0)</p>`;
     else if (rec.locked && !prac) mainHtml = `${story(says)}<div class="cr-lock"><b>🙋 선생님 확인을 기다려요</b><p>기회가 1칸 남았어요 — 학습지에 풀이를 정리해 두면 선생님이 와서 확인해 줘요.</p></div>`;
-    else mainHtml = `${story(says)}<div class="paper"><div class="paper-h"><b>${esc(step.title)} · ${stage === pItems.length - 1 ? '👑 대장' : `졸개 ${'①②③④⑤⑥'[stage]}`}</b><small>${prac ? '연습 (숫자 바뀜 · 데미지 없음)' : '틀려도 숫자는 그대로'}</small></div>
+    else mainHtml = `${story(says)}<div class="paper">${probBox}<div class="paper-h"><b>${esc(step.title)} · ${stage === pItems.length - 1 ? '👑 대장' : `졸개 ${'①②③④⑤⑥'[stage]}`}</b><small>${prac ? '연습 (숫자 바뀜 · 데미지 없음)' : '틀려도 숫자는 그대로'}</small></div>
         ${lastWrong ? '<p class="paper-note">✘ 다시 생각해 봐요 — 같은 문제예요</p>' : ''}<div class="items">${itemHtml(q, 0, lastWrong, null, cform.given)}</div></div>${prac ? wrBtn : ''}`; // #38: 연습 진행 중에도 📸 단추
     body.innerHTML = `<div class="panel framed st-fight ch-wrap">${scene(step, rec, hp, '', '')}
       <div class="cr-chips">${chips}</div>${cheer}${hintsBox}${mainHtml}
@@ -737,6 +738,7 @@ DS.Student = (function () {
     const wb = $('#cr-write'); if (wb) wb.onclick = () => { writeMode[mid] = { peek: false }; drawn = ''; render(); };
     chargeBtn(body);
     const hb = $('#cr-hint'); if (hb) hb.onclick = () => DS.Control.run(async () => { hb.disabled = true; await DS.Act.giveHint(code, raw, mid); DS.Sound.clank(); DS.UI.toast('💡 힌트를 TV 에 띄웠어요 · EXP +1'); drawn = ''; render(); });
+    body.querySelectorAll('.cr-prob').forEach((d) => d.addEventListener('toggle', () => { probShut[d.dataset.pm] = !d.open; })); // 📜 접기 기억
     const pb = $('#cr-prac'); if (pb) pb.onclick = () => DS.Control.run(async () => { pb.disabled = true; chainPrac[mid] = await DS.Act.pracStart(code, raw, mid); cform = null; drawn = ''; render(); }); // 🔥 #39 시작 = 셈
     const go = $('#cr-go');
     if (go) go.onclick = () => DS.Control.run(async () => {
