@@ -160,7 +160,7 @@ DS.Student = (function () {
   function gemRefresh(force) {
     if (!real() || !DS.Gem || !info0 || info0.cls == null || (!force && Date.now() - gemAt < 15000)) return;
     gemAt = Date.now();
-    DS.Gem.mine(acc()).then((d) => { const n = Number((d || {}).total) || 0, up = gemN != null && n > gemN; gemN = n; document.querySelectorAll('.sc-gn').forEach((e) => { e.textContent = n; if (up) { e.classList.remove('up'); void e.offsetWidth; e.classList.add('up'); } }); }).catch(() => {});
+    DS.Gem.mine(acc()).then((d) => { const n = Number((d || {}).total) || 0, up = gemN != null && n > gemN; gemN = n; document.querySelectorAll('.sc-gn').forEach((e) => { e.textContent = n; if (up) { e.classList.remove('up'); void e.offsetWidth; e.classList.add('up'); } }); if (DS.Gem.showLeft) DS.Gem.showLeft(d); }).catch(() => {});
   }
   const openFb = () => (focusLock() ? DS.UI.toast('👀 집중모드가 끝나면 보내 주세요') : DS.Feedback.open({ c: info0.cls, n: info0.num, name: info0.nick }, { code, where: 'dungeon' }));
   const openShop = () => (focusLock() ? DS.UI.toast('👀 집중모드에는 상점을 열 수 없어요') : DS.Control.run(() => DS.Camp.settings({ me: { c: info0.cls, n: info0.num, name: info0.nick, hero: myP().hero, fx: myP().fx, title: myP().title, socket: info0.socket }, onSave: async (v) => {
@@ -685,6 +685,8 @@ DS.Student = (function () {
         const items = [{ question: (((DS.Rubrics || {})[L.id] || {})[mid] || {}).ask || step.title, answer: rec.items[rec.items.length - 1].answer, solution: rec.says.join(' / '), check: Object.assign({}, ...rec.items.map((x) => x.check || {})) }]; // 학습지 숫자 · 단계별 기대 중간값
         const res = await DS.Photo.grade(acc(), { lesson: L.id, room: mid, title: step.title, items });
         const out = await DS.Act.snapEnd(code, raw, mid, res, wm.peek);
+        // 📜 서술 조각 +1 (2026-11-09 #27 선생님): ✍ 📸 통과로 🌟 진필살기가 나갈 때만 (석화 · 금빛 컷인 · ⚡ 충전 저장) · 문제당 한 번 · 「다시 보기」 연습 쓰기 = 없음
+        if (!wm.peek && ['true', 'cut', 'charge'].includes(out) && DS.Gem && DS.Gem.addScroll && real()) DS.Gem.addScroll(acc(), 1, `ult_${L.id}_${mid}`, '🌟 진필살기 서술').catch(() => 0);
         const missOf = (r) => Object.values((r && r.steps) || {}).map((x, i) => (x && !x.earned ? (i === rec.items.length - 1 ? '👑' : '①②③④⑤⑥'[i]) : null)).filter(Boolean);
         if (res && res.status === 'pass' && missOf(res).length) setTimeout(() => DS.UI.toast(`✏ 통과! 다만 ${missOf(res).join(' · ')} 단계는 학습지에 다시 정리해 둬요`, 4500), 4400); // 1점 빠져도 통과 (2026-11-09 선생님)
         if (res && res.status === 'pass') { delete writeMode[mid]; DS.UI.toast(wm.peek ? '✍ 연습 쓰기 통과! (진필살기 없음)' : out === 'true' ? '🌟 진필살기 발동! 몬스터가 돌로 굳어요' : out === 'cut' ? '🌟 금빛 컷인! (석화는 이미 친구가)' : out === 'charge' ? '⚡ 진필살기 충전 1개 — 다음 몬스터에서 써요' : '🌟 서술형 통과!', 4200); }

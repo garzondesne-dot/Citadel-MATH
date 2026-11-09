@@ -276,6 +276,7 @@ DS.Camp = (function () {
       ${me.teacher ? '' : `<div class="st-go-row"><button class="btn primary big" id="camp-enter">${live && live.open ? `⚔ ${live.no ? `${DS.Lessons.noText(live.no)}차시 ` : ''}입장` : riftNow() ? `⏳ ${riftNow().no}차시 이어하기` : '🔒 수업 기다리는 중'}</button><button class="btn big" id="camp-me">🧙 내 용사</button></div>`}`; // 🧹 2026-11-07 정돈판: 능력치 · 장착 · 수집 줄 → 「🧙 내 용사」 창 안으로
     { const ce = el.querySelector('#camp-enter'); if (ce) ce.onclick = () => { const g = $('#camp-gate'); if (g) g.click(); }; const cm = el.querySelector('#camp-me'); if (cm) cm.onclick = () => settings({ tab: 'hero' }); }
     document.querySelectorAll('#camp .sc-gn').forEach((e) => { e.textContent = L.gem != null ? L.gem : 0; /* 2026-11-08: 「·」 는 도트 글꼴에 없어 네모(▯)로 보였음 */ });
+    if (DS.Gem && DS.Gem.showLeft && !me.teacher) DS.Gem.mine(me).then(DS.Gem.showLeft).catch(() => {}); // 💎 오늘 남은 한도
     void st; void sealMax; void U; void heroOpen; void heroAll; void t; void earned;
     // 장면: 등불 · 깃발 · 상태 표시 (글씨 없이)
     const stage = document.querySelector('#camp .camp-stage'); // 2026-11-05: 성벽 등불(차시 층) 없앰

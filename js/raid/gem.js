@@ -8,11 +8,14 @@ DS.Gem = (function () {
   const N = () => DS.Net;
   const ck = (c) => String(c).replace(/[.#$/[\]]/g, '_');
   const kk = (k) => String(k).replace(/[.#$/[\]]/g, '_');
-  const DAY_CAP = 60; // 2026-11-06 경제 다시 맞춤: 30 → 50 (수학 풀이 보상을 올려서) · 2026-11-07 → 60 (보상 전체 +20%)
+  const DAY_CAP = 100; // 2026-11-06 경제 다시 맞춤: 30 → 50 (수학 풀이 보상을 올려서) · 2026-11-07 → 60 (보상 전체 +20%) · 2026-11-09 #27 → 100 (선생님)
   const path = (m) => `gem/${ck(m.c)}/${m.n}`;
   // 🧪 테스트 모드 (2026-11-09 선생님 「테스트 모드에서 마정석 많이 · 해금은 전부 잠가 두고」): 테스트 저장소(이 기기 안 · Firebase 아님)로 바꿔 낀 동안은 💎 · 📜 · 상점 · 강화가 진짜처럼 돎
   const tst = (m) => !!(m && m.test && !(typeof DS !== 'undefined' && DS.Test && DS.Test.active && DS.Test.active()));
   const today = () => new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
+  // 💎 오늘 남은 한도 (2026-11-09 #27): 한도에 걸려 덜 받을 때 학생이 이유를 알게 · 💎 칩 옆에 작게
+  const dayLeft = (d) => Math.max(0, DAY_CAP - ((((d || {}).day) || {})[today()] || 0));
+  function showLeft(d) { if (typeof document === 'undefined') return; const n = dayLeft(d); document.querySelectorAll('.sc-gem').forEach((b) => { let s = b.querySelector('.sc-day'); if (!s) { s = document.createElement('small'); s.className = 'sc-day'; b.appendChild(s); } s.textContent = `오늘 +${n}`; s.classList.toggle('out', n <= 0); b.title = `오늘 더 받을 수 있는 💎 ${n}개 (하루 ${DAY_CAP}개까지 · 선물 · 업적은 따로)`; }); }
   // 적립표 (확정안 · 한 곳에서 바꿈)
   // 2026-11-07 사용자 「보상 전체 +20%」: 새 용사 6 · 📐 수식 이펙트로 상점이 💎1,580 → 1,980 → 수입도 약 1.2배 (비율은 그대로 · tests/economy.test.js)
   const G = {
@@ -224,5 +227,5 @@ DS.Gem = (function () {
     await N().update(path(m), { total: (Number(d.total) || 0) + back, [`log/refund_${key}`]: { g: back, at: N().TS, why: '📚 도감 완성 → 💎 돌려받음', gift: true } });
     return back;
   }
-  return { auraCls, AURA_NAMES, PHOTO_HEROES, photoPassed, SCROLL_NEED, scrollOf, ENH, ENH_MAX, GREAT, enhTier, addScroll, enhance, watchGifts, giftList, chest, feathers, rareOf, convert, CONV, cardRefund, CARD_HEROES, G, SHOP, DAY_CAP, price, mine, add, gift, giftsSince, addDaily, medal, buy, sell, refundOf, REFUND, owns, itemKey, streak, today };
+  return { dayLeft, showLeft, auraCls, AURA_NAMES, PHOTO_HEROES, photoPassed, SCROLL_NEED, scrollOf, ENH, ENH_MAX, GREAT, enhTier, addScroll, enhance, watchGifts, giftList, chest, feathers, rareOf, convert, CONV, cardRefund, CARD_HEROES, G, SHOP, DAY_CAP, price, mine, add, gift, giftsSince, addDaily, medal, buy, sell, refundOf, REFUND, owns, itemKey, streak, today };
 })();

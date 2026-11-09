@@ -30,4 +30,8 @@ const balOk = ratio >= 0.8 && ratio <= 2.2; if (!balOk) fail++;
 console.log(`${balOk ? '✔' : '✘'} 실력 : 노력 = 1 : ${ratio.toFixed(2)} (노력만으로도 같은 높이까지 — 1 : 0.8~2.2)`);
 const enh = DS.Gem.ENH.slice(1).reduce((a, c) => ({ g: a.g + c.g, s: a.s + (c.s || 0) }), { g: 0, s: 0 });
 console.log(`🔨 강화 +10 까지 💎 ${enh.g} + 📜 ${enh.s} (상점 밖 큰 쓸 곳)`);
+// 📜 서술 조각 공급 (2026-11-09 #27): 성채 서술형 7방 × 최대 3 (통과 · 만점 · 점수 상승) + 수업 소레이드 ✍ 📸 진필살기 문제당 1 (지금 기준표가 있는 문제 수) · 필요 = 상점 📜 + 강화 📜
+{ global.window = global; require('../lessons/rubrics.js'); const RB = DS.Rubrics || {}; let raid = 0, castle = 0; Object.entries(RB).forEach(([l, rs]) => Object.keys(rs).forEach(() => { if (/^eval-/.test(l)) castle++; else raid++; }));
+  const need = Object.values(DS.Gem.SCROLL_NEED).reduce((a, k) => a + Object.values(k).reduce((b, v) => b + v, 0), 0) + enh.s, sup = castle * 3 + raid;
+  console.log(`📜 공급 ${sup} (성채 ${castle}방 × 3 = ${castle * 3} + 수업 진필살기 ${raid}문제 × 1) · 필요 ${need} (상점 ${need - enh.s} + 강화 ${enh.s}) → ${sup >= need ? '다 모음' : `${need - sup}개 모자람 (수업 ✍ 문제가 늘면 채워짐)`}`); }
 console.log(fail ? `❌ 경제 목표 밖 ${fail}개` : '✅ 💎 경제 목표 안'); process.exit(fail ? 1 : 0);
