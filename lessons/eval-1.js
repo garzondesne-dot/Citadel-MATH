@@ -138,6 +138,87 @@
       `「아니거나 아닌」 = (${p}의 배수 그리고 나머지 ${rem})의 여집합 (드모르간) → 빼는 수 ${st(bad)} ${bad.length}개 → ${N - 1} − ${bad.length} = ${n}`, { N, p, q, rem })];
   }
 
+  // ⚔ 소레이드 방 (2026-11-09 요청 #23 · 선생님 「추천대로 진행」): q07 ~ q12 = 졸개(소문제) … 👑 대장(마지막) · 혼자 하는 성채용
+  //   pass 0 = 위 첫 시도 숫자 · pass ≥ 1 = 숫자 바뀐 사슬 (각 방 r 생성기와 같은 조건) · say = 「📜 나의 풀이」 한 줄 (6차시 CHAIN 말투)
+  const sayOf = (q, say) => Object.assign(q, { say }), show = (x) => String(x).replace(/^-/, '−');
+  function c07(p, q, N, r) {
+    const A = divs(p), B = mults(q, N), D = minus(B, A), U = union(A, B);
+    return [
+      sayOf(multi(`A = {x | x는 ${p}의 약수} 의 원소를 모두 고르시오.`, fill(r, A, range(1, Math.max(12, p + 3)), Math.min(10, A.length + 4)), A, `${p}의 약수 → ${st(A)}`, { p, step: 1 }), `A = ${st(A)} 이다.`),
+      sayOf(multi(`B = {x | x는 ${N} 이하의 ${q}의 배수} 의 원소를 모두 고르시오.`, fill(r, B, range(1, N + 4), Math.min(12, B.length + 4)), B, `${N} 이하의 ${q}의 배수 → ${st(B)}`, { q, N, step: 2 }), `B = ${st(B)} 이다.`),
+      sayOf(multi(`A ∩ X = ∅ 이고 B ∪ X = B 일 때, X 에 들어갈 수 있는 원소를 모두 고르시오.`, U, D, `B ∪ X = B → X ⊂ B · A ∩ X = ∅ → A 의 원소는 안 됨 → B − A = ${st(D)}`, { step: 3 }),
+        `B ∪ X = B 이므로 X ⊂ B, A ∩ X = ∅ 이므로 X 는 A 와 서로소이다. 따라서 X ⊂ B − A = ${st(D)} 이다.`),
+      sayOf(nm(`집합 X 의 개수는?`, 2 ** D.length, `B − A 의 원소 ${D.length}개로 만들 수 있는 부분집합 → 2${sup(D.length)} = ${2 ** D.length}`, { p, q, N, step: 4 }), `그러므로 집합 X 의 개수는 2${sup(D.length)} = ${2 ** D.length} 이다.`),
+    ];
+  }
+  function c08(c, b, d, r) {
+    const want = sorted([1 - c, 0, b]), opts = fill(r, [...want, d], range(-5, 9), 9);
+    return [
+      sayOf(ch(`A = {x² + ${c}x, ${b}, ${d}}, B = {x, ${d}} 에서 A ∩ B = B 이면 두 집합 A, B 사이의 관계는?`, ['B ⊂ A', 'A ⊂ B', 'A ∩ B = ∅'], 'B ⊂ A', 'A ∩ B 가 B 전체 → B 의 원소가 모두 A 에 있음 → B ⊂ A', { step: 1 }), `A ∩ B = B 이므로 B ⊂ A, 곧 x 는 A 의 원소이다 (x ≠ ${d}).`),
+      sayOf(ch(`x = ${b} 일 때 B ⊂ A 가 될 수 있는가?`, ['가능하다 (○)', '불가능하다 (✕)'], '가능하다 (○)', `x = ${b} 이면 B = {${b}, ${d}} 이고 ${b}, ${d} 가 모두 A 에 있음 → 가능`, { step: 2 }), `x = ${b} 이면 B = {${b}, ${d}} ⊂ A 이므로 가능하다.`),
+      sayOf(multi(`x = x² + ${c}x 를 만족시키는 x 를 모두 고르시오.`, opts, [0, 1 - c], `x² + ${c - 1 === 1 ? '' : c - 1}x = 0 → x(x + ${c - 1}) = 0 → x = 0, ${show(1 - c)}`, { step: 3 }), `x = x² + ${c}x 에서 x² + ${c - 1 === 1 ? '' : c - 1}x = 0 이므로 x = 0 또는 x = ${show(1 - c)} 이다.`),
+      sayOf(multi(`A ∩ B = B 를 만족시키는 정수 x 를 모두 고르시오.`, opts, want, `x = ${b} · 0 · ${show(1 - c)} 모두 가능`, { c, b, d, step: 4 }), `그러므로 x = ${want.map(show).join(', ')} 이다.`),
+    ];
+  }
+  function c09(a, b, c, r) {
+    const n100 = (k) => Math.floor(100 / k), L1 = lcm(a, b), L2 = lcm(a, c), L3 = lcm(L1, L2), A = (k) => `A${sub(k)}`;
+    const ok = `${n100(L1)}개, ${n100(L2)}개`, pool = [ok, `${n100(a * b)}개, ${n100(a * c)}개`, `${n100(b)}개, ${n100(c)}개`, `${n100(L2)}개, ${n100(L1)}개`, `${n100(L1) + 1}개, ${n100(L2) + 1}개`];
+    const pairs = [...new Set(pool)].slice(0, 4), choices = (r || DS.Rng(`e1|c09|${a}|${b}|${c}`)).shuffle(pairs.slice());
+    return [
+      sayOf(ch(`${A(a)} ∩ (${A(b)} ∪ ${A(c)}) 을 분배법칙으로 바르게 나타낸 것은?`, [`(${A(a)} ∩ ${A(b)}) ∪ (${A(a)} ∩ ${A(c)})`, `(${A(a)} ∪ ${A(b)}) ∩ (${A(a)} ∪ ${A(c)})`, `(${A(a)} ∩ ${A(b)}) ∩ (${A(a)} ∩ ${A(c)})`], `(${A(a)} ∩ ${A(b)}) ∪ (${A(a)} ∩ ${A(c)})`, '∩ 가 ∪ 위에 분배됨', { step: 1 }),
+        `분배법칙에 의해 ${A(a)} ∩ (${A(b)} ∪ ${A(c)}) = (${A(a)} ∩ ${A(b)}) ∪ (${A(a)} ∩ ${A(c)}) 이다.`),
+      sayOf(ch(`n(${A(a)} ∩ ${A(b)}), n(${A(a)} ∩ ${A(c)}) 를 차례로 구하면? (100 이하)`, choices, ok, `${A(a)} ∩ ${A(b)} = ${A(L1)} (최소공배수) → ${n100(L1)}개 · ${A(a)} ∩ ${A(c)} = ${A(L2)} → ${n100(L2)}개`, { a, b, c, step: 2 }),
+        `${A(a)} ∩ ${A(b)} = ${A(L1)} 이므로 ${n100(L1)}개, ${A(a)} ∩ ${A(c)} = ${A(L2)} 이므로 ${n100(L2)}개이다.`),
+      sayOf(nm(`두 집합 ${A(L1)}, ${A(L2)} 에 함께 들어 있는 원소는 몇 개인가?`, n100(L3), `${A(L1)} ∩ ${A(L2)} = ${A(L3)} → ${n100(L3)}개`, { step: 3 }), `${A(L1)} ∩ ${A(L2)} = ${A(L3)} 이므로 겹치는 원소는 ${n100(L3)}개이다.`),
+      sayOf(nm(`n(${A(a)} ∩ (${A(b)} ∪ ${A(c)})) 의 값은?`, n100(L1) + n100(L2) - n100(L3), `${n100(L1)} + ${n100(L2)} − ${n100(L3)} = ${n100(L1) + n100(L2) - n100(L3)}`, { a, b, c, step: 4 }),
+        `그러므로 n(${A(a)} ∩ (${A(b)} ∪ ${A(c)})) = ${n100(L1)} + ${n100(L2)} − ${n100(L3)} = ${n100(L1) + n100(L2) - n100(L3)} 이다.`),
+    ];
+  }
+  function c10(N, k, m, r) {
+    const A = mults(k, N), B = divs(m), I = inter(A, B), u = A.length + B.length - I.length;
+    const ok = `n(A) = ${A.length}, n(B) = ${B.length}`, pool = [ok, `n(A) = ${A.length}, n(B) = ${B.length - 1}`, `n(A) = ${A.length + 1}, n(B) = ${B.length}`, `n(A) = ${B.length}, n(B) = ${A.length}`, `n(A) = ${A.length - 1}, n(B) = ${B.length - 1}`];
+    const choices = (r || DS.Rng(`e1|c10|${N}|${k}|${m}`)).shuffle([...new Set(pool)].slice(0, 4));
+    return [
+      sayOf(ch(`Aᶜ ∩ Bᶜ 와 같은 집합은?`, ['(A ∪ B)ᶜ', '(A ∩ B)ᶜ', 'A ∪ B'], '(A ∪ B)ᶜ', '드모르간의 법칙', { step: 1 }), `드모르간의 법칙에 의해 Aᶜ ∩ Bᶜ = (A ∪ B)ᶜ 이다.`),
+      sayOf(ch(`U = {x | x는 ${N} 이하의 자연수}, A = {x | x는 ${k}의 배수}, B = {x | x는 ${m}의 약수} 일 때 n(A), n(B) 는?`, choices, ok, `A = ${st(A)} · B = ${st(B)}`, { N, k, m, step: 2 }), `A = ${st(A)} 이므로 n(A) = ${A.length}, B = ${st(B)} 이므로 n(B) = ${B.length} 이다.`),
+      sayOf(nm(`n(A ∪ B) 의 값은?`, u, `A ∩ B = ${st(I)} → ${A.length} + ${B.length} − ${I.length} = ${u}`, { step: 3 }), `A ∩ B = ${st(I)} 이므로 n(A ∪ B) = ${A.length} + ${B.length} − ${I.length} = ${u} 이다.`),
+      sayOf(nm(`n(Aᶜ ∩ Bᶜ) 의 값은?`, N - u, `${N} − ${u} = ${N - u}`, { N, k, m, step: 4 }), `그러므로 n(Aᶜ ∩ Bᶜ) = n(U) − n(A ∪ B) = ${N} − ${u} = ${N - u} 이다.`),
+    ];
+  }
+  function c11(T, a, b) {
+    return [
+      sayOf(nm(`동아리 회원 ${T}명 중 A 코스 ${a}명, B 코스 ${b}명일 때 n(A) + n(B) 의 값은?`, a + b, `${a} + ${b} = ${a + b}`, { step: 1 }), `n(A) + n(B) = ${a} + ${b} = ${a + b} 이다.`),
+      sayOf(nm(`두 코스를 모두 다녀온 회원 수의 최댓값은?`, Math.min(a, b), `B ⊂ A 일 때 n(A ∩ B) 가 가장 큼 → ${Math.min(a, b)}`, { step: 2 }), `B ⊂ A 일 때 n(A ∩ B) 가 가장 크므로 최댓값은 ${Math.min(a, b)} 이다.`),
+      sayOf(nm(`두 코스를 모두 다녀온 회원 수의 최솟값은?`, a + b - T, `n(A ∪ B) = ${T} 일 때 가장 작음 → ${a + b} − ${T} = ${a + b - T}`, { T, a, b, step: 3 }), `그러므로 n(A ∪ B) = ${T} 일 때 최솟값은 ${a + b} − ${T} = ${a + b - T} 이다.`),
+    ];
+  }
+  function c12(N, p, q, rem) {
+    const bad = range(1, N - 1).filter((x) => x % p === 0 && x % q === rem), n = N - 1 - bad.length;
+    return [
+      sayOf(nm(`${N} 미만의 자연수는 모두 몇 개인가?`, N - 1, `1, 2, …, ${N - 1} → ${N - 1}개`, { step: 1 }), `${N} 미만의 자연수는 ${N - 1}개이다.`),
+      sayOf(ch(`A = {${p}의 배수}, B = {${ro(q)} 나눈 나머지가 ${rem}} 일 때 「${p}의 배수가 아니거나 ${ro(q)} 나눈 나머지가 ${iga(rem)} 아닌 수」의 집합은?`, ['(A ∩ B)ᶜ', '(A ∪ B)ᶜ', 'A ∩ Bᶜ'], '(A ∩ B)ᶜ', 'Aᶜ ∪ Bᶜ = (A ∩ B)ᶜ (드모르간)', { step: 2 }), `「A 가 아니거나 B 가 아닌」 수의 집합은 Aᶜ ∪ Bᶜ = (A ∩ B)ᶜ 이다.`),
+      sayOf(nm(`A ∩ B 의 원소는 몇 개인가?`, bad.length, `A ∩ B = ${st(bad)}`, { step: 3 }), `A ∩ B = ${st(bad)} 이므로 ${bad.length}개이다.`),
+      sayOf(nm(`구하는 자연수의 개수는?`, n, `${N - 1} − ${bad.length} = ${n}`, { N, p, q, rem, step: 4 }), `그러므로 구하는 개수는 ${N - 1} − ${bad.length} = ${n} 이다.`),
+    ];
+  }
+  const CARGS = { // 숫자 바뀐 사슬 (각 방 r 생성기와 같은 조건 · 첫 시도 숫자 빼기 · 집합 원소가 겹치지 않게)
+    q07: (r) => { for (;;) { const p = r.pick([4, 6, 8, 9, 10, 12]), q = r.pick([2, 3, 4]), N = q * r.int(4, 7), B = mults(q, N), D = minus(B, divs(p)); if (p === 6 && q === 3 && N === 18) continue; if (inter(B, divs(p)).length && D.length >= 2 && D.length <= 5) return [p, q, N]; } },
+    q08: (r) => { for (;;) { const c = r.int(2, 5), b = r.int(2, 6), d = r.int(6, 9); if (b === d || b === 1 - c || b * b + c * b === d || (c === 3 && b === 5 && d === 7)) continue; return [c, b, d]; } },
+    q09: (r) => { for (;;) { const a = r.int(2, 6), [b, c] = r.shuffle(range(3, 10)).slice(0, 2); if (b === a || c === a || lcm(a, b) > 50 || lcm(a, c) > 50 || lcm(a, b) === lcm(a, c) || (a === 6 && b === 4 && c === 10)) continue; return [a, b, c]; } },
+    q10: (r) => { for (;;) { const N = r.pick([30, 36, 40, 48, 50]), k = r.int(4, 9), m = r.pick([24, 30, 32, 36, 40, 48].filter((x) => x <= N)); if (N === 40 && k === 8 && m === 32) continue; if (inter(mults(k, N), divs(m)).length >= 2) return [N, k, m]; } },
+    q11: (r) => { for (;;) { const T = r.int(30, 50), a = r.int(Math.ceil(T / 2), T - 3), b = r.int(Math.ceil(T / 3), T - 5); if (T === 50 && a === 34 && b === 27) continue; if (a + b > T + 2 && b < a) return [T, a, b]; } },
+    q12: (r) => { for (;;) { const N = r.pick([50, 60, 80, 100]), p = r.int(3, 8), q = r.int(3, 6), rem = r.int(1, q - 1); if (N === 100 && p === 6 && q === 4 && rem === 2) continue; const k = range(1, N - 1).filter((x) => x % p === 0 && x % q === rem).length; if (k >= 2 && k <= 8) return [N, p, q, rem]; } },
+  };
+  const CHAIN = {
+    q07: (pass, r) => c07(...(pass === 0 ? [6, 3, 18] : CARGS.q07(r)), r),
+    q08: (pass, r) => c08(...(pass === 0 ? [3, 5, 7] : CARGS.q08(r)), r),
+    q09: (pass, r) => c09(...(pass === 0 ? [6, 4, 10] : CARGS.q09(r)), r),
+    q10: (pass, r) => c10(...(pass === 0 ? [40, 8, 32] : CARGS.q10(r)), r),
+    q11: (pass, r) => c11(...(pass === 0 ? [50, 34, 27] : CARGS.q11(r))),
+    q12: (pass, r) => c12(...(pass === 0 ? [100, 6, 4, 2] : CARGS.q12(r))),
+  };
+  const CHAIN_VIDEO = { q07: 'assets/video/e1-34.mp4', q10: 'assets/video/e1-35.mp4', q11: 'assets/video/e1-36-v2.mp4' }; // 기회 1칸 남으면 여는 해설 영상 (없는 방 = 📜 풀이 첫 두 줄)
+
   // 소문제마다 학습지 번호(ref) · 풀이 영상(video = 교과서 숫자로 푼 예제, 한 번 틀린 뒤 열림). 영상이 없는 문항(01 · 02 · 06 · 08 · 09 · 12)은 주문서 37~40 대기
   const V = { '03': 'assets/video/v03-22.mp4', '04': 'assets/video/e1-32.mp4', '05': 'assets/video/e1-33.mp4', '07': 'assets/video/e1-34.mp4', '10': 'assets/video/e1-35.mp4', '11': 'assets/video/e1-36-v2.mp4' };
   const tagRefs = (arr, refs) => arr.map((q, i) => Object.assign(q, { ref: refs[i] }, V[refs[i].slice(0, 2)] ? { video: V[refs[i].slice(0, 2)] } : {}));
@@ -171,8 +252,10 @@
     videos: { q04: 'assets/video/e1-32.mp4', q05: 'assets/video/e1-33.mp4', q07: 'assets/video/e1-34.mp4', q10: 'assets/video/e1-35.mp4', q11: 'assets/video/e1-36-v2.mp4' },
     steps: [],
     monsters: MONSTERS,
-    rooms: ROOMS.map(({ id, no, title, boss, photo }) => ({ id, no, title, boss: !!boss, photo: !!photo })), // photo = 서술형 → 📷 사진 분석 전까지 잠금 (2026-11-05)
+    rooms: ROOMS.map(({ id, no, title, boss, photo }) => ({ id, no, title, boss: !!boss, photo: !!photo, chain: !!CHAIN[id] })), // photo = 서술형 → 📷 사진 분석 전까지 잠금 (2026-11-05)
     legacy: LEGACY,
     items(id, seed, attempt) { return MONSTERS[id].make(attempt, DS.Rng(`${seed}|${id}|${attempt}`)); },
+    chain: Object.keys(CHAIN), chainVideo: CHAIN_VIDEO, // ⚔ 소레이드 방 (혼자 · 성채용 규칙은 js/raid/bonus.js chainFight)
+    chainItems(id, seed, pass) { return CHAIN[id](pass, DS.Rng(pass === 0 ? `e1|chain|${id}` : `${seed}|${id}|c${pass}`)); },
   });
 })();

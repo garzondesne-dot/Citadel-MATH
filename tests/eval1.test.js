@@ -117,5 +117,30 @@ for (const b of L.rooms) {
   check(R(1, 20).some((s) => JSON.stringify(L.items(b.id, `q${s}`, 1)) !== JSON.stringify(first[b.id])), `${b.id}: 재도전 문제가 바뀜`);
 }
 
+// ── ⚔ 소레이드 방 q07 ~ q12 (요청 #23): 첫 판 = 방향 방 독립 검산값 · 연습 판 200개 = 마지막 단계 check 의 숫자로 따로 세어 맞춤 ──
+{
+  const ans = (q) => (q.type === 'multi' ? q.answer.map((i) => toNum(q.options[i])).sort((a, b) => a - b) : q.type === 'choice' ? q.choices[q.answerIndex] : q.answer);
+  const want0 = {
+    q07: [[1, 2, 3, 6], [3, 6, 9, 12, 15, 18], [9, 12, 15, 18], 16], q08: ['B ⊂ A', '가능하다 (○)', [-2, 0], [-2, 0, 5]],
+    q09: ['(A₆ ∩ A₄) ∪ (A₆ ∩ A₁₀)', '8개, 3개', 1, 10], q10: ['(A ∪ B)ᶜ', 'n(A) = 5, n(B) = 6', 8, 32], q11: [61, 27, 11], q12: [99, '(A ∩ B)ᶜ', 8, 91],
+  };
+  check(JSON.stringify(L.chain) === JSON.stringify(['q07', 'q08', 'q09', 'q10', 'q11', 'q12']), '소레이드 방 = q07 ~ q12');
+  for (const id of L.chain) {
+    const it = L.chainItems(id, 'x', 0); check(JSON.stringify(it.map(ans)) === JSON.stringify(want0[id]), `${id} 첫 판 정답 = 방향 방 검산 ${JSON.stringify(it.map(ans))}`);
+    check(it.every((q) => q.say && q.say.length > 4), `${id} 모든 단계에 나의 풀이 한 줄`);
+    check(JSON.stringify(L.chainItems(id, 'other', 0)) === JSON.stringify(it), `${id} 첫 판은 누구에게나 같음`);
+    for (let k = 1; k <= 200; k++) {
+      const c = L.chainItems(id, 's' + k, k), last = c[c.length - 1], v = Object.assign({}, ...c.map((q) => q.check || {}));
+      check(c.every((q) => Q.grade(q, q.type === 'multi' ? q.answer : q.type === 'choice' ? q.answerIndex : [String(q.answer)])), `${id} #${k} 정답으로 채점 = 맞음`);
+      if (id === 'q07') { const A = R(1, v.p).filter((x) => v.p % x === 0), B = R(1, v.N).filter((x) => x % v.q === 0), X = subsets(B).filter((S) => S.every((x) => !A.includes(x))); check(last.answer === X.length && eq(ans(c[2]), B.filter((x) => !A.includes(x))), `q07 #${k} 부분집합 직접 셈`); }
+      if (id === 'q08') { const good = R(-20, 20).filter((x) => { if (x === v.d) return false; const Aset = [x * x + v.c * x, v.b, v.d]; return Aset.includes(x) && new Set(Aset).size === 3; }); check(eq(ans(last), good), `q08 #${k} x 직접 대입 ${good}`); }
+      if (id === 'q09') { const S = (m) => R(1, 100).filter((x) => x % m === 0), t = S(v.a).filter((x) => S(v.b).includes(x) || S(v.c).includes(x)).length; check(last.answer === t, `q09 #${k} 직접 셈 ${t}`); check(new Set(c[1].choices).size === c[1].choices.length, `q09 #${k} 보기 겹침 없음`); }
+      if (id === 'q10') { const A = R(1, v.N).filter((x) => x % v.k === 0), B = R(1, v.N).filter((x) => v.m % x === 0), t = R(1, v.N).filter((x) => !A.includes(x) && !B.includes(x)).length; check(last.answer === t && c[2].answer === v.N - t, `q10 #${k} 직접 셈 ${t}`); check(new Set(c[1].choices).size === c[1].choices.length, `q10 #${k} 보기 겹침 없음`); }
+      if (id === 'q11') { let mx = -1, mn = 1e9; for (let i = 0; i <= Math.min(v.a, v.b); i++) if (v.a + v.b - i <= v.T) { mx = Math.max(mx, i); mn = Math.min(mn, i); } check(c[1].answer === mx && last.answer === mn, `q11 #${k} 겹침 직접 셈`); }
+      if (id === 'q12') { const t = R(1, v.N - 1).filter((x) => x % v.p !== 0 || x % v.q !== v.rem).length; check(last.answer === t, `q12 #${k} 직접 셈 ${t}`); }
+    }
+  }
+}
+
 if (fail) { console.error(`\n${fail}건 실패 / ${count}건`); process.exit(1); }
 console.log(`OK: 🏰 성채던전 1층 12방 — 제안서 정답 · 교과서 숫자 안 씀 · 재도전 300×3 독립 검산 ${count}건 통과`);
