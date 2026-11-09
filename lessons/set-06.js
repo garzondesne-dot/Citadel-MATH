@@ -239,14 +239,22 @@
   const sayOf = (q, say) => Object.assign(q, { say });
   // 💡 근거 줄 (2026-11-09 #26 · 7차시 학습지 표): 그 단계를 맞힌 뒤 붙는 「∵ …」 한 줄 · 첫 판 = 완성 문장으로 📜 에 · 🔥 한 판 더 = 빈칸 고르기
   const whyOf = (q, pre, choices, post) => Object.assign(q, { why: { pre, post, choices, answer: 0, text: `${pre} ${choices[0]}${post}` } });
+  // 🔁 #41 (2026-11-09 선생님 「추천대로」 · 7차시 문제 4 다시 짜기 · 4단계 그대로): 졸개1 = A · B 두 칸 한 화면 · 졸개2 = 조건의 뜻 · 졸개3 = B − A (+ 💡 2ⁿ 근거) · 대장 = 개수
+  //   두 칸 고르기 = multi 하나 + groups(칸 제목 · 보기 수) → 보기 번호를 이어 붙임 · 둘 다 맞아야 정답 · 틀리면 0.5 한 번
+  const multi2 = (question, parts, solution, check) => {
+    const options = [], answer = [], groups = []; parts.forEach(({ label, opts, want }) => { const o = opts.map(show), w = want.map(show), base = options.length; o.forEach((x, i) => { options.push(x); if (w.includes(x)) answer.push(base + i); }); groups.push({ label, n: o.length }); });
+    return { type: 'multi', question, options, answer, groups, solution, check };
+  };
   function u4Chain(p, q, N, r) {
-    const A = divs(p), B = mults(q, N), D = minus(B, A), U = sorted([...new Set([...A, ...B])]);
+    const A = divs(p), B = mults(q, N), D = minus(B, A), U = sorted([...new Set([...A, ...B])]), n = D.length;
+    const aOpts = fill(r, A, range(1, Math.max(12, p + 3)), Math.min(10, A.length + 4)), bOpts = fill(r, B, range(1, N + 4), Math.min(12, B.length + 4));
+    const s3 = sayOf(multi(`A ∩ X = ∅ 이고 B ∪ X = B 일 때, X 에 들어갈 수 있는 원소를 모두 고르시오.`, U.map(show), D, `X ⊂ B 이고 A 와 서로소 → B − A = ${st(D)}`, { step: 3 }), `따라서 X ⊂ B − A = ${st(D)} 이다.`);
+    s3.why = { pre: `∵ 원소가 ${n}개인 집합의 부분집합의 개수는`, post: '', choices: [`2ⁿ 꼴(예: 2${sup(n)})`, `n²(예: ${n}²)`, `2n(예: ${2 * n})`], answer: 0, text: `∵ 원소가 ${n}개인 집합의 부분집합의 개수는 2${sup(n)}` };
     return [
-      sayOf(multi(`A = {x | x는 ${p}의 약수} 의 원소를 모두 고르시오.`, fill(r, A, range(1, Math.max(12, p + 3)), Math.min(10, A.length + 4)), A, `${p}의 약수 → ${st(A)}`, { p, step: 1 }), `A = ${st(A)} 이다.`),
-      sayOf(multi(`B = {x | x는 ${N} 이하의 ${q}의 배수} 의 원소를 모두 고르시오.`, fill(r, B, range(1, N + 4), Math.min(12, B.length + 4)), B, `${N} 이하의 ${q}의 배수 → ${st(B)}`, { q, N, step: 2 }), `B = ${st(B)} 이다.`),
-      whyOf(sayOf(multi(`A ∩ X = ∅ 이고 B ∪ X = B 일 때, X 에 들어갈 수 있는 원소를 모두 고르시오.`, U.map(show), D, `B ∪ X = B → X ⊂ B · A ∩ X = ∅ → A 의 원소는 안 됨 → B − A = ${st(D)}`, { step: 3 }),
-        `B ∪ X = B 이므로 X ⊂ B, A ∩ X = ∅ 이므로 X 는 A 와 서로소이다. 따라서 X ⊂ B − A = ${st(D)} 이다.`), '∵ X 는 B − A 의', ['부분집합', '원소', '여집합'], '이므로 개수 = 2^(B − A 의 원소의 개수)'),
-      sayOf(nq(`집합 X 의 개수는?`, 2 ** D.length, `B − A 의 원소 ${D.length}개로 만들 수 있는 부분집합 → 2${sup(D.length)} = ${2 ** D.length}`, { step: 4 }), `그러므로 집합 X 의 개수는 2${sup(D.length)} = ${2 ** D.length} 이다.`),
+      sayOf(multi2('A 와 B 의 원소를 각각 모두 고르시오.', [{ label: `A = {x | x는 ${p}의 약수}`, opts: aOpts, want: A }, { label: `B = {x | x는 ${N} 이하의 ${q}의 배수}`, opts: bOpts, want: B }], `${p}의 약수 → ${st(A)} · ${N} 이하의 ${q}의 배수 → ${st(B)}`, { p, q, N, step: 1 }), `A = ${st(A)}, B = ${st(B)} 이다.`),
+      sayOf(ch('B ∪ X = B, A ∩ X = ∅ 이 뜻하는 것은?', ['X ⊂ B 이고 X 와 A 는 서로소', 'B ⊂ X 이고 X ⊂ A', 'X ⊂ A 이고 X 와 B 는 서로소'], 'X ⊂ B 이고 X 와 A 는 서로소', 'B ∪ X = B → X ⊂ B · A ∩ X = ∅ → 공통 원소 없음(서로소)', { step: 2 }), 'B ∪ X = B 이므로 X ⊂ B, A ∩ X = ∅ 이므로 X 와 A 는 서로소이다.'),
+      s3,
+      sayOf(nq(`집합 X 의 개수는?`, 2 ** n, `B − A 의 원소 ${n}개로 만들 수 있는 부분집합 → 2${sup(n)} = ${2 ** n}`, { step: 4 }), `그러므로 집합 X 의 개수는 2${sup(n)} = ${2 ** n} 이다.`),
     ];
   }
   function u5Chain(c, b, d, r) {

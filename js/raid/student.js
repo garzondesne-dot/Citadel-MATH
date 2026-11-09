@@ -774,6 +774,8 @@ DS.Student = (function () {
     }
     if (q.type === 'multi') {
       const on = new Set(G[i]);
+      if (q.groups && q.groups.length) { let b0 = 0; // 🔁 #41 두 칸 고르기 (A 칸 · B 칸 · 보기 번호는 이어 붙임 · 둘 다 맞아야 정답)
+        return `<div class="item">${tag}${qText(q.question)}${q.groups.map((g) => { const from = b0; b0 += g.n; return `<div class="pick-grp"><b class="pick-grp-h math">${pretty(g.label)}</b><div class="item-opts pickset">${q.options.slice(from, from + g.n).map((o, j) => { const k = from + j; return `<button class="choice chipset${on.has(k) ? ' on' : ''}" data-pick="${i}|${k}"><span class="math">${pretty(o)}</span></button>`; }).join('')}</div></div>`; }).join('')}</div>`; }
       return `<div class="item">${tag}${qText(q.question)}
         <div class="item-opts pickset">${q.options.map((o, k) => `<button class="choice chipset${on.has(k) ? ' on' : ''}" data-pick="${i}|${k}"><span class="math">${pretty(o)}</span></button>`).join('')}</div></div>`;
     }

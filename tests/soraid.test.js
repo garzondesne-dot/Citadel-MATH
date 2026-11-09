@@ -7,27 +7,37 @@ const check = (c, m) => { if (c) ok++; else { fail++; console.log('FAIL:', m); }
 const right = (q) => (q.type === 'multi' ? q.answer : q.type === 'choice' ? q.answerIndex : q.answer), wrongOf = (q) => (q.type === 'multi' ? [] : q.type === 'choice' ? (q.answerIndex + 1) % q.choices.length : q.answer + 1);
 // ① 교과서 숫자 · 독립 계산
 const ans = (id) => L.chainItems(id, 's', 0).map((q) => (q.type === 'multi' ? q.answer.map((i) => q.options[i]).join(',') : q.type === 'choice' ? q.choices[q.answerIndex] : String(q.answer)));
-check(ans('u4').join(' | ') === '1,2,4,8 | 4,8,12,16,20 | 12,16,20 | 8', `문제 4 ${ans('u4')}`);
+check(ans('u4').join(' | ') === '1,2,4,8,4,8,12,16,20 | X ⊂ B 이고 X 와 A 는 서로소 | 12,16,20 | 8', `문제 4 ${ans('u4')}`);
+// #41 문제 4 다시 짜기: 졸개1 = A 칸 · B 칸 두 묶음 (교과서 8 · 4 · 20 → A = {1, 2, 4, 8} · B = {4, 8, …, 20}) · 졸개3 근거 = 2³ · 대장 8
+{ const u4 = L.chainItems('u4', 's', 0), g = u4[0].groups || [], cut = (g[0] || {}).n, pick = (lo, hi) => u4[0].answer.filter((i) => i >= lo && i < hi).map((i) => u4[0].options[i]).join(',');
+  check(g.length === 2 && pick(0, cut) === '1,2,4,8' && pick(cut, cut + g[1].n) === '4,8,12,16,20' && /8의 약수/.test(g[0].label) && /20 이하의 4의 배수/.test(g[1].label), `졸개1 = A 칸 ${pick(0, cut)} · B 칸 ${pick(cut, 99)}`);
+  check(u4.length === 4 && u4[1].type === 'choice' && u4[2].why && u4[2].why.text === '∵ 원소가 3개인 집합의 부분집합의 개수는 2³' && u4[2].why.choices[0].startsWith('2ⁿ') && u4[3].answer === 8, '4단계 · 졸개2 고르기 · 졸개3 근거 「…2³」 · 대장 8');
+  check(u4[0].say === 'A = {1, 2, 4, 8}, B = {4, 8, 12, 16, 20} 이다.' && /서로소이다\.$/.test(u4[1].say) && u4[2].say === '따라서 X ⊂ B − A = {12, 16, 20} 이다.', `나의 풀이 문장 ${u4[0].say}`);
+  const DS2 = DS; check(!DS2.Quiz.grade(u4[0], u4[0].answer.slice(0, -1)) && DS2.Quiz.grade(u4[0], u4[0].answer.slice()), '두 칸 다 맞아야 정답 (하나 빠지면 틀림)'); }
 check(ans('u5').join(' | ') === 'B ⊂ A | 가능하다 (○) | −1,0 | −1,0,4', `문제 5 ${ans('u5')}`);
 check(ans('u6').join(' | ') === '49 | 21 | 9', `문제 6 ${ans('u6')}`);
 check(ans('u7').join(' | ') === '99 | (A ∩ B)ᶜ | 3 | 96', `문제 7 ${ans('u7')}`);
 // ② 연습 판: 숫자로 다시 계산
 for (let k = 1; k <= 50; k++) {
-  const a = L.chainItems('u4', 's' + k, k), c4 = a[3].check || {}; const D = a[2].answer.map((i) => Number(String(a[2].options[i]).replace('−', '-')));
-  check(a[3].answer === 2 ** D.length && D.length >= 2, `연습 u4 #${k}`);
+  const a = L.chainItems('u4', 's' + k, k), c1 = a[0].check || {}, num = (q, ix) => ix.map((i) => Number(String(q.options[i]).replace('−', '-')));
+  const A0 = Array.from({ length: c1.p }, (_, i) => i + 1).filter((d) => c1.p % d === 0), B0 = Array.from({ length: Math.floor(c1.N / c1.q) }, (_, i) => (i + 1) * c1.q), D0 = B0.filter((x) => !A0.includes(x)), g0 = (a[0].groups || [{}])[0].n;
+  const D = num(a[2], a[2].answer);
+  check(num(a[0], a[0].answer.filter((i) => i < g0)).join() === A0.join() && num(a[0], a[0].answer.filter((i) => i >= g0)).join() === B0.join() && D.join() === D0.join() && a[3].answer === 2 ** D0.length && D0.length >= 2 && a[2].why.text.endsWith('2' + String(D0.length).replace(/\d/g, (x) => '⁰¹²³⁴⁵⁶⁷⁸⁹'[x])), `연습 u4 #${k} (독립 계산 p ${c1.p} · q ${c1.q} · N ${c1.N})`);
   const u7 = L.chainItems('u7', 's' + k, k), q = u7[3].check, bad = Array.from({ length: q.N - 1 }, (_, i) => i + 1).filter((x) => x % q.p === 0 && x % q.q === q.rem).length;
   check(u7[0].answer === q.N - 1 && u7[2].answer === bad && u7[3].answer === q.N - 1 - bad, `연습 u7 #${k}`);
   const u6 = L.chainItems('u6', 's' + k, k), w = u6[2].check; check(u6[0].answer === w.a + w.b && u6[1].answer === Math.min(w.a, w.b) && u6[2].answer === w.a + w.b - w.T, `연습 u6 #${k}`);
   const u5 = L.chainItems('u5', 's' + k, k), v = u5[3].check, want = [1 - v.c, 0, v.b].sort((x, y) => x - y).join(','); check(u5[3].answer.map((i) => String(u5[3].options[i]).replace('−', '-')).join(',') === want, `연습 u5 #${k}`);
   check(L.chainItems('u4', 's' + k, k).every((x) => x.say), `연습 say #${k}`);
 }
+for (let k = 51; k <= 200; k++) { const a = L.chainItems('u4', 's' + k, k), c1 = a[0].check || {}, A0 = Array.from({ length: c1.p }, (_, i) => i + 1).filter((d) => c1.p % d === 0), B0 = Array.from({ length: Math.floor(c1.N / c1.q) }, (_, i) => (i + 1) * c1.q), D0 = B0.filter((x) => !A0.includes(x));
+  check(a[3].answer === 2 ** D0.length && a[2].answer.map((i) => Number(a[2].options[i])).join() === D0.join() && a[0].groups.length === 2, `연습 u4 #${k} (#41 연습 200개)`); }
 // ③ 진행 · 기회 · 잠김 · 풀어주기
 const R = X.newRoom('555555', 'set-06', 'T', 1000); R.active = { a: true, b: true }; R.players = { a: { num: 1 }, b: { num: 2 } }; R.state.headcount = 2;
 const sub = (u, s, good, p = 0) => { const it = p ? L.chainItems('u4', X.chainSubs ? `555555|${u}` : '', p) : X.chainItems(L, R, 'u4', u, 0); const q = it[s];
   const m = ((R.chain = R.chain || {}).u4 = R.chain.u4 || {}); const a = (m[u] = m[u] || {}); a[Object.keys(a).length] = { s, p, g: good ? right(q) : wrongOf(q) }; };
 check(X.isChain(L, R, 'u4') && X.monsterHp(L, R, 'u4').max === Math.floor(2 * 4 * (L.defaultPct || 90) / 100), '반 체력 = 인원 × 단계 4 × 기준%');
 sub('a', 0, true); sub('a', 1, true); sub('a', 2, true); sub('a', 3, true); let r = X.record(L, R, 'u4', 'a');
-check(r.done && r.perfect && r.best === 4 && r.says.length === 5 && /^∵ X 는 B − A 의 부분집합/.test(r.says[3]) && /그러므로/.test(r.says[4]), '퍼펙트: 4단계 · 나의 풀이 4줄 + 💡 근거 줄(완성 문장) · 마지막 「그러므로」');
+check(r.done && r.perfect && r.best === 4 && r.says.length === 5 && /^∵ 원소가 3개인 집합의 부분집합의 개수는 2³$/.test(r.says[3]) && /그러므로/.test(r.says[4]), '퍼펙트: 4단계 · 나의 풀이 4줄 + 💡 근거 줄(완성 문장) · 마지막 「그러므로」');
 sub('b', 0, false); r = X.record(L, R, 'u4', 'b'); check(r.left === 3.5 && r.stage === 0 && !r.locked, '졸개 오답 = 0.5칸 · 같은 단계');
 sub('b', 0, true); sub('b', 1, true); sub('b', 2, true); sub('b', 3, false); sub('b', 3, false); r = X.record(L, R, 'u4', 'b');
 check(r.left === 1.5 && r.stage === 3 && !r.locked, '대장 오답 = 1칸씩');
