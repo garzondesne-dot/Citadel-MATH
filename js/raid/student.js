@@ -658,6 +658,7 @@ DS.Student = (function () {
     if (!cform || cform.key !== key) cform = { key, given: [q.type === 'multi' ? [] : q.type === 'number' ? 0 : null] };
     const ready = q.type === 'multi' ? cform.given[0].length > 0 : cform.given[0] != null;
     const dns = Raid().chainDown(L, R, mid).filter((d) => d.down).map((d) => d.k); // 💥 반이 쓰러뜨린 졸개
+    const wm = writeMode[mid], phN = Number((myP().ph || {})[mid]) || 0, wrOk = (myP().wr || {})[mid], canPhoto = !test && rec.done && DS.Photo && DS.Photo.ready(L.id, mid); // 🐞 2026-11-09: sig 보다 먼저 (예전엔 뒤에 있어 소레이드 화면이 그려지지 않음 · v0.9.34.0~)
     const sig = `${key}|${JSON.stringify(cform.given)}|${rec.locked}|${rec.fail}|${rec.done}|${pDone}|${hp.left}|${dns.join(',')}|${needWhy}|${rec.whyOk}|${hintBy.length}|${myHint}|${wm ? (wm.peek ? 'p' : 'w') : ''}|${phN}|${wrOk || ''}|${!!(DS.Photo && DS.Photo.ready(L.id, mid))}|${myP().charge || 0}`;
     if (sig === drawn && body.querySelector('.ch-wrap')) { hpText(body, hp); return; }
     drawn = sig;
@@ -665,7 +666,6 @@ DS.Student = (function () {
     const story = (arr) => (arr.length ? `<div class="cr-story"><b>📜 나의 풀이</b><ol>${arr.map((t) => `<li>${pretty(t)}</li>`).join('')}</ol></div>` : '');
     const lastWrong = !prac && rec.lastWrong && rec.lastWrong.s === stage, cheer = !prac && !rec.done && !rec.fail && dns.includes(stage) ? '<p class="cr-more">💥 친구들은 이 졸개를 넘었어요! 힘내요</p>' : '';
     if (!photoLoaded && DS.Photo) { photoLoaded = true; DS.Photo.load().then(() => { drawn = ''; render(); }).catch(() => {}); }
-    const wm = writeMode[mid], phN = Number((myP().ph || {})[mid]) || 0, wrOk = (myP().wr || {})[mid], canPhoto = !test && rec.done && DS.Photo && DS.Photo.ready(L.id, mid);
     const wrBtn = !canPhoto || prac ? '' : wrOk === 'ok' ? '<p class="okc center">🌟 서술형 통과 — 진필살기!</p>' : phN >= DS.Photo.raidMax() ? '<p class="muted small center">📸 이 소레이드 사진은 다 썼어요</p>' : '<button class="btn big cr-write" id="cr-write">✍ 서술형으로 써서 📸 진필살기 도전</button>';
     const hintBtn = wItem && rec.whyOk && !myHint ? '<button class="btn cr-hint" id="cr-hint">💡 힌트 주기 <small>근거 한 줄이 TV 에 떠요 · 한 번 · EXP +1</small></button>' : myHint ? '<p class="muted small center">💡 힌트를 줬어요 — 고마워요!</p>' : '';
     const hintsBox = wItem && hintBy.length && !rec.done ? `<details class="cr-hints"><summary>💡 친구 힌트 ${hintBy.length}개 <small>(누르면 펼침)</small></summary><p>${pretty(wItem.why.text)}</p><p class="muted small">${hintBy.slice(0, 5).map((p) => esc(p.nick || '')).join(' · ')}</p></details>` : '';
