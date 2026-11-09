@@ -7,15 +7,15 @@
 - --color = 배경색 상자: 상자 좌우 배경 띠의 평균 색으로 칠함 (YUV 변환 때 1~2 단계 어긋날 수 있음).
 - --blur = 상자 안을 강하게 흐림 (배경이 움직이거나 색이 고르지 않을 때).
 - 상자 기본값 = 1280×720 기준 x 560 · y 678 · 160 × 36 (math-concept-motion 워터마크 자리) · 다른 크기면 비율로 맞춤.
-- 소리는 그대로 복사 · 화질 CRF 28 (tools/motion 사양) · 원본은 건드리지 않음 · 출력 기본 이름 = 「입력_anon.mp4」.
+- 소리는 그대로 복사 · 화질 = 원본 영상 비트레이트에 맞춘 2회 인코딩(용량 · 화질 원본 수준 · 비트레이트를 모르면 CRF 28) · 원본은 건드리지 않음 · 출력 기본 이름 = 「입력_anon.mp4」.
 - 워터마크가 없는 옛 영상(흰 배경 개념 영상)은 가릴 필요 없음 — 넣기 전에 프레임을 눈으로 확인.
 """
 import json, os, subprocess, sys, tempfile
 
 def probe(src):
-    out = subprocess.check_output(['ffprobe', '-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=width,height', '-of', 'json', src])
+    out = subprocess.check_output(['ffprobe', '-v', 'error', '-select_streams', 'v:0', '-show_entries', 'stream=width,height,bit_rate', '-of', 'json', src])
     s = json.loads(out)['streams'][0]
-    return s['width'], s['height']
+    return s['width'], s['height'], int(s.get('bit_rate') or 0)
 
 def sample(src, box, W, H):
     """상자 좌우 띠(각 24px)의 평균 색 · 영상 1초 · 15초 두 장면 평균 (압축 · 그림자 차이를 줄임)"""
@@ -25,7 +25,7 @@ def sample(src, box, W, H):
     with tempfile.TemporaryDirectory() as d:
         for i, t in enumerate(('1', '15')):
             png = os.path.join(d, f'f{i}.png')
-            subprocess.call(['ffmpeg', '-v', 'error', '-y', '-ss', t, '-i', src, '-frames:v', '1', png])
+            subprocess.call(['ffmpeg', '-nostdin', '-v', 'error', '-y', '-ss', t, '-i', src, '-frames:v', '1', png])
             if not os.path.exists(png): continue
             im = Image.open(png).convert('RGB')
             for yy in range(y + 2, y + h - 2, 3):
@@ -43,7 +43,7 @@ def main(a):
         i = a.index('--box'); box = [int(v) for v in a[i + 1].split(',')]; a = a[:i] + a[i + 2:]
     files = [x for x in a if not x.startswith('--')]
     src = files[0]; dst = files[1] if len(files) > 1 else os.path.splitext(src)[0] + '_anon.mp4'
-    W, H = probe(src)
+    W, H, BR = probe(src)
     if not box:
         k = W / 1280; box = [round(560 * k), round(678 * H / 720), round(160 * k), round(36 * H / 720)]
     x, y, w, h = box
@@ -56,8 +56,15 @@ def main(a):
     else:
         r, g, b = sample(src, box, W, H)
         vf = f"drawbox=x={x}:y={y}:w={w}:h={h}:color=0x{r:02x}{g:02x}{b:02x}@1:t=fill"
-    cmd = ['ffmpeg', '-v', 'error', '-y', '-i', src, '-vf' if mode == 'color' else '-filter_complex', vf, '-c:v', 'libx264', '-crf', '28', '-preset', 'medium', '-pix_fmt', 'yuv420p', '-c:a', 'copy', '-movflags', '+faststart', dst]
-    subprocess.check_call(cmd)
+    fl = ['-vf' if mode == 'color' else '-filter_complex', vf]
+    if BR:  # 원본 비트레이트에 맞춘 2회 인코딩 (1회 평균은 고요한 장면에서 용량이 크게 모자람)
+        with tempfile.TemporaryDirectory() as d:
+            log = os.path.join(d, 'x264')
+            enc = ['-c:v', 'libx264', '-b:v', str(BR), '-preset', 'slow', '-pix_fmt', 'yuv420p', '-passlogfile', log]
+            subprocess.check_call(['ffmpeg', '-nostdin', '-v', 'error', '-y', '-i', src, *fl, *enc, '-pass', '1', '-an', '-f', 'mp4', os.devnull])
+            subprocess.check_call(['ffmpeg', '-nostdin', '-v', 'error', '-y', '-i', src, *fl, *enc, '-pass', '2', '-c:a', 'copy', '-movflags', '+faststart', dst])
+    else:
+        subprocess.check_call(['ffmpeg', '-nostdin', '-v', 'error', '-y', '-i', src, *fl, '-c:v', 'libx264', '-crf', '28', '-preset', 'slow', '-pix_fmt', 'yuv420p', '-c:a', 'copy', '-movflags', '+faststart', dst])
     print(f'✔ {dst} · 상자 {x},{y} {w}×{h} · { {'patch': '옆 배경 복사', 'color': '배경색', 'blur': '흐림'}[mode] } · {os.path.getsize(dst) // 1024}KB')
     return 0
 

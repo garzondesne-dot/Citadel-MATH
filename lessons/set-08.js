@@ -198,9 +198,9 @@
     crops: CROPS,
     theme: '04-mine', // 던전 테마: 거울 수정 광산 (배경 dg-04-mine-v2 · 몬스터 mirror:0~4)
     videos: { // 🎬 2026-11-08 모션 방 완료 (30초 · 720p · 루프): 40 명제와 부정 · 41 진리집합과 조건의 부정 · 42 모든과 어떤
-      c1: 'assets/video/v08-40.mp4', m1: 'assets/video/v08-40.mp4',
-      c2: 'assets/video/v08-41.mp4', c3: 'assets/video/v08-41.mp4', m2: 'assets/video/v08-41.mp4', m3: 'assets/video/v08-41.mp4',
-      c4: 'assets/video/v08-42.mp4', c5: 'assets/video/v08-42.mp4', m4: 'assets/video/v08-42.mp4', m5: 'assets/video/v08-42.mp4' },
+      c1: 'assets/video/v08-40-v2.mp4', m1: 'assets/video/v08-40-v2.mp4',
+      c2: 'assets/video/v08-41-v2.mp4', c3: 'assets/video/v08-41-v2.mp4', m2: 'assets/video/v08-41-v2.mp4', m3: 'assets/video/v08-41-v2.mp4',
+      c4: 'assets/video/v08-42-v2.mp4', c5: 'assets/video/v08-42-v2.mp4', m4: 'assets/video/v08-42-v2.mp4', m5: 'assets/video/v08-42-v2.mp4' },
     goal: '명제와 그 부정의 뜻을 안다 · 조건의 진리집합과 조건의 부정을 구한다 · 「모든」 · 「어떤」을 포함한 명제의 참 · 거짓을 판별하고 부정을 말한다',
     defaultPct: 90,
     steps: STEPS,
