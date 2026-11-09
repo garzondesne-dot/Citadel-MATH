@@ -656,6 +656,8 @@ DS.Student = (function () {
         const items = [{ question: (((DS.Rubrics || {})[L.id] || {})[mid] || {}).ask || step.title, answer: rec.items[rec.items.length - 1].answer, solution: rec.says.join(' / '), check: Object.assign({}, ...rec.items.map((x) => x.check || {})) }]; // 학습지 숫자 · 단계별 기대 중간값
         const res = await DS.Photo.grade(acc(), { lesson: L.id, room: mid, title: step.title, items });
         const out = await DS.Act.snapEnd(code, raw, mid, res, wm.peek);
+        const missOf = (r) => Object.values((r && r.steps) || {}).map((x, i) => (x && !x.earned ? (i === rec.items.length - 1 ? '👑' : '①②③④⑤⑥'[i]) : null)).filter(Boolean);
+        if (res && res.status === 'pass' && missOf(res).length) setTimeout(() => DS.UI.toast(`✏ 통과! 다만 ${missOf(res).join(' · ')} 단계는 학습지에 다시 정리해 둬요`, 4500), 4400); // 1점 빠져도 통과 (2026-11-09 선생님)
         if (res && res.status === 'pass') { delete writeMode[mid]; DS.UI.toast(wm.peek ? '✍ 연습 쓰기 통과! (진필살기 없음)' : out === 'true' ? '🌟 진필살기 발동! 몬스터가 돌로 굳어요' : out === 'cut' ? '🌟 금빛 컷인! (석화는 이미 친구가)' : out === 'charge' ? '⚡ 진필살기 충전 1개 — 다음 몬스터에서 써요' : '🌟 서술형 통과!', 4200); }
         else if (res && res.steps) { const miss = Object.values(res.steps).map((x, i) => (x && !x.earned ? (i === rec.items.length - 1 ? '👑' : '①②③④⑤⑥'[i]) : null)).filter(Boolean); if (miss.length) DS.UI.toast(`✏ 빠진 단계: ${miss.join(' · ')} — 그 졸개만 다시 고쳐 써요 (충전 유지)`, 4500); }
         drawn = ''; render();

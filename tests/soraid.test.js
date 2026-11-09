@@ -64,7 +64,7 @@ for (let i = 0; i < 8; i++) add('c', 1, false); d = X.chainDown(L, Q, 'u4'); che
   check(X.chainDown(L, Q, 'm1').length === 0, '보통 몬스터 = 졸개 없음'); }
 // ⑦ ✍ → 📸 진필살기 (2026-11-09 #26): 채점 기준 = 소레이드 단계 · 학습지 숫자 · 다음 통과자 금빛 컷인 3명
 { for (const id of L.chain) { const rb = (DS.Rubrics['set-06'] || {})[id], it = X.chainItems(L, X.newRoom('1', 'set-06', 'T', 1), id, '_', 0);
-    check(rb && rb.steps.length === it.length && rb.pass === rb.total && rb.raid, `${id} 채점 기준 ${rb ? rb.steps.length : 0}칸 = 단계 ${it.length}칸 · 모든 단계 통과`);
+    check(rb && rb.steps.length === it.length && rb.pass === rb.total - 1 && rb.raid, `${id} 채점 기준 ${rb ? rb.steps.length : 0}칸 = 단계 ${it.length}칸 · 1점 빠져도 통과`);
     check(rb && /학습지|[0-9]/.test(rb.ask) && rb.steps[rb.steps.length - 1].key.includes(String(it[it.length - 1].answer).split(',')[0].replace('−', '−')) || id === 'u5', `${id} 마지막 기준 = 대장 답 ${it[it.length - 1].answer}`); }
   const T = X.newRoom('2', 'set-06', 'T', 1); T.heals = { u4: { a: { 0: '!true@5' }, b: { 0: '!tcut@6' }, c: { 0: '!tcut@7', 1: '_' } } };
   check(X.tcutN(T, 'u4') === 2 && X.isTcut('!tcut@1') && !X.isTcut('!true@1') && X.petrify(T, 'u4') && X.petrify(T, 'u4').by === 'a', '석화 = 첫 통과자 1번 · 다음은 금빛 컷인만 (셈 2)'); }
