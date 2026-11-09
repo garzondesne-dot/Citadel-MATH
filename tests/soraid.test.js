@@ -47,4 +47,13 @@ check(DS.Grow && DS.Grow.XP ? DS.Grow.XP.chainPrac === 1 : true, 'EXP 표 chainP
   let k = X.solveLock(L, S, 11000); check(k && k.on && k.left === 50000, '정찰 기본 60초 · 10초 지남 = 50초 남음');
   S.state.solveOn = { u4: { sec: 30, at: 1000 } }; k = X.solveLock(L, S, 11000); check(k.on && k.left === 20000, '−30초 → 20초 남음');
   S.state.solveEnd = { u4: 11000 }; k = X.solveLock(L, S, 11000); check(!k.on, '남은 시간보다 많이 줄이면 = 바로 등장'); }
+// ⑥ 💥 졸개 쓰러짐 (기준% · 못 맞힘 빼고 · 리모컨 쓰러뜨리기)
+{ const Q = X.newRoom('888888', 'set-06', 'T', 1000); Q.active = { a: true, b: true, c: true }; Q.players = { a: {}, b: {}, c: {} }; Q.chain = { u4: {} };
+  const add = (u, s, good) => { const q = X.chainItems(L, Q, 'u4', u, 0)[s]; const m = (Q.chain.u4[u] = Q.chain.u4[u] || {}); m[Object.keys(m).length] = { s, p: 0, g: good ? right(q) : wrongOf(q) }; };
+  add('a', 0, true); add('b', 0, true); add('b', 1, true); add('c', 0, false);
+  let d = X.chainDown(L, Q, 'u4'); check(d.length === 3 && d[0].past === 2 && d[0].need === 3 && !d[0].down, '졸개 3마리 · ① 넘은 2명 < 기준 3명(90%) = 안 쓰러짐');
+  add('c', 0, true); d = X.chainDown(L, Q, 'u4'); check(d[0].down && !d[1].down, '① 3명 다 넘음 = 쓰러짐 · ② 아직');
+  Q.state.chainDown = { u4: { 1: true } }; d = X.chainDown(L, Q, 'u4'); check(d[1].down && !d[2].down, '리모컨 쓰러뜨리기 = ② 쓰러짐');
+for (let i = 0; i < 8; i++) add('c', 1, false); d = X.chainDown(L, Q, 'u4'); check(d[0].all === 2, '기회 다 쓴 학생은 머릿수에서 뺌');
+  check(X.chainDown(L, Q, 'm1').length === 0, '보통 몬스터 = 졸개 없음'); }
 console.log(fail ? `❌ 소레이드 실패 ${fail}` : `✅ 소레이드: 확인 ${ok}개 · 실패 0`); if (fail) process.exit(1);

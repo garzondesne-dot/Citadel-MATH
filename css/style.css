@@ -2894,3 +2894,16 @@ html body .sc-gem, html body .sc-gem .sc-gn, html body .sc-gem b { font-weight: 
 .cr-more { margin: 6px 0; text-align: center; color: #ffe08a; font-weight: 700; }
 .cr-again { display: block; margin: 8px auto 2px; background: linear-gradient(#ff9a3c, #e0571f) !important; color: #fff !important; }
 .cr-pnote { text-align: center; margin: 0 8px 6px; }
+/* 💥 졸개 쓰러짐 (2026-11-09): 전투 중 졸개(색) · 쓰러지면 뒤로 넘어지며 흐려짐 */
+.sc-pack .m3 { left: 18%; bottom: -14%; transform: scale(.95); } .sc-pack .m4 { left: 42%; bottom: 14%; transform: scale(.85); z-index: -1; }
+.sc-pack.sc-fight .sc-min { transition: transform .7s cubic-bezier(.5, -0.4, .7, 1), opacity .7s, filter .7s; }
+.sc-pack.sc-fight .sc-min.down { transform: translate(18%, 8%) rotate(-80deg) scale(.85); opacity: .35; filter: grayscale(1) brightness(.6); }
+.sc-pack.sc-fight .sc-min .art.monster { filter: drop-shadow(0 4px 6px #000a); }
+.h-down-ban { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%); z-index: 45; padding: 10px 24px; border-radius: 12px; background: #3a1206e6; color: #ffd08a; font: 900 34px var(--pixel, sans-serif); box-shadow: 0 0 0 3px #ff8a3c, 0 0 30px #ff6a2a; animation: hDown 2.4s ease-out forwards; pointer-events: none; }
+@keyframes hDown { 0% { transform: translate(-50%, -50%) scale(.4); opacity: 0; } 15% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; } 25% { transform: translate(-50%, -50%) scale(1); } 85% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -60%); } }
+.cr-down { display: flex; flex-direction: column; gap: 4px; margin: 4px 0; } .cr-down span { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; } .cr-down .on { color: #ffb36b; }
+.cr-chip.down { opacity: .55; text-decoration: line-through; }
+/* 👥 대기실 접속 인원 (2026-11-09) */
+.lb-count { position: absolute; bottom: 6px; left: 8px; margin: 0; padding: 2px 8px; border-radius: 8px; background: #000a; color: #fff; font-size: 13px; z-index: 40; }
+.lb-count b { color: #7dff9a; font-size: 16px; }
+.lb2-on { top: auto; bottom: 18px; right: 18px; font-size: 26px; color: #fff; } .lb2-on b { color: #7dff9a; font-size: 34px; }

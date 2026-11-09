@@ -243,7 +243,8 @@ DS.Student = (function () {
     const w = (R.words || {})[me], finale = Raid().isFinale(L, R), full = Raid().fullMarks(L, R, me);
     const kr = after && DS.ShareCard && DS.ShareCard.klassReady(L, R); // v0.9.2: 🏫 학급 결과 (마무리 · 보스 격파부터)
     const sv = after && !test && DS.Survey ? DS.Survey.pending() : 0;
-    const sig = `lobby|${L.id}|${after}|${sv}|${others.length}|${JSON.stringify(w || null)}|${finale}|${full}|${(R.hide || {})[me] ? 1 : 0}|${kr}`;
+    const tot = Object.entries(R.players || {}).filter(([, p]) => !p.teacher), onN = tot.filter(([u]) => Raid().online(R, u) || u === me).length; // 👥 2026-11-09 선생님: 대기실 접속 인원
+    const sig = `lobby|${L.id}|${after}|${sv}|${others.length}|${tot.length}|${onN}|${JSON.stringify(w || null)}|${finale}|${full}|${(R.hide || {})[me] ? 1 : 0}|${kr}`;
     if (sig === drawn && body.querySelector('.lobby-scene')) return;
     drawn = sig;
     const crowd = others.map(([, p], k) => `<div class="lb-h${k % 2 ? ' face-l' : ''}" style="left:${12 + ((k * 37) % 76)}%;bottom:${8 + (k % 3) * 9}%;z-index:${30 - (8 + (k % 3) * 9)}">${DS.Art.hero(p.hero, 'idle', `small ${after && finale ? 'pairhop' : 'huff'}`)}<i class="shadow"></i></div>`).join('');
@@ -251,6 +252,7 @@ DS.Student = (function () {
       <div class="lobby-scene bg-scene th-${L.theme || ''}"><p class="lb-title">${after ? `<i class="trophy-img sm" style="background-image:url('${DS.ASSETS.base}${DS.ASSETS.trophy}')"></i> ` : '⚔ '}${esc(dungeonName())} ${after ? '클리어!' : '단체 대기실'}</p>
         <div class="lb-h teacher" style="left:50%;bottom:20%">${DS.Art.hero(DS.ASSETS.heroes.teacher, 'idle', after && finale ? 'pairhop' : 'huff')}<i class="shadow"></i></div>
         ${crowd}<div class="lb-h me" style="left:34%;bottom:12%">${DS.Art.hero(myP().hero, 'idle', after && finale ? 'pairhop' : 'huff')}<i class="shadow"></i>${w && !(R.hide || {})[me] ? `<span class="lb-say">${esc(w.t)}</span>` : ''}</div>
+        <p class="lb-count">👥 접속 <b>${onN}</b>명 · 입장 ${tot.length}명</p>
         <p class="lb-greet">${after ? '모두 수고했네! 오늘 배운 것 한마디씩 남기게' : `${L.no ? `${DS.Lessons.noText(L.no)}차시 ` : ''}${esc(L.title.split('·')[0].trim())} 던전에 온 것을 환영하네!`}</p></div>
       ${after ? `<div class="stamp-bar">📮 반드시 학습지 확인도장 받아가세요.</div>${sv ? DS.Survey.btnHtml('st-survey') : ''}<button class="btn primary" id="st-mine">⚔ 내 전투 결과 보기</button>${kr ? '<button class="btn sc-btn" id="st-klass">🏫 우리 반 학급 결과 보기</button>' : ''}${kr && DS.Punch && !DS.Act.punchOff(R) && R.meta.cls && L.no && !L.eval ? '<button class="btn" id="st-punch">🏁 반대항 경주</button>' : ''}${wordsForm(w)}${'' /* 2026-11-03 사용자 확정: 모루는 개인 캠프(모닥불)에서만 — 대기실에서는 열지 않는다 (수업 중엔 여유가 없음) */}`
         : test ? '<p class="center">친구들이 다 모이면 아래 「수업 시작 ▶」을 눌러요!</p>' : '<p class="center">선생님이 수업을 시작할 때까지 기다려요. 학습지를 꺼내 두세요!</p>'}</div>`;
@@ -613,12 +615,13 @@ DS.Student = (function () {
     const key = `chain|${mid}|${pass}|${stage}|${rec.nextK}`;
     if (!cform || cform.key !== key) cform = { key, given: [q.type === 'multi' ? [] : q.type === 'number' ? 0 : null] };
     const ready = q.type === 'multi' ? cform.given[0].length > 0 : cform.given[0] != null;
-    const sig = `${key}|${JSON.stringify(cform.given)}|${rec.locked}|${rec.fail}|${rec.done}|${pDone}|${hp.left}`;
+    const dns = Raid().chainDown(L, R, mid).filter((d) => d.down).map((d) => d.k); // 💥 반이 쓰러뜨린 졸개
+    const sig = `${key}|${JSON.stringify(cform.given)}|${rec.locked}|${rec.fail}|${rec.done}|${pDone}|${hp.left}|${dns.join(',')}`;
     if (sig === drawn && body.querySelector('.ch-wrap')) { hpText(body, hp); return; }
     drawn = sig;
-    const chips = pItems.map((_, i) => `<span class="cr-chip ${i < stage || (!prac && rec.done) ? 'ok' : i === stage ? 'now' : ''}">${i === pItems.length - 1 ? '👑' : '①②③④⑤⑥'[i]}${i < stage || (!prac && rec.done) ? '✔' : i === stage ? '⚔' : ''}</span>`).join('<i>›</i>');
+    const chips = pItems.map((_, i) => `<span class="cr-chip ${i < stage || (!prac && rec.done) ? 'ok' : i === stage ? 'now' : ''}${!prac && dns.includes(i) ? ' down' : ''}">${!prac && dns.includes(i) ? '💀' : ''}${i === pItems.length - 1 ? '👑' : '①②③④⑤⑥'[i]}${i < stage || (!prac && rec.done) ? '✔' : i === stage ? '⚔' : ''}</span>`).join('<i>›</i>');
     const story = (arr) => (arr.length ? `<div class="cr-story"><b>📜 나의 풀이</b><ol>${arr.map((t) => `<li>${pretty(t)}</li>`).join('')}</ol></div>` : '');
-    const lastWrong = !prac && rec.lastWrong && rec.lastWrong.s === stage;
+    const lastWrong = !prac && rec.lastWrong && rec.lastWrong.s === stage, cheer = !prac && !rec.done && !rec.fail && dns.includes(stage) ? '<p class="cr-more">💥 친구들은 이 졸개를 넘었어요! 힘내요</p>' : '';
     let mainHtml;
     if (rec.fail) mainHtml = `<p class="paper-note">끝까지 못 맞혔어요 — 아래 풀이를 학습지에 옮겨 적고 🎯 복습 허수아비에서 다시 도전해요.</p>${story(rec.items.map((x) => x.say))}`;
     else if (!prac && rec.done) mainHtml = `<p class="okc big-msg">${rec.perfect ? '🌟 퍼펙트 사슬!' : '🎉 대장 처치!'}</p>${story(says)}<p class="cr-more">✅ 다 풀었어요! 🔥 한 판 더 해 볼래요? 부담 없어요</p><button class="btn big cr-again" id="cr-prac">🔥 한 판 더! (연습)</button><p class="muted small cr-pnote">숫자만 바뀐 새 문제 · 틀려도 아무것도 안 줄어요 (기록 · 기회 · 💎 그대로) · 사슬 완성마다 경험치 +1 (데미지 0)</p>`;
@@ -627,7 +630,7 @@ DS.Student = (function () {
     else mainHtml = `${story(says)}<div class="paper"><div class="paper-h"><b>${esc(step.title)} · ${stage === pItems.length - 1 ? '👑 대장' : `졸개 ${'①②③④⑤⑥'[stage]}`}</b><small>${prac ? '연습 (숫자 바뀜 · 데미지 없음)' : '틀려도 숫자는 그대로'}</small></div>
         ${lastWrong ? '<p class="paper-note">✘ 다시 생각해 봐요 — 같은 문제예요</p>' : ''}<div class="items">${itemHtml(q, 0, lastWrong, null, cform.given)}</div></div>`;
     body.innerHTML = `<div class="panel framed st-fight ch-wrap">${scene(step, rec, hp, '', '')}
-      <div class="cr-chips">${chips}</div>${mainHtml}
+      <div class="cr-chips">${chips}</div>${cheer}${mainHtml}
       ${prac || rec.done || rec.fail || rec.locked ? dock(rec, '') : dock(rec, `<button class="btn primary big dock-go" id="cr-go"${ready ? '' : ' disabled'}>⚔ 공격!</button>`)}${helpBtn()}</div>`;
     if (prac && !pDone) body.querySelector('.st-dock').insertAdjacentHTML('beforeend', `<button class="btn primary big dock-go" id="cr-go"${ready ? '' : ' disabled'}>⚔ 연습 공격</button>`);
     bindTop(); bindHelp();

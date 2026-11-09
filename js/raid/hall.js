@@ -243,7 +243,8 @@ DS.Hall = (function () {
   // ── 가운데: 던전 단체 대기실 (수업 전 · 마무리) ─────────────
   function lobbyScene(finale) {
     const list = inClass().filter(([, p]) => !finale || true);
-    const sig = `lobby|${finale}|${list.map(([u, p]) => u + p.hero + (p.title || '')).join()}|${finale ? JSON.stringify([R.words, R.hide]) : ''}|${DS.ShareCard.klassReady(L, R)}|t${DS.Art.teacherHero(R)}`; // 2026-11-08 사용자 「교사 캠프에서 모습 바꿔도 던전 들어가면 그대로」: 선생님 모습이 바뀌면 다시 그림
+    const onN = list.filter(([u]) => Raid().online(R, u)).length; // 👥 2026-11-09 선생님: 대기실 접속 인원 (지금 연결 / 입장)
+    const sig = `lobby|${finale}|${onN}|${list.map(([u, p]) => u + p.hero + (p.title || '')).join()}|${finale ? JSON.stringify([R.words, R.hide]) : ''}|${DS.ShareCard.klassReady(L, R)}|t${DS.Art.teacherHero(R)}`; // 2026-11-08 사용자 「교사 캠프에서 모습 바꿔도 던전 들어가면 그대로」: 선생님 모습이 바뀌면 다시 그림
     if (built === sig) return;
     built = sig;
     const n = list.length, size = n > 24 ? 62 : n > 16 ? 72 : 84, per = Math.max(1, Math.ceil(n / 3));
@@ -257,7 +258,7 @@ DS.Hall = (function () {
       <p class="lb2-title">${finale ? `<i class="trophy-img sm" style="background-image:url('${DS.ASSETS.base}${DS.ASSETS.trophy}')"></i> ${esc(dungeonName())} 클리어!` : `⚔ ${esc(dungeonName())} · 던전 입장!`}</p>
       <p class="lb2-sub">${finale ? '오늘 배운 것 한마디씩 남기고 가자' : `${esc(L.title)} — 선생님 주위로 모여라`}</p>
       ${finale && DS.Result.floorText(L) ? `<p class="lb2-floor">${DS.Result.floorText(L)}</p>` : ''}
-      ${finale ? `<div class="lb2-cnt">💬 ${words.length} / ${n}</div>` : `<div class="lb2-qr"><div id="h-qr" class="qr"></div><b>${code}</b><span>QR · 수업 코드</span></div>`}
+      ${finale ? `<div class="lb2-cnt">💬 ${words.length} / ${n}</div>` : `<div class="lb2-qr"><div id="h-qr" class="qr"></div><b>${code}</b><span>QR · 수업 코드</span></div><div class="lb2-cnt lb2-on">👥 접속 <b>${onN}</b>명 · 입장 ${n}명</div>`}
       <div class="lb2-say teacher">${finale ? '모두 수고했네! 오늘 배운 것 한마디씩 남기게' : `${L.no ? `${DS.Lessons.noText(L.no)}차시 ` : ''}${esc(L.title.split('·')[0].trim())} 던전에 온 것을 환영하네!`}</div>
       <div class="lb2-h teacher" style="left:50%;top:60%">${DS.Art.hero(DS.Art.teacherHero(R), finale ? 'attack' : 'idle', finale ? 'pairhop' : 'huff')}<i class="shadow"></i><span class="nm gold">선생님</span></div>
       ${pos.map((o, i) => `<div class="lb2-h${enhCls(o.p)}" style="left:${o.x}%;top:${o.y}%;z-index:${5 + Math.round(o.y / 10)};--sz:${size}px;animation-delay:${(i * 0.13) % 0.9}s"><span class="nm">${DS.Titles.nameHtml(o.p, { size: 16, short: true })}</span><div class="${(finale ? i % 2 === 1 : o.flip) ? 'face-l' : ''}">${DS.Art.hero(o.p.hero, 'idle', finale ? 'pairhop' : 'huff')}</div><i class="shadow"></i>${finale && words.includes(o.u) ? `<span class="lb2-bub" data-u="${o.u}">${esc(R.words[o.u].t)}</span>` : ''}</div>`).join('')}
@@ -403,7 +404,7 @@ DS.Hall = (function () {
     const key = on ? `${lk.id}|${lk.t0}|${lk.end}|${rd}|${all}` : '';
     arena.classList.toggle('scouting', on); // 🌫 #22: 정찰 동안 = 학습지 그림 오른쪽 크게 · 실루엣 진형은 왼쪽으로 비켜 섬 (그림 위에 그리지 않음)
     const mon = $('#rm'); if (on && mon && !mon.classList.contains('scout-sil')) mon.classList.add('scout-sil'); // 화면을 다시 그려도 실루엣 유지
-    if (on && mon && !mon.querySelector('.sc-pack')) DS.Art.scoutDeco(mon); // 🌫 진형(대장 + 졸개 3)
+    if (on && mon && !mon.querySelector('.sc-pack')) { const s0 = Raid().stepOf(L, R) || {}, ch = s0.kind === 'monster' && Raid().isChain(L, R, s0.id); DS.Art.scoutDeco(mon, true, ch ? { n: Raid().chainDown(L, R, s0.id).length } : {}); } // 🌫 진형(대장 + 졸개 · 소레이드는 단계 수만큼)
     if (key === slKey) return;
     const was = slKey; slKey = key;
     let ban = arena.querySelector('.h-solve');
@@ -419,11 +420,24 @@ DS.Hall = (function () {
     }
   }
   // ⚔ 소레이드 진행판 (2026-11-09 #18): ①②③👑 칸마다 그 단계 학생 번호 · 🙋 = 선생님 확인 필요 · 맨 위 체력바는 반 전체 그대로
-  let crKey = '';
+  let crKey = '', dnSeen = null;
   function hallChain() {
     const arena = $('#raid'); if (!arena || !L || !R) return;
     const st = Raid().stepOf(L, R), on = !!(st && st.kind === 'monster' && Raid().isChain && Raid().isChain(L, R, st.id));
-    let box = arena.querySelector('.h-chain'); if (!on) { if (box) box.remove(); crKey = ''; return; }
+    let box = arena.querySelector('.h-chain'); if (!on) { if (box) box.remove(); crKey = ''; dnSeen = null; return; }
+    // 💥 졸개 쓰러짐: 정찰이 끝난 뒤 대장 앞에 졸개(색) · 반 기준% 가 넘은 졸개는 쓰러짐 + 띠
+    const mon = $('#rm'), dn = Raid().chainDown(L, R, st.id), downs = dn.filter((d) => d.down).map((d) => d.k), dk = `${st.id}|${downs.join(',')}`;
+    if (mon && !mon.classList.contains('scout-sil')) {
+      const pack = mon.querySelector('.sc-pack.sc-fight');
+      if (!pack || pack.dataset.key !== dk) {
+        DS.Art.scoutDeco(mon, false); DS.Art.scoutDeco(mon, true, { n: dn.length, down: dnSeen && dnSeen.id === st.id ? dnSeen.downs : downs, fight: true }); mon.classList.remove('sc-lead');
+        const p2 = mon.querySelector('.sc-pack'); if (p2) p2.dataset.key = dk;
+        const fresh = dnSeen && dnSeen.id === st.id ? downs.filter((k) => !dnSeen.downs.includes(k)) : [];
+        if (p2 && fresh.length) requestAnimationFrame(() => fresh.forEach((k) => { const e = p2.querySelector(`[data-k="${k}"]`); if (e) e.classList.add('down'); }));
+        fresh.forEach((k, i) => setTimeout(() => { const b = document.createElement('div'); b.className = 'h-down-ban'; b.textContent = `💥 졸개 ${'①②③④⑤⑥'[k]} 쓰러짐!`; arena.appendChild(b); if (Snd() && Snd().hit) Snd().hit(); setTimeout(() => b.remove(), 2400); }, i * 900));
+        dnSeen = { id: st.id, downs };
+      }
+    }
     const ids = Raid().activeIds(R).filter((u) => u !== (R.meta || {}).teacher), recs = ids.map((u) => [u, Raid().record(L, R, st.id, u)]), n = recs[0] ? recs[0][1].n : 0;
     const cols = Array.from({ length: n + 1 }, (_, i) => recs.filter(([, r]) => (i === n ? r.done : !r.done && r.stage === i)));
     const key = JSON.stringify(cols.map((c) => c.map(([u, r]) => u + (r.locked ? '!' : r.perfect ? '*' : ''))));

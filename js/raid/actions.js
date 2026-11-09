@@ -190,6 +190,7 @@ DS.Act = (function () {
     await N().set(P(code, `chain/${mid}/${me}/${rec.nextK}`), { s, p: p || 0, g: g == null ? '' : g, at: N().TS });
     return Raid.record(L, { ...R, chain: { ...(R.chain || {}), [mid]: { ...((R.chain || {})[mid] || {}), [me]: { ...(((R.chain || {})[mid] || {})[me] || {}), [rec.nextK]: { s, p: p || 0, g } } } } }, mid, me);
   }
+  const chainKnock = (code, mid, k) => N().set(P(code, `state/chainDown/${mid}/${k}`), true); // 💥 리모컨 「쓰러뜨리기」 (state 아래 · 규칙 바꿈 없음)
   const chainRelease = (code, mid, uid) => N().set(P(code, `chainOk/${mid}/${uid}`), true);
   const scoutReady = (code, id) => N().set(P(code, `ready/${id}/${N().uid()}`), N().TS); // 🌫 정찰 ✋ 준비 완료 (2026-11-09 #17)
   async function saveEnd(code) {
@@ -387,5 +388,5 @@ DS.Act = (function () {
     return out;
   }
 
-  return { chainSubmit, chainRelease, scoutReady, setSolve, saveEnd, resumeInfo, switchLesson, setSound, bossTry, openRooms, savePunch, finishOvertime, setPunchOff, punchOff, batTick, batAnswer, hit, endClassAsk, timeUp, extendTime, openRift, cutShort, setRest, setRestMin, markBossWin, prepLite, prepImg, hasImg, setVideoFile, setVideoOn, endClass, admitLate, getPrep, setImage, setVideo, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, heal, bossAnswer, unpackRoom, P };
+  return { chainSubmit, chainKnock, chainRelease, scoutReady, setSolve, saveEnd, resumeInfo, switchLesson, setSound, bossTry, openRooms, savePunch, finishOvertime, setPunchOff, punchOff, batTick, batAnswer, hit, endClassAsk, timeUp, extendTime, openRift, cutShort, setRest, setRestMin, markBossWin, prepLite, prepImg, hasImg, setVideoFile, setVideoOn, endClass, admitLate, getPrep, setImage, setVideo, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, heal, bossAnswer, unpackRoom, P };
 })();
