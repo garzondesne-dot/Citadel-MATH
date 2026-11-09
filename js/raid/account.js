@@ -189,7 +189,7 @@ DS.Account = (function () {
         if (f.open && f.bought) return; // 예전에 산 것
         const sealGot = f.open && !f.bought; f.open = false;
         f.locked = `먼저 ${TN[t - 1]} 「${DS.FX.NAMES[f.need].replace(/^\S+\s/, '')}」`;
-        f.cond = sealGot ? `🏆 받음 · ${TN[t - 1]}먼저` : `💎${f.shop ? f.shop.price : ''} · ${TN[t - 1]}먼저`;
+        f.cond = sealGot ? `🏆 받음 · ${TN[t - 1]} 열면 사용` : `💎${f.shop ? f.shop.price : ''} · ${TN[t - 1]}먼저`; f.got = sealGot; // #31 A안: 받은 것 = 금빛 (잠김 아님)
       }));
     }
     // 🪶 황금 날개 (v0.9.11 업적 전용): 🎁 보물 상자에서 황금 깃털 5개

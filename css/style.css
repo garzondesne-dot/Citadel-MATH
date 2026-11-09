@@ -744,6 +744,7 @@ body.forge-open { overflow: hidden; }
 .set-box { max-height: 92dvh; overflow-y: auto; }
 .set-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
 .hpick.lock, .fxpick.lock { filter: grayscale(1) brightness(.5); position: relative; }
+.fxpick.got { border-color: var(--gold); } .fxpick.got canvas { filter: grayscale(.6) brightness(.7); } .fxpick.got small { color: var(--gold); font-weight: 700; } /* #31 업적으로 받은 Ⅲ = 금빛 · Ⅱ 열면 사용 */
 .hpick .lk { position: absolute; right: 2px; top: 0; font-size: 14px; }
 .hpick { position: relative; }
 

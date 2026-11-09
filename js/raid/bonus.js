@@ -432,7 +432,11 @@ DS.Bonus = (function () {
         if (!castle) { const x = noteOf(L); if (!x.none && x.left === 0) await gm(G.note, `note_${L.id}`, '오답노트 완성'); }
       }
       if (sealed) show(`🏆 업적 ${seals(mine).length}개째!`, 'seal');
-      if (fx) show(`✨ ${DS.FX.NAMES[fx]} 열림`, 'seal');
+      if (fx) { // 🔗 #31 (2026-11-09 A안 · 규칙 그대로 · 문구만): 같은 계열 Ⅱ 가 아직 잠겨 있으면 「받음 · Ⅱ 열면 사용」
+        const fam = DS.FX.FAMS.find((f) => f.ids.includes(fx)), two = fam ? fam.ids[1] : null;
+        const g = DS.Gem && DS.Gem.mine ? await DS.Gem.mine(me).catch(() => ({})) : {}, twoOpen = !two || (DS.Gem && DS.Gem.owns(g, 'fx', two));
+        show(twoOpen ? `✨ ${DS.FX.NAMES[fx]} 열림` : `${DS.FX.NAMES[fx]} 받음! 같은 계열 Ⅱ를 열면 바로 쓸 수 있어요`, 'seal');
+      }
       if (sealed && seals(mine).length === 3) show('🧑 용사 금발 검사 열림', 'seal');
     };
     if (photoRoom && !chainRoom && rec.ans && !rec.clear && rec.ans.seed) { cur = itemsOf(L, mid, rec.ans.seed, rec.ans.attempt || 0); solved.fill(true); return photoStage(cur, false); } // 📷 답은 이미 맞힘 → 같은 숫자로 사진 단계
