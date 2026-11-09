@@ -326,7 +326,7 @@ DS.Student = (function () {
     const done = Raid().cleared(L, R, step.id);
     return `<div class="scene enc bg-scene th-${L.theme || ''} ${cls}${step.special ? ' special' : ''}">${scTop()}${hpBox(hp.left, hp.max, gauge)}
       ${partyHtml(step.id)}
-      <div class="enc-hero${enhCls(info0)}">${rec && rec.slots ? hpTries(rec) : ''}${heroNow(pose2(done, cls), done ? 'pairhop' : cls === 'miss' ? 'slump' : 'huff')}<i class="shadow"></i>${plate()}</div>
+      <div class="enc-hero${enhCls(info0)}">${heroNow(pose2(done, cls), done ? 'pairhop' : cls === 'miss' ? 'slump' : 'huff')}<i class="shadow"></i>${plate()}</div>
       <div class="enc-mon">${DS.Art.monster(L.monsters[step.id].sprite, done ? 'down' : 'idle', done ? '' : 'float')}<div class="segs" title="내가 맞힌 만큼 칸이 깨져요">${segs}</div></div>${banner}</div>`;
   }
   // 생각 시간: 틀린 칸이 있으면 해설은 읽을 수 있고 「다시 도전」만 잠깐 잠긴다 (수업 준비에서 0·5·10·15초, 기본 5초)
