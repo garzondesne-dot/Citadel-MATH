@@ -26,7 +26,7 @@ function play(map, n, kind, seed) {
 }
 let fail = 0; const out = [];
 const N = Number(process.env.TD_N) || 12;
-for (const map of MAPS) {
+for (const map of MAPS.filter((m) => !process.env.TD_MAP || m.id === process.env.TD_MAP)) { // TD_MAP=지도 하나만 (맞추기용)
   const row = { map: map.id };
   for (const [n, kind] of [[20, 'mid'], [12, 'mid'], [20, 'weak'], [20, 'strong'], [4, 'mid']]) {
     let win = 0, tmax = 0, life = 0; for (let s = 0; s < N; s++) { const S = play(map, n, kind, s); if (S.win) win++; tmax = Math.max(tmax, S.t); life += S.life; }

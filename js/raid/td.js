@@ -8,11 +8,11 @@ window.DS = window.DS || {};
 DS.TD = (function () {
   const M = () => DS.TDMaps;
   // ── 숫자 (확정안) ──────────────────────────────────────
-  const PICK_MS = 40000, DT = 0.05, WAVE_AT = [0, 36, 72, 108, 144], LIMIT = 225, LIFE = 30, WALK = 22; // 보통 몬스터가 길을 다 걷는 시간(초)
-  const STARS_AT = [3, 8, 15, 25], TERRAIN = 1.2, RESO = 1.1, MELEE = { range: 1.6, dmg: 1.3 }, RANGED = { range: 3, dmg: 1 };
+  const PICK_MS = 40000, DT = 0.05, WAVE_AT = [0, 36, 72, 108, 144], LIMIT = 225, LIFE = 30, WALK = 26, DENSE = 1.7; // 🌊 2026-11-09 선생님 「줄지어 · 속도는 늦어도 물량이 밀어닥치게」: 수 × 1.7 · 한 마리 체력 ÷ 1.7 · 걷기 22 → 26초 (난이도는 판마다 calibrate 가 맞춤) // 보통 몬스터가 길을 다 걷는 시간(초)
+  const STARS_AT = [5, 14, 26, 43], /* 수 × 1.7 → 업그레이드 속도 그대로 (옛 3 · 8 · 15 · 25) */ TERRAIN = 1.2, RESO = 1.1, MELEE = { range: 1.6, dmg: 1.3 }, RANGED = { range: 3, dmg: 1 };
   const UP = { a: { atk: 0.25 }, b: { rate: 0.2 }, c: { tier: 1 } }; // ⚔ 공격 · ⚡ 속도 · ✨ 특기 (한 판 하고 끝)
   // 🏰 개편 A (2026-11-08): 몬스터 떼 = 한 마리 체력 ↓ · 수 3배 · t = 🪨 골렘(단단 · 근접이 막으면 2칸 차지) · v = 🦇 박쥐(날아다님 = 원거리만 때림 · 근접이 못 막음)
-  const TYPES = { n: { hp: 0.35, sp: 1, leak: 1, star: 1 }, f: { hp: 0.22, sp: 1.6, leak: 1, star: 1 }, t: { hp: 1.4, sp: 0.55, leak: 2, star: 2, heavy: true }, v: { hp: 0.25, sp: 1.25, leak: 1, star: 1, fly: true }, m: { hp: 3, sp: 0.7, leak: 3, star: 5, boss: true, heavy: true }, b: { hp: 10, sp: 0.5, leak: 5, star: 10, boss: true, heavy: true } };
+  const TYPES = { n: { hp: 0.21, sp: 1, leak: 1, star: 1 }, f: { hp: 0.13, sp: 1.6, leak: 1, star: 1 }, t: { hp: 0.82, sp: 0.55, leak: 2, star: 2, heavy: true }, v: { hp: 0.15, sp: 1.25, leak: 1, star: 1, fly: true }, /* 한 마리 체력 ÷ 1.7 (옛 0.35 · 0.22 · 1.4 · 0.25) */ m: { hp: 3, sp: 0.7, leak: 3, star: 5, boss: true, heavy: true }, b: { hp: 10, sp: 0.5, leak: 5, star: 10, boss: true, heavy: true } };
   const WAVES = [['n', 30], ['n', 30, 'f', 10, 'v', 6], ['n', 26, 't', 8, 'v', 8], ['n', 20, 'f', 10, 't', 8, 'v', 8, 'm', 2], ['b', 1, 'n', 18, 'f', 8, 't', 8, 'v', 8]];
   const BLOCK = { r: 0.75, cap: 3 }; // ⛔ 근접 용사: 몸에 닿은(0.75칸) 땅 몬스터를 3칸만큼 붙잡음 (골렘 · 보스 = 2칸)
   // 계열 특기 (단계 0~4 = Ⅰ Ⅱ Ⅲ Ⅳ + ✨ 업그레이드 한 칸)
@@ -45,8 +45,8 @@ DS.TD = (function () {
     const students = towers.filter((T) => !T.teacher).length, few = Math.max(0.45, Math.min(1, students / 12));
     const hp0 = opt.hp0 || Math.max(30, HP_K * power / Math.max(0.6, few * 1.4)); // 실제로는 calibrate() 로 정함
     const R = rng(opt.seed || 1), spawns = [];
-    WAVES.forEach((w, wi) => { const list = []; for (let i = 0; i < w.length; i += 2) for (let k = 0; k < Math.max(w[i] === 'b' || w[i] === 'm' ? w[i + 1] : 1, Math.round(w[i + 1] * few)); k++) list.push(w[i]); { const head = w[0] === 'b' ? list.shift() : null; list.sort(() => R() - 0.5); if (head) list.unshift(head); } // 👑 보스는 마지막 웨이브 맨 앞 (느려서 · 시간 안에 끝나게)
-      list.forEach((ty, i) => spawns.push({ at: WAVE_AT[wi] + 1 + i * (28 / Math.max(8, list.length)), ty, wave: wi + 1, path: i % paths.length })); });
+    WAVES.forEach((w, wi) => { const list = []; for (let i = 0; i < w.length; i += 2) for (let k = 0; k < Math.max(w[i] === 'b' || w[i] === 'm' ? w[i + 1] : 1, Math.round(w[i + 1] * few * (w[i] === 'b' || w[i] === 'm' ? 1 : 1 + (DENSE - 1) * few))); k++) list.push(w[i]); { const head = w[0] === 'b' ? list.shift() : null; list.sort(() => R() - 0.5); if (head) list.unshift(head); } // 👑 보스는 마지막 웨이브 맨 앞 (느려서 · 시간 안에 끝나게)
+      { const G = 6, ng = Math.ceil(list.length / G), gap = 26 / Math.max(3, ng); list.forEach((ty, i) => { const gi = Math.floor(i / G); spawns.push({ at: WAVE_AT[wi] + 1 + gi * gap + (i % G) * 0.3, ty, wave: wi + 1, path: gi % paths.length }); }); } }); // 🚂 줄지어 (2026-11-09): 6마리씩 바짝 붙어 한 줄로 → 다음 줄 · 줄마다 길을 번갈아
     return { map, paths, plen, sp, hp0, towers, spawns, si: 0, mons: [], t: 0, life: LIFE, wave: 1, shield: 0, cheerUntil: 0, petriUntil: 0, nid: 0, fx: [], done: false, win: false, leaks: 0, R, log: [] };
   }
   const posAt = (S, path, d) => { const p = S.paths[path]; let r = d; for (let i = 1; i < p.length; i++) { const L = Math.hypot(p[i][0] - p[i - 1][0], p[i][1] - p[i - 1][1]); if (r <= L) { const k = r / (L || 1); return [p[i - 1][0] + k * (p[i][0] - p[i - 1][0]), p[i - 1][1] + k * (p[i][1] - p[i - 1][1])]; } r -= L; } return p[p.length - 1]; };
@@ -72,6 +72,7 @@ DS.TD = (function () {
     if (F.proof && !noFx) { T.stk = T.last === m ? Math.min(3, (T.stk || 0) + 1) : 0; T.last = m; dmg *= 1 + F.proof[ti] * tk * T.stk; }
     if (F.crit && S.R() < F.crit[ti] * tk) { dmg *= 2; if (!noFx) S.fx.push({ k: 'crit', x: m.x, y: m.y, t: S.t }); }
     m.hp -= dmg; T.dmg += dmg;
+    if (!noFx) S.fx.push({ k: 'dmg', x: m.x, y: m.y, v: Math.max(1, Math.round(dmg)), t: S.t }); // 💥 데미지 숫자 (2026-11-09 선생님)
     if (F.slow) { m.slow = Math.max(m.slow || 0, F.slow[ti] * tk); m.slowUntil = S.t + 1.5; }
     if (F.burn) { m.burn = Math.max(m.burn || 0, T.atk * F.burn[ti] * tk); m.burnUntil = S.t + 2; m.burnBy = T; }
     if (F.stun && T.hits % 3 === 0) m.stunUntil = S.t + F.stun[ti] * tk;
@@ -104,7 +105,7 @@ DS.TD = (function () {
       T.cd -= DT * cheerK; if (T.cd > 0) return;
       let best = null; S.mons.forEach((m) => { if (!m.dead && (T.ranged || !TYPES[m.ty].fly) && Math.hypot(m.x - T.x, m.y - T.y) <= T.range && (!best || (best.blockBy === T) < (m.blockBy === T) || ((best.blockBy === T) === (m.blockBy === T) && m.d > best.d))) best = m; }); // 근접 = 박쥐 못 때림 · 내가 막은 몬스터 먼저
       if (!best) return;
-      T.cd = 1 / T.rate; T.hits++; T.shotAt = S.t;
+      T.cd = 1 / T.rate; T.hits++; T.shotAt = S.t; T.tx = best.x; // ↔ 마지막으로 친 몬스터 쪽을 봄
       const F = FAM[T.fam] || {}, ti = Math.min(4, T.tier), dmg = T.atk * T.dmgK;
       hit(S, T, best, dmg);
       if (F.splash) S.mons.forEach((m) => { if (m !== best && !m.dead && (T.ranged || !TYPES[m.ty].fly) && Math.hypot(m.x - best.x, m.y - best.y) <= F.splash[ti] * T.terr) hit(S, T, m, dmg * 0.5, true); });
@@ -125,7 +126,7 @@ DS.TD = (function () {
   //   점수 = 이기면 남은 생명 · 지면 −(남은 몬스터 체력 / 한 마리 체력) → 점수가 TARGET 이 되는 체력 (이분 탐색)
   //   → 실제 판은 기술 · 선생님 방패 · 응원 · 업그레이드 고르기에 따라 이기고 짐 (tests/td.test.js 로 ≈ 70%)
   //   경계 = 미리 돌린 판(기술 · 선생님 없음)이 아슬아슬하게 이기는 가장 센 체력 → × FACTOR (지도마다 · tests/td.test.js 로 ≈ 70%)
-  const FACTOR = { forest: 1.12, volcano: 1.12, ice: 1.08, desert: 1.10, crypt: 1.13 }; // 2026-11-08 개편 A(몬스터 떼 · 막기) 뒤 다시 맞춤
+  const FACTOR = { forest: 1.10, volcano: 1.12, ice: 1.09, desert: 1.12, crypt: 1.14 }; // 2026-11-08 개편 A(몬스터 떼 · 막기) 뒤 다시 맞춤 · 2026-11-09 줄지어 물량(× 1.7 · 6마리 줄) 뒤 다시 맞춤 (옛 1.12 · 1.12 · 1.08 · 1.10 · 1.13)
   function score(opt, hp0) { const S = create(Object.assign({}, opt, { hp0 })), R = rng('cal' + (opt.seed || 1)); run(S, (S) => S.towers.forEach((T) => { while (pending(T) > 0) upgrade(S, T.uid, auto(T, R)); })); return S.win ? S.life : -(S.left || 0) - 0.01; }
   function calibrate(opt, f) { let lo = 5, hi = 5000; for (let i = 0; i < 14; i++) { const mid = Math.sqrt(lo * hi); if (score(opt, mid) > 0) lo = mid; else hi = mid; } return Math.round(lo * (f != null ? f : FACTOR[opt.map.id] || 1.2)); }
   const auto = (T, R) => (T.fam === 'fire' || T.fam === 'frost' || T.fam === 'spark' ? 'c' : R() < 0.5 ? 'a' : 'b'); // 안 고르면 저절로 (12초)
@@ -219,6 +220,10 @@ DS.TD = (function () {
     const h = H, f = h.f, R = h.R, picks = ((R.tdp || {})[f.g]) || {}, left = Math.max(0, Math.ceil((f.to - N().now()) / 1000)), studs = studentsIn(R), got = new Set(Object.values(picks));
     h.hud.innerHTML = `<div class="td-top"><b>🏰 ${esc(h.map.name)}</b> <span>자리 고르기 <b class="td-sec">${left}</b>초</span> <span>고른 사람 ${studs.filter((u) => got.has(u)).length} / ${studs.length}</span> <span class="td-tile">지형 보너스: ${esc(FAMN[h.map.tile].split(' · ')[0])} +20%</span></div><p class="td-desc">${esc(h.map.desc)} · 폰에서 칸을 눌러 자리를 잡아요 (선착순 · 한 번) · ★ = 명당</p>`;
     h.dom.innerHTML = Object.entries(picks).map(([no, u]) => { const s = M().slots(h.map)[Number(no) - 1], p = R.players[u] || {}; return s ? `<div class="td-pk" style="${pos(h, s.x, s.y)}">${DS.Art.hero(p.hero || 0, 'idle', 'small')}<b>${esc(p.nick || '')}</b></div>` : ''; }).join('');
+    // 🔁 자리 교환 (2026-11-09 선생님 「1:1 교환 신청」): 둘이 서로 신청(tdm/…/sw) = TV 가 두 자리를 맞바꿈 (학생은 남의 자리에 못 쓰므로 TV 가)
+    { const st = ((R.tdm || {})[f.g]) || {}, slotOf = (u) => Object.keys(picks).find((k) => picks[k] === u); h.swDone = h.swDone || {};
+      Object.keys(st).forEach((a) => { const b = (st[a] || {}).sw; if (!b || a >= b || (st[b] || {}).sw !== a) return; const sa = slotOf(a), sb = slotOf(b), key = `${a}|${b}|${sa}|${sb}`; if (!sa || !sb || h.swDone[key] || !codeOf()) return; h.swDone[key] = 1;
+        N().update(`rooms/${codeOf()}`, { [`tdp/${f.g}/${sa}`]: b, [`tdp/${f.g}/${sb}`]: a, [`tdm/${f.g}/${a}/sw`]: null, [`tdm/${f.g}/${b}/sw`]: null, [`tdm/${f.g}/${a}/swd`]: N().now(), [`tdm/${f.g}/${b}/swd`]: N().now() }).catch(() => { delete h.swDone[key]; }); }); }
     clearTimeout(h.pickT); h.pickT = setTimeout(() => { if (H === h && h.f.phase === 'pick') hall(h.el, h.R); }, 500);
   }
   // 자리 고르기 끝 → 자리 정리 · 난이도 맞추기 → 놀이 시작 (TV 하나가)
@@ -290,7 +295,7 @@ DS.TD = (function () {
     // 몬스터 (DOM · 그림 재사용)
     const seen = new Set();
     S.mons.forEach((m) => { seen.add(m.id); let d = h.mons.get(m.id);
-      if (!d) { d = document.createElement('div'); d.className = `td-mon t-${m.ty}`; d.innerHTML = `${DS.Art.monster(h.spr[m.ty] || 0, 'idle', '')}<i class="td-hp"><i></i></i>`; h.dom.appendChild(d); h.mons.set(m.id, d); }
+      if (!d) { d = document.createElement('div'); d.className = `td-mon t-${m.ty}`; d.innerHTML = `<i class="td-sh"></i>${DS.Art.monster(h.spr[m.ty] || 0, 'idle', '')}<i class="td-hp"><i></i></i>`; /* 👣 발밑 그림자 */ h.dom.appendChild(d); h.mons.set(m.id, d); }
       d.style.transform = `translate(${m.x * U}px, ${m.y * U}px)`; const hp = d.querySelector('.td-hp i'); if (hp) hp.style.width = `${Math.max(0, (100 * m.hp) / m.max)}%`;
       d.classList.toggle('dead', !!m.dead); d.classList.toggle('slow', m.slowUntil > S.t); d.classList.toggle('burn', m.burnUntil > S.t); d.classList.toggle('stun', m.stunUntil > S.t || S.t < S.petriUntil); });
     h.mons.forEach((d, id) => { if (!seen.has(id)) { d.remove(); h.mons.delete(id); } });
@@ -298,14 +303,18 @@ DS.TD = (function () {
     const blk = new Set(); S.mons.forEach((m) => { if (!m.dead && m.blockBy) blk.add(m.blockBy); });
     S.towers.forEach((T) => { const d = h.tw.get(T.uid); if (!d) return;
       const pose = S.t - T.shotAt < 0.45 ? 'attack' : 'idle'; if (d.dataset.pose !== pose) { d.dataset.pose = pose; d.querySelector('.td-art').innerHTML = DS.Art.hero(Number(d.dataset.hero) || 0, pose, 'small'); }
-      const k = d.querySelector('.td-k'), kt = `⚔ ${T.kills}`; if (k.textContent !== kt) k.textContent = kt; d.classList.toggle('blocking', blk.has(T)); });
+      const k = d.querySelector('.td-k'), kt = `⚔ ${T.kills}`; if (k.textContent !== kt) k.textContent = kt; d.classList.toggle('blocking', blk.has(T)); d.classList.toggle('flip', T.tx != null && T.tx < T.x - 0.05); }); /* ↔ 왼쪽에서 오는 적 = 뒤집어 그쪽을 보고 공격 (2026-11-09 선생님) */
     S.towers.forEach((T) => { const d = h.tw.get(T.uid); if (!d) return; const e = d.querySelector('.td-up'), txt = T.ups.map((k) => ({ a: '⚔', b: '⚡', c: '✨' })[k]).join(''); if (e.textContent !== txt) e.textContent = txt; d.classList.toggle('awake', T.awake); d.classList.toggle('pending', pending(T) > 0); });
+    // 🔊 타격음 (2026-11-09 선생님 「공격할 때 이펙트 타격음」): 새 공격마다 · 여럿이면 0.09초에 한 번
+    { let nNew = 0, ranged = 0; S.fx.forEach((e) => { if (e.k === 'shot' && e.t > (h.sndT || 0)) { nNew++; if (e.r) ranged++; } }); h.sndT = S.t;
+      const Snd = DS.Sound; if (nNew && Snd && now - (h.sndAt || 0) > 90) { h.sndAt = now; try { if (ranged === nNew && Snd.slash) Snd.slash(); else if (Snd.hit) Snd.hit(); } catch (e) { /* 소리 없음 */ } } }
     // 효과 (캔버스)
     const g = h.fx.getContext('2d'); g.clearRect(0, 0, h.fx.width, h.fx.height); g.lineCap = 'round';
     S.fx.forEach((e) => { const a = ago(S, e.t);
       if (e.k === 'shot' && !e.r && a < 0.18) { g.strokeStyle = FAMC[e.fam] || '#fff'; g.globalAlpha = 1 - a / 0.18; g.lineWidth = U * 0.09; const ang = Math.atan2(e.y1 - e.y0, e.x1 - e.x0); g.beginPath(); g.arc(e.x1 * U, e.y1 * U, U * 0.32, ang - 1.9 + a * 8, ang - 0.4 + a * 8); g.stroke(); } // ⚔ 근접 = 베기
       else if (e.k === 'shot' && e.r && a < 0.22) { const k = Math.min(1, a / 0.16), x = e.x0 + (e.x1 - e.x0) * k, y = e.y0 + (e.y1 - e.y0) * k; g.globalAlpha = k < 1 ? 1 : 1 - (a - 0.16) / 0.06; g.fillStyle = FAMC[e.fam] || '#fff'; g.beginPath(); g.arc(x * U, y * U, U * (k < 1 ? 0.1 : 0.2), 0, 7); g.fill(); g.strokeStyle = '#fff8'; g.lineWidth = U * 0.03; g.beginPath(); g.moveTo((x - (e.x1 - e.x0) * 0.08) * U, (y - (e.y1 - e.y0) * 0.08) * U); g.lineTo(x * U, y * U); g.stroke(); } // 🏹 원거리 = 날아가는 탄
       else if (e.k === 'shot' && a < 0.15) { g.strokeStyle = FAMC[e.fam] || '#fff'; g.globalAlpha = 1 - a / 0.15; g.lineWidth = U * 0.07; g.beginPath(); g.moveTo(e.x0 * U, e.y0 * U); g.lineTo(e.x1 * U, e.y1 * U); g.stroke(); g.beginPath(); g.arc(e.x1 * U, e.y1 * U, U * 0.16, 0, 7); g.fillStyle = FAMC[e.fam] || '#fff'; g.fill(); }
+      else if (e.k === 'dmg' && a < 0.6) { const r = a / 0.6, fs = U * 0.38; g.globalAlpha = r < 0.7 ? 1 : 1 - (r - 0.7) / 0.3; g.font = `bold ${fs}px sans-serif`; g.textAlign = 'center'; g.lineWidth = Math.max(2, fs * 0.18); g.strokeStyle = '#000'; const tx = e.x * U + ((e.v * 7) % 11 - 5) * U * 0.02, ty = (e.y - 0.55 - r * 0.5) * U; g.strokeText(String(e.v), tx, ty); g.fillStyle = '#fff'; g.fillText(String(e.v), tx, ty); g.textAlign = 'start'; } // 💥 데미지 숫자 (떠오르며 사라짐)
       else if (e.k === 'crit' && a < 0.5) { g.globalAlpha = 1 - a / 0.5; g.fillStyle = '#ffd25a'; g.font = `bold ${U * 0.3}px sans-serif`; g.fillText('치명!', e.x * U, (e.y - 0.5 - a) * U); }
       else if ((e.k === 'skill' || e.k === 'ult' || e.k === 'true') && a < 0.8) { g.globalAlpha = 1 - a / 0.8; g.strokeStyle = e.k === 'true' ? '#ffd25a' : e.k === 'ult' ? '#ff7a1a' : '#9ef0ff'; g.lineWidth = U * 0.12; g.beginPath(); g.arc(e.x * U, e.y * U, U * (0.4 + a * 2.4), 0, 7); g.stroke(); } });
     g.globalAlpha = 1;
@@ -344,14 +353,26 @@ DS.TD = (function () {
     const map = mapOf(f), picks = ((R.tdp || {})[f.g]) || {}, mine = Object.keys(picks).find((k) => picks[k] === me), left = Math.max(0, Math.ceil((f.to - N().now()) / 1000));
     if (!PH.stat || PH.statFor !== `${(R.players[me] || {}).hero}|${(R.players[me] || {}).fx}`) { PH.statFor = `${(R.players[me] || {}).hero}|${(R.players[me] || {}).fx}`; myStats(R, me).then((st) => { PH.stat = st; N().set(P(code, `tdm/${f.g}/${me}`), st).catch(() => {}); if (body.isConnected) phonePick(body, R, me, code, f); }); }
     const st = PH.stat || { lv: 3, enh: 0, hero: (R.players[me] || {}).hero || 0, fx: (R.players[me] || {}).fx || 'flame' };
-    body.innerHTML = `<div class="panel framed td-ph"><p class="td-ph-h">🏰 자리 고르기 <b class="gold">${left}초</b></p><p class="muted small">${esc(map.name)} · ${esc(map.desc)} · 선착순 · 한 번 고르면 끝 · ★ = 명당</p>
+    // 🔁 자리 교환 (1:1): 내 자리가 있으면 친구 자리를 눌러 신청 · 받은 신청은 수락 / 거절 · 서로 신청이 맞으면 TV 가 맞바꿈
+    const SW = ((R.tdm || {})[f.g]) || {}, my = SW[me] || {}, nick = (u) => esc(((R.players || {})[u] || {}).nick || '친구'), slotOf = (u) => Object.keys(picks).find((k) => picks[k] === u);
+    const inc = Object.keys(SW).filter((u) => u !== me && (SW[u] || {}).sw === me && my.sw !== u && my.no !== u && slotOf(u));
+    if (my.sw && (SW[my.sw] || {}).no === me && PH.swNo !== my.sw) { PH.swNo = my.sw; DS.UI.toast(`🙅 ${nick(my.sw)} 친구가 교환을 거절했어요`); N().set(P(code, `tdm/${f.g}/${me}/sw`), null).catch(() => {}); }
+    if (my.swd && PH.swd !== my.swd) { if (PH.swd) DS.UI.toast('🔁 자리를 바꿨어요!'); PH.swd = my.swd; }
+    const swHtml = `${my.sw ? `<p class="td-sw">⏳ <b>${nick(my.sw)}</b>(${slotOf(my.sw) || '?'}번)에게 교환 신청 중 <button class="btn small" data-swc="1">취소</button></p>` : '<p class="muted small">🔁 친구 자리를 누르면 1:1 교환 신청 (친구가 수락하면 바뀜)</p>'}${inc.map((u) => `<div class="td-sw in">🔁 <b>${nick(u)}</b>(${slotOf(u)}번)가 내 자리(${mine}번)와 바꾸자고 해요 <button class="btn small primary" data-swy="${esc(u)}">수락</button><button class="btn small" data-swn="${esc(u)}">거절</button></div>`).join('')}`;
+    body.innerHTML = `<div class="panel framed td-ph"><p class="td-ph-h">🏰 자리 고르기 <b class="gold">${left}초</b></p><p class="muted small">${esc(map.name)} · ${esc(map.desc)} · 선착순 · 고른 뒤엔 친구와 1:1 교환 신청 · ★ = 명당</p>
       ${miniMap(map, picks, R, me, mine)}${statCard(st, map)}
-      ${mine ? `<p class="okc">✔ <b>${mine}번</b> 자리를 잡았어요! 웨이브를 기다려요</p>` : '<p class="muted small">💡 근접은 길 가까운 칸 · 원거리는 어디든 · 지도에서 빈 칸을 눌러요</p>'}
+      ${mine ? `<p class="okc">✔ <b>${mine}번</b> 자리를 잡았어요! 웨이브를 기다려요</p>${swHtml}` : '<p class="muted small">💡 근접은 길 가까운 칸 · 원거리는 어디든 · 지도에서 빈 칸을 눌러요</p>'}
       <button class="btn small" id="td-set">⚙ 용사 · 스킬 바꾸기 <small>(자리 고르기 동안만)</small></button></div>`;
     body.querySelectorAll('[data-slot]').forEach((g) => (g.onclick = () => DS.Control.run(async () => {
-      if (mine) { DS.UI.toast('이미 자리를 골랐어요 (한 번 고르면 끝)'); return; } const no = g.dataset.slot; if (picks[no]) { DS.UI.toast('다른 친구가 먼저 잡았어요!'); return; }
+      const no = g.dataset.slot;
+      if (mine) { const o = picks[no]; if (!o || o === me) { DS.UI.toast(o ? '내 자리예요' : '이미 자리를 골랐어요 · 친구 자리를 누르면 교환 신청'); return; } if (!SW[me]) { DS.UI.toast('잠깐 뒤 다시 눌러 주세요'); return; }
+        await N().set(P(code, `tdm/${f.g}/${me}/sw`), my.sw === o ? null : o); DS.UI.toast(my.sw === o ? '교환 신청을 취소했어요' : `🔁 ${nick(o)}에게 교환 신청!`); return; }
+      if (picks[no]) { DS.UI.toast('다른 친구가 먼저 잡았어요!'); return; }
       try { await N().set(P(code, `tdp/${f.g}/${no}`), me); if (DS.Sound && DS.Sound.card) DS.Sound.card(); } catch (e) { DS.UI.toast('다른 친구가 먼저 잡았어요!'); }
     })));
+    body.querySelectorAll('[data-swy]').forEach((b) => (b.onclick = () => DS.Control.run(async () => { await N().update(P(code, `tdm/${f.g}/${me}`), { sw: b.dataset.swy, no: null }); DS.UI.toast('🔁 수락! 곧 자리가 바뀌어요'); })));
+    body.querySelectorAll('[data-swn]').forEach((b) => (b.onclick = () => DS.Control.run(async () => { await N().set(P(code, `tdm/${f.g}/${me}/no`), b.dataset.swn); })));
+    body.querySelectorAll('[data-swc]').forEach((b) => (b.onclick = () => DS.Control.run(async () => { await N().set(P(code, `tdm/${f.g}/${me}/sw`), null); })));
     const sb = body.querySelector('#td-set'); if (sb) sb.onclick = () => { const p = R.players[me] || {}; DS.Camp.settings({ me: { c: p.cls, n: p.num, name: p.nick, hero: p.hero, fx: p.fx, title: p.title, socket: {} }, onSave: async (v) => { await N().update(P(code, `players/${me}`), { hero: v.hero, fx: v.fx }).catch(() => {}); PH.stat = null; } }).catch(() => {}); };
     clearTimeout(PH.t); PH.t = setTimeout(() => { if (body.isConnected && (R.fun || {}).phase === 'pick') phonePick(body, R, me, code, f); }, 1000);
   }

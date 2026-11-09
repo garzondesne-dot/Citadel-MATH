@@ -18,7 +18,7 @@ DS.Aura = (function () {
 .au-g{left:calc(50% - var(--p)*32);bottom:calc(var(--p)*-4);width:calc(var(--p)*64);height:calc(var(--p)*14);border-radius:50%;background:radial-gradient(closest-side,var(--au) 0%,transparent 100%);opacity:.5;animation:auGl 1.6s ease-in-out infinite alternate;z-index:0}
 @keyframes auGl{to{opacity:.28;transform:scaleX(.9)}}
 .au-r{left:calc(50% - var(--p)*40);bottom:calc(var(--p)*-4);width:calc(var(--p)*80);height:calc(var(--p)*80);background:${u(a.ring)} 0 var(--ay)/400% 1000% no-repeat;animation:auF .8s steps(4) infinite;filter:drop-shadow(0 0 1px var(--au)) drop-shadow(0 0 calc(var(--p)*2) var(--au));z-index:0}
-.au-r.f{clip-path:inset(84% 0 0 0);z-index:2}
+.au-r.f{clip-path:inset(89% 0 0 0);z-index:2}
 .au-w{left:calc(50% - var(--p)*48);bottom:calc(var(--p)*16);width:calc(var(--p)*96);height:calc(var(--p)*48);background:${u(a.wings)} 0 0/400% 100% no-repeat;animation:auF 1.28s steps(4) infinite;filter:drop-shadow(0 0 calc(var(--p)*1.5) #fff3c0aa);z-index:0}
 .au-o{left:50%;bottom:calc(var(--p)*20);width:0;height:0;animation:auO var(--d) linear infinite;z-index:3}
 .au-o>.au-s{left:calc(var(--p)*-6);top:calc(var(--p)*-6);width:calc(var(--p)*12);height:calc(var(--p)*12);background:${u(a.orbs)} 0 var(--ay)/400% 1000% no-repeat;animation:auF .6s steps(4) infinite;filter:drop-shadow(0 0 2px var(--au))}
