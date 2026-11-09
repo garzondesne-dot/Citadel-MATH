@@ -2881,7 +2881,7 @@ html body .sc-gem, html body .sc-gem .sc-gn, html body .sc-gem b { font-weight: 
 .cr-ctl p { margin: 0; } .cr-need { color: #ffb4ae; } .cr-lockrow { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
 .h-chain { position: absolute; left: 61%; top: 6px; transform: translateX(-50%); display: flex; gap: 6px; z-index: 6; max-width: 46%; } /* 2026-11-09 선생님 「하단보다 상단」: 위쪽 · 왼쪽 상태 칸(36%)과 오른쪽 콤보 사이 */ #raid.scouting .h-chain { display: none; } /* 정찰 중 = 오른쪽 위 정찰 안내와 겹침 · 아직 아무도 시작 전 */
 .hc-col { min-width: 84px; background: #14110fcc; border: 1px solid #b08d5788; border-radius: 8px; padding: 4px 6px; text-align: center; }
-.hc-col b { display: block; font-size: clamp(11px, 1vw, 15px); color: #ebb84f; } .hc-col.boss b { color: #ff8f86; } .hc-col.done b { color: #62d394; }
+.hc-col b { display: block; font-size: clamp(11px, 1vw, 15px); color: #ebb84f; } .hc-col.boss b { color: #ff8f86; } .hc-col.done b { color: #62d394; } .hc-col.need { border-color: #e5534b; } .hc-col.need b { color: #ff8f86; }
 .hc-col div { display: flex; flex-wrap: wrap; gap: 3px; justify-content: center; margin-top: 3px; }
 .hc-p { font-size: clamp(10px, .9vw, 14px); padding: 0 5px; border-radius: 8px; background: #ffffff1a; color: #f3ecdc; } .hc-p.need { background: #e5534b; color: #fff; animation: nnBlink 1s steps(2) infinite; } .hc-p.pf { background: #ebb84f55; }
 /* 🌫 정찰 진형 (2026-11-09 #18 후속): 대장 붉은 기운 · 빨간 눈 · 졸개 3 앞에 뭉침 (Art.scoutDeco) */
@@ -2911,6 +2911,12 @@ html body .sc-gem, html body .sc-gem .sc-gn, html body .sc-gem b { font-weight: 
 .sc-pack.sc-fight .sc-min { transition: transform .7s cubic-bezier(.5, -0.4, .7, 1), opacity .7s, filter .7s; }
 .sc-pack.sc-fight .sc-min.down { transform: translate(18%, 8%) rotate(-80deg) scale(.85); opacity: .35; filter: grayscale(1) brightness(.6); }
 .sc-pack.sc-fight .sc-min .art.monster { filter: drop-shadow(0 4px 6px #000a); }
+.sc-tag { position: absolute; left: 50%; bottom: 98%; transform: translateX(-50%); display: grid; grid-template-columns: auto auto; align-items: center; gap: 1px 4px; z-index: 4; pointer-events: none; white-space: nowrap; padding: 2px 5px 3px; background: #14110fd9; border: 1px solid #b08d5799; border-radius: 6px; } /* 🩸 #37 졸개 이름표 · 체력 (이름 · 남은/최대 / 막대) */
+.sc-tag b { font-size: clamp(11px, 1vw, 16px); color: #ffe9a8; line-height: 1.2; }
+.sc-tag small { font-size: clamp(10px, .85vw, 14px); color: #f3ecdc; line-height: 1.2; justify-self: end; }
+.sc-tag .mn-hp { grid-column: 1 / -1; display: block; position: static; width: clamp(56px, 5.2vw, 86px); height: 7px; background: #000; border: 1px solid #000; border-radius: 3px; overflow: hidden; } .sc-tag .mn-hp i { display: block; height: 100%; background: linear-gradient(#ff7a6a, #d8342a); transition: width .3s; }
+.sc-min.down .sc-tag { display: none; }
+.sc-pack .m0 .sc-tag { left: 34%; } .sc-pack .m1 .sc-tag { bottom: 118%; } .sc-pack .m2 .sc-tag { left: 70%; }
 .h-down-ban { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%); z-index: 45; padding: 10px 24px; border-radius: 12px; background: #3a1206e6; color: #ffd08a; font: 900 34px var(--pixel, sans-serif); box-shadow: 0 0 0 3px #ff8a3c, 0 0 30px #ff6a2a; animation: hDown 2.4s ease-out forwards; pointer-events: none; }
 @keyframes hDown { 0% { transform: translate(-50%, -50%) scale(.4); opacity: 0; } 15% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; } 25% { transform: translate(-50%, -50%) scale(1); } 85% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -60%); } }
 .cr-down { display: flex; flex-direction: column; gap: 4px; margin: 4px 0; } .cr-down span { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; } .cr-down .on { color: #ffb36b; }

@@ -147,7 +147,7 @@ DS.Raid = (function () {
     if (!isChain(L, R, mid)) return [];
     const ids = activeIds(R).filter((u) => u !== (R.meta || {}).teacher), recs = ids.map((u) => chainRecord(L, R, mid, u)), live = recs.filter((r) => !r.fail);
     const n = chainItems(L, R, mid, '_', 0).length, need = Math.ceil((live.length * pctOf(L, R, mid)) / 100), man = ((R.state || {}).chainDown || {})[mid] || {};
-    return Array.from({ length: Math.max(0, n - 1) }, (_, k) => { const past = live.filter((r) => r.done || r.stage > k).length; return { k, past, all: live.length, need, down: !!man[k] || (live.length > 0 && past >= need) }; });
+    return Array.from({ length: Math.max(0, n - 1) }, (_, k) => { const past = live.filter((r) => r.done || r.stage > k).length; const down = !!man[k] || (live.length > 0 && past >= need); return { k, past, all: live.length, need, down, max: need, left: down ? 0 : Math.max(0, need - past) }; }); // 🩸 #37 졸개 체력 = 최대 올림(머릿수 × 기준%) · 넘은 학생 1명마다 −1 · 0 = 쓰러짐 (리모컨 쓰러뜨리기 = 0)
   }
   function record(L, R, mid, uid) {
     if (isChain(L, R, mid)) return chainRecord(L, R, mid, uid);

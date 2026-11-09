@@ -62,6 +62,17 @@ check(DS.Grow && DS.Grow.XP ? DS.Grow.XP.chainPrac === 1 : true, 'EXP 표 chainP
   Q.state.chainDown = { u4: { 1: true } }; d = X.chainDown(L, Q, 'u4'); check(d[1].down && !d[2].down, '리모컨 쓰러뜨리기 = ② 쓰러짐');
 for (let i = 0; i < 8; i++) add('c', 1, false); d = X.chainDown(L, Q, 'u4'); check(d[0].all === 2, '기회 다 쓴 학생은 머릿수에서 뺌');
   check(X.chainDown(L, Q, 'm1').length === 0, '보통 몬스터 = 졸개 없음'); }
+// ⑦ 🩸 졸개 체력 막대 (#37 · 2026-11-09): 최대 = 올림(머릿수 × 기준%) · 넘은 학생마다 −1 · 0 = 쓰러짐 · 머릿수가 바뀌면 다시 계산
+{ const Q = X.newRoom('999999', 'set-06', 'T', 1000), us = Array.from({ length: 20 }, (_, i) => 'p' + i); Q.active = {}; Q.players = {}; Q.chain = { u4: {} };
+  us.forEach((u) => { Q.active[u] = true; Q.players[u] = {}; });
+  const pass = (u, s) => { const q = X.chainItems(L, Q, 'u4', u, 0)[s]; const m = (Q.chain.u4[u] = Q.chain.u4[u] || {}); m[Object.keys(m).length] = { s, p: 0, g: right(q) }; };
+  let d = X.chainDown(L, Q, 'u4'); check(d[0].max === 18 && d[0].left === 18, `20명 · 90% → 졸개 체력 18칸 (${d[0].max})`);
+  us.slice(0, 5).forEach((u) => pass(u, 0)); d = X.chainDown(L, Q, 'u4'); check(d[0].left === 13 && d[1].left === 18, '① 5명 넘음 → 13 남음 · ② 그대로 18');
+  us.slice(5, 18).forEach((u) => pass(u, 0)); d = X.chainDown(L, Q, 'u4'); check(d[0].left === 0 && d[0].down, '18명 넘음 → 0 = 쓰러짐 (같은 순간)');
+  us.slice(18).forEach((u) => pass(u, 0)); d = X.chainDown(L, Q, 'u4'); check(d[0].left === 0, '더 넘어도 0 아래로 안 감');
+  us.slice(0, 2).forEach((u) => { delete Q.active[u]; }); d = X.chainDown(L, Q, 'u4'); check(d[0].max === 17 && d[1].max === 17 && d[1].left === 17, `머릿수 18 → 최대 다시 계산 17 (${d[1].max})`);
+  Q.state.chainDown = { u4: { 2: true } }; d = X.chainDown(L, Q, 'u4'); check(d[2].left === 0 && d[2].down, '리모컨 쓰러뜨리기 = 막대 0');
+  Q.state.pct = { u4: 50 }; d = X.chainDown(L, Q, 'u4'); check(d[1].max === 9, `기준% 50 · 18명 → 9 (${d[1].max})`); }
 // ⑦ ✍ → 📸 진필살기 (2026-11-09 #26): 채점 기준 = 소레이드 단계 · 학습지 숫자 · 다음 통과자 금빛 컷인 3명
 { for (const id of L.chain) { const rb = (DS.Rubrics['set-06'] || {})[id], it = X.chainItems(L, X.newRoom('1', 'set-06', 'T', 1), id, '_', 0);
     check(rb && rb.steps.length === it.length && rb.pass === rb.total - 1 && rb.raid, `${id} 채점 기준 ${rb ? rb.steps.length : 0}칸 = 단계 ${it.length}칸 · 1점 빠져도 통과`);

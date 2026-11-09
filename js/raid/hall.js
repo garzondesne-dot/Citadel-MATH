@@ -347,7 +347,7 @@ DS.Hall = (function () {
   function updateFight(step) {
     const f = fightOf(step);
     $('#rh-bar').style.width = `${f.hp.max ? (100 * f.hp.left) / f.hp.max : 0}%`;
-    $('#rh-txt').textContent = `HP ${f.hp.left} / ${f.hp.max}`; // 2026-11-07 비교 6: 기준 % 는 교사 폰에만
+    $('#rh-txt').textContent = `${step && step.kind === 'monster' && Raid().isChain && Raid().isChain(L, R, step.id) ? '👑 대장 · ' : ''}HP ${f.hp.left} / ${f.hp.max}`; // #37: 소레이드 = 대장 이름표 // 2026-11-07 비교 6: 기준 % 는 교사 폰에만
     const now = attacks(step);
     Object.entries(now).forEach(([u, a]) => {
       const was = seen[u] || { n: 0, dmg: 0 };
@@ -433,6 +433,16 @@ DS.Hall = (function () {
   }
   // ⚔ 소레이드 진행판 (2026-11-09 #18): ①②③👑 칸마다 그 단계 학생 번호 · 🙋 = 선생님 확인 필요 · 맨 위 체력바는 반 전체 그대로
   let crKey = '', dnSeen = null;
+  // 🩸 #37 (2026-11-09 선생님 「B안」): 졸개 그림 위 이름표 「졸개1 …」 + 체력 막대(남은/최대) · 쓰러지면 숨김 · 정찰 중(실루엣)엔 없음
+  function minionTags(mon, dn) {
+    const pack = mon && mon.querySelector('.sc-pack.sc-fight'); if (!pack) return;
+    pack.querySelectorAll('.sc-min').forEach((m) => {
+      const k = Number(m.dataset.k), d = dn[k]; if (!d) return;
+      let t = m.querySelector('.sc-tag'); if (!t) { t = document.createElement('div'); t.className = 'sc-tag'; t.innerHTML = `<b>졸개${k + 1}</b><small></small><span class="mn-hp"><i></i></span>`; m.appendChild(t); }
+      const kk = `${d.left}/${d.max}`; if (t.dataset.k === kk) return; t.dataset.k = kk;
+      t.querySelector('i').style.width = `${d.max ? (100 * d.left) / d.max : 0}%`; t.querySelector('small').textContent = kk;
+    });
+  }
   function hallChain() {
     const arena = $('#raid'); if (!arena || !L || !R) return;
     const st = Raid().stepOf(L, R), on = !!(st && st.kind === 'monster' && Raid().isChain && Raid().isChain(L, R, st.id));
@@ -465,11 +475,13 @@ DS.Hall = (function () {
     }
     const ids = Raid().activeIds(R).filter((u) => u !== (R.meta || {}).teacher), recs = ids.map((u) => [u, Raid().record(L, R, st.id, u)]), n = recs[0] ? recs[0][1].n : 0;
     const cols = Array.from({ length: n + 1 }, (_, i) => recs.filter(([, r]) => (i === n ? r.done : !r.done && r.stage === i)));
-    const key = JSON.stringify(cols.map((c) => c.map(([u, r]) => u + (r.locked ? '!' : r.perfect ? '*' : ''))));
+    minionTags(mon, dn); // 🩸 #37 졸개 이름표 · 체력 막대 (몬스터 그림 위)
+    const needL = recs.filter(([, r]) => r.locked && !r.done), doneL = cols[n] || []; // #37 보충: 진행판 = 🙋 확인 필요 · 🏁 완료만 (졸개 · 대장 이름은 그림 위 이름표로)
+    const key = JSON.stringify([needL.map(([u]) => u), doneL.map(([u, r]) => u + (r.perfect ? '*' : ''))]);
     if (key === crKey && box) return; crKey = key;
     if (!box) { box = document.createElement('div'); box.className = 'h-chain'; arena.appendChild(box); }
     const num = (u) => ((R.players || {})[u] || {}).num;
-    box.innerHTML = cols.map((c, i) => `<div class="hc-col${i === n ? ' done' : i === n - 1 ? ' boss' : ''}"><b>${i === n ? '🏁 완료' : i === n - 1 ? '👑 대장' : `졸개 ${'①②③④⑤⑥'[i]}`}</b><div>${c.map(([u, r]) => `<span class="hc-p${r.locked ? ' need' : ''}${r.perfect ? ' pf' : ''}">${r.locked ? '🙋' : r.perfect ? '🌟' : ''}${num(u)}</span>`).join('')}</div></div>`).join('');
+    box.innerHTML = `${needL.length ? `<div class="hc-col need"><b>🙋 확인</b><div>${needL.map(([u]) => `<span class="hc-p need">🙋${num(u)}</span>`).join('')}</div></div>` : ''}<div class="hc-col done"><b>🏁 완료</b><div>${doneL.map(([u, r]) => `<span class="hc-p${r.perfect ? ' pf' : ''}">${r.perfect ? '🌟' : ''}${num(u)}</span>`).join('')}</div></div>`;
   }
   // 📸 ⚡ 진필살기 충전 중 (2026-11-09 #26): 학생이 찰칵(서술형 사진)을 누르면 금빛 게이지 · 동시 3명 · 나머지 +n명 · 채점이 끝나면 사라짐 (실패 연출 없음)
   let snapSeen = {};
