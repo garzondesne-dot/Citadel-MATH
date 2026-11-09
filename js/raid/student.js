@@ -357,7 +357,19 @@ DS.Student = (function () {
     if (c.paused) { if (g) g.classList.add('bound'); return; }
     const tr = Raid().atkTrack(atkMemo, c, `${code}|${(R.state || {}).step}|${c.kind}`);
     if (g) { g.querySelector('i').style.width = `${(tr.p * 100).toFixed(1)}%`; g.classList.toggle('hot', tr.p > 0.8); g.classList.remove('bound'); }
-    if (tr.strike) monsterStrike(c.lock, !!g);
+    if (tr.strike) { const gu = tr.first ? Raid().guardian(L, R) : null; if (gu) guardStrike(gu); else monsterStrike(c.lock, !!g); }
+  }
+  // ⭐ 각성 막기 (2026-11-09 선생님 · 반 전체): 첫 공격은 아무도 안 멈춤 · 막은 학생 폰 = 내 용사가 날개 · 방패 연출 · 다른 폰 = 알림만
+  function guardStrike(gu) {
+    const sc = document.querySelector('#st-body .scene'), mon = sc && sc.querySelector('.art.monster'), hb = sc && sc.querySelector('.enc-hero'), nick = ((R.players || {})[gu] || {}).nick || '친구', mine = gu === me;
+    const tell = () => {
+      const st = document.createElement('div'); st.className = 'stun guard'; st.innerHTML = `<b>🛡 ${mine ? '내' : esc(nick) + '의'} 각성 방패! 안 멈춰요</b>`;
+      document.body.appendChild(st); setTimeout(() => st.remove(), 1600);
+      DS.Sound.correct(); if (navigator.vibrate) navigator.vibrate(mine ? [60, 40, 120] : 40);
+    };
+    const ms = mine && hb && DS.Aura && DS.Aura.guard ? DS.Aura.guard(hb, tell) : 0;
+    setTimeout(() => { if (mon) { mon.classList.remove('lunge'); void mon.offsetWidth; mon.classList.add('lunge'); setTimeout(() => mon.classList.remove('lunge'), 500); } }, Math.max(0, (ms || 200) - 200));
+    if (!ms) setTimeout(tell, 200);
   }
   function monsterStrike(lock, stun) { // stun: 문제 입력 화면이면 잠금, 아니면 맞는 모습만
     if (stun) stunUntil = Date.now() + lock * 1000;

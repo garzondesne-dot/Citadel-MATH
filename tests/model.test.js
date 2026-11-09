@@ -187,6 +187,17 @@ check(X.online(R2, 'a') && !X.online(R2, 'b'), '접속 표시');
   // atkTrack: 바퀴가 차면 공격 · 주기가 바뀌어도 거꾸로 튀지 않음
   const memo = {}; let tr = X.atkTrack(memo, { t: 5, per: 20 }, 'k'); check(Math.abs(tr.p - 0.25) < 1e-9 && !tr.strike, 'atkTrack 시작');
   tr = X.atkTrack(memo, { t: 20, per: 20 }, 'k'); check(tr.strike && memo.start === 20, '20초에 공격');
+  check(tr.first === true, '⭐ 첫 공격 표시 (first)');
+  { const m2 = {}; X.atkTrack(m2, { t: 25, per: 20 }, 'k'); const t2 = X.atkTrack(m2, { t: 40, per: 20 }, 'k'); check(t2.strike && t2.first === false, '두 번째 공격은 first 아님 (늦게 들어온 기기도)'); }
+  { const m3 = {}; X.atkTrack(m3, { t: 1, per: 20 }, 'a'); const a1 = X.atkTrack(m3, { t: 20, per: 20 }, 'a'); const a2 = X.atkTrack(m3, { t: 40, per: 20 }, 'a'); X.atkTrack(m3, { t: 2, per: 20 }, 'b'); const b1 = X.atkTrack(m3, { t: 21, per: 20 }, 'b');
+    check(a1.first && !a2.first && b1.first, '다음 몬스터(새 열쇠)는 다시 첫 공격');
+    const m4 = {}; X.atkTrack(m4, { t: 1, per: 20 }, 'c'); X.atkTrack(m4, { t: 20, per: 20 }, 'c'); X.atkTrack(m4, { t: 5, per: 20 }, 'c'); const c2 = X.atkTrack(m4, { t: 20, per: 20 }, 'c'); check(c2.strike && !c2.first, '⛓ 묶기로 시계가 처음으로 돌아가도 두 번 막지 않음'); }
+  // ⭐ 각성 막는 학생: +10 접속 학생 중 단계 번호로 돌아가며 · 교사 · +9 · 접속 안 한 학생 제외 · 없으면 null
+  { const R0 = { meta: { teacher: 'T' }, active: { a: true, b: true, c: true, d: false, T: true }, players: { a: { num: 1, enh: 10 }, b: { num: 2, enh: 9 }, c: { num: 3, enh: 10 }, d: { num: 4, enh: 10 }, T: { num: 0, enh: 10 } }, state: { step: 0 } };
+    check(X.guardian(null, R0) === 'a', '각성 1번째 = 번호 순 첫 학생');
+    check(X.guardian(null, { ...R0, state: { step: 1 } }) === 'c', '다음 단계 = 다음 각성 학생 (돌아가며)');
+    check(X.guardian(null, { ...R0, state: { step: 2 } }) === 'a', '한 바퀴 돌면 처음으로');
+    check(X.guardian(null, { ...R0, players: { ...R0.players, a: { num: 1, enh: 3 }, c: { num: 3 } } }) === null, '각성 학생 없으면 null (지금과 같음)'); }
   tr = X.atkTrack(memo, { t: 30, per: 40 }, 'k'); check(!tr.strike && Math.abs(tr.p - 0.25) < 1e-9, '느려진 주기는 이번 바퀴부터 (게이지 그대로 이어짐)');
   tr = X.atkTrack(memo, { t: 18, per: 40 }, 'k'); check(!tr.strike && tr.p >= 0, '묶기로 시계가 뒤로 가도 게이지가 음수가 되지 않음');
   Q.state.step = L.steps.findIndex((st) => st.kind === 'boss'); c = X.atkClock(L, Q, 70000);

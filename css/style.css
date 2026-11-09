@@ -706,6 +706,9 @@ body.forge-open { overflow: hidden; }
 @keyframes struck { 0% { filter: brightness(2) sepia(1) hue-rotate(-40deg) saturate(5); transform: translateX(-6px); } 100% { filter: none; transform: none; } }
 .stun { position: fixed; inset: 0; z-index: 9000; display: flex; align-items: center; justify-content: center; background: #ff203012; animation: stunIn .25s; }
 .stun b { font: 700 24px var(--pixel); color: #ffe27a; background: #1a0508e6; border: 2px solid #ff5a3a; padding: 10px 16px; text-shadow: 2px 2px 0 #000; }
+.stun.guard { inset: auto 0 auto 0; top: 18%; background: none; pointer-events: none; animation: none; } /* ⭐ 각성 막기 알림 = 입력 안 막음 */
+.stun.guard b { color: #fff6c8; background: #2a2208e6; border-color: #ffd86a; box-shadow: 0 0 18px #ffe9a0aa; font-size: 20px; }
+.atk-banner.guard { color: #fff6c8; text-shadow: 4px 4px 0 #5a4300, 0 0 24px #ffe27a; }
 @keyframes stunIn { 0% { background: #ff203055; } 100% { background: #ff203012; } }
 .heal-pick { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
 .heal-btn { background: linear-gradient(#2f8f5a, #1f6a40); border-color: #7dffb5; color: #eafff2; }

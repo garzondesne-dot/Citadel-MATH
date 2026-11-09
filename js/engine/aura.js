@@ -48,5 +48,40 @@ DS.Aura = (function () {
     new MutationObserver((ms) => ms.forEach((m) => { m.addedNodes.forEach((n) => { if (n.nodeType === 1) scan(n); }); if (m.type === 'attributes' && m.target.classList && m.target.classList.contains('aura')) scan(m.target); })).observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
   }
   if (typeof document !== 'undefined') { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start(); }
-  return { scan, deco };
+  // ⭐ +10 각성 「첫 공격 막기」 연출 (2026-11-09 선생님 그림 · 시안 guard-holy.mp4)
+  //   날개(6칸): ① 빛 소용돌이 ② 용사를 감쌈(용사 앞) → ③~⑥ 한 번에 쫙 (용사 뒤 · 좌우로 용사 폭 2배씩) · 용사 살짝 떠오름
+  //   방패(6칸 · 용사 키 약 3배): 빛 모임 → 생김 → 완성 → 💥 맞음(섬광) → 금 감 → 부서져 사라짐 · 옆 용사를 가려도 됨
+  //   host = 용사를 담은 칸(.fh2 · .enc-hero) · 그 안 .art 의 크기로 1 도트(p)를 잼 → 폰 · TV 어디서나 같은 비율
+  //   onHit = 몬스터 공격이 방패에 닿는 순간(방패 ④) 부름
+  function guard(host, onHit) { // 반환 = 방패에 맞는 순간(ms) · 0 = 그림 없음
+    const a = A(); if (!host || !a || !a.guardWings) return 0;
+    const art = host.querySelector('.art'); if (!art) return 0;
+    const hr = host.getBoundingClientRect(), ar = art.getBoundingClientRect(); if (!ar.width) return 0;
+    const fit = host.closest('.scene'), fh = fit ? fit.getBoundingClientRect().height : 0; // 📱 폰 전투 장면 = 방패가 장면 높이 안에 (위 상태줄을 덮지 않게)
+    const p = fh ? Math.min(ar.width * 0.0155, (fh * 1.05) / 170) : ar.width * 0.0155, cx = ar.left - hr.left + ar.width / 2 - 7 * p, by = hr.bottom - ar.bottom; // 날개 · 방패 중심 = 용사 몸통 (칸 가운데보다 7도트 왼쪽)
+    if (getComputedStyle(host).position === 'static') host.style.position = 'relative';
+    const old = host.querySelector('.gd-fx'); if (old) old.remove();
+    const u = (f) => `url('${base()}${f}')`, mk = (f, w, h, bot, z) => { const e = document.createElement('span'); e.className = 'gd-fx'; e.style.cssText = `position:absolute;pointer-events:none;image-rendering:pixelated;left:${cx - (w * p) / 2}px;bottom:${by + bot * p}px;width:${w * p}px;height:${h * p}px;background:${u(f)} 0 0/600% 100% no-repeat;opacity:0;z-index:${z}`; host.appendChild(e); return e; };
+    const W = mk(a.guardWings, 206, 103, -14.8, 3), S = mk(a.guardShield, 340, 170, -10.8, 6);
+    W.style.filter = 'drop-shadow(0 0 4px #fff3c0aa)';
+    const fr = (el, f, o) => { el.style.transition = 'none'; el.style.opacity = o; el.style.backgroundPositionX = `${f * 20}%`; };
+    const z0 = host.style.zIndex, lift = (on) => { art.style.transition = 'transform .25s ease-out'; art.style.transform = on ? `translateY(${-6 * p}px)` : ''; };
+    host.style.zIndex = 30; host.classList.add('gd-on');
+    const T = [], at = (ms, fn) => T.push(setTimeout(fn, ms));
+    // 날개: 감쌈(앞) → 쫙(뒤)
+    at(0, () => { lift(true); W.style.zIndex = 5; fr(W, 1, 1); });
+    at(150, () => fr(W, 2, 1));
+    at(450, () => { W.style.zIndex = 0; fr(W, 3, 1); });
+    at(510, () => fr(W, 4, 1));
+    at(570, () => fr(W, 5, 1));
+    // 방패
+    at(620, () => fr(S, 0, 0.9)); at(710, () => fr(S, 1, 0.9)); at(800, () => fr(S, 2, 0.9));
+    at(1120, () => { fr(S, 3, 1); if (onHit) onHit(); });
+    at(1320, () => fr(S, 4, 0.95)); at(1560, () => fr(S, 5, 0.9));
+    at(1860, () => { S.style.transition = 'opacity .35s'; S.style.opacity = 0; });
+    at(2070, () => { W.style.transition = 'opacity .45s'; W.style.opacity = 0; lift(false); });
+    at(2600, () => { W.remove(); S.remove(); art.style.transform = ''; host.style.zIndex = z0; host.classList.remove('gd-on'); });
+    return 1120; // 방패에 맞는 순간(ms)
+  }
+  return { scan, deco, guard, HIT_MS: 1120 };
 })();

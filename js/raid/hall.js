@@ -490,10 +490,22 @@ DS.Hall = (function () {
     const tr = Raid().atkTrack(atkMemo, c, `${code}|${(R.state || {}).step}|${c.kind}`);
     bar.style.width = `${(tr.p * 100).toFixed(1)}%`; g.classList.toggle('hot', tr.p > 0.8); g.classList.remove('bound');
     txt.textContent = `⏱ ${Math.max(0, Math.ceil((1 - tr.p) * c.per))}${c.bind ? ` · ⛓ ${c.bind}초` : ''}`; // 2026-11-07 비교 6: 「HP ▬ n / N ⏱ 20」 (빠름 · 단계 글자 없음)
-    if (tr.strike) hallStrike(c);
+    if (tr.strike) hallStrike(c, tr.first ? Raid().guardian(L, R) : null);
   }
-  function hallStrike(c) {
+  // ⭐ 각성 막기 (2026-11-09): 이 몬스터의 첫 공격 + 반에 +10 학생 → 그 용사가 날개 · 방패로 막음 · 반 전체 안 멈춤 (피격 · 헉헉 없음)
+  function hallGuard(c, gu) {
+    const arena = $('#raid'), m = $('#rm'), h = document.getElementById(`fh-${gu}`), nick = ((R.players || {})[gu] || {}).nick || '친구';
+    const hit = () => {
+      const b = document.createElement('div'); b.className = 'atk-banner guard'; b.innerHTML = `🛡 ${esc(nick)}의 각성 방패! <small>이번 공격은 멈추지 않아요</small>`; arena.appendChild(b); setTimeout(() => b.remove(), 1800);
+      Snd().hit(); setTimeout(() => Snd().correct(), 160);
+    };
+    const ms = h && DS.Aura && DS.Aura.guard ? DS.Aura.guard(h, hit) : 0;
+    setTimeout(() => { if (m) { m.classList.remove('lunge-big'); void m.offsetWidth; m.classList.add('lunge-big'); setTimeout(() => m.classList.remove('lunge-big'), 700); } }, Math.max(0, (ms || 300) - 300));
+    if (!ms) setTimeout(hit, 300);
+  }
+  function hallStrike(c, gu) {
     const arena = $('#raid'), m = $('#rm'); if (!arena) return;
+    if (gu) return hallGuard(c, gu);
     if (m) { m.classList.remove('lunge-big'); void m.offsetWidth; m.classList.add('lunge-big'); setTimeout(() => m.classList.remove('lunge-big'), 700); }
     setTimeout(() => {
       arena.classList.remove('atk-hit'); void arena.offsetWidth; arena.classList.add('atk-hit'); setTimeout(() => arena.classList.remove('atk-hit'), 800);
