@@ -180,7 +180,7 @@ DS.Act = (function () {
     if (id && o.on === true) patch[`solveOn/${id}`] = { sec: Math.max(10, Number(o.onSec) || Number(patch.solve ?? (R.state || {}).solve ?? (R.meta || {}).solve ?? 60)), at: N().TS };
     if (id && o.on === false) patch[`solveOn/${id}`] = 0;
     if (id && o.now) patch[`solveEnd/${id}`] = N().TS;
-    if (id && o.add) { const lk = Raid.solveLock(L, R, N().now()); if (lk && lk.on) patch[`solveOn/${id}`] = { sec: Math.round((lk.end - lk.t0) / 1000 + Number(o.add)), at: lk.t0 }; }
+    if (id && o.add) { const lk = Raid.solveLock(L, R, N().now()); if (lk && lk.on) { if (Number(o.add) < 0 && lk.left <= -Number(o.add) * 1000) patch[`solveEnd/${id}`] = N().TS; else patch[`solveOn/${id}`] = { sec: Math.max(1, Math.round((lk.end - lk.t0) / 1000 + Number(o.add))), at: lk.t0 }; } } // 줄이기: 남은 시간보다 많이 줄이면 바로 등장
     if (Object.keys(patch).length) await N().update(P(code, 'state'), patch);
   }
   // ⚔ 소레이드 (2026-11-09 #18): 단계 답 한 개 · 선생님 「✔ 풀어주기」

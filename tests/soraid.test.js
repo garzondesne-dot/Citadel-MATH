@@ -42,4 +42,9 @@ check(r.pDoneN === 1 && r.left === 4 && r.best === 4 && r.perfect, '연습 1판 
 [0, 1].forEach((s) => psub('a', 2, s, true)); r = X.record(L, R, 'u4', 'a'); check(r.pDoneN === 1, '연습 2판 반만 = 그대로 1');
 [2, 3].forEach((s) => psub('a', 2, s, true)); r = X.record(L, R, 'u4', 'a'); check(r.pDoneN === 2, '연습 2판 완성 = 2');
 check(DS.Grow && DS.Grow.XP ? DS.Grow.XP.chainPrac === 1 : true, 'EXP 표 chainPrac = 1');
+// ⑤ 🌫 정찰 시간 줄이기 (2026-11-09 리모컨 −30초): solveOn sec 줄이면 끝 시각이 당겨지고 · 이미 지난 시간보다 짧으면 바로 등장
+{ const S = X.newRoom('777777', 'set-06', 'T', 1000); S.state.step = L.steps.findIndex((s) => s.id === 'u4'); S.state.stepAt = 1000;
+  let k = X.solveLock(L, S, 11000); check(k && k.on && k.left === 50000, '정찰 기본 60초 · 10초 지남 = 50초 남음');
+  S.state.solveOn = { u4: { sec: 30, at: 1000 } }; k = X.solveLock(L, S, 11000); check(k.on && k.left === 20000, '−30초 → 20초 남음');
+  S.state.solveEnd = { u4: 11000 }; k = X.solveLock(L, S, 11000); check(!k.on, '남은 시간보다 많이 줄이면 = 바로 등장'); }
 console.log(fail ? `❌ 소레이드 실패 ${fail}` : `✅ 소레이드: 확인 ${ok}개 · 실패 0`); if (fail) process.exit(1);

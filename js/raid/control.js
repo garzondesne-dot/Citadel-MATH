@@ -156,13 +156,14 @@ DS.Control = (function () {
     const lk = Raid().solveLock(L, R, DS.Net.now()), base = (R.state || {}).solve != null ? Number(R.state.solve) : (R.meta || {}).solve != null ? Number(R.meta.solve) : 60;
     // 🌫 2026-11-09 #17: 「❄ 학생 60초 얼리기」 버튼은 없앰 → 몬스터마다 정찰 (기본 60초) · 준비 완료가 많으면 「⚔ 등장!」
     const rd = lk ? Raid().readyOf(R, lk.id).length : 0, all = Raid().activeIds(R).filter((u) => u !== (R.meta || {}).teacher).length;
-    return `<div class="sl-row">${lk && lk.on ? `<span>🌫 정찰 <b class="sl-left" data-sl-end="${lk.end}">${Math.ceil(lk.left / 1000)}초</b> · ✋ 준비 <b>${rd}</b> / ${all}</span><button class="btn small primary" data-sl="now">⚔ 등장!</button><button class="btn small" data-sl="add">+30초</button>`
+    return `<div class="sl-row">${lk && lk.on ? `<span>🌫 정찰 <b class="sl-left" data-sl-end="${lk.end}">${Math.ceil(lk.left / 1000)}초</b> · ✋ 준비 <b>${rd}</b> / ${all}</span><button class="btn small" data-sl="cut">−30초</button><button class="btn small" data-sl="add">+30초</button><button class="btn small primary" data-sl="now">⚔ 등장!</button><button class="btn small" data-sl="add">+30초</button>`
       : `<span>🌫 정찰 시간</span><button class="btn small" data-sl="dn">−30</button><b>${base}초</b><button class="btn small" data-sl="up">+30</button><span class="muted small">다음 몬스터부터</span>`}</div>`;
   }
   const bindSolve = (el, code, R, L) => el.querySelectorAll('[data-sl]').forEach((b) => (b.onclick = () => run(async () => {
     const k = b.dataset.sl, base = (R.state || {}).solve != null ? Number(R.state.solve) : (R.meta || {}).solve != null ? Number(R.meta.solve) : 60;
     if (k === 'now') await Act().setSolve(code, R, L, { now: true });
     else if (k === 'add') await Act().setSolve(code, R, L, { add: 30 });
+    else if (k === 'cut') await Act().setSolve(code, R, L, { add: -30 }); // ⏩ 2026-11-09 선생님: 정찰 중 등장 시간 줄이기 (남은 시간이 30초 이하면 바로 등장)
     else if (k === 'on') await Act().setSolve(code, R, L, { on: true, onSec: base || 60 });
     else await Act().setSolve(code, R, L, { sec: Math.max(0, base + (k === 'up' ? 30 : -30)) });
   })));
