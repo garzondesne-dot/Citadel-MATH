@@ -51,6 +51,7 @@ DS.Teacher = (function () {
   const studentUrl = () => `${location.origin}${location.pathname.replace(/[^/]*$/, '')}index.html?role=student&code=${code}${DS.Net.mode === 'local' ? '&local' : ''}`;
 
   let moreOpen = false; // ⋯ 더보기 (체력 기준 · 풀이 시간 — 종합실 조작 막대에는 없음 · 리모컨에서만)
+  if (typeof window !== 'undefined') window.addEventListener('ds-roster', () => { try { if (R && L) render(); } catch (e) { /* 무시 */ } }); // 🧮 명단 번호를 받으면 다시 그림
   function render() {
     const studs = Object.keys(R.players || {}).filter((u) => !R.players[u].teacher);
     const total = L.steps.length, i = R.state.step ?? -1;
@@ -61,14 +62,14 @@ DS.Teacher = (function () {
     const body = $('#t-body');
     const live = !Raid().isLobby(R) && !Raid().isClosed(R);
     // 2026-11-07 정돈판 ⑥ 비교 14: 위에서부터 [지금 · 제출 · 도움 필요] [⋯ 더보기] [⏸ 수업 끝] [단추 줄 8칸] … [◀ 뒤로 · 앞으로 ▶ 맨 아래]
-    const sd = (R.state || {}).sound || { sfx: true, bgm: true }, sndOn = sd.sfx !== false || sd.bgm !== false;
-    const more = live ? C().chainHtml(L, R) + (() => { const sh = C().solveHtml(L, R), frozen = /data-sl="now"/.test(sh); /* ❄ 생각 시간 중이면 「지금 풀기」를 서랍 밖에 */ return `${frozen ? sh : ''}<details class="t-more" id="t-more"${moreOpen ? ' open' : ''}><summary>⋯ 더보기 · 체력 기준 · 풀이 시간</summary>${C().pctHtml(L, R)}${frozen ? '' : sh}</details>`; })() : C().pctHtml(L, R);
+    const sd = (R.state || {}).sound || { sfx: true, bgm: true }, sndOn = sd.sfx !== false || sd.bgm !== false, sndLv = !sndOn ? 'off' : sd.vol || 'mid'; // 🔉 #24: 보통 → 작게 → 🔇 → 보통
+    const more = live ? C().draftHtml(L, R) + C().oldHtml(R) + C().chainHtml(L, R) + (() => { const sh = C().solveHtml(L, R), frozen = /data-sl="now"/.test(sh); /* ❄ 생각 시간 중이면 「지금 풀기」를 서랍 밖에 */ return `${frozen ? sh : ''}<details class="t-more" id="t-more"${moreOpen ? ' open' : ''}><summary>⋯ 더보기 · 체력 기준 · 풀이 시간</summary>${C().pctHtml(L, R)}${frozen ? '' : sh}</details>`; })() : (Raid().isLobby(R) ? C().missingHtml(R) + C().oldHtml(R) : '') + C().pctHtml(L, R);
     const grid8 = () => {
       if (Raid().restOn(R)) return C().restBtn(R);
       const st = Raid().stepOf(L, R), fight = st && (st.kind === 'monster' || st.kind === 'boss');
       const vid = st && DS.Video.ok(DS.Video.pick(L, videos, st.id)), von = vid && Raid().videoOn(R, st.id);
       const t = (attr, ic, cap, on, off) => `<button class="rg-b${on ? ' on' : ''}" ${off ? 'disabled' : attr}><i>${ic}</i><span>${cap}</span></button>`;
-      return `<div class="rg rg8">${t('data-rest', '🏕', '쉼터')}${t(vid ? `data-video="${st.id}"` : '', '🎬', von ? '영상 닫기' : '영상', von, !vid)}${t('data-focus', '🔴', Raid().focusOn(R) ? '집중 끄기' : '집중', Raid().focusOn(R))}${t('id="t-gift"', '💎', '선물', false, !(DS.Gem && R.meta.cls))}${t('id="t-snd"', sndOn ? '🔊' : '🔇', sndOn ? '소리' : '소리 꺼짐', !sndOn)}${t('data-extend', '⏰', '+5분', false, !Raid().deadline(R))}${t('data-sheet', '📄', Raid().sheetOn(R) ? '레이드로' : '문제', Raid().sheetOn(R), !fight)}${t('id="t-demo"', '🎮', '시연', false, true)}</div>`;
+      return `<div class="rg rg8">${t('data-rest', '🏕', '쉼터')}${t(vid ? `data-video="${st.id}"` : '', '🎬', von ? '영상 닫기' : '영상', von, !vid)}${t('data-focus', '🔴', Raid().focusOn(R) ? '집중 끄기' : '집중', Raid().focusOn(R))}${t('id="t-gift"', '💎', '선물', false, !(DS.Gem && R.meta.cls))}${t('id="t-snd"', sndLv === 'off' ? '🔇' : sndLv === 'low' ? '🔉' : '🔊', sndLv === 'off' ? '소리 꺼짐' : sndLv === 'low' ? '소리 작게' : '소리 보통', sndLv === 'off')}${t('data-extend', '⏰', '+5분', false, !Raid().deadline(R))}${t('data-sheet', '📄', Raid().sheetOn(R) ? '레이드로' : '문제', Raid().sheetOn(R), !fight)}${t('id="t-demo"', '🎮', '시연', false, true)}</div>`;
     };
     body.innerHTML = `<div class="panel framed t-now">${now()}${!Raid().isLobby(R) && !Raid().isEnd(L, R) ? helpPanel() : ''}</div>
       ${more}${C().saveBtn(R)}${live ? grid8() : ''}
@@ -76,13 +77,13 @@ DS.Teacher = (function () {
       ${DS.ShareCard.klassReady(L, R) ? '<button class="btn sc-btn" id="t-news">🏫 학급 결과 · 우리 반 수업 소식</button>' : ''}${DS.Punch && R.meta.cls && L.no && !L.eval && (Raid().isEnd(L, R) || Raid().isClosed(R)) ? `<button class="btn small" id="t-punch">🏁 반대항 경주 ${DS.Act.punchOff(R) ? '꺼짐 → 켜기' : '켜짐 → 끄기'}</button>` : ''}${!live && DS.Gem && R.meta.cls ? '<button class="btn small" id="t-gift">💎 마정석 선물</button>' : ''}${Raid().isClosed(R) ? '<button class="btn primary" id="t-tcamp">🏛 교사 캠프 가기</button>' : ''}
       <div class="t-pad"><button class="btn t-back" id="t-back"${i < 0 ? ' disabled' : ''}>◀<br>뒤로</button><button class="btn primary t-fwd" id="t-fwd"${Raid().isClosed(R) ? ' disabled' : ''}>${Raid().isFinale(L, R) ? '수업 끝 ▶' : '앞으로 ▶'}<small>${esc(C().nextName(L, R))}</small></button></div>`;
     if (Raid().isLobby(R)) drawQR();
-    C().bindChain(body, code, R, L); C().bindRest(body, code, R); C().bindPct(body, code, R, L); C().bindFocus(body, code, R); C().bindSheet(body, code, R); C().bindVideo(body, code, R); C().bindWords(body, code, R); C().bindLesson(body, code, R); C().bindSave(body, code, R, L); C().bindSolve(body, code, R, L);
+    C().bindMissing(body, code); C().bindChain(body, code, R, L); C().bindRest(body, code, R); C().bindPct(body, code, R, L); C().bindFocus(body, code, R); C().bindSheet(body, code, R); C().bindVideo(body, code, R); C().bindWords(body, code, R); C().bindLesson(body, code, R); C().bindSave(body, code, R, L); C().bindSolve(body, code, R, L);
     { const mo = $('#t-more'); if (mo) mo.ontoggle = () => { moreOpen = mo.open; }; } // ⋯ 더보기 서랍: 다시 그려도 열린 채로
     if (DS.Survey) DS.Survey.bindCtl(body, R, L);
     const nb = $('#t-news'); if (nb) nb.onclick = () => C().run(() => DS.ShareCard.klassOpen(L, R, { praise: true }));
     const pb = $('#t-punch'); if (pb) pb.onclick = () => C().run(async () => { const off = !DS.Act.punchOff(R); await DS.Act.setPunchOff(code, off); DS.UI.toast(off ? '🏁 반대항 경주를 껐어요 (다음 수업도 꺼짐)' : '🏁 반대항 경주를 켰어요'); });
     const gb = $('#t-gift'); if (gb) gb.onclick = () => giftModal();
-    { const sn = $('#t-snd'); if (sn) sn.onclick = () => C().run(() => DS.Act.setSound(code, { sfx: !sndOn, bgm: !sndOn })); } // 🔊 종합실 효과음 · 배경음 한꺼번에
+    { const sn = $('#t-snd'); if (sn) sn.onclick = () => C().run(() => { const nx = sndLv === 'mid' ? 'low' : sndLv === 'low' ? 'off' : 'mid'; return DS.Act.setSound(code, { sfx: nx !== 'off', bgm: nx !== 'off', vol: nx === 'off' ? sndLv === 'off' ? 'mid' : 'low' : nx }); }); } // 🔊 종합실 효과음 · 배경음 한꺼번에
     C().bindExtend(body, code, R);
     const cb = $('#t-tcamp'); if (cb) cb.onclick = () => C().run(() => { if (stop) stop(); stop = null; clearInterval(tick); return DS.TCamp.enter({ code, hallKey: curKey }); });
     body.querySelectorAll('[data-help]').forEach((b) => (b.onclick = () => C().run(() => DS.Act.clearHelp(code, b.dataset.help))));

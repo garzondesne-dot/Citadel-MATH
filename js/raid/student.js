@@ -557,6 +557,9 @@ DS.Student = (function () {
   const itemText = (q) => (q.type === 'blanks' ? q.items.map((it) => `${it.left} □ ${it.right}`).join('   ') : DS.UI.plain(q.question));
   const solOf = (q) => q.solution || (q.type === 'text' ? `정답: ${q.answers.join(' / ')}` : '');
 
+  // ⚔ #24 (2026-11-09 1-4반 「다 적고 공격을 안 누름」): 칸을 다 채우면 players/{나}/draft = 그 시도 · 리모컨이 「입력 다 함 · 공격 안 누름」으로 봄 (바뀔 때만 씀)
+  let draftKey = '';
+  function draftMark(k) { if (test || !code || !me || draftKey === (k || '')) return; draftKey = k || ''; DS.Net.set(`rooms/${code}/players/${me}/draft`, k || null).catch(() => {}); }
   function fightForm(body, step, rec, hp) {
     const mid = step.id, attempt = rec.nextAttempt, key = `${mid}|${attempt}`;
     const items = Raid().itemsFor(L, R, mid, me, attempt);
@@ -574,11 +577,12 @@ DS.Student = (function () {
     body.innerHTML = `<div class="panel framed st-fight">${scene(step, rec, hp, '', down ? '' : GAUGE)}
       <div class="paper"><div class="paper-h"><b>${step.special ? '⭐ ' : step.review ? '📖 ' : ''}${esc(step.title)}</b><small>${items.length > 1 ? `(1)~(${items.length}) 모두 풀고 공격` : '풀고 공격'}</small></div>
       ${down ? '<p class="paper-note ok">🎉 몬스터는 쓰러졌어요! 그래도 풀어서 공격하면 이펙트도 뜨고 경험치가 쌓여요.</p>' : ''}
-      ${attempt && rec.v3 ? `<p class="paper-note">${rec.perfect ? (rec.fix ? '✏ 같은 문제 — ✘ 칸을 고쳐서 다시 내요 (맞히면 묶기 · 힐 한 번)' : '🆕 새 문제 (숫자가 바뀌었어요) — 맞히면 기회 그대로 + 묶기 · 힐 한 번 · 틀리면 기회 −1') : '🔄 같은 문제 다시 — 지난 답이 채워져 있어요 · ✘ 문항만 고쳐요'}</p>` : attempt && rec.perfect ? `<p class="paper-note">⛓ 몬스터 묶기 — 맞힌 소문제 1개마다 반 전체의 몬스터 공격이 1초 늦어져요 (최대 ${Raid().BIND_MAX}초)</p>` : attempt ? `<p class="paper-note">🔄 재도전 ${attempt} — 숫자가 모두 바뀌었어요 · 지난번 틀린 문항은 <b class="ngc">✘</b></p>` : ''}
+      ${attempt && rec.v3 ? `<p class="paper-note">${rec.perfect ? (rec.fix ? '🔁 <b>같은 문제 그대로예요</b> (고장 아님!) — 종이 풀이를 고쳐서 ✘ 칸을 다시 내요 (맞히면 묶기 · 힐 한 번)' : '🆕 새 문제 (숫자가 바뀌었어요) — 맞히면 기회 그대로 + 묶기 · 힐 한 번 · 틀리면 기회 −1') : '🔁 <b>같은 문제 그대로예요</b> (고장 아님!) — 종이 풀이를 고쳐서 ✘ 칸만 다시 내요 · 지난 답은 채워져 있어요'}</p>` : attempt && rec.perfect ? `<p class="paper-note">⛓ 몬스터 묶기 — 맞힌 소문제 1개마다 반 전체의 몬스터 공격이 1초 늦어져요 (최대 ${Raid().BIND_MAX}초)</p>` : attempt ? `<p class="paper-note">🔄 재도전 ${attempt} — 숫자가 모두 바뀌었어요 · 지난번 틀린 문항은 <b class="ngc">✘</b></p>` : ''}
       ${L.monsters[mid].note ? `<p class="paper-note">💡 ${esc(L.monsters[mid].note)}</p>` : ''}
       <div class="items">${items.map((q, i) => itemHtml(q, i, prevWrong[i], null)).join('')}</div></div>
-      ${dock(rec, `<button class="btn primary big dock-go" id="st-go"${ready ? '' : ' disabled'}>⚔ 공격!</button>`)}
+      ${dock(rec, `<button class="btn primary big dock-go${ready ? ' go-pulse' : ''}" id="st-go"${ready ? '' : ' disabled'}>⚔ 공격!</button>`)}
       ${helpBtn()}</div>`;
+    draftMark(ready && form.touched ? key : null); // ⚔ #24 (숫자 칸은 0 으로 시작하니 한 번이라도 고친 뒤에만): 다 채웠는데 공격을 안 누름 → 리모컨에 표시
     if (keep) { const pp = body.querySelector('.paper'); if (pp) pp.scrollTop = keep.p; body.scrollTop = keep.b; window.scrollTo(0, keep.w); }
     bindTop();
     bindHelp();
@@ -589,17 +593,17 @@ DS.Student = (function () {
       else if (t === 'choice') form.given[k] = Number(v);
       else if (t === 'ox') form.given[k] = v === 'O';
       else form.given[k] = [v];
-      DS.Sound.clank(); render();
+      form.touched = true; DS.Sound.clank(); render();
     }));
     body.querySelectorAll('[data-hint]').forEach((b) => b.addEventListener('click', () => { hintTap(b.dataset.hint); drawn = ''; render(); }));
     // 단답 입력: 다시 그리지 않고 값만 기억 (글자 입력 중에 화면이 바뀌지 않게) · 공격 버튼만 켜고 끔
     body.querySelectorAll('[data-text]').forEach((inp) => inp.addEventListener('input', () => {
       form.given[Number(inp.dataset.text)] = inp.value;
       const ok = items.every((q, j) => (q.type === 'multi' ? form.given[j].length > 0 : q.type === 'text' ? String(form.given[j] || '').trim() !== '' : form.given[j] != null));
-      const go = $('#st-go'); if (go) go.disabled = !ok;
+      const go = $('#st-go'); if (go) { go.disabled = !ok; go.classList.toggle('go-pulse', ok); } form.touched = true; draftMark(ok ? key : null);
       drawn = `form|${key}|${JSON.stringify(form.given)}|${(R.help || {})[me] ? 1 : 0}`;
     }));
-    DS.UI.dial(body, (i) => form.given[i], (i, v) => { form.given[i] = v; drawn = `form|${key}|${JSON.stringify(form.given)}|${(R.help || {})[me] ? 1 : 0}|${down}`; }); // 꾹 누르면 계속 · 숫자만 바꿈 (v0.9.6.16)
+    DS.UI.dial(body, (i) => form.given[i], (i, v) => { form.given[i] = v; form.touched = true; if (items.every((q, j) => (q.type === 'multi' ? form.given[j].length > 0 : q.type === 'text' ? String(form.given[j] || '').trim() !== '' : form.given[j] != null))) draftMark(key); drawn = `form|${key}|${JSON.stringify(form.given)}|${(R.help || {})[me] ? 1 : 0}|${down}`; }); // 꾹 누르면 계속 · 숫자만 바꿈 (v0.9.6.16)
     $('#st-go').onclick = async () => {
       const given = items.map((q, i) => (q.type === 'blanks' ? form.given[i] : q.type === 'number' ? Number(form.given[i]) : form.given[i]));
       try { await DS.Act.submit(code, raw, mid, attempt, given); retrying = ''; form = null; dirty = true; } catch (e) { DS.UI.toast(e.message); }

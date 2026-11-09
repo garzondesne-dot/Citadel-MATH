@@ -132,7 +132,7 @@ DS.Act = (function () {
   const setThink = (lessonId, sec) => N().set(prepPath(lessonId, 'think'), Number(sec));
   // 📄 문제 화면: 종합상황실에 지금 문제의 학습지 이미지를 크게 (교사 해설용, 레이드는 뒤에서 계속)
   const setSheet = (code, on) => N().set(P(code, 'state/sheet'), on ? true : null);
-  const setSound = (code, v) => N().set(P(code, 'state/sound'), { sfx: !!v.sfx, bgm: !!v.bgm }); // 🔇 2026-11-06: 교사 리모컨 → 종합실 효과음 · 배경음
+  const setSound = (code, v) => N().set(P(code, 'state/sound'), { sfx: !!v.sfx, bgm: !!v.bgm, vol: v.vol === 'low' ? 'low' : 'mid' }); // 🔇 2026-11-06: 교사 리모컨 → 종합실 효과음 · 배경음
   async function setVideoOn(code, stepId) { // 🎬 큰 화면에 설명 영상 (null = 닫기) · 🔥 콤보 시계 멈춤 (v0.9.11)
     const st = (await N().get(P(code, 'state'))) || {};
     await N().update(P(code, 'state'), { video: stepId || null, ...cp(st, { video: stepId || null }) });
@@ -321,7 +321,7 @@ DS.Act = (function () {
     const dup = Object.entries(R.players || {}).find(([u, p]) => u !== me && !p.teacher && Number(p.num) === Number(info.num));
     if (dup) fail(`${info.num}번은 이미 입장했어요. 번호를 확인해 주세요.`);
     const was = (R.players || {})[me] || {};
-    await N().set(P(code, `players/${me}`), { num: Number(info.num), nick: String(info.nick).slice(0, 8), hero: Number(info.hero) || 0, fx: info.fx || 'flame', ...(info.cls ? { cls: String(info.cls) } : {}), ...(info.title ? { title: String(info.title).slice(0, 24) } : {}), ...(Number(info.enh) > 0 ? { enh: Math.min(10, Number(info.enh)) } : {}), ...(was.lobby ? { lobby: true } : {}), at: N().TS, first: was.first || N().TS }); // first = 처음 들어온 시각 (출석부)
+    await N().set(P(code, `players/${me}`), { v: String(DS.VERSION || ''), num: Number(info.num), nick: String(info.nick).slice(0, 8), hero: Number(info.hero) || 0, /* v = 앱 판 (🔄 #24 옛 판 알아보기) */ fx: info.fx || 'flame', ...(info.cls ? { cls: String(info.cls) } : {}), ...(info.title ? { title: String(info.title).slice(0, 24) } : {}), ...(Number(info.enh) > 0 ? { enh: Math.min(10, Number(info.enh)) } : {}), ...(was.lobby ? { lobby: true } : {}), at: N().TS, first: was.first || N().TS }); // first = 처음 들어온 시각 (출석부)
     return R.meta;
   }
   // 접속 표시: 연결이 끊기면 서버가 지운다 (Firebase onDisconnect)

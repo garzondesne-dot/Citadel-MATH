@@ -156,7 +156,7 @@ DS.Control = (function () {
     const lk = Raid().solveLock(L, R, DS.Net.now()), base = (R.state || {}).solve != null ? Number(R.state.solve) : (R.meta || {}).solve != null ? Number(R.meta.solve) : 60;
     // 🌫 2026-11-09 #17: 「❄ 학생 60초 얼리기」 버튼은 없앰 → 몬스터마다 정찰 (기본 60초) · 준비 완료가 많으면 「⚔ 등장!」
     const rd = lk ? Raid().readyOf(R, lk.id).length : 0, all = Raid().activeIds(R).filter((u) => u !== (R.meta || {}).teacher).length;
-    return `<div class="sl-row">${lk && lk.on ? `<span>🌫 정찰 <b class="sl-left" data-sl-end="${lk.end}">${Math.ceil(lk.left / 1000)}초</b> · ✋ 준비 <b>${rd}</b> / ${all}</span><button class="btn small" data-sl="cut">−30초</button><button class="btn small" data-sl="add">+30초</button><button class="btn small primary" data-sl="now">⚔ 등장!</button><button class="btn small" data-sl="add">+30초</button>`
+    return `<div class="sl-row${lk && lk.on ? ' sl-scout' : ''}">${lk && lk.on ? `<p class="sl-info">🌫 정찰 중 · 등장까지 <b class="sl-left" data-sl-end="${lk.end}">${Math.ceil(lk.left / 1000)}초</b> · ✋ 준비 <b>${rd}</b> / ${all}</p><div class="sl-btns"><button class="btn" data-sl="cut">−30초</button><button class="btn" data-sl="add">+30초</button><button class="btn primary big sl-now" data-sl="now">⚔ 지금 등장</button></div><button class="btn small" data-sl="add">+30초</button>`
       : `<span>🌫 정찰 시간</span><button class="btn small" data-sl="dn">−30</button><b>${base}초</b><button class="btn small" data-sl="up">+30</button><span class="muted small">다음 몬스터부터</span>`}</div>`;
   }
   const bindSolve = (el, code, R, L) => el.querySelectorAll('[data-sl]').forEach((b) => (b.onclick = () => run(async () => {
@@ -230,5 +230,34 @@ DS.Control = (function () {
     host.appendChild(e); setTimeout(() => e.remove(), 2400);
   }
   const xpOf = (rec) => (rec && rec.tries ? rec.tries.length * 2 + (Number(rec.best) || 0) * 2 : 0); // 제출 2 + 맞힌 소문제 2 (EXP 표와 같게)
-  return { chainHtml, bindChain, solveHtml, bindSolve, saveBtn, bindSave, lessonBtn, bindLesson, remoteGrid, xpFloat, xpOf, tbarHtml, onTimeUp, bindExtend, hm, iconBar, restBtn, bindRest, restLeft, restEnd, mmss, name, run, wordsHtml, bindWords, stepName, nextName, stepTitles, FINALE, forward, back, pctHtml, bindPct, focusBtn, bindFocus, sheetBtn, bindSheet, videoBtn, bindVideo, esc };
+  // 🧮 아직 안 들어온 번호 (2026-11-09 #24 · 1-4반 「17명이지?」): 반 명단(rosterMask 번호) − 들어온 학생 − 교사가 뺀 결석(state/absent)
+  const rosterCache = {};
+  function rosterNums(cls) {
+    if (!cls) return null;
+    if (rosterCache[cls] === undefined) { rosterCache[cls] = null; DS.Net.get(`rosterMask/${cls}`).then((v) => { rosterCache[cls] = Object.keys(v || {}).map(Number).filter((n) => n > 0).sort((a, b) => a - b); window.dispatchEvent(new Event('ds-roster')); }).catch(() => {}); }
+    return rosterCache[cls];
+  }
+  function missing(R) {
+    const all = rosterNums(R.meta && R.meta.cls); if (!all || !all.length) return null;
+    const inN = new Set(Object.values(R.players || {}).filter((p) => !p.teacher).map((p) => Number(p.num))), ab = (R.state || {}).absent || {};
+    return { miss: all.filter((n) => !inN.has(n) && !ab[n]), absent: all.filter((n) => ab[n] && !inN.has(n)), total: all.length };
+  }
+  function missingHtml(R, big) {
+    const m = missing(R); if (!m) return '';
+    if (!m.miss.length && !m.absent.length) return `<div class="miss-row${big ? ' big' : ''}"><b>🧮 명단 ${m.total}명 모두 들어왔어요</b></div>`;
+    return `<div class="miss-row${big ? ' big' : ''}"><b>🧮 아직 ${m.miss.length}명${m.miss.length ? ':' : ''}</b>${m.miss.map((n) => `<button class="miss-n" data-absent="${n}" title="눌러서 결석으로 빼기">${n}</button>`).join('')}${m.absent.length ? `<span class="miss-ab">결석 ${m.absent.map((n) => `<button class="miss-n ab" data-unabsent="${n}" title="다시 넣기">${n}</button>`).join('')}</span>` : ''}${m.miss.length ? '<span class="miss-tip">번호를 누르면 결석으로 빼요</span>' : ''}</div>`;
+  }
+  const bindMissing = (el, code) => el.querySelectorAll('[data-absent],[data-unabsent]').forEach((b) => (b.onclick = () => run(() => DS.Net.set(`rooms/${code}/state/absent/${b.dataset.absent || b.dataset.unabsent}`, b.dataset.absent ? true : null))));
+  // 🔄 #24 옛 판 학생 (들어올 때 적은 앱 판 v 가 이 기기 판과 다름 · 옛 판은 v 가 없음)
+  function oldHtml(R) {
+    const old = Object.values(R.players || {}).filter((p) => !p.teacher && p.v !== DS.VERSION).map((p) => p.num).filter((n) => n != null).sort((a, b) => a - b);
+    return old.length ? `<p class="old-row">🔄 옛 판 ${old.length}명: <b>${old.join(' · ')}번</b> <span class="muted small">— 폰 위 「🔄 새로 고침」 띠를 누르거나 앱을 다시 열게 해 주세요</span></p>` : '';
+  }
+  // ⚔ #24 다 채우고 공격을 안 누른 학생 (지금 몬스터 · 아직 안 낸 시도)
+  function draftHtml(L, R) {
+    const st = Raid().stepOf(L, R); if (!st || st.kind !== 'monster' || !L.monsters[st.id] || Raid().isChain(L, R, st.id)) return '';
+    const who = Raid().activeIds(R).filter((u) => { const p = (R.players || {})[u] || {}; return !p.teacher && p.draft && p.draft === `${st.id}|${Raid().record(L, R, st.id, u).nextAttempt}`; }).map((u) => R.players[u].num).sort((a, b) => a - b);
+    return who.length ? `<p class="draft-row">⌛ 입력 다 함 · <b>공격 안 누름 ${who.length}명: ${who.join(' · ')}번</b> <span class="muted small">— 「⚔ 공격!」을 눌러야 내져요</span></p>` : '';
+  }
+  return { draftHtml, oldHtml, missing, missingHtml, bindMissing, chainHtml, bindChain, solveHtml, bindSolve, saveBtn, bindSave, lessonBtn, bindLesson, remoteGrid, xpFloat, xpOf, tbarHtml, onTimeUp, bindExtend, hm, iconBar, restBtn, bindRest, restLeft, restEnd, mmss, name, run, wordsHtml, bindWords, stepName, nextName, stepTitles, FINALE, forward, back, pctHtml, bindPct, focusBtn, bindFocus, sheetBtn, bindSheet, videoBtn, bindVideo, esc };
 })();

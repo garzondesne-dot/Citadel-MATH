@@ -38,7 +38,7 @@ DS.Hall = (function () {
       if (DS.Act.isHost(R)) { DS.Act.admitLate(code, R, L); DS.Act.markBossWin(code, R, L); }
       if (first || L.id !== prepFor) { prepFor = L.id; built = ''; if (stopPrep) stopPrep(); stopPrep = DS.Net.watch(`prep/${L.id}`, (p) => { prep = p || {}; built = ''; if (R) render(); }); } // 🔄 차시 바꾸기: 새 차시의 개념 그림 · 영상
       xpHall(); lvHall(); ulHall();
-      { const sd = (R.state || {}).sound, key = sd ? `${sd.sfx}|${sd.bgm}` : ''; if (key && key !== sndKey && Snd()) { sndKey = key; Snd().setSfx(sd.sfx !== false, false); Snd().setBgm(sd.bgm !== false, false); } } // 🔇 교사 리모컨 → 종합실 소리
+      { const sd = (R.state || {}).sound, key = sd ? `${sd.sfx}|${sd.bgm}|${sd.vol || ''}` : ''; if (key && key !== sndKey && Snd()) { sndKey = key; Snd().setSfx(sd.sfx !== false, false); Snd().setBgm(sd.bgm !== false, false); if (sd.vol) Snd().setVol(sd.vol, false); } } hallVol(); // 🔇 교사 리모컨 → 종합실 소리
       render();
       thrillHall();
       // v0.9.2: 종합상황실은 교사 캠프(학생 입장 QR · 모루 · 보강던전)에서 시작 — 수업이 시작되면 저절로 이 화면으로
@@ -46,6 +46,14 @@ DS.Hall = (function () {
     });
   }
   // 🆙 몬스터가 쓰러질 때 공격한 용사들 머리 위 +EXP · 🎉 레벨업 알림 (2026-11-05 · 좋은 순간만 크게 · 레벨 목록 · 순위는 안 보임)
+  // 🔉 종합실 구석 소리 단추 (2026-11-09 #24): 🔇 / 작게 / 보통 · 이 PC 에 기억 · 리모컨으로도 바뀜
+  function hallVol() {
+    if (!Snd() || !Snd().setLevel) return;
+    let b = document.getElementById('h-vol'); const host = document.getElementById('screen-hall') || document.body;
+    if (!b) { b = document.createElement('div'); b.id = 'h-vol'; host.appendChild(b); b.onclick = (e) => { const v = e.target.closest('[data-lv]'); if (!v) return; Snd().setLevel(v.dataset.lv); if (v.dataset.lv !== 'off' && Snd().clank) Snd().clank(); hallVol(); }; }
+    const lv = Snd().level, k = `v|${lv}`; if (b.dataset.k === k) return; b.dataset.k = k;
+    b.innerHTML = `<span>🔊</span>${[['off', '🔇'], ['low', '작게'], ['mid', '보통']].map(([x, t]) => `<button data-lv="${x}" class="${lv === x ? 'on' : ''}">${t}</button>`).join('')}`;
+  }
   let hxSeen = null, lvSeen = null, lvQ = [], lvBusy = false, ulSeen = null, ulQ = [], ulBusy = false, sndKey = '';
   function xpHall() {
     if (!L || !R) return;
@@ -178,6 +186,7 @@ DS.Hall = (function () {
     return `<span class="h-stp">${Raid().isLobby(R) ? '<i class="on">대기실</i>' : Raid().isFinale(L, R) ? '<i class="on">마무리</i>' : chips}</span><span class="h-dots">${dots}</span>`;
   }
   let gearOpen = false; // ⚙ 종합실 메뉴 (메뉴화면 · 선생님 모습 · 캠프 보기 · 전체 화면 · 보스 문 닫힘 시각)
+  if (typeof window !== 'undefined') window.addEventListener('ds-roster', () => { try { if (R && L) render(); } catch (e) { /* 무시 */ } }); // 🧮 명단 번호를 받으면 다시 그림
   function render() {
     const i = R.state.step ?? -1;
     // 2026-11-07 정돈판 비교 1~3: 위 한 줄 = 「n차시 · 단계」 · 4단계 · 시간 막대 · 🚪 코드 · ⚙ (메뉴화면 · 선생님 모습 · 캠프 보기 · 전체 화면은 ⚙ 안)
@@ -243,8 +252,9 @@ DS.Hall = (function () {
   // ── 가운데: 던전 단체 대기실 (수업 전 · 마무리) ─────────────
   function lobbyScene(finale) {
     const list = inClass().filter(([, p]) => !finale || true);
+    const mis = finale ? '' : C().missingHtml(R, true); // 🧮 #24 아직 안 들어온 번호
     const onN = list.filter(([u]) => Raid().online(R, u)).length; // 👥 2026-11-09 선생님: 대기실 접속 인원 (지금 연결 / 입장)
-    const sig = `lobby|${finale}|${onN}|${list.map(([u, p]) => u + p.hero + (p.title || '')).join()}|${finale ? JSON.stringify([R.words, R.hide]) : ''}|${DS.ShareCard.klassReady(L, R)}|t${DS.Art.teacherHero(R)}`; // 2026-11-08 사용자 「교사 캠프에서 모습 바꿔도 던전 들어가면 그대로」: 선생님 모습이 바뀌면 다시 그림
+    const sig = `lobby|${finale}|${onN}|${mis}|${list.map(([u, p]) => u + p.hero + (p.title || '')).join()}|${finale ? JSON.stringify([R.words, R.hide]) : ''}|${DS.ShareCard.klassReady(L, R)}|t${DS.Art.teacherHero(R)}`; // 2026-11-08 사용자 「교사 캠프에서 모습 바꿔도 던전 들어가면 그대로」: 선생님 모습이 바뀌면 다시 그림
     if (built === sig) return;
     built = sig;
     const n = list.length, size = n > 24 ? 62 : n > 16 ? 72 : 84, per = Math.max(1, Math.ceil(n / 3));
@@ -258,14 +268,14 @@ DS.Hall = (function () {
       <p class="lb2-title">${finale ? `<i class="trophy-img sm" style="background-image:url('${DS.ASSETS.base}${DS.ASSETS.trophy}')"></i> ${esc(dungeonName())} 클리어!` : `⚔ ${esc(dungeonName())} · 던전 입장!`}</p>
       <p class="lb2-sub">${finale ? '오늘 배운 것 한마디씩 남기고 가자' : `${esc(L.title)} — 선생님 주위로 모여라`}</p>
       ${finale && DS.Result.floorText(L) ? `<p class="lb2-floor">${DS.Result.floorText(L)}</p>` : ''}
-      ${finale ? `<div class="lb2-cnt">💬 ${words.length} / ${n}</div>` : `<div class="lb2-qr"><div id="h-qr" class="qr"></div><b>${code}</b><span>QR · 수업 코드</span></div><div class="lb2-cnt lb2-on">👥 접속 <b>${onN}</b>명 · 입장 ${n}명</div>`}
+      ${finale ? `<div class="lb2-cnt">💬 ${words.length} / ${n}</div>` : `<div class="lb2-qr"><div id="h-qr" class="qr"></div><b>${code}</b><span>QR · 수업 코드</span></div><div class="lb2-cnt lb2-on">👥 접속 <b>${onN}</b>명 · 입장 ${n}명</div>${mis ? `<div class="lb2-miss">${mis}</div>` : ''}`}
       <div class="lb2-say teacher">${finale ? '모두 수고했네! 오늘 배운 것 한마디씩 남기게' : `${L.no ? `${DS.Lessons.noText(L.no)}차시 ` : ''}${esc(L.title.split('·')[0].trim())} 던전에 온 것을 환영하네!`}</div>
       <div class="lb2-h teacher" style="left:50%;top:60%">${DS.Art.hero(DS.Art.teacherHero(R), finale ? 'attack' : 'idle', finale ? 'pairhop' : 'huff')}<i class="shadow"></i><span class="nm gold">선생님</span></div>
       ${pos.map((o, i) => `<div class="lb2-h${enhCls(o.p)}" style="left:${o.x}%;top:${o.y}%;z-index:${5 + Math.round(o.y / 10)};--sz:${size}px;animation-delay:${(i * 0.13) % 0.9}s"><span class="nm">${DS.Titles.nameHtml(o.p, { size: 16, short: true })}</span><div class="${(finale ? i % 2 === 1 : o.flip) ? 'face-l' : ''}">${DS.Art.hero(o.p.hero, 'idle', finale ? 'pairhop' : 'huff')}</div><i class="shadow"></i>${finale && words.includes(o.u) ? `<span class="lb2-bub" data-u="${o.u}">${esc(R.words[o.u].t)}</span>` : ''}</div>`).join('')}
       ${finale ? '<div class="stamp-bar wide">📮 반드시 학습지 확인도장 받아가세요.</div>' : ''}
       ${Raid().focusOn(R) ? '<div class="h-focus-badge">⚠ 집중모드</div>' : ''}
       <div class="h-acts corner${finale ? '' : ' below-qr'}">${finale ? klassBtn() + punchBtn() : `<button class="btn small" id="h-tcamp">🏛 교사 캠프</button>${(R.meta || {}).otShow && DS.Punch && !DS.Act.punchOff(R) ? '<button class="btn small" id="h-ot">⏳ 연장전 결과</button>' : ''}`}</div></div>`;
-    bindActs(); if (!finale) otAuto();
+    bindActs(); if (!finale) { otAuto(); C().bindMissing($('#h-arena'), code); }
     if (!finale && window.QRCode) new QRCode($('#h-qr'), { text: studentUrl(), width: 150, height: 150 });
     if (finale) rotateBubbles();
   }
@@ -365,11 +375,11 @@ DS.Hall = (function () {
       const h = document.getElementById(`fh-${u}`); if (!h) return;
       h.classList.toggle('off', k === 'off');
       let si = h.querySelector('.si'); if (!si) { si = document.createElement('i'); const nm = h.querySelector('.fh-name'); if (nm) nm.prepend(si); }
-      si.className = `si ${k}`; si.textContent = k === 'ok' ? '✓' : k === 'go' ? '…' : 'z';
+      si.className = `si ${k}`; si.textContent = k === 'ok' ? '✓' : k === 'go' ? '…' : '📵'; // 📵 #24: 끊김 ≠ 쓰러짐 (흐리게만 · 회색 X)
     });
     const el = document.getElementById('h-leg'); if (!el) return;
     const wait = studs().filter(([u]) => !(R.active || {})[u] && Raid().online(R, u)).length; // ● 접속 · 대기 (늦게 와 대기실에 있는 학생)
-    el.innerHTML = `<span><i class="si ok">✓</i>제출 ${cnt.ok}</span><span><i class="si go">…</i>풀이 중 ${cnt.go}</span><span><i class="si on">●</i>접속 · 대기 ${wait}</span><span><i class="si off">z</i>끊김 ${cnt.off}</span><span class="nt">정답 · 오답 글자는 띄우지 않아요</span>`; // 2026-11-07 비교 4: 「제출 n / m」 큰 줄 삭제 (선생님 지시)
+    el.innerHTML = `<span><i class="si ok">✓</i>제출 ${cnt.ok}</span><span><i class="si go">…</i>풀이 중 ${cnt.go}</span><span><i class="si on">●</i>접속 · 대기 ${wait}</span><span><i class="si off">📵</i>연결 끊김 ${cnt.off}</span><span class="nt">정답 · 오답 글자는 띄우지 않아요</span>`; // 2026-11-07 비교 4: 「제출 n / m」 큰 줄 삭제 (선생님 지시)
   }
   // ⚔ 마무리 일격 (2026-11-03 · 0.9.6.9 고침: 이름 배너 없앰): 체력을 0 으로 만든 학생의 용사가 슬로모션으로 돌진 → 하얀 섬광 · 큰 이펙트 두 번 · 강한 흔들림
   function finisher(u, step) {

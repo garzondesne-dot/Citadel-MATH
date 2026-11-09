@@ -6,6 +6,8 @@ DS.Sound = (function () {
   // 🔇 2026-11-06: 효과음 · 배경음을 따로 끔 (이 기기에 기억) · 종합실은 교사 리모컨이 덮어씀(remote)
   const LS = (k, v) => { try { if (v === undefined) return localStorage.getItem(k) === '1'; localStorage.setItem(k, v ? '1' : '0'); } catch (e) { /* 저장 못 하면 이번만 */ } return false; };
   let ctx = null, master = null, noiseBuf = null, sfxOff = typeof localStorage !== 'undefined' && LS('ds-sfx-off'), bgmOff = typeof localStorage !== 'undefined' && LS('ds-bgm-off');
+  // 🔉 소리 크기 (2026-11-09 #24 1-4반: 시작하자마자 너무 큼) · 작게 / 보통 · 기본 = 보통(예전 0.45 → 0.28)
+  const VOL = { low: 0.12, mid: 0.28 }; let vol = (() => { try { return localStorage.getItem('ds-vol') === 'low' ? 'low' : 'mid'; } catch (e) { return 'mid'; } })();
   const listeners = [];
   const changed = () => listeners.forEach((f) => { try { f({ sfx: !sfxOff, bgm: !bgmOff }); } catch (e) { /* 무시 */ } });
 
@@ -15,7 +17,7 @@ DS.Sound = (function () {
       if (!AC) return null;
       ctx = new AC();
       master = ctx.createGain();
-      master.gain.value = 0.45;
+      master.gain.value = VOL[vol];
       master.connect(ctx.destination);
     }
     if (ctx.state === 'suspended') ctx.resume();
@@ -84,7 +86,7 @@ DS.Sound = (function () {
     if (bgmKey === k && bgmEl) { if (!bgmOff && bgmEl.paused && !document.hidden) bgmEl.play().catch(() => {}); return; }
     if (bgmEl) { bgmEl.pause(); bgmEl = null; } bgmKey = k || null;
     const u = k && sfxUrl(k); if (!u) return;
-    bgmEl = new Audio(u); bgmEl.loop = true; bgmEl.volume = 0.22;
+    bgmEl = new Audio(u); bgmEl.loop = true; bgmEl.volume = vol === 'low' ? 0.08 : 0.16;
     if (!bgmOff && !document.hidden) bgmEl.play().catch(() => {});
   }
   // 첫 터치 때 소리 장치를 깨우고 녹음 소리를 미리 받음 (0.5MB 안쪽 · 배경음은 성채 · 허수아비에서만)
@@ -99,6 +101,11 @@ DS.Sound = (function () {
     // 🔇 효과음 · 배경음 따로 (on = 켜기) · keep = false 면 이 기기에 저장 안 함 (교사 리모컨이 종합실을 바꿀 때)
     setSfx(on, keep = true) { sfxOff = !on; if (keep) LS('ds-sfx-off', sfxOff); changed(); },
     setBgm(on, keep = true) { bgmOff = !on; if (keep) LS('ds-bgm-off', bgmOff); if (bgmEl) { if (bgmOff) bgmEl.pause(); else if (!document.hidden) bgmEl.play().catch(() => {}); } changed(); },
+    setVol(v, keep = true) { vol = v === 'low' ? 'low' : 'mid'; if (master) master.gain.value = VOL[vol]; if (bgmEl) bgmEl.volume = vol === 'low' ? 0.08 : 0.16; if (keep) { try { localStorage.setItem('ds-vol', vol); } catch (e) { /* 무시 */ } } changed(); },
+    get vol() { return vol; },
+    // 🔇 / 작게 / 보통 한 번에 (종합실 구석 · 리모컨)
+    setLevel(l, keep = true) { if (l === 'off') { this.setSfx(false, keep); this.setBgm(false, keep); return; } this.setVol(l, keep); this.setSfx(true, keep); this.setBgm(true, keep); },
+    get level() { return sfxOff && bgmOff ? 'off' : vol; },
     get sfxOn() { return !sfxOff; },
     get bgmOn() { return !bgmOff; },
     onChange(f) { listeners.push(f); },

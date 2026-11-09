@@ -33,7 +33,11 @@ DS.PWA = (function () {
           b.textContent = '🔄 새 판 나옴 · 눌러서 처음부터'; b.onclick = () => location.reload();
           document.body.appendChild(b); return;
         }
-        if (DS.UI && DS.UI.toast) DS.UI.toast('🔄 새 판이 준비됐어요 — 앱을 다시 열면 적용돼요', 4000);
+        // 🔄 #24 (2026-11-09 1-4반 「다시 들어와야 돼」): 수업 중에도 눌러서 바로 새 판 (보던 장면 · 기록은 그대로 이어짐)
+        if (document.getElementById('upd-bar')) return;
+        const b = document.createElement('button'); b.id = 'upd-bar'; b.type = 'button'; b.className = 'upd-bar';
+        b.textContent = '🔄 새 판이 나왔어요 · 눌러서 새로 고침 (기록은 그대로)'; b.onclick = () => location.reload();
+        document.body.appendChild(b);
       });
     }
     if (!btn || standalone()) return;
