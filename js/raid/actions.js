@@ -63,7 +63,7 @@ DS.Act = (function () {
     try { think = await N().get(prepPath(lessonId, 'think')); } catch (e) { /* 기본 5초 */ }
     const Lp = DS.Lessons.get(lessonId);
     room.meta.think = think != null ? Number(think) : Lp && Lp.think != null ? Lp.think : 5;
-    { let sv = null; try { sv = await N().get(prepPath(lessonId, 'solve')); } catch (e) { /* 기본 60 */ } room.meta.solve = sv != null ? Number(sv) : 60; } // 📝 풀이 시간 (중단원 평가 문항 기본 · 2026-11-06)
+    { let sv = null; try { sv = await N().get(prepPath(lessonId, 'solve')); } catch (e) { /* 기본 60 */ } room.meta.solve = sv != null ? Number(sv) : 60; if (opt.solve != null) room.meta.solve = Number(opt.solve); } // 📝 풀이 시간 (중단원 평가 문항 기본 · 2026-11-06)
     // 🔥 반 최고 콤보 · 🏁 반대항 끄기 (v0.9.11)
     if (cls) { try { const cb = await N().get(`combo/${ck(cls)}`); room.meta.comboBest = Number((cb || {}).best) || 0; } catch (e) { room.meta.comboBest = 0; } }
     try { if ((await N().get(prepPath('_cfg', 'punchOff'))) === true) room.meta.punchOff = true; } catch (e) { /* 기본 켬 */ }
