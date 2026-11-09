@@ -647,14 +647,39 @@ DS.Student = (function () {
   }
   // ⚔ 소레이드 화면 (2026-11-09 #18): 진행 칩 ①②③👑 · 지금 단계 문제 하나 · 「📜 나의 풀이」가 한 줄씩 쌓임 · 기회 반 칸 · 1칸 남으면 🙋 선생님 확인
   let cform = null; const chainPrac = {}, writeMode = {}, probShut = {}, pracArm = {};
-  // ✨ 모래 글씨 (#46 · 2026-11-09 선생님): 「📜 나의 풀이」에 새 줄이 생길 때만 · 모래 알갱이가 모이며 흐림 → 선명 → 금빛 반짝 (약 1.1초 · 한 번에 한 줄 · 겹치면 차례로)
-  //   이미 있던 줄 · 다시 들어온 첫 화면은 연출 없이 · 화면을 다시 그려도 이어서(시작 시각 기억 → 음수 지연) · CSS 만 (그림 없음)
-  const sandSeen = {}, sandAt = {}, SAND_MS = 1100;
+  // ✨ 「📜 나의 풀이」 새 줄 (#46 모래 글씨 → 2026-11-10 선생님 「픽셀 디졸브 인 · 새 문장은 빨간색 · 다음 단계에서 다시 검정」)
+  //   새 줄만 · 종이색 픽셀 칸이 흩어지듯 사라지며 글씨가 드러남 (왼쪽부터 조금 먼저 · 약 0.9초 · 한 줄씩 차례로) · 그 단계에서 생긴 줄 = 빨강 → 다음 단계 줄이 생기면 검정
+  //   이미 있던 줄 · 다시 들어온 첫 화면은 연출 없이 · 화면을 다시 그려도 이어서(시작 시각 기억 · 칸 순서는 줄마다 고정) · 그림 파일 없음 (캔버스 1장)
+  const sandSeen = {}, sandAt = {}, sandNew = {}, SAND_MS = 900, PIX = 5;
+  const pixBg = (el) => { for (let e = el; e && e !== document.body; e = e.parentElement) { const c = getComputedStyle(e).backgroundColor; if (c && !/rgba\(0, 0, 0, 0\)|transparent/.test(c)) return c; } return '#fbf5e6'; };
+  function pixIn(li, t0, seed) {
+    if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const w = li.offsetWidth, h = li.offsetHeight; if (!w || !h) return;
+    const cols = Math.ceil((w + 8) / PIX), rows = Math.ceil((h + 4) / PIX), N = cols * rows, cv = document.createElement('canvas');
+    cv.className = 'pix-cv'; cv.width = cols; cv.height = rows; li.appendChild(cv);
+    const g = cv.getContext('2d'); g.fillStyle = pixBg(li); g.fillRect(0, 0, cols, rows);
+    let a = (seed * 2654435761) >>> 0; const rnd = () => { a = (a + 0x6D2B79F5) >>> 0; let t = Math.imul(a ^ (a >>> 15), 1 | a); t ^= t + Math.imul(t ^ (t >>> 7), 61 | t); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; };
+    const order = Array.from({ length: N }, (_, i) => ({ i, r: rnd() * 0.65 + ((i % cols) / cols) * 0.35 })).sort((x, y) => x.r - y.r).map((o) => o.i); // 픽셀이 흩어지듯 · 왼쪽부터 살짝 먼저 (읽는 방향)
+    let done = 0;
+    const step = () => {
+      if (!cv.isConnected) return;
+      const p = Math.min(1, Math.max(0, (Date.now() - t0) / SAND_MS)), upto = Math.floor(p * N);
+      for (; done < upto; done++) { const k = order[done]; g.clearRect(k % cols, Math.floor(k / cols), 1, 1); }
+      if (p >= 1) { cv.remove(); return; }
+      requestAnimationFrame(step);
+    };
+    step();
+  }
   function sandApply(body, key) {
     const lis = [...body.querySelectorAll('.cr-story li')], n = lis.length, now = Date.now();
     if (sandSeen[key] == null) { sandSeen[key] = n; return; }
-    if (n > sandSeen[key]) { let t = Math.max(now, ...Object.keys(sandAt).filter((k) => k.startsWith(key + '|')).map((k) => sandAt[k] + SAND_MS)); for (let i = sandSeen[key]; i < n; i++) { sandAt[`${key}|${i}`] = t; setTimeout(() => { if (DS.Sound && DS.Sound.sand) DS.Sound.sand(); }, Math.max(0, t - now)); t += SAND_MS; } sandSeen[key] = n; }
-    lis.forEach((li, i) => { const t0 = sandAt[`${key}|${i}`]; if (t0 == null || now - t0 > SAND_MS + 200) return; li.classList.add('sand'); li.style.animationDelay = `${t0 - now}ms`; li.style.setProperty('--sd', `${t0 - now}ms`); });
+    if (n > sandSeen[key]) { let t = Math.max(now, ...Object.keys(sandAt).filter((k) => k.startsWith(key + '|')).map((k) => sandAt[k] + SAND_MS)); for (let i = sandSeen[key]; i < n; i++) { sandAt[`${key}|${i}`] = t; setTimeout(() => { if (DS.Sound && DS.Sound.sand) DS.Sound.sand(); }, Math.max(0, t - now)); t += SAND_MS; } sandNew[key] = [sandSeen[key], n]; sandSeen[key] = n; }
+    const nw = sandNew[key] || [0, 0];
+    lis.forEach((li, i) => {
+      if (i >= nw[0] && i < nw[1]) li.classList.add('cr-new'); // 🔴 이번 단계에서 생긴 줄
+      const t0 = sandAt[`${key}|${i}`]; if (t0 == null || now - t0 > SAND_MS + 200) return;
+      li.classList.add('pix-in'); pixIn(li, t0, i + 1 + key.length * 31);
+    });
   } let photoLoaded = false; // ✍ writeMode[mid] = { peek } (2026-11-09 #26)
   // ⚔ 소레이드 공격 모션 (2026-11-09 선생님 「졸개는 공격 모션 없이 판정만」): 답을 내면 화면을 다시 그린 뒤 일반 몬스터처럼 돌진 · 탄 · 빗나감
   //   모션이 끝날 때까지(약 1초) 실시간 갱신으로 화면을 다시 그리지 않음 (그리면 이펙트가 지워짐)
