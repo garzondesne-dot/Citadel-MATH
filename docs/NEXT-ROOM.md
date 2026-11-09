@@ -22,7 +22,7 @@
 
 | 항목 | 상태 |
 |---|---|
-| 배포된 판 | **v0.9.37.5** (main 7c5334a · 2026-11-09 밤 #5 방 · 선생님 「배포」) — #31 이펙트 「🏆 받음 · Ⅱ 열면 사용」 · #32 선생님 설정 서버 저장 `gcfg/teacher` · #33 도트 패치 바로 넣기 4 · Firebase 규칙 = 서버와 파일 일치 확인(게시됨) · 남은 것: #33 보류 4 선생님 결정(캡처 보냄) |
+| 배포된 판 | **v0.9.37.7** (main 078f10e · 2026-11-09 밤 손발 방 · 선생님 「배포」) — v0.9.37.6 `?anon` 개발자 이름 숨김 · v0.9.37.7 게임 영상 17개 워터마크 덮어 교체 · 그 전 v0.9.37.5(#31~#33) · Firebase 규칙 변경 없음 · 남은 것: #33 보류 4 선생님 결정 |
 | 브랜치 | 작업 = `hero-v2` (같은 커밋을 `ccr-…` 세션 브랜치에도) · 배포 = `git push origin hero-v2:main` (fast-forward) → Pages run 확인 · GPT 그림 = `assets-gpt` 브랜치 `asset-handoff/` (force-push 금지) |
 | 배포 전 시험 | `tests/*.test.js` 전부 (td.test.js 는 8~15분 · 지도 하나만 = `TD_MAP=ice node tests/td.test.js`) · sw.js CACHE = 'ds-' + DS.VERSION (js/config.js 와 같이 올림) |
 | 방 운영 | CLAUDE.md 「운영 규칙 4가지」(#28) · 완료 보고 = 「✅ #n · 버전 · 확인할 것 1줄」 · 결정 원본 = DECISIONS.md |
