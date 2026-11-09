@@ -297,6 +297,10 @@ DS.App = (function () {
     const cls = ($('#t-cls') || {}).value, lid = ($('#lesson') || {}).value; let b = document.getElementById('t-resume2');
     if (!b) { b = document.createElement('button'); b.id = 't-resume2'; b.className = 'btn big t-resume2'; b.hidden = true; ($('#t-new').closest('.mk-open') || $('#t-new')).after(b); }
     b.hidden = true; if (!cls || !lid) return;
+    // 🧩 한 차시를 두 수업으로 (2026-11-09 #26 · 6 · 7차시): 차시 파일 parts = [{ no, from, title }] → 저장 지점이 없어도 「▶ 7차시 열기 (문제 4부터)」
+    { const L0 = DS.Lessons.get(lid); let pb = document.getElementById('t-part'); if (!pb) { pb = document.createElement('div'); pb.id = 't-part'; ($('#t-new').closest('.mk-open') || $('#t-new')).after(pb); }
+      pb.innerHTML = (L0 && L0.parts || []).map((x, i) => `<button class="btn big t-resume2" data-part="${i}">▶ ${DS.Lessons.noText(x.no)}차시 열기 <small>${esc(x.title)}</small></button>`).join('');
+      pb.querySelectorAll('[data-part]').forEach((x) => (x.onclick = go(async () => { const pt = L0.parts[Number(x.dataset.part)], k = L0.steps.findIndex((s) => s.id === pt.from); if (k >= 0) await DS.Teacher.create(lid, cls, { resume: k }); }))); }
     let codes = []; try { codes = (JSON.parse(localStorage.getItem('citadel-rooms')) || []).filter((r) => r.cls === cls && r.lesson === lid).map((r) => r.code).slice(0, 5); } catch (e) { /* 없음 */ }
     const r = await DS.Act.resumeInfo(lid, cls, codes), Lx = DS.Lessons.get(lid);
     // 2026-11-07 선생님 「이어하기 기능」: ⏸ 저장 지점이 없어도 그 반이 이 차시를 한 적 있으면 → 단계를 골라 이어서 (6·7차시 = 6차시 두 시간)

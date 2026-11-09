@@ -83,9 +83,9 @@ p4blk = f'''
 <div class="q"><span class="stp">③</span>{v("B ∪ X = B → X ⊂ B")}, {v("A ∩ X = ∅ → X")}는 {v("A")}와 서로소<br>&nbsp;&nbsp;&nbsp;&nbsp;→ {S}{v("X")}에 들어갈 수 있는 원소 = {v("B − A")} = {BL["l"]}</div>
 <div class="q why">💡 ∵ {v("X")}는 {v("B − A")}의 {BL["m"]}이므로 개수 = 2<sup>(원소의 개수)</sup></div>
 <div class="q"><span class="stp">👑</span>{S}{v("X")}의 개수 = 2<sup>□</sup> = {BL["s"]}</div>
-<div class="wr" style="min-height:30mm">✍ <b>서술형 쓰기</b> — 대장을 이기면 게임 풀이를 보지 말고 <b>처음부터</b> 써 보기 (<b>학습지 숫자 그대로</b>) → 📸 찍으면 🌟 <b>진필살기</b> 도전</div>
+<div class="wr" style="flex:1;min-height:110mm;font-size:9pt">✍ <b>서술형 쓰기</b> — 대장을 이기면 게임 풀이를 보지 말고 <b>처음부터</b> 써 보기 (<b>학습지 숫자 그대로</b>) → 📸 찍으면 🌟 <b>진필살기</b> 도전</div>
 
-{MEMO}'''
+'''
 
 p1_r2 = f'''
 {P(5, "두 집합 A = {x² + 2x, 4, 6}, B = {x, 6}에 대하여 A ∩ B = B를 만족시키는 모든 정수 x의 값을 구하시오.", T("08") + " " + GAME("소레이드 · 졸개 3 + 대장"))}
@@ -94,8 +94,8 @@ p1_r2 = f'''
 <div class="q"><span class="stp">②</span>{S}{v("x = 4")} 일 수 있다 ( ○ / × )</div>
 <div class="q"><span class="stp">③</span>{S}{v("x = x² + 2x → x² + x = 0 → x")} = {BL["s"]}, {BL["s"]}</div>
 <div class="q"><span class="stp">👑</span>{S}{v("x")}의 값 모두 : {BL["l"]}</div>
-<div class="wr" style="min-height:30mm">✍ <b>서술형 쓰기</b> — 대장을 이기면 게임 풀이를 보지 말고 <b>처음부터</b> 써 보기 (<b>학습지 숫자 그대로</b>) → 📸 찍으면 🌟 <b>진필살기</b> 도전</div>
-{MEMO}'''
+<div class="wr" style="flex:1;min-height:110mm;font-size:9pt">✍ <b>서술형 쓰기</b> — 대장을 이기면 게임 풀이를 보지 말고 <b>처음부터</b> 써 보기 (<b>학습지 숫자 그대로</b>) → 📸 찍으면 🌟 <b>진필살기</b> 도전</div>
+'''
 
 p2_mid = f'''
 {P(6, "어느 자전거 동아리 회원 40명을 대상으로 두 코스 A와 B를 다녀온 경험이 있는 회원 수를 조사하였더니 A 코스는 28명이고 B 코스는 21명이었다. 두 코스 A와 B를 모두 다녀온 회원 수의 최댓값과 최솟값을 구하시오.", T("11") + "<br>" + GAME("소레이드 · 졸개 2 + 대장"))}
@@ -104,8 +104,8 @@ p2_mid = f'''
 <div class="q"><span class="stp">②</span>{S}최댓값 : {v("B")}가 {v("A")} 안에 쏙 → {v("n(A ∩ B)")} = 작은 쪽 = {BL["s"]}명</div>
 <div class="q why">💡 ∵ {v("n(A ∩ B)")}는 {v("n(A ∪ B)")}가 가장 ( 클 / 작을 ) 때 가장 작다</div>
 <div class="q"><span class="stp">👑</span>{S}최솟값 : {v("n(A ∪ B)")} = 전체 40 → {BL["s"]} − 40 = {BL["s"]}명</div>
-<div class="wr" style="min-height:85mm">✍ <b>서술형 쓰기</b> — 대장을 이기면 게임 풀이를 보지 말고 <b>처음부터</b> 써 보기 (<b>학습지 숫자 그대로</b>) → 📸 찍으면 🌟 <b>진필살기</b> 도전</div>
-{MEMO}'''
+<div class="wr" style="flex:1;min-height:110mm;font-size:9pt">✍ <b>서술형 쓰기</b> — 대장을 이기면 게임 풀이를 보지 말고 <b>처음부터</b> 써 보기 (<b>학습지 숫자 그대로</b>) → 📸 찍으면 🌟 <b>진필살기</b> 도전</div>
+'''
 
 p3_left = f'''
 {P(7, "100 미만의 자연수 중에서 7의 배수가 아니거나 5로 나누었을 때의 나머지가 3이 아닌 자연수의 개수를 구하시오.", T("12") + " " + GAME("소레이드 · 졸개 3 + 대장"))}
@@ -114,8 +114,8 @@ p3_left = f'''
 <div class="q"><span class="stp">③</span>{S}{v("A ∩ B")} = 7의 배수 중 5로 나눈 나머지가 3 = {{ {BL["s"]}, {BL["s"]}, {BL["s"]} }}</div>
 <div class="q why">💡 ∵ 여집합의 원소의 개수 = 전체의 개수 − {BL["m"]}의 개수</div>
 <div class="q"><span class="stp">👑</span>{S}구하는 개수 = {v("n(U) − n(A ∩ B)")} = {BL["m"]}</div>
-<div class="wr" style="min-height:95mm">✍ <b>서술형 쓰기</b> — 대장을 이기면 게임 풀이를 보지 말고 <b>처음부터</b> 써 보기 (<b>학습지 숫자 그대로</b>) → 📸 찍으면 🌟 <b>진필살기</b> 도전</div>
-{MEMO}'''
+<div class="wr" style="flex:1;min-height:110mm;font-size:9pt">✍ <b>서술형 쓰기</b> — 대장을 이기면 게임 풀이를 보지 말고 <b>처음부터</b> 써 보기 (<b>학습지 숫자 그대로</b>) → 📸 찍으면 🌟 <b>진필살기</b> 도전</div>
+'''
 
 W = lambda h: f'<div style="height:{h}mm"></div>'
 fq = lambda n, s, h: f'<div class="q">{n}. {s}</div>{W(h)}'
@@ -162,7 +162,7 @@ def build(no, rng, pages, extra=''):
     pg = lambda g, l, r, n: f'<div class="page">{hd}{g}<div class="cols"><div class="col">{l}</div><div class="col">{r}</div></div><div class="pno">- {no}차시 ({n}/{N}) -</div></div>'
     return f"<!DOCTYPE html><html><head><meta charset='utf-8'><title>학습과정 {no}차시 레이드용</title><style>{CSS}{EXTRA}</style></head><body>" + ''.join(pg(g, l, r, i + 1) for i, (g, l, r) in enumerate(pages)) + extra + "</body></html>"
 html6 = build(6, '공통수학2 Ⅱ. 집합과 명제 1. 집합 04. 드모르간의 법칙 · 원소의 개수 (6차시) · 레이드용 v5', [(goal6, p1_left, SUMMARY + '<div class="mini">문제 4~7 (중단원 마무리) · 형성평가 = 7차시 학습지</div>' + MEMO + '<div class="stampwrap"><div class="stamp"><span>확인 도장</span></div></div>')])
-html7 = build(7, '공통수학2 Ⅱ. 집합과 명제 1. 집합 · 중단원 마무리 소레이드 (7차시) · 레이드용 v1', [(goal7, p4blk.replace(MEMO,'') + p1_r2, p2_mid), ('', p3_left, FA6)], T3)
+html7 = build(7, '공통수학2 Ⅱ. 집합과 명제 1. 집합 · 중단원 마무리 소레이드 (7차시) · 레이드용 v2', [(goal7, p4blk, p1_r2), ('', p2_mid, p3_left), ('', FA6, MEMO)], T3)
 OUT7 = sys.argv[3] if len(sys.argv) > 3 else OUT.replace('06', '07')
 with sync_playwright() as p:
     b = p.chromium.launch()
