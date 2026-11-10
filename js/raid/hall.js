@@ -681,8 +681,10 @@ DS.Hall = (function () {
   //   형성평가 = 세트 1 (학습지) · 세트 2 (숫자 바꿈) · 체력 문항(1 ~ hpItems)을 다 맞히면 ⚔ / ⚡ · 보너스 문항은 선택 · 부분집합 「모두 쓰기」 문항만 입력 창
   function demoOpen(step, attempt = 0) {
     if (!step || !['monster', 'boss'].includes(step.kind)) return;
-    const boss = step.kind === 'boss';
-    const items = boss ? L.boss.sets[attempt ? 2 : 1] || L.boss.sets[1] : L.items(step.id, `demo|${code}|${Date.now()}`, attempt);
+    const boss = step.kind === 'boss', seed = `demo|${code}|${Date.now()}`;
+    // 🪞 #81 (2026-11-11 선생님 「시연 = 학생과 똑같이」): 학생 폰과 같은 함수 — 소레이드 = L.chainItems (졸개 → 대장 · 근거 줄) · 형성평가 다시 = L.boss.make (bossItem 과 같음) · 일반 = L.items
+    if (!boss && Raid().isChain(L, R, step.id)) { demo = { step, attempt, chain: true, boss: false, items: L.chainItems(step.id, seed, attempt), stage: 0, says: [], why: -1, wrong: false, given: [null], shown: false }; demo.hp = demo.items.length; return demoDraw(); }
+    const nb = (L.boss.sets[1] || []).length, items = boss ? (attempt ? Array.from({ length: nb }, (_, i) => (L.boss.make ? L.boss.make(i, attempt, DS.Rng(`${seed}|boss|${i}|${attempt}`)) : (L.boss.sets[2] || L.boss.sets[1])[i])) : L.boss.sets[1]) : L.items(step.id, seed, attempt);
     demo = { step, attempt, boss, hp: boss ? L.boss.hpItems || items.length : items.length, items, given: items.map((q) => (q.type === 'multi' || q.type === 'subsets' ? [] : q.type === 'number' ? 0 : q.type === 'text' ? '' : null)), marks: null, shown: false };
     demoDraw();
   }
@@ -709,6 +711,7 @@ DS.Hall = (function () {
     if (!ov) { ov = document.createElement('div'); ov.id = 'h-demo-ov'; ov.className = 'h-demo-ov side'; document.getElementById('screen-hall').appendChild(ov); }
     // 2026-11-07 최종 정돈판 ⑤: 시연 칸 = 오른쪽에서 밀려 나온 36% 칸 · 레이드는 왼쪽에 그대로 · 선생님 용사가 필드에 (금색 이름표 「🎮 시연 중」)
     demoHero(true);
+    if (demo.chain) return demoChain(ov);
     const d = demo, S = DS.Student, need = d.items.slice(0, d.hp), ready = need.every((q, i) => filled(q, d.given[i]));
     const win = d.shown || (d.marks && d.marks.slice(0, d.hp).every(Boolean)), title = d.boss ? L.boss.title : d.step.title;
     const bonusTag = (i) => (d.boss && i >= d.hp ? '<span class="demo-bonus">⭐ 보너스</span>' : '');
@@ -718,7 +721,7 @@ DS.Hall = (function () {
       ? `<div class="item"><span class="item-no">${i + 1}</span>${bonusTag(i)}<div class="item-q">${DS.UI.rich(q.question || S.itemText(q))}</div><button class="btn" data-ask="${i}">${d.given[i].length ? `✏ ${d.given[i].length}개 썼어요 · 고치기` : '✏ 입력 창 열기'}</button></div>`
       : (bonusTag(i) ? `<div class="demo-bwrap">${bonusTag(i)}${S.itemHtml(q, i, d.given)}</div>` : S.itemHtml(q, i, d.given)));
     ov.innerHTML = `<div class="demo-box paper${d.boss ? ' boss' : ''}"><div class="demo-head"><b>🎮 시연 · ${esc(title)}</b><span class="demo-tag">데미지 · 기록 없음</span>
-        <button class="btn small${d.attempt ? '' : ' on'}" data-da="0">📄 ${d.boss ? '세트 1 (학습지)' : '학습지 문제'}</button><button class="btn small${d.attempt ? ' on' : ''}" data-da="1">🔄 ${d.boss ? '세트 2 (숫자 바꿈)' : '숫자 바꾼 문제'}</button><button class="btn small" id="demo-x">✕ 닫기</button></div>
+        <button class="btn small${d.attempt ? '' : ' on'}" data-da="0">📄 ${d.boss ? '세트 1 (학습지)' : '학습지 문제'}</button><button class="btn small${d.attempt ? ' on' : ''}" data-da="${d.attempt + 1}">🔄 ${d.boss ? '숫자 바꿈 (한 판 더)' : '숫자 바꾼 문제'}</button><button class="btn small" id="demo-x">✕ 닫기</button></div>
       ${d.marks ? res : `${!d.boss && (L.monsters[d.step.id] || {}).note ? `<p class="muted small">💡 ${esc(L.monsters[d.step.id].note)}</p>` : ''}${d.boss && d.hp < d.items.length ? `<p class="muted small">1~${d.hp}번을 모두 맞히면 선생님의 일격! (${d.hp + 1}번~ 보너스는 골라서)</p>` : ''}<div class="items demo-items${d.boss ? ' two' : ''}">${d.items.map(itemOf).join('')}</div>
         <div class="row demo-go-row"><button class="btn big" id="demo-reveal">💡 정답 펼치기</button><button class="btn primary big" id="demo-go"${ready ? '' : ' disabled'}>⚔ 공격! (시연)</button></div>`}
       ${d.marks ? '<div class="row demo-row"><button class="btn" data-da="1">🔄 숫자 바꿔 다시</button><button class="btn primary" id="demo-x2">✕ 닫고 레이드로</button></div>' : ''}</div>`;
@@ -745,6 +748,44 @@ DS.Hall = (function () {
       d.marks = d.items.map((q, i) => filled(q, given[i]) && DS.Quiz.grade(q, given[i]));
       demoDraw();
       if (d.marks.slice(0, d.hp).every(Boolean)) Snd().slash(); else Snd().squish(); // 다 맞히면 ⚔ 일반 · ⚡ 필살기 버튼 (2026-11-06)
+    };
+  }
+  // 🪞 #81 ⚔ 소레이드 시연 = 학생 폰 소레이드와 같은 단계: 졸개 → 👑 대장 (한 단계씩 · 같은 보기 · 원소 칩) · 맞히면 📜 나의 풀이 한 줄
+  //   첫 판(학습지 숫자) = 근거 줄이 완성 문장으로 붙음 · 숫자 바꾼 판 = 그 단계 뒤 근거 빈칸 고르기 (학생의 한 판 더와 같은 규칙) · 틀려도 같은 문제 · 💡 = 이 단계 정답 펼치기 · 데미지 · 기록 없음
+  function demoChain(ov) {
+    const d = demo, S = DS.Student, n = d.items.length, P = DS.UI.pretty, title = d.step.title;
+    const wq = d.why >= 0 ? d.items[d.why] : null, done = d.stage >= n && !wq, q = done ? null : wq ? { type: 'choice', question: `${wq.why.pre} ____${wq.why.post}`, choices: wq.why.choices, answerIndex: wq.why.answer } : d.items[d.stage];
+    if (q && d.given[0] == null && (q.type === 'multi' || q.type === 'subsets')) d.given[0] = []; // 원소 칩 = 빈 목록부터 (학생과 같음)
+    const chips = d.items.map((_, i) => `<span class="cr-chip ${i < d.stage ? 'ok' : i === d.stage ? 'now' : ''}">${i === n - 1 ? '👑' : '①②③④⑤⑥'[i]}${i < d.stage ? '✔' : i === d.stage ? '⚔' : ''}</span>`).join('<i>›</i>');
+    const story = d.says.length ? `<div class="cr-story"><b>📜 나의 풀이</b><ol>${d.says.map((t) => `<li>${P(t)}</li>`).join('')}</ol></div>` : '';
+    const lbl = wq ? '💡 근거 한 줄' : d.stage === n - 1 ? '👑 대장' : `졸개 ${'①②③④⑤⑥'[d.stage]}`;
+    const body = done ? `<div class="demo-res ok">⚔ 소레이드 처치! 어떤 공격으로 갈까요?</div>${strikeHtml()}`
+      : `<p class="cr-now"><b>${lbl}</b>${d.wrong ? ' <span class="paper-note">✘ 다시 생각해 봐요 — 같은 문제예요</span>' : ''}</p><div class="items demo-items">${S.itemHtml(q, 0, d.given)}</div>
+        ${d.shown ? `<p class="sol-line math">💡 정답: ${ansText(q)}${S.solOf(q) ? ` · ${P(S.solOf(q))}` : ''}</p>` : ''}
+        <div class="row"><button class="btn primary" id="demo-go"${filled(q, d.given[0]) ? '' : ' disabled'}>⚔ 공격 (확인)</button><button class="btn" id="demo-reveal">💡 정답 펼치기</button></div>`;
+    ov.innerHTML = `<div class="demo-box paper"><div class="demo-head"><b>🎮 시연 · ${esc(title)}</b><span class="demo-tag">데미지 · 기록 없음</span>
+        <button class="btn small${d.attempt ? '' : ' on'}" data-da="0">📄 학습지 숫자</button><button class="btn small${d.attempt ? ' on' : ''}" data-da="${d.attempt + 1}">🔄 숫자 바꿈</button><button class="btn small" id="demo-x">✕ 닫기</button></div>
+      <div class="cr-chips">${chips}</div>${story}${body}</div>`;
+    ov.querySelector('#demo-x').onclick = demoClose;
+    ov.querySelectorAll('[data-da]').forEach((b) => (b.onclick = () => demoOpen(d.step, Number(b.dataset.da))));
+    if (done) return bindStrike(ov, d.step);
+    ov.querySelectorAll('[data-pick]').forEach((b) => (b.onclick = () => {
+      const v = b.dataset.pick.split('|')[1], t = q.type;
+      if (t === 'multi') { const k = Number(v); if (q.empty) d.given[0] = DS.Quiz.chipToggle(q, d.given[0] || [], k); else { const st = new Set(d.given[0] || []); if (st.has(k)) st.delete(k); else st.add(k); d.given[0] = [...st].sort((a, b2) => a - b2); } }
+      else if (t === 'choice') d.given[0] = Number(v); else if (t === 'ox') d.given[0] = v === 'O'; else d.given[0] = [v];
+      Snd().clank(); demoChain(ov);
+    }));
+    DS.UI.dial(ov, () => d.given[0], (i, v) => { d.given[0] = v; const g = ov.querySelector('#demo-go'); if (g) g.disabled = !filled(q, v); });
+    ov.querySelectorAll('[data-text]').forEach((inp) => inp.addEventListener('input', () => { d.given[0] = inp.value; const g = ov.querySelector('#demo-go'); if (g) g.disabled = !filled(q, d.given[0]); }));
+    const rv = ov.querySelector('#demo-reveal'); if (rv) rv.onclick = () => { d.shown = true; demoChain(ov); };
+    const go = ov.querySelector('#demo-go');
+    if (go) go.onclick = () => {
+      const g = q.type === 'number' ? Number(d.given[0]) : d.given[0];
+      if (!DS.Quiz.grade(q, g)) { d.wrong = true; Snd().squish(); return demoChain(ov); }
+      Snd().slash(); d.wrong = false; d.shown = false;
+      if (wq) { d.says.push(wq.why.text); d.why = -1; }
+      else { const it = d.items[d.stage]; d.says.push(it.say || ''); if (it.why) { if (d.attempt) d.why = d.stage; else d.says.push(it.why.text); } d.stage += 1; } // 학생과 같음: 첫 판 = 근거 완성 문장 · 숫자 바꾼 판 = 근거 빈칸
+      d.given = [null]; demoChain(ov);
     };
   }
   // ⚡ 선생님 필살기 (2026-11-06 사용자 확정): 시연을 다 맞히면 선생님이 「⚔ 일반 공격」 · 「⚡ 필살기」 중 고름 (홍보용으로 가끔)

@@ -94,14 +94,15 @@ DS.Prep = (function () {
     return esc(String(q.answer)); }
   function v4Open(id) {
     const boss = id === 'boss', seed = `미리보기|${L.id}`;
-    const ver = (a) => (boss ? Array.from({ length: L.boss.items || L.boss.sets[1].length }, (_, i) => (a ? L.boss.make(i, a, DS.Rng(`${seed}|boss|${i}|${a}`)) : L.boss.sets[1][i])) : L.items(id, seed, a));
+    const chain = !boss && (L.chain || []).includes(id) && typeof L.chainItems === 'function'; // 🪞 #81 소레이드 = 학생과 같은 단계 (졸개 → 대장 · 한 판 더 판)
+    const ver = (a) => (boss ? Array.from({ length: L.boss.items || L.boss.sets[1].length }, (_, i) => (a && L.boss.make ? L.boss.make(i, a, DS.Rng(`${seed}|boss|${i}|${a}`)) : a ? (L.boss.sets[2] || L.boss.sets[1])[i] : L.boss.sets[1][i])) : chain ? L.chainItems(id, seed, a) : L.items(id, seed, a));
     const el = document.createElement('div'); el.className = 'modal camp-modal'; document.body.appendChild(el);
     let a = 0;
     const draw = () => { const items = ver(a);
       el.innerHTML = `<div class="quiz-box framed rs-box v4-box"><div class="quiz-head"><b>🔢 ${esc(boss ? L.boss.title : (L.steps.find((x) => x.id === id) || {}).title || id)}</b><button class="btn small" id="v4-x">✕ 닫기</button></div>
-        <div class="row v4-tabs">${[0, 1, 2, 3].map((k) => `<button class="btn small${k === a ? ' primary' : ''}" data-va="${k}">${k ? `재도전 ${k}` : '첫 시도 (학습지)'}</button>`).join('')}</div>
+        <div class="row v4-tabs">${[0, 1, 2, 3].map((k) => `<button class="btn small${k === a ? ' primary' : ''}" data-va="${k}">${k ? (chain ? `한 판 더 ${k}` : `재도전 ${k}`) : '첫 시도 (학습지)'}</button>`).join('')}</div>
         <p class="muted small">${a ? '예시 숫자예요 — 실제 재도전 숫자는 학생마다 달라요' : '첫 시도 = 학습지 숫자 그대로'}</p>
-        <ol class="v4-list">${items.map((q) => `<li><span class="math">${DS.UI.pretty(DS.UI.plain(q.question || ''))}</span>${q.type === 'choice' ? `<br><small class="muted">${q.choices.map((c) => DS.UI.opt(c)).join(' · ')}</small>` : ''}<br><b class="okc">정답: ${ansOf(q)}</b></li>`).join('')}</ol></div>`;
+        <ol class="v4-list">${items.map((q, k) => `<li>${chain ? `<b>${k === items.length - 1 ? '👑 대장' : `졸개 ${'①②③④⑤⑥'[k]}`}</b> ` : ''}<span class="math">${DS.UI.pretty(DS.UI.plain(q.question || ''))}</span>${q.type === 'choice' ? `<br><small class="muted">${q.choices.map((c) => DS.UI.opt(c)).join(' · ')}</small>` : ''}<br><b class="okc">정답: ${ansOf(q)}</b>${chain && q.why ? `<br><small class="muted">💡 근거 줄: ${DS.UI.pretty(q.why.text)}</small>` : ''}</li>`).join('')}</ol></div>`;
       el.querySelector('#v4-x').onclick = () => el.remove();
       el.querySelectorAll('[data-va]').forEach((b) => (b.onclick = () => { a = Number(b.dataset.va); draw(); })); };
     draw();
