@@ -43,7 +43,7 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   await S.evaluate(() => DS.Camp.back()); await S.waitForSelector('.nt-pop', { timeout: 6000 }).catch(() => {});
   const p2 = (await S.$('.nt-pop')) ? (await S.textContent('.nt-pop')).replace(/\s+/g, ' ') : '';
   C(/새 공지 2개/.test(p2) && /둘째 공지/.test(p2), `새 공지 2개 + 최근 것 (${p2.slice(0, 60)})`);
-  await S.screenshot({ path: `${OUT}/4-two.png` }); await S.click('#nt-x'); await S.waitForTimeout(300);
+  await S.screenshot({ path: `${OUT}/4-two.png` }); await S.click('.nt-pop .ui-x'); await S.waitForTimeout(300);
   C(!(await S.$('.nt-pop')), '닫기');
   // ④ 대기실: 새 공지 → 입장하면 한 번 · 문제 화면이 되면 닫힘
   await T.evaluate(async () => { await DS.Mail.notice('1-3', '대기실 공지'); });

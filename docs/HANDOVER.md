@@ -236,6 +236,6 @@
 ## 📢 공지 팝업 (2026-11-10 #61) — `js/raid/mail.js` `noticePop` · `noticeAll`
 - 학생: 캠프 `enter` 0.9초 뒤(다른 창이 떠 있으면 안 뜸) · 수업 대기실(`student.js` render · 수업 하나에 한 번 `ntAsked`) → 안 읽은 `notice/{반}` 만. 선물 · 답장은 안 띄움. 문제 · 레이드 화면이 되면 `noticeClose()`.
 - 본 표시 = localStorage `citadel-notice-seen-{반}-{번호}` (마지막 공지 at) · 우편함을 열면(`citadel-mail-seen-…`) 그때까지도 본 것으로.
-- 「📮 우편함 열기」 = 캠프에서는 `#camp-mail` 을 눌러 준 것과 같음 · 대기실은 `DS.Mail.open`. 창 공통 틀(✕) 위에 아래 「닫기」도 보이게 (`ui-x-src` 뺌).
+- 「📮 우편함 열기」 = 캠프에서는 `#camp-mail` 을 눌러 준 것과 같음 · 대기실은 `DS.Mail.open`. 창 공통 틀 = 위 ✕ 만 (아래 「닫기」 숨김 · 11/10 선생님 「위에 X만」).
 - 교사 「📢 모든 반에 보내기」 = `rosterMask` 의 모든 반에 같은 id · `{ t, at, all: true }` → 목록 「전체」. DB 규칙 그대로(추가 칸 허용).
 - 🧪 테스트: 시작할 때 실제 공지 중 가장 최근 것 하나를 테스트 반 `notice/테스트` 로 복사 → 같은 팝업. 시험 = e2e93.

@@ -112,7 +112,7 @@ DS.Mail = (() => {
         <div class="nt-btns"><button class="btn primary" id="nt-mail">📮 우편함 열기</button><button class="btn" id="nt-x">닫기</button></div></div>`;
       const done = () => { ntSet(m, until); el.remove(); };
       el.querySelector('#nt-x').onclick = done;
-      if (DS.UI.frame) DS.UI.frame(el); el.querySelector('#nt-x').classList.remove('ui-x-src'); // 🪟 창 공통 틀(✕ · 바깥 누르면 닫힘) + 아래 「닫기」 도 보이게 (#61 확정 두 단추)
+      if (DS.UI.frame) DS.UI.frame(el); // 🪟 창 공통 틀: 위 ✕ 만 (아래 「닫기」 는 숨김 · 2026-11-10 선생님 「위에 X만」) · 바깥 누르면 닫힘
       el.querySelector('#nt-mail').onclick = () => { done(); if (opt.openMail) opt.openMail(); else DS.Control.run(() => open(m)); };
       return true;
     } finally { popBusy = false; }
