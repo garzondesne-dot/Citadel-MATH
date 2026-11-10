@@ -163,7 +163,7 @@ DS.Bonus = (function () {
   const gReviewLeft = () => { const G = DS.Gem; if (!G) return 0; const pre = `review_${G.today()}_`; return Math.max(0, G.G.reviewDay - Object.keys((gemD || {}).log || {}).filter((k) => k.startsWith(pre)).length); };
   const gTag = (n, extra = '', free = false) => (!gemD || !DS.Gem || !n ? '' : `<span class="gm-tag${!free && gDayFull() ? ' full' : ''}" title="${!free && gDayFull() ? '오늘 💎 한도(30)가 찼어요 — 내일 받아요' : '처치하면 받아요'}">💎+${n}${extra}</span>`);
   // 🟪 인장 꼬리표: 이번 인장으로 열리는 것까지 (다음 인장 = 지금 + 1 → 이펙트 · 3개 = 금발 검사)
-  const sealTag = () => { const nx = seals(mine).length + 1, i = UNLOCK.indexOf(nx), what = i >= 0 ? DS.FX.NAMES[DS.FX.FANCY[i]] : nx === 3 ? '용사 금발 검사' : '';
+  const sealTag = () => { const nx = seals(mine).length + 1, i = UNLOCK.indexOf(nx), what = i >= 0 ? DS.FX.NAMES[DS.FX.FANCY[i]] : nx === 3 ? '🏅 호칭 「만 번째 베기」' : '';
     return `<span class="gm-tag seal" title="처치하면 업적 ${nx}개째">🏆 업적${what ? ` → ${esc(what)}` : ''}</span>`; };
   // 🎁 머리 위 보상 줄 (처치 순간 · 차례로 하나씩 떠올라 8초 머묾 · 팝업 위로)
   function headRewards(host) {
@@ -488,7 +488,7 @@ DS.Bonus = (function () {
         const g = DS.Gem && DS.Gem.mine ? await DS.Gem.mine(me).catch(() => ({})) : {}, twoOpen = !two || (DS.Gem && DS.Gem.owns(g, 'fx', two));
         show(twoOpen ? `✨ ${DS.FX.NAMES[fx]} 열림` : `${DS.FX.NAMES[fx]} 받음! 같은 계열 Ⅱ를 열면 바로 쓸 수 있어요`, 'seal');
       }
-      if (sealed && seals(mine).length === 3) show('🧑 용사 금발 검사 열림', 'seal');
+      if (sealed && seals(mine).length === 3) show('🏅 호칭 「만 번째 베기」 획득!', 'seal'); // #77 ④ (옛 「금발 검사 열림」)
     };
     if (photoRoom && !chainRoom && rec.ans && !rec.clear && rec.ans.seed) { cur = itemsOf(L, mid, rec.ans.seed, rec.ans.attempt || 0); solved.fill(true); return photoStage(cur, false); } // 📷 답은 이미 맞힘 → 같은 숫자로 사진 단계
     // ⚔ 소레이드 방 (2026-11-09 #23 · 방향 방 사양 · 선생님 「추천대로 진행」): 단계마다 하나씩 · 틀려도 같은 숫자 · 기회 4칸(졸개 −½ · 대장 −1)

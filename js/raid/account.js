@@ -166,7 +166,7 @@ DS.Account = (function () {
     const heroes = Array.from({ length: 7 }, (_, i) => ({ id: i, open: true }))
       .concat(Array.from({ length: 8 }, (_, i) => ({ id: 8 + i, open: (i === 0 && need.length > 0 && got === need.length) || (i === 1 && raided) || (i === 2 && need46.length > 0 && got46 === need46.length) || (i === 3 && need710.length > 0 && got710 === need710.length),
         cond: i === 0 ? `1~3차시 도감 ${got} / ${need.length}장 모으면 열려요` : i === 1 ? '🎁 첫 레이드를 마치면 열려요' : i === 2 ? `4~6차시 도감 ${got46} / ${need46.length}장 모으면 열려요` : i === 3 ? `8~11차시 도감 ${got710} / ${need710.length}장 모으면 열려요` : '해금 조건은 추후 공개' })))
-; // 2026-11-03: 0~15 직업 모두 v2 도트 · 0 = 갈색머리 검사 v3 · 16 금발 검사 = 추가 용사(아래, 인장 3개)
+; // 2026-11-03: 0~15 직업 모두 v2 도트 · 0 = 갈색머리 검사 v3 · 16 = 각성한 로안(로안의 변신 모습 · 고르는 칸 아님 · #73)
     // 화려한 이펙트 = 🟪 중단원던전 인장 1 · 2 · 4 · 6 · 8 · 10개에서 하나씩 (v0.8.0 · 2026-11-03 보강던전 → 중단원던전)
     const bonus = (m && DS.Bonus && (await N().get(`bonus/${String(m.c).replace(/[.#$/[\]]/g, '_')}/${m.n}`).catch(() => null))) || {};
     const fo = DS.Bonus ? DS.Bonus.fxOpen(bonus) : {}, seals = DS.Bonus ? DS.Bonus.seals(bonus).length : 0;

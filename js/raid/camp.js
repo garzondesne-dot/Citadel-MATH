@@ -561,7 +561,7 @@ DS.Camp = (function () {
       return `<div class="fx-fam${fam.id === aff.id ? ' aff' : ''}${fam.id === 'sp' ? ' sp' : ''}${open ? '' : ' shut'}" data-fam="${fam.id}"><b class="fam-h" data-famt="${fam.id}">${fam.name}${fam.id === aff.id ? ' ★' : ''}${com ? ' <small>공통</small>' : ''}<span class="fam-n">${n} / ${fam.ids.length} ${open ? '▴' : '▾'}</span></b>${open ? fam.ids.map(fxCell).join('') : ''}</div>`;
     };
     const gemTop = () => { const fx = fxNow(), aff = DS.FX.affOf(hero), reso = DS.FX.resonates(hero, fx), set = sock[hero] != null;
-      return `<div class="sock"><canvas width="128" height="80" data-still="${fx}"></canvas><div><small>${heroName(hero)}의 스킬 · 속성 ${aff.name}</small><b>${esc(DS.FX.NAMES[fx] || '')} ${tierTag(fx)}${reso ? ` <span class="reso">${DS.FX.commonReso && DS.FX.commonReso(hero, fx) ? '공통 ★ 공명' : '★ 공명'}</span>` : ''}</b><small>${set ? '아래 표에서 누르면 바로 바뀌어요' : '고른 스킬 없음 → 속성 Ⅰ 이 기본으로 나가요'}</small></div><div class="sock-btns">${set ? '<button class="btn small" id="sock-out">🔄 기본으로<br><small>스킬은 계속 가짐</small></button>' : ''}${!T && (L.fx.find((x) => x.id === fx) || {}).bought ? `<button class="btn small sock-sell" id="sock-sell">💰 되팔기<br><small>💎 +${DS.Gem.refundOf('fx', fx)} · 다시 잠김</small></button>` : ''}</div></div>
+      return `<div class="sock"><canvas width="128" height="80" data-still="${fx}"></canvas><div><small>${heroName(hero)}의 스킬 · 속성 ${aff.name}</small><b>${esc(DS.FX.NAMES[fx] || '')} ${tierTag(fx)}${reso ? ` <span class="reso">${DS.FX.commonReso && DS.FX.commonReso(hero, fx) ? '공통 ★ 공명' : '★ 공명'}</span>` : ''}</b><small>${set ? '아래 표에서 누르면 바로 바뀌어요' : '고른 스킬 없음 → 속성 Ⅰ 이 기본으로 나가요'}</small></div><div class="sock-btns">${set ? '<button class="btn small" id="sock-out">🔄 기본으로<br><small>스킬은 계속 가짐</small></button>' : ''}</div></div>
         ${T ? ([3, 's'].includes(DS.FX.tierOf(fx)) ? '<button class="btn small ult-btn" id="ult-demo">⚡ 필살기 미리보기 <small>(선생님: 시연을 다 맞힌 뒤 ⚔ 일반 · ⚡ 필살기 중 골라요)</small></button>' : '<p class="muted small">⚡ 선생님 필살기는 Ⅳ 전설(9개 모두) · 🪶 특별 스킬일 때 시연 뒤 고를 수 있어요</p>') : DS.Attack && DS.Attack.canUlt(fx, hero) ? '<button class="btn small ult-btn" id="ult-demo">⚡ 필살기 미리보기 <small>(내 속성 Ⅲ 이상 + 퍼펙트일 때 · 공통 특화는 Ⅳ + 퍼펙트)</small></button>' : [2, 3].includes(DS.FX.tierOf(fx)) ? `<p class="muted small">⚡ 필살기는 내 속성(${DS.FX.affOf(hero).name}) Ⅲ 이상 스킬 + 퍼펙트일 때 나가요 · 공통 특화는 Ⅳ + 퍼펙트</p>` : ''}
         <p class="muted small">⚔ 한 번 연 스킬은 <b>여러 용사가 동시에</b> 쓸 수 있고, 빼도 사라지지 않아요. ${T ? '' : '잠긴 스킬은 누르면 💎 조각 · 🏆 업적으로 열어요.'}</p>
 `; };
@@ -595,14 +595,7 @@ DS.Camp = (function () {
       { const hb = el.querySelector('[data-hbuy]'); if (hb) hb.onclick = () => { const h = L.heroes.find((x) => x.id === pickH); if (h) DS.Control.run(() => shopBuy(h)); }; }
       const bindTop = () => {
       { const ub = el.querySelector('#ult-demo'); if (ub) ub.onclick = () => { const ap = el.querySelector('#ap'); if (ap && DS.Attack) { ap.scrollIntoView({ block: 'nearest' }); DS.Attack.play(ap, { heroBox: ap.querySelector('.ap-hero'), monBox: ap.querySelector('.ap-mon'), hero, fx: fxNow(), s: 0.85, ps: 1, rest: 'idle', finish: true, ultimate: true }); } }; }
-      { const sl = el.querySelector('#sock-sell'); if (sl) sl.onclick = () => DS.Control.run(async () => { // 💰 되팔기 (2026-11-06): 70% 환불 · 다시 잠김 · 다음 단계를 산 경우는 그것부터
-        const id = fxNow(), f = L.fx.find((x) => x.id === id), up = L.fx.find((x) => x.need === id && x.bought);
-        if (!f || !f.bought) return; if (up) { DS.UI.toast(`먼저 윗 단계 「${nmOf(up.id)}」을 되팔아야 해요`, 3200); return; }
-        const p = DS.Gem.price('fx', id), back = DS.Gem.refundOf('fx', id);
-        if (!confirm(`「${nmOf(id)}」을 되팔까요?\n💎 ${back}개를 돌려받아요 (산 값 ${p}개의 70% · 30% 는 수수료).\n이 스킬은 다시 잠기고, 끼워 둔 용사는 기본 스킬로 돌아가요.`)) return;
-        await DS.Gem.sell(me, 'fx', id); Object.keys(sock).forEach((h) => { if (sock[h] === id) delete sock[h]; });
-        await DS.Account.setSocket(sock).catch(() => {}); me.socket = sock; L = await DS.Account.looks(me); DS.Sound.coin && DS.Sound.coin(); DS.UI.toast(`💰 되팔았어요 · 💎 +${back}`); draw();
-      }); }
+      // 💰 되팔기 = #77 ① (2026-11-11) 화면에서 뺌 · 한 번 연 스킬은 다시 잠기지 않음 (gem.js sell 은 옛 기록용으로 남김)
       { const out = el.querySelector('#sock-out'); if (out) out.onclick = () => { delete sock[hero]; DS.Sound.clank(); DS.UI.toast('스킬을 뺐어요 (기본 스킬로 · 언제든 다시 고를 수 있어요)', 2600); draw(); demo(); }; }
       };
       bindTop();
