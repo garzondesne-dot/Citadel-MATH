@@ -3101,3 +3101,12 @@ body:has(#test-bar) #screen-student.st-battle .wrap:has(.cr-dock) { padding-bott
 .choice.chip-empty { border-style: dashed !important; margin-left: 10px !important; font-weight: 700; }
 /* 🔢 #65-3 숫자 4판 미리보기 */
 .v4-box { max-width: 640px; } .v4-tabs { flex-wrap: wrap; gap: 6px; } .v4-list { padding-left: 22px; max-height: 60vh; overflow-y: auto; } .v4-list li { margin: 6px 0; line-height: 1.5; }
+/* ✍ #65-2 일반 몬스터 나의 풀이: 연필(옅은 회색) → 제출 뒤 맞힌 줄 진하게 · 틀린 줄 스르르 */
+.pen-box li.pen { color: #8b8478; font-style: italic; }
+.pen-box.cr-fold ol li { display: none !important; } .pen-box.cr-fold ol li.latest { display: list-item !important; }
+.pen-box.cr-fold ol:not(:has(li.latest)) li:last-child { display: list-item !important; }
+.pen-res li.pen-ok { color: #1b130a; font-weight: 600; }
+.pen-res li.pen-gone { color: #8b8478; font-style: italic; animation: pen-gone 1.1s ease-in forwards; }
+@keyframes pen-gone { 0% { opacity: 1; } 100% { opacity: 0; transform: translateX(6px); } }
+@media (prefers-reduced-motion: reduce) { .pen-res li.pen-gone { animation: none; opacity: 0; } }
+.pen-box ol { list-style: none; padding-left: 0.2em; }

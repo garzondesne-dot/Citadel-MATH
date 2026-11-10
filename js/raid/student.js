@@ -545,6 +545,7 @@ DS.Student = (function () {
     const resLine = prac ? head : label === 'success' ? `✔ ${t.correct} / ${t.total} 성공!` : label === 'partial' ? `◐ ${t.correct} / ${t.total} 부분 성공` : `✘ ${t.correct} / ${t.total} — 다시 도전해요`;
     paint(body, `res|${mid}|${t.attempt}`, `<div class="panel framed st-fight st-after">${scene(step, rec, hp, atk ? '' : fx, '', banner)}
       <div class="st-res res-${prac && !(rec.v3 && rec.fix) ? 'success' : label}"><b>${esc(step.title)} · ${resLine}</b>${t.total > 1 ? `<div class="mk-chips">${t.marks.map((m, i) => `<span class="${m ? 'ok' : 'ng'}">(${i + 1}) ${m ? '✔' : '✘'}</span>`).join('')}</div>` : ''}</div>
+      ${(() => { const pk = `${mid}|${t.attempt}`, el = penShown[pk] ? Date.now() - penShown[pk] : fx ? 0 : 9e9, fresh = el < 1200; const ls = items.map((q, i) => ({ t: penLine(q, (t.given || [])[i], i), ok: t.marks[i] })).filter((l) => l.t && (l.ok || fresh)).map((l) => ({ t: l.t, cls: l.ok ? (el < 900 ? 'pen-ok pix-in' : 'pen-ok') : 'pen-gone', d: el })); return penBox(`r|${pk}`, ls, ' pen-res'); })()}
       <details class="paper-fold"><summary>▸ ${esc(step.title)} 다시 보기</summary><div class="paper"><div class="marks">${items.map((q, i) => `<div class="mark ${t.marks[i] ? 'ok' : 'ng'}"><b>(${i + 1})</b> ${t.marks[i] ? '✔' : '✘'} <span class="math">${pretty(itemText(q))}</span>${t.marks[i] ? '' : `<br><span class="sol-line math">${pretty(solOf(q))}</span>`}</div>`).join('')}</div></div></details>
       ${ult ? `<p class="okc">🌟 <b>3연속 퍼펙트!</b> 전설 스킬이 진짜 힘을 깨웠어요</p><p>마지막 기회로 <b>진필살기</b>를 쓸까요?</p>
         <div class="heal-pick"><button class="btn primary big ult-go true" id="st-ult">🌟 ${esc(String(DS.FX.NAMES[myP().fx] || '').replace(/^\S+\s/, ''))}<br><small>진필살기</small></button><button class="btn big heal-btn" id="st-party">💚 파티 힐<br><small>못 맞힌 친구 모두 +1</small></button></div>
@@ -564,6 +565,7 @@ DS.Student = (function () {
       ${dock(rec, done && !rec.canRetry ? '<span class="dock-wait">다음 단계를 기다려요</span>' : '')}
       ${helpBtn()}</div>`); // #47 테스트에서도 🙋 도움 요청
     bindHelp(); bindTop();
+    { const pk = `${mid}|${t.attempt}`; if (!penShown[pk] && fx) penShown[pk] = Date.now(); const t0 = penShown[pk]; if (t0) body.querySelectorAll('.pen-res li.pix-in').forEach((li, i) => pixIn(li, t0 + i * 250, i + 7)); body.querySelectorAll('.pen-res li.pen-gone').forEach((li) => { li.style.animationDelay = `-${Math.max(0, Date.now() - (t0 || 0))}ms`; }); } // 다시 그려도 이어서 // ✍ 맞힌 줄 = 픽셀 디졸브로 굳음 · 틀린 줄 = CSS 로 스르르
     const sb = $('#st-sheet'); if (sb) sb.onclick = () => sheetModal(step);
     // v0.9.3 (⑤): 공격 자세는 잠깐만 → 다시 서 있는 자세 (격파됐으면 승리 자세 그대로)
     if (atk) { const sc = body.querySelector('.scene'); if (sc) DS.Attack.play(sc, { heroBox: sc.querySelector('.enc-hero'), monBox: sc.querySelector('.enc-mon'), hero: myP().hero || 0, fx: myP().fx || 'flame', miss: label === 'fail' && !prac, s: grit ? 1.3 : 1, rest: done ? 'win' : 'idle', noDmg: prac, ultimate: autoUlt, finish: grit }).then(() => { if (prac && t.correct > 0 && DS.Thrill && sc.isConnected) DS.Thrill.bindFx(sc.querySelector('.enc-mon .art.monster') || sc.querySelector('.enc-mon')); }); } // ⛓ 묶기 공격 = 사슬 이펙트
@@ -611,6 +613,23 @@ DS.Student = (function () {
   // ⚔ #24 (2026-11-09 1-4반 「다 적고 공격을 안 누름」): 칸을 다 채우면 players/{나}/draft = 그 시도 · 리모컨이 「입력 다 함 · 공격 안 누름」으로 봄 (바뀔 때만 씀)
   let draftKey = '';
   function draftMark(k) { if (test || !code || !me || draftKey === (k || '')) return; draftKey = k || ''; DS.Net.set(`rooms/${code}/players/${me}/draft`, k || null).catch(() => {}); }
+  // ✍ #65-2 일반 몬스터 「나의 풀이」: 고르는 동안 연필 글씨(옅은 회색) · 빼면 바로 지워짐 · 제출 뒤 맞힌 줄 = 픽셀 디졸브로 진하게 · 틀린 줄 = 스르르 지워짐 (정답 여부는 제출 전에 알리지 않음)
+  //   접힘 = 한 줄(방금 고친 줄)만 · ▾ 모두 · 고르는 칸 아래에 둠 (P5 「고르는 칸이 먼저」)
+  const penOpen = {}, penLast = {}, penShown = {};
+  function penLine(q, g, i) {
+    const no = (/^\s*(\([^)]*\)|\d+-\(\d+\)|문제 \d+ \(\d+\)|문제 \d+\))/.exec(DS.UI.plain(q.question || '')) || [])[1] || `(${i + 1})`;
+    let v = '';
+    if (q.type === 'multi') { if (!g || !g.length) return null; const pick = (ks) => { const o = ks.map((k) => q.options[k]); return o.some((x) => /^∅/.test(x)) ? '∅' : `{${o.join(', ')}}`; };
+      if (q.groups && q.groups.length) { let b0 = 0; v = q.groups.map((gr) => { const ks = g.filter((k) => k >= b0 && k < b0 + gr.n); b0 += gr.n; return ks.length ? `${String(gr.label).replace(/ → P$/, '').replace(/ 전체의 집합/, '')} → ${pick(ks)}` : ''; }).filter(Boolean).join(' · '); }
+      else { const lab = (/진리집합 ([A-Z]) 의/.exec(q.question) || [])[1] || (/(~[pqr]) 의 진리집합/.exec(q.question) || [])[1]; v = `${lab ? (lab[0] === '~' ? `${lab} 의 진리집합` : lab) + ' = ' : ''}${pick(g)}`; } }
+    else if (q.type === 'choice') { if (g == null) return null; v = DS.UI.plain(String(q.choices[g])); }
+    else if (q.type === 'ox') { if (g == null) return null; v = g ? 'O' : 'X'; }
+    else if (q.type === 'blanks') { if (!g || g[0] == null) return null; v = String(g[0]); }
+    else if (q.type === 'text') { if (!String(g || '').trim()) return null; v = String(g).trim(); }
+    else { if (g == null) return null; v = String(g); }
+    return `${no} ${v}`;
+  }
+  const penBox = (key, lines, cls = '') => (lines.length ? `<div class="cr-story pen-box${penOpen[key] || cls ? '' : ' cr-fold'}${cls}" data-pk="${esc(key)}"><b>✍ 나의 풀이</b>${lines.length > 1 && !cls ? `<button class="cr-sf pen-sf" type="button">${penOpen[key] ? '▴ 접기' : `▾ 모두 ${lines.length}줄`}</button>` : ''}<ol>${lines.map((l) => `<li class="${l.cls || ''}">${pretty(l.t)}</li>`).join('')}</ol></div>` : '');
   function fightForm(body, step, rec, hp) {
     const mid = step.id, attempt = rec.nextAttempt, key = `${mid}|${attempt}`;
     const items = Raid().itemsFor(L, R, mid, me, attempt);
@@ -629,7 +648,8 @@ DS.Student = (function () {
       ${down ? '<p class="paper-note ok">🎉 몬스터는 쓰러졌어요! 그래도 풀어서 공격하면 이펙트도 뜨고 경험치가 쌓여요.</p>' : ''}
       ${attempt && rec.v3 ? `<p class="paper-note">${rec.perfect ? (rec.fix ? '🔁 <b>같은 문제 그대로예요</b> (고장 아님!) — 종이 풀이를 고쳐서 ✘ 칸을 다시 내요 (맞히면 묶기 · 힐 한 번)' : '🆕 새 문제 (숫자가 바뀌었어요) — 맞히면 기회 그대로 + 묶기 · 힐 한 번 · 틀리면 기회 −1') : '🔁 <b>같은 문제 그대로예요</b> (고장 아님!) — 종이 풀이를 고쳐서 ✘ 칸만 다시 내요 · 지난 답은 채워져 있어요'}</p>` : attempt && rec.perfect ? `<p class="paper-note">⛓ 몬스터 묶기 — 맞힌 소문제 1개마다 반 전체의 몬스터 공격이 1초 늦어져요 (최대 ${Raid().BIND_MAX}초)</p>` : attempt ? `<p class="paper-note">🔄 재도전 ${attempt} — 숫자가 모두 바뀌었어요 · 지난번 틀린 문항은 <b class="ngc">✘</b></p>` : ''}
       ${L.monsters[mid].note ? `<p class="paper-note">💡 ${esc(L.monsters[mid].note)}</p>` : ''}
-      <div class="items">${items.map((q, i) => itemHtml(q, i, prevWrong[i], null)).join('')}</div></div>
+      <div class="items">${items.map((q, i) => itemHtml(q, i, prevWrong[i], null)).join('')}</div>
+      ${penBox(mid, items.map((q, i) => ({ t: penLine(q, form.given[i], i), cls: `pen${penLast[mid] === i ? ' latest' : ''}` })).filter((l) => l.t))}</div>
       ${dock(rec, `<button class="btn primary big dock-go${ready ? ' go-pulse' : ''}" id="st-go"${ready ? '' : ' disabled'}>⚔ 공격!</button>`)}
       ${helpBtn()}</div>`);
     chargeBtn(body); draftMark(ready && form.touched ? key : null); // ⚔ #24 (숫자 칸은 0 으로 시작하니 한 번이라도 고친 뒤에만): 다 채웠는데 공격을 안 누름 → 리모컨에 표시
@@ -642,8 +662,9 @@ DS.Student = (function () {
       else if (t === 'choice') form.given[k] = Number(v);
       else if (t === 'ox') form.given[k] = v === 'O';
       else form.given[k] = [v];
-      form.touched = true; DS.Sound.clank(); render();
+      penLast[mid] = k; form.touched = true; DS.Sound.clank(); render();
     }));
+    body.querySelectorAll('.pen-sf').forEach((b) => (b.onclick = (e) => { e.stopPropagation(); const k = b.closest('.pen-box').dataset.pk; penOpen[k] = !penOpen[k]; drawn = ''; render(); })); // ✍ 접기 · 펼치기
     body.querySelectorAll('[data-hint]').forEach((b) => b.addEventListener('click', () => { hintTap(b.dataset.hint); drawn = ''; render(); }));
     // 단답 입력: 다시 그리지 않고 값만 기억 (글자 입력 중에 화면이 바뀌지 않게) · 공격 버튼만 켜고 끔
     body.querySelectorAll('[data-text]').forEach((inp) => inp.addEventListener('input', () => {
