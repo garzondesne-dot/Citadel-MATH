@@ -289,3 +289,8 @@
 - 빠지는 곳: 대시보드(`dash.js one()` 이 명단에서 거름 → 랭킹 · 반 통계 · 대항전 · 기호 톡 순위 · 주의 학생) · 학급 결과(`sharecard classStats`) · 설문 응답 집계(`survey.submit` 이 surveyA 에 안 씀). 기록은 지우지 않음 · 끄면 다시 들어감.
 - 못 거르는 것: 켜기 **전에** 낸 수업 설문 응답(익명이라 누가 냈는지 모름) · 설문 「응답 n/명」 의 응답 표시 수.
 - 6반 1번 = 켜 둠 (11/11 · Firebase 직접).
+
+## 🧩 성채 · 허수아비 A안 (2026-11-11 선생님 「A안 진행」)
+- 일반 방(소레이드 아님) = `bonus.js formRound` — 남은 소문제를 한 장(`.bf-paper`)에 `DS.Student.itemHtml` 로 · 칩 `DS.Quiz.chipToggle` · ✍ `DS.Student.penLine/penBox` · ⚔ 한 번 → 결과 `pen-res` · 틀린 것만 다시. 시험 고리 `DS.Bonus._form` (e2e61 · e2e70 · e2e102).
+- 앞으로 차시 던전의 문제 칸(`itemHtml`) · 나의 풀이 · 칩을 고치면 성채 · 허수아비에 저절로 들어감.
+- 옛 e2e 중 A안과 무관하게 낡은 것: e2e36(#e-cls 없음) · e2e54(성채 방 수 기준값) · e2e61(💎 꼬리표 값) · e2e70(07번 방 = 소레이드로 바뀐 뒤).
