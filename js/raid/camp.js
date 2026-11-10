@@ -521,7 +521,7 @@ DS.Camp = (function () {
         <div class="me-stats">${STATS.map(([id, , nm]) => `<span>${ic[id]} ${nm}<b>${ST.st[id] || 0}</b></span>`).join('')}</div>`; };
     // 🧙 #73 소개 카드 (시안 ① ② ③): 칸을 누르면 카드만 바뀜 · 아래 단추로 정함 · 잠긴 용사 = 「???」 · 이야기 첫 줄 · 여는 조건
     let pickH = hero;
-    const portrait = (n) => { const P = (DS.ASSETS.heroPortraits || {}).list, c = P && P[n]; return c ? `<i class="hc-img" style="background-image:url('${DS.ASSETS.base}${c.src}');background-size:${(c.cols || 2) * 100}% ${(c.rows || 2) * 100}%;background-position:${((c.col || 0) / Math.max(1, (c.cols || 2) - 1)) * 100}% ${((c.row || 0) / Math.max(1, (c.rows || 2) - 1)) * 100}%"></i>` : DS.Art.hero(n, 'idle'); }; // 초상(port-1~9)이 오기 전 = 도트를 키움
+    const portrait = (n) => { const P = DS.ASSETS.heroPortraits, c = P && P.list && P.list[n]; return c ? `<i class="hc-img" style="background-image:url('${DS.ASSETS.base}${P.src}');background-size:${P.cols * 100}% ${P.rows * 100}%;background-position:${(c[0] / Math.max(1, P.cols - 1)) * 100}% ${(c[1] / Math.max(1, P.rows - 1)) * 100}%"></i>` : DS.Art.hero(n, 'idle'); }; // 초상(port-1~9)이 오기 전 = 도트를 키움
     const heroCard = () => {
       if (pickH === DS.Art.AWAKE.to && !T) { // 🌟 #73 각성한 로안: 따로 고르는 칸이 아님 · 조건이 맞으면 저절로
         const on = DS.Art.awake({ hero, enh: L.enh, fx: fxNow(), title }), lo2 = DS.Lore && DS.Lore.of(16), t2 = DS.Titles && DS.Titles.get('slash10k');

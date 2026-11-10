@@ -265,7 +265,7 @@
 
 ## 🧙 #73 용사 고르기 · 이름 · 새 용사 해금 · 각성한 로안 · 스킬 탭 (2026-11-11)
 - 이름 · 이야기 = `js/engine/lore.js` (DS.Lore · docs/HERO-LORE.md 표 그대로 · `tests/lore.test.js` 가 표와 비교) · 표시 = `DS.Lore.label(n)` 「로안 · 검사」. 표를 고치면 lore.js 도 같이.
-- 소개 카드 = camp.js settings `heroCard()` (학생 · 선생님 · 테스트 같은 카드) · 칸 = 카드만 바꿈 · [이 용사로 정하기] · 💎 [n 으로 열기] · 도전 = 진행 막대 · 처음 누르면 `DS.Attack.cutin(n, fx, { peek })` 0.8초(이 기기 `citadel-hero-peek`). 초상 = manifest `heroPortraits.list[n] = { src, cols, rows, col, row }` (port-1~9 오면 채움 · 없으면 도트 확대).
+- 소개 카드 = camp.js settings `heroCard()` (학생 · 선생님 · 테스트 같은 카드) · 칸 = 카드만 바꿈 · [이 용사로 정하기] · 💎 [n 으로 열기] · 도전 = 진행 막대 · 처음 누르면 `DS.Attack.cutin(n, fx, { peek })` 0.8초(이 기기 `citadel-hero-peek`). 초상 = manifest `heroPortraits` (`hero-portraits-v1.webp` · 칸 256 · 6 × 6 · list[n] = [열, 줄] · 11-11 port-1~8 31명 넣음 · **4 사제 · 25 해골 소환사 · 33 별점술사 없음** → 도트 확대 · 오면 빈 칸(줄 5 열 1~5)에 넣고 파일 v2).
 - 해금: 💎 = gem.js SHOP.hero (26 · 29 · 30 = 30 · 24 · 25 · 31 · 32 = 60) · 도전 = account.js `CHAL` · `chalProgress(rec, bonus)` (27 형성평가 만점 서로 다른 차시 3 · 28 성채 방 처치 10 · 33 오답노트 보충 완료(p) 15) · 지난 기록 셈.
 - 🌟 각성한 로안: `DS.Art.awake(p)` · `DS.Art.look(p)` (로안 + enh ≥ 10 + fx 'twin' + title 'slash10k') → 16. 수업 방 players `hero` = 보이는 모습 · `base` = 고른 용사(설정 창은 base). 캠프는 `look(me)` (me.enh 는 status 에서 채움). 호칭 `slash10k` 「만 번째 베기」 = 업적 3개. **옮기기 = `node tools/auto/migrate73.js` (미리 보기) → 배포 날 `--go`** (💎30 + 우편함 문구 · gem log `blond73` · hero 16 → 0).
 - ⚔ 스킬 탭: 정지 그림 = `fxStills` 한 장(`tools/pfx/stills.py` · 이펙트 띠를 바꾸면 다시 굽고 v 번호) · 속성 접기(내 속성 + 공통) · 스킬 누름 = `gemPatch()`(위 칸 · 미리보기 · 고른 칸만).
