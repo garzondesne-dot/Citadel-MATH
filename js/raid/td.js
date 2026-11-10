@@ -381,7 +381,7 @@ DS.TD = (function () {
     body.querySelectorAll('[data-swy]').forEach((b) => (b.onclick = () => DS.Control.run(async () => { await N().update(P(code, `tdm/${f.g}/${me}`), { sw: b.dataset.swy, no: null }); DS.UI.toast('🔁 수락! 곧 자리가 바뀌어요'); })));
     body.querySelectorAll('[data-swn]').forEach((b) => (b.onclick = () => DS.Control.run(async () => { await N().set(P(code, `tdm/${f.g}/${me}/no`), b.dataset.swn); })));
     body.querySelectorAll('[data-swc]').forEach((b) => (b.onclick = () => DS.Control.run(async () => { await N().set(P(code, `tdm/${f.g}/${me}/sw`), null); })));
-    const sb = body.querySelector('#td-set'); if (sb) sb.onclick = () => { const p = R.players[me] || {}; DS.Camp.settings({ me: { c: p.cls, n: p.num, name: p.nick, hero: p.hero, fx: p.fx, title: p.title, socket: {} }, onSave: async (v) => { await N().update(P(code, `players/${me}`), { hero: v.hero, fx: v.fx }).catch(() => {}); PH.stat = null; } }).catch(() => {}); };
+    const sb = body.querySelector('#td-set'); if (sb) sb.onclick = () => { const p = R.players[me] || {}; DS.Camp.settings({ me: { c: p.cls, n: p.num, name: p.nick, hero: p.base != null ? p.base : p.hero, fx: p.fx, title: p.title, socket: {} }, onSave: async (v) => { await N().update(P(code, `players/${me}`), { hero: v.hero, fx: v.fx }).catch(() => {}); PH.stat = null; } }).catch(() => {}); };
     clearTimeout(PH.t); PH.t = setTimeout(() => { if (body.isConnected && (R.fun || {}).phase === 'pick') phonePick(body, R, me, code, f); }, 1000);
   }
   function phonePlay(body, R, me, code, f) {

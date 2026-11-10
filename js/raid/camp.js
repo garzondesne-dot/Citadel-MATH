@@ -163,7 +163,7 @@ DS.Camp = (function () {
         <button class="cs-zone camp-gate-z" id="camp-gate" style="${S.box(c.zones.gate)}" aria-label="차시 던전"><span class="camp-label">🔒 차시 던전</span></button>
         <button class="camp-anvil cs-int" id="camp-anvil" aria-label="모루">${sheet(c.anvil, c.anvil.states.idle, 0, 'camp-anvil-img')}<span class="camp-label">⚒ 모루</span></button>
         <div class="camp-fire"><i class="camp-glow"></i><i class="camp-glow g2"></i>${sheet(c.fire, 0, 0, 'camp-fire-img', '')}</div>
-        <div class="camp-hero">${DS.Art.hero(me.hero, 'sit', 'huff')}<i class="shadow"></i><div class="camp-plate"><span class="nm">${DS.Titles ? DS.Titles.nameHtml({ title: me.title || 'none', nick: me.name, stk: me.stk }, { num: false, size: 14, uid: 'me' }) : esc(me.name)}</span></div></div>
+        <div class="camp-hero">${DS.Art.hero(DS.Art.look(me), 'sit', 'huff')}<i class="shadow"></i><div class="camp-plate"><span class="nm">${DS.Titles ? DS.Titles.nameHtml({ title: me.title || 'none', nick: me.name, stk: me.stk }, { num: false, size: 14, uid: 'me' }) : esc(me.name)}</span></div></div>
         ${prop('dummy', '🎯', '복습 허수아비', '')}${prop('mail', '📮', '우편함', '')}
       </div>
       <div class="camp-bar"><span id="camp-sv"></span></div>
@@ -196,7 +196,7 @@ DS.Camp = (function () {
   // 선택 연출 (한 번 탭 · 0.7초): 흰 테두리 번쩍 + 눌림 반동 + 소리·진동 → 금빛 외곽선 + ▼ → 내 용사가 그쪽으로 폴짝 → 열림
   let picking = false;
   // pose: 그쪽으로 가는 동안의 용사 동작 (기본 걷기 · 차원문 = 뒷모습으로 들어가기 → 작아지며 사라짐)
-  const heroArt = (pose, cls = '') => { const a = document.querySelector('.camp-hero .art'); if (a) a.outerHTML = DS.Art.hero(me.hero, pose, cls); };
+  const heroArt = (pose, cls = '') => { const a = document.querySelector('.camp-hero .art'); if (a) a.outerHTML = DS.Art.hero(DS.Art.look(me), pose, cls); }; // 🌟 #73 각성한 로안
   function pick(sel, then, pose = 'walk') {
     const el = document.querySelector(sel); if (!el || picking) return;
     picking = true;
@@ -249,7 +249,7 @@ DS.Camp = (function () {
     const cand = [], U = DS.Unit ? DS.Unit.CARDS : [], range = (a, b) => U.filter((c) => c.no >= a && c.no <= b), hasN = (arr) => arr.filter((c) => owned[c.id]).length;
     const hn = (id) => (DS.Lore ? DS.Lore.label(id) : (DS.ASSETS.heroesV2.list[id] || {}).name || '용사'); // 🧙 #73
     const lock = (id) => !((L.heroes || []).find((h) => h.id === id) || {}).open;
-    if (lock(16)) cand.push([3 - seals, `업적 ${3 - seals}개 더 모으면 <b class="gold">${hn(16)}</b> 해금!`]);
+    if (seals < 3) cand.push([3 - seals, `업적 ${3 - seals}개 더 모으면 🏅 호칭 <b class="gold">「만 번째 베기」</b>!`]); // 🌟 #73 (옛 금발 검사 해금 → 호칭)
     const need3 = U.filter((c) => c.no <= 3 && c.id !== 'subcount'); if (lock(8) && need3.length) cand.push([need3.length - hasN(need3), `카드 ${need3.length - hasN(need3)}장 더 → 🧑 <b class="gold">${hn(8)}</b>`]);
     const r46 = range(4, 6); if (lock(10) && r46.length) cand.push([r46.length - hasN(r46), `카드 ${r46.length - hasN(r46)}장 더 → 🧑 <b class="gold">${hn(10)}</b>`]);
     const ui = DS.Bonus ? DS.Bonus.UNLOCK.findIndex((u) => seals < u) : -1;
@@ -262,6 +262,7 @@ DS.Camp = (function () {
     const k = ck(me.c), get = (p) => DS.Net.get(`${p}/${k}/${me.n}`).catch(() => null);
     const [rec, bonus, cards, no] = await Promise.all([get('records'), get('bonus'), get('cards'), DS.Net.get(`unlock/${k}`).catch(() => 0)]);
     const L = DS.Account ? await DS.Account.looks(me).catch(() => ({ heroes: [], seals: 0 })) : { heroes: [], seals: 0 };
+    if (L.enh != null && Number(me.enh || 0) !== Number(L.enh || 0)) { const was = DS.Art.look(me); me.enh = Number(L.enh) || 0; if (DS.Art.look(me) !== was) { const a = document.querySelector('.camp-hero .art'); if (a) a.outerHTML = DS.Art.hero(DS.Art.look(me), 'sit', 'huff'); } } // 🌟 #73 강화 단계 → 각성 모습
     const g = DS.Grow ? await DS.Grow.mine(me).catch(() => null) : null;
     const TD = DS.Titles ? await DS.Titles.data(me).catch(() => ({})) : {}, earned = DS.Titles ? DS.Titles.earned(TD).filter((t) => !/^lv\d/.test(t.id)) : [];
     if (!document.getElementById('camp-forge')) return;
@@ -522,6 +523,10 @@ DS.Camp = (function () {
     let pickH = hero;
     const portrait = (n) => { const P = (DS.ASSETS.heroPortraits || {}).list, c = P && P[n]; return c ? `<i class="hc-img" style="background-image:url('${DS.ASSETS.base}${c.src}');background-size:${(c.cols || 2) * 100}% ${(c.rows || 2) * 100}%;background-position:${((c.col || 0) / Math.max(1, (c.cols || 2) - 1)) * 100}% ${((c.row || 0) / Math.max(1, (c.rows || 2) - 1)) * 100}%"></i>` : DS.Art.hero(n, 'idle'); }; // 초상(port-1~9)이 오기 전 = 도트를 키움
     const heroCard = () => {
+      if (pickH === DS.Art.AWAKE.to && !T) { // 🌟 #73 각성한 로안: 따로 고르는 칸이 아님 · 조건이 맞으면 저절로
+        const on = DS.Art.awake({ hero, enh: L.enh, fx: fxNow(), title }), lo2 = DS.Lore && DS.Lore.of(16), t2 = DS.Titles && DS.Titles.get('slash10k');
+        return `<div class="hero-card${on ? '' : ' lock'}"><div class="hc-port${on ? '' : ' dim'}">${portrait(16)}${on ? '' : '<small>?</small>'}</div><div class="hc-txt"><h3>${on && lo2 ? esc(lo2.name) : '???'} <small>· 호칭으로 깨어나는 모습</small></h3>${on && lo2 ? `<div class="hc-nick">「${esc(lo2.nick)}」</div><p>${esc(lo2.a)}</p><p>${esc(lo2.b)}</p>` : `<p>🏅 호칭 「${esc(t2 ? t2.name : '만 번째 베기')}」 — ${esc((t2 && t2.desc) || '')}</p>`}</div>${on ? '<div class="hc-cond">🌟 지금 각성한 모습이에요 · 모습만 바뀌고 데미지 · 보상은 같아요</div>' : ''}</div>`;
+      }
       const h = L.heroes.find((x) => x.id === pickH) || { id: pickH, open: true }, lo = DS.Lore ? DS.Lore.of(pickH) : null, open = T || h.open;
       const r = DS.Attack && DS.Attack.isRanged(pickH), af = DS.FX.affOf(pickH);
       let cond = '', cta = '';
@@ -539,10 +544,11 @@ DS.Camp = (function () {
       const gp = (p) => gm.filter((h) => h.shop.price === p), prices = [...new Set(gm.map((h) => h.shop.price))].sort((a, b) => a - b);
       return `${meHead()}${heroCard()}<p class="me-sec">가진 용사 ${own.length}</p><div class="heroes set-grid">${own.map(heroCell).join('')}</div>
         ${lock.length ? `<details class="me-lock"${gm.some(can) || lock.some((h) => h.id === pickH) ? ' open' : ''}><summary>🔒 더 열 수 있는 용사 ${lock.length} ▾</summary>${prices.map((p) => `<p class="me-sec">💎 ${p}</p><div class="heroes set-grid">${gp(p).map(heroCell).join('')}</div>`).join('')}${ch.length ? `<p class="me-sec">도전으로 여는 용사</p><div class="heroes set-grid">${ch.map(heroCell).join('')}</div>` : ''}${ph.length ? `<p class="me-sec">📷 서술형 풀이 사진 통과</p><div class="heroes set-grid">${ph.map(heroCell).join('')}</div>` : ''}${ac.length ? `<p class="me-sec">🏆 업적으로 열기</p><div class="heroes set-grid">${ac.map(heroCell).join('')}</div>` : ''}</details>` : ''}
+        <p class="me-sec">호칭으로 깨어나는 모습</p><div class="heroes set-grid"><button class="hpick lock${pickH === DS.Art.AWAKE.to ? ' peek-on' : ''}" data-awk>${DS.Art.hero(DS.Art.AWAKE.to, 'idle')}<small class="hp-prog">?</small></button></div>
         <p class="muted small">🗡 근접 · 🏹 원거리 · 데미지 · 보상은 모두 같아요 · 스킬은 ⚔ 스킬 탭에서</p>`; };
     const heroTab0 = () => `${heroCard()}<div class="heroes set-grid">${L.heroes.map((h) => { const r = DS.Attack && DS.Attack.isRanged(h.id), af = DS.FX.affOf(h.id); return `<button class="hpick${h.id === hero ? ' on' : ''}${h.id === pickH && pickH !== hero ? ' peek-on' : ''}${h.open ? '' : ' lock'}" data-h="${h.id}" title="${esc(h.cond || '')}"><b class="atk-badge${r ? ' r' : ''}">${r ? '🏹' : '🗡'}</b>${sock[h.id] ? '<i class="gemdot" title="스킬 고름"></i>' : ''}<b class="aff" title="친화 계열">${af.name.split(' ')[0]}</b>${DS.Art.hero(h.id, h.id === hero ? 'attack' : 'idle')}${h.open ? '' : '<b class="lk">🔒</b>'}</button>`; }).join('')}</div>
         <p class="muted small">🗡 근접 = 다가가서 · 🏹 원거리 = 탄을 날려서 · 오른쪽 아래 = 친화 계열 (같은 계열 스킬을 고르면 ★ 공명) · 파란 점 = 스킬 고름 · 데미지 · 보상은 모두 같아요</p>
-        ${T ? '' : `<p class="muted small">✨ 업적 용사: ① 1~3차시 도감 <b>${L.got} / ${L.need}</b>장 · ② 🎁 첫 레이드 · ③ 4~6차시 도감 · ④ 8~11차시 도감 · 금발 검사 = 🏆 업적 3개 / 💎 상점 용사 = 조각으로</p>`}`;
+        ${T ? '' : `<p class="muted small">✨ 업적 용사: ① 1~3차시 도감 <b>${L.got} / ${L.need}</b>장 · ② 🎁 첫 레이드 · ③ 4~6차시 도감 · ④ 8~11차시 도감 · 🏆 업적 3개 = 🏅 호칭 「만 번째 베기」 / 💎 상점 용사 = 조각으로</p>`}`;
     const gemTab = () => { const fx = fxNow(), aff = DS.FX.affOf(hero), reso = DS.FX.resonates(hero, fx), set = sock[hero] != null;
       return `<div class="sock"><canvas width="128" height="80" data-still="${fx}"></canvas><div><small>${heroName(hero)}의 스킬 · 친화 ${aff.name}</small><b>${esc(DS.FX.NAMES[fx] || '')} ${tierTag(fx)}${reso ? ' <span class="reso">★ 공명</span>' : ''}</b><small>${set ? '아래 표에서 누르면 바로 바뀌어요' : '고른 스킬 없음 → 친화 계열 Ⅰ 이 기본으로 나가요'}</small></div><div class="sock-btns">${set ? '<button class="btn small" id="sock-out">🔄 기본으로<br><small>스킬은 계속 가짐</small></button>' : ''}${!T && (L.fx.find((x) => x.id === fx) || {}).bought ? `<button class="btn small sock-sell" id="sock-sell">💰 되팔기<br><small>💎 +${DS.Gem.refundOf('fx', fx)} · 다시 잠김</small></button>` : ''}</div></div>
         ${T ? ([3, 's'].includes(DS.FX.tierOf(fx)) ? '<button class="btn small ult-btn" id="ult-demo">⚡ 필살기 미리보기 <small>(선생님: 시연을 다 맞힌 뒤 ⚔ 일반 · ⚡ 필살기 중 골라요)</small></button>' : '<p class="muted small">⚡ 선생님 필살기는 Ⅳ 전설(9개 모두) · 🪶 특별 스킬일 때 시연 뒤 고를 수 있어요</p>') : DS.Attack && DS.Attack.canUlt(fx, hero) ? '<button class="btn small ult-btn" id="ult-demo">⚡ 필살기 미리보기 <small>(특화 계열 Ⅳ 전설 스킬 + 퍼펙트일 때)</small></button>' : DS.FX.tierOf(fx) === 3 ? `<p class="muted small">⚡ 필살기는 이 용사의 특화(친화 ${DS.FX.affOf(hero).name}) Ⅳ 전설 스킬일 때만 나가요</p>` : ''}
@@ -573,6 +579,7 @@ DS.Camp = (function () {
       { const ap = el.querySelector('#ap'); if (ap) ap.onclick = demo; }
       el.querySelectorAll('[data-tab]').forEach((b) => (b.onclick = () => { tab = b.dataset.tab; try { localStorage.setItem('citadel-settab', tab); } catch (e) { /* 이 기기에만 */ } DS.Sound.clank(); const sb3 = el.querySelector('.set-box'); if (sb3) sb3.scrollTop = 0; draw(); if (tab !== 'ttl') demo(); }));
       el.querySelectorAll('[data-h]').forEach((b) => (b.onclick = () => { const h = L.heroes.find((x) => x.id === Number(b.dataset.h)); if (!h) return; pickH = h.id; DS.Sound.clank(); peek(h.id); draw(); { const hc = el.querySelector('.hero-card'); if (hc) hc.scrollIntoView({ block: 'nearest' }); } })); // 🧙 #73 칸 = 소개 카드만 바꿈
+      { const aw = el.querySelector('[data-awk]'); if (aw) aw.onclick = () => { pickH = DS.Art.AWAKE.to; DS.Sound.clank(); draw(); const hc = el.querySelector('.hero-card'); if (hc) hc.scrollIntoView({ block: 'nearest' }); }; }
       { const hs = el.querySelector('[data-hset]'); if (hs) hs.onclick = () => { hero = pickH; DS.Sound.clank(); draw(); demo(); }; }
       { const hb = el.querySelector('[data-hbuy]'); if (hb) hb.onclick = () => { const h = L.heroes.find((x) => x.id === pickH); if (h) DS.Control.run(() => shopBuy(h)); }; }
       el.querySelectorAll('[data-fx]').forEach((b) => (b.onclick = () => { const f = L.fx.find((x) => x.id === b.dataset.fx); if (!f) return; if (!f.open) { if (f.got) { DS.UI.toast(`🏆 받은 이펙트예요 · ${f.locked.replace(/^먼저 /, '')} 를 열면 바로 쓸 수 있어요`, 3600); return; } if (f.locked) { DS.UI.toast(`🔒 ${f.locked} 열어야 살 수 있어요`, 3200); return; } if (f.shop) { DS.Control.run(() => shopBuy(f)); return; } DS.UI.toast(`🔒 ${f.cond || '해금 조건은 추후 공개'}`, 3200); return; } sock[hero] = f.id; draw(); demo(); DS.Sound.clank(); }));
@@ -598,6 +605,7 @@ DS.Camp = (function () {
       el.querySelector('#set-x').onclick = () => el.remove();
       el.querySelector('#set-ok').onclick = () => DS.Control.run(async () => { const fx = fxNow();
         if (T) { await DS.Art.setTeacherLook({ hero, fx, title, socket: sock }, { room: opt.room }); /* 🧙 #32 서버에도 */ el.remove(); DS.UI.toast('선생님 모습을 바꿨어요!'); if (opt.onSave) await opt.onSave({ hero, fx, title }); return; }
+        { const was = DS.Art.awake({ hero: me.hero, enh: L.enh, fx: me.fx, title: me.title }), now = DS.Art.awake({ hero, enh: L.enh, fx, title }); let seen = false; try { seen = localStorage.getItem('citadel-awake-seen') === '1'; } catch (e) { /* 무시 */ } if (now && !was && !seen && DS.Attack && DS.Attack.cutin) { try { localStorage.setItem('citadel-awake-seen', '1'); } catch (e) { /* 무시 */ } setTimeout(() => DS.Attack.cutin(DS.Art.AWAKE.to, fx, { peek: true, name: '🌟 각성한 로안' }), 300); } } // 🌟 #73 처음 한 번 변신 컷인
         if (me.test) DS.Test.setLook(hero, fx); else { await DS.Account.setLook(hero, fx); await DS.Account.setSocket(sock); if (title !== (me.title || 'none')) await DS.Account.setTitle(title); }
         me.title = title; me.hero = hero; me.fx = fx; me.socket = sock; el.remove();
         if (opt.onSave) { await opt.onSave({ hero, fx, title }); DS.UI.toast('저장했어요! 지금 던전에도 바로 적용돼요.'); return; } // 던전 안: 수업 방의 내 용사 · 스킬도 바로

@@ -35,6 +35,7 @@ DS.Titles = (function () {
     { id: 'hunter', name: '오답 사냥꾼', tier: 'b', medal: ['rank', 6], cond: '📕 오답노트 빨간 칸(틀림 · 안 풂)을 수업 밖에서 10개 해결', test: (d) => fixedOutside(d) >= 10 },
     { id: 'wall', name: '성벽의 수호자', tier: 'b', medal: ['rank', 7], cond: '🏰 디펜스 한 판 처치 30', test: (d) => (Number((((d.xr || {}).ttl) || {}).wall) || 0) >= 30 },
     { id: 'awake', name: '각성한 자', tier: 'o', medal: ['rank', 9], cond: '🔨 강화 +10', test: (d) => (Number((d.gem || {}).enh) || 0) >= 10 },
+    { id: 'slash10k', name: '만 번째 베기', tier: 'o', medal: ['rank', 7], cond: '🏆 업적 3개', desc: '기본기의 검이 끝까지 벼려지면, 금빛이 깃든다.', test: (d) => !!(DS.Bonus && DS.Bonus.seals(d.bonus || {}).length >= 3) }, // 🌟 #73 (2026-11-11): 옛 금발 검사 조건 → 호칭 · 각성한 로안 조건 하나
   ];
   // 📸 서술형 통과 수: photo/{반}/{번호}/{차시_방}/{id} 의 pass(AI) 또는 ok(선생님 인정) · 첫 판 · 연습 판 상관없음
   function photoPass(d) { let n = 0; Object.values(d.photo || {}).forEach((byId) => Object.values(byId || {}).forEach((x) => { if (x && (x.status === 'pass' || x.ok === true)) n++; })); return n; }
@@ -76,7 +77,7 @@ DS.Titles = (function () {
   // ── 🏅 #63 칭호 작은 기능 (C안 · 보이는 연출만 · 고른 칭호 하나만) ─────────────────────────
   //   평소 = 이름표 옆 멈춘 기호(.tfx-ic) · 사건 때 한 번(1초 안 · transform/opacity 만) · 종합실 = 동시에 움직이는 이름표 최대 5(줄 서기)
   //   종합실 설정 「칭호 효과 끄기」(localStorage ds-tfx-off · 기본 켬) · prefers-reduced-motion = 움직임 없음
-  const ICON = { dawn: '✦', first: '✦', slayer: '⚔', grit: '💪', steady: '🔁', smith: '⚒', collector: '⚒', magic: '⚒', rare: '⚒', sage: '⚒', gambler: '🎲', nunchi: '🙊', oxsurv: '⭕', quester: '✏', writer: '✍', hunter: '🎯', wall: '🛡', awake: '⚡' };
+  const ICON = { dawn: '✦', first: '✦', slayer: '⚔', grit: '💪', steady: '🔁', smith: '⚒', collector: '⚒', magic: '⚒', rare: '⚒', sage: '⚒', gambler: '🎲', nunchi: '🙊', oxsurv: '⭕', quester: '✏', writer: '✍', hunter: '🎯', wall: '🛡', awake: '⚡', slash10k: '🌟' };
   const UNIT = { king: { sym: '∩', from: 2, to: 7 }, detective: { sym: '→', from: 8, to: 13 }, sovereign: { sym: '∴', from: 2, to: 13 } }; // 그 단원 차시 레이드에서만
   // 사건 → 그 사건에 반응하는 칭호
   const EVENT = { boss: ['slayer'], bossStart: ['king', 'detective', 'sovereign'], grit: ['grit'], forge: ['smith', 'collector', 'magic', 'rare', 'sage'], fun: ['gambler'], nun: ['gambler', 'nunchi'], ox: ['gambler', 'oxsurv'], photo: ['writer'], fix: ['hunter'], td: ['wall'], holy: ['awake'], quest: ['quester'] };

@@ -170,7 +170,7 @@ DS.Account = (function () {
     // 화려한 이펙트 = 🟪 중단원던전 인장 1 · 2 · 4 · 6 · 8 · 10개에서 하나씩 (v0.8.0 · 2026-11-03 보강던전 → 중단원던전)
     const bonus = (m && DS.Bonus && (await N().get(`bonus/${String(m.c).replace(/[.#$/[\]]/g, '_')}/${m.n}`).catch(() => null))) || {};
     const fo = DS.Bonus ? DS.Bonus.fxOpen(bonus) : {}, seals = DS.Bonus ? DS.Bonus.seals(bonus).length : 0;
-    heroes.push({ id: 16, open: seals >= 3, cond: `🏆 업적 ${Math.min(seals, 3)} / 3 — 🎯 허수아비 👑 형성평가 재대결 · 🏰 성채 보스 방을 처치하면 하나씩` }); // 2026-11-03 사용자 결정: 금발 검사 = 인장 3개
+    // 🌟 #73 (2026-11-11): 금발 검사(16) = 따로 고르는 칸이 아님 → 각성한 로안(로안의 변신 모습) · 🏆 업적 3개 = 호칭 「만 번째 베기」
     [18, 19, 20, 21, 22, 23].forEach((id) => heroes.push({ id, open: false, cond: '💎 조각으로 해금' })); // 2026-11-07 새 용사 6 (흑기사 · 메카닉 · 해커 · 용기사 = 💎 상점 · gem.js SHOP)
     [24, 25, 26, 27, 28, 29, 30, 31, 32, 33].forEach((id) => heroes.push({ id, open: false, cond: '💎 조각으로 해금' })); // 2026-11-11 #73 새 용사 10: 💎 30 · 60 (gem.js SHOP) · 27 · 28 · 33 = 도전 (아래 CHAL)
     { const cp = chalProgress(rec, bonus); Object.entries(CHAL).forEach(([id, c]) => { const h = heroes.find((x) => x.id === Number(id)); if (!h) return; const n = cp[id] || 0; h.chal = { n: Math.min(n, c.need), need: c.need }; h.open = n >= c.need; h.cond = `${c.cond} · ${Math.min(n, c.need)} / ${c.need}`; }); }

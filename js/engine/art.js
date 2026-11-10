@@ -22,6 +22,11 @@ DS.Art = (function () {
     const W = 124, left = 50 - (h.cx || 0.4) * W; // 그림 칸(80×64)을 상자보다 넓게 두고, 머리 가운데가 상자 가운데에 오게
     return `<i class="art hero hv2 ${String(cls).replace(/\bhuff\b/g, '')}" data-anim="${a}"><b style="left:${left.toFixed(1)}%;width:${W}%;background-image:url('${A().base}${h.src}');background-size:${v.cols * 100}% ${rows * 100}%;background-position:0% ${rows > 1 ? (100 * row) / (rows - 1) : 0}%;${run}"></b></i>`;
   }
+  // 🌟 #73 각성한 로안 (2026-11-11): 로안(0) + 🔨 10강 + ⚔ 쌍월 참(베기 Ⅳ) 장착 + 호칭 「만 번째 베기」 장착 → 금발 모습(16) · 하나라도 빼면 로안
+  //   모습만 바뀜(데미지 · 보상 그대로) · p = { hero, enh, fx, title } (수업 방 players · 캠프 me)
+  const AWAKE = { hero: 0, to: 16, enh: 10, fx: 'twin', title: 'slash10k' };
+  const awake = (p) => !!(p && Number(p.hero) === AWAKE.hero && Number(p.enh) >= AWAKE.enh && p.fx === AWAKE.fx && p.title === AWAKE.title);
+  const look = (p) => (awake(p) ? AWAKE.to : Number((p || {}).hero) || 0);
   const hero = (n, pose = 'idle', cls = '') => {
     if (isV2(n)) return heroV2(Number(n), pose, cls);
     n = Number(n) || 0;
@@ -206,5 +211,5 @@ ${a.ui.home ? `.home-props{display:contents}.home-props img{position:fixed;z-ind
     const prev = L.no ? DS.Lessons.list.find((l) => l.no === L.no - 1) : null;
     setTimeout(() => trim([L, prev]), 5000);
   }
-  return { emojify, cell, hero, isV2, monster, scoutDeco, card, install, pos, lessonFiles, prefetch, trim, lessonEnter, teacherHero, teacherFx, setTeacherHero, teacherLook, setTeacherLook, loadTeacherCfg, saveTeacherCfg, teacherCfg: tcfg };
+  return { AWAKE, awake, look, emojify, cell, hero, isV2, monster, scoutDeco, card, install, pos, lessonFiles, prefetch, trim, lessonEnter, teacherHero, teacherFx, setTeacherHero, teacherLook, setTeacherLook, loadTeacherCfg, saveTeacherCfg, teacherCfg: tcfg };
 })();

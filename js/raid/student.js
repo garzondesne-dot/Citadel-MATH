@@ -174,7 +174,7 @@ DS.Student = (function () {
   }
   const openFb = () => (focusLock() ? DS.UI.toast('👀 집중모드가 끝나면 보내 주세요') : DS.Feedback.open({ c: info0.cls, n: info0.num, name: info0.nick }, { code, where: 'dungeon' }));
   const openShop = () => (focusLock() ? DS.UI.toast('👀 집중모드에는 상점을 열 수 없어요') : DS.Control.run(() => DS.Camp.settings({ me: { c: info0.cls, n: info0.num, name: info0.nick, hero: myP().hero, fx: myP().fx, title: myP().title, socket: info0.socket }, onSave: async (v) => {
-    await DS.Net.update(`rooms/${code}/players/${me}`, { hero: v.hero, fx: v.fx, title: v.title || 'none' }).catch(() => {}); info0.hero = v.hero; info0.fx = v.fx; info0.title = v.title; drawn = ''; render(); gemRefresh(true);
+    await DS.Net.update(`rooms/${code}/players/${me}`, { hero: DS.Art.look({ hero: v.hero, enh: info0.enh, fx: v.fx, title: v.title }), base: v.hero, fx: v.fx, title: v.title || 'none' }).catch(() => {}); // 🌟 #73 각성한 로안 info0.hero = v.hero; info0.fx = v.fx; info0.title = v.title; drawn = ''; render(); gemRefresh(true);
   } })));
   function bindTop() {
     const fb = $('#st-fb'); if (fb) fb.onclick = openFb;
