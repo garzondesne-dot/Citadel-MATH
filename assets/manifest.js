@@ -65,12 +65,16 @@ DS.ASSETS = {
   monstersCastle3: { src: 'monsters-castle3-v1.webp', cols: 3, rows: 5, poses: { idle: 0, attack: 1, down: 2 }, names: ['진리집합 수정 골렘', '역 · 대우 사슬 망령', '귀류법 미로 거미', '절대부등식 탑 수호자', '필요충분 쌍둥이 열쇠 기사'] },
   monstersCastleBoss2: { src: 'monsters-castleboss2-v1.webp', cols: 3, rows: 1, poses: { idle: 0, attack: 1, down: 2 }, names: ['진리의 심판관'] },
   monstersMirrorBoss8: { src: 'monsters-mirrorboss-v3.webp', cols: 3, rows: 1, poses: { idle: 0, attack: 1, down: 2 }, names: ['부정의 수정 여왕'] }, // 👑 8차시 보스 (2026-11-08 선생님 그림 · 하늘색 기준선 지움 · demagenta + cut_grid 384) — 'mirrorboss8:0' · 대우의 거울 마왕(monstersMirrorBoss)은 10차시용
+  // 9차시 🔑 열쇠와 자물쇠의 묘실 (2026-11-10 · 선생님 그림 · 에셋 작업대 m09-01~05 · b09-01 · demagenta + 하늘색 기준선 · 칸 선 지움 + cut_grid · 칸 192 · 보스 384): 'keyvault:번호' · 보스 'keyvaultboss:0'
+  //   3번(봉인 석상 m09-04)은 그림이 아직 없어 빈 줄 · 열쇠 유령 쓰러짐 칸은 받은 그림의 흐린 분홍이 배경과 함께 지워져 대기 모습을 흐리게 가라앉혀 만듦
+  monstersKeyvault: { src: 'monsters-keyvault-v1.webp', cols: 3, rows: 5, poses: { idle: 0, attack: 1, down: 2 }, names: ['자물쇠 미믹', '열쇠 유령', '사슬 기사', '봉인 석상', '뒤집개 박쥐'] },
+  monstersKeyvaultBoss: { src: 'monsters-keyvaultboss-v1.webp', cols: 3, rows: 1, poses: { idle: 0, attack: 1, down: 2 }, names: ['역과 대우의 문지기'] },
   monstersMirrorBoss: { src: 'monsters-mirrorboss-v2.webp', cols: 3, rows: 1, poses: { idle: 0, attack: 1, down: 2 }, names: ['대우의 거울 마왕'] },
   monstersCrown: { src: 'monsters-crown-v1.webp', cols: 3, rows: 10, poses: { idle: 0, attack: 1, down: 2 },
     names: ['에메랄드 왕관 슬라임', '루비 박쥐', '사파이어 뿔벌레', '자수정 뼈뱀', '버섯 전사', '자수정 눈알 문어', '이끼 골렘', '서리 왕관 늑대', '덩굴 미믹', '청록 수정룡'] },
   // 던전 테마 10종: 던전 안 전투 배경(dg-). 차시 파일의 theme 으로 고른다 (2026-11-08 요청 #8: 화면에 안 나오던 테마 포털 portal- 10장 · 특수 차원문 dportal- 3장은 assets/_old 로 옮김)
-  dungeons: { ids: ['01-burrow', '02-deep-forest', '03-dimensional', '04-mine', '05-ruins', '06-frost', '07-volcano', '08-crypt', '09-underwater', '10-sky'],
-    names: ['땅굴', '깊은 숲 성역', '차원 균열 지대', '폐광 갱도', '고대 유적 심장부', '빙결 동굴', '화산 심연', '망자의 지하 묘실', '수중 신전', '천공 성소'],
+  dungeons: { ids: ['01-burrow', '02-deep-forest', '03-dimensional', '04-mine', '05-ruins', '06-frost', '07-volcano', '08-crypt', '09-underwater', '10-sky', '11-keyvault', '12-skygarden'], // 11 · 12 = 9 · 10차시 새 테마 (2026-11-10 · bg-09 · bg-10)
+    names: ['땅굴', '깊은 숲 성역', '차원 균열 지대', '폐광 갱도', '고대 유적 심장부', '빙결 동굴', '화산 심연', '망자의 지하 묘실', '수중 신전', '천공 성소', '열쇠와 자물쇠의 묘실', '저울의 공중 정원'],
     bg: (id) => ({ '03-dimensional': 'dg-03-dimensional-v2.webp', '04-mine': 'dg-04-mine-v2.webp' })[id] || `dg-${id}-v1.webp`  // v2 도트 배경이 온 테마만 바꿔 씀 (2026-11-03: 03 차원 균열)
   },
   // 메달 (v0.9.1 · 사용자 제공 · 5열 × 2행): rank = 업적 · 성장 10종, dungeon = 던전 테마 01~10 정복

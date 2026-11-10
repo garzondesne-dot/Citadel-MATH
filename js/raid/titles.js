@@ -43,7 +43,7 @@ DS.Titles = (function () {
   // 던전 정복: 차시마다 그 던전 테마의 메달 (보스 격파 또는 형성평가 만점)
   function dungeonTitles() {
     const D = DS.ASSETS.dungeons;
-    return DS.Lessons.list.filter((l) => !l.eval && l.theme && D.ids.includes(l.theme)).map((l) => ({ id: `dg-${l.id}`, name: `${D.names[D.ids.indexOf(l.theme)]} 정복`, tier: 'b', medal: ['dungeon', D.ids.indexOf(l.theme)],
+    return DS.Lessons.list.filter((l) => !l.eval && l.theme && D.ids.includes(l.theme)).map((l) => ({ id: `dg-${l.id}`, name: `${D.names[D.ids.indexOf(l.theme)]} 정복`, tier: 'b', medal: ['dungeon', D.ids.indexOf(l.theme) % 10], /* 11 · 12번 테마는 메달 그림이 아직 없어 앞 칸 재사용 */
       cond: `${l.no ? `${DS.Lessons.noText(l.no)}차시 ` : ''}${l.title} — 보스 격파 또는 형성평가 만점`, test: (d) => { const r = (d.records || {})[l.id]; return !!r && (r.won || (r.bossN && r.boss >= r.bossN)); } }));
   }
   // 레벨 칭호 (일반): 지금 레벨까지의 칭호
