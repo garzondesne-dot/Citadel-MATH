@@ -6,7 +6,7 @@ const fs = require('fs');
 const { chromium } = require('playwright');
 const { firebaseToken } = require('./google');
 const DB = 'https://citadel-math-default-rtdb.asia-southeast1.firebasedatabase.app';
-const [lesson, pdf, dry] = process.argv.slice(2);
+const [lesson, pdf] = process.argv.slice(2), dry = process.argv.includes('--dry');
 (async () => {
   const b = await chromium.launch(); const p = await (await b.newContext({ viewport: { width: 1280, height: 900 } })).newPage();
   p.on('dialog', (d) => d.accept());
@@ -25,5 +25,7 @@ const [lesson, pdf, dry] = process.argv.slice(2);
   console.log('Firebase 열쇠 받는 중…'); const tok = await firebaseToken(); console.log('열쇠 OK · 올리기 시작');
   const put = async (path, val) => { const r = await fetch(`${DB}/${path}.json`, { method: 'PUT', headers: { Authorization: `Bearer ${tok}`, 'content-type': 'application/json' }, body: JSON.stringify(val), signal: AbortSignal.timeout(60000) }); if (!r.ok) throw new Error(`Firebase ${r.status} ${path}: ${(await r.text()).slice(0, 200)}`); };
   for (const k of slots) { await put(`prep/${lesson}/img/${k}`, img[k]); await put(`prep/${lesson}/has/${k}`, true); console.log(`  ↑ ${k} (${(img[k].length / 1024).toFixed(0)} KB)`); }
+  const drop = (process.argv.find((x) => x.startsWith('--drop=')) || '').slice(7).split(',').filter(Boolean); // --drop=a,b : 잘못 올라간 · 이제 안 쓰는 칸 지우기 (#60 intro)
+  for (const k of drop) { await put(`prep/${lesson}/img/${k}`, null); await put(`prep/${lesson}/has/${k}`, null); console.log(`  ✕ ${k}`); }
   console.log(`✅ Firebase prep/${lesson} 에 ${slots.length}칸 올림`);
 })().catch((e) => { console.error('❌', e.message); process.exit(1); });

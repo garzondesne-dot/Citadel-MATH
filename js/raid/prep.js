@@ -11,7 +11,7 @@ DS.Prep = (function () {
   let L = null, data = {}, stops = [], opened = new Set();
   let sel = null, pages = [], thumbs = [], draft = {}, editing = null, piece = 0;
   // 이미지 칸: 도입·개념(설명 때 크게) + 문제·보강·형성평가(교사가 「📄 문제 화면」을 누르면 해설용으로 크게)
-  const slotSteps = () => L.steps.map((s) => (s.kind === 'boss' ? { ...s, title: s.title || L.boss.title } : s))
+  const slotSteps = () => L.steps.map((s) => (s.kind === 'boss' ? { ...s, title: s.title || L.boss.title } : s.img ? { ...s, id: s.img, title: `${s.title} (🔁 그림 칸 ${s.img})` } : s)) // #60: 도입 step img = 다른 칸 이름(🔁 전시 확인 review) → 그 이름으로 잘라 저장 (종합실은 step.img 로 찾음)
     .concat((L.bonus || []).map((b) => ({ kind: 'bonus', id: b.id, title: `🟪 중단원던전 ${L.no}층 · ${b.title}` }))); // 4차시부터: 중단원던전 층의 보강 칸 (학생 「📄 학습지 보기」 · 🎬)
 
   async function enter(lessonId) {
