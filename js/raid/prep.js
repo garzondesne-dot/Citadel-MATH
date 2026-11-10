@@ -81,7 +81,30 @@ DS.Prep = (function () {
       <label class="btn small">🎞 파일 올리기<input type="file" accept="video/mp4,video/webm,video/*" data-vfile="${s.id}" hidden></label>
       ${isFile ? `<span class="okc small">🎞 올린 영상 파일</span><button class="btn small" data-vplay="${s.id}">▶ 미리보기</button><button class="btn small" data-vdel="${s.id}">지우기</button>`
         : vid ? `<span class="muted small">${DS.Video && DS.Video.kind(vid) ? DS.Video.kind(vid) : '⚠ 알 수 없는 주소'}</span>` : (L.videos || {})[s.id] ? `<span class="okc small">🎬 기본 영상 연결됨 (모션그래픽)</span><button class="btn small" data-vdef="${s.id}">▶ 미리보기</button>` : '<span class="muted small">링크 또는 mp4 파일 (3MB 이하) · 큰 화면 「🎬 설명 영상 틀기」 · 중단원던전에서 재생</span>'}</div>`;
-    return `<div class="panel framed p-slot${sel === s.id ? ' sel' : ''}" data-box="${s.id}" tabindex="0">${head.replace('</div>', `<button class="btn small" data-fold="${s.id}">접기 ▴</button></div>`)}${body}${video}${sel === s.id && editing !== s.id ? '<p class="p-paste small">📋 지금 Ctrl+V 하면 이 칸에 들어가요</p>' : ''}</div>`;
+    const v4 = (s.kind === 'monster' && (L.monsters || {})[s.id] && L.items) || (s.kind === 'boss' && L.boss && L.boss.make) ? `<div class="row"><button class="btn small" data-v4="${s.id}">🔢 숫자 4판 보기 (첫 시도 + 재도전 3)</button></div>` : ''; // #65-3
+    return `<div class="panel framed p-slot${sel === s.id ? ' sel' : ''}" data-box="${s.id}" tabindex="0">${head.replace('</div>', `<button class="btn small" data-fold="${s.id}">접기 ▴</button></div>`)}${body}${v4}${video}${sel === s.id && editing !== s.id ? '<p class="p-paste small">📋 지금 Ctrl+V 하면 이 칸에 들어가요</p>' : ''}</div>`;
+  }
+  // 🔢 #65-3 숫자 4판 미리보기: 몬스터 · 형성평가마다 v0(학습지) ~ v3 (예시 · 실제 숫자는 학생마다 달라요)
+  function ansOf(q) { const P = DS.UI.pretty;
+    if (q.type === 'choice') return DS.UI.opt(q.choices[q.answerIndex]);
+    if (q.type === 'multi') { const g = q.groups; if (g && g.length) { let b0 = 0; return g.map((x) => { const a = q.answer.filter((k) => k >= b0 && k < b0 + x.n).map((k) => q.options[k]); b0 += x.n; return `${P(x.label)} {${P(a.filter((o) => !/^∅/.test(o)).join(', '))}}`; }).join(' · '); } const a = q.answer.map((k) => q.options[k]); return a.some((o) => /^∅/.test(o)) ? '∅' : `{${P(a.join(', '))}}`; }
+    if (q.type === 'blanks') return esc(q.items.map((it) => it.answer).join(' , '));
+    if (q.type === 'ox') return q.answer ? 'O' : 'X';
+    if (q.type === 'text') return esc((q.answers || [q.answer]).join(' / '));
+    return esc(String(q.answer)); }
+  function v4Open(id) {
+    const boss = id === 'boss', seed = `미리보기|${L.id}`;
+    const ver = (a) => (boss ? Array.from({ length: L.boss.items || L.boss.sets[1].length }, (_, i) => (a ? L.boss.make(i, a, DS.Rng(`${seed}|boss|${i}|${a}`)) : L.boss.sets[1][i])) : L.items(id, seed, a));
+    const el = document.createElement('div'); el.className = 'modal camp-modal'; document.body.appendChild(el);
+    let a = 0;
+    const draw = () => { const items = ver(a);
+      el.innerHTML = `<div class="quiz-box framed rs-box v4-box"><div class="quiz-head"><b>🔢 ${esc(boss ? L.boss.title : (L.steps.find((x) => x.id === id) || {}).title || id)}</b><button class="btn small" id="v4-x">✕ 닫기</button></div>
+        <div class="row v4-tabs">${[0, 1, 2, 3].map((k) => `<button class="btn small${k === a ? ' primary' : ''}" data-va="${k}">${k ? `재도전 ${k}` : '첫 시도 (학습지)'}</button>`).join('')}</div>
+        <p class="muted small">${a ? '예시 숫자예요 — 실제 재도전 숫자는 학생마다 달라요' : '첫 시도 = 학습지 숫자 그대로'}</p>
+        <ol class="v4-list">${items.map((q) => `<li><span class="math">${DS.UI.pretty(DS.UI.plain(q.question || ''))}</span>${q.type === 'choice' ? `<br><small class="muted">${q.choices.map((c) => DS.UI.opt(c)).join(' · ')}</small>` : ''}<br><b class="okc">정답: ${ansOf(q)}</b></li>`).join('')}</ol></div>`;
+      el.querySelector('#v4-x').onclick = () => el.remove();
+      el.querySelectorAll('[data-va]').forEach((b) => (b.onclick = () => { a = Number(b.dataset.va); draw(); })); };
+    draw();
   }
   const up = (slot, url, msg = '올렸어요!') => DS.Control.run(async () => { await DS.Act.setImage(L.id, slot, url); delete draft[slot]; DS.UI.toast(msg); render(); });
   function bindSlots() {
@@ -93,6 +116,7 @@ DS.Prep = (function () {
     });
     document.querySelectorAll('[data-open]').forEach((b) => (b.onclick = () => { opened.add(b.dataset.open); sel = b.dataset.open; render(); }));
     document.querySelectorAll('[data-fold]').forEach((b) => (b.onclick = () => { opened.delete(b.dataset.fold); if (sel === b.dataset.fold) sel = null; if (editing === b.dataset.fold) editing = null; render(); }));
+    document.querySelectorAll('[data-v4]').forEach((b) => (b.onclick = (e) => { e.stopPropagation(); v4Open(b.dataset.v4); }));
     document.querySelectorAll('[data-vsave]').forEach((b) => (b.onclick = () => DS.Control.run(async () => {
       const id = b.dataset.vsave, v = document.querySelector(`[data-vid="${id}"]`).value.trim();
       if (v && !(DS.Video && DS.Video.embed(v))) throw Object.assign(new Error('유튜브 또는 구글 드라이브 주소만 넣을 수 있어요.'), { user: true });

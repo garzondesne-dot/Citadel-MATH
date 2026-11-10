@@ -3099,3 +3099,5 @@ body:has(#test-bar) #screen-student.st-battle .wrap:has(.cr-dock) { padding-bott
 @media (prefers-reduced-motion: reduce) { .tfx-ic.tfx-pop, .tfx-say { animation: none !important; } .tname.t-o::after { display: none !important; } }
 /* 🔘 #65-6 원소 칩: 「∅ (공집합)」 단추는 따로 (점선 · 줄 끝) */
 .choice.chip-empty { border-style: dashed !important; margin-left: 10px !important; font-weight: 700; }
+/* 🔢 #65-3 숫자 4판 미리보기 */
+.v4-box { max-width: 640px; } .v4-tabs { flex-wrap: wrap; gap: 6px; } .v4-list { padding-left: 22px; max-height: 60vh; overflow-y: auto; } .v4-list li { margin: 6px 0; line-height: 1.5; }

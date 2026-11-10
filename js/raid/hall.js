@@ -719,7 +719,7 @@ DS.Hall = (function () {
     const reGo = () => { const go = ov.querySelector('#demo-go'); if (go) go.disabled = !need.every((q, j) => filled(q, d.given[j])); };
     ov.querySelectorAll('[data-pick]').forEach((b) => (b.onclick = () => {
       const [i, v] = b.dataset.pick.split('|'), k = Number(i), t = d.items[k].type;
-      if (t === 'multi') { const s = new Set(d.given[k]); const n = Number(v); if (s.has(n)) s.delete(n); else s.add(n); d.given[k] = [...s].sort((a, b2) => a - b2); }
+      if (t === 'multi') { const n = Number(v); if (d.items[k].empty) d.given[k] = DS.Quiz.chipToggle(d.items[k], d.given[k], n); else { const s = new Set(d.given[k]); if (s.has(n)) s.delete(n); else s.add(n); d.given[k] = [...s].sort((a, b2) => a - b2); } } // 🔘 ∅ 단추
       else if (t === 'choice') d.given[k] = Number(v); else if (t === 'ox') d.given[k] = v === 'O'; else d.given[k] = [v];
       Snd().clank(); demoDraw();
     }));
