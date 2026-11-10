@@ -19,7 +19,7 @@ rows.forEach(([sym, easy, def, memo], i) => { const r = S.ROWS[i] || {};
   check(c.easy === row[1], `개념 톡 ① 「${c.easy}」 = 「${row[1]}」`); check(c.def === row[2], `개념 톡 ② 「${c.def}」 = 「${row[2]}」`); check(c.memo === row[3], `개념 톡 ③ 「${c.memo}」 = 「${row[3]}」`);
   check(c.where.test('집합 X 의 개수는?') && !c.where.test('A ∩ B 의 가장 작은 원소는?'), '붙는 곳 = 집합 X 의 개수 문제만'); }
 // ①-3 명제 단원 (#62): SYMBOL-TALK 「명제 단원」 표 그대로 (쪽 8x) · 붙는 곳
-{ const pr = md.split('\n').filter((l) => /^\| .* \| 8\d \|$/.test(l)).map((l) => l.split('|').slice(1, -1).map((c) => c.trim().replace(/\*\*/g, '')));
+{ const sec8 = md.slice(md.indexOf('## 명제 단원'), md.indexOf('### 9차시')); const pr = sec8.split('\n').filter((l) => /^\| .* \| 8\d \|$/.test(l)) /* 8차시 표만 (9차시 = #66) */.map((l) => l.split('|').slice(1, -1).map((c) => c.trim().replace(/\*\*/g, '')));
   const ids = ['neg', 'prop', 'cond', 'truth'];
   check(pr.length === 4 && S.PROP.length === 4 && S.PROP.map((r) => r.id).join() === ids.join(), `명제 4줄 (문서 ${pr.length} · 코드 ${S.PROP.length})`);
   pr.forEach(([, easy, def, memo], i) => { const r = S.PROP[i] || {};
