@@ -90,7 +90,7 @@ DS.Gem = (function () {
       [`log/${k}`]: { g: had + g, at: N().TS, why: String(why || '').slice(0, 40) },
       ...(opt.free ? {} : { [`day/${day}`]: used + g }),
     });
-    pop(g, why); if (!opt.free) capAlert(m, { day: { [day]: used + g } }); // 한도 밖(선물 · 업적)은 알림 없음
+    if (!opt.quiet) pop(g, why); if (!opt.free) capAlert(m, { day: { [day]: used + g } }); // 한도 밖(선물 · 업적)은 알림 없음
     return g;
   }
   // 📜 받기: key 한 번만 (upsert = 늘어난 만큼만) · 하루 한도 없음
@@ -173,6 +173,7 @@ DS.Gem = (function () {
     return back;
   }
   // 화면: 받는 순간 오른쪽 위에 「💎 +3」
+  // opt.quiet (#68 B 2026-11-11): 부른 쪽이 여러 💎 를 모아 pop 한 번
   function pop(g, why) {
     if (typeof document === 'undefined' || !g) return;
     const e = document.createElement('div'); e.className = 'gem-pop'; e.innerHTML = `💎 +${g}${why ? ` <small>${String(why).replace(/[<>&]/g, '')}</small>` : ''}`;
@@ -234,5 +235,5 @@ DS.Gem = (function () {
     await N().update(path(m), { total: (Number(d.total) || 0) + back, [`log/refund_${key}`]: { g: back, at: N().TS, why: '📚 도감 완성 → 💎 돌려받음', gift: true } });
     return back;
   }
-  return { dayLeft, showLeft, capAlert, auraCls, AURA_NAMES, PHOTO_HEROES, photoPassed, SCROLL_NEED, scrollOf, ENH, ENH_MAX, GREAT, enhTier, addScroll, enhance, watchGifts, giftList, chest, feathers, rareOf, convert, CONV, cardRefund, CARD_HEROES, G, SHOP, DAY_CAP, price, mine, add, gift, giftsSince, addDaily, medal, buy, sell, refundOf, REFUND, owns, itemKey, streak, today };
+  return { pop, dayLeft, showLeft, capAlert, auraCls, AURA_NAMES, PHOTO_HEROES, photoPassed, SCROLL_NEED, scrollOf, ENH, ENH_MAX, GREAT, enhTier, addScroll, enhance, watchGifts, giftList, chest, feathers, rareOf, convert, CONV, cardRefund, CARD_HEROES, G, SHOP, DAY_CAP, price, mine, add, gift, giftsSince, addDaily, medal, buy, sell, refundOf, REFUND, owns, itemKey, streak, today };
 })();

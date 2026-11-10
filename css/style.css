@@ -3210,3 +3210,12 @@ body:has(#test-bar) #screen-student.st-battle .wrap:has(.cr-dock) { padding-bott
 .door-ov .dr-band .dr-sec { font-size: 12px; }
 @keyframes drBand { from { transform: translateY(-120%); } to { transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) { .door-ov, .door-ov * { animation: none !important; transition: none !important; } }
+/* 🏁 #68 B 마무리 한 화면 (2026-11-11): 내 결과 한 줄 · 더 보기 · 한마디 접힌 칸 */
+.lb-mine { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 8px 0; padding: 8px 12px; border-radius: 10px; background: #2a1e14cc; border: 1px solid #c99a4a88; color: #fff3d6; font-size: 15px; }
+.lb-mine b { color: #ffd25a; }
+.lb-more, .lb-words { margin: 8px 0; border-radius: 10px; border: 1px solid #c99a4a66; background: #1a120ccc; }
+.lb-more > summary, .lb-words > summary { cursor: pointer; padding: 9px 12px; font-weight: 800; color: #ffe9b8; list-style: none; }
+.lb-more > summary::-webkit-details-marker, .lb-words > summary::-webkit-details-marker { display: none; }
+.lb-more[open] > summary, .lb-words[open] > summary { border-bottom: 1px solid #c99a4a44; }
+.lb-more-in { display: grid; gap: 6px; padding: 10px; }
+.lb-words .words { padding: 4px 10px 10px; }

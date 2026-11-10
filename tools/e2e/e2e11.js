@@ -57,7 +57,7 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   for (const P of [S1, typeof S2 !== 'undefined' ? S2 : null].filter(Boolean)) await P.evaluate(() => document.querySelectorAll('.th-chest-ov, #th-bat').forEach((e) => e.remove())); // 🎁 상자 · 🦇 박쥐 창 닫기 (0.9.11~)
   await S1.waitForTimeout(1500); await S1.click('#st-lobby'); await S1.waitForTimeout(2500);
   const ok = await S1.$('#rs-ok'); if (ok) await ok.click(); await S1.waitForTimeout(1500);
-  console.log('7 student klass btn:', !!(await S1.$('#st-klass')));
+  console.log('7 student klass btn:', !!(await S1.$('#st-klass')), '| #68 B 한 줄:', await S1.$eval('.lb-mine', (e) => e.textContent.replace(/\s+/g, ' ').trim()).catch(() => 'none'), '| 더 보기 접힘:', await S1.$eval('.lb-more', (e) => !e.open).catch(() => 'none'), '| 한마디 접힘:', await S1.$eval('.lb-words', (e) => !e.open && !!e.querySelector('#st-word')).catch(() => 'none'));
   await S1.screenshot({ path: `${OUT}/05-student-lobby.png`, fullPage: true });
   await go(); await T.waitForTimeout(1500); // → 마무리
   console.log('8 hall finale klass btn:', !!(await H.$('#h-klass')), 'teacher news:', !!(await T.$('#t-news')));
@@ -66,7 +66,8 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   await T.evaluate(async () => DS.Act.endClass(DS.Teacher.code())); await T.waitForTimeout(2000);
   console.log('9 teacher after end:', await act(T), 'tcamp btn:', !!(await T.$('#t-tcamp')), '| hall:', await act(H), 'h-tcamp:', !!(await H.$('#h-tcamp')));
   await T.screenshot({ path: `${OUT}/08-teacher-end.png`, fullPage: true }); await H.screenshot({ path: `${OUT}/09-hall-end.png` });
-  await H.waitForTimeout(2500); if (await H.$('.pm-x')) await H.click('.pm-x'); // 🏁 반대항 경주 창 닫기 (0.9.11~)
+  await H.waitForTimeout(2500); console.log('9b #68 B 종합실 끝: 학급 결과 저절로', !!(await H.$('.sc-modal')), '| 반대항 저절로 안 열림', !(await H.$('.pm-x')), '| 학생 결과 다시 안 뜸', !(await S1.$('.rs-modal')));
+  if (await H.$('.pm-x')) await H.click('.pm-x'); if (await H.$('.sc-modal .ui-x')) await H.click('.sc-modal .ui-x'); // 🏁 반대항 · 🏫 학급 결과 창 닫기
   await H.click('#h-tcamp'); await H.waitForTimeout(1500);
   console.log('10 hall camp again:', await act(H), 'news:', !!(await H.$('#tc-news')));
   await H.screenshot({ path: `${OUT}/10-hall-tcamp-closed.png` });

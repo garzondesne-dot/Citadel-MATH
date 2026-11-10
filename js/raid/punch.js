@@ -95,16 +95,17 @@ DS.Punch = (function () {
   }
   // 학생 보상: 끝난 뒤 저장된 기록(같은 수업 코드)을 기다렸다가 1등 💎 +5 · +10% 💎 +3 (한도 밖 · 한 번)
   async function reward(m, L, R, code) {
-    if (!DS.Gem || !m || m.c == null || !R.meta.cls || !L.no || L.eval) return;
+    if (!DS.Gem || !m || m.c == null || !R.meta.cls || !L.no || L.eval) return 0;
     for (let i = 0; i < 5; i++) {
       const all = (await N().get('punch').catch(() => null)) || {}, e = ((all[L.id] || {})[ck(R.meta.cls)]);
       if (e && e.code === code) {
         const bd = DS.Combo.board(all, L.id, ck(R.meta.cls));
-        for (const [k, g, why] of DS.Combo.punchGems(bd.me, bd)) await DS.Gem.add(m, g, `punch_${L.id}_${k}`, why, { free: true }).catch(() => {});
-        return;
+        let sum = 0; for (const [k, g, why] of DS.Combo.punchGems(bd.me, bd)) sum += (await DS.Gem.add(m, g, `punch_${L.id}_${k}`, why, { free: true, quiet: true }).catch(() => 0)) || 0;
+        return sum; // #68 B: 알림은 부른 쪽이 한 줄로
       }
       await new Promise((r) => setTimeout(r, 1500));
     }
+    return 0;
   }
   return { open, load, reward };
 })();

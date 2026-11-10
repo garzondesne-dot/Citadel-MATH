@@ -102,8 +102,11 @@ DS.Student = (function () {
     if (!real() || !DS.Gem || !DS.Combo || !info0 || info0.cls == null || !L || !R || endPaid === code || !Raid().activeIds(R).includes(me)) return;
     endPaid = code;
     const a = DS.Combo.analyze(L, R), was = Number((R.meta || {}).comboBest) || 0;
-    if (a.best >= 10 && a.best > was && a.bestUsers.includes(me)) DS.Gem.add(acc(), DS.Gem.G.comboBest, `combo_${code}`, `🔥 반 최고 콤보 ${a.best}!`, { free: true }).catch(() => {});
-    if (DS.Punch && !DS.Act.punchOff(R)) DS.Punch.reward(acc(), L, R, code).catch(() => {});
+    // 💎 알림 한 줄로 묶어 한 번 (#68 B 2026-11-11): 🔥 반 최고 콤보 · 🏁 반대항
+    const parts = [], m0 = acc();
+    const cb = a.best >= 10 && a.best > was && a.bestUsers.includes(me) ? DS.Gem.add(m0, DS.Gem.G.comboBest, `combo_${code}`, `🔥 반 최고 콤보 ${a.best}!`, { free: true, quiet: true }).then((g) => { if (g) parts.push([g, '🔥 콤보']); }).catch(() => {}) : Promise.resolve();
+    const pu = DS.Punch && !DS.Act.punchOff(R) ? DS.Punch.reward(m0, L, R, code).then((g) => { if (g) parts.push([g, '🏁 반대항']); }).catch(() => {}) : Promise.resolve();
+    Promise.all([cb, pu]).then(() => { const sum = parts.reduce((t, [g]) => t + g, 0); if (sum && DS.Gem.pop) DS.Gem.pop(sum, parts.map(([, w]) => w).join(' · ')); });
   }
   // 🆙 몬스터를 쓰러뜨리는 순간 내 용사 머리 위 +EXP · 보스 처치 +EXP (처음 들어왔을 때 이미 쓰러진 것은 빼고)
   let xpSeen = null;
@@ -143,7 +146,7 @@ DS.Student = (function () {
     if (stop) stop(); stop = null; focus(false); atkStop(); DS.Thrill && DS.Thrill.batPhone(null); { const cb = document.getElementById('st-combo'); if (cb) cb.innerHTML = ''; }
     const t = test; test = null;
     const go = (bonus) => { if (t) { t.exit(); return; } if (bonus && DS.Bonus) DS.Bonus.enter(acc(), { train: true }); else DS.Camp.enter(acc()); };
-    if (DS.Result && L && R && me && Raid().activeIds(R).includes(me)) return DS.Result.show(L, R, me, t ? null : acc(), code, go, { force: true }).catch(() => go()); // 2026-11-03: 수업이 끝나면 언제나 ⚔ 개인 결과 → 모닥불 (학급 결과는 대기실 버튼)
+    if (DS.Result && L && R && me && Raid().activeIds(R).includes(me)) return DS.Result.show(L, R, me, t ? null : acc(), code, go, {}).catch(() => go()); // #68 B (2026-11-11): 전투 결과는 한 번 — 형성평가 뒤 이미 봤으면 바로 캠프 · 못 본 학생만 여기서 (기록 저장은 그대로)
     go();
   }
   const stop0 = () => { saveNow(); if (stop) stop(); stop = null; focus(false); atkStop(); test = null; if (DS.Thrill) DS.Thrill.batPhone(null); const cb = document.getElementById('st-combo'); if (cb) cb.innerHTML = ''; };
@@ -262,14 +265,25 @@ DS.Student = (function () {
         <div class="lb-h teacher" style="left:50%;bottom:20%">${DS.Art.hero(DS.ASSETS.heroes.teacher, 'idle', after && finale ? 'pairhop' : 'huff')}<i class="shadow"></i></div>
         ${crowd}<div class="lb-h me" style="left:34%;bottom:12%">${DS.Art.hero(myP().hero, 'idle', after && finale ? 'pairhop' : 'huff')}<i class="shadow"></i>${w && !(R.hide || {})[me] ? `<span class="lb-say">${esc(w.t)}</span>` : ''}</div>
         <p class="lb-count">👥 접속 <b>${onN}</b>명 · 입장 ${tot.length}명</p>
-        <p class="lb-greet">${after ? '모두 수고했네! 오늘 배운 것 한마디씩 남기게' : `${L.no ? `${DS.Lessons.noText(L.no)}차시 ` : ''}${esc(L.title.split('·')[0].trim())} 던전에 온 것을 환영하네!`}</p></div>
-      ${after ? `<div class="stamp-bar">📮 반드시 학습지 확인도장 받아가세요.</div>${sv ? DS.Survey.btnHtml('st-survey') : ''}<button class="btn primary" id="st-mine">⚔ 내 전투 결과 보기</button>${kr ? '<button class="btn sc-btn" id="st-klass">🏫 우리 반 학급 결과 보기</button>' : ''}${kr && DS.Punch && !DS.Act.punchOff(R) && R.meta.cls && L.no && !L.eval ? '<button class="btn" id="st-punch">🏁 반대항 경주</button>' : ''}${wordsForm(w)}${'' /* 2026-11-03 사용자 확정: 모루는 개인 캠프(모닥불)에서만 — 대기실에서는 열지 않는다 (수업 중엔 여유가 없음) */}`
+        <p class="lb-greet">${after ? '모두 수고했네!' : `${L.no ? `${DS.Lessons.noText(L.no)}차시 ` : ''}${esc(L.title.split('·')[0].trim())} 던전에 온 것을 환영하네!`}</p></div>
+      ${after ? `<div class="stamp-bar">📮 반드시 학습지 확인도장 받아가세요.</div>${myLine()}${sv ? DS.Survey.btnHtml('st-survey') : ''}${kr ? `<details class="lb-more" data-lbo="more"${lbOpen.more ? ' open' : ''}><summary>더 보기 ▸</summary><div class="lb-more-in"><button class="btn sc-btn" id="st-klass">🏫 우리 반 학급 결과 보기</button>${DS.Punch && !DS.Act.punchOff(R) && R.meta.cls && L.no && !L.eval ? '<button class="btn" id="st-punch">🏁 반대항 경주</button>' : ''}</div></details>` : ''}<details class="lb-words" data-lbo="words"${lbOpen.words ? ' open' : ''}><summary>💬 한마디 남기기 ▸${w ? ` <small class="muted">「${esc(w.t)}」</small>` : ' <small class="muted">(선택)</small>'}</summary>${wordsForm(w)}</details>${'' /* 2026-11-03 사용자 확정: 모루는 개인 캠프(모닥불)에서만 — 대기실에서는 열지 않는다 (수업 중엔 여유가 없음) */}`
         : test ? '<p class="center">친구들이 다 모이면 아래 「수업 시작 ▶」을 눌러요!</p>' : '<p class="center">선생님이 수업을 시작할 때까지 기다려요. 학습지를 꺼내 두세요!</p>'}</div>`;
     if (after) bindWords();
+    body.querySelectorAll('[data-lbo]').forEach((d) => d.addEventListener('toggle', () => { lbOpen[d.dataset.lbo] = d.open; }));
     const svb = $('#st-survey'); if (svb) svb.onclick = () => DS.Survey.open(acc(), () => { drawn = ''; render(); });
     const kb = $('#st-klass'); if (kb) kb.onclick = () => DS.Control.run(() => DS.ShareCard.klassOpen(L, R));
     const pb = $('#st-punch'); if (pb) pb.onclick = () => DS.Control.run(() => DS.Punch.open(L, R));
     const mb = $('#st-mine'); if (mb) mb.onclick = () => DS.Control.run(() => DS.Result.show(L, R, me, !real() ? null : acc(), code, () => {}, { inClass: true, force: true }));
+  }
+  // 🏁 #68 B 마무리 한 화면 (2026-11-11): 내 결과 한 줄(맞힌 소문제 · +EXP · +💎) + 「자세히 ▸」 = 전투 결과 · 「더 보기 ▸」 = 학급 결과 · 반대항 · 한마디 = 접힌 칸
+  const lbOpen = {};
+  function myLine() {
+    if (!DS.Result || !Raid().activeIds(R).includes(me)) return '<button class="btn primary" id="st-mine">⚔ 내 전투 결과 보기</button>';
+    let r = null; try { r = DS.Result.compute(L, R, me); } catch (e) { r = null; }
+    if (!r) return '<button class="btn primary" id="st-mine">⚔ 내 전투 결과 보기</button>';
+    const xp = DS.Grow ? DS.Grow.sum(r.parts) : 0, G = (DS.Gem && DS.Gem.G) || null;
+    const gem = G ? G.join + Math.min(G.solvedMax, Number(r.parts.correct) || 0) + (r.perfects > 0 ? G.perfect || 0 : 0) + (r.parts.perfect ? G.bossPerfect || 0 : 0) : 0;
+    return `<div class="lb-mine"><span>✔ 맞힌 소문제 <b>${Number(r.parts.correct) || 0}</b> · ⭐ <b>+${xp}</b> EXP${gem ? ` · 💎 <b>+${gem}</b>` : ''}</span><button class="btn small" id="st-mine">자세히 ▸</button></div>`;
   }
   function wordsForm(w) {
     if (locked) return '<p class="muted small center">💬 한마디는 선생님이 잠가 두었어요.</p>';
