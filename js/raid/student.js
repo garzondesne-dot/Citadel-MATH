@@ -10,6 +10,7 @@ DS.Student = (function () {
   const { esc, pretty } = DS.UI;
   const Raid = () => DS.Raid;
   let code = null, L = null, R = null, raw = null, me = null, stop = null;
+  if (DS.Control && DS.Control.onTimeUp) DS.Control.onTimeUp('student', () => { if (code && R && L && document.getElementById('screen-student').classList.contains('active')) DS.Control.doorMount('student', code, R, L); }); // ⏰ #68 A 학생 폰 위쪽 띠 (풀기는 계속)
   let form = null;          // 풀고 있는 시도 { key, given: [] }
   let retrying = '';        // '몬스터id|다음 시도' — "다시 도전"을 누른 상태
   let shown = '';           // 결과 연출을 한 번만

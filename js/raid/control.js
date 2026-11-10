@@ -214,6 +214,51 @@ DS.Control = (function () {
     document.querySelectorAll('[data-sl-end]').forEach((e) => { const l = Math.max(0, Number(e.dataset.slEnd) - now); e.textContent = `${Math.ceil(l / 1000)}초`; }); // 📝 풀이 시간 남은 초
     document.body.classList.toggle('tb-last-min', lastMin); // 이긴 뒤 · 수업 끝 · 화면 바뀜이면 붉은 테두리 끔
     Object.values(timeUpFns).forEach((fn) => { try { fn(now); } catch (err) { console.error(err); } });
+    try { doorPaint(); } catch (err) { console.error(err); } // ⏰ #68 A 남은 초
+  }
+
+  // ⏰ #68 A 보스 문 닫기 장면 (2026-11-11 선생님 「추천대로」): 마감(50분 · 연장 뒤 55분) → 그 차시 보스가 문 앞에 · 15초 「5분 연장할까요?」
+  //   리모컨 · 종합실 = [+5분 연장] · [그대로 닫기] · 학생 폰 = 위쪽 띠(풀기는 계속) · 15초 지남 · 그대로 닫기 = 끝 · 연장을 이미 썼으면 묻지 않고 닫힘 장면(3.5초)만
+  //   보스를 이겼거나 마무리 단계면 장면 없이 평소처럼 끝 · 새 그림 없음(차시 보스 · 선생님 용사 도트) · transform/opacity 만
+  const DOOR_ASK = 15e3, DOOR_SHUT = 3500, DOOR_EXT = 6000;
+  const doorBoss = (L) => { const b = (L && L.boss) || {}; return { name: String(b.title || '보스').split('·').pop().trim() || '보스', sprite: b.sprite || '' }; };
+  function doorState(R, L, now = DS.Net.now()) {
+    if (!R || !R.state || Raid().isClosed(R)) return null;
+    const s = R.state, d = Raid().deadline(R), dr = s.door;
+    if (dr && d && Number(dr.d) === d && Number(dr.at)) { const lim = dr.ask ? DOOR_ASK : DOOR_SHUT; return { kind: dr.ask ? 'ask' : 'shut', left: Math.max(0, Math.ceil((Number(dr.at) + lim - now) / 1000)) }; }
+    if (s.doorExt && now - Number(s.doorExt) < DOOR_EXT) return { kind: 'ext' };
+    return null;
+  }
+  // 마감 시계 (리모컨 · 종합실 onTimeUp 이 부름 · 예전 「바로 timeUp」 대신)
+  function doorHost(code, R, L, now) {
+    const d = Raid().deadline(R); if (!d || now < d || Raid().isClosed(R) || Raid().isLobby(R)) return;
+    if (Raid().bossHp(L, R).won || Raid().isEnd(L, R)) return Act().timeUp(code, R, L).catch(() => {});
+    const dr = (R.state || {}).door;
+    if (!dr || Number(dr.d) !== d) return Act().doorStart(code, R, d).catch(() => {});
+    if (Number(dr.at) && now >= Number(dr.at) + (dr.ask ? DOOR_ASK : DOOR_SHUT)) return Act().timeUp(code, R, L).catch(() => {});
+  }
+  let DM = null; // { role: 'hall' | 'teacher' | 'student', code, R, L }
+  function doorMount(role, code, R, L) { DM = R && L ? { role, code, R, L } : null; doorPaint(); }
+  function doorPaint() {
+    if (typeof document === 'undefined') return;
+    let el = document.getElementById('door-ov');
+    const scr = DM && document.getElementById(`screen-${DM.role}`), st = DM && scr && scr.classList.contains('active') ? doorState(DM.R, DM.L) : null;
+    if (!st) { if (el) el.remove(); return; }
+    const { role, code, R, L } = DM, B = doorBoss(L), sig = `${role}|${st.kind}`;
+    if (!el || el.dataset.sig !== sig) {
+      if (!el) { el = document.createElement('div'); el.id = 'door-ov'; document.body.appendChild(el); }
+      el.dataset.sig = sig; el.className = `door-ov ${role} ${st.kind}`;
+      const boss = B.sprite && DS.Art.monster ? `<div class="dr-boss">${DS.Art.monster(B.sprite, st.kind === 'ext' ? 'down' : 'idle')}</div>` : '<div class="dr-boss">👑</div>';
+      const door = '<div class="dr-door"><i class="l"></i><i class="r"></i></div>';
+      const btns = role !== 'student' && st.kind === 'ask' ? '<div class="dr-btns"><button class="btn primary" data-door-ext>⏰ +5분 연장</button><button class="btn" data-door-close>그대로 닫기</button></div>' : '';
+      const sec = '<b class="dr-sec"></b>';
+      if (role === 'student') el.innerHTML = `<div class="dr-band">${st.kind === 'ext' ? '🧙 선생님이 5분을 벌었다!' : st.kind === 'ask' ? `👑 보스가 문을 닫으려 해요… 선생님을 기다리는 중 ${sec}` : '👑 보스가 문을 닫아요'}</div>`;
+      else if (st.kind === 'ext') el.innerHTML = `<div class="dr-card">${door}${boss}<div class="dr-hero">${DS.Art.hero(DS.Art.teacherHero(R), 'attack')}</div><p class="dr-t">🧙 선생님이 문을 밀어 열었다!</p><b class="dr-plus">⏳ +5분!</b></div>`;
+      else el.innerHTML = `<div class="dr-card">${door}${boss}<p class="dr-t">👑 ${esc(B.name)}${st.kind === 'ask' ? '가 던전 문을 닫으려 한다!' : '가 던전 문을 닫는다!'}</p>${st.kind === 'ask' ? `<p class="dr-q">${role === 'teacher' ? '⏰ 5분 연장할까요?' : '⏰ 선생님, 5분 연장할까요?'} ${sec}</p>` : ''}${btns}</div>`;
+      el.querySelectorAll('[data-door-ext]').forEach((b) => (b.onclick = () => run(async () => { b.disabled = true; await Act().doorExtend(code, R); })));
+      el.querySelectorAll('[data-door-close]').forEach((b) => (b.onclick = () => run(async () => { b.disabled = true; await Act().timeUp(code, R, L); })));
+    }
+    const sc = el.querySelector('.dr-sec'); if (sc && st.left != null) sc.textContent = st.left;
   }
   function tbAlert(min, e) {
     const big = !!e.closest('#screen-hall');
@@ -261,5 +306,5 @@ DS.Control = (function () {
     const who = Raid().activeIds(R).filter((u) => { const p = (R.players || {})[u] || {}; return !p.teacher && p.draft && p.draft === `${st.id}|${Raid().record(L, R, st.id, u).nextAttempt}`; }).map((u) => R.players[u].num).sort((a, b) => a - b);
     return who.length ? `<p class="draft-row">⌛ 입력 다 함 · <b>공격 안 누름 ${who.length}명: ${who.join(' · ')}번</b> <span class="muted small">— 「⚔ 공격!」을 눌러야 내져요</span></p>` : '';
   }
-  return { draftHtml, oldHtml, missing, missingHtml, bindMissing, chainHtml, bindChain, solveHtml, bindSolve, saveBtn, bindSave, lessonBtn, bindLesson, remoteGrid, xpFloat, xpOf, tbarHtml, onTimeUp, bindExtend, hm, iconBar, restBtn, bindRest, restLeft, restEnd, mmss, name, run, wordsHtml, bindWords, stepName, nextName, stepTitles, FINALE, forward, back, pctHtml, bindPct, focusBtn, bindFocus, sheetBtn, bindSheet, videoBtn, bindVideo, esc };
+  return { doorHost, doorMount, doorState, draftHtml, oldHtml, missing, missingHtml, bindMissing, chainHtml, bindChain, solveHtml, bindSolve, saveBtn, bindSave, lessonBtn, bindLesson, remoteGrid, xpFloat, xpOf, tbarHtml, onTimeUp, bindExtend, hm, iconBar, restBtn, bindRest, restLeft, restEnd, mmss, name, run, wordsHtml, bindWords, stepName, nextName, stepTitles, FINALE, forward, back, pctHtml, bindPct, focusBtn, bindFocus, sheetBtn, bindSheet, videoBtn, bindVideo, esc };
 })();

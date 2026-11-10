@@ -3168,3 +3168,45 @@ body:has(#test-bar) #screen-student.st-battle .wrap:has(.cr-dock) { padding-bott
 .ult.guard .u-shield { position: absolute; left: 50%; top: 47%; width: min(46vh, 340px); aspect-ratio: 5 / 6; transform: translate(-50%, -50%) scale(.6); clip-path: polygon(50% 0, 100% 14%, 94% 58%, 50% 100%, 6% 58%, 0 14%); background: radial-gradient(ellipse at 50% 35%, #ffffff55, #9fdcff22 60%, transparent 75%); box-shadow: inset 0 0 0 6px #ffe9a6; opacity: 0; z-index: 2; animation: uShield .8s ease-out forwards; }
 .ult.guard .u-shield::before { content: ''; position: absolute; inset: 6px; clip-path: inherit; background: linear-gradient(180deg, #ffe9a6, #fff6d0 30%, transparent 31%, transparent 69%, #fff6d0 70%, #ffe9a6); opacity: .35; }
 @keyframes uShield { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.6); } 30% { opacity: .9; transform: translate(-50%, -50%) scale(1); } 75% { opacity: .7; } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.12); } }
+/* ⏰ #68 A 보스 문 닫기 장면 (2026-11-11): 종합실 = 가운데 큰 장면 · 리모컨 = 위쪽 카드 · 학생 = 위쪽 띠(누름 통과) · transform/opacity 만 */
+.door-ov { position: fixed; z-index: 85; pointer-events: none; }
+.door-ov.hall, .door-ov.teacher { inset: 0; display: flex; align-items: center; justify-content: center; background: #0008; animation: drFade .3s ease-out both; }
+.door-ov.teacher { align-items: flex-start; padding-top: 12vh; }
+.door-ov .dr-card { pointer-events: auto; position: relative; width: min(92vw, 640px); padding: 18px 18px 16px; border-radius: 16px; text-align: center; background: linear-gradient(180deg, #2a1e14ee, #160f0aee); border: 3px solid #c99a4a; box-shadow: 0 0 40px #000c, 0 0 24px #ffb02e55; color: #fff3d6; }
+.door-ov.hall .dr-card { width: min(70vw, 820px); padding: 26px 26px 22px; }
+.door-ov .dr-door { position: relative; height: 170px; width: 150px; margin: 0 auto -150px; border-radius: 70px 70px 6px 6px; background: #0b0705; box-shadow: inset 0 0 0 4px #5a3b1c, 0 0 30px #ffb02e33; overflow: hidden; }
+.door-ov.hall .dr-door { height: 250px; width: 220px; margin-bottom: -220px; border-radius: 110px 110px 8px 8px; }
+.door-ov .dr-door i { position: absolute; top: 0; bottom: 0; width: 50%; background: repeating-linear-gradient(90deg, #6b4524 0 18px, #5a391d 18px 20px); box-shadow: inset 0 0 0 3px #3a2410; transition: transform .6s ease-in; }
+.door-ov .dr-door i.l { left: 0; transform: translateX(-88%); } .door-ov .dr-door i.r { right: 0; transform: translateX(88%); }
+.door-ov.ask .dr-door i.l { animation: drCreepL 15s linear both; } .door-ov.ask .dr-door i.r { animation: drCreepR 15s linear both; }
+.door-ov.shut .dr-door i { transform: translateX(0) !important; transition-duration: 1.4s; }
+.door-ov.shut .dr-door i.l { animation: drShutL 1.4s ease-in both; } .door-ov.shut .dr-door i.r { animation: drShutR 1.4s ease-in both; }
+.door-ov.ext .dr-door i.l { animation: drOpenL .5s ease-out both; } .door-ov.ext .dr-door i.r { animation: drOpenR .5s ease-out both; }
+@keyframes drCreepL { from { transform: translateX(-88%); } to { transform: translateX(-35%); } } @keyframes drCreepR { from { transform: translateX(88%); } to { transform: translateX(35%); } }
+@keyframes drShutL { from { transform: translateX(-60%); } to { transform: translateX(0); } } @keyframes drShutR { from { transform: translateX(60%); } to { transform: translateX(0); } }
+@keyframes drOpenL { from { transform: translateX(-30%); } to { transform: translateX(-92%); } } @keyframes drOpenR { from { transform: translateX(30%); } to { transform: translateX(92%); } }
+.door-ov .dr-boss { position: relative; z-index: 1; width: 150px; height: 150px; margin: 0 auto; animation: drBoss 1.6s ease-in-out infinite alternate; }
+.door-ov.hall .dr-boss { width: 220px; height: 220px; }
+.door-ov .dr-boss .art { width: 100% !important; height: 100% !important; }
+.door-ov.ext .dr-boss { animation: drPushed .7s ease-out both; }
+@keyframes drBoss { from { transform: translateY(0) scale(1); } to { transform: translateY(-4px) scale(1.04); } }
+@keyframes drPushed { from { transform: translateX(0); opacity: 1; } to { transform: translateX(46%) rotate(8deg); opacity: .55; } }
+.door-ov .dr-hero { position: absolute; z-index: 2; left: 12%; top: 34%; width: 120px; height: 120px; animation: drHero .6s cubic-bezier(.2,1.4,.4,1) both; }
+.door-ov.hall .dr-hero { width: 170px; height: 170px; left: 16%; top: 30%; }
+.door-ov .dr-hero .art { width: 100% !important; height: 100% !important; }
+@keyframes drHero { from { transform: translateX(-60%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+.door-ov .dr-t { margin: 12px 0 4px; font-weight: 900; font-size: clamp(18px, 4.6vw, 30px); text-shadow: 0 2px 0 #000; }
+.door-ov.hall .dr-t { font-size: clamp(26px, 3vw, 44px); }
+.door-ov .dr-q { margin: 4px 0 10px; font-size: clamp(16px, 4vw, 24px); color: #ffe08a; }
+.door-ov .dr-sec { display: inline-block; min-width: 1.6em; margin-left: 6px; padding: 0 6px; border-radius: 8px; background: #b3261e; color: #fff; font-variant-numeric: tabular-nums; }
+.door-ov .dr-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.door-ov .dr-btns .btn { min-width: 140px; font-size: 18px; }
+.door-ov .dr-plus { display: block; font-size: clamp(30px, 6vw, 60px); color: #9fe870; text-shadow: 0 0 18px #4caf50, 3px 3px 0 #000; animation: drPlus .7s .25s cubic-bezier(.2,1.6,.4,1) both; }
+@keyframes drPlus { from { transform: scale(2.2); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+@keyframes drFade { from { opacity: 0; } to { opacity: 1; } }
+.door-ov.student { left: 0; right: 0; top: 0; }
+.door-ov .dr-band { margin: calc(env(safe-area-inset-top, 0px) + 6px) 8px 0; padding: 8px 12px; border-radius: 10px; background: #2a1408ee; border: 2px solid #c99a4a; color: #ffe9b8; font-weight: 800; font-size: 14px; text-align: center; box-shadow: 0 4px 14px #0008; animation: drBand .35s ease-out both; }
+.door-ov.student.ext .dr-band { background: #123018ee; border-color: #6fcf5a; color: #dfffd2; }
+.door-ov .dr-band .dr-sec { font-size: 12px; }
+@keyframes drBand { from { transform: translateY(-120%); } to { transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .door-ov, .door-ov * { animation: none !important; transition: none !important; } }

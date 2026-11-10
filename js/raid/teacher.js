@@ -28,7 +28,7 @@ DS.Teacher = (function () {
     try { const a = JSON.parse(localStorage.getItem('citadel-rooms')) || []; a.unshift({ code: r.code, cls: cls || '', lesson: lessonId, uid: DS.Net.uid(), at: Date.now() }); localStorage.setItem('citadel-rooms', JSON.stringify(a.slice(0, 30))); } catch (e) { /* 무시 */ } // 📋 만든 수업 목록
     return open(r.code, r.hallKey); // v0.9.2: 교사 폰은 리모컨에서 바로 시작 (교사 캠프는 종합상황실 첫 화면 · 수업 끝 뒤 버튼)
   }
-  C().onTimeUp('teacher', (now) => { if (!R || !L || !code || !document.getElementById('screen-teacher').classList.contains('active')) return; const d = Raid().deadline(R); if (d && now >= d && !Raid().isClosed(R)) DS.Act.timeUp(code, R, L).catch(() => {}); });
+  C().onTimeUp('teacher', (now) => { if (!R || !L || !code || !document.getElementById('screen-teacher').classList.contains('active')) return; C().doorMount('teacher', code, R, L); C().doorHost(code, R, L, now); }); // ⏰ #68 A
   C().onTimeUp('teacher-bat', () => { if (R && L && code && document.getElementById('screen-teacher').classList.contains('active')) DS.Act.batTick(code, R, L).catch(() => {}); }); // 🦇 황금 박쥐 (v0.9.11)
   async function open(c, hallKey) {
     if (DS.Art.loadTeacherCfg) await DS.Art.loadTeacherCfg(); // 🧙 #32 선생님 설정 = 서버 gcfg/teacher

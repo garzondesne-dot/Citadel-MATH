@@ -178,7 +178,7 @@ DS.Hall = (function () {
     const cb = $('#h-combo'); if (cb) { const h = DS.Thrill.badge(DS.Combo.comboNow(han, R, now), { big: true }) + (han && han.best >= 5 ? `<small class="th-best">오늘 최고 ${han.best}${(R.meta || {}).comboBest ? ` · 반 기록 ${R.meta.comboBest}` : ''}</small>` : ''); if (cb.innerHTML !== h) cb.innerHTML = h; }
     DS.Thrill.batHall($('#raid'), Raid().isClosed(R) ? null : b);
   }
-  C().onTimeUp('hall', (now) => { if (!R || !L || !DS.Act.isHost(R) || !document.getElementById('screen-hall').classList.contains('active')) return; const d = Raid().deadline(R); if (d && now >= d && !Raid().isClosed(R)) DS.Act.timeUp(code, R, L).catch(() => {}); });
+  C().onTimeUp('hall', (now) => { if (!R || !L || !document.getElementById('screen-hall').classList.contains('active')) return; C().doorMount('hall', code, R, L); if (DS.Act.isHost(R)) C().doorHost(code, R, L, now); }); // ⏰ #68 A 보스 문 닫기 장면 (마감 → 15초 묻기 → 끝)
   // 🧭 위 줄 「도입 · 개념 · 문제 · 형성」 (2026-11-07 최종 정돈판 ⑤): 지금 단계만 금색 + 그 종류 안에서 「1 / 5」 · 아래 얇은 진행 점(단계 하나 = 점 하나 · 형성평가는 긴 점)
   const KIND4 = (st) => (st.kind === 'concept' ? '개념' : st.kind === 'monster' ? '문제' : st.kind === 'boss' ? '형성' : '도입');
   function stepChips(i) {
