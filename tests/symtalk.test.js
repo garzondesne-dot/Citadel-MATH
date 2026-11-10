@@ -13,6 +13,11 @@ rows.forEach(([sym, easy, def, memo], i) => { const r = S.ROWS[i] || {};
   check(r.def === def, `${sym} ② 정의 「${r.def}」 = 「${def}」`);
   check(r.memo === (memo === '—' ? '' : memo), `${sym} ③ 기억 고리 「${r.memo}」 = 「${memo}」`); });
 
+// ①-2 개념 톡 (#58 F): SYMBOL-TALK 「개념 톡」 표 그대로 · 붙는 곳 = 부분집합의 개수 문제 글
+{ const row = md.split('\n').find((l) => /^\| 「집합 X 의 개수는\?」/.test(l)).split('|').slice(1, -1).map((c) => c.trim().replace(/\*\*/g, '')), c = S.CONCEPTS[0];
+  check(c && c.id === '2^n' && c.sym === '2ⁿ', '개념 톡 기록 키 「2^n」 · 칩 「2ⁿ」');
+  check(c.easy === row[1], `개념 톡 ① 「${c.easy}」 = 「${row[1]}」`); check(c.def === row[2], `개념 톡 ② 「${c.def}」 = 「${row[2]}」`); check(c.memo === row[3], `개념 톡 ③ 「${c.memo}」 = 「${row[3]}」`);
+  check(c.where.test('집합 X 의 개수는?') && !c.where.test('A ∩ B 의 가장 작은 원소는?'), '붙는 곳 = 집합 X 의 개수 문제만'); }
 // ② 문맥 (요청 #54 예: 「A ∩ B = ∅」 → 서로소 · 「n(A ∪ B)」 → 개수 공식 · 「Aᶜ」 → 여집합 · 「A − B」 → 차집합 · 「a ∈ A」 → 속한다)
 const at = (t, ch, k = 0) => { let i = -1; for (let j = 0; j <= k; j++) i = t.indexOf(ch, i + 1); return S.pick(t, i); };
 const T = [
@@ -26,7 +31,7 @@ const T = [
   ['U = 100 미만의 자연수', 'U', 'U'], ['n(U) = 99', 'U', 'U'], ['n(∅) = 0', '∅', 'empty'], ['A − B ≠ B − A', '−', 'diff'],
 ];
 T.forEach(([t, ch, want]) => { const got = at(t, ch); check(got === want, `「${t}」의 ${ch} → ${want} (${got})`); });
-check(Object.keys(S.BY).every((k) => S.ROWS.some((r) => r.id === k)), '모든 기호 id = 16줄 안');
+check(Object.keys(S.BY).every((k) => S.ROWS.some((r) => r.id === k) || S.CONCEPTS.some((r) => r.id === k)), '모든 id = 기호 16줄 + 개념 톡');
 
 // ③ 대시보드 순위: 반 · 차시 거르기
 const xp = { 1: { st: { 'set-06': { cap: 3, compl: 1 }, 'eval-1': { cap: 2 } } }, 2: { st: { 'set-06': { compl: 5 } } }, 3: { total: 10 } };

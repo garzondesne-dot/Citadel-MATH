@@ -3042,3 +3042,4 @@ body:has(#test-bar) #screen-student.st-battle .wrap:has(.cr-dock) { padding-bott
 .ch-wrap.cr-q:not(.cr-big) .scene .sc-gem { display: none; } .ch-wrap.cr-q:not(.cr-big) .scene .sc-hp { right: 52px; } /* 📱 #56 띠에선 💎 숨김 (HP 와 겹침) */
 .cr-story.cr-fold ol li { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .cr-story.cr-fold ol { margin-top: 2px; margin-bottom: 0; } /* 📱 #56 접힌 풀이 = 한 줄 */
 .ch-wrap.cr-q .paper { padding-top: 8px; padding-bottom: 8px; } .ch-wrap.cr-q .paper .item { padding-top: 6px !important; padding-bottom: 6px !important; }
+.sym-t.sym-c { display: inline-block; margin-left: 4px; padding: 0 7px; border-radius: 8px; background: #fff1c2; color: #6b4a00; font-weight: 800; font-size: .9em; text-decoration: none; border: 1.5px dashed #b8873a; } /* 📖 #58 F 개념 톡 칩 */

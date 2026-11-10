@@ -40,6 +40,10 @@ const OUT = process.argv[2] || '.', U = 'http://localhost:8765/index.html?local'
   // 나의 풀이 (첫 졸개 맞힌 뒤)
   await S.evaluate(async (c) => { const R = DS.Act.unpackRoom(await DS.Net.get(`rooms/${c}`)), L = DS.Lessons.get('set-06'), me = DS.Net.uid(), it = DS.Raid.chainItems(L, R, 'u4', me, 0); await DS.Net.set(`rooms/${c}/chain/u4/${me}/0`, { s: 0, p: 0, g: DS.Raid.chainAns(it[0]), at: DS.Net.TS }); await DS.Net.set(`rooms/${c}/chain/u4/${me}/1`, { s: 1, p: 0, g: DS.Raid.chainAns(it[1]), at: DS.Net.TS }); }, code);
   await S.waitForTimeout(3000); await clr();
+  await S.evaluate(async (c) => { const R = DS.Act.unpackRoom(await DS.Net.get(`rooms/${c}`)), L = DS.Lessons.get('set-06'), me = DS.Net.uid(), it = DS.Raid.chainItems(L, R, 'u4', me, 0); await DS.Net.set(`rooms/${c}/chain/u4/${me}/2`, { s: 2, p: 0, g: DS.Raid.chainAns(it[2]), at: DS.Net.TS }); }, code); await S.waitForTimeout(3000); await clr();
+  const pc = await S.evaluate(() => { const c = document.querySelector('#st-body .sym-c'); if (!c) return null; c.scrollIntoView({ block: 'center' }); c.click(); const b = document.querySelector('.st-bub'); return { chip: c.textContent, def: b && (b.querySelector('.st-def') || {}).textContent }; });
+  ok(pc && pc.chip === '2ⁿ' && /부분집합의 개수는 2ⁿ 개/.test(pc.def || ''), `📖 개념 톡: 문제 4 대장 「집합 X 의 개수는?」 옆 2ⁿ → 「${pc && pc.def}」`); await S.mouse.click(5, 5); await S.waitForTimeout(1800);
+  const st2 = await S.evaluate(() => DS.Net.get('xp/1-3/1/st/set-06')); ok(st2 && st2['2^n'] >= 1, `개념 톡 기록 키 2^n (${JSON.stringify(st2)})`);
   const story = await S.evaluate(() => [...document.querySelectorAll('#st-body .cr-story .sym-t')].map((e) => `${e.textContent}:${e.dataset.st}`)); ok(story.length > 0, `📜 나의 풀이 기호도 (${story.join(' ')})`);
   // 대시보드 「📖 기호 톡」
   await T.evaluate(() => DS.Dash.enter()); await T.waitForTimeout(1800); if (await T.isVisible('[data-cls="1-3"]')) { await T.click('[data-cls="1-3"]'); await T.waitForTimeout(1500); }

@@ -25,7 +25,11 @@ DS.SymTalk = (function () {
     { id: 'compl', sym: 'Aᶜ', easy: 'U 안에서 A 밖에 있는 것 전부 (여집합)', def: 'U 의 원소 중 A 에 속하지 않는 모든 원소로 이루어진 집합', memo: 'C = complement 의 첫 글자 · Aᶜ = U − A · 「A 가 아니다」' },
     { id: 'diff', sym: 'A − B', easy: 'A 에서 B 를 빼고 남은 것 (A 쪽만)', def: 'A 에 속하지만 B 에는 속하지 않는 모든 원소로 이루어진 집합 = A 에 대한 B 의 차집합', memo: 'A − B ≠ B − A · A − B = A ∩ Bᶜ' },
   ];
-  const BY = Object.fromEntries(ROWS.map((r) => [r.id, r]));
+  // 📖 개념 톡 (#58 F · SYMBOL-TALK.md 「개념 톡」 절 그대로): 기호가 아니라 개념 · 부분집합의 개수를 묻는 문제 글 끝에 「2ⁿ」 칩 · 기록 키 「2^n」
+  const CONCEPTS = [
+    { id: '2^n', sym: '2ⁿ', easy: '원소마다 「넣을까 뺄까」 2가지씩 → 2 × 2 × … (원소 수만큼)', def: '원소가 n 개인 집합의 부분집합의 개수는 2ⁿ 개', memo: '2³ = 2 × 2 × 2 = 8 · 2⁵ = 2 × 2 × 2 × 2 × 2 = 32 (25 아님) · 지수 n = 원소의 개수', where: /집합 X 의 개수는\?|부분집합의 개수/ },
+  ];
+  const BY = Object.fromEntries([...ROWS, ...CONCEPTS].map((r) => [r.id, r]));
   const esc = (s) => (DS.UI ? DS.UI.esc(s) : String(s));
   const pretty = (s) => (DS.UI ? DS.UI.pretty(s) : esc(s));
 
@@ -94,6 +98,9 @@ DS.SymTalk = (function () {
         tail.replaceWith(w); w.appendChild(tail); void rest;
       });
     });
+    // 개념 톡: 문제 글(.item-q · 문제 창 · 쓰기 화면 문제)에 칩 하나
+    root.querySelectorAll('.item-q, .bl-q').forEach((q) => { if (q.querySelector('.sym-c')) return; const c = CONCEPTS.find((x) => x.where.test(q.textContent)); if (c) q.insertAdjacentHTML('beforeend', ` <span class="sym-t sym-c" data-st="${c.id}">${esc(c.sym)}</span>`); });
+    if (root.id === 'quiz-q' && !root.querySelector('.sym-c')) { const c = CONCEPTS.find((x) => x.where.test(root.textContent)); if (c) root.insertAdjacentHTML('beforeend', ` <span class="sym-t sym-c" data-st="${c.id}">${esc(c.sym)}</span>`); }
     root.dataset.stDone = root.innerHTML.length + '';
   }
   let busy = false;
@@ -155,5 +162,5 @@ DS.SymTalk = (function () {
     scan();
   }
   if (typeof document !== 'undefined') { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start(); }
-  return { ROWS, BY, pick, setCtx, rank, scan, close, flush, _markEl: markEl };
+  return { ROWS, CONCEPTS, BY, pick, setCtx, rank, scan, close, flush, _markEl: markEl };
 })();
