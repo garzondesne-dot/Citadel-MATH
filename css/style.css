@@ -3277,3 +3277,5 @@ body:has(#test-bar) #screen-student.st-battle .wrap:has(.cr-dock) { padding-bott
 .hero-card .hc-cta.gem { background: #6fc3ff; color: #06243a; border-color: #3a8fc8; } .hero-card .hc-cta.off { opacity: .55; filter: saturate(.5); }
 .hpick .hp-prog { position: absolute; left: 0; right: 0; bottom: 0; font-size: 10.5px; text-align: center; background: #14110fcc; color: #ebb84f; font-variant-numeric: tabular-nums; }
 .hpick.peek-on { outline: 2px solid #ebb84f; outline-offset: -2px; }
+/* 🐞 내 용사 창 제목 줄: 「오늘 받은 💎」 이 제목과 한 줄에 끼어 「내 용사」 가 세로로 눌리던 것 → 아래 줄로 (2026-11-11) */
+.set-head { flex-wrap: wrap; } .set-head .me-day { flex: 1 1 100%; order: 3; margin: 0; }

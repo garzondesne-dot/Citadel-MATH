@@ -527,7 +527,7 @@ DS.Camp = (function () {
       let cond = '', cta = '';
       if (open) cta = pickH === hero ? '<button class="btn hc-cta" disabled>✔ 지금 내 용사</button>' : '<button class="btn primary hc-cta" data-hset>이 용사로 정하기</button>';
       else if (h.shop) { const lack = Math.max(0, h.shop.price - (L.gem || 0)); cond = `💎 ${h.shop.price} 으로 열어요 · 지금 내 💎 ${L.gem || 0}${lack ? ` (${lack} 모자람)` : ''}`; cta = `<button class="btn hc-cta gem${lack ? ' off' : ''}" data-hbuy>💎 ${h.shop.price} 으로 열기</button>`; }
-      else if (h.chal) { const c = ((DS.Account.CHAL || {})[pickH] || {}).cond || h.cond; cond = `${esc(c)} 열려요 · <b>${h.chal.n} / ${h.chal.need}</b><div class="hc-bar"><b style="width:${Math.round((100 * h.chal.n) / h.chal.need)}%"></b></div>`; cta = '<button class="btn hc-cta off" disabled>💎 로는 열 수 없어요</button>'; }
+      else if (h.chal) { const c = ((DS.Account.CHAL || {})[pickH] || {}).cond || h.cond; cond = `🔓 조건: ${esc(c)} · <b>${h.chal.n} / ${h.chal.need}</b><div class="hc-bar"><b style="width:${Math.round((100 * h.chal.n) / h.chal.need)}%"></b></div>`; cta = '<button class="btn hc-cta off" disabled>💎 로는 열 수 없어요</button>'; }
       else cond = esc(h.cond || '');
       return `<div class="hero-card${open ? '' : ' lock'}"><div class="hc-port${open ? '' : ' dim'}">${portrait(pickH)}${open ? '' : '<small>🔒 잠김</small>'}</div>
         <div class="hc-txt"><h3>${open ? esc(lo ? lo.name : '') : '???'} <small>· ${esc(lo ? lo.job : (DS.ASSETS.heroesV2.list[pickH] || {}).name || '')}</small></h3>${lo ? `<div class="hc-nick">「${esc(lo.nick)}」</div><p>${esc(lo.a)}</p>${open ? `<p>${esc(lo.b)}</p>` : '<p class="hid">열면 다음 이야기가 보여요.</p>'}` : ''}
