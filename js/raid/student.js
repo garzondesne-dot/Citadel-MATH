@@ -941,5 +941,5 @@ DS.Student = (function () {
     bindLobby();
   }
   // v0.9.3 종합상황실 시연: 학생 폰과 같은 문항 칸 · 해설 줄
-  return { enter, stop: stop0, itemHtml: (q, i, G) => itemHtml(q, i, false, null, G, true), solOf, itemText, hintCount };
+  return { enter, stop: stop0, itemHtml: (q, i, G) => itemHtml(q, i, false, null, G, true), solOf, itemText, hintCount, penLine, penBox, pixIn, penToggle: (k) => { penOpen[k] = !penOpen[k]; }, penMark: (k, i) => { penLast[k] = i; } }; // 🧩 A안 (11/11): 성채 · 허수아비 전투도 같은 부품
 })();
