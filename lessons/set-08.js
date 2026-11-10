@@ -1,4 +1,6 @@
-// 공통수학2 Ⅱ. 집합과 명제 · 8차시 「명제와 조건」 (학습과정 8차시 레이드용 v5 · 2026-11-10 선생님 컨펌 · 요청 #60 · DECISIONS 「📄 8차시 레이드용 v5」)
+// 공통수학2 Ⅱ. 집합과 명제 · 8차시 「명제와 조건」 (학습과정 8차시 레이드용 v6 · 2026-11-10 선생님 플레이 피드백 · 요청 #65 · DECISIONS 「🎮 8차시 플레이 피드백 반영」)
+// v6: v5 + STEP 4 ‘모든’과 ‘어떤’(c4 · m5 반쪽 슬라임 = 문제 7 · 8) · 형성평가 v6 4문항 · 답이 집합인 문항 = 원소 칩 + 「∅ (공집합)」 단추 (SORAID P8)
+// (아래 v5 머리말)
 // v5: 생각 열기 없음 · 🔁 전시 확인(도입 img review) · 개념 3 · 몬스터 4(m1 명제와 부정 · m2 진리집합 · m3 U 에 따라 · m4 조건의 부정) · 형성평가 4 · ‘모든’과 ‘어떤’(옛 c4 · c5 · m4 · m5) = 9차시로 (아래 KEEP9 에 보관)
 // (옛 머리말) 학습과정 8차시 레이드용 v1 · 2026-11-08 사용자 「8차시 진행하자」 = 변경 제안 v1 컨펌 · 방향 방 요청 #5
 // 교과서 82~85쪽 · 보강 · 도전 없음 · ★ 칸만 게임 · 몬스터 5 + 보스(형성평가 6문항)
@@ -15,6 +17,15 @@
   const TF = (question, t, solution, check) => ch(question, ['참', '거짓'], t ? '참' : '거짓', solution, check);
   const multi = (question, U, want, solution, check) => ({ type: 'multi', question: `${question} 원소를 모두 고르시오.`, options: U.map(String), answer: U.map((x, i) => (want.includes(x) ? i : -1)).filter((i) => i >= 0), solution, check });
   const divs = (n) => range(1, n).filter((d) => n % d === 0);
+  // 🔘 #65-6 원소 칩 (SORAID P8): 칩 = 정답 원소 + 함정 수(부호 · 제곱 · U 밖의 수) · 「∅ (공집합)」 단추 따로 (q.empty) · 정답이 공집합이면 ∅ 하나만
+  const EMPTY = '∅ (공집합)', num = (x) => (x < 0 ? `−${-x}` : String(x));
+  const chips = (question, cands, want, solution, check) => { const c = [...new Set(cands)].sort((a, b) => a - b);
+    return { type: 'multi', question: `${question} 원소를 모두 고르시오.`, options: [...c.map(num), EMPTY], answer: want.length ? c.map((x, i) => (want.includes(x) ? i : -1)).filter((i) => i >= 0) : [c.length], empty: [c.length], solution, check }; };
+  const chipsU = (question, U, want, solution, check) => chips(question, [0, ...U, Math.max(...U) + 1], want, solution, check); // 유한 U: U 원소 + U 밖의 수 0 · N+1
+  const sqC = (a) => [-a * a, -a, -1, 0, 1, a, a * a]; // x² = a² 함정: 부호 · 제곱
+  const chips2 = (question, gs, solution, check) => { const opts = [], ans = [], empty = [], groups = [];
+    gs.forEach((g) => { const c = [...new Set(g.cands)].sort((a, b) => a - b), b0 = opts.length; c.forEach((x, i) => { opts.push(num(x)); if (g.want.includes(x)) ans.push(b0 + i); }); opts.push(EMPTY); empty.push(opts.length - 1); if (!g.want.length) ans.push(opts.length - 1); groups.push({ label: g.label, n: c.length + 1 }); });
+    return { type: 'multi', question: `${question} 원소를 모두 고르시오.`, options: opts, answer: ans, empty, groups, solution, check }; };
 
   // ── 문제 1: 명제 판별 · 참 거짓 + 부정 ────────────────────
   // 문장 → 참(true) · 거짓(false) · 명제 아님(null)  (교과서 · 학습지 뜻 · 시험은 따로 같은 표를 적음)
@@ -163,11 +174,57 @@
     for (;;) { const N = r.pick([6, 7, 8]), par = r.pick(Object.keys(PAR)), op = r.pick(['>', '<', '≥', '≤']), c = r.int(2, N - 2), k = r.int(1, N), sc = r.pick([5, 6, 7, 8, 11, 12, 15, 18, 20, 24, 27, 30]);
       if (N === 6 && par === '홀수' && op === '>' && c === 4 && k === 2) continue; if (sc === 10) continue; return v5m4(N, par, op, c, k, sc, r); }
   }
-  const MONSTERS = {
+  // ══ v6 (2026-11-10 #65) ═══════════════════════════════════
+  // 문제 3: U = {1, …, N} 진리집합 (원소 칩)
+  const v6m2 = (N, k, a, b, m) => { const U = range(1, N), head = `U = ${st(U)} 일 때`;
+    return [chipsU(`(1) ${head} 조건 p : x는 ${k}의 배수 의 진리집합 P 의`, U, U.filter((x) => x % k === 0), `${k}, ${2 * k}, … → P = ${st(U.filter((x) => x % k === 0))}`, { U, kind: 'mul', k }),
+      chipsU(`(2) ${head} 조건 q : x + ${a} = ${b} 의 진리집합 Q 의`, U, U.filter((x) => x + a === b), `x = ${b} − ${a} = ${b - a} → Q = ${st(U.filter((x) => x + a === b))}`, { U, kind: 'eq', a, b }),
+      chipsU(`(3) ${head} 조건 r : x는 ${m}의 약수 의 진리집합 R 의`, U, U.filter((x) => m % x === 0), `${m}을 나누어떨어지게 하는 수 → R = ${st(U.filter((x) => m % x === 0))}`, { U, kind: 'div', m })]; };
+  function v6m2Retry(r) { for (;;) { const N = r.pick([8, 10, 12]), k = r.int(2, 5), a = r.int(1, 6), b = a + r.int(1, N), m = r.pick([4, 6, 8, 9, 10, 12].filter((x) => x <= N)); if (N === 10 && k === 3 && a === 2 && b === 7 && m === 6) continue; return v6m2(N, k, a, b, m); } }
+  // 문제 4: p : x² = a² 의 진리집합 — U = 자연수 / 정수 (원소 칩 · 함정 = 부호 · 제곱)
+  const v6m3 = (a) => [chips(`(1) U = 자연수 전체의 집합일 때 조건 p : x² = ${a * a} 의 진리집합 P 의`, sqC(a), [a], `x² = ${a * a} → x = ${a} 또는 x = −${a} · 자연수만 → P = {${a}}`, { a, U: '자연수' }),
+    chips(`(2) U = 정수 전체의 집합일 때 조건 p : x² = ${a * a} 의 진리집합 P 의`, sqC(a), [-a, a], `x = ±${a} 모두 정수 → P = {−${a}, ${a}}`, { a, U: '정수' })];
+  // 문제 5 · 6: 부정의 진리집합 (원소 칩) · 6 = U 자연수, ~p : x² ≤ c
+  const v6m4 = (N, par, op, c, k, sc) => { const U = range(1, N), head = `U = ${st(U)} 일 때`, notPar = U.filter((x) => !PAR[par](x)), notQ = U.filter((x) => !cmp(x, op, c)), notR = U.filter((x) => x !== k);
+    const P6 = range(1, 40).filter((x) => x * x <= sc), m = P6.length;
+    return [chipsU(`(1) ${head} 조건 p : x는 ${par} 의 부정 ~p 의 진리집합의`, U, notPar, `~p : x는 ${par}가 아니다 → Pᶜ = ${st(notPar)}`, { U, kind: 'par', par }),
+      chipsU(`(2) ${head} 조건 q : x ${op} ${c} 의 부정 ~q 의 진리집합의`, U, notQ, `~q : x ${NEGOP[op]} ${c} (등호도 바뀜!) → ${st(notQ)}`, { U, kind: 'cmp', op, c }),
+      chipsU(`(3) ${head} 조건 r : x = ${k} 의 부정 ~r 의 진리집합의`, U, notR, `~r : x ≠ ${k} → ${st(notR)}`, { U, kind: 'ne', k }),
+      chips(`문제 6) U 가 자연수 전체의 집합일 때, 조건 p : x² > ${sc} 의 부정 ~p 의 진리집합의`, [-m, 0, ...range(1, m + 1), sc], P6, `~p : x² ≤ ${sc} → ${P6.map((x) => `${x}² = ${x * x}`).join(' · ')} → ${st(P6)}`, { sqc: sc })]; };
+  function v6m4Retry(r) { for (;;) { const N = r.pick([6, 7, 8]), par = r.pick(Object.keys(PAR)), op = r.pick(['>', '<', '≥', '≤']), c = r.int(2, N - 2), k = r.int(1, N), sc = r.pick([5, 6, 7, 8, 11, 12, 15, 18, 20, 24, 27, 30]);
+    if (N === 6 && par === '홀수' && op === '>' && c === 4 && k === 2) continue; return v6m4(N, par, op, c, k, sc); } }
+  // 문제 7: U = {1, …, n} 모든 · 어떤 참 · 거짓 (x + a > b · 짝수/홀수 · x² = s)
+  const v6m5 = (n, A, par, sq, quad, B, r) => { const U = range(1, n);
+    const t1 = U.every((x) => x + A[0] > A[1]), t2 = U.every((x) => PAR[par](x)), t3 = U.some((x) => x * x === sq);
+    const q8 = (no, row) => [chR(`${no} 「${row[0]}」 의 부정은?`, row[2], row[1], '「모든 ~이다」의 부정 = 「어떤 ~가 아니다」 (모든 ~아니다 가 아님!)', { s: row[0] }, r),
+      TF(`${no} 「${row[1]}」 는 참인가 거짓인가?`, row[3], row[3] ? `「${row[0]}」 는 거짓(반례가 있음) → 그 부정은 참` : `「${row[0]}」 는 참 → 그 부정은 거짓`, { quad: row[0] })];
+    // 문제 8 (2): U 에서 「어떤 x 에 대하여 x > c」 의 부정 = 「모든 x 에 대하여 x ≤ c」
+    const [q2, op2, c2] = B, s2 = `${qWord[q2]} x에 대하여 x ${op2} ${c2}이다.`, q2n = qWord[q2 === 'all' ? 'some' : 'all'], n2 = NEGOP[op2], neg2 = `${q2n} x에 대하여 x ${n2} ${c2}이다.`;
+    const tNeg = q2 === 'some' ? U.every((x) => cmp(x, n2, c2)) : U.some((x) => cmp(x, n2, c2));
+    const flip = { '>': '<', '<': '>', '≥': '≤', '≤': '≥' }[op2];
+    return [TF(`(1) U = ${st(U)} 일 때 「모든 x에 대하여 x + ${A[0]} > ${A[1]}이다.」 는 참인가 거짓인가?`, t1, t1 ? `가장 작은 1 도 1 + ${A[0]} = ${1 + A[0]} > ${A[1]} → 모두 됨 → 참` : `반례가 있다 (x + ${A[0]} ≤ ${A[1]} 인 x) → 거짓`, { U, q: 'all', f: 'plusgt', a: A[0], b: A[1] }),
+      TF(`(2) U = ${st(U)} 일 때 「모든 x에 대하여 x는 ${par}이다.」 는 참인가 거짓인가?`, t2, t2 ? '모두 됨 → 참' : `${par}가 아닌 원소가 있다 (반례) → 거짓`, { U, q: 'all', f: 'par', par }),
+      TF(`(3) U = ${st(U)} 일 때 「어떤 x에 대하여 x² = ${sq}이다.」 는 참인가 거짓인가?`, t3, t3 ? `${Math.round(Math.sqrt(sq))}² = ${sq} → 하나 있음 → 참` : `x² = ${sq} 인 x 가 U 에 없다 → 거짓`, { U, q: 'some', f: 'sq', s: sq }),
+      ...q8('문제 8 (1)', quad),
+      chR(`문제 8 (2) U = ${st(U)} 일 때 「${s2}」 의 부정은?`, [`${qWord[q2]} x에 대하여 x ${n2} ${c2}이다.`, `${q2n} x에 대하여 x ${op2} ${c2}이다.`, `${q2n} x에 대하여 x ${flip} ${c2}이다.`], neg2, `모든 ↔ 어떤 을 바꾸고 ${op2} 의 부정 = ${n2} (등호 조심)`, { q: q2, op: op2, c: c2 }, r),
+      TF(`문제 8 (2) U = ${st(U)} 일 때 「${neg2}」 는 참인가 거짓인가?`, tNeg, sol8(U, q2 === 'some' ? 'all' : 'some', n2, c2), { U, q: q2 === 'all' ? 'some' : 'all', op: n2, c: c2 })]; };
+  function sol8(U, q, op, c) { // 「모든/어떤 x 에 대하여 x op c」 의 참 · 거짓 풀이
+    if (q === 'all') { const bad = U.filter((x) => !cmp(x, op, c)); return bad.length ? `${bad.join(', ')} 은(는) x ${op} ${c} 가 아니다 (반례) → 거짓` : `모든 원소가 x ${op} ${c} → 참`; }
+    const good = U.filter((x) => cmp(x, op, c)); return good.length ? `x = ${good[0]} 이면 x ${op} ${c} → 참` : `x ${op} ${c} 인 원소가 없다 → 거짓`; }
+  function v6m5Retry(r) { for (;;) { const n = r.int(4, 6), A = [r.int(0, 3), r.int(0, 4)], par = r.pick(['짝수', '홀수']), sq = r.pick([1, 4, 9, 16, 25, 36, 2, 8]), quad = r.pick(QUAD.slice(1)), B = ['some', r.pick(['>', '≥']), r.int(1, n)];
+    if (n === 4 && A[0] === 1 && A[1] === 1 && sq === 9) continue; return v6m5(n, A, par, sq, quad, B, r); } }
+  const MONSTERS_V5 = {
     m1: { title: '문제 1 · 2 · 명제와 그 부정', sprite: 'mirror:0', make: (a, r) => (a === 0 ? v5m1(['π는 유리수이다.', '섬진강은 아름답다.', '4 − 1 = 3', '정삼각형은 이등변삼각형이다.'], 15, 3, [2, '≤', 1, 2], null) : v5m1Retry(r)) },
     m2: { title: '문제 3 · 진리집합', sprite: 'mirror:1', make: (a, r) => (a === 0 ? m2Make(10, 3, 2, 7, 6) : m2Retry(r)) },
     m3: { title: '문제 4 · U 에 따라 바뀌는 진리집합', sprite: 'mirror:3' /* 수정 광부 유령 */, note: '⚠ 같은 조건이라도 U 가 다르면 진리집합이 달라져요 · ⛺ 이 몬스터 뒤 = 쉼터', make: (a, r) => (a === 0 ? m3U(2, null) : m3U(r.pick([3, 4, 5, 6]), r)) },
     m4: { title: '문제 5 · 6 · 조건의 부정', sprite: 'mirror:2' /* 뒤집힌 거미 */, note: '> 의 부정은 ≤ (같다도 들어가요!) · ~p 의 진리집합 = Pᶜ', make: (a, r) => (a === 0 ? v5m4(6, '홀수', '>', 4, 2, 10, null) : v5m4Retry(r)) },
+  };
+  const MONSTERS = { // v6 (#65): 답이 집합 = 원소 칩 · m5 = STEP 4 ‘모든’과 ‘어떤’
+    m1: MONSTERS_V5.m1,
+    m2: { title: '문제 3 · 진리집합', sprite: 'mirror:1', make: (a, r) => (a === 0 ? v6m2(10, 3, 2, 7, 6) : v6m2Retry(r)) },
+    m3: { title: '문제 4 · U 에 따라 바뀌는 진리집합', sprite: 'mirror:3' /* 수정 광부 유령 */, note: '⚠ 같은 조건이라도 U 가 다르면 진리집합이 달라져요 · ⛺ 이 몬스터 뒤 = 쉼터', make: (a, r) => (a === 0 ? v6m3(2) : v6m3(r.pick([3, 4, 5, 6]))) },
+    m4: { title: '문제 5 · 6 · 조건의 부정', sprite: 'mirror:2' /* 뒤집힌 거미 */, note: '> 의 부정은 ≤ (같다도 들어가요!) · ~p 의 진리집합 = Pᶜ', make: (a, r) => (a === 0 ? v6m4(6, '홀수', '>', 4, 2, 10) : v6m4Retry(r)) },
+    m5: { title: '문제 7 · 8 · ‘모든’과 ‘어떤’', sprite: 'mirror:4' /* 반쪽 슬라임 */, note: '모든 = 하나라도 안 되면 거짓 · 어떤 = 하나만 되어도 참 · 부정: 모든 ↔ 어떤', make: (a, r) => (a === 0 ? v6m5(4, [1, 1], '짝수', 9, QUAD[0], ['some', '>', 3], DS.Rng('s8v6|m5|0')) : v6m5Retry(r)) }, // 첫 시도도 보기 순서만 섞음 (정답이 늘 첫 번째가 되지 않게)
   };
   // 9차시 「‘모든’과 ‘어떤’」 으로 옮긴 것 (v1 c4 · c5 · m4 · m5) — 버리지 않고 보관 · 9차시를 만들 때 다시 씀
   const KEEP9 = {
@@ -225,9 +282,27 @@
       const N = r.int(5, 8), c = r.pick([2, 3, 6, 7, 8, 10, 12, 15, 20].filter((x) => x < N * N)); if (N === 5 && c === 5) continue; if (!range(1, N).some((x) => x * x > c)) continue; return v5b4(N, c);
     }
   }
-  const BOSS = { 1: BOSS5, 2: BOSS5.map((q, i) => bossMake5(i, 1, DS.Rng(`s8v5|boss2|${i}`))) }; // 세트2 = 수업 준비 미리보기용
+  // ── v6 형성평가 4문항 (#65): ① 명제가 아닌 것(3지) ② x² = a² 진리집합 U 자연수 / 정수 (원소 칩 두 칸) ③ U = {1…N} x² > c → ~p 진리집합 (원소 칩) ④ 「모든 x < c」 참 · 거짓과 부정 ──
+  const v6b1 = (np, ps, r) => fix(chR('다음 중 명제가 아닌 것은?', ps, np, `「${np}」 는 사람마다 판단이 달라 참 · 거짓을 정할 수 없다`, { np }, r), 1);
+  const v6b2 = (a) => fix(chips2(`p : x² = ${a * a} 의 진리집합을 U 에 따라 구하시오. 칸마다`, [{ label: 'U = 자연수 전체의 집합 → P', cands: sqC(a), want: [a] }, { label: 'U = 정수 전체의 집합 → P', cands: sqC(a), want: [-a, a] }], `자연수 → {${a}} · 정수 → {−${a}, ${a}}`, { a, two: true }), 2);
+  const v6b3 = (N, c) => { const U = range(1, N), P = U.filter((x) => x * x <= c); return fix(chipsU(`U = ${st(U)}, p : x² > ${c} 일 때 ~p 의 진리집합의`, U, P, `~p : x² ≤ ${c} → ${st(P)}`, { U, sqle: c }), 3); };
+  const v6b4 = (n, op, c, r) => { const U = range(1, n), t = U.every((x) => cmp(x, op, c)), n2 = NEGOP[op], T = t ? '참' : '거짓', F = t ? '거짓' : '참', flip = { '>': '<', '<': '>', '≥': '≤', '≤': '≥' }[op];
+    const ans = `${T} · 어떤 x에 대하여 x ${n2} ${c}이다.`;
+    return fix(chR(`U = ${st(U)} 일 때 「모든 x에 대하여 x ${op} ${c}이다.」 의 참 · 거짓과 그 부정을 바르게 짝지은 것은?`, [`${F} · 어떤 x에 대하여 x ${n2} ${c}이다.`, `${T} · 모든 x에 대하여 x ${n2} ${c}이다.`, `${T} · 어떤 x에 대하여 x ${flip} ${c}이다.`], ans, `${sol8(U, 'all', op, c)} · 부정 = 「어떤 x에 대하여 x ${n2} ${c}」 (모든 ↔ 어떤 · ${op} ↔ ${n2})`, { U, op, c }, r), 4); };
+  const BOSS6 = [fix(ch('다음 중 명제가 아닌 것은?', ['2 + 3 = 6', '7은 소수이다.', '수학은 재미있다.'], '수학은 재미있다.', '「수학은 재미있다.」는 사람마다 판단이 달라 참 · 거짓을 정할 수 없다', { np: '수학은 재미있다.' }), 1),
+    v6b2(3), v6b3(5, 5), v6b4(3, '<', 3, DS.Rng('s8v6|b4|0'))];
+  function bossMake6(i, a, r) {
+    for (;;) {
+      if (i === 0) { const np = r.pick(NOTPROP.slice(1)); return v6b1(np, r.shuffle(YESPROP.filter((x) => !/^모든/.test(x)).slice()).slice(0, 2), r); }
+      if (i === 1) return v6b2(r.pick([2, 4, 5, 6]));
+      if (i === 2) { const N = r.int(5, 8), c = r.pick([2, 3, 6, 7, 8, 10, 12, 15, 20].filter((x) => x < N * N)); if (N === 5 && c === 5) continue; if (!range(1, N).some((x) => x * x > c)) continue; return v6b3(N, c); }
+      const n = r.int(3, 5), op = r.pick(['<', '≤', '>', '≥']), c = r.int(1, n + 1); if (n === 3 && op === '<' && c === 3) continue; return v6b4(n, op, c, r);
+    }
+  }
+  const BOSS_V5 = { 1: BOSS5, 2: BOSS5.map((q, i) => bossMake5(i, 1, DS.Rng(`s8v5|boss2|${i}`))) }; // 세트2 = 수업 준비 미리보기용
 
-  const STEPS = [ // v5 (#60): 도입 = 🔁 전시 확인 그림 · 개념 3 · 몬스터 4 · ⛺ 쉼터는 m3 뒤에 선생님이 켬
+  const BOSS = { 1: BOSS6, 2: BOSS6.map((q, i) => bossMake6(i, 1, DS.Rng(`s8v6|boss2|${i}`))) }; void BOSS_V5; // 세트2 = 수업 준비 미리보기용
+  const STEPS = [ // v6 (#65): v5 + c4 · m5 (STEP 4 ‘모든’과 ‘어떤’) · v5 (#60): 도입 = 🔁 전시 확인 그림 · 개념 3 · 몬스터 4 · ⛺ 쉼터는 m3 뒤에 선생님이 켬
     { kind: 'intro', id: 'intro', title: '도입 · 🔁 전시 확인', say: '지난 시간: (A ∩ B)ᶜ = Aᶜ ∪ Bᶜ (드모르간) · A ∩ B = ∅ 이면 서로소 — 학습지 맨 위 칸을 같이 확인해요', img: 'review' },
     { kind: 'concept', id: 'c1', title: '개념 1 · 명제와 그 부정', say: '참 · 거짓을 분명히 정할 수 있으면 명제 · p 의 부정 ~p = 「p 가 아니다」 · p 가 참이면 ~p 는 거짓' },
     { kind: 'monster', id: 'm1' },
@@ -236,15 +311,20 @@
     { kind: 'monster', id: 'm3' },
     { kind: 'concept', id: 'c3', title: '개념 3 · 조건의 부정', say: '~p 의 진리집합 = Pᶜ · x = 1 의 부정은 x ≠ 1 · x > 2 의 부정은 x ≤ 2 (같다도 들어감)' },
     { kind: 'monster', id: 'm4' },
+    { kind: 'concept', id: 'c4', title: '개념 4 · ‘모든’과 ‘어떤’', say: '모든: P = U 이면 참 · 하나라도 안 되면 거짓 / 어떤: P ≠ ∅ 이면 참 / 부정: 모든 ↔ 어떤 · p ↔ ~p' },
+    { kind: 'monster', id: 'm5' },
     { kind: 'boss', id: 'boss', title: '형성평가 · 부정의 수정 여왕' },
   ];
   STEPS.forEach((s) => { if (s.kind === 'monster') Object.assign(s, { title: MONSTERS[s.id].title, special: !!MONSTERS[s.id].special }); });
 
-  // 칸 위치 (레이드용 v5 PDF · 2026-11-10 #60 · tools/worksheet/crops_pdf.py 로 잼 · 빨간 상자 그림으로 눈 확인 · review = 🔁 전시 확인 줄(두 단에 걸침) · m3 = ⛺ 쉼터 표지판 위까지)
-  const CROPS = { review: [{ p: 1, x: 0.045, y: 0.1282, w: 0.914, h: 0.0472 }],
-    c1: [{ p: 1, x: 0.045, y: 0.1724, w: 0.455, h: 0.1818 }], m1: [{ p: 1, x: 0.045, y: 0.3512, w: 0.455, h: 0.3668 }],
-    c2: [{ p: 1, x: 0.507, y: 0.1724, w: 0.452, h: 0.1898 }], m2: [{ p: 1, x: 0.507, y: 0.3592, w: 0.452, h: 0.207 }], m3: [{ p: 1, x: 0.507, y: 0.5632, w: 0.452, h: 0.1941 }],
-    c3: [{ p: 2, x: 0.045, y: 0.0975, w: 0.455, h: 0.1346 }], m4: [{ p: 2, x: 0.045, y: 0.2291, w: 0.455, h: 0.3811 }], boss: [{ p: 2, x: 0.507, y: 0.0944, w: 0.452, h: 0.731 }] };
+  // 칸 위치 (레이드용 v6 PDF · 2026-11-10 #65 · tools/worksheet/crops_pdf.py · 빨간 상자 그림으로 눈 확인 · m3 = ⛺ 쉼터 표지판 위까지 · m5 = 2쪽 왼쪽 아래(문제 7) + 오른쪽 위(문제 8) 두 칸)
+  const CROPS = { review: [{ p: 1, x: 0.045, y: 0.1469, w: 0.914, h: 0.0472 }],
+    c1: [{ p: 1, x: 0.045, y: 0.1911, w: 0.455, h: 0.1818 }], m1: [{ p: 1, x: 0.045, y: 0.3699, w: 0.455, h: 0.3668 }],
+    c2: [{ p: 1, x: 0.507, y: 0.1911, w: 0.452, h: 0.1889 }], m2: [{ p: 1, x: 0.507, y: 0.377, w: 0.452, h: 0.2079 }], m3: [{ p: 1, x: 0.507, y: 0.5819, w: 0.452, h: 0.169 }],
+    c3: [{ p: 2, x: 0.045, y: 0.0975, w: 0.455, h: 0.1346 }], m4: [{ p: 2, x: 0.045, y: 0.2291, w: 0.455, h: 0.3471 }],
+    c4: [{ p: 2, x: 0.045, y: 0.5732, w: 0.455, h: 0.1908 }], m5: [{ p: 2, x: 0.045, y: 0.761, w: 0.455, h: 0.1815 }, { p: 2, x: 0.507, y: 0.0931, w: 0.452, h: 0.1612 }],
+    boss: [{ p: 2, x: 0.507, y: 0.2513, w: 0.452, h: 0.5741 }] };
+  const CROPS_V5 = { review: [{ p: 1, x: 0.045, y: 0.1282, w: 0.914, h: 0.0472 }], c1: [{ p: 1, x: 0.045, y: 0.1724, w: 0.455, h: 0.1818 }], m1: [{ p: 1, x: 0.045, y: 0.3512, w: 0.455, h: 0.3668 }], c2: [{ p: 1, x: 0.507, y: 0.1724, w: 0.452, h: 0.1898 }], m2: [{ p: 1, x: 0.507, y: 0.3592, w: 0.452, h: 0.207 }], m3: [{ p: 1, x: 0.507, y: 0.5632, w: 0.452, h: 0.1941 }], c3: [{ p: 2, x: 0.045, y: 0.0975, w: 0.455, h: 0.1346 }], m4: [{ p: 2, x: 0.045, y: 0.2291, w: 0.455, h: 0.3811 }], boss: [{ p: 2, x: 0.507, y: 0.0944, w: 0.452, h: 0.731 }] }; void CROPS_V5;
   const CROPS_V1 = { c0: [{ p: 1, x: 0.045, y: 0.148, w: 0.455, h: 0.104 }], // (보관 · 9차시 참고)
     c1: [{ p: 1, x: 0.045, y: 0.2525, w: 0.455, h: 0.1739 }], m1: [{ p: 1, x: 0.045, y: 0.4234, w: 0.455, h: 0.2197 }], c2: [{ p: 1, x: 0.045, y: 0.6401, w: 0.455, h: 0.1275 }], m2: [{ p: 1, x: 0.045, y: 0.7646, w: 0.455, h: 0.136 }],
     c3: [{ p: 1, x: 0.507, y: 0.1412, w: 0.452, h: 0.1124 }], m3: [{ p: 1, x: 0.507, y: 0.2506, w: 0.452, h: 0.2 }], c4: [{ p: 1, x: 0.507, y: 0.4476, w: 0.452, h: 0.1267 }], m4: [{ p: 1, x: 0.507, y: 0.5713, w: 0.452, h: 0.2198 }],
@@ -254,22 +334,23 @@
     id: 'set-08', no: 8,
     title: '명제와 조건',
     unit: '공통수학2 Ⅱ. 집합과 명제 · 8차시',
-    sheet: '학습과정 8차시 레이드용 v5', // #60 (v1 = 옛 c0 ~ m5)
+    sheet: '학습과정 8차시 레이드용 v6', // #65 (v5 #60 · v1 = 옛 c0 ~ m5)
     crops: CROPS,
     theme: '04-mine', // 던전 테마: 거울 수정 광산 (배경 dg-04-mine-v2 · 몬스터 mirror:0~4)
     videos: { // 🎬 40 명제와 부정 · 41 진리집합과 조건의 부정 (#60 v5 · 42 모든과 어떤 = 9차시 · KEEP9.video)
       c1: 'assets/video/v08-40-v2.mp4', m1: 'assets/video/v08-40-v2.mp4',
-      c2: 'assets/video/v08-41-v2.mp4', m2: 'assets/video/v08-41-v2.mp4', m3: 'assets/video/v08-41-v2.mp4', c3: 'assets/video/v08-41-v2.mp4', m4: 'assets/video/v08-41-v2.mp4' },
-    goal: '명제와 그 부정의 뜻을 안다 · 조건의 진리집합과 조건의 부정을 구할 수 있다',
+      c2: 'assets/video/v08-41-v2.mp4', m2: 'assets/video/v08-41-v2.mp4', m3: 'assets/video/v08-41-v2.mp4', c3: 'assets/video/v08-41-v2.mp4', m4: 'assets/video/v08-41-v2.mp4',
+      c4: 'assets/video/v08-42-v2.mp4', m5: 'assets/video/v08-42-v2.mp4' }, // v6 (#65): 42 모든과 어떤 = 8차시로 다시
+    goal: '명제와 그 부정의 뜻을 안다 · 조건의 진리집합과 조건의 부정을 구할 수 있다 · ‘모든’, ‘어떤’을 포함한 명제의 참 · 거짓을 판별할 수 있다',
     defaultPct: 90,
     steps: STEPS,
     monsters: MONSTERS,
     items(id, seed, attempt) { return MONSTERS[id].make(attempt, DS.Rng(`${seed}|${id}|${attempt}`)); },
     WORDS: { PROP, NEG5, QUAD, NOTPROP, YESPROP },
     KEEP9, // 9차시 「‘모든’과 ‘어떤’」 으로 옮긴 몬스터 · 개념 (보관)
-    _v1: { OLD_MONSTERS, BOSS1 }, // v1 (보관 · 시험 참고)
-    next: { title: '9차시 · ‘모든’과 ‘어떤’', ask: '「우리 반 모든 학생은 휴대폰이 있다」 — 한 명이라도 없으면? 「어떤 학생은 휴대폰이 있다」는 언제 참일까?', link: '오늘 배운 진리집합으로 「모든」 · 「어떤」 이 붙은 명제의 참 · 거짓을 판단해요' },
-    boss: { title: '8차시 형성평가 · 부정의 수정 여왕', sprite: 'mirrorboss8:0', items: 4, hpItems: 4, sets: BOSS, tags: ['c1', 'c2', 'c2', 'c3'], // #60 v5 4문항
-      make(i, a, rng) { return a ? bossMake5(i, a, rng) : BOSS5[i]; } },
+    _v1: { OLD_MONSTERS, BOSS1 }, _v5: { MONSTERS: MONSTERS_V5, BOSS: BOSS_V5, bossMake5 }, // v1 (보관 · 시험 참고)
+    next: { title: '9차시 · 명제 p → q · 역과 대우', ask: '「p 이면 q 이다」 꼴의 명제는 언제 참일까? 거꾸로 「q 이면 p 이다」 도 참일까?', link: '오늘 배운 진리집합으로 p → q 의 참 · 거짓을 판단해요' },
+    boss: { title: '8차시 형성평가 · 부정의 수정 여왕', sprite: 'mirrorboss8:0', items: 4, hpItems: 4, sets: BOSS, tags: ['c1', 'c2', 'c3', 'c4'], // #65 v6 4문항
+      make(i, a, rng) { return a ? bossMake6(i, a, rng) : BOSS6[i]; } },
   });
 })();
