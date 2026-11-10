@@ -1781,7 +1781,7 @@ input.sv-no { width: 64px !important; display: inline-block; padding: 2px 4px; }
 .tb.warn .tb-fill { background: linear-gradient(90deg, #e8b04a, #ffd25a); }
 .tb.hot .tb-fill { background: linear-gradient(90deg, #ff3355, #ff7a59); animation: tbHot 1s ease-in-out infinite; }
 .tb.hot { border-color: #ff3355; }
-.tb.last .tb-left { font-size: 1.6em; color: #ff5470; }
+.tb.last .tb-left { display: inline-block; color: #ff5470; transform: scale(1.5); transform-origin: right center; } /* 🐞 2026-11-10 선생님 「디펜스 때 타이머가 빨개지며 커져 화면이 흔들림」: 글자 크기(1.6em)를 키우면 줄 높이가 바뀌어 아래가 들썩임 → 보기만 크게(scale · 자리 그대로) */
 .tb.won .tb-fill { background: linear-gradient(90deg, #ffd25a, #fff3b0); }
 @keyframes tbHot { 50% { opacity: .55; } }
 .tb-prog { position: relative; height: 14px; margin-top: 4px; border-radius: 7px; background: #181410; overflow: hidden; }
