@@ -51,7 +51,7 @@
 
 | 항목 | 상태 |
 |---|---|
-| 배포된 판 | **v0.9.43.0** (main 05980ec · 2026-11-11 04:1x KST · 선생님 「배포」) — 8차시 v6(‘모든’과 ‘어떤’ · 형성평가 v6 · Firebase 칸 그림 11칸 올림) · 원소 칩 + ∅ · 일반 몬스터 나의 풀이 · 형성평가 한 판 더 · 숫자 4판 보기 · 공지 팝업 ✕ · 칭호 4개 + 작은 기능 · 기호 톡 명제 · 9~11차시 그림 · 규칙 게시 불필요 ← v0.9.42.0 (7589bf2) |
+| 배포된 판 | **v0.9.44.0** (main ff0b065 · 2026-11-11 07:5x KST · 선생님 「지금 바로 배포」) — 아래 82줄 · 이전 v0.9.43.0 (05980ec) |
 | 브랜치 | 작업 = `hero-v2` (같은 커밋을 `ccr-…` 세션 브랜치에도) · 배포 = `git push origin hero-v2:main` (fast-forward) → Pages run 확인 · GPT 그림 = `assets-gpt` 브랜치 `asset-handoff/` (force-push 금지) |
 | 배포 전 시험 | `tests/*.test.js` 전부 (td.test.js 는 8~15분 · 지도 하나만 = `TD_MAP=ice node tests/td.test.js`) · sw.js CACHE = 'ds-' + DS.VERSION (js/config.js 와 같이 올림) |
 | 방 운영 | CLAUDE.md 「운영 규칙 4가지」(#28) · 완료 보고 = 「✅ #n · 버전 · 확인할 것 1줄」 · 결정 원본 = DECISIONS.md |
