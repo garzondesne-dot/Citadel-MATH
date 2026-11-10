@@ -26,6 +26,8 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   // 문제 하나 맞게 풀기 (DS.Quiz.last)
   async function solveAll() {
     for (let k = 0; k < 20; k++) {
+      const fm = await S.evaluate(() => { const f = DS.Bonus._form, paper = document.querySelector('.bn-fight .bf-paper .item'); if (!f || !paper) return false; f.todo.forEach((i) => { const q = f.items[i]; f.G[i] = q.type === 'choice' ? q.answerIndex : q.type === 'multi' ? q.answer.slice() : q.answer; }); DS.Bonus._form = null; f.submit(); return true; }); // 🧩 A안: 한 장(양피지) 꼴
+      if (fm) { await S.waitForTimeout(3500); continue; }
       const q = await S.evaluate(() => { const r = document.querySelector('#quiz'); if (!r || r.classList.contains('hidden')) return null; const l = DS.Quiz.last; return l && { type: l.type, ai: l.answerIndex, ans: l.answer }; });
       if (!q) return;
       if (q.type === 'choice') await S.click(`#quiz-choices button:nth-child(${q.ai + 1})`);

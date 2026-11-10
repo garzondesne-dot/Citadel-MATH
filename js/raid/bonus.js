@@ -379,6 +379,7 @@ DS.Bonus = (function () {
         el.querySelectorAll('[data-hint]').forEach((b) => (b.onclick = () => { const k = Number(String(b.dataset.hint).replace(/^bf/, '')); if (hOpen.has(k)) hOpen.delete(k); else hOpen.add(k); DS.Sound.clank(); paint(); }));
         el.querySelectorAll('.pen-sf').forEach((b) => (b.onclick = (e) => { e.stopPropagation(); S.penToggle(penKey()); paint(); }));
         const go = el.querySelector('#bf-go2'); if (go) go.onclick = () => resolve(G.map((g, i) => (items[i].type === 'number' ? Number(g) : g)));
+        DS.Bonus._form = { items, todo, G, submit: () => resolve(G.map((g, i) => (items[i].type === 'number' ? Number(g) : g))) }; // 🧪 시험용 고리 (자동 풀이 · 화면에는 영향 없음)
       };
       paint();
     });
