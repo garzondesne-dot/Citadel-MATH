@@ -135,6 +135,22 @@ DS.Account = (function () {
     if (id !== 'none') { const d = await DS.Titles.data(m); if (!DS.Titles.earned(d).some((t) => t.id === id)) fail('아직 얻지 못한 호칭이에요.'); }
     await N().update(`accounts/${m.c}/${m.n}`, { title: String(id) }); m.title = String(id);
   }
+  // 🧙 #73 도전으로 여는 용사 (2026-11-11 머리 방 「추천대로」 · 💎 로 못 삼 · 지난 기록도 셈)
+  //   27 주판 술사 = 👑 형성평가 만점 서로 다른 차시 3개 (수업 = 체력 문항 모두 정답 · 🎯 허수아비 재대결 처치 어느 쪽이든)
+  //   28 기하 마도사 = 🏰 성채 방 처치 서로 다른 방 10개 (보스 방 포함) · 33 별점술사 = 📕 오답노트 빨간 칸 해결(보충 완료) 누적 15개
+  const CHAL = {
+    27: { need: 3, cond: '👑 형성평가 만점 3번 (서로 다른 차시 · 수업이나 🎯 재대결)' },
+    28: { need: 10, cond: '🏰 성채 방 10개 처치 (보스 방 포함)' },
+    33: { need: 15, cond: '🎯 오답노트 빨간 칸 15개 해결' },
+  };
+  function chalProgress(rec, bonus) {
+    rec = rec || {}; bonus = bonus || {};
+    const les = DS.Lessons.list.filter((L) => L.no && !L.eval && L.boss);
+    const perfect = les.filter((L) => { const r = rec[L.id], hp = L.boss.hpItems || L.boss.items; return (r && Number(r.boss) >= (Number(r.bossN) || hp) && Number(r.boss) > 0) || !!((bonus[L.id] || {}).boss || {}).clear; }).length;
+    let rooms = 0; if (DS.Bonus) (DS.Bonus.FLOORS || []).map((f) => DS.Lessons.get(f.id)).filter(Boolean).forEach((CL) => (CL.rooms || []).forEach((r) => { if (DS.Bonus.roomRec(bonus, CL, r.id).clear) rooms++; }));
+    let fixed = 0; if (DS.Note) les.filter((L) => rec[L.id]).forEach((L) => { const x = DS.Note.lesson(L, rec[L.id], bonus[L.id]); fixed += x.mons.filter((st) => st === 'p').length + x.boss.slice(0, x.hp).filter((st) => st === 'p').length; });
+    return { 27: perfect, 28: rooms, 33: fixed };
+  }
   // 고를 수 있는 용사 · 이펙트 목록 (잠금 · 해금 조건)
   // 기본 용사 0~6 · 기본 이펙트 6종 = 열림. 추가 용사 8번 = 1~3차시 도감 15장 · 9번 = 첫 레이드 · 10번 = 4~6차시 도감 · 11번 = 8~11차시 도감, 12~15번 · 화려한 이펙트 = 추후 공개
   async function looks(m) {
@@ -156,7 +172,8 @@ DS.Account = (function () {
     const fo = DS.Bonus ? DS.Bonus.fxOpen(bonus) : {}, seals = DS.Bonus ? DS.Bonus.seals(bonus).length : 0;
     heroes.push({ id: 16, open: seals >= 3, cond: `🏆 업적 ${Math.min(seals, 3)} / 3 — 🎯 허수아비 👑 형성평가 재대결 · 🏰 성채 보스 방을 처치하면 하나씩` }); // 2026-11-03 사용자 결정: 금발 검사 = 인장 3개
     [18, 19, 20, 21, 22, 23].forEach((id) => heroes.push({ id, open: false, cond: '💎 조각으로 해금' })); // 2026-11-07 새 용사 6 (흑기사 · 메카닉 · 해커 · 용기사 = 💎 상점 · gem.js SHOP)
-    [24, 25, 26, 27, 28, 29, 30, 31, 32, 33].forEach((id) => heroes.push({ id, open: false, cond: '🔒 여는 방법은 곧 알려 줄게요' })); // 2026-11-10 새 용사 10 (마검사 ~ 별점술사) · 해금 조건 = 머리 방 결정 기다림 (선생님 「머리 방에서 정하기」)
+    [24, 25, 26, 27, 28, 29, 30, 31, 32, 33].forEach((id) => heroes.push({ id, open: false, cond: '💎 조각으로 해금' })); // 2026-11-11 #73 새 용사 10: 💎 30 · 60 (gem.js SHOP) · 27 · 28 · 33 = 도전 (아래 CHAL)
+    { const cp = chalProgress(rec, bonus); Object.entries(CHAL).forEach(([id, c]) => { const h = heroes.find((x) => x.id === Number(id)); if (!h) return; const n = cp[id] || 0; h.chal = { n: Math.min(n, c.need), need: c.need }; h.open = n >= c.need; h.cond = `${c.cond} · ${Math.min(n, c.need)} / ${c.need}`; }); }
     // ⚔ 이펙트 v2 (2026-11-06): 계열 6 × 단계 4 — Ⅰ 열림 · Ⅱ 💎 · Ⅲ 인장(또는 💎) · Ⅳ 💎 + 같은 계열 Ⅲ 필요 · 특별(업적)
     const fx = [];
     DS.FX.FAMS.forEach((fam) => fam.ids.forEach((k, t) => {
@@ -231,5 +248,5 @@ DS.Account = (function () {
     tsess(true);
   }
 
-  return { classKey, email, teacherEmail, pw, validPin, mask, parseRoster, uploadRoster, removeStudent, resetAccount, masks, accountOf, signUp, login, me, setHero, setFx, setLook, setSocket, setTitle, looks, logout, adminExists, isAdmin, teacherCreate, teacherLogin, endStaleTeacher };
+  return { classKey, email, teacherEmail, pw, validPin, mask, parseRoster, uploadRoster, removeStudent, resetAccount, masks, accountOf, signUp, login, me, setHero, setFx, setLook, setSocket, setTitle, looks, CHAL, chalProgress, logout, adminExists, isAdmin, teacherCreate, teacherLogin, endStaleTeacher };
 })();
