@@ -210,11 +210,13 @@ DS.Quiz = (function () {
           const b = document.createElement('button');
           b.className = 'choice multi';
           // 보기가 숫자뿐이면 번호(①…)를 붙이지 않는다 (① 1 처럼 헷갈림). 그 밖에는 ①~⑳ (9번째부터 undefined 가 뜨던 것 수정)
-          const mark = /^[-−]?\d+$/.test(String(o)) ? '' : `<span class="no">${i < 20 ? String.fromCharCode(0x2460 + i) : i + 1}</span>`;
+          const mark = /^[-−]?\d+$/.test(String(o)) || (prob.empty || []).includes(i) ? '' : `<span class="no">${i < 20 ? String.fromCharCode(0x2460 + i) : i + 1}</span>`;
           b.innerHTML = `${mark}<span class="math">${pretty(o)}</span>`;
+          if ((prob.empty || []).includes(i)) b.classList.add('chip-empty');
           b.addEventListener('click', () => {
             if (done) return;
-            if (on.has(i)) on.delete(i); else on.add(i);
+            if (prob.empty) { const nx = chipToggle(prob, [...on], i); on.clear(); nx.forEach((k) => on.add(k)); box.querySelectorAll('.choice.multi').forEach((bb, k) => bb.classList.toggle('on', on.has(k))); }
+            else if (on.has(i)) on.delete(i); else on.add(i);
             b.classList.toggle('on', on.has(i));
             sub.disabled = !on.size;
             DS.Sound.clank();
@@ -280,5 +282,14 @@ DS.Quiz = (function () {
     });
   }
 
-  return { ask, close, grade, subsetsNote };
+  // 🔘 #65-6 원소 칩 (SORAID P8): 답이 집합인 문항 = 원소 칩 여러 개 + 「∅ (공집합)」 단추(q.empty = 그 보기 번호들)
+  //   ∅ 를 누르면 같은 칸(groups)의 칩이 모두 꺼지고, 칩을 누르면 그 칸의 ∅ 가 꺼짐 → 고른 번호 배열을 돌려줌
+  function chipToggle(q, given, n) {
+    const s = new Set(given || []), E = new Set(q.empty || []);
+    const span = (k) => { if (!q.groups || !q.groups.length) return [0, q.options.length]; let b0 = 0; for (const g of q.groups) { if (k < b0 + g.n) return [b0, b0 + g.n]; b0 += g.n; } return [0, q.options.length]; };
+    if (s.has(n)) s.delete(n);
+    else { const [a, b] = span(n); if (E.has(n)) { for (let k = a; k < b; k++) s.delete(k); } else { for (let k = a; k < b; k++) if (E.has(k)) s.delete(k); } s.add(n); }
+    return [...s].sort((a, b) => a - b);
+  }
+  return { ask, close, grade, subsetsNote, chipToggle };
 })();

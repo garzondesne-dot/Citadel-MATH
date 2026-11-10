@@ -638,7 +638,7 @@ DS.Student = (function () {
     body.querySelectorAll('[data-pick]').forEach((b) => b.addEventListener('click', () => {
       const [i, v] = b.dataset.pick.split('|'); const k = Number(i);
       const t = items[k].type;
-      if (t === 'multi') { const s = new Set(form.given[k]); const n = Number(v); if (s.has(n)) s.delete(n); else s.add(n); form.given[k] = [...s].sort((a, b2) => a - b2); }
+      if (t === 'multi') { const n = Number(v); if (items[k].empty) form.given[k] = DS.Quiz.chipToggle(items[k], form.given[k], n); else { const s = new Set(form.given[k]); if (s.has(n)) s.delete(n); else s.add(n); form.given[k] = [...s].sort((a, b2) => a - b2); } } // 🔘 #65-6 ∅ 단추
       else if (t === 'choice') form.given[k] = Number(v);
       else if (t === 'ox') form.given[k] = v === 'O';
       else form.given[k] = [v];
@@ -787,7 +787,7 @@ DS.Student = (function () {
     bindTop(); bindHelp();
     body.querySelectorAll('[data-pick]').forEach((b) => b.addEventListener('click', () => {
       const v = b.dataset.pick.split('|')[1];
-      if (q.type === 'multi') { const st = new Set(cform.given[0]); const nn = Number(v); if (st.has(nn)) st.delete(nn); else st.add(nn); cform.given[0] = [...st].sort((a, b2) => a - b2); }
+      if (q.type === 'multi') { const nn = Number(v); if (q.empty) cform.given[0] = DS.Quiz.chipToggle(q, cform.given[0], nn); else { const st = new Set(cform.given[0]); if (st.has(nn)) st.delete(nn); else st.add(nn); cform.given[0] = [...st].sort((a, b2) => a - b2); } }
       else if (q.type === 'choice') cform.given[0] = Number(v); else cform.given[0] = [v];
       DS.Sound.clank(); render();
     }));
@@ -849,9 +849,9 @@ DS.Student = (function () {
     if (q.type === 'multi') {
       const on = new Set(G[i]);
       if (q.groups && q.groups.length) { let b0 = 0; // 🔁 #41 두 칸 고르기 (A 칸 · B 칸 · 보기 번호는 이어 붙임 · 둘 다 맞아야 정답)
-        return `<div class="item">${tag}${qText(q.question)}${q.groups.map((g) => { const from = b0; b0 += g.n; return `<div class="pick-grp"><b class="pick-grp-h math">${pretty(g.label)}</b><div class="item-opts pickset">${q.options.slice(from, from + g.n).map((o, j) => { const k = from + j; return `<button class="choice chipset${on.has(k) ? ' on' : ''}" data-pick="${i}|${k}"><span class="math">${pretty(o)}</span></button>`; }).join('')}</div></div>`; }).join('')}</div>`; }
+        return `<div class="item">${tag}${qText(q.question)}${q.groups.map((g) => { const from = b0; b0 += g.n; return `<div class="pick-grp"><b class="pick-grp-h math">${pretty(g.label)}</b><div class="item-opts pickset">${q.options.slice(from, from + g.n).map((o, j) => { const k = from + j; return `<button class="choice chipset${on.has(k) ? ' on' : ''}${(q.empty || []).includes(k) ? ' chip-empty' : ''}" data-pick="${i}|${k}"><span class="math">${pretty(o)}</span></button>`; }).join('')}</div></div>`; }).join('')}</div>`; }
       return `<div class="item">${tag}${qText(q.question)}
-        <div class="item-opts pickset">${q.options.map((o, k) => `<button class="choice chipset${on.has(k) ? ' on' : ''}" data-pick="${i}|${k}"><span class="math">${pretty(o)}</span></button>`).join('')}</div></div>`;
+        <div class="item-opts pickset">${q.options.map((o, k) => `<button class="choice chipset${on.has(k) ? ' on' : ''}${(q.empty || []).includes(k) ? ' chip-empty' : ''}" data-pick="${i}|${k}"><span class="math">${pretty(o)}</span></button>`).join('')}</div></div>`;
     }
     if (q.type === 'choice') {
       return `<div class="item">${tag}${qText(q.question)}

@@ -3097,3 +3097,5 @@ body:has(#test-bar) #screen-student.st-battle .wrap:has(.cr-dock) { padding-bott
 #screen-hall .tname.t-o { box-shadow: 0 0 0 1px #ffcf5a; border-radius: 3px; padding: 0 2px; }
 .tfx-off #screen-hall .tfx-ic { display: none; }
 @media (prefers-reduced-motion: reduce) { .tfx-ic.tfx-pop, .tfx-say { animation: none !important; } .tname.t-o::after { display: none !important; } }
+/* 🔘 #65-6 원소 칩: 「∅ (공집합)」 단추는 따로 (점선 · 줄 끝) */
+.choice.chip-empty { border-style: dashed !important; margin-left: 10px !important; font-weight: 700; }
