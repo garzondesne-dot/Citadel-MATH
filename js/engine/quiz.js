@@ -63,6 +63,7 @@ DS.Quiz = (function () {
       box.innerHTML = '';
       box.className = `choices q-${prob.type || 'choice'}`;
       root.classList.remove('hidden', 'ok', 'ng');
+      root.classList.toggle('q-compact', !!opt.compact || /👑/.test(opt.tag || '')); // 👑 형성평가 · 연습 형성평가 = 보기 작게 (2026-11-11 선생님 「형성평가 전부 작게」)
       let done = false;
       // ✍ opt.extra = { label, value } (#50 · 2026-11-10): 문제 창 아래 따로 단추 하나 (성채 소레이드 「✍ 서술형 도전 📸」) · 누르면 그 값을 돌려줌 (채점 없음)
       let exRow = root.querySelector('.q-extra-row'); if (exRow) exRow.remove();

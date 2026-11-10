@@ -3136,3 +3136,9 @@ body:has(#test-bar) #screen-student.st-battle .wrap:has(.cr-dock) { padding-bott
 .choices.q-chips .choice.multi { flex: 0 0 auto; width: auto; min-width: 44px; padding: 6px 10px; font-size: 16px; margin: 0; }
 .choices.q-chips .choice.multi.chip-empty { margin-left: 4px !important; }
 .choices.q-chips:not(:has(.quiz-grp)) { flex-direction: row; flex-wrap: wrap; }
+/* 👑 형성평가 문제 창 = 보기 작게 (2026-11-11 선생님) */
+#quiz.q-compact .choices { gap: 6px; }
+#quiz.q-compact .choice { font-size: 15px; padding: 6px 10px; min-height: 0; line-height: 1.35; margin: 0; }
+#quiz.q-compact .choice .no { font-size: 12px; }
+#quiz.q-compact #quiz-q { font-size: 15px; }
+#quiz.q-compact .q-submit { padding: 8px 12px; font-size: 16px; }
