@@ -48,7 +48,7 @@ check(f.phase === 'pick' && f.n === 2 && f.to - f.from === 15000 && f.rps && f.q
   const h = F.tHand(f.g, f.n), beat = { a: 'b', b: 'c', c: 'a' }[h], keep = { a: 'c', b: 'a', c: 'b' }[h]; // keep = 선생님 손을 이기는 손
   const v = { u1: beat, u2: beat, u3: h, u6: keep };  // u7 안 냄
   f = F.step(f, v, f.to);
-  check(f.phase === 'show' && Object.keys(f.alive).join() === 'u3,u6' && f.res.hand === h && f.res.out.sort().join() === 'u1,u2,u7', `가위바위보: 진 2명 + 안 낸 1명 탈락 · 비긴 u3 · 이긴 u6 생존 (선생님 ${h})`);
+  check(f.phase === 'show' && Object.keys(f.alive).join() === 'u3,u6' && f.res.hand === h && f.res.out.sort().join() === 'u1,u2' && f.zz.u7 && f.res.zz.join() === 'u7', `가위바위보: 진 2명 탈락 · 안 낸 u7 = 💤 관전(#57 ⑫) · 비긴 u3 · 이긴 u6 생존 (선생님 ${h})`);
   f = F.step(f, null, f.to + F.SHOW);
   check(f.phase === 'end' && f.win.join() === 'u3,u6', '2명 남으면 끝 · 우승 2명');
 }
@@ -191,4 +191,12 @@ check(fq.marks.u1 === 'ooooo' && fq.marks.u3 === 'xxxxx' && fq.marks.u4 === '---
 check(fq.hist.length === 5 && fq.hist.every((h) => h.ok === 2 && h.n === 4), '판마다 반 정답 수');
 
 if (fail) { console.error(`\n${fail}건 실패`); process.exit(1); }
+// 💤 #57 ⑫ (2026-11-10): ⚖ 에서 안 고른 학생 = 💤 관전 (탈락 아님 · 남은 수 · 상에서 빠짐) → 관전 중에 고르면 다음 판부터 다시
+{ const al8 = us(8), now = 1e6; let g = { g: 1, kind: 'bal', n: 1, rk: 'r1', phase: 'pick', from: now, to: now + 1000, at0: now, queue: [0, 1, 2, 3, 4, 5, 6, 7], alive: Object.fromEntries(al8.map((u) => [u, true])), outAt: {} };
+  g = F.step(g, V(al8.slice(0, 4), al8.slice(4, 7)), now + 1000); // u8 안 고름 · 4 : 3 → b 3명 탈락
+  check(!g.alive.u8 && g.zz.u8 && !g.outAt.u8 && g.res.out.length === 3 && Object.keys(g.alive).length === 4, `안 고른 u8 = 💤 (탈락 아님) · 남은 4명`);
+  g = F.step(g, {}, g.until); check(g.phase === 'pick' && !g.alive.u8, '다음 판: u8 은 관전');
+  g = F.step(g, { u1: 'a', u2: 'a', u3: 'b', u4: 'b', u8: 'a' }, g.to); check(arr2(g.back).includes('u8') && !g.alive.u8, '관전 중 u8 이 고름 → 이번 판 결과엔 영향 없음 · 다음 판 참여 예약');
+  g = F.step(g, {}, g.until); check(g.alive.u8 && !(g.zz || {}).u8, '그다음 판부터 u8 다시 참여'); }
+function arr2(x) { return Array.isArray(x) ? x : x ? Object.values(x) : []; }
 console.log('OK: 밸런스 게임 — 판정(적은 쪽 · 비김 · 안 고름 · 없던 일 · 무작위 1만 번) · 진행(15 → 5초 · 5명 이하 ✊✌✋ 가위바위보 · 2명 끝 · 4분 마지막 판 · 18명 시뮬) · 질문 150개 · 반대로 · 수학 OX(판정 · 문장 독립 계산) · OX 타임(탈락 없음 · 5문장 · 기록) 통과');

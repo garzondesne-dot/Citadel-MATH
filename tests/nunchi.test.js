@@ -17,7 +17,10 @@ check(NU.step(base(['a', 'b', 'c']), { a: 1100 }, 1300) === null, '0.4초 창 �
 // ④ 시작 전에 누른 것 무시 · 판에 없는 사람 무시
 f = NU.step(base(['a', 'b', 'c']), { a: 500, z: 1200 }, 2000); check(f === null, '시작 전 입력 · 판 밖 사람 무시');
 // ⑤ 20초 무반응 → 남은 사람 모두 탈락
-f = NU.step(base(['a', 'b', 'c']), {}, 1000 + 20001); check(f.out.a === 'time' && f.out.c === 'time' && f.phase === 'show', '20초 무반응');
+f = NU.step(base(['a', 'b', 'c']), {}, 1000 + 20001); check(f.out.a === 'zz' && f.out.c === 'zz' && f.zz.a && f.phase === 'show', '20초 무반응 = 💤 관전 (#57 ⑫ · 탈락 아님)');
+{ let h = base(['a', 'b', 'c', 'd', 'e', 'f']); h = NU.step(h, { b: 1100 }, 1700); h = NU.step(h, { b: 1100, c: 2100 }, 2700); h = NU.step(h, { b: 1100, c: 2100, d: 3100 }, 3700); h = NU.step(h, { b: 1100, c: 2100, d: 3100, f: 4100 }, 4700);
+  h = NU.step(h, { b: 1100, c: 2100, d: 3100, f: 4100 }, 4100 + 20001); check(h.out.a === 'zz' && h.out.e === 'zz' && h.phase === 'show', '4명 외치고 2명 20초 무반응 → 2명 💤');
+  const g = NU.step(h, {}, h.to + 1, { a: { e: '🙋', at: h.to } }); check(g.round === 2 && g.alive.a && g.alive.b && !g.alive.e && !g.zz.a && g.zz.e, '💤 → 🙋 다음 판 참여 누르면 다음 판부터 · 안 누르면 그대로 관전'); }
 // ⑥ 생존전: 판 끝 → 생존 4명이면 다음 판 · 3명 이하면 우승
 let s = { ...base(['a', 'b', 'c', 'd', 'e', 'f']), phase: 'show', to: 100, said: { a: 1, b: 2, c: 3, d: 4 }, out: { e: 'clash', f: 'clash' } };
 let nx = NU.step(s, {}, 200); check(nx.phase === 'ready' && nx.round === 2 && Object.keys(nx.alive).join() === 'a,b,c,d', '생존 4명 → 2판');

@@ -87,17 +87,20 @@ DS.Fun = (function () {
         const hist = [...arr(f.hist), { qi: f.qi, ok: ok.length, n: alive.length }];
         return { ...f, phase: 'show', until: now + SHOWMS(), res: { a: r.a, b: r.b, none: r.none, lose: r.lose, out: [], voided: false, sa: 0, sb: 0 }, marks, hist };
       }
+      // 💤 #57 ⑫ (2026-11-10): ⚖ · 🔄 (가위바위보 판 포함) 에서 시간 안에 안 고른 학생 = 탈락이 아니라 💤 관전 (남은 수 · 결과 · 상에서 빠짐) · 관전 중에 아무거나 고르면 다음 판부터 다시
+      const zzOn = f.kind === 'bal' || f.kind === 'rev' || !f.kind, spect = Object.keys(votes || {}).filter((u) => !(f.alive || {})[u]), back = zzOn ? spect.filter((u) => (f.zz || {})[u]) : [];
+      const sleep = (r) => (zzOn && !r.voided ? r.none : []), zzOf = (r) => ({ ...(f.zz || {}), ...Object.fromEntries(sleep(r).map((u) => [u, f.n])) }), outOf = (r) => r.out.filter((u) => !sleep(r).includes(u));
       if (f.rps) { // ✊✌✋
-        const r = judgeRps(alive, votes, tHand(f.g, f.n));
-        return { ...f, phase: 'show', until: now + SHOWMS(), res: { a: r.a, b: r.b, c: r.c, none: r.none, lose: r.lose, hand: r.hand, out: r.out, voided: r.voided, sa: 0, sb: 0 }, alive: Object.fromEntries(r.left.map((u) => [u, true])), outAt: { ...(f.outAt || {}), ...Object.fromEntries(r.out.map((u) => [u, f.n])) } };
+        const r = judgeRps(alive, votes, tHand(f.g, f.n)), out = outOf(r);
+        return { ...f, phase: 'show', until: now + SHOWMS(), res: { a: r.a, b: r.b, c: r.c, none: r.none, zz: sleep(r), lose: r.lose, hand: r.hand, out, voided: r.voided, sa: 0, sb: 0 }, alive: Object.fromEntries(r.left.map((u) => [u, true])), outAt: { ...(f.outAt || {}), ...Object.fromEntries(out.map((u) => [u, f.n])) }, zz: zzOf(r), back };
       }
-      const r = judge(alive, votes, f.kind || 'bal', f.ans);
-      const spect = Object.keys(votes || {}).filter((u) => !(f.alive || {})[u]);
+      const r = judge(alive, votes, f.kind || 'bal', f.ans), out = outOf(r);
       const sa = spect.filter((u) => votes[u] === 'a').length;
-      return { ...f, phase: 'show', until: now + SHOWMS(), res: { a: r.a, b: r.b, none: r.none, lose: r.lose, out: r.out, voided: r.voided, sa, sb: spect.length - sa }, alive: Object.fromEntries(r.left.map((u) => [u, true])), outAt: { ...(f.outAt || {}), ...Object.fromEntries(r.out.map((u) => [u, f.n])) } };
+      return { ...f, phase: 'show', until: now + SHOWMS(), res: { a: r.a, b: r.b, none: r.none, zz: sleep(r), lose: r.lose, out, voided: r.voided, sa, sb: spect.length - sa }, alive: Object.fromEntries(r.left.map((u) => [u, true])), outAt: { ...(f.outAt || {}), ...Object.fromEntries(out.map((u) => [u, f.n])) }, zz: zzOf(r), back };
     }
     if (f.phase === 'show' && now >= f.until) {
-      const left = Object.keys(f.alive || {});
+      const back = arr(f.back).filter((u) => (f.zz || {})[u]), left = [...new Set([...Object.keys(f.alive || {}), ...back])], zz = { ...(f.zz || {}) }; back.forEach((u) => { delete zz[u]; }); // 💤 → 다음 판부터 다시
+      if (back.length) f = { ...f, alive: Object.fromEntries(left.map((u) => [u, true])), zz, back: [] };
       if (f.kind === 'quiz') return f.n >= Math.min(QN, f.queue.length) ? { ...f, phase: 'end', win: [], endAt: now } : { ...f, ...round(f, f.n + 1, now) };
       if (left.length <= 2 || f.final) return { ...f, phase: 'end', win: left, endAt: now };
       return { ...f, ...round(f, f.n + 1, now) };
@@ -270,7 +273,8 @@ DS.Fun = (function () {
       if (DS.Sound) { if (DS.Sound.hit) DS.Sound.hit(); if (DS.Sound.rumble) DS.Sound.rumble(); if (rev && DS.Sound.boing) setTimeout(() => DS.Sound.boing(), 350); }
     }, 2600);
   }
-  const head = (f) => (f.phase === 'end' ? `<b>${f.kind === 'quiz' ? '' : '🏆 '}${esc(K(f).name)} 끝!</b>`
+  const zzTag = (f) => { const n = Object.keys(f.zz || {}).length; return n && f.phase !== 'end' ? `<span class="fa-zz">💤 ${n}명 관전</span>` : ''; }; // #57 ⑫
+  const head = (f) => zzTag(f) + (f.phase === 'end' ? `<b>${f.kind === 'quiz' ? '' : '🏆 '}${esc(K(f).name)} 끝!</b>`
     : f.rps ? `<b>✊✌️✋ 가위바위보 ${f.n}판${f.final ? ' · 마지막 판' : ''}</b><span class="fa-st">${Object.keys(f.alive || {}).length}명 남음 — 선생님과 가위바위보! 지면 탈락 · 이기거나 비기면 살아남아요</span>`
     : `<b>${esc(K(f).short)} ${f.kind === 'quiz' ? `${f.n} / ${Math.min(QN, arr(f.queue).length)}` : `${f.n}판`}${f.final && f.kind !== 'quiz' ? ' · 마지막 판' : ''}</b>${f.kind === 'ox' || f.kind === 'quiz' ? `<span class="fa-st">${esc(f.s)}</span>` : `<span class="fa-vs"><i class="a">${esc(f.q[0])}</i> vs <i class="b">${esc(f.q[1])}</i></span>`}<em class="fa-rule">${esc(K(f).rule)}</em>${f.phase === 'pick' ? `<span class="fa-t">⏱ <b data-fun-end="${f.to}">${left(f)}</b></span>` : ''}`);
   const verdict = (f) => {
@@ -327,10 +331,10 @@ DS.Fun = (function () {
     }
     const me2 = f.kind === 'quiz' ? (f.phase === 'show' ? (mk.slice(-1) === 'o' ? '<p class="fa-me ok">⭕ 정답!</p>' : `<p class="fa-me ng">${mk.slice(-1) === '-' ? '⏱ 시간이 지났어요' : '❌ 아쉬워요'} — 해설을 확인해요</p>`)
         : f.phase === 'end' ? `<p class="fa-me ok">⭕ ${myOk} / ${mk.length} 정답${myOk ? ` · +${myOk * 2} EXP` : ''}</p>${arr(f.hist).map((h, i) => (mk[i] && mk[i] !== 'o' ? (() => { const q = OXL()[h.qi] || {}; return `<p class="fa-wq me">📌 「${esc(q.t)}」 → ${q.a ? '⭕' : '❌'}<small>${esc(q.why)}</small></p>`; })() : '')).join('')}` : '<p class="fa-me">맞을까 틀릴까? <b>탈락 없이 끝까지!</b> · 시간 안에는 바꿀 수 있어요</p>')
-      : f.phase === 'show' ? (wasIn ? (alive ? '<p class="fa-me ok">🎉 살아남았다!</p>' : `<p class="fa-me ng">💥 ${(r.none || []).includes(me) ? '안 골라서' : f.rps ? '가위바위보에 져서' : K(f).out} 탈락… 관객석으로</p>`) : '<p class="fa-me">👀 관객석</p>')
+      : f.phase === 'show' ? (wasIn ? (alive ? '<p class="fa-me ok">🎉 살아남았다!</p>' : (f.zz || {})[me] ? '<p class="fa-me">💤 안 골라서 관전 — 다음 판에 아무거나 고르면 그다음 판부터 다시 참여</p>' : `<p class="fa-me ng">💥 ${(r.none || []).includes(me) ? '안 골라서' : f.rps ? '가위바위보에 져서' : K(f).out} 탈락… 관객석으로</p>`) : (f.zz || {})[me] ? `<p class="fa-me">💤 관전 중${arr(f.back).includes(me) ? ' — 🙋 다음 판부터 참여!' : ''}</p>` : '<p class="fa-me">👀 관객석</p>')
       : f.phase === 'end' ? ((f.win || []).includes(me) ? '<p class="fa-me ok">🏆 우승! 끝까지 살아남았어요</p>' : `<p class="fa-me">우승: ${(f.win || []).map((u) => esc(nameOf(R, u))).join(' · ')}</p>`)
       : alive && f.rps ? '<p class="fa-me">✊✌️✋ <b>선생님과 가위바위보!</b> 지면 탈락 · 시간 안에는 바꿀 수 있어요</p>'
-      : alive ? `<p class="fa-me">${f.kind === 'ox' ? '맞을까 틀릴까?' : '둘 중 하나!'} <b>${esc(K(f).rule)}</b> · 시간 안에는 바꿀 수 있어요</p>` : '<p class="fa-me">👀 관객석 — 골라도 결과엔 영향 없어요</p>';
+      : alive ? `<p class="fa-me">${f.kind === 'ox' ? '맞을까 틀릴까?' : '둘 중 하나!'} <b>${esc(K(f).rule)}</b> · 시간 안에는 바꿀 수 있어요</p>` : (f.zz || {})[me] ? '<p class="fa-me">💤 관전 중 — <b>아무거나 고르면 다음 판부터 다시 참여</b></p>' : '<p class="fa-me">👀 관객석 — 골라도 결과엔 영향 없어요</p>';
     body.innerHTML = `<div class="panel framed fa-wrap"><div class="fa-head">${head(f)}</div>${stage(R, f, false, me)}${me2}
       ${f.phase === 'pick' && f.rps ? `<div class="fa-pick rps">${['a', 'b', 'c'].map((k, i) => `<button class="btn big fa-${k}${mine === k ? ' on' : ''}" data-pick="${k}">${HANDS[i]}</button>`).join('')}</div>` : f.phase === 'pick' ? `<div class="fa-pick"><button class="btn big fa-a${mine === 'a' ? ' on' : ''}" data-pick="a">${esc(f.q[0])}</button><button class="btn big fa-b${mine === 'b' ? ' on' : ''}" data-pick="b">${esc(f.q[1])}</button></div>` : ''}
       ${f.phase === 'show' ? `<p class="fa-res">${verdict(f)}</p>` : ''}</div>`;

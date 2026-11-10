@@ -26,15 +26,17 @@ DS.Nunchi = (() => {
   }
 
   // ── 판정 (교실 TV 한 대만: drv) ─────────────────────────
-  function step(f, presses, now) {
-    const x = JSON.parse(JSON.stringify(f)); x.said = x.said || {}; x.out = x.out || {}; x.done = x.done || {}; x.ev = arr(x.ev); x.hist = arr(x.hist); x.ev.forEach((e) => { e.u = arr(e.u); });
+  // 💤 #57 ⑫ (2026-11-10): 20초 무반응(지금 규칙의 시간)까지 한 번도 안 누른 학생 = 탈락이 아니라 💤 관전 (혼자 남은 「⌛ 마지막」 은 게임 규칙이라 그대로 탈락) (남은 수 · 결과 · 상에서 빠짐) · 폰 「🙋 다음 판 참여」(응원 칸 🙋) = 다음 판부터 다시
+  function step(f, presses, now, cheers) {
+    const x = JSON.parse(JSON.stringify(f)); x.said = x.said || {}; x.out = x.out || {}; x.done = x.done || {}; x.zz = x.zz || {}; x.ev = arr(x.ev); x.hist = arr(x.hist); x.ev.forEach((e) => { e.u = arr(e.u); });
     const ev = (e) => { x.ev.push({ ...e, at: now }); x.ev = x.ev.slice(-6); };
     if (x.phase === 'ready') { if (now < x.to) return null; x.phase = 'play'; x.lastAt = now; return x; }
     if (x.phase === 'show') {
       if (now < x.to) return null;
       const surv = keys(x.alive).filter((u) => x.said[u]);
       if (surv.length <= WIN_AT || x.round >= ROUNDS) { x.phase = 'end'; x.win = surv; x.endAt = now; return x; }
-      return { kind: 'nun', g: x.g, round: x.round + 1, phase: 'ready', to: now + READY(), alive: Object.fromEntries(surv.map((u) => [u, 1])), n: 1, said: {}, out: {}, done: {}, ev: [], lastAt: now + READY(), hist: [...x.hist, { round: x.round, surv: surv.length }], at: now };
+      const back = keys(x.zz).filter((u) => { const c = (cheers || {})[u]; return c && c.e === '🙋' && Number(c.at) >= Number(x.zz[u]); }), zz = { ...x.zz }; back.forEach((u) => { delete zz[u]; });
+      return { kind: 'nun', g: x.g, round: x.round + 1, phase: 'ready', to: now + READY(), alive: Object.fromEntries([...surv, ...back].map((u) => [u, 1])), zz, n: 1, said: {}, out: {}, done: {}, ev: [], lastAt: now + READY(), hist: [...x.hist, { round: x.round, surv: surv.length, back: back.length }], at: now };
     }
     if (x.phase !== 'play') return null;
     let changed = false;
@@ -52,7 +54,7 @@ DS.Nunchi = (() => {
     const L = left();
     if (L.length === 1 && !todo.length) { x.out[L[0]] = 'last'; ev({ k: 'last', n: x.n, u: L }); changed = true; }
     else if (L.length > 1 && !todo.length && now - x.lastAt > TIMEOUT()) { L.forEach((u) => { x.out[u] = 'time'; }); ev({ k: 'time', n: x.n, u: L }); changed = true; }
-    if (!left().length) { x.phase = 'show'; x.to = now + SHOW(); changed = true; }
+    if (!left().length) { keys(x.alive).forEach((u) => { if (!x.done[u] && x.out[u] === 'time') { x.out[u] = 'zz'; x.zz[u] = now; } }); x.phase = 'show'; x.to = now + SHOW(); changed = true; } // 💤 한 번도 안 누름
     return changed ? x : null;
   }
   let timer = null, busy = false;
@@ -66,7 +68,8 @@ DS.Nunchi = (() => {
         if (f.phase === 'end') { if (now - (f.endAt || now) > (T().endHold || 15000) && (!f.drv || f.drv.u === me || now - (f.drv.at || 0) > 3000) && DS.Fun) await DS.Fun.stop(code); return; } // 2026-11-09: 끝 화면 15초 뒤 저절로 닫힘
         if (f.drv && f.drv.u !== me && now - (f.drv.at || 0) < 3000) return;
         const presses = f.phase === 'play' ? (await N().get(P(code, `nun/${f.g}/${f.round}`)).catch(() => null)) || {} : {};
-        const nx = step(f, presses, now);
+        const cheers = f.phase === 'show' && f.zz ? (await N().get(P(code, `nunE/${f.g}`)).catch(() => null)) || {} : {};
+        const nx = step(f, presses, now, cheers);
         if (nx) { nx.drv = { u: me, at: now }; await N().set(P(code, 'fun'), nx); }
         else if (!f.drv || f.drv.u !== me || now - f.drv.at > 1200) await N().set(P(code, 'fun/drv'), { u: me, at: now });
       } finally { busy = false; }
@@ -74,7 +77,7 @@ DS.Nunchi = (() => {
   }
 
   // ── 교사 리모컨 · 종합실 조작 막대 ───────────────────────
-  const status = (f) => (f.phase === 'end' ? `🙊 눈치 · 🏆 우승 ${(f.win || []).length}명` : `🙊 눈치 · ${f.round}판 · 남은 ${keys(f.alive).filter((u) => !(f.out || {})[u]).length}명`);
+  const status = (f) => (f.phase === 'end' ? `🙊 눈치 · 🏆 우승 ${(f.win || []).length}명` : `🙊 눈치 · ${f.round}판 · 남은 ${keys(f.alive).filter((u) => !(f.out || {})[u]).length}명${keys(f.zz).length ? ` · 💤 ${keys(f.zz).length}명 관전` : ''}`);
   const ctlHtml = (R) => `<div class="fun-ctl"><span>${esc(status(R.fun || {}))}</span><button class="btn small" data-fun="stop">⏹ 게임 끝</button><button class="btn small" data-fun="again">🔄 새 게임</button></div>`;
   const bindCtl = () => drive();
 
@@ -86,21 +89,21 @@ DS.Nunchi = (() => {
     const fresh = last && now - last.at < 1800;
     const ids = keys(f.alive), said = f.said || {}, out = f.out || {};
     const hint = f.phase === 'play' && now - (f.lastAt || now) > HINT ? '<p class="nn-hint">⏳ 긴장감…</p>' : '';
-    const sig = JSON.stringify([f.g, f.round, f.phase, f.n, keys(said).length, keys(out).length, last && last.at, !!hint, (R.nunE || {})[f.g] ? keys(R.nunE[f.g]).length : 0]);
+    const sig = JSON.stringify([f.g, f.round, f.phase, f.n, keys(said).length, keys(out).length, keys(f.zz).length, last && last.at, !!hint, (R.nunE || {})[f.g] ? keys(R.nunE[f.g]).length : 0]);
     if (hallSig === sig && el.querySelector('.nn-wrap')) return; hallSig = sig;
-    const hero = (u) => { const p = R.players[u] || {}, st = out[u] ? 'out' : said[u] ? 'said' : ''; const pop = fresh && (last.u || []).includes(u);
+    const hero = (u) => { const p = R.players[u] || {}, st = out[u] === 'zz' ? 'out zz' : out[u] ? 'out' : said[u] ? 'said' : ''; const pop = fresh && (last.u || []).includes(u);
       return `<div class="nn-h ${st}${pop ? ` pop ${last.k}` : ''}">${pop ? `<b class="nn-bub">${last.k === 'say' ? `${last.n}!` : last.k === 'clash' ? '💥' : last.k === 'last' ? '⌛' : '⏳'}</b>` : said[u] ? `<b class="nn-num">${said[u]}</b>` : ''}${DS.Art.hero(p.hero || 0, out[u] ? 'down' : pop && last.k === 'say' ? 'win' : 'idle', '')}<span class="nn-name">${esc(nameOf(R, u))}</span></div>`; };
     const big = f.phase === 'ready' ? `<h1 class="nn-big">${Math.max(1, Math.ceil(((f.to || now) - now) / 1000))}</h1><p>${f.round}판 준비! 1부터 차례로 — 겹치면 탈락</p>`
       : f.phase === 'play' ? (fresh && last.k === 'clash' ? `<h1 class="nn-big bad">💥 동시!</h1><p>${last.u.length}명 탈락 · 다음은 그대로 <b>${f.n}</b></p>` : fresh && last.k === 'last' ? '<h1 class="nn-big bad">⌛ 마지막!</h1><p>끝까지 못 외쳐서 탈락</p>' : `<p>다음</p><h1 class="nn-big">${f.n}</h1>${hint}`)
       : f.phase === 'show' ? `<h1 class="nn-big">${f.round}판 끝</h1><p>살아남은 사람 ${keys(said).length}명</p>`
       : `<h1 class="nn-big win">🏆 눈치 백단!</h1><p>${(f.win || []).map((u) => `<b>${esc(nameOf(R, u))}</b>`).join(' · ') || '우승자 없음 — 모두 아쉬웠어요'}</p>`;
     const emo = Object.values((R.nunE || {})[f.g] || {}).slice(-12).map((e, i) => `<i class="nn-emo" style="left:${(i * 37) % 92 + 3}%;animation-delay:${(i % 4) * 0.3}s">${esc(e.e || '👏')}</i>`).join('');
-    el.innerHTML = `<div class="nn-wrap ph-${f.phase}"><div class="nn-top"><b>🙊 눈치 게임</b><span>${f.round} / ${ROUNDS}판 · 남은 ${ids.filter((u) => !out[u]).length}명</span></div>
+    el.innerHTML = `<div class="nn-wrap ph-${f.phase}"><div class="nn-top"><b>🙊 눈치 게임</b><span>${f.round} / ${ROUNDS}판 · 남은 ${ids.filter((u) => !out[u]).length}명${keys(f.zz).length ? ` · 💤 ${keys(f.zz).length}명 관전` : ''}</span></div>
       <div class="nn-center">${big}</div><div class="nn-row" style="--cols:${Math.max(1, Math.ceil(ids.length / 2))}">${ids.map(hero).join('')}</div><div class="nn-emos">${emo}</div></div>`;
   }
 
   // ── 학생 폰 ─────────────────────────────────────────────
-  const paid = {}, sent = {};
+  const paid = {}, sent = {}, backSent = {};
   let phoneSig = '';
   let phone = function (body, R, me, c) {
     if (c) code = c;
@@ -111,10 +114,11 @@ DS.Nunchi = (() => {
       const joined = f.hist.length || inRound || (f.win || []).includes(me);
       if (m && joined) { paid[f.g] = true; DS.Gem.add(m, G.funJoin, `fun_${f.g}`, '쉼터 놀이 참여').catch(() => {}); if ((f.win || []).includes(me)) { DS.Gem.add(m, G.funWin, `funwin_${f.g}`, '눈치 게임 우승').catch(() => {}); DS.Gem.medal(m, 'nun').catch(() => {}); } }
     }
-    const sig = JSON.stringify([f.g, f.round, f.phase, f.n, inRound, out, said, !!mine, f.phase === 'ready' ? Math.ceil(((f.to || 0) - N().now()) / 1000) : 0]);
+    const sig = JSON.stringify([f.g, f.round, f.phase, f.n, inRound, out, said, !!mine, (f.zz || {})[me] || 0, backSent[f.g] || 0, f.phase === 'ready' ? Math.ceil(((f.to || 0) - N().now()) / 1000) : 0]);
     if (phoneSig === sig && body.querySelector('.nn-phone')) return; phoneSig = sig;
     let mid;
     if (f.phase === 'end') mid = (f.win || []).includes(me) ? '<h1 class="nn-big win">🏆 우승!</h1><p>호칭 「눈치 백단」 · 💎 +4</p>' : '<h1 class="nn-big">끝!</h1><p>다음 판에 도전해요 · 💎 +1</p>';
+    else if ((f.zz || {})[me] || out === 'zz') mid = `<p class="nn-say">💤 관전 중 — 이번 판에 한 번도 안 눌렀어요</p><button class="btn primary big" id="nn-back"${backSent[f.g] && backSent[f.g] >= Number((f.zz || {})[me] || 0) ? ' disabled' : ''}>🙋 다음 판 참여</button>`; // #57 ⑫
     else if (!inRound) mid = '<p class="nn-say">👀 관객석 — 응원해요!</p>';
     else if (out) mid = `<h1 class="nn-big bad">${out === 'clash' ? '💥 동시!' : out === 'last' ? '⌛ 마지막!' : '⏳ 시간 끝'}</h1><p>이번 판 탈락 — 응원해요!</p>`;
     else if (said) mid = `<h1 class="nn-big">${said}! ✔</h1><p>살아남았어요 — 판이 끝날 때까지 기다려요</p>`;
@@ -126,6 +130,7 @@ DS.Nunchi = (() => {
     body.innerHTML = `<div class="panel framed nn-phone"><p class="nn-top"><b>🙊 눈치 게임</b> · ${f.round || 1} / ${ROUNDS}판</p>${mid}${cheer}</div>`;
     const go = body.querySelector('#nn-go');
     if (go) go.onclick = () => { if (sent[`${f.g}|${f.round}`]) return; sent[`${f.g}|${f.round}`] = 1; if (navigator.vibrate) navigator.vibrate(30); N().set(P(code, `nun/${f.g}/${f.round}/${me}`), N().TS).catch(() => {}); phoneSig = ''; phone(body, R, me, code); };
+    const bk = body.querySelector('#nn-back'); if (bk) bk.onclick = () => { backSent[f.g] = N().now(); N().set(P(code, `nunE/${f.g}/${me}`), { e: '🙋', at: N().TS }).catch(() => {}); phoneSig = ''; phone(body, R, me, code); };
     body.querySelectorAll('[data-e]').forEach((b) => (b.onclick = () => N().set(P(code, `nunE/${f.g}/${me}`), { e: b.dataset.e, at: N().TS }).catch(() => {})));
   }
 

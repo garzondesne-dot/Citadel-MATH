@@ -3061,3 +3061,5 @@ body:has(#test-bar) #screen-student.st-battle .wrap:has(.cr-dock) { padding-bott
 .nn-wrap > .nn-top { position: absolute; top: 10px; left: 0; right: 0; }
 .nn-row { display: grid; grid-template-columns: repeat(var(--cols, 8), minmax(0, auto)); justify-content: center; gap: clamp(12px, 3vh, 26px) clamp(6px, 1.4vw, 18px); width: auto; max-width: 100%; }
 .nn-center .nn-big { color: #ffd84a; text-shadow: 0 4px 0 #7a2bb0, 0 0 22px #ff6fa866; }
+.fa-zz { float: right; margin-left: 8px; padding: 1px 8px; border-radius: 8px; background: #2d4f78; color: #fff; font-size: 13px; } /* 💤 #57 ⑫ */
+.nn-h.zz .art { filter: grayscale(1) brightness(.7); } .nn-h.zz::after { content: '💤'; position: absolute; top: -10px; right: 4px; font-size: 18px; }
