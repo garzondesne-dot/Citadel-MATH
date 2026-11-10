@@ -323,6 +323,11 @@ DS.Hall = (function () {
     const out = {};
     Raid().activeIds(R).forEach((u) => {
       if (step.kind === 'boss') { const m = Raid().mastery(L, R, u).filter(Boolean).length; const n = Raid().bossTries(L, R, u).length; out[u] = { n, dmg: m }; }
+      else if (Raid().isChain && Raid().isChain(L, R, step.id)) { // ⚔ 소레이드 (🐞 2026-11-10 핫픽스 「종합실에서 공격 모션이 아예 안 나감」: 소레이드는 tries 가 늘 0 → 단계 답을 낼 때마다 한 번)
+        const rec = Raid().record(L, R, step.id, u), subs = Raid().chainSubs(R, step.id, u).filter((t) => !t.w), last = subs[subs.length - 1], ps = (rec.pass || 0) * 100 + (rec.pStage || 0), was = seen[u] || {};
+        const prac = !!(last && last.p), up = prac ? ps > (was.ps || 0) : rec.stage > (was.dmg || 0);
+        out[u] = { n: subs.length, dmg: rec.stage, ps, prac: false /* 한 판 더도 「몬스터 묶기!」 글자 없이 공격 모션만 (데미지 0) */, label: up ? (!prac && rec.done ? 'success' : 'partial') : 'fail', h: Object.values(Raid().healsOf(R, step.id)[u] || {}).filter((v) => typeof v === 'string' && !v.startsWith('!')).length }; // 💚 #50 소레이드 힐
+      }
       else { const rec = Raid().record(L, R, step.id, u); out[u] = { n: rec.tries.length, dmg: rec.best, label: Raid().resultLabel(rec.last), prac: rec.practice, h: Object.values(Raid().healsOf(R, step.id)[u] || {}).filter((v) => v !== '!ult' && !Raid().isTcut(v)).length }; /* 2026-11-06 검증: ⚡ 필살기 칸은 「💚 응원」으로 세지 않음 (필살기 컷인만) */ }
     });
     return out;
