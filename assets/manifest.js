@@ -71,8 +71,9 @@ DS.ASSETS = {
   monstersKeyvaultBoss: { src: 'monsters-keyvaultboss-v1.webp', cols: 3, rows: 1, poses: { idle: 0, attack: 1, down: 2 }, names: ['역과 대우의 문지기'] },
   // 10차시 ⚖ 저울의 공중 정원 (2026-11-10 · m10-01~04 · 칸 192): 'garden:번호' — 4번(거울 웅덩이 두꺼비 m10-05) 그림 아직 없음 · 빈 줄
   monstersGarden: { src: 'monsters-skygarden-v1.webp', cols: 3, rows: 5, poses: { idle: 0, attack: 1, down: 2 }, names: ['천칭 가고일', '필요 덩굴', '충분 나비', '쌍둥이 구름 정령', '거울 웅덩이 두꺼비'] },
-  // 11차시 🌊 모순의 수중 신전 (2026-11-10 · m11-01 · 02 · 칸 192): 'undersea:번호' — 2 ~ 4번(m11-03 ~ 05) 그림 아직 없음 · 빈 줄
-  monstersUndersea: { src: 'monsters-undersea-v1.webp', cols: 3, rows: 5, poses: { idle: 0, attack: 1, down: 2 }, names: ['모순 문어', '역설 해파리', '부등호 가오리', '거품 골렘', '산호 미믹'] },
+  // 11차시 🌊 모순의 수중 신전 (2026-11-10 · m11-01 ~ 05 · 칸 192): 'undersea:번호' · 보스 b11-01 = 'underseaboss:0' (칸 384)
+  monstersUndersea: { src: 'monsters-undersea-v2.webp', cols: 3, rows: 5, poses: { idle: 0, attack: 1, down: 2 }, names: ['모순 문어', '역설 해파리', '부등호 가오리', '거품 골렘', '산호 미믹'] },
+  monstersUnderseaBoss: { src: 'monsters-underseaboss-v1.webp', cols: 3, rows: 1, poses: { idle: 0, attack: 1, down: 2 }, names: ['모순의 리바이어던'] },
   monstersMirrorBoss: { src: 'monsters-mirrorboss-v2.webp', cols: 3, rows: 1, poses: { idle: 0, attack: 1, down: 2 }, names: ['대우의 거울 마왕'] },
   monstersCrown: { src: 'monsters-crown-v1.webp', cols: 3, rows: 10, poses: { idle: 0, attack: 1, down: 2 },
     names: ['에메랄드 왕관 슬라임', '루비 박쥐', '사파이어 뿔벌레', '자수정 뼈뱀', '버섯 전사', '자수정 눈알 문어', '이끼 골렘', '서리 왕관 늑대', '덩굴 미믹', '청록 수정룡'] },
