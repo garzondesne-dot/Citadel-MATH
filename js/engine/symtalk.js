@@ -90,6 +90,7 @@ DS.SymTalk = (function () {
   // ── 표시 (화면에 그린 뒤 텍스트에 점선 밑줄 칸을 씌움) ──
   const ROOTS = '#st-body .paper, #st-body .cr-story, #st-body .cr-prob, #st-body .cr-why, #st-body .items, #st-body .st-res, #quiz-q, #quiz-choices, .bn-fight .cr-story, .bn-fight .bf-body > p';
   const SKIP = 'button.btn, .sym-t, svg, input, textarea, .sheet-tag, .q-no, .item-no, small, .muted';
+  const ANS = 'button, .choice, label, [data-o]'; // 🐞 2026-11-11 선생님(체험판): 답 칸(보기 · 칩 · 단추) 안의 기호는 톡을 붙이지 않음 — 누르면 기호 톡이 떠서 답 고르기를 막았음
   const lineOf = (el) => { const blk = el.closest('li, p, .item-q, .choice, .why-q, .bl-q, .mark, summary, div') || el.parentElement; return blk; };
   function textOf(blk) { // 보이는 글자 · ᶜ 위첨자(<sup class="cpl">C</sup>)는 ᶜ 한 글자로
     let s = ''; const map = []; // map[k] = { node, off } (ᶜ 는 { sup })
@@ -116,10 +117,10 @@ DS.SymTalk = (function () {
       if (pOn) propHits(s, whole).forEach((h) => hits.push(h));
       hits.sort((a, b) => b.i - a.i).forEach((h) => { // 뒤에서부터 (앞 자리 그대로)
         const at = map[h.i]; if (!at) return;
-        if (at.sup) { if (at.sup.closest('.sym-t') || at.sup.closest(SKIP)) return; const w = document.createElement('span'); w.className = 'sym-t'; w.dataset.st = h.id; at.sup.replaceWith(w); w.appendChild(at.sup); return; }
+        if (at.sup) { if (at.sup.closest('.sym-t') || at.sup.closest(SKIP) || at.sup.closest(ANS)) return; const w = document.createElement('span'); w.className = 'sym-t'; w.dataset.st = h.id; at.sup.replaceWith(w); w.appendChild(at.sup); return; }
         if (!at.node.parentNode || (at.node.parentElement && at.node.parentElement.closest(SKIP))) return;
         const len = h.len || 1, last = map[h.i + len - 1]; if (!last || last.node !== at.node) return; // 낱말이 두 칸에 걸치면 건너뜀
-        if (WORDY.has(h.id) && at.node.parentElement && at.node.parentElement.closest('button, .choice, label')) return; // #62 명제 낱말은 보기 단추 안엔 안 붙임 (「명제 · 참」 보기마다 있어 고르기를 막음 · ~ 기호는 붙임)
+        if (at.node.parentElement && at.node.parentElement.closest(ANS)) return; // 답 칸 안 = 기호 · 낱말 모두 안 붙임 (옛 #62 = 낱말만 뺐음) // #62 명제 낱말은 보기 단추 안엔 안 붙임 (「명제 · 참」 보기마다 있어 고르기를 막음 · ~ 기호는 붙임)
         const tail = at.node.splitText(at.off), rest = tail.splitText(len), w = document.createElement('span'); w.className = 'sym-t'; w.dataset.st = h.id;
         tail.replaceWith(w); w.appendChild(tail); void rest;
       });
@@ -154,7 +155,7 @@ DS.SymTalk = (function () {
   function onTap(e) {
     const t = e.target, s = t && t.closest && t.closest('.sym-t');
     if (bub && t && bub.contains(t)) return;
-    if (s && on()) { e.preventDefault(); e.stopPropagation(); open(s); return; }
+    if (s && on() && !s.closest(ANS)) { e.preventDefault(); e.stopPropagation(); open(s); return; } // 답 칸 안에 이미 붙은 톡이 있어도 누르면 그냥 고르기
     if (bub) close();
   }
 

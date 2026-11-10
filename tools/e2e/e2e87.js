@@ -21,12 +21,12 @@ const OUT = process.argv[2] || '.', U = 'http://localhost:8765/index.html?local'
   const syms = await S.evaluate(() => [...document.querySelectorAll('#st-body .sym-t')].map((e) => `${e.textContent}:${e.dataset.st}`));
   ok(syms.length > 0, `문제 속 기호에 점선 (${syms.slice(0, 8).join(' ')})`);
   const bub = () => S.evaluate(() => { const b = document.querySelector('.st-bub'); return b ? { def: (b.querySelector('.st-def') || {}).textContent, easy: (b.querySelector('.st-easy') || {}).textContent, more: !!b.querySelector('.st-more'), memo: (b.querySelector('.st-memo') || {}).hidden } : null; });
-  // 보기(칩) 안 기호가 있으면 그걸, 없으면 문제 글 기호
-  const target = await S.evaluate(() => { const c = document.querySelector('#st-body .choice .sym-t') || document.querySelector('#st-body .sym-t'); c.scrollIntoView({ block: 'center' }); c.id = 'sym-x'; return { inChoice: !!c.closest('.choice'), st: c.dataset.st }; });
+  // 🐞 2026-11-11 선생님: 답 칸(보기 · 칩) 안 기호엔 톡을 안 붙임 → 문제 글 기호로 시험 · 답 칸 안 점선 0개 확인
+  ok(await S.evaluate(() => !document.querySelector('#st-body .choice .sym-t, #st-body button .sym-t, #st-body label .sym-t')), '답 칸(보기 · 칩) 안 기호 = 톡 없음 (누르면 바로 고르기)');
+  const target = await S.evaluate(() => { const c = [...document.querySelectorAll('#st-body .sym-t')].find((x) => !x.closest('button, .choice, label')); c.scrollIntoView({ block: 'center' }); c.id = 'sym-x'; return { inChoice: !!c.closest('.choice'), st: c.dataset.st }; });
   const y0 = await S.evaluate(() => ({ p: (document.querySelector('#st-body .paper') || {}).scrollTop || 0, w: scrollY }));
   await S.click('#sym-x'); await S.waitForTimeout(300);
   let bb = await bub(); ok(bb && bb.def && /쉽게 말하면/.test(bb.easy), `톡 → 말풍선 (${target.st}) 「${bb && bb.def}」 · 「${bb && bb.easy}」`);
-  if (target.inChoice) ok(await S.evaluate(() => !document.querySelector('#sym-x').closest('.choice').classList.contains('on')), '보기 안 기호를 눌러도 그 보기를 고르지 않음');
   const y1 = await S.evaluate(() => ({ p: (document.querySelector('#st-body .paper') || {}).scrollTop || 0, w: scrollY }));
   ok(JSON.stringify(y0) === JSON.stringify(y1), `말풍선 떠도 스크롤 그대로 ${JSON.stringify(y1)}`);
   await S.screenshot({ path: `${OUT}/87-bubble.png` });
