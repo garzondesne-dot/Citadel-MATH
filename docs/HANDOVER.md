@@ -255,7 +255,7 @@
 - 🔁n = 입장 때 `players/{uid}/stk` (꾸준한 용사를 단 학생만 · 캠프는 기록에서 계산).
 
 ## 📦 9차시부터 차시 파일 꼴 = 데이터 위 · 계산 아래 (2026-11-10 #64 · 차시 팩 준비 · 2~8차시는 그대로)
-새 `lessons/set-NN.js`(9~17차시)는 이 순서로 쓴다. 학생 화면 · 규칙 · `DS.Lessons.register` 모양은 지금과 같다(팩 엔진은 겨울방학 초).
+새 `lessons/set-NN.js`(9~17차시)는 이 순서로 쓴다 — **9차시 `set-09.js` 가 첫 본보기** (DATA · GEN · RG 재도전 이름표 · CHAIN). 학생 화면 · 규칙 · `DS.Lessons.register` 모양은 지금과 같다(팩 엔진은 겨울방학 초).
 1. **데이터 묶음** `const DATA = { … }` — JSON 으로 옮길 수 있는 값만: 개념 칸(제목 · say) · 몬스터(이름 · 그림 칸 · 소문제 글 틀 · 보기 · 첫 시도 숫자 · 정답 · 풀이 · 💡 힌트 · 근거 줄) · 형성평가 문항 · `crops` · `videos` · 기호 톡 연결. 함수 · 정규식 ✕.
    - 재도전은 이름으로: `retry: { gen: 'negSet', range: [10, 20], k: [2, 3] }` — 「어떤 생성기를 어떤 매개변수로」.
 2. **계산 코드** — `const GEN = { negSet(p, rng) { … } }` 재도전 숫자 바꾸기 · 오개념 보기 · 정답 계산. `make: (a, r) => (a === 0 ? first(DATA.m1) : GEN[DATA.m1.retry.gen](DATA.m1.retry, r))` 처럼 데이터를 읽어 몬스터를 만든다.
@@ -276,3 +276,9 @@
 - 🔥 형성평가 한 판 더 = `DS.Bonus.bossPrac(L, m, key)` (3판 · 판 수 localStorage `citadel-bprac|key` · 다 맞히면 Grow chainPrac +1) — 수업 key `code|uid` · 허수아비 key `re|반|번호|차시|날짜`.
 - ✍ 일반 몬스터 나의 풀이 = `student.js penLine · penBox` (연필 `.pen` · 접힘 `.latest` 한 줄 · 결과 `.pen-res` 맞힘 pixIn · 틀림 `.pen-gone`).
 - ⚠ 재도전 숫자: 지금 규칙은 v3(11/09) = **틀리면 같은 문제 · 다 맞히면 새 숫자** — #65 의 「기회마다 새 숫자」와 다름 → 머리 방 ❓ 질문으로 넘김(코드는 그대로).
+
+## 📄 9차시 (2026-11-10 #66) — `lessons/set-09.js` (#64 꼴 첫 차시)
+- 순서 intro · c1 · cp1(➕ 사각형) · m1 · m2 · c2 · m3 · c3 · m4 · cp2(➕ 수) · m5(⚔ 소레이드) · boss · 시험 `tests/lesson9.test.js` (문제 글을 읽어 독립 판정) · e2e100.
+- m4 봉인 석상 = 그림 오기 전 `keyvault:2@h200` 임시 → m09-04 그림이 오면 `monsters-keyvault` 3번 줄을 채우고 `sprite: 'keyvault:3'`.
+- 영상 43 · 44 · 45 = 모션 방 주문 중 → `DATA.videos` 에 연결 (c1 · m1 · m2 = 43 · c2 · c3 · m3 · m4 · m5 = 44 · cp1 · cp2 = 45).
+- 📸 기준표 `rubrics.js set-09/m5` (raid · on) → Firebase `photo_rubric` 은 교사 「기준표 올리기」.
