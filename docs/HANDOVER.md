@@ -246,3 +246,10 @@
 - 낱말(두 글자 이상)은 보기 단추(`button · .choice · label`) 안에는 안 붙임 — 8차시 보기 「명제 · 참」 마다 붙으면 고르기가 막혀서 (손발 판단). ~ 기호는 붙임.
 - `setCtx(m, lesson)` = 계정이 없어도(성채 미리 보기) 차시는 기억 · 기록은 계정 있을 때만(테스트 계정 안 셈 그대로).
 - 다음 차시분 = `PROP` 에 줄 추가 + `propHits` 정규식 + `propOn` 범위.
+
+## 🏅 칭호 정리 · 작은 기능 (2026-11-10 #63) — `js/raid/titles.js`
+- 새 칭호 판정 기록: ✍ writer = `photo/{반}/{번호}/*/*` 의 status pass 또는 ok:true 3개 · 🎯 hunter = 오답노트 「보충 완료」(p) 칸 수 10 (`fixedOutside`) · 🛡 wall = `xp/{반}/{번호}/ttl/wall`(디펜스 끝 화면에서 한 판 처치 최고 기록을 학생이 씀) · ⚡ awake = `gem.enh` 10. 도감 수집가 = 카드 30장 **또는** 옛 조건(1~3차시 15장).
+- 평소 기호 = `nameHtml` 이 `.tfx-ic`(data-tfx · data-tu=uid) 를 붙임 · 이모지는 화면에서 도트 아이콘으로 바뀔 수 있음(⚔ → 칼). 단원 문양 = `setNo(차시 번호)` (학생 render · 종합실 render) 범위 안에서만.
+- 사건: `watch(R, L, who, code)` (종합실 'h' = 방 전체 · 폰 = 나) 가 보스 격파 · 보스전 시작 · 놀이(fun kind) · 디펜스 · 홀리 방패를 **바뀌는 순간만**(처음 본 상태 안 쏨) · 그 밖 = `me(title, kind, 말)` (끈기 · 연성 · 서술 · 빨간 칸) · `band()` (출제 띠).
+- 종합실 = 동시 5 (`HALL_MAX` · 줄 서기) · ⚙ `#h-tfx` = localStorage `ds-tfx-off` → `html.tfx-off` · reduced-motion 이면 움직임 없음. 시험 = `tests/titles-fx.test.js` · e2e95.
+- 🔁n = 입장 때 `players/{uid}/stk` (꾸준한 용사를 단 학생만 · 캠프는 기록에서 계산).
