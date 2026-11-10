@@ -294,3 +294,8 @@
 - 일반 방(소레이드 아님) = `bonus.js formRound` — 남은 소문제를 한 장(`.bf-paper`)에 `DS.Student.itemHtml` 로 · 칩 `DS.Quiz.chipToggle` · ✍ `DS.Student.penLine/penBox` · ⚔ 한 번 → 결과 `pen-res` · 틀린 것만 다시. 시험 고리 `DS.Bonus._form` (e2e61 · e2e70 · e2e102).
 - 앞으로 차시 던전의 문제 칸(`itemHtml`) · 나의 풀이 · 칩을 고치면 성채 · 허수아비에 저절로 들어감.
 - 옛 e2e 중 A안과 무관하게 낡은 것: e2e36(#e-cls 없음) · e2e54(성채 방 수 기준값) · e2e61(💎 꼬리표 값) · e2e70(07번 방 = 소레이드로 바뀐 뒤).
+
+## 📱 화면 꺼짐 방지 · 수업 끝 하나로 (2026-11-11 #70)
+- `DS.UI.show(id)` 가 `WAKE_SCREENS`(학생 수업 · 성채 · 허수아비 · 교사 리모컨 · 교사 캠프 · 종합실) 이면 `wake.on()` · 아니면 `off()` · 다른 앱에서 돌아오면 다시 켬(visibilitychange) · 안 되는 폰 = `wake.tip()` 토스트 한 번(localStorage `ds-wake-tip`).
+- 아이폰 홈 화면 앱(PWA): Screen Wake Lock 은 iOS 16.4+ 사파리 · 18.4 부터 홈 화면 앱(standalone)도 지원 — 그 아래 판은 안내 띠가 뜸 (실기기 확인은 선생님 폰으로 · 「지금 되나?」).
+- 「수업 끝 ▶」 = `control.saveBtn(R, L)` 하나 · 확인 한 번 · 마무리 단계면 `go(+1)`(진도 끝) · 아니면 `saveEnd`(이어서 지점 저장) · 마무리의 ▶ 도 같은 확인.
