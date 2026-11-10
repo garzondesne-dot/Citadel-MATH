@@ -22,6 +22,12 @@ const OUT = process.argv[2] || '.', U = 'http://localhost:8765/index.html?local'
   await S.screenshot({ path: `${OUT}/84-start.png` });
   await S.evaluate(async (c) => { const R = DS.Act.unpackRoom(await DS.Net.get(`rooms/${c}`)), L = DS.Lessons.get('set-06'), me = DS.Net.uid(), it = DS.Raid.chainItems(L, R, 'u4', me, 0); await DS.Net.set(`rooms/${c}/chain/u4/${me}/0`, { s: 0, p: 0, g: DS.Raid.chainAns(it[0]), at: DS.Net.TS }); }, code);
   await S.waitForTimeout(2000); await clr(); d = await dk(); ok(d.go && d.wr, `졸개 ① 뒤에도 ✍ 서술형 그대로 (${JSON.stringify(d)})`);
+  // 🐞 #57 ② AI 가 확신 못함(check) → 「알겠어요」로 창을 닫아도 ⏳ 선생님 확인 중 줄이 남음
+  await S.evaluate(() => { DS.Photo.grade = async () => ({ status: 'check', id: 'c1', scores: [3] }); });
+  await S.click('#cr-write'); await S.waitForTimeout(800); await S.click('#wr-snap'); await S.waitForTimeout(2500); await clr();
+  ok(await S.evaluate(() => /선생님이 직접 확인/.test((document.querySelector('.cr-pend-ph') || {}).textContent || '')), '⏳ 서술형 선생님 확인 중 줄이 남음 (쓰기 화면)');
+  await S.click('#wr-x'); await S.waitForTimeout(1200); await clr();
+  ok(await S.evaluate(() => !!document.querySelector('.cr-pend-ph')), '⏳ 닫은 뒤 소레이드 화면에도 남음');
   await S.evaluate(() => { DS.Photo.grade = async () => ({ status: 'pass', id: 'x1', score: 3, total: 3, scores: [3], steps: {} }); });
   await S.click("#cr-write"); await S.waitForTimeout(800); await S.click("#wr-snap"); await S.waitForTimeout(3500); await clr();
   const rec = await S.evaluate(async (c) => { const R = DS.Act.unpackRoom(await DS.Net.get(`rooms/${c}`)), r = DS.Raid.record(DS.Lessons.get('set-06'), R, 'u4', DS.Net.uid()); return { done: r.done, byPh: r.byPh, perfect: r.perfect, tok: r.tokLeft, n: r.n }; }, code);

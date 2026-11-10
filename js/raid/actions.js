@@ -224,7 +224,7 @@ DS.Act = (function () {
   const snapStart = (code, mid) => N().set(P(code, `players/${N().uid()}/snap`), { mid, at: N().TS });
   async function snapEnd(code, packed, mid, res, peek) {
     const R = unpackRoom(packed), me = N().uid(), p = (R.players || {})[me] || {}, used = res && (res.status === 'check' || res.status === 'appeal') ? Math.max(0, ((res.scores || []).length) - 1) : Math.max(res ? 1 : 0, ((res && res.scores) || []).length), n = (Number((p.ph || {})[mid]) || 0) + used; // ⏳ 선생님 확인으로 넘어간 장 · 창만 닫은 경우는 안 셈
-    await N().update(P(code, `players/${me}`), { snap: null, [`ph/${mid}`]: n, ...(res && res.status === 'pass' ? { [`wr/${mid}`]: peek ? 'peek' : 'ok' } : {}) });
+    await N().update(P(code, `players/${me}`), { snap: null, [`ph/${mid}`]: n, [`pp/${mid}`]: res && (res.status === 'check' || res.status === 'appeal') ? (res.id || 1) : null, ...(res && res.status === 'pass' ? { [`wr/${mid}`]: peek ? 'peek' : 'ok' } : {}) });
     if (!res || res.status !== 'pass' || peek) return null;
     return photoTrue(code, R, mid);
   }

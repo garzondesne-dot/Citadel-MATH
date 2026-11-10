@@ -3044,3 +3044,5 @@ body:has(#test-bar) #screen-student.st-battle .wrap:has(.cr-dock) { padding-bott
 .ch-wrap.cr-q .paper { padding-top: 8px; padding-bottom: 8px; } .ch-wrap.cr-q .paper .item { padding-top: 6px !important; padding-bottom: 6px !important; }
 .sym-t.sym-c { display: inline-block; margin-left: 4px; padding: 0 7px; border-radius: 8px; background: #fff1c2; color: #6b4a00; font-weight: 800; font-size: .9em; text-decoration: none; border: 1.5px dashed #b8873a; } /* 📖 #58 F 개념 톡 칩 */
 .ph-hand { margin: 6px 0; padding: 6px 10px; border-radius: 8px; background: #fff1c2; color: #5a3a00; font-size: 14px; line-height: 1.45; } /* ✍ #58 A 손글씨만 */
+/* 🐞 #57 ② 아이폰 사파리: 글자 16px 미만 입력칸을 누르면 화면이 확대되고 안 풀림 (이의 신청 칸 15px) → 아이폰에서만 입력칸 16px 이상 */
+@supports (-webkit-touch-callout: none) { textarea, .p-video input, .ph-lim input, .ph-set input[type=url], .sv-q textarea, input.sv-no { font-size: 16px !important; } }

@@ -716,7 +716,7 @@ DS.Student = (function () {
     const ready = q.type === 'multi' ? cform.given[0].length > 0 : cform.given[0] != null;
     const dns = Raid().chainDown(L, R, mid).filter((d) => d.down).map((d) => d.k); // 💥 반이 쓰러뜨린 졸개
     const wm = writeMode[mid], phN = Number((myP().ph || {})[mid]) || 0, wrOk = (myP().wr || {})[mid], canPhoto = DS.Photo && DS.Photo.ready(L.id, mid); // ✍ #50 ② 언제나 (시작 전 · 졸개 도중 · 대장 뒤 · 한 판 더 중) // #47 테스트에서도 ✍ 📸 (진짜 중계소 · 기준표 켜진 문제) // 🐞 2026-11-09: sig 보다 먼저 (예전엔 뒤에 있어 소레이드 화면이 그려지지 않음 · v0.9.34.0~)
-    const sig = `${key}|${JSON.stringify(cform.given)}|${rec.locked}|${rec.fail}|${rec.done}|${pDone}|${hp.left}|${dns.join(',')}|${needWhy}|${rec.whyOk}|${rec.whyN}|${nextHint}|${hintBy.length}|${myHint}|${wm ? (wm.peek ? 'p' : 'w') : ''}|${phN}|${wrOk || ''}|${!!(DS.Photo && DS.Photo.ready(L.id, mid))}|${myP().charge || 0}|${rec.tokLeft}|${rec.slots}|${rec.left}`;
+    const sig = `${key}|${JSON.stringify(cform.given)}|${rec.locked}|${rec.fail}|${rec.done}|${pDone}|${hp.left}|${dns.join(',')}|${needWhy}|${rec.whyOk}|${rec.whyN}|${nextHint}|${hintBy.length}|${myHint}|${wm ? (wm.peek ? 'p' : 'w') : ''}|${phN}|${wrOk || ''}|${!!(DS.Photo && DS.Photo.ready(L.id, mid))}|${myP().charge || 0}|${JSON.stringify(myP().pp || {})}|${rec.tokLeft}|${rec.slots}|${rec.left}`;
     if (sig === drawn && body.querySelector('.ch-wrap')) { hpText(body, hp); return; }
     if (chainAtkUntil > Date.now() && body.querySelector('.ch-wrap')) { hpText(body, hp); return; } // ⚔ 공격 모션 중엔 다시 그리지 않음 (끝나면 다시 그림)
     drawn = sig;
@@ -726,6 +726,7 @@ DS.Student = (function () {
     const sfKey = `${mid}|${pass}`, storyF = (arr) => (arr.length ? `<div class="cr-story${storyOpen[sfKey] ? '' : ' cr-fold'}" data-sf="${esc(sfKey)}"><b>📜 나의 풀이</b>${arr.length > 1 ? `<button type="button" class="cr-sf">${storyOpen[sfKey] ? '접기 ▲' : `${arr.length}줄 ▼`}</button>` : ''}<ol>${arr.map((t, k) => `<li value="${k + 1}">${pretty(t)}</li>`).join('')}</ol></div>` : '');
     const lastWrong = !prac && rec.lastWrong && rec.lastWrong.s === stage, cheer = !prac && !rec.done && !rec.fail && dns.includes(stage) ? '<p class="cr-more cr-cheer">💥 친구들은 이 졸개를 넘었어요! 힘내요</p>' : ''; // 📱 #56 ④ 장면 띠 위에 겹침
     if (!photoLoaded && DS.Photo) { photoLoaded = true; DS.Photo.load().then(() => { drawn = ''; render(); }).catch(() => {}); }
+    const pendPh = (myP().pp || {})[mid] && wrOk !== 'ok' ? '<p class="ph-hand cr-pend-ph">⏳ 서술형 사진은 <b>선생님이 직접 확인</b>하고 있어요 (AI 가 확신하지 못함) · 더 또렷하게 다시 찍어도 돼요</p>' : ''; // 🐞 #57 ② 「알겠어요」 뒤 결과가 사라진 것처럼 보임 → 남김
     const wrBtn = !canPhoto ? '' : /* ⚔ #50 ② 아래 칸 오른쪽 · 언제나 (채점은 학습지 숫자 그대로) */ wrOk === 'ok' ? '<button class="btn big dock-wr" disabled>🌟 서술형 통과</button>' : phN >= DS.Photo.raidMax() ? '<button class="btn big dock-wr" disabled>📸 사진 다 씀</button>' : '<button class="btn big dock-wr" id="cr-write">✍ 서술형</button>';
     const pUsed = Raid().pracUsed(R, mid, me, rec), pLeft = Math.max(0, Raid().PRAC_MAX - pUsed); // 🔥 #39 한 판 더 3판
     const pracBtn = pLeft > 0 ? `<button class="btn primary big dock-go cr-again" id="cr-prac">🔥 한 판 더 <small>${pLeft}/${Raid().PRAC_MAX}</small></button>` : `<span class="dock-wait cr-pend">🔥 연습 ${Raid().PRAC_MAX}번 끝!</span>`;
@@ -741,7 +742,7 @@ DS.Student = (function () {
       if (scoutImg[mid] === undefined) { scoutImg[mid] = null; DS.Net.get(`prep/${L.id}/img/${mid}`).then((u) => { if (u) { scoutImg[mid] = u; drawn = ''; render(); } }).catch(() => {}); }
       paint(body, `write|${mid}|${wm.peek ? 1 : 0}`, `<div class="panel framed st-fight ch-wrap cr-writing">${scene(step, rec, hp, '', '')}<div class="paper"><div class="paper-h"><b>✍ ${esc(step.title)}</b><small>${wm.peek ? '✍ 연습 쓰기 (진필살기 없음)' : '게임 풀이를 보지 말고 처음부터 · 학습지 숫자 그대로'}</small></div>
         ${img ? `<img class="scout-img" src="${img}" alt="학습지 문제">` : `<p>${esc((((DS.Rubrics || {})[L.id] || {})[mid] || {}).ask || step.title)}</p>`}
-        ${wm.peek ? story(rec.says) : ''}<p class="ph-hand">✍ 학습지 서술형 칸에 <b>직접 손으로 쓴 풀이</b>만 찍어요 · 화면 · 인쇄 글은 통과 안 돼요</p><p class="muted small">종이에 풀이를 처음부터 끝까지 쓰고 📸 찍어요 (이 소레이드 ${Math.max(0, DS.Photo.raidMax() - phN)}장 남음)</p></div>
+        ${wm.peek ? story(rec.says) : ''}${pendPh}<p class="ph-hand">✍ 학습지 서술형 칸에 <b>직접 손으로 쓴 풀이</b>만 찍어요 · 화면 · 인쇄 글은 통과 안 돼요</p><p class="muted small">종이에 풀이를 처음부터 끝까지 쓰고 📸 찍어요 (이 소레이드 ${Math.max(0, DS.Photo.raidMax() - phN)}장 남음)</p></div>
         <div class="row cr-wbtns"><button class="btn primary big" id="wr-snap"${phN >= DS.Photo.raidMax() ? ' disabled' : ''}>📸 찍어서 채점</button>${wm.peek ? '' : '<button class="btn" id="wr-peek">📜 풀이 다시 보기</button>'}<button class="btn" id="wr-x">✕ 그만 쓰기</button></div></div>`);
       bindTop();
       $('#wr-x').onclick = () => { delete writeMode[mid]; drawn = ''; render(); };
@@ -777,7 +778,7 @@ DS.Student = (function () {
     const dockL = needWhy ? '' : prac ? (pDone || pFail ? pracBtn : goBtn('⚔ 연습 공격')) : rec.done ? pracBtn : rec.fail ? '' : rec.locked ? '<span class="dock-wait">🙋 확인 기다림</span>' : goBtn('⚔ 공격!');
     const qView = !needWhy && !rec.fail && !(!prac && rec.done) && !pFail && !pDone && !(rec.locked && !prac); // 문제 화면 = 높이 고정(양피지 안에서 스크롤) · 끝난 화면 = 높이 자유(맨 끝 단추까지 스크롤 · 🐞 2026-11-10 힌트 단추가 아래 칸에 가려 못 누름)
     paint(body, `${key}|${needWhy ? 'w' : 'q'}`, `<div class="panel framed st-fight ch-wrap${qView || needWhy ? ' cr-q' : ' st-after'}"><div class="cr-scw">${scene(step, rec, hp, '', '')}${qView || needWhy ? cheer : ''}</div>
-      <div class="cr-chips">${chips}${prac && whyTag ? `<b class="cr-whyn">${whyTag}</b>` : ''}</div>${qView || needWhy ? '' : cheer}${hintsBox}${mainHtml}
+      <div class="cr-chips">${chips}${prac && whyTag ? `<b class="cr-whyn">${whyTag}</b>` : ''}</div>${pendPh}${qView || needWhy ? '' : cheer}${hintsBox}${mainHtml}
       ${dock(prac && !pDone && !pFail ? pDock : rec, `<div class="cr-dbtns">${dockL}${wrBtn}</div>`).replace('class="st-dock"', 'class="st-dock cr-dock"')}${helpBtn()}${qView || needWhy ? '' : '<div class="cr-pad"></div>'}</div>`); // cr-pad = 아래 칸(두 줄)에 맨 끝 단추가 가리지 않게
     bindTop(); bindHelp();
     body.querySelectorAll('[data-pick]').forEach((b) => b.addEventListener('click', () => {
