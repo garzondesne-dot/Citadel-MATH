@@ -521,7 +521,8 @@ DS.Student = (function () {
     const prac = rec.practice; // v0.9.2 연습 공격: 다 맞힌 뒤의 시도 → 이펙트는 그대로 · 데미지 0 · 「이미 성공」
     const fx = `${mid}|${t.attempt}` !== shown ? (label === 'fail' && !prac ? 'miss' : 'hit') : '';
     if (fx && t.correct < t.total && thinkSec() > 0) thinkUntil[`${mid}|${t.attempt}`] = Date.now() + thinkSec() * 1000;
-    const atk = !!(fx && DS.Attack); // ⚔ 공격 개편 2단계 (2026-11-06): 근접 = 돌진 · 원거리 = 탄 → 그림을 그린 뒤 DS.Attack.play (아래)
+    const atk = !!(fx && DS.Attack);
+    const sd = fx ? stampMs(items.filter((q, i) => penLine(q, (t.given || [])[i], i)).length) : 0; // ✍ 📜 채점 도장이 끝난 뒤 공격 (2026-11-11 선생님) // ⚔ 공격 개편 2단계 (2026-11-06): 근접 = 돌진 · 원거리 = 탄 → 그림을 그린 뒤 DS.Attack.play (아래)
     if (fx) { shown = `${mid}|${t.attempt}`; if (!atk) { if (label === 'fail' && !prac) DS.Sound.squish(); else { DS.Sound.slash(); setTimeout(() => DS.Sound.hit(), 160); setTimeout(() => { const sc = body.querySelector('.scene'); if (sc) DS.FX.play(sc, myP().fx || 'flame', { perfect: label === 'success', scale: label === 'success' ? 0.42 : 0.3 }); }, 60); } } }
     // ⚔ 마무리 일격: 내 이번 공격이 몬스터 체력을 0 으로 만들었으면
     const bestBefore = rec.tries.slice(0, -1).reduce((m, x) => Math.max(m, x.correct), 0), gain = rec.best - bestBefore;
@@ -532,7 +533,7 @@ DS.Student = (function () {
     // 🔥 끈기의 일격: 두 번 넘게 틀린 뒤 드디어 다 맞힘 (연출만)
     const grit = !!(fx && !prac && t.attempt >= 2 && rec.perfectAt === t.attempt);
     if (fx && !prac && t.attempt >= 1 && rec.perfectAt === t.attempt && DS.Titles && DS.Titles.me) setTimeout(() => DS.Titles.me(myP().title, 'grit', '끈기!'), 900); // 🏅 #63 💪 끈기의 용사: 재도전으로 맞히는 순간
-    if (finish) setTimeout(() => { const sc = body.querySelector('.scene'); if (sc) { sc.classList.add('fin-flash'); DS.FX.play(sc, myP().fx || 'flame', { perfect: true, scale: 0.6 }); } DS.Sound.correct(); }, atk ? 1300 : 500);
+    if (finish) setTimeout(() => { const sc = body.querySelector('.scene'); if (sc) { sc.classList.add('fin-flash'); DS.FX.play(sc, myP().fx || 'flame', { perfect: true, scale: 0.6 }); } DS.Sound.correct(); }, (atk ? 1300 : 500) + sd);
     const head = prac && rec.v3 ? (t.correct === t.total ? `✔ 새 문제 해결! <span class="small muted">기회는 그대로</span>` : `✏ 틀린 부분이 있습니다. 고쳐 보세요. <span class="small muted">(기회 −1)</span>`) : prac ? `몬스터 묶기 ${t.correct}/${t.total} — 지금까지 <b>${Raid().bindOf(L, R, mid, me)}초</b> 묶음 <span class="small muted">(최대 ${Raid().BIND_MAX}초)</span>` : { success: '⚔ 공격 성공!', partial: `⚔ 부분 성공 (${t.correct}/${t.total})`, fail: '💨 공격 실패…' }[label];
     const done = Raid().cleared(L, R, mid);
     // ⚡ 수업 필살기 (2026-11-06 확정 ①): 첫 시도 퍼펙트 + 묶기 2번 퍼펙트 = 3연속 · 특화 Ⅳ 전설 스킬 · 마지막 기회가 남아 있을 때
@@ -566,10 +567,10 @@ DS.Student = (function () {
       ${dock(rec, done && !rec.canRetry ? '<span class="dock-wait">다음 단계를 기다려요</span>' : '')}
       ${helpBtn()}</div>`); // #47 테스트에서도 🙋 도움 요청
     bindHelp(); bindTop();
-    { const pk = `${mid}|${t.attempt}`; if (!penShown[pk] && fx) penShown[pk] = Date.now(); const t0 = penShown[pk]; if (t0) body.querySelectorAll('.pen-res li.pix-in').forEach((li, i) => pixIn(li, t0 + i * 250, i + 7)); body.querySelectorAll('.pen-res li.pen-gone').forEach((li) => { li.style.animationDelay = `-${Math.max(0, Date.now() - (t0 || 0))}ms`; }); } // 다시 그려도 이어서 // ✍ 맞힌 줄 = 픽셀 디졸브로 굳음 · 틀린 줄 = CSS 로 스르르
+    { const pk = `${mid}|${t.attempt}`; if (!penShown[pk] && fx) penShown[pk] = Date.now(); const t0 = penShown[pk]; if (t0) body.querySelectorAll('.pen-res li').forEach((li, i) => { if (li.classList.contains('pix-in')) pixIn(li, t0 + i * STAMP_GAP + 150, i + 7); }); body.querySelectorAll('.pen-res li').forEach((li, k) => { li.style.setProperty('--d', `${(k * STAMP_GAP - Math.max(0, Date.now() - (t0 || 0))) / 1000}s`); }); /* 다시 그려도 도장 · 지움이 이어서 */ } // 다시 그려도 이어서 // ✍ 맞힌 줄 = 픽셀 디졸브로 굳음 · 틀린 줄 = CSS 로 스르르
     const sb = $('#st-sheet'); if (sb) sb.onclick = () => sheetModal(step);
     // v0.9.3 (⑤): 공격 자세는 잠깐만 → 다시 서 있는 자세 (격파됐으면 승리 자세 그대로)
-    if (atk) { const sc = body.querySelector('.scene'); if (sc) DS.Attack.play(sc, { heroBox: sc.querySelector('.enc-hero'), monBox: sc.querySelector('.enc-mon'), hero: myP().hero || 0, fx: myP().fx || 'flame', miss: label === 'fail' && !prac, s: grit ? 1.3 : 1, rest: done ? 'win' : 'idle', noDmg: prac, ultimate: autoUlt, finish: grit }).then(() => { if (prac && t.correct > 0 && DS.Thrill && sc.isConnected) DS.Thrill.bindFx(sc.querySelector('.enc-mon .art.monster') || sc.querySelector('.enc-mon')); }); } // ⛓ 묶기 공격 = 사슬 이펙트
+    if (atk) setTimeout(() => { if (!body.isConnected) return; { const sc = body.querySelector('.scene'); if (sc) DS.Attack.play(sc, { heroBox: sc.querySelector('.enc-hero'), monBox: sc.querySelector('.enc-mon'), hero: myP().hero || 0, fx: myP().fx || 'flame', miss: label === 'fail' && !prac, s: grit ? 1.3 : 1, rest: done ? 'win' : 'idle', noDmg: prac, ultimate: autoUlt, finish: grit }).then(() => { if (prac && t.correct > 0 && DS.Thrill && sc.isConnected) DS.Thrill.bindFx(sc.querySelector('.enc-mon .art.monster') || sc.querySelector('.enc-mon')); }); } }, sd); // ⛓ 묶기 공격 = 사슬 이펙트 · 📜 도장 뒤
     else if (fx && !done) setTimeout(() => { const a = body.querySelector('.enc-hero .art'); if (a) a.outerHTML = heroNow('idle', fx === 'miss' ? 'slump' : 'huff'); }, 650);
     const rb = $('#st-retry');
     if (rb) { thinkTimer(rb, `${mid}|${t.attempt}`, rec.v3 ? rb.textContent : rec.perfect ? '몬스터 묶기' : '🔄 다시 도전'); rb.onclick = () => { retrying = `${mid}|${rec.nextAttempt}`; form = null; DS.Sound.clank(); render(); }; }
@@ -630,7 +631,27 @@ DS.Student = (function () {
     else { if (g == null) return null; v = String(g); }
     return `${no} ${v}`;
   }
-  const penBox = (key, lines, cls = '') => (lines.length ? `<div class="cr-story pen-box${penOpen[key] || cls ? '' : ' cr-fold'}${cls}" data-pk="${esc(key)}"><b>✍ 나의 풀이</b>${lines.length > 1 && !cls ? `<button class="cr-sf pen-sf" type="button">${penOpen[key] ? '▴ 접기' : `▾ 모두 ${lines.length}줄`}</button>` : ''}<ol>${lines.map((l) => `<li class="${l.cls || ''}">${pretty(l.t)}</li>`).join('')}</ol></div>` : '');
+  const penBox = (key, lines, cls = '') => (lines.length ? `<div class="cr-story pen-box${penOpen[key] || cls ? '' : ' cr-fold'}${cls}" data-pk="${esc(key)}"><b>${/pen-res/.test(cls) ? '📜 나의 답안' : '✍ 나의 풀이'}</b>${lines.length > 1 && !cls ? `<button class="cr-sf pen-sf" type="button">${penOpen[key] ? '▴ 접기' : `▾ 모두 ${lines.length}줄`}</button>` : ''}<ol>${lines.map((l, k) => `<li class="${l.cls || ''}"${/pen-res/.test(cls) ? ` style="--d:${(k * STAMP_GAP) / 1000}s"` : ''}>${pretty(l.t)}</li>`).join('')}</ol></div>` : '');
+  // ✍ 문제마다 「나의 답」 한 줄 (2026-11-11 선생님 「문제마다 나의 풀이 칸 · 공격 때 하나로 합쳐 채점」): 고르기 전 = 점선 빈칸 · 고르면 연필 글씨
+  const STAMP_GAP = 400, stampMs = (n) => (n ? n * STAMP_GAP + 450 : 0); // 채점 도장 한 줄 0.4초 → 끝나면 공격
+  const NO_RE = /^(\([^)]*\)|\d+-\(\d+\)|문제 \d+ \(\d+\)|문제 \d+\))\s/;
+  function ansLine(q, g, i) { const t = penLine(q, g, i); return `<div class="ans-line${t ? ' pen' : ' empty'}" data-al="${i}"><b class="al-ic">✍</b> ${t ? pretty(t.replace(NO_RE, '')) : '<span class="al-blank">고르면 여기에 적혀요</span>'}</div>`; }
+  const withAns = (html, q, g, i) => html.replace(/<\/div>\s*$/, `${ansLine(q, g, i)}</div>`); // 문제 칸(.item) 맨 아래에
+  // ⚔ 공격을 누르면: 문제마다 적힌 줄이 위로 모여 「📜 나의 답안」 카드 한 장으로 (약 0.8초 · transform/opacity · 움직임 줄이기면 건너뜀)
+  function mergeAnim(root) {
+    return new Promise((res) => {
+      const ls = [...root.querySelectorAll('.ans-line.pen')], paper = root.querySelector('.paper, .bf-paper');
+      if (!ls.length || !paper || (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) return res();
+      const pr = paper.getBoundingClientRect(), top = Math.max(70, Math.min(window.innerHeight * 0.35, pr.top + 12)), card = document.createElement('div');
+      card.className = 'ans-card'; card.innerHTML = '<b>📜 나의 답안</b>'; card.style.cssText = `left:${pr.left + 10}px;top:${top}px;width:${pr.width - 20}px`; document.body.appendChild(card);
+      let y = top + 32;
+      ls.forEach((l, k) => { const r = l.getBoundingClientRect(), c = l.cloneNode(true); c.classList.add('ans-fly'); c.style.cssText = `left:${r.left}px;top:${r.top}px;width:${Math.min(r.width, pr.width - 40)}px`; document.body.appendChild(c);
+        const dx = pr.left + 22 - r.left, dy = y - r.top; y += Math.max(22, r.height) + 4; l.style.opacity = '.2';
+        requestAnimationFrame(() => requestAnimationFrame(() => { c.style.transitionDelay = `${k * 0.06}s`; c.style.transform = `translate(${dx}px, ${dy}px)`; })); });
+      card.style.height = `${y - top + 8}px`;
+      setTimeout(() => { document.querySelectorAll('.ans-fly, .ans-card').forEach((e) => e.remove()); res(); }, 850 + ls.length * 60);
+    });
+  }
   function fightForm(body, step, rec, hp) {
     const mid = step.id, attempt = rec.nextAttempt, key = `${mid}|${attempt}`;
     const items = Raid().itemsFor(L, R, mid, me, attempt);
@@ -649,8 +670,7 @@ DS.Student = (function () {
       ${down ? '<p class="paper-note ok">🎉 몬스터는 쓰러졌어요! 그래도 풀어서 공격하면 이펙트도 뜨고 경험치가 쌓여요.</p>' : ''}
       ${attempt && rec.v3 ? `<p class="paper-note">${rec.perfect ? (rec.fix ? '🔁 <b>같은 문제 그대로예요</b> (고장 아님!) — 종이 풀이를 고쳐서 ✘ 칸을 다시 내요 (맞히면 묶기 · 힐 한 번)' : '🆕 새 문제 (숫자가 바뀌었어요) — 맞히면 기회 그대로 + 묶기 · 힐 한 번 · 틀리면 기회 −1') : '🔁 <b>같은 문제 그대로예요</b> (고장 아님!) — 종이 풀이를 고쳐서 ✘ 칸만 다시 내요 · 지난 답은 채워져 있어요'}</p>` : attempt && rec.perfect ? `<p class="paper-note">⛓ 몬스터 묶기 — 맞힌 소문제 1개마다 반 전체의 몬스터 공격이 1초 늦어져요 (최대 ${Raid().BIND_MAX}초)</p>` : attempt ? `<p class="paper-note">🔄 재도전 ${attempt} — 숫자가 모두 바뀌었어요 · 지난번 틀린 문항은 <b class="ngc">✘</b></p>` : ''}
       ${L.monsters[mid].note ? `<p class="paper-note">💡 ${esc(L.monsters[mid].note)}</p>` : ''}
-      <div class="items">${items.map((q, i) => itemHtml(q, i, prevWrong[i], null)).join('')}</div>
-      ${penBox(mid, items.map((q, i) => ({ t: penLine(q, form.given[i], i), cls: `pen${penLast[mid] === i ? ' latest' : ''}` })).filter((l) => l.t))}</div>
+      <div class="items">${items.map((q, i) => withAns(itemHtml(q, i, prevWrong[i], null), q, form.given[i], i)).join('')}</div></div>
       ${dock(rec, `<button class="btn primary big dock-go${ready ? ' go-pulse' : ''}" id="st-go"${ready ? '' : ' disabled'}>⚔ 공격!</button>`)}
       ${helpBtn()}</div>`);
     chargeBtn(body); draftMark(ready && form.touched ? key : null); // ⚔ #24 (숫자 칸은 0 으로 시작하니 한 번이라도 고친 뒤에만): 다 채웠는데 공격을 안 누름 → 리모컨에 표시
@@ -677,7 +697,8 @@ DS.Student = (function () {
     DS.UI.dial(body, (i) => form.given[i], (i, v) => { form.given[i] = v; form.touched = true; if (items.every((q, j) => (q.type === 'multi' ? form.given[j].length > 0 : q.type === 'text' ? String(form.given[j] || '').trim() !== '' : form.given[j] != null))) draftMark(key); drawn = `form|${key}|${JSON.stringify(form.given)}|${(R.help || {})[me] ? 1 : 0}|${down}`; }); // 꾹 누르면 계속 · 숫자만 바꿈 (v0.9.6.16)
     $('#st-go').onclick = async () => {
       const given = items.map((q, i) => (q.type === 'blanks' ? form.given[i] : q.type === 'number' ? Number(form.given[i]) : form.given[i]));
-      try { await DS.Act.submit(code, raw, mid, attempt, given); retrying = ''; form = null; dirty = true; } catch (e) { DS.UI.toast(e.message); }
+      const go = $('#st-go'); if (go) go.disabled = true; await mergeAnim(body); // ✍ → 📜 하나로 모임 (이 폰에서만 · 답은 그다음 바로 저장)
+      try { await DS.Act.submit(code, raw, mid, attempt, given); retrying = ''; form = null; dirty = true; } catch (e) { DS.UI.toast(e.message); if (go) go.disabled = false; }
     };
   }
   // ⚔ 소레이드 화면 (2026-11-09 #18): 진행 칩 ①②③👑 · 지금 단계 문제 하나 · 「📜 나의 풀이」가 한 줄씩 쌓임 · 기회 반 칸 · 1칸 남으면 🙋 선생님 확인
@@ -941,5 +962,5 @@ DS.Student = (function () {
     bindLobby();
   }
   // v0.9.3 종합상황실 시연: 학생 폰과 같은 문항 칸 · 해설 줄
-  return { enter, stop: stop0, itemHtml: (q, i, G) => itemHtml(q, i, false, null, G, true), solOf, itemText, hintCount, penLine, penBox, pixIn, penToggle: (k) => { penOpen[k] = !penOpen[k]; }, penMark: (k, i) => { penLast[k] = i; } }; // 🧩 A안 (11/11): 성채 · 허수아비 전투도 같은 부품
+  return { enter, stop: stop0, itemHtml: (q, i, G) => itemHtml(q, i, false, null, G, true), solOf, itemText, hintCount, penLine, penBox, pixIn, withAns, mergeAnim, stampMs, STAMP_GAP, penToggle: (k) => { penOpen[k] = !penOpen[k]; }, penMark: (k, i) => { penLast[k] = i; } }; // 🧩 A안 (11/11): 성채 · 허수아비 전투도 같은 부품
 })();

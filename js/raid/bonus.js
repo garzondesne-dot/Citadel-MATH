@@ -360,11 +360,9 @@ DS.Bonus = (function () {
       const paint = () => {
         const sc = el.querySelector('.bf-body'), keep = first ? null : { y: el.scrollTop, b: sc ? sc.scrollTop : 0, p: (el.querySelector('.bf-paper') || {}).scrollTop || 0 };
         const ready = todo.every((i) => filled(items[i], G[i]));
-        const lines = todo.map((i) => ({ t: S.penLine(items[i], G[i], i), cls: 'pen' })).filter((l) => l.t);
         const paper = `<div class="paper bf-paper"><div class="paper-h"><b>${esc(mon.title)}</b><small>${todo.length > 1 ? `남은 ${todo.length}문제 모두 풀고 공격` : '풀고 공격'}</small></div>
           ${attempt ? `<p class="paper-note">${mid === 'boss' ? '🔄 세트가 바뀌었어요' : '🔄 숫자가 바뀌었어요'} — 틀렸던 것만 새 숫자로</p>` : ''}
-          <div class="items">${todo.map((i) => `${S.itemHtml(items[i], i, G)}${hasHint(items[i]) ? `<div class="bf-hint">${DS.Hint.html(items[i], `bf${i}`, hOpen.has(i))}</div>` : ''}`).join('')}</div>
-          ${S.penBox(penKey(), lines)}</div>
+          <div class="items">${todo.map((i) => `${S.withAns(S.itemHtml(items[i], i, G), items[i], G[i], i)}${hasHint(items[i]) ? `<div class="bf-hint">${DS.Hint.html(items[i], `bf${i}`, hOpen.has(i))}</div>` : ''}`).join('')}</div></div>
           <div class="row bf-go-row"><button class="btn primary big dock-go${ready ? ' go-pulse' : ''}" id="bf-go2"${ready ? '' : ' disabled'}>⚔ 공격!</button></div>`;
         const act = draw('', paper); act.innerHTML = '';
         first = false;
@@ -378,7 +376,7 @@ DS.Bonus = (function () {
         if (DS.UI.dial) DS.UI.dial(el, (i) => G[i], (i, v) => { G[i] = v; const go = el.querySelector('#bf-go2'); const ok = todo.every((k) => filled(items[k], G[k])); if (go) { go.disabled = !ok; go.classList.toggle('go-pulse', ok); } });
         el.querySelectorAll('[data-hint]').forEach((b) => (b.onclick = () => { const k = Number(String(b.dataset.hint).replace(/^bf/, '')); if (hOpen.has(k)) hOpen.delete(k); else hOpen.add(k); DS.Sound.clank(); paint(); }));
         el.querySelectorAll('.pen-sf').forEach((b) => (b.onclick = (e) => { e.stopPropagation(); S.penToggle(penKey()); paint(); }));
-        const go = el.querySelector('#bf-go2'); if (go) go.onclick = () => resolve(G.map((g, i) => (items[i].type === 'number' ? Number(g) : g)));
+        const go = el.querySelector('#bf-go2'); if (go) go.onclick = () => { go.disabled = true; S.mergeAnim(el).then(() => resolve(G.map((g, i) => (items[i].type === 'number' ? Number(g) : g)))); }; // ✍ → 📜 하나로 모임
         DS.Bonus._form = { items, todo, G, submit: () => resolve(G.map((g, i) => (items[i].type === 'number' ? Number(g) : g))) }; // 🧪 시험용 고리 (자동 풀이 · 화면에는 영향 없음)
       };
       paint();
@@ -396,11 +394,15 @@ DS.Bonus = (function () {
       const anyOk = todo.some((i) => marks[i]);
       penRes = DS.Student.penBox(`r|${penKey()}`, todo.map((i) => ({ t: DS.Student.penLine(items[i], given[i], i), cls: marks[i] ? 'pen-ok' : 'pen-gone' })).filter((l) => l.t), ' pen-res');
       draw('', penRes);
+      { const t0 = Date.now(); el.querySelectorAll('.pen-res li.pen-ok').forEach((li) => { const k = [...li.parentNode.children].indexOf(li); li.classList.add('pix-in'); DS.Student.pixIn(li, t0 + k * DS.Student.STAMP_GAP + 150, k + 7); }); } // 📜 채점 도장 (줄마다 0.4초)
+      await new Promise((r) => setTimeout(r, DS.Student.stampMs(el.querySelectorAll('.pen-res li').length)));
+      if (!document.body.contains(el)) return null;
       if (anyOk) DS.Sound.correct(); else DS.Sound.squish();
       // ⚔ 공격 연출 한 번 (맞힌 게 하나라도 있으면 명중 · 모두 틀리면 튕겨냄 · 벌 없음)
       if (DS.Attack) { const sc = el.querySelector('.scene'); await DS.Attack.play(sc, { heroBox: sc && sc.querySelector('.enc-hero'), monBox: sc && sc.querySelector('.enc-mon'), hero: me.hero || 0, fx: me.fx || 'flame', miss: !anyOk, finish: anyOk && solved.every(Boolean), s: 1 }).catch(() => {}); }
       else if (anyOk) DS.FX.play(el.querySelector('.scene'), me.fx || 'flame', { scale: 0.3 });
       if (!document.body.contains(el)) return null;
+      penRes = penRes.replace(' pen-res', ' pen-res pen-still'); // 다음 그림부터는 도장 · 지움을 다시 하지 않음
       left--;
       const cleared = solved.every(Boolean);
       const tries = Number(rec.tries || 0) + 1;

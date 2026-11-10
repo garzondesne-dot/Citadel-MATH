@@ -29,10 +29,14 @@ const OUT = process.argv[2] || '.', U = 'http://localhost:8765/index.html?local'
     [...it.querySelectorAll('.chipset')].forEach((c) => { if (want.includes(Number(c.textContent.trim()))) c.click(); }); return want; }, [k, wrong]);
   await solve(0, false); await S.waitForTimeout(250); await solve(1, true); await S.waitForTimeout(250); await solve(2, false); await S.waitForTimeout(300);
   v = await view(); ok(!v.dis, '다 고르면 ⚔ 공격 켜짐');
-  const pen = await S.evaluate(() => [...document.querySelectorAll('.bn-fight .pen-box li')].map((l) => l.textContent));
-  ok(pen.length === 3, `✍ 나의 풀이 연필 줄 3 (${pen.join(' | ')})`);
+  const pen = await S.evaluate(() => [...document.querySelectorAll('.bn-fight .item .ans-line.pen')].map((l) => l.textContent.trim()));
+  ok(pen.length === 3 && /P = \{/.test(pen[0]), `✍ 문제마다 나의 답 줄 3 (${pen.join(' | ')})`);
   await S.screenshot({ path: `${OUT}/102-form.png` });
-  await S.evaluate(() => document.querySelector('#bf-go2').click()); await S.waitForTimeout(3500);
+  await S.evaluate(() => document.querySelector('#bf-go2').click()); await S.waitForTimeout(350);
+  const card = await S.evaluate(() => ({ card: !!document.querySelector('.ans-card'), fly: document.querySelectorAll('.ans-fly').length }));
+  ok(card.card && card.fly === 3, `⚔ 공격 → 3줄이 📜 나의 답안 카드로 모임 (${JSON.stringify(card)})`);
+  await S.waitForTimeout(1200); await S.screenshot({ path: `${OUT}/102-stamp.png` });
+  await S.waitForTimeout(4500);
   const r1 = await S.evaluate(() => ({ ok: document.querySelectorAll('.bn-fight .pen-res li.pen-ok').length, gone: document.querySelectorAll('.bn-fight .pen-res li.pen-gone').length, msg: (document.querySelector('.bn-fight .bf-body') || {}).innerText || '', again: !!document.querySelector('#bf-again') }));
   ok(r1.ok === 2 && r1.gone === 1 && /맞힌 소문제 2 \/ 3/.test(r1.msg) && r1.again, `결과: 맞힌 2줄 진하게 · 틀린 1줄 스르르 · 다시 도전 (${JSON.stringify({ ...r1, msg: r1.msg.slice(0, 60) })})`);
   await S.screenshot({ path: `${OUT}/102-res.png` });
