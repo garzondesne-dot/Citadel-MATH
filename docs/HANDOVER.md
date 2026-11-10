@@ -263,6 +263,14 @@
 - 독립 검산(`tests/lessonN.test.js`)은 지금처럼 · 더해서 「DATA 가 JSON.stringify → parse 해도 같다」를 한 줄 확인.
 - 9차시 일정이 빠듯하면 9차시는 옛 꼴로 하고 이 절에 「10차시부터」로 고쳐 적는다.
 
+## 🧙 #73 용사 고르기 · 이름 · 새 용사 해금 · 각성한 로안 · 스킬 탭 (2026-11-11)
+- 이름 · 이야기 = `js/engine/lore.js` (DS.Lore · docs/HERO-LORE.md 표 그대로 · `tests/lore.test.js` 가 표와 비교) · 표시 = `DS.Lore.label(n)` 「로안 · 검사」. 표를 고치면 lore.js 도 같이.
+- 소개 카드 = camp.js settings `heroCard()` (학생 · 선생님 · 테스트 같은 카드) · 칸 = 카드만 바꿈 · [이 용사로 정하기] · 💎 [n 으로 열기] · 도전 = 진행 막대 · 처음 누르면 `DS.Attack.cutin(n, fx, { peek })` 0.8초(이 기기 `citadel-hero-peek`). 초상 = manifest `heroPortraits.list[n] = { src, cols, rows, col, row }` (port-1~9 오면 채움 · 없으면 도트 확대).
+- 해금: 💎 = gem.js SHOP.hero (26 · 29 · 30 = 30 · 24 · 25 · 31 · 32 = 60) · 도전 = account.js `CHAL` · `chalProgress(rec, bonus)` (27 형성평가 만점 서로 다른 차시 3 · 28 성채 방 처치 10 · 33 오답노트 보충 완료(p) 15) · 지난 기록 셈.
+- 🌟 각성한 로안: `DS.Art.awake(p)` · `DS.Art.look(p)` (로안 + enh ≥ 10 + fx 'twin' + title 'slash10k') → 16. 수업 방 players `hero` = 보이는 모습 · `base` = 고른 용사(설정 창은 base). 캠프는 `look(me)` (me.enh 는 status 에서 채움). 호칭 `slash10k` 「만 번째 베기」 = 업적 3개. **옮기기 = `node tools/auto/migrate73.js` (미리 보기) → 배포 날 `--go`** (💎30 + 우편함 문구 · gem log `blond73` · hero 16 → 0).
+- ⚔ 스킬 탭: 정지 그림 = `fxStills` 한 장(`tools/pfx/stills.py` · 이펙트 띠를 바꾸면 다시 굽고 v 번호) · 속성 접기(내 속성 + 공통) · 스킬 누름 = `gemPatch()`(위 칸 · 미리보기 · 고른 칸만).
+- 시험: e2e105(카드) · e2e106(스킬 탭) · tests/awake · tests/lore.
+
 ## 🧙 새 용사 10 (2026-11-10 · 24 ~ 33) — 드라이브 「07 에셋 원본 / 용사10」 + 빠진 2장은 선생님이 대화로
 - 번호: 24 마검사 · 25 해골 소환사 · 26 석궁 사냥꾼 · 27 주판 술사 · 28 기하 마도사 · 29 상인 · 30 드론 조종사 · 31 발키리 · 32 정령사 · 33 별점술사 (에셋 작업대 h24 ~ h33 순서)
 - 시트 = `tools/sprite/hero_pair.py` (① 7줄 + ② 5줄 → 12줄) · 보라 몸(마검사 · 해골 소환사)은 `BG=edge` (아니면 로브 · 망토가 지워짐)
