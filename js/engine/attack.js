@@ -206,8 +206,7 @@ DS.Attack = (function () {
   // 2026-11-06 사용자 「필살기 그리고 특화일 때만」: Ⅳ 전설 + 그 용사의 친화(특화) 계열 스킬일 때만
   // ⚡ 필살기 = 특화 계열 Ⅲ 이상 · 🌟 진필살기 = 특화 Ⅳ (2026-11-06 사용자 「추천대로」 · 둘 다 연출 · 데미지 그대로)
   const tierN = (fx) => { const t = DS.FX ? DS.FX.tierOf(fx) : -1; return typeof t === 'number' ? t : -1; };
-  // 🤝 #74-1: 자기 속성 = Ⅲ 이상 그대로 · 공통 특화 = Ⅳ + 퍼펙트 · 🌟 진필살기 = 자기 속성 Ⅳ 그대로 (공통 특화로는 안 남)
-  const canUlt = (fx, hero) => !!(DS.FX && ((tierN(fx) >= 2 && (DS.FX.ownReso || DS.FX.resonates)(hero, fx)) || (tierN(fx) === 3 && DS.FX.commonReso && DS.FX.commonReso(hero, fx))));
-  const canTrue = (fx, hero) => !!(DS.FX && tierN(fx) === 3 && (DS.FX.ownReso || DS.FX.resonates)(hero, fx));
+  const canUlt = (fx, hero) => !!(DS.FX && tierN(fx) >= 2 && DS.FX.resonates(hero, fx));
+  const canTrue = (fx, hero) => !!(DS.FX && tierN(fx) === 3 && DS.FX.resonates(hero, fx));
   return { projOf, isRanged, body, play, impact, fly, preload, preloadFaces, shake, knock, cutin, canUlt, canTrue, ultBlast };
 })();
