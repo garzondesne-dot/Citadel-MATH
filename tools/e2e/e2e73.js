@@ -37,6 +37,9 @@ const OUT = process.argv[2] || '.', U = 'http://localhost:8765/index.html?local'
   const s2took = await S2.evaluate(async ([c, s]) => { const f = await DS.Net.get(`rooms/${c}/fun`); return (await DS.Net.get(`rooms/${c}/tdp/${f.g}/${s}`)); }, [code, star]);
   await S2.click('.td-mini g[data-slot="2"]').catch(() => {}); await S2.waitForTimeout(800);
   const ph1 = await S1.evaluate(() => (document.querySelector('.td-ph') || {}).textContent || '');
+  { await S3.setViewportSize({ width: 360, height: 560 }); await S3.waitForTimeout(400); await S3.evaluate(() => window.scrollTo(0, 200)); await S3.waitForTimeout(200); const y0 = await S3.evaluate(() => Math.round(scrollY)), sec0 = await S3.evaluate(() => (document.querySelector('.td-left') || {}).textContent);
+    await S3.waitForTimeout(2600); const y1 = await S3.evaluate(() => Math.round(scrollY)), sec1 = await S3.evaluate(() => (document.querySelector('.td-left') || {}).textContent);
+    P(`${y0 > 50 && y1 === y0 && sec0 !== sec1 ? '✔' : '✘'} 🐞 자리 고르기 폰: 초가 줄어도 스크롤 그대로 (${y0} → ${y1} · ${sec0} → ${sec1})`); }
   await S1.screenshot({ path: `${OUT}/73-1-phone-pick.png` }); await H.screenshot({ path: `${OUT}/73-2-tv-pick.png` });
   P(`자리: S1 ★${star} · S2 같은 칸 → ${s2took === (await S1.evaluate(() => DS.Net.uid())) ? '막힘(S1 것)' : '이상'} · S1 폰 「${ph1.replace(/\s+/g, ' ').slice(0, 60)}」`);
   // 놀이 시작까지
@@ -46,6 +49,10 @@ const OUT = process.argv[2] || '.', U = 'http://localhost:8765/index.html?local'
   const tv = await H.evaluate(() => ({ mons: document.querySelectorAll('.td-mon').length, tw: document.querySelectorAll('.td-tw').length, head: (document.querySelector('.td-top') || {}).textContent || '' }));
   await H.screenshot({ path: `${OUT}/73-3-tv-play.png` });
   P('TV 놀이: ' + JSON.stringify(tv));
+  // 🐞 #59 전체 화면을 켜고 끄면(창 크기 바뀜) 용사 · 처치 수가 사라지던 것
+  { const look = () => H.evaluate(() => { const t = [...document.querySelectorAll('.td-tw')]; return { tw: t.length, k: t.filter((x) => x.querySelector('.td-k')).length, inside: t.every((x) => { const r = x.getBoundingClientRect(), st = document.querySelector('.td-stage').getBoundingClientRect(); return r.left >= st.left - 40 && r.right <= st.right + 40; }) }; });
+    const a0 = await look(); await H.setViewportSize({ width: 1000, height: 640 }); await H.waitForTimeout(800); const a1 = await look(); await H.setViewportSize({ width: 1400, height: 820 }); await H.waitForTimeout(800); const a2 = await look();
+    P(`${a0.tw > 0 && a1.tw === a0.tw && a2.tw === a0.tw && a1.k === a0.tw && a1.inside && a2.inside ? '✔' : '✘'} 🐞 #59 창 크기 바뀌어도 용사 · 처치 수 그대로 (${JSON.stringify([a0, a1, a2])})`); }
   // 교사: 방패 · 응원
   await T.waitForTimeout(500); const tctl = await T.evaluate(() => (document.querySelector('.td-ctl') || {}).textContent || '');
   await T.click('[data-td="sh"]').catch((e) => errs.push('sh ' + e.message)); await T.waitForTimeout(400); await T.click('[data-td="ch"]').catch((e) => errs.push('ch ' + e.message));

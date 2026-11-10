@@ -362,10 +362,15 @@ DS.TD = (function () {
     if (my.sw && (SW[my.sw] || {}).no === me && PH.swNo !== my.sw) { PH.swNo = my.sw; DS.UI.toast(`🙅 ${nick(my.sw)} 친구가 교환을 거절했어요`); N().set(P(code, `tdm/${f.g}/${me}/sw`), null).catch(() => {}); }
     if (my.swd && PH.swd !== my.swd) { if (PH.swd) DS.UI.toast('🔁 자리를 바꿨어요!'); PH.swd = my.swd; }
     const swHtml = `${my.sw ? `<p class="td-sw">⏳ <b>${nick(my.sw)}</b>(${slotOf(my.sw) || '?'}번)에게 교환 신청 중 <button class="btn small" data-swc="1">취소</button></p>` : '<p class="muted small">🔁 친구 자리를 누르면 1:1 교환 신청 (친구가 수락하면 바뀜)</p>'}${inc.map((u) => `<div class="td-sw in">🔁 <b>${nick(u)}</b>(${slotOf(u)}번)가 내 자리(${mine}번)와 바꾸자고 해요 <button class="btn small primary" data-swy="${esc(u)}">수락</button><button class="btn small" data-swn="${esc(u)}">거절</button></div>`).join('')}`;
-    body.innerHTML = `<div class="panel framed td-ph"><p class="td-ph-h">🏰 자리 고르기 <b class="gold">${left}초</b></p><p class="muted small">${esc(map.name)} · ${esc(map.desc)} · 선착순 · 고른 뒤엔 친구와 1:1 교환 신청 · ★ = 명당</p>
+    // 🐞 2026-11-10 7차시 「디펜스 화면이 위아래로 흔들림」: 자리 고르기 화면을 1초마다 통째로 다시 그려 스크롤이 튀고 누르던 단추가 사라짐 → 바뀐 게 남은 초뿐이면 그 숫자만 · 다시 그릴 때도 스크롤 그대로
+    const pkSig = JSON.stringify([f.g, picks, mine, SW, PH.statFor, !!PH.stat, my.sw || '', my.swd || '']);
+    if (body.dataset.tdpk === pkSig && body.querySelector('.td-ph .td-left')) { const lb = body.querySelector('.td-left'); if (lb.textContent !== `${left}초`) lb.textContent = `${left}초`; clearTimeout(PH.t); PH.t = setTimeout(() => { if (body.isConnected && (R.fun || {}).phase === 'pick') phonePick(body, R, me, code, f); }, 1000); return; }
+    body.dataset.tdpk = pkSig; const keepY = window.scrollY, keepB = body.scrollTop;
+    body.innerHTML = `<div class="panel framed td-ph"><p class="td-ph-h">🏰 자리 고르기 <b class="gold td-left">${left}초</b></p><p class="muted small">${esc(map.name)} · ${esc(map.desc)} · 선착순 · 고른 뒤엔 친구와 1:1 교환 신청 · ★ = 명당</p>
       ${miniMap(map, picks, R, me, mine)}${statCard(st, map)}
       ${mine ? `<p class="okc">✔ <b>${mine}번</b> 자리를 잡았어요! 웨이브를 기다려요</p>${swHtml}` : '<p class="muted small">💡 근접은 길 가까운 칸 · 원거리는 어디든 · 지도에서 빈 칸을 눌러요</p>'}
       <button class="btn small" id="td-set">⚙ 용사 · 스킬 바꾸기 <small>(자리 고르기 동안만)</small></button></div>`;
+    if (window.scrollY !== keepY) window.scrollTo(0, keepY); body.scrollTop = keepB;
     body.querySelectorAll('[data-slot]').forEach((g) => (g.onclick = () => DS.Control.run(async () => {
       const no = g.dataset.slot;
       if (mine) { const o = picks[no]; if (!o || o === me) { DS.UI.toast(o ? '내 자리예요' : '이미 자리를 골랐어요 · 친구 자리를 누르면 교환 신청'); return; } if (!SW[me]) { DS.UI.toast('잠깐 뒤 다시 눌러 주세요'); return; }
@@ -388,12 +393,13 @@ DS.TD = (function () {
     const dyn = { head: cd > 0 ? `<b class="gold">${cd}</b>초 뒤 시작!` : `🌊 웨이브 <b>${L.wave || 1}</b> / 5 · ❤ <b>${L.life != null ? L.life : LIFE}</b>`, me: `<b>${tw.s}번 자리</b> · 처치 <b>${(L.kills || {})[me] || 0}</b> · ⭐ <b>${stars}</b>${next ? ` <small>(다음 업그레이드 ⭐${next})</small>` : ' <small>(업그레이드 끝)</small>'}${ups ? `<br>업그레이드: ${ups.split('').map((k) => UPN[k].split(' ')[0]).join(' ')}` : ''}` };
     const sig = `${need > 0}|${ups}|${used}|${cd > 0}`;
     if (body.dataset.tdsig === sig && body.querySelector('.td-ph')) { const a1 = body.querySelector('.td-dh'), a2 = body.querySelector('.td-me'); if (a1 && a1.innerHTML !== dyn.head) a1.innerHTML = dyn.head; if (a2 && a2.innerHTML !== dyn.me) a2.innerHTML = dyn.me; return; }
-    body.dataset.tdsig = sig;
+    body.dataset.tdsig = sig; body.dataset.tdpk = ''; const keepY2 = window.scrollY;
     body.innerHTML = `<div class="panel framed td-ph"><p class="td-ph-h">🏰 ${esc(mapOf(f).name)} · <span class="td-dh">${dyn.head}</span></p>
       <div class="td-me">${dyn.me}</div>
       ${need > 0 ? `<p class="okc">⬆ <b>업그레이드!</b> 하나를 골라요 <small>(12초 안에 안 고르면 저절로)</small></p><div class="td-ups">${['a', 'b', 'c'].map((k) => `<button class="btn td-btn" data-up="${k}">${UPN[k]}</button>`).join('')}</div>` : ''}
       ${used ? '<p class="muted small">⚡ 기술은 이번 판에 썼어요</p>' : `<button class="btn primary td-btn td-sk${T.tier >= 2 ? ' td-ult' : ''}" id="td-sk">${T.tier >= 3 && T.reso ? '🌟 진필살기 (모든 몬스터 3초 석화)' : T.tier >= 2 ? '⚡ 필살기 (주변 광역 × 5)' : '💥 기술 (주변 광역 × 3)'}<br><small>한 판에 한 번 · 몬스터가 몰렸을 때!</small></button>`}
       ${statCard(tw, mapOf(f))}</div>`;
+    if (window.scrollY !== keepY2) window.scrollTo(0, keepY2);
     body.querySelectorAll('[data-up]').forEach((b) => (b.onclick = () => DS.Control.run(async () => { const k = Math.max(ups.length, mine.length); body.querySelectorAll('[data-up]').forEach((x) => { x.disabled = true; }); await N().set(P(code, `tdu/${f.g}/${me}/${k}`), b.dataset.up).catch(() => {}); if (DS.Sound && DS.Sound.correct) DS.Sound.correct(); })));
     const sk = body.querySelector('#td-sk'); if (sk) sk.onclick = () => DS.Control.run(async () => { sk.disabled = true; await N().set(P(code, `tdt/${f.g}/${me}`), N().now()).catch(() => {}); if (DS.Attack && T.tier >= 2) DS.Attack.cutin(Number(tw.hero) || 0, tw.fx, { gold: T.tier >= 3 && T.reso }).catch(() => {}); });
     clearTimeout(PH.t); if (cd > 0) PH.t = setTimeout(() => { if (body.isConnected) phonePlay(body, R, me, code, f); }, 500);
