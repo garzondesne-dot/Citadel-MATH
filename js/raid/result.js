@@ -107,6 +107,7 @@ DS.Result = (function () {
       else { const cur = await DS.Grow.mine(m).catch(() => DS.Grow.level(0)), base = DS.Grow.sum(r.parts); r.parts.first = Math.max(40, cur.next - cur.into - base + 1); }
     }
     const rec = summary(r, code); if (first && r.parts.first) rec.firstXp = r.parts.first; if (at) rec.at = at;
+    if (mineNow && mineNow.loot) rec.loot = mineNow.loot; // 🎒 #71 전리품 요약은 다시 저장해도 남김
     if (R.meta && R.meta.resumeFrom != null && prev[L.id] && prev[L.id].code !== String(code)) { // ▶ 이어서 한 수업: 앞 수업에서 푼 몬스터 기록을 지우지 않고 합침 (2026-11-06)
       const pm = prev[L.id].mons || {}, cut = Number(R.meta.resumeFrom) || 0, before = new Set(L.steps.slice(0, cut).map((s) => s.id));
       rec.mons = Object.fromEntries(Object.keys({ ...pm, ...rec.mons }).map((k) => [k, before.has(k) && pm[k] != null ? pm[k] : rec.mons[k] != null ? rec.mons[k] : pm[k]]));
@@ -144,21 +145,92 @@ DS.Result = (function () {
     }
     return out;
   }
+  // 🎒 #71 오늘의 전리품 (2026-11-11 선생님 「전투 기록 결과로 대체」): 보물 상자가 열리며 숫자가 차례로 올라감(5초 안팎 · 누르면 건너뜀)
+  //   ⭐ EXP(레벨 막대 · 오르면 이 화면에서 🎉) · 💎(이 수업 시각부터 받은 것 · 오늘 a / 100) · 📜 서술 조각 · 🔓 새 호칭 · 🏰 새 성채 방 · 다음 목표 하나
+  //   수치는 바꾸지 않음(보여 주는 방식만) · 점수 · 정답률 · 등수는 크게 안 보임 · 요약은 records/…/{차시}/loot 에 남겨 📮 「지난 전리품」
+  const lootKey = (me, L) => (me ? `citadel-castle-pop-${me.c}-${me.n}-${L.id}` : '');
+  async function lootOf(L, R, uid, me, code, r, g) {
+    const t0 = Number((R.meta || {}).created) || 0, real = !!(me && me.c != null && me.n && !(DS.Test && DS.Test.active && DS.Test.active()));
+    const G = (DS.Gem && DS.Gem.G) || null;
+    const est = G ? G.join + Math.min(G.solvedMax, Number(r.parts.correct) || 0) + (r.perfects > 0 ? G.perfect || 0 : 0) + (r.parts.perfect ? G.bossPerfect || 0 : 0) : 0;
+    const out = { xp: g ? g.gained : DS.Grow ? DS.Grow.sum(r.parts) : 0, gem: est, scroll: 0, day: null, titles: [], rooms: [], goal: '', review: 0 };
+    let d = null;
+    if (real && DS.Gem) {
+      await new Promise((res) => setTimeout(res, 600)); // 💎 보상(따로 쌓임)이 들어올 틈
+      d = await DS.Gem.mine(me).catch(() => null);
+      if (d) {
+        let gem = 0, sc = 0;
+        Object.entries(d.log || {}).forEach(([k, v]) => { if (!v || Number(v.at) < t0) return; if (/^s_/.test(k)) sc += Math.max(0, Number(v.s) || 0); else if (!/^enh_/.test(k) && Number(v.g) > 0) gem += Number(v.g); });
+        out.gem = gem; out.scroll = sc; out.day = DS.Gem.DAY_CAP - DS.Gem.dayLeft(d);
+      }
+    }
+    if (real && DS.Titles) { // 🔓 새 호칭 (캠프 「새 호칭」 알림과 같은 기록 → 여기서 보면 캠프에서 다시 안 알림)
+      try {
+        const k = `citadel-ttl-seen-${me.c}-${me.n}`; let seen = null; try { seen = JSON.parse(localStorage.getItem(k)); } catch (e) { /* 무시 */ }
+        const got = DS.Titles.earned(await DS.Titles.data(me)).filter((t) => !/^lv\d/.test(t.id));
+        if (seen) out.titles = got.filter((t) => !seen.includes(t.id)).map((t) => t.name);
+        localStorage.setItem(k, JSON.stringify(got.map((t) => t.id)));
+      } catch (e) { /* 무시 */ }
+    }
+    if (L.no && !L.eval) { // 🏰 이 차시로 열리는 성채 방 (#69 팝업은 여기서 보면 다시 안 띄움)
+      out.rooms = DS.Lessons.list.filter((x) => x.rooms).flatMap((x) => x.rooms.filter((rm) => rm.no === L.no && !rm.boss).map((rm) => rm.title || rm.id));
+      try { if (out.rooms.length && lootKey(me, L)) localStorage.setItem(lootKey(me, L), '1'); } catch (e) { /* 무시 */ }
+    }
+    if (d && DS.Gem.ENH) { const e = Number(d.enh) || 0, nx = DS.Gem.ENH[e + 1]; if (nx) { const need = nx.g - (Number(d.total) || 0); out.goal = need > 0 ? `⚒ 강화 +${e + 1}까지 💎 ${need} 남음` : `⚒ 지금 강화 +${e + 1} 할 수 있어요!`; } }
+    if (!out.goal) out.goal = r.weak.length ? `📌 「${r.titles[r.weak[0]] || r.weak[0]}」 한 번 더 보기` : '🏰 성채던전 새 방에 도전';
+    out.review = r.mons.filter((m) => m.st === 'x').length + (r.boss.tried ? r.boss.mast.slice(0, r.boss.hp).filter((ok) => !ok).length : 0);
+    if (real) { try { await DS.Net.update(`records/${ck(me.c)}/${me.n}/${L.id}/loot`, { g: out.gem, s: out.scroll, xp: out.xp, u: [...out.titles.map((t) => `🏅 ${t}`), ...(out.rooms.length ? [`🏰 성채 방 ${out.rooms.length}개`] : [])].slice(0, 6) }); } catch (e) { /* 저장 실패해도 화면은 */ } }
+    try { (api.last = api.last || {})[code] = { xp: out.xp, gem: out.gem, scroll: out.scroll }; } catch (e) { /* 무시 */ }
+    return out;
+  }
+  function lootHtml(L, r, lt, lv, up, opt) {
+    const rooms = lt.rooms.slice(0, 3).map(esc).join(' · ') + (lt.rooms.length > 3 ? ` 외 ${lt.rooms.length - 3}개` : '');
+    return `<h2 class="lt-h">🎒 오늘의 전리품</h2><p class="muted small center">${L.no ? `${DS.Lessons.noText(L.no)}차시 ` : ''}${esc(L.title)}</p>
+      <div class="lt-chest"><i class="lt-lid"></i><i class="lt-body"></i><i class="lt-glow"></i></div>
+      <div class="lt-list">
+        <div class="lt-row" data-k="xp"><span>⭐ EXP</span><b class="lt-n" data-to="${lt.xp}">+0</b>${lv ? `<div class="lt-lv${up ? ' up' : ''}"><small>Lv.${lv.lv} ${esc(lv.title)}${up ? ' <b class="lt-up">🎉 레벨 업!</b>' : ''}</small><div class="rs-bar"><i data-w="${Math.round((100 * lv.into) / lv.next)}" style="width:0%"></i><span>${lv.into} / ${lv.next}</span></div></div>` : ''}</div>
+        <div class="lt-row" data-k="gem"><span>💎</span><b class="lt-n" data-to="${lt.gem}">+0</b>${lt.day != null ? `<small class="muted">오늘 받은 💎 ${lt.day} / ${DS.Gem.DAY_CAP}</small>` : ''}</div>
+        <div class="lt-row" data-k="scroll"><span>📜 서술 조각</span>${lt.scroll ? `<b class="lt-n" data-to="${lt.scroll}">+0</b>` : '<small class="muted">✍ 서술형에 도전하면 📜!</small>'}</div>
+        ${lt.titles.length ? `<div class="lt-row" data-k="ttl"><span>🔓 새 호칭</span><b class="lt-txt">${lt.titles.slice(0, 2).map((t) => `[${esc(t)}]`).join(' ')}${lt.titles.length > 2 ? ` 외 ${lt.titles.length - 2}개` : ''}</b></div>` : ''}
+        ${lt.rooms.length ? `<div class="lt-row" data-k="room"><span>🏰 새 성채 방</span><b class="lt-txt">${lt.rooms.length}개 <small>${rooms}</small></b></div>` : ''}
+        <div class="lt-row goal" data-k="goal"><span>🎯 다음 목표</span><b class="lt-txt">${esc(lt.goal)}</b></div>
+      </div>
+      ${lt.review ? `<p class="lt-review">📕 다시 볼 문제 <b>${lt.review}</b>개 → ${opt.inClass ? '수업이 끝나면 🎯 허수아비에서' : '<button class="btn small" data-dummy>🎯 허수아비</button>'}</p>` : ''}`;
+  }
+  function lootPlay(el, lt, lv, up) {
+    const rows = [...el.querySelectorAll('.lt-row')], nums = [...el.querySelectorAll('.lt-n')], bar = el.querySelector('.lt-lv .rs-bar i');
+    const reduce = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let done = false; const timers = [];
+    const finish = () => { if (done) return; done = true; timers.forEach(clearTimeout); el.classList.add('lt-done'); rows.forEach((x) => x.classList.add('on')); nums.forEach((n) => { n.textContent = `+${n.dataset.to}`; }); if (bar) bar.style.width = `${bar.dataset.w}%`; };
+    el.querySelector('.loot-box').classList.add('lt-open');
+    if (reduce) return finish();
+    const STEP = 650;
+    rows.forEach((row, k) => timers.push(setTimeout(() => {
+      row.classList.add('on'); const n = row.querySelector('.lt-n');
+      if (n) { const to = Number(n.dataset.to) || 0, t0 = performance.now(), dur = 520; const tick = (t) => { if (done) return; const f = Math.min(1, (t - t0) / dur); n.textContent = `+${Math.round(to * f)}`; if (f < 1) requestAnimationFrame(tick); }; requestAnimationFrame(tick); }
+      if (row.dataset.k === 'xp' && bar) setTimeout(() => { bar.style.width = `${bar.dataset.w}%`; if (up && DS.Sound) (DS.Sound.levelup || DS.Sound.correct)(); }, 300);
+      if (row.dataset.k === 'gem' && lt.gem && DS.Sound && DS.Sound.coin) DS.Sound.coin();
+    }, 700 + k * STEP)));
+    timers.push(setTimeout(finish, 700 + rows.length * STEP + 400));
+    el.querySelector('.lt-list').addEventListener('click', finish); el.querySelector('.lt-chest').addEventListener('click', finish);
+  }
   async function show(L, R, uid, me, code, then, opt = {}) {
     const r = compute(L, R, uid);
     let g = null, first = false, raids = 1;
     const seenKey = `citadel-result-${code}`;
     let seen = false; try { seen = localStorage.getItem(seenKey) === '1'; } catch (e) { /* 무시 */ }
+    api.busy = !(seen && !opt.force); // 🎒 #71: 전리품 화면에서 레벨 업을 보여 주니 따로 레벨업 창은 안 띄움
     if (me && me.c != null && me.n) ({ g, first, raids } = await save(L, R, uid, me, code, r));
-    if (seen && !opt.force) return then(); // v0.9.7.6: 진행 저장으로 g 가 늘 있으니 「이미 봄」만 본다 · force: 수업이 끝날 때는 이미 본 학생도 개인 결과를 다시 (2026-11-03)
+    if (seen && !opt.force) { api.busy = false; return then(); } // v0.9.7.6: 진행 저장으로 g 가 늘 있으니 「이미 봄」만 본다 · force: 수업이 끝날 때는 이미 본 학생도 개인 결과를 다시 (2026-11-03)
     try { localStorage.setItem(seenKey, '1'); } catch (e) { /* 무시 */ }
     const prep = (DS.Test && DS.Test.active() && DS.Test.prep(L.id)) || (await DS.Act.prepLite(L.id)); // 이미지는 누를 때 한 장만 (v0.8.8)
     const lv = g ? g.after : DS.Grow && me ? await DS.Grow.mine(me).catch(() => null) : null;
     const up = g && g.after.lv > g.before.lv;
     const el = document.createElement('div'); el.className = 'modal rs-modal';
     const mark = (m) => (!m.tried ? '<span class="muted">— 안 함</span>' : `${m.first ? `<span class="okc">✔ ${m.first}</span>` : ''} ${m.fixed ? `<span class="gold">🔁 ${m.fixed}</span>` : ''} ${m.miss ? `<span class="ngc">✖ ${m.miss}</span>` : ''}`);
-    el.innerHTML = `<div class="quiz-box framed rs-box"><h2>⚔ 오늘의 전투 결과</h2><p class="muted small">${esc(L.unit || '')} · ${esc(L.title)} — 성적이 아니라 다음에 볼 것을 알려 주는 기록이에요</p>
-      ${lv ? `<div class="rs-lv${up ? ' up' : ''}"><b>${up ? '🎉 레벨 업! ' : ''}Lv.${lv.lv} ${esc(lv.title)}</b>${g && g.gained ? ` <span class="gold">+${g.gained} EXP</span>` : ''}<div class="rs-bar"><i style="width:${Math.round((100 * lv.into) / lv.next)}%"></i><span>${lv.into} / ${lv.next}</span></div></div>` : ''}
+    const lt = await lootOf(L, R, uid, me, code, r, g);
+    el.innerHTML = `<div class="quiz-box framed rs-box loot-box">${lootHtml(L, r, lt, lv, up, opt)}
+      <details class="rs-more"><summary>자세히 ▸ <small class="muted">몬스터별 · 개념별 · 복습 추천 · 📤 카톡</small></summary><p class="muted small">${esc(L.unit || '')} · ${esc(L.title)} — 성적이 아니라 다음에 볼 것을 알려 주는 기록이에요</p>
       ${g && g.gained ? `<p class="rs-why">${DS.Grow.lines(r.parts).map((l) => `${esc(l.why)} ${l.n > 1 ? `×${l.n} ` : ''}<b>+${l.xp}</b>`).join(' · ')}</p>` : ''}
       ${first ? `<div class="rs-perk"><b>🎁 첫 출정 특전!</b> 새 용사가 합류했어요 ${DS.Art.hero(9, 'attack', 'pairhop')}<span class="muted small">내 캠프 💎 상점에서 고를 수 있어요</span></div>` : ''}
       <p class="shelf-title">몬스터별</p><table class="r-table rs-t">${r.mons.map((m) => `<tr><td>${esc(m.title)}</td><td>${mark(m)}</td></tr>`).join('')}
@@ -168,23 +240,39 @@ DS.Result = (function () {
       <p class="shelf-title">복습 추천</p>${floorLine(L)}${misLine(r.mis)}${recs(L, r, prep, opt.inClass)}
       <p class="shelf-title">📤 카톡으로 보내기</p><div class="row rs-share"><button class="btn" id="rs-card1">⚔ 전투 기록 보내기</button><button class="btn" id="rs-card2">📘 수학 노트 보내기</button></div>
       ${(() => { const cs = DS.Unit ? DS.Unit.CARDS.filter((c) => c.no === L.no) : []; return cs.length ? `<p class="rs-forge">⚒ 오늘 배운 개념 카드 <b>${cs.length}장</b>이 모루에서 기다려요 · 장마다 💎 +${DS.Gem ? DS.Gem.G.card : 3}</p>` : ''; })()}
+      </details>
       <div class="row"><button class="btn primary big" id="rs-ok">${opt.inClass ? '🏕 대기실로' : '🏕 내 캠프로'}</button></div></div>`;
     document.body.appendChild(el);
-    if (up) DS.Sound.correct();
+    lootPlay(el, lt, lv, up);
     el.querySelectorAll('[data-img]').forEach((b) => (b.onclick = () => DS.Control.run(async () => {
       const src = (prep.img || {})[b.dataset.img] || (await DS.Act.prepImg(L.id, b.dataset.img));
       if (!src) { DS.UI.toast('아직 이 개념의 학습지 이미지가 없어요.'); return; }
       const v = document.createElement('div'); v.className = 'modal sheet-modal'; v.innerHTML = `<div class="quiz-box framed"><div class="quiz-head"><b>📄 ${esc(r.titles[b.dataset.img] || '')}</b><button class="btn small" data-x>✕ 닫기</button></div><img class="bn-sheet" src="${src}" alt="학습지"></div>`; v.querySelector('[data-x]').onclick = () => v.remove(); document.body.appendChild(v);
     })));
     el.querySelectorAll('[data-vid]').forEach((b) => (b.onclick = () => DS.Video.open(DS.Video.pick(L, prep.video, b.dataset.vid), r.titles[b.dataset.vid], { lesson: L.id, slot: b.dataset.vid })));
-    el.querySelectorAll('[data-bonus]').forEach((b) => (b.onclick = () => { el.remove(); then(true); }));
-    el.querySelector('#rs-ok').onclick = () => { el.remove(); then(); };
+    el.querySelectorAll('[data-bonus]').forEach((b) => (b.onclick = () => { el.remove(); api.busy = false; then(true); }));
+    el.querySelector('#rs-ok').onclick = () => { el.remove(); api.busy = false; then(); };
+    el.querySelectorAll('[data-dummy]').forEach((b) => (b.onclick = () => { el.remove(); api.busy = false; then(true); }));
     const who = { name: (me && me.name) || '용사', hero: me ? me.hero : (DS.Test && DS.Test.active() ? 0 : 0) };
     if (!who.name || who.name === '용사') { try { const p = (R.players || {})[uid] || {}; who.name = p.nick || who.name; who.hero = p.hero || who.hero; } catch (e) { /* 무시 */ } }
     const no = L.no ? `${DS.Lessons.noText(L.no)}차시 ` : '';
     el.querySelector('#rs-card1').onclick = () => DS.Control.run(() => DS.ShareCard.preview(() => DS.ShareCard.battle({ L, r, me: who, lv, gained: g ? g.gained : 0, up, first, raids }), `오늘의 전투 기록 · ${no}${L.title}`, `⚔ 모두의 던전 ${no}${L.title} 클리어!${lv ? ` Lv.${lv.lv} ${lv.title}` : ''}${g && g.gained ? ` (+${g.gained} EXP)` : ''}`));
     el.querySelector('#rs-card2').onclick = () => DS.Control.run(() => DS.ShareCard.preview(() => DS.ShareCard.math({ L, r, me: who }), `오늘의 수학 노트 · ${no}${L.title}`, `📘 공통수학2 ${no}${L.title} — 오늘 배운 것과 다음 수업`));
     return null;
+  }
+  // 📮 🎒 지난 전리품 (#71 · 2026-11-11): 우편함 안에서 펼친 채 · 최근 차시 위로 · 차시마다 카드 하나 (옛 기록은 전리품 요약이 없어 — 로)
+  function lootHist(rec) {
+    const ids = Object.keys(rec || {}).filter((id) => rec[id] && typeof rec[id] === 'object').sort((a, b) => (rec[b].no || 0) - (rec[a].no || 0) || (Number(rec[b].at) || 0) - (Number(rec[a].at) || 0));
+    if (!ids.length) return '<p class="muted">아직 전리품이 없어요. 수업이 끝나면 여기에 쌓여요.</p>';
+    return ids.map((id) => {
+      const x = rec[id], L = DS.Lessons.get(id), lt = x.loot || null, names = x.names || {}, miss = (x.miss || []).length + Math.max(0, (Number(x.bossN) || 0) - (Number(x.boss) || 0));
+      const v = (n) => (lt ? `+${Number(n) || 0}` : '—');
+      return `<div class="lh-card"><b class="lh-t">${x.no ? `${DS.Lessons.noText(x.no)}차시 ` : ''}${esc(L ? L.title : id)}</b>
+        <div class="lh-got"><span>⭐ <b>+${Number(lt ? lt.xp : x.xp) || 0}</b></span><span>💎 <b>${v(lt && lt.g)}</b></span><span>📜 <b>${v(lt && lt.s)}</b></span><span class="muted small">👑 형성평가 ${x.boss || 0} / ${x.bossN || '-'}</span></div>
+        ${lt && (lt.u || []).length ? `<p class="lh-u small">🔓 ${lt.u.map(esc).join(' · ')}</p>` : ''}
+        ${miss ? `<p class="lh-rv small">📕 다시 볼 것 <b>${miss}</b>개 → 🎯 허수아비</p>` : ''}
+        <div class="lh-dots">${Object.entries(x.conc || {}).map(([c, cv]) => `<span><small>${esc(names[c] || c)}</small><i class="rs-dots">${dots(cv[0], cv[1] || 1)}</i></span>`).join('')}</div></div>`;
+    }).join('');
   }
   // 교사 학생 관리 · 학생 복습 노트: 차시별 기록 (records/{반}/{번호})
   function history(rec) {
@@ -197,5 +285,6 @@ DS.Result = (function () {
         ${misLine(x.mis)}${(x.weak || []).length ? `<p class="small">📌 복습 추천: <b>${x.weak.map((c) => esc(names[c] || c)).join(', ')}</b></p>` : '<p class="small okc">👍 고르게 잘함</p>'}</div>`;
     }).join('');
   }
-  return { compute, summary, save, gather, show, history, conceptMap, floorText };
+  const api = { compute, summary, save, gather, show, history, lootHist, conceptMap, floorText, lootKey, busy: false, last: {} };
+  return api;
 })();

@@ -80,14 +80,14 @@ DS.Mail = (() => {
         <p class="mail-sub"><b>보내기</b></p>
         <div class="sendrow"><button class="btn" id="ml-letter"><i>💌</i>편지</button><button class="btn" id="ml-sv"${sv ? '' : ' disabled'}><i>📝</i>설문${sv ? `<b class="mk-bd">${sv}</b>` : ''}</button><button class="btn" id="ml-gift"${on ? '' : ' disabled'} title="${on ? '' : '선생님이 켜면 보낼 수 있어요'}"><i>🎁</i>친구 선물</button></div>
         <p class="muted small">편지 = 선생님께 · 버그 · 아이디어 · 기타 · 위 💬 단추로도 바로 써요${on ? '' : ' · 🎁 친구 선물은 선생님이 켜면 열려요'}</p>
-        <details class="mail-old"><summary>📜 지난 수업 결과</summary><div id="ml-hist"></div></details></div>`;
+        <p class="mail-sub"><b>🎒 지난 전리품</b></p><div id="ml-hist" class="lh-list"><p class="muted small">불러오는 중…</p></div></div>`; // #71 (2026-11-11): 접힌 「지난 수업 결과」 → 펼친 채 한 창
       seenSet(m, Date.now());
       el.querySelector('#ml-x').onclick = () => { el.remove(); if (opt.onClose) opt.onClose(); };
       el.querySelectorAll('[data-claim]').forEach((b) => (b.onclick = () => DS.Control.run(async () => { const g = await claim(m, b.dataset.claim); if (g) { DS.UI.toast(`🎁 💎 +${g} 받았어요!`); if (DS.Sound && DS.Sound.coin) DS.Sound.coin(); } await draw(); })));
       el.querySelector('#ml-letter').onclick = () => DS.Feedback.open(m, { from: '우편함' });
       el.querySelector('#ml-sv').onclick = () => { if (DS.Survey && DS.Survey.open) DS.Survey.open(m, () => draw()); };
       el.querySelector('#ml-gift').onclick = () => DS.Control.run(() => giftDlg(m, () => draw()));
-      el.querySelector('.mail-old').ontoggle = async (e) => { const box = el.querySelector('#ml-hist'); if (!e.target.open || box.dataset.ok) return; box.dataset.ok = 1; const rec = (await N().get(`records/${ck(m.c)}/${m.n}`).catch(() => null)) || {}; box.innerHTML = DS.Result ? DS.Result.history(rec) : ''; };
+      { const box = el.querySelector('#ml-hist'); N().get(`records/${ck(m.c)}/${m.n}`).catch(() => null).then((rec) => { if (box.isConnected) box.innerHTML = DS.Result ? DS.Result.lootHist(rec || {}) : ''; }); }
     };
     await draw();
   }

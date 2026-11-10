@@ -122,10 +122,11 @@ DS.Student = (function () {
     const { after, m } = e.detail || {}; if (!after || !info0 || !m || Number(m.n) !== Number(info0.num)) return;
     // 2026-11-05 수업에서: 개념 설명 · 형성평가 중에 화면 전체 덮개가 문제를 가림 → 수업 중에는 위쪽 작은 띠 (화면을 덮지 않음) · 수업 밖(캠프 등)은 크게
     const inClass = !!(code && R && !Raid().isClosed(R));
+    if (code && R && real() && !Raid().isClosed(R)) DS.Net.set(`rooms/${code}/lvup/${me}`, { lv: after.lv, at: DS.Net.TS }).catch(() => {});
+    if (DS.Result && DS.Result.busy) return; // 🎒 #71 전리품 화면이 레벨 업을 보여 줌 (따로 창 없음)
     const o = document.createElement('div'); o.className = inClass ? 'lvup-mini' : 'lvup-full';
     o.innerHTML = inClass ? `<b>🎉 LEVEL UP!</b> Lv.${after.lv} <span>${esc(after.title)}</span>` : `<div><p>🎉 LEVEL UP!</p><b>Lv.${after.lv}</b><span>${esc(after.title)}</span></div>`;
     document.body.appendChild(o); if (DS.Sound.levelup) DS.Sound.levelup(); else DS.Sound.correct(); setTimeout(() => o.remove(), inClass ? 3200 : 2800);
-    if (code && R && real() && !Raid().isClosed(R)) DS.Net.set(`rooms/${code}/lvup/${me}`, { lv: after.lv, at: DS.Net.TS }).catch(() => {});
   });
   let clearPaid = '';
   const acc = () => ({ c: info0.cls, n: info0.num, name: info0.nick, hero: info0.hero, fx: info0.fx, title: info0.title });
@@ -275,15 +276,16 @@ DS.Student = (function () {
     const pb = $('#st-punch'); if (pb) pb.onclick = () => DS.Control.run(() => DS.Punch.open(L, R));
     const mb = $('#st-mine'); if (mb) mb.onclick = () => DS.Control.run(() => DS.Result.show(L, R, me, !real() ? null : acc(), code, () => {}, { inClass: true, force: true }));
   }
-  // 🏁 #68 B 마무리 한 화면 (2026-11-11): 내 결과 한 줄(맞힌 소문제 · +EXP · +💎) + 「자세히 ▸」 = 전투 결과 · 「더 보기 ▸」 = 학급 결과 · 반대항 · 한마디 = 접힌 칸
+  // 🏁 #68 B 마무리 한 화면 (2026-11-11): 내 결과 한 줄(#71 「⭐ +n · 💎 +n · 📜 +n」) + 「자세히 ▸」 = 전투 결과 · 「더 보기 ▸」 = 학급 결과 · 반대항 · 한마디 = 접힌 칸
   const lbOpen = {};
   function myLine() {
     if (!DS.Result || !Raid().activeIds(R).includes(me)) return '<button class="btn primary" id="st-mine">⚔ 내 전투 결과 보기</button>';
     let r = null; try { r = DS.Result.compute(L, R, me); } catch (e) { r = null; }
     if (!r) return '<button class="btn primary" id="st-mine">⚔ 내 전투 결과 보기</button>';
-    const xp = DS.Grow ? DS.Grow.sum(r.parts) : 0, G = (DS.Gem && DS.Gem.G) || null;
-    const gem = G ? G.join + Math.min(G.solvedMax, Number(r.parts.correct) || 0) + (r.perfects > 0 ? G.perfect || 0 : 0) + (r.parts.perfect ? G.bossPerfect || 0 : 0) : 0;
-    return `<div class="lb-mine"><span>✔ 맞힌 소문제 <b>${Number(r.parts.correct) || 0}</b> · ⭐ <b>+${xp}</b> EXP${gem ? ` · 💎 <b>+${gem}</b>` : ''}</span><button class="btn small" id="st-mine">자세히 ▸</button></div>`;
+    const lt = (DS.Result.last || {})[code], G = (DS.Gem && DS.Gem.G) || null; // 🎒 #71: 전리품에서 센 실제 값 · 없으면 어림
+    const xp = lt ? lt.xp : DS.Grow ? DS.Grow.sum(r.parts) : 0;
+    const gem = lt ? lt.gem : G ? G.join + Math.min(G.solvedMax, Number(r.parts.correct) || 0) + (r.perfects > 0 ? G.perfect || 0 : 0) + (r.parts.perfect ? G.bossPerfect || 0 : 0) : 0;
+    return `<div class="lb-mine"><span>⭐ <b>+${xp}</b> · 💎 <b>+${gem}</b> · 📜 <b>+${lt ? lt.scroll : 0}</b></span><button class="btn small" id="st-mine">자세히 ▸</button></div>`;
   }
   function wordsForm(w) {
     if (locked) return '<p class="muted small center">💬 한마디는 선생님이 잠가 두었어요.</p>';

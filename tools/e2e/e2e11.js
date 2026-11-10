@@ -56,6 +56,7 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   await H.waitForTimeout(2500); await H.screenshot({ path: `${OUT}/04-hall-boss.png` });
   for (const P of [S1, typeof S2 !== 'undefined' ? S2 : null].filter(Boolean)) await P.evaluate(() => document.querySelectorAll('.th-chest-ov, #th-bat').forEach((e) => e.remove())); // 🎁 상자 · 🦇 박쥐 창 닫기 (0.9.11~)
   await S1.waitForTimeout(1500); await S1.click('#st-lobby'); await S1.waitForTimeout(2500);
+  await S1.waitForTimeout(3500); console.log('6b #71 전리품:', await S1.$$eval('.lt-row.on', (a) => a.map((e) => e.textContent.replace(/\s+/g, ' ').trim().slice(0, 40)).join(' | ')).catch(() => 'none'), '| 자세히 접힘', await S1.$eval('.rs-more', (e) => !e.open).catch(() => 'none')); await S1.screenshot({ path: `${OUT}/05a-loot.png` });
   const ok = await S1.$('#rs-ok'); if (ok) await ok.click(); await S1.waitForTimeout(1500);
   console.log('7 student klass btn:', !!(await S1.$('#st-klass')), '| #68 B 한 줄:', await S1.$eval('.lb-mine', (e) => e.textContent.replace(/\s+/g, ' ').trim()).catch(() => 'none'), '| 더 보기 접힘:', await S1.$eval('.lb-more', (e) => !e.open).catch(() => 'none'), '| 한마디 접힘:', await S1.$eval('.lb-words', (e) => !e.open && !!e.querySelector('#st-word')).catch(() => 'none'));
   await S1.screenshot({ path: `${OUT}/05-student-lobby.png`, fullPage: true });
