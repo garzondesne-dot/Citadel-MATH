@@ -50,8 +50,8 @@ DS.Control = (function () {
   const back = (code, R, L, out) => { armed = ''; if (Raid().isClosed(R)) return out ? out() : null; return Act().go(code, R, L, -1); }; // 🏁 #68 C①: 끝난 수업에서 ◀ = 다시 열지 않고 교사 캠프 · 메뉴로 (예전: closed 를 지워 끝난 수업이 다시 열림)
   // 마무리에서 ▶ = 수업 끝: 한 번 더 확인
   async function forwardEnd(code, R, L) {
-    if (armed !== 'end') { armed = 'end'; DS.UI.toast('▶ 를 한 번 더 누르면 수업을 끝내고 학생들은 내 캠프로 돌아가요', 4200); return true; }
-    armed = ''; await Act().go(code, R, L, 1); return true;
+    armed = ''; if (!confirm(END_ASK)) return true; // 📱 #70: 두 번 누르기 → 확인 한 번
+    await Act().go(code, R, L, 1); return true;
   }
   // 🏕 쉼터 버튼 (아무 단계에서나): 켜면 종합상황실 · 학생 폰이 쉼터 장면 · 끄면 하던 단계로 · 타이머는 교사가 −1 / +1 분 (기본 5분)
   const restLeft = (R) => { const r = (R.state || {}).rest; return r ? Math.max(0, Math.round(((r.at || 0) + (r.min || 5) * 60000 - DS.Net.now()) / 1000)) : 0; };
@@ -182,11 +182,13 @@ DS.Control = (function () {
   }
   const bindChain = (el, code, R, L) => (el.querySelectorAll('[data-crdown]').forEach((b) => (b.onclick = () => run(async () => { const st = Raid().stepOf(L, R); await Act().chainKnock(code, st.id, Number(b.dataset.crdown)); DS.UI.toast('💥 졸개를 쓰러뜨렸어요'); }))), el.querySelectorAll('[data-crok]')).forEach((b) => (b.onclick = () => run(async () => { const st = Raid().stepOf(L, R); await Act().chainRelease(code, st.id, b.dataset.crok); DS.UI.toast('✔ 마지막 칸을 풀어 줬어요'); })));
   // ⏸ 수업 끝 (저장) — 진행 중이면 늘 (교사 리모컨 · 종합실)
-  const saveBtn = (R) => (!Raid().isLobby(R) && !Raid().isClosed(R) ? '<button class="btn t-save" data-saveend>⏸ 수업 끝 (저장)</button>' : '');
+  // 📱 #70 (11/11): 「수업 끝 ▶」 하나 + 확인 한 번 · 끝내면 늘 진행 저장 (마무리까지 왔으면 그 차시 진도도 끝냄) · 교사 메뉴 「▶ 지난 수업 이어서」 · 「다른 단계부터 이어서 ▾」 그대로
+  const END_ASK = '수업을 끝낼까요?\n\n진행은 저장돼요 · 다음에 「다른 단계부터 이어서」로 원하는 곳부터 시작할 수 있어요.';
+  const saveBtn = (R, L) => (!Raid().isLobby(R) && !Raid().isClosed(R) && !(L && Raid().isEnd(L, R)) ? '<button class="btn t-save" data-saveend>수업 끝 ▶</button>' : '');
   const bindSave = (el, code, R, L) => el.querySelectorAll('[data-saveend]').forEach((b) => (b.onclick = () => run(async () => {
-    const st = L.steps[(R.state || {}).step] || {}, nm = st.title || (L.monsters[st.id] || {}).title || (st.kind === 'boss' ? L.boss.title : '');
-    if (!confirm(`⏸ 지금 「${nm}」에서 저장하고 수업을 끝낼까요?\n\n다음에 같은 반 · 같은 차시를 열면 교사 메뉴에 「▶ 지난 수업 이어서」가 생겨 여기부터 다시 시작해요.\n(학생 기록 · 경험치는 그대로 저장돼요)`)) return;
-    await Act().saveEnd(code); DS.UI.toast('⏸ 저장하고 수업을 끝냈어요 — 다음 시간에 이어서!', 3600);
+    if (!confirm(END_ASK)) return;
+    if (Raid().isEnd(L, R)) { await Act().go(code, R, L, 1); DS.UI.toast('수업을 끝냈어요 — 학생들은 캠프로', 3000); return; } // 마무리 = 그 차시 끝 (진도)
+    await Act().saveEnd(code); DS.UI.toast('수업을 끝냈어요 · 진행은 저장했어요 — 다음 시간에 이어서!', 3600);
   })));
   const bindLesson = (el, code, R) => el.querySelectorAll('[data-lswitch]').forEach((b) => (b.onclick = () => lessonPick(code, R)));
   const timeUpFns = {};

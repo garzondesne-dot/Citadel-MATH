@@ -650,7 +650,7 @@ DS.Hall = (function () {
     const inkOk = step && (step.kind === 'concept' || Raid().sheetOn(R));
     const fin = Raid().isFinale(L, R);
     d.innerHTML = `${live ? C().iconBar(L, R, prep.video, true) : ''}${live && !Raid().restOn(R) ? `<button class="icb${DS.Ink && DS.Ink.on() ? ' on' : ''}" id="h-ink"${inkOk ? '' : ' disabled'} title="개념 · 문제 화면 위에 손가락 · 펜으로 쓰기 (TV 화면에만 · 저장 안 함)">✏<small>필기</small></button>` : ''}
-      <span class="dk-sep"></span>${C().lessonBtn(R)}${C().saveBtn(R)}
+      <span class="dk-sep"></span>${C().lessonBtn(R)}${C().saveBtn(R, L)}
       <button class="btn" id="h-back"${i < 0 ? ' disabled' : ''}>◀ 뒤로</button><button class="btn primary" id="h-fwd"${Raid().isClosed(R) ? ' disabled' : ''}>${fin ? '수업 끝 ▶' : '앞으로 ▶'}<small>${esc(C().nextName(L, R))}</small></button>
       <button class="icb dk-pin${pinned() ? ' on' : ''}" id="h-pin" title="조작 막대 늘 보이기">📌</button>`;
     const db = $('#h-demo'); if (db) db.onclick = () => demoOpen(Raid().stepOf(L, R));
