@@ -1,7 +1,7 @@
 // 성장 · 보강던전 · 개인 결과 검증: node tests/grow.test.js
 // (1) EXP 표 · 레벨 경계 · 칭호  (2) 보강 인장 · 화려한 이펙트 해금 (인장 1·2·4·6·8·10개)  (3) 개인 결과: 첫 시도 / 고침 / 못 맞힘 · 개념별 · 복습 추천
 const load = require('./load');
-const DS = load(['assets/manifest.js', 'js/engine/ui.js', 'js/engine/setgen.js', 'js/engine/quiz.js', 'js/engine/lessons.js', 'lessons/set-02.js', 'lessons/set-03.js', 'lessons/set-04.js', 'lessons/set-05.js', 'lessons/set-06.js', 'lessons/eval-1.js', 'js/engine/fx.js', 'js/raid/model.js', 'js/raid/grow.js', 'js/raid/bonus.js', 'js/raid/result.js', 'lessons/unit-set.js', 'js/raid/titles.js']);
+const DS = load(['assets/manifest.js', 'js/engine/ui.js', 'js/engine/setgen.js', 'js/engine/quiz.js', 'js/engine/lessons.js', 'lessons/set-02.js', 'lessons/set-03.js', 'lessons/set-04.js', 'lessons/set-05.js', 'lessons/set-06.js', 'lessons/eval-1.js', 'js/engine/fx.js', 'js/raid/model.js', 'js/raid/grow.js', 'js/raid/bonus.js', 'js/raid/result.js', 'lessons/unit-set.js', 'js/raid/note.js', 'js/raid/titles.js']);
 let fail = 0;
 const check = (c, m) => { if (!c) { fail++; console.error('FAIL:', m); } };
 const G = DS.Grow, B = DS.Bonus, X = DS.Raid;
@@ -108,6 +108,24 @@ check(!T.earned({ ...d1, xp: 1e6 }).some((t) => t.id === 'king'), '집합의 지
 check(T.earned({ ...d1, bonus: { 'eval-1': { eb: { clear: true, tries: 1 } } } }).some((t) => t.id === 'king') && !T.earned({ ...d1, bonus: { 'eval-1': { e1: { clear: true, tries: 1 } } } }).some((t) => t.id === 'king'), '집합의 지배자 = 꼭대기 층 발전 보스 처치');
 check(T.earned({ ...d1, bonus: { 'eval-2': { q11: { clear: true, tries: 1 } } } }).some((t) => t.id === 'detective') && !T.earned({ ...d1, bonus: { 'eval-2': { q10: { clear: true } } } }).some((t) => t.id === 'detective'), '🕵 논리의 탐정 = 성채 2층 11번 보스 처치 (2026-11-06)');
 check(T.all().every((t) => T.TIER[t.tier]), '모든 호칭에 등급');
+// 🏅 #63 칭호 정리 (2026-11-10)
+{ const has = (d, id) => T.earned({ ...empty, ...d }).some((t) => t.id === id);
+  const ph = (k) => ({ 'set-06_m4': Object.fromEntries(Array.from({ length: k }, (_, i) => [`r${i}`, { status: i === 0 ? 'check' : 'pass', ...(i === 0 ? { ok: true } : {}) }])) });
+  check(!has({ photo: ph(2) }, 'writer') && has({ photo: ph(3) }, 'writer') && !has({ photo: { a: { x: { status: 'retry' }, y: { status: 'check', ok: false }, z: { status: 'pass' } } } }, 'writer'), '✍ 서술의 현자 = 📸 통과 3 (선생님 인정 포함 · 그대로/다시는 안 셈)');
+  check(T.get('writer').tier === 'p' && T.get('hunter').tier === 'b' && T.get('wall').tier === 'b' && T.get('awake').tier === 'o', '등급: 서술 보라 · 사냥꾼 · 성벽 파랑 · 각성 주황');
+  check(!has({ xr: { ttl: { wall: 29 } } }, 'wall') && has({ xr: { ttl: { wall: 30 } } }, 'wall'), '🛡 성벽의 수호자 = 디펜스 한 판 처치 30');
+  check(!has({ gem: { enh: 9 } }, 'awake') && has({ gem: { enh: 10 } }, 'awake'), '⚡ 각성한 자 = 강화 +10');
+  const L6 = DS.Lessons.get('set-06'), mids = L6.steps.filter((x) => x.kind === 'monster' && L6.monsters[x.id]).map((x) => x.id);
+  const recX = { 'set-06': { mons: Object.fromEntries(mids.map((m) => [m, 'x'])), bossM: 'xxxxxx' } };
+  const bonFix = (k) => ({ 'set-06': Object.fromEntries(mids.slice(0, k).map((m) => [m, { clear: true }])) });
+  check(T.fixedOutside({ records: recX, bonus: bonFix(3) }) === Math.min(3, mids.length), `빨간 칸 해결 수 = 보충 완료 칸 (${T.fixedOutside({ records: recX, bonus: bonFix(3) })})`);
+  const recBoth = { ...recX, 'set-05': { mons: {}, bossM: 'xxxx' } };
+  const fix10 = T.fixedOutside({ records: recX, bonus: { 'set-06': { ...bonFix(mids.length)['set-06'], boss: { clear: true } } } });
+  check(has({ records: recX, bonus: { 'set-06': { ...bonFix(mids.length)['set-06'], boss: { clear: true } } } }, 'hunter') === (fix10 >= 10) && !has({ records: recX, bonus: bonFix(1) }, 'hunter'), `🎯 오답 사냥꾼 = 10칸 (${fix10})`); void recBoth;
+  const all30 = Object.fromEntries(DS.Unit.CARDS.slice(0, 30).map((c) => [c.id, true])), old15 = Object.fromEntries(DS.Unit.CARDS.filter((c) => c.no <= 3).map((c) => [c.id, true]));
+  check(DS.Unit.CARDS.length < 30 || has({ cards: all30 }, 'sage'), '도감 수집가 = 30장');
+  check(has({ cards: old15 }, 'sage') && !has({ cards: Object.fromEntries(DS.Unit.CARDS.slice(0, 5).map((c) => [c.id, true])) }, 'sage') && T.get('sage').cond === '연성 도감 30장', '도감 수집가: 옛 조건(1~3차시 15장)을 채운 학생은 그대로 · 조건 글 「연성 도감 30장」');
+  check(T.get('sovereign').name === '집합과 명제의 군주', '명제의 군주 → 집합과 명제의 군주'); }
 
 if (fail) { console.error(`\n${fail}건 실패`); process.exit(1); }
 console.log('OK: 성장 — 호칭·메달 · 첫 출정 · 늦게 온 학생 · 차원문 2시간 · EXP · 레벨 · 칭호 · 보강 인장 → 이펙트 해금 · 개인 결과(처음/고침/못 맞힘 · 개념별 · 복습 추천) 통과');

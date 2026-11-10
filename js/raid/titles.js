@@ -20,17 +20,26 @@ DS.Titles = (function () {
     { id: 'magic', name: '매직 연성사', tier: 'p', medal: ['rank', 3], cond: '매직(파랑) 카드 만들기', test: (d) => cardsOf(d, 2).length > 0 },
     { id: 'rare', name: '레어 연성사', tier: 'p', medal: ['rank', 5], cond: '레어(보라) 카드 만들기', test: (d) => cardsOf(d, 3).length > 0 },
     { id: 'grit', name: '끈기의 용사', tier: 'p', medal: ['rank', 6], cond: '재도전으로 고친 문제 모두 10개', test: (d) => recs(d).reduce((a, r) => a + (Number(r.fixed) || 0), 0) >= 10 },
-    { id: 'sage', name: '도감 수집가', tier: 'o', medal: ['rank', 8], cond: '1~3차시 연성 도감 15장 완성', test: (d) => { const need = DS.Unit ? DS.Unit.CARDS.filter((c) => c.no <= 3) : []; return need.length > 0 && need.every((c) => (d.cards || {})[c.id]); } },
+    { id: 'sage', name: '도감 수집가', tier: 'o', medal: ['rank', 8], cond: '연성 도감 30장', test: (d) => { if (cardsOf(d).length >= 30) return true; const need = DS.Unit ? DS.Unit.CARDS.filter((c) => c.no <= 3) : []; return need.length > 0 && need.every((c) => (d.cards || {})[c.id]); } }, // #63: 15장(1~3차시) → 30장 · 옛 조건을 이미 채운 학생은 그대로 인정
     { id: 'king', name: '집합의 지배자', tier: 'o', medal: ['rank', 9], cond: '🏰 성채던전 1층 👑 보스 방 처치', test: (d) => { const e = (d.bonus || {})['eval-1'] || {}; return !!((e.q12 || {}).clear || (e.eb || {}).clear); } }, // 2026-11-05: 12번 보스 방 (옛 eb 기록도) · 2026-11-03 변경 제안 v1
     { id: 'detective', name: '논리의 탐정', tier: 'o', medal: ['rank', 9], cond: '🏰 성채던전 2층 👑 보스 방(11번) 처치', test: (d) => !!((((d.bonus || {})['eval-2'] || {}).q11 || {}).clear) }, // 2026-11-06 명제 중단원
-    { id: 'sovereign', name: '명제의 군주', tier: 'o', medal: ['rank', 9], cond: '🏰 성채던전 3층 👑 보스 방(17번) 처치', test: (d) => !!((((d.bonus || {})['eval-3'] || {}).q17 || {}).clear) }, // 2026-11-05 대단원 컨펌
+    { id: 'sovereign', name: '집합과 명제의 군주', tier: 'o', medal: ['rank', 9], cond: '🏰 성채던전 3층 👑 보스 방(17번) 처치', test: (d) => !!((((d.bonus || {})['eval-3'] || {}).q17 || {}).clear) }, // 2026-11-05 대단원 컨펌
     // 🎖 놀이 메달 · 🔁 연속 참여 (2026-11-05): gem/{반}/{번호}.medal · log
     { id: 'gambler', name: '쉼터의 승부사', tier: 'b', medal: ['rank', 4], cond: '🎖 쉼터 놀이 우승 메달 3개', test: (d) => Object.values(((d.gem || {}).medal) || {}).reduce((a, b) => a + (Number(b) || 0), 0) >= 3 },
     { id: 'nunchi', name: '눈치 백단', tier: 'p', medal: ['rank', 4], cond: '🙊 눈치 게임 우승', test: (d) => (Number((((d.gem || {}).medal) || {}).nun) || 0) >= 1 }, // 2026-11-08
     { id: 'oxsurv', name: 'OX 서바이버', tier: 'p', medal: ['rank', 6], cond: '🎖 수학 OX 우승 메달 3개', test: (d) => (Number((((d.gem || {}).medal) || {}).ox) || 0) >= 3 },
     { id: 'steady', name: '꾸준한 용사', tier: 'b', medal: ['rank', 2], cond: '🔁 10차시 연속 참여', test: (d) => Object.keys(((d.gem || {}).log) || {}).some((k) => k.startsWith('streak10_')) },
     { id: 'quester', name: '출제자', tier: 'p', medal: ['rank', 3], cond: '✏ 출제 공방에서 만든 문제가 처음 출제됨', test: (d) => Object.keys(((d.gem || {}).log) || {}).some((k) => k.startsWith('quest_')) }, // 2026-11-07 6판
+    // 🏅 #63 (2026-11-10 · DECISIONS 72ce314): 칭호 = 보이는 연출만 · 메달 = 지금 칸 재사용
+    { id: 'writer', name: '서술의 현자', tier: 'p', medal: ['rank', 3], cond: '📸 서술형 사진 채점 통과 3번 (선생님 확인 인정 포함)', test: (d) => photoPass(d) >= 3 },
+    { id: 'hunter', name: '오답 사냥꾼', tier: 'b', medal: ['rank', 6], cond: '📕 오답노트 빨간 칸(틀림 · 안 풂)을 수업 밖에서 10개 해결', test: (d) => fixedOutside(d) >= 10 },
+    { id: 'wall', name: '성벽의 수호자', tier: 'b', medal: ['rank', 7], cond: '🏰 디펜스 한 판 처치 30', test: (d) => (Number((((d.xr || {}).ttl) || {}).wall) || 0) >= 30 },
+    { id: 'awake', name: '각성한 자', tier: 'o', medal: ['rank', 9], cond: '🔨 강화 +10', test: (d) => (Number((d.gem || {}).enh) || 0) >= 10 },
   ];
+  // 📸 서술형 통과 수: photo/{반}/{번호}/{차시_방}/{id} 의 pass(AI) 또는 ok(선생님 인정) · 첫 판 · 연습 판 상관없음
+  function photoPass(d) { let n = 0; Object.values(d.photo || {}).forEach((byId) => Object.values(byId || {}).forEach((x) => { if (x && (x.status === 'pass' || x.ok === true)) n++; })); return n; }
+  // 📕 수업 밖에서 해결한 빨간 칸 수 = 오답노트 「보충 완료」(p) 칸
+  function fixedOutside(d) { if (!DS.Note || !DS.Note.all) return 0; const nt = DS.Note.all(d.records || {}, d.bonus || {}, 99); return nt.list.reduce((a, x) => a + x.mons.filter((st) => st === 'p').length + x.boss.slice(0, x.hp).filter((st) => st === 'p').length, 0); }
   // 던전 정복: 차시마다 그 던전 테마의 메달 (보스 격파 또는 형성평가 만점)
   function dungeonTitles() {
     const D = DS.ASSETS.dungeons;
@@ -43,8 +52,8 @@ DS.Titles = (function () {
   const get = (id) => all().find((t) => t.id === id) || null;
   // 한 학생의 기록 모으기 (모닥불 · 설정에서)
   async function data(m) {
-    const k = ck(m.c), [records, cards, xp, bonus, gem] = await Promise.all(['records', 'cards', 'xp', 'bonus', 'gem'].map((p) => DS.Net.get(`${p}/${k}/${m.n}`).catch(() => null)));
-    return { records: records || {}, cards: cards || {}, xp: Number((xp || {}).total || 0), bonus: bonus || {}, gem: gem || {} };
+    const k = ck(m.c), [records, cards, xp, bonus, gem, photo] = await Promise.all(['records', 'cards', 'xp', 'bonus', 'gem', 'photo'].map((p) => DS.Net.get(`${p}/${k}/${m.n}`).catch(() => null)));
+    return { records: records || {}, cards: cards || {}, xp: Number((xp || {}).total || 0), xr: xp || {}, bonus: bonus || {}, gem: gem || {}, photo: photo || {} };
   }
   const earned = (d) => all().filter((t) => { try { return t.test(d); } catch (e) { return false; } });
   // 메달 그림 칸
@@ -64,5 +73,5 @@ DS.Titles = (function () {
     const en = ''; // 🔨 2026-11-08 사용자 「아이디 옆 강화 횟수는 지워 · 대신 은은한 오라」 → 용사 둘레 오라 1~10 (DS.Gem.auraCls)
     return `${tag}<span class="tname ${cls}">${num}${esc((p && (p.nick || p.name)) || '')}</span>${en}`;
   }
-  return { TIER, all, get, data, earned, medal, nameHtml, BASE };
+  return { TIER, all, get, data, earned, medal, nameHtml, BASE, photoPass, fixedOutside };
 })();
