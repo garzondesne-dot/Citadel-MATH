@@ -297,7 +297,7 @@ DS.Dash = (function () {
     const pMax = Math.max(1, ...S.picks.map((x) => x.n)), cMax = Math.max(1, ...S.cmp.map((x) => x.n));
     const body = !S.n ? '<p class="muted">아직 응답이 없어요. 7~8차시 마무리 때 위에서 「열기」 (또는 교사 리모컨 마무리 화면의 📝 설문 열기)</p>' : `
       <h3>A. 회고 비교 <span class="muted small">(1~5점 평균 · 응답 ${S.n}개)</span></h3>
-      <div class="st-scroll"><table class="r-table sv-t"><tr><th>문장</th><th>중간고사 전</th><th>지금</th><th>변화</th><th>오름 / 같음 / 내림</th></tr>
+      <div class="st-scroll"><table class="r-table sv-t"><tr><th>문장</th><th>2학기 중간고사 전</th><th>지금</th><th>변화</th><th>오름 / 같음 / 내림</th></tr>
       ${S.pairs.map((r, i) => `<tr><td>${i + 1}. ${esc(r.q)}</td><td>${r.pre ?? '-'}</td><td><b>${r.now ?? '-'}</b></td><td class="${r.diff > 0 ? 'sv-up' : r.diff < 0 ? 'sv-down' : ''}">${sign(r.diff)}</td><td>${r.up} / ${r.same} / ${r.down}</td></tr>`).join('')}</table></div>
       <h3>B. 지금 수업</h3>
       <div class="sv-cols"><div><p class="gold small">8. 가장 도움이 된 것 (2개까지)</p>${S.picks.slice().sort((a, b) => b.n - a.n).map((x) => `<p class="sv-row"><span>${esc(x.t)}</span>${bar(x.n, pMax)}<b>${x.n}</b></p>`).join('')}</div>

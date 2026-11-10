@@ -18,7 +18,7 @@ DS.Survey = (function () {
     '점수(수행평가)가 아니어도 풀고 싶었다',
     '수학 시간이 기다려졌다',
   ];
-  const WHEN = ['중간고사 전', '지금'];
+  const WHEN = ['2학기 중간고사 전', '지금']; // 2026-11-10 미래교육상 근거: 1학기로 헷갈리지 않게 (문항 · 저장 · 1~5 점수는 그대로)
   const SCALE = ['전혀 아니다', '아니다', '보통', '그렇다', '매우 그렇다'];
   // B. 지금 수업만
   const PICKS = ['재도전', '친구 힐', '보스전', '오답노트', '쉼터 놀이', 'OX 타임'];
@@ -112,7 +112,8 @@ DS.Survey = (function () {
     el.innerHTML = `<div class="quiz-box framed sv-box">
       <p class="gold">📝 우리 반 수업 설문 <span class="muted small">· ${no}차시</span></p>
       <p class="sv-anon">🔒 이름 · 번호가 저장되지 않아요. <b>선생님도 누가 뭐라고 답했는지 볼 수 없어요.</b> 점수와도 상관없으니 솔직하게!</p>
-      <p class="sv-h">A. 「중간고사 전」 수학 시간과 「지금」 던전 수업을 각각 골라요</p>
+      <p class="sv-h">A. 『<b class="sv-pre-em">2학기 중간고사 전</b>』 수학 시간과 『<b class="sv-now-em">지금</b>』 던전 수업을 각각 골라요 · <b class="sv-not1">1학기가 아니에요!</b></p>
+      <p class="sv-pre-big">🕰 2학기 중간고사 전 <small>(게임 없이 하던 수업)</small></p>
       <p class="sv-legend muted small">1 전혀 아니다 · 2 아니다 · 3 보통 · 4 그렇다 · 5 매우 그렇다</p>
       ${PAIR.map((q, i) => `<div class="sv-q"><p><b>${i + 1}.</b> ${q}</p>${scale(i, 0)}${scale(i, 1)}</div>`).join('')}
       <p class="sv-h">B. 지금 던전 수업</p>
