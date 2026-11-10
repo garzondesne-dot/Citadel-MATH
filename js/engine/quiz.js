@@ -205,8 +205,10 @@ DS.Quiz = (function () {
       } else if (t === 'multi') {
         const on = new Set();
         const gStart = {}; if (prob.groups) { let b0 = 0; prob.groups.forEach((g) => { gStart[b0] = g.label; b0 += g.n; }); } // 🔁 #48 두 칸 고르기 (A 칸 · B 칸)
+        let grpBox = null; // 🔘 두 칸 고르기: 칸마다 테두리 상자로 묶음 (2026-11-11 선생님 「보기 칸이 너무 크고 영역을 침범」)
+        if (prob.groups || prob.empty) box.classList.add('q-chips');
         prob.options.forEach((o, i) => {
-          if (gStart[i] != null) { const h = document.createElement('div'); h.className = 'quiz-grp-h math'; h.innerHTML = pretty(gStart[i]); box.appendChild(h); }
+          if (gStart[i] != null) { grpBox = document.createElement('div'); grpBox.className = 'quiz-grp'; const h = document.createElement('div'); h.className = 'quiz-grp-h math'; h.innerHTML = pretty(gStart[i]); grpBox.appendChild(h); box.appendChild(grpBox); }
           const b = document.createElement('button');
           b.className = 'choice multi';
           // 보기가 숫자뿐이면 번호(①…)를 붙이지 않는다 (① 1 처럼 헷갈림). 그 밖에는 ①~⑳ (9번째부터 undefined 가 뜨던 것 수정)
@@ -221,7 +223,7 @@ DS.Quiz = (function () {
             sub.disabled = !on.size;
             DS.Sound.clank();
           });
-          box.appendChild(b);
+          (grpBox || box).appendChild(b);
         });
         const sub = submitBtn('모두 골랐어요 · 제출', () => {
           if (collect([...on])) return;
