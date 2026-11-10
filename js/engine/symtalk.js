@@ -29,7 +29,23 @@ DS.SymTalk = (function () {
   const CONCEPTS = [
     { id: '2^n', sym: '2ⁿ', easy: '원소마다 「넣을까 뺄까」 2가지씩 → 2 × 2 × … (원소 수만큼)', def: '원소가 n 개인 집합의 부분집합의 개수는 2ⁿ 개', memo: '2³ = 2 × 2 × 2 = 8 · 2⁵ = 2 × 2 × 2 × 2 × 2 = 32 (25 아님) · 지수 n = 원소의 개수', where: /집합 X 의 개수는\?|부분집합의 개수/ },
   ];
-  const BY = Object.fromEntries([...ROWS, ...CONCEPTS].map((r) => [r.id, r]));
+  // 📖 명제 단원 (#62 · SYMBOL-TALK.md 「명제 단원」 절 그대로 · 8차시분): ~p 기호 + 「명제」 · 「조건」 · 「진리집합」 낱말 (그 낱말에 점선 밑줄)
+  //   붙는 범위 = 명제 차시(8차시부터) · 성채 2층 명제 방만 (집합 차시의 「조건제시법」과 안 겹침) · 진리집합 기호 P 는 같은 문제 글에 「진리집합」 낱말이 있을 때만
+  const PROP = [
+    { id: 'neg', sym: '~p', easy: 'p를 거꾸로 뒤집은 말', def: '「p가 아니다」 = p의 부정 · p가 참이면 ~p는 거짓, p가 거짓이면 ~p는 참', memo: '~(~p) = p · 「x > 2」의 부정은 「x ≤ 2」 (같다도 들어감)' },
+    { id: 'prop', sym: '명제', easy: '참 · 거짓이 딱 정해지는 말', def: '참 또는 거짓을 명확하게 판별할 수 있는 문장이나 식', memo: '「아름답다」 · 「높다」처럼 기준이 사람마다 다르면 명제가 아님' },
+    { id: 'cond', sym: '조건', easy: 'x가 정해져야 참 · 거짓이 정해지는 말', def: '변수의 값에 따라 참, 거짓을 판별할 수 있는 문장이나 식', memo: '「x는 3의 배수」 → x = 6이면 참, x = 5이면 거짓' },
+    { id: 'truth', sym: '진리집합 P', easy: 'U에서 조건을 통과한 것만 모은 집합', def: '전체집합 U의 원소 중 조건 p를 참이 되게 하는 모든 원소의 집합', memo: 'U가 바뀌면 진리집합도 바뀜(x² = 4 → 자연수면 {2}, 정수면 {−2, 2}) · ~p의 진리집합 = Pᶜ' },
+  ];
+  const BY = Object.fromEntries([...ROWS, ...CONCEPTS, ...PROP].map((r) => [r.id, r]));
+  const propOn = () => { const id = ctx && ctx.lesson; if (!id) return false; if (id === 'eval-2') return true; const L = DS.Lessons && DS.Lessons.get && DS.Lessons.get(id); return !!(L && !L.eval && Number(L.no) >= 8); };
+  // 명제 낱말 · 기호 찾기: text 한 줄 · whole = 문제 글 전체 → [{ i, len, id }]
+  function propHits(t, whole) {
+    const out = [], re = /~(?=\s*[pqr](?![A-Za-z]))|진리집합|명제|조건(?!제시)|(?<![A-Za-z])P(?![A-Za-z])/g; let m;
+    const tp = /진리집합/.test(whole || t);
+    while ((m = re.exec(t))) { const w = m[0]; const id = w === '~' ? 'neg' : w === '명제' ? 'prop' : w === '조건' ? 'cond' : 'truth'; if (w === 'P' && !tp) continue; out.push({ i: m.index, len: w.length, id }); }
+    return out;
+  }
   const esc = (s) => (DS.UI ? DS.UI.esc(s) : String(s));
   const pretty = (s) => (DS.UI ? DS.UI.pretty(s) : esc(s));
 
@@ -82,7 +98,8 @@ DS.SymTalk = (function () {
   function markEl(root) {
     if (!root || root.dataset.stDone === root.innerHTML.length + '') return;
     const blocks = new Set();
-    const tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: (n) => (/[∈∉⊂⊄∅∩∪=−U{|]|n\(/.test(n.data) && !(n.parentElement && n.parentElement.closest(SKIP)) ? 1 : 3) });
+    const pOn = propOn(), whole = pOn ? root.textContent : '';
+    const tw = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: (n) => ((/[∈∉⊂⊄∅∩∪=−U{|]|n\(/.test(n.data) || (pOn && /~|명제|조건|진리집합|P/.test(n.data))) && !(n.parentElement && n.parentElement.closest(SKIP)) ? 1 : 3) });
     let n; while ((n = tw.nextNode())) blocks.add(lineOf(n.parentElement));
     root.querySelectorAll('sup.cpl').forEach((sp) => { if (!sp.closest('.sym-t')) blocks.add(lineOf(sp)); });
     blocks.forEach((blk) => {
@@ -90,11 +107,14 @@ DS.SymTalk = (function () {
       const { s, map } = textOf(blk), hits = [];
       CH.lastIndex = 0; let m; while ((m = CH.exec(s))) { const id = pick(s, m.index); if (id) hits.push({ i: m.index, len: m[0] === 'n' ? 1 : 1, id }); }
       for (let k = 0; k < s.length; k++) if (s[k] === 'ᶜ' && map[k] && map[k].sup) hits.push({ i: k, id: 'compl' });
+      if (pOn) propHits(s, whole).forEach((h) => hits.push(h));
       hits.sort((a, b) => b.i - a.i).forEach((h) => { // 뒤에서부터 (앞 자리 그대로)
         const at = map[h.i]; if (!at) return;
         if (at.sup) { if (at.sup.closest('.sym-t') || at.sup.closest(SKIP)) return; const w = document.createElement('span'); w.className = 'sym-t'; w.dataset.st = h.id; at.sup.replaceWith(w); w.appendChild(at.sup); return; }
         if (!at.node.parentNode || (at.node.parentElement && at.node.parentElement.closest(SKIP))) return;
-        const tail = at.node.splitText(at.off), rest = tail.splitText(1), w = document.createElement('span'); w.className = 'sym-t'; w.dataset.st = h.id;
+        const len = h.len || 1, last = map[h.i + len - 1]; if (!last || last.node !== at.node) return; // 낱말이 두 칸에 걸치면 건너뜀
+        if (len > 1 && at.node.parentElement && at.node.parentElement.closest('button, .choice, label')) return; // #62 명제 낱말은 보기 단추 안엔 안 붙임 (「명제 · 참」 보기마다 있어 고르기를 막음 · ~ 기호는 붙임)
+        const tail = at.node.splitText(at.off), rest = tail.splitText(len), w = document.createElement('span'); w.className = 'sym-t'; w.dataset.st = h.id;
         tail.replaceWith(w); w.appendChild(tail); void rest;
       });
     });
@@ -134,7 +154,7 @@ DS.SymTalk = (function () {
 
   // ── 기록 ──
   let ctx = null; // { m: 계정 { c, n, test }, lesson }
-  const setCtx = (m, lesson) => { ctx = m && lesson ? { m, lesson } : null; };
+  const setCtx = (m, lesson) => { ctx = lesson ? { m: m || null, lesson } : null; }; // #62: 계정이 없어도(성채 미리 보기 · 테스트) 차시는 기억 = 명제 낱말 표시 · 기록은 계정 있을 때만
   const ck = (c) => String(c).replace(/[.#$/[\]]/g, '_');
   const pend = {}; let ptimer = 0;
   function count(id) {
@@ -162,5 +182,5 @@ DS.SymTalk = (function () {
     scan();
   }
   if (typeof document !== 'undefined') { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start(); }
-  return { ROWS, CONCEPTS, BY, pick, setCtx, rank, scan, close, flush, _markEl: markEl };
+  return { ROWS, CONCEPTS, PROP, BY, pick, propHits, propOn, setCtx, rank, scan, close, flush, _markEl: markEl };
 })();

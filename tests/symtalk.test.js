@@ -18,6 +18,18 @@ rows.forEach(([sym, easy, def, memo], i) => { const r = S.ROWS[i] || {};
   check(c && c.id === '2^n' && c.sym === '2ⁿ', '개념 톡 기록 키 「2^n」 · 칩 「2ⁿ」');
   check(c.easy === row[1], `개념 톡 ① 「${c.easy}」 = 「${row[1]}」`); check(c.def === row[2], `개념 톡 ② 「${c.def}」 = 「${row[2]}」`); check(c.memo === row[3], `개념 톡 ③ 「${c.memo}」 = 「${row[3]}」`);
   check(c.where.test('집합 X 의 개수는?') && !c.where.test('A ∩ B 의 가장 작은 원소는?'), '붙는 곳 = 집합 X 의 개수 문제만'); }
+// ①-3 명제 단원 (#62): SYMBOL-TALK 「명제 단원」 표 그대로 (쪽 8x) · 붙는 곳
+{ const pr = md.split('\n').filter((l) => /^\| .* \| 8\d \|$/.test(l)).map((l) => l.split('|').slice(1, -1).map((c) => c.trim().replace(/\*\*/g, '')));
+  const ids = ['neg', 'prop', 'cond', 'truth'];
+  check(pr.length === 4 && S.PROP.length === 4 && S.PROP.map((r) => r.id).join() === ids.join(), `명제 4줄 (문서 ${pr.length} · 코드 ${S.PROP.length})`);
+  pr.forEach(([, easy, def, memo], i) => { const r = S.PROP[i] || {};
+    check(r.easy === easy, `${r.id} ① 「${r.easy}」 = 「${easy}」`); check(r.def === def, `${r.id} ② 「${r.def}」 = 「${def}」`); check(r.memo === memo, `${r.id} ③ 「${r.memo}」 = 「${memo}」`); });
+  const H = (t, w) => S.propHits(t, w).map((h) => `${t.substr(h.i, h.len)}:${h.id}`).join(' ');
+  check(H('(1) 조건 p : x는 홀수 의 부정 ~p 의 진리집합의') === '조건:cond ~:neg 진리집합:truth', `8차시 문제 글 (${H('(1) 조건 p : x는 홀수 의 부정 ~p 의 진리집합의')})`);
+  check(H('~q : x ≤ 3') === '~:neg' && H('~ 5') === '' && H('x ~ y') === '', '~ 는 ~p · ~q · ~r 꼴만');
+  check(H('조건제시법으로 나타내면') === '', '「조건제시법」 은 안 붙음');
+  check(H('Pᶜ = {2, 4}', '진리집합') === 'P:truth' && H('Pᶜ = {2, 4}', '집합 P') === '' && H('APB') === '', 'P = 「진리집합」 낱말이 같은 문제 글에 있을 때만');
+  check(H('다음 중 명제인 것은?') === '명제:prop', '「명제」 낱말'); }
 // ② 문맥 (요청 #54 예: 「A ∩ B = ∅」 → 서로소 · 「n(A ∪ B)」 → 개수 공식 · 「Aᶜ」 → 여집합 · 「A − B」 → 차집합 · 「a ∈ A」 → 속한다)
 const at = (t, ch, k = 0) => { let i = -1; for (let j = 0; j <= k; j++) i = t.indexOf(ch, i + 1); return S.pick(t, i); };
 const T = [
@@ -31,7 +43,7 @@ const T = [
   ['U = 100 미만의 자연수', 'U', 'U'], ['n(U) = 99', 'U', 'U'], ['n(∅) = 0', '∅', 'empty'], ['A − B ≠ B − A', '−', 'diff'],
 ];
 T.forEach(([t, ch, want]) => { const got = at(t, ch); check(got === want, `「${t}」의 ${ch} → ${want} (${got})`); });
-check(Object.keys(S.BY).every((k) => S.ROWS.some((r) => r.id === k) || S.CONCEPTS.some((r) => r.id === k)), '모든 id = 기호 16줄 + 개념 톡');
+check(Object.keys(S.BY).every((k) => S.ROWS.some((r) => r.id === k) || S.CONCEPTS.some((r) => r.id === k) || S.PROP.some((r) => r.id === k)), '모든 id = 기호 16줄 + 개념 톡 + 명제');
 
 // ③ 대시보드 순위: 반 · 차시 거르기
 const xp = { 1: { st: { 'set-06': { cap: 3, compl: 1 }, 'eval-1': { cap: 2 } } }, 2: { st: { 'set-06': { compl: 5 } } }, 3: { total: 10 } };
