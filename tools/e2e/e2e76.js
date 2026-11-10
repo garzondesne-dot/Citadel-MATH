@@ -48,6 +48,7 @@ const OUT = process.argv[2] || '.', U = 'http://localhost:8765/index.html?local'
   await T.evaluate(async () => { await DS.Mail.notice('1-3', '내일 6차시 형성평가 있어요'); await DS.Mail.setGift('1-3', true); await DS.Mail.send({ c: '1-3', n: 2, name: '이서연' }, 1, 5, '힘내!'); });
   await S.evaluate(() => DS.Camp.back()); await S.waitForTimeout(2500);
   const badge = await S.evaluate(() => (document.querySelector('#camp-mail .ml-badge') || {}).textContent || '0');
+  await S.evaluate(() => document.querySelectorAll('.nt-pop').forEach((e) => e.remove())); // 📢 #61 공지 팝업은 닫고
   await S.click('#camp-mail', { force: true }); await S.waitForTimeout(1500); await S.screenshot({ path: `${OUT}/76-5-mail.png`, fullPage: true });
   const g0 = await S.evaluate(async () => (await DS.Gem.mine({ c: '1-3', n: 1 })).total);
   await S.click('[data-claim]'); await S.waitForTimeout(1200);
