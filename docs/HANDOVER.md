@@ -263,6 +263,9 @@
 - 독립 검산(`tests/lessonN.test.js`)은 지금처럼 · 더해서 「DATA 가 JSON.stringify → parse 해도 같다」를 한 줄 확인.
 - 9차시 일정이 빠듯하면 9차시는 옛 꼴로 하고 이 절에 「10차시부터」로 고쳐 적는다.
 
+## 🔐 규칙 게시 = 손발 방이 직접 (2026-11-11)
+- `firebase/database.rules.json` 을 바꾸면: 서비스 계정 토큰(`tools/auto/google.js firebaseToken`)으로 `PUT {DB}/.settings/rules.json` (읽기 → 올리기 → 다시 읽어 파일과 같은지 확인). 선생님 「규칙 올려줘」 뒤에만.
+
 ## 🧙 #73 용사 고르기 · 이름 · 새 용사 해금 · 각성한 로안 · 스킬 탭 (2026-11-11)
 - 이름 · 이야기 = `js/engine/lore.js` (DS.Lore · docs/HERO-LORE.md 표 그대로 · `tests/lore.test.js` 가 표와 비교) · 표시 = `DS.Lore.label(n)` 「로안 · 검사」. 표를 고치면 lore.js 도 같이.
 - 소개 카드 = camp.js settings `heroCard()` (학생 · 선생님 · 테스트 같은 카드) · 칸 = 카드만 바꿈 · [이 용사로 정하기] · 💎 [n 으로 열기] · 도전 = 진행 막대 · 처음 누르면 `DS.Attack.cutin(n, fx, { peek })` 0.8초(이 기기 `citadel-hero-peek`). 초상 = manifest `heroPortraits` (`hero-portraits-v1.webp` · 칸 256 · 6 × 6 · list[n] = [열, 줄] · 11-11 port-1~9 34명 모두 · `hero-portraits-v2.webp`).
