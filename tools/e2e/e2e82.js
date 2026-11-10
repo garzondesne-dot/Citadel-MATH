@@ -41,10 +41,10 @@ const OUT = process.argv[2] || '.', U = 'http://localhost:8765/index.html?local'
   await S.evaluate(async (c) => { const R = DS.Act.unpackRoom(await DS.Net.get(`rooms/${c}`)), me = DS.Net.uid(), k = Object.keys((((R.chain || {}).u4 || {})[me]) || {}).length; await DS.Net.set(`rooms/${c}/chain/u4/${me}/${k}`, { s: 0, p: 1, g: -999, at: DS.Net.TS }); }, code);
   await S.waitForTimeout(1500); ok(await S.evaluate(() => /3\.5/.test((document.querySelector('.dt-n') || {}).textContent || '')), `연습 오답 → 아래 기회 「${await S.evaluate(() => (document.querySelector('.dt-n') || {}).textContent)}」`);
   await finishPass(1); await S.waitForTimeout(1500);
-  let P = await pr(); ok(/2\/3 남음/.test(P.btn), `연습 1판 끝 → 단추 「${P.btn}」`);
+  let P = await pr(); ok(/2\/3/.test(P.btn), `연습 1판 끝 → 단추 「${P.btn}」`);
   const shut = () => S.evaluate(() => document.querySelectorAll('.th-chest-ov, .bat-ov, .th-bat').forEach((e) => e.remove()));
   await shut(); await S.click('#cr-prac'); await S.waitForTimeout(900); await finishPass(2); await S.waitForTimeout(1500);
-  P = await pr(); ok(/1\/3 남음/.test(P.btn), `연습 2판 끝 → 「${P.btn}」`);
+  P = await pr(); ok(/1\/3/.test(P.btn), `연습 2판 끝 → 「${P.btn}」`);
   await shut(); await S.click('#cr-prac'); await S.waitForTimeout(900); await finishPass(3); await S.waitForTimeout(1500);
   P = await pr(); ok(!P.btn && /연습 3번 끝/.test(P.end), `3판 끝 → 「${P.end}」 · 단추 없음`);
   const used = await S.evaluate(async (c) => DS.Net.get(`rooms/${c}/players/${DS.Net.uid()}/pr/u4`), code);

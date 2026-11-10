@@ -655,7 +655,7 @@ DS.Student = (function () {
     };
   }
   // ⚔ 소레이드 화면 (2026-11-09 #18): 진행 칩 ①②③👑 · 지금 단계 문제 하나 · 「📜 나의 풀이」가 한 줄씩 쌓임 · 기회 반 칸 · 1칸 남으면 🙋 선생님 확인
-  let cform = null; const chainPrac = {}, writeMode = {}, probShut = {}, pracArm = {};
+  let cform = null; const chainPrac = {}, writeMode = {}, probShut = {}, probOpen = {}, storyOpen = {}, pracArm = {};
   // ✨ 「📜 나의 풀이」 새 줄 (#46 모래 글씨 → 2026-11-10 선생님 「픽셀 디졸브 인 · 새 문장은 빨간색 · 다음 단계에서 다시 검정」)
   //   새 줄만 · 종이색 픽셀 칸이 흩어지듯 사라지며 글씨가 드러남 (왼쪽부터 조금 먼저 · 약 0.9초 · 한 줄씩 차례로) · 그 단계에서 생긴 줄 = 빨강 → 다음 단계 줄이 생기면 검정
   //   이미 있던 줄 · 다시 들어온 첫 화면은 연출 없이 · 화면을 다시 그려도 이어서(시작 시각 기억 · 칸 순서는 줄마다 고정) · 그림 파일 없음 (캔버스 1장)
@@ -697,6 +697,7 @@ DS.Student = (function () {
     const a = chainAtk; chainAtk = null; if (!a || !DS.Attack) return;
     const body = $('#st-body'), sc = body && body.querySelector('.scene'); if (!sc) return;
     chainAtkUntil = Date.now() + 1400;
+    const wr = body.querySelector('.ch-wrap.cr-q'); if (wr) { wr.classList.add('cr-big'); void wr.offsetHeight; } // 📱 #56 ② 공격 순간만 장면 크게 (끝나면 다시 그려서 띠)
     DS.Attack.play(sc, { heroBox: sc.querySelector('.enc-hero'), monBox: sc.querySelector('.enc-mon'), hero: myP().hero || 0, fx: myP().fx || 'flame', miss: !a.ok, s: a.big ? 1.2 : 0.85, rest: 'idle', noDmg: a.prac || !a.ok }).catch(() => {}).then(() => { chainAtkUntil = 0; drawn = ''; render(); });
   }
   function chainView(body, step, rec, hp) {
@@ -721,11 +722,13 @@ DS.Student = (function () {
     drawn = sig;
     const chips = pItems.map((_, i) => `<span class="cr-chip ${i < stage || (!prac && rec.done) ? 'ok' : i === stage ? 'now' : ''}${!prac && dns.includes(i) ? ' down' : ''}">${!prac && dns.includes(i) ? '💀' : ''}${i === pItems.length - 1 ? '👑' : '①②③④⑤⑥'[i]}${i < stage || (!prac && rec.done) ? '✔' : i === stage ? '⚔' : ''}</span>`).join('<i>›</i>');
     const story = (arr) => (arr.length ? `<div class="cr-story"><b>📜 나의 풀이</b><ol>${arr.map((t) => `<li>${pretty(t)}</li>`).join('')}</ol></div>` : '');
-    const lastWrong = !prac && rec.lastWrong && rec.lastWrong.s === stage, cheer = !prac && !rec.done && !rec.fail && dns.includes(stage) ? '<p class="cr-more">💥 친구들은 이 졸개를 넘었어요! 힘내요</p>' : '';
+    // 📱 #56 ③ 문제 푸는 동안 「나의 풀이」 = 가장 최근 한 줄 + 「n줄 ▼」 (누르면 모두 · 다시 그려도 유지)
+    const sfKey = `${mid}|${pass}`, storyF = (arr) => (arr.length ? `<div class="cr-story${storyOpen[sfKey] ? '' : ' cr-fold'}" data-sf="${esc(sfKey)}"><b>📜 나의 풀이</b>${arr.length > 1 ? `<button type="button" class="cr-sf">${storyOpen[sfKey] ? '접기 ▲' : `${arr.length}줄 ▼`}</button>` : ''}<ol>${arr.map((t, k) => `<li value="${k + 1}">${pretty(t)}</li>`).join('')}</ol></div>` : '');
+    const lastWrong = !prac && rec.lastWrong && rec.lastWrong.s === stage, cheer = !prac && !rec.done && !rec.fail && dns.includes(stage) ? '<p class="cr-more cr-cheer">💥 친구들은 이 졸개를 넘었어요! 힘내요</p>' : ''; // 📱 #56 ④ 장면 띠 위에 겹침
     if (!photoLoaded && DS.Photo) { photoLoaded = true; DS.Photo.load().then(() => { drawn = ''; render(); }).catch(() => {}); }
-    const wrBtn = !canPhoto ? '' : /* ⚔ #50 ② 아래 칸 오른쪽 · 언제나 (채점은 학습지 숫자 그대로) */ wrOk === 'ok' ? '<button class="btn big dock-wr" disabled>🌟 서술형 통과</button>' : phN >= DS.Photo.raidMax() ? '<button class="btn big dock-wr" disabled>📸 사진 다 씀</button>' : '<button class="btn big dock-wr" id="cr-write">✍ 서술형 도전 📸</button>';
+    const wrBtn = !canPhoto ? '' : /* ⚔ #50 ② 아래 칸 오른쪽 · 언제나 (채점은 학습지 숫자 그대로) */ wrOk === 'ok' ? '<button class="btn big dock-wr" disabled>🌟 서술형 통과</button>' : phN >= DS.Photo.raidMax() ? '<button class="btn big dock-wr" disabled>📸 사진 다 씀</button>' : '<button class="btn big dock-wr" id="cr-write">✍ 서술형</button>';
     const pUsed = Raid().pracUsed(R, mid, me, rec), pLeft = Math.max(0, Raid().PRAC_MAX - pUsed); // 🔥 #39 한 판 더 3판
-    const pracBtn = pLeft > 0 ? `<button class="btn primary big dock-go cr-again" id="cr-prac">🔥 한 판 더 <small>(${pLeft}/${Raid().PRAC_MAX} 남음)</small></button>` : `<span class="dock-wait cr-pend">🔥 연습 ${Raid().PRAC_MAX}번 끝!</span>`;
+    const pracBtn = pLeft > 0 ? `<button class="btn primary big dock-go cr-again" id="cr-prac">🔥 한 판 더 <small>${pLeft}/${Raid().PRAC_MAX}</small></button>` : `<span class="dock-wait cr-pend">🔥 연습 ${Raid().PRAC_MAX}번 끝!</span>`;
     // ⛓ 💚 #50 ①: 대장 처치 뒤 남은 기회(정수 칸)로 묶기 · 힐 (일반 몬스터 결과 화면과 같은 방식) · 한 판 더 기회와 따로
     const tokPick = rec.done && rec.tokLeft > 0 && (!prac || pDone || pFail) ? `<p class="okc st-ask">남은 기회로 무엇을 할까요? <span class="muted small">(${rec.tokLeft}번)</span></p>
       <div class="heal-pick"><button class="btn primary big" id="st-bind">⛓ 몬스터 묶기<br><small>공격 ${Raid().BIND_TOKEN}초 늦춤</small></button><button class="btn big heal-btn" id="st-heal">💚 친구 힐<br><small>막힌 친구 기회 +1</small></button></div>` : '';
@@ -760,21 +763,21 @@ DS.Student = (function () {
       chargeBtn(body);
       return;
     }
-    const probText = prac ? (pItems[0] || {}).problem : null, probBox = probText ? `<details class="cr-prob"${probShut[mid] ? '' : ' open'} data-pm="${esc(mid)}"><summary>📜 문제 <small>(숫자가 바뀐 원문 · 눌러서 접기)</small></summary><p>${pretty(probText)}</p></details>` : ''; // 📜 #44 ⑤ 한 판 더 = 바뀐 숫자의 원문 문제 (모든 단계 · 접기)
-    if (needWhy) mainHtml = `${probBox}${story(says)}<div class="paper cr-why"><div class="paper-h"><b>💡 근거 한 줄</b><small>틀려도 괜찮아요 · 다시 골라요</small></div><p class="why-q">${pretty(wq.why.pre)} <b class="why-bl">____</b>${pretty(wq.why.post)}</p><div class="choices">${wq.why.choices.map((c, i) => `<button class="choice" data-why="${i}">${pretty(c)}</button>`).join('')}</div></div>`;
+    const probText = prac ? (pItems[0] || {}).problem : null, pbKey = `${mid}|${pass}|${stage}`, probBox = probText ? `<details class="cr-prob"${(probOpen[pbKey] != null ? probOpen[pbKey] : stage === 0) ? ' open' : ''} data-pm="${esc(pbKey)}"><summary>📜 문제 <small>(숫자가 바뀐 원문 · 눌러서 접기)</small></summary><p>${pretty(probText)}</p></details>` : ''; // 📜 #44 ⑤ 한 판 더 = 바뀐 숫자의 원문 문제 (모든 단계 · 접기)
+    if (needWhy) mainHtml = `${probBox}${storyF(says)}<div class="paper cr-why"><div class="paper-h"><b>💡 근거 한 줄</b><small>틀려도 괜찮아요 · 다시 골라요</small></div><p class="why-q">${pretty(wq.why.pre)} <b class="why-bl">____</b>${pretty(wq.why.post)}</p><div class="choices">${wq.why.choices.map((c, i) => `<button class="choice" data-why="${i}">${pretty(c)}</button>`).join('')}</div></div>`;
     else if (rec.fail) mainHtml = `<p class="paper-note">끝까지 못 맞혔어요 — 아래 풀이를 학습지에 옮겨 적고 🎯 복습 허수아비에서 다시 도전해요.</p>${story(rec.items.map((x) => x.say))}`;
     else if (!prac && rec.done) mainHtml = `<p class="okc big-msg">${rec.perfect ? '🌟 퍼펙트 사슬!' : '🎉 대장 처치!'}</p>${story(says)}${rec.byPh ? '<p class="cr-more">✍ 서술형으로 남은 단계를 한 번에!</p>' : ''}${tokPick}${pendTip}${hintBtn}<p class="muted small cr-pnote">숫자만 바뀐 새 문제 · 판마다 연습 기회 4칸 (틀리면 줄어요 · 다 쓰면 그 판 끝) · 수업 기록 · 💎 그대로 · 사슬 완성마다 경험치 +1 (데미지 0)</p>`;
     else if (pFail) mainHtml = `<p class="paper-note">✘ 이번 연습 판은 기회를 다 썼어요 — 끝 (EXP 없음) · 아래 풀이를 보고 다시 해 봐요</p>${story(pItems.map((x) => x.say))}${tokPick}${pendTip}${hintBtn}`; // #40
     else if (pDone) mainHtml = `<p class="okc">✔ 연습 사슬 완성! <b class="gold">+1 EXP</b></p>${story(says)}${tokPick}${pendTip}${hintBtn}<p class="muted small cr-pnote">숫자만 바뀐 새 문제 · 판마다 연습 기회 4칸 (틀리면 줄어요 · 다 쓰면 그 판 끝) · 수업 기록 · 💎 그대로 · 맞히면 공격 이펙트가 나가요 (데미지 0)</p>`;
     else if (rec.locked && !prac) mainHtml = `${story(says)}<div class="cr-lock"><b>🙋 선생님 확인을 기다려요</b><p>기회가 1칸 남았어요 — 학습지에 풀이를 정리해 두면 선생님이 와서 확인해 줘요.</p></div>`;
-    else mainHtml = `${probBox}${story(says)}<div class="paper"><div class="paper-h"><b>${esc(step.title)} · ${stage === pItems.length - 1 ? '👑 대장' : `졸개 ${'①②③④⑤⑥'[stage]}`}</b><small>${prac ? '연습 (숫자 바뀜 · 데미지 없음)' : '틀려도 숫자는 그대로'}</small></div>
+    else mainHtml = `${probBox}${storyF(says)}<div class="paper"><div class="paper-h"><b>${esc(step.title)} · ${stage === pItems.length - 1 ? '👑 대장' : `졸개 ${'①②③④⑤⑥'[stage]}`}</b><small>${prac ? '연습 (숫자 바뀜 · 데미지 없음)' : '틀려도 숫자는 그대로'}</small></div>
         ${lastWrong ? '<p class="paper-note">✘ 다시 생각해 봐요 — 같은 문제예요</p>' : ''}<div class="items">${itemHtml(q, 0, lastWrong, null, cform.given)}</div></div>`;
     // ⚔ #50 ② 아래 칸 = 왼쪽 「⚔ 공격」(대장 뒤 = 「🔥 한 판 더」) · 오른쪽 「✍ 서술형 도전 📸」
     const goBtn = (t) => `<button class="btn primary big dock-go" id="cr-go"${ready ? '' : ' disabled'}>${t}</button>`;
     const dockL = needWhy ? '' : prac ? (pDone || pFail ? pracBtn : goBtn('⚔ 연습 공격')) : rec.done ? pracBtn : rec.fail ? '' : rec.locked ? '<span class="dock-wait">🙋 확인 기다림</span>' : goBtn('⚔ 공격!');
     const qView = !needWhy && !rec.fail && !(!prac && rec.done) && !pFail && !pDone && !(rec.locked && !prac); // 문제 화면 = 높이 고정(양피지 안에서 스크롤) · 끝난 화면 = 높이 자유(맨 끝 단추까지 스크롤 · 🐞 2026-11-10 힌트 단추가 아래 칸에 가려 못 누름)
-    paint(body, `${key}|${needWhy ? 'w' : 'q'}`, `<div class="panel framed st-fight ch-wrap${qView || needWhy ? '' : ' st-after'}">${scene(step, rec, hp, '', '')}
-      <div class="cr-chips">${chips}${prac && whyTag ? `<b class="cr-whyn">${whyTag}</b>` : ''}</div>${cheer}${hintsBox}${mainHtml}
+    paint(body, `${key}|${needWhy ? 'w' : 'q'}`, `<div class="panel framed st-fight ch-wrap${qView || needWhy ? ' cr-q' : ' st-after'}"><div class="cr-scw">${scene(step, rec, hp, '', '')}${qView || needWhy ? cheer : ''}</div>
+      <div class="cr-chips">${chips}${prac && whyTag ? `<b class="cr-whyn">${whyTag}</b>` : ''}</div>${qView || needWhy ? '' : cheer}${hintsBox}${mainHtml}
       ${dock(prac && !pDone && !pFail ? pDock : rec, `<div class="cr-dbtns">${dockL}${wrBtn}</div>`).replace('class="st-dock"', 'class="st-dock cr-dock"')}${helpBtn()}${qView || needWhy ? '' : '<div class="cr-pad"></div>'}</div>`); // cr-pad = 아래 칸(두 줄)에 맨 끝 단추가 가리지 않게
     bindTop(); bindHelp();
     body.querySelectorAll('[data-pick]').forEach((b) => b.addEventListener('click', () => {
@@ -792,7 +795,8 @@ DS.Student = (function () {
     const wb = $('#cr-write'); if (wb) wb.onclick = () => { writeMode[mid] = { peek: false }; drawn = ''; render(); };
     chargeBtn(body);
     const hb = $('#cr-hint'); if (hb) hb.onclick = () => DS.Control.run(async () => { hb.disabled = true; await DS.Act.giveHint(code, raw, mid, Number(hb.dataset.s)); DS.Sound.clank(); DS.UI.toast('💡 힌트를 TV 에 띄웠어요 · EXP +1'); drawn = ''; render(); });
-    body.querySelectorAll('.cr-prob').forEach((d) => d.addEventListener('toggle', () => { probShut[d.dataset.pm] = !d.open; })); // 📜 접기 기억
+    body.querySelectorAll('.cr-prob').forEach((d) => d.addEventListener('toggle', () => { probOpen[d.dataset.pm] = d.open; })); // 📜 접기 기억 (단계마다 · #56)
+    body.querySelectorAll('.cr-sf').forEach((b) => (b.onclick = (e) => { e.stopPropagation(); const st = b.closest('.cr-story'), k = st.dataset.sf; storyOpen[k] = !storyOpen[k]; st.classList.toggle('cr-fold', !storyOpen[k]); b.textContent = storyOpen[k] ? '접기 ▲' : `${st.querySelectorAll('li').length}줄 ▼`; })); // 📱 #56 ③ 다시 그리지 않고 그 자리에서
     sandApply(body, `${mid}|${prac ? pass : 0}`); // ✨ 모래 글씨
     const pb = $('#cr-prac');
     if (pb) { const ak = `${mid}|${pass}|${pDone || pFail || !prac}`; if (!pracArm[ak]) pracArm[ak] = Date.now(); const wait = 1500 - (Date.now() - pracArm[ak]); if (wait > 0) { pb.disabled = true; setTimeout(() => { if (pb.isConnected) pb.disabled = false; }, wait); } } // 🐞 #50 ①: 대장을 잡은 그 손가락이 같은 자리 「🔥 한 판 더」를 눌러 저절로 넘어가던 것 → 나타난 뒤 1.5초 잠깐 잠금

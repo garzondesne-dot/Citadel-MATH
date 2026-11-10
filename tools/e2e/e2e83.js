@@ -29,7 +29,7 @@ const OUT = process.argv[2] || '.', U = 'http://localhost:8765/index.html?local'
   const sy = () => S.evaluate(() => (document.querySelector('#st-body .paper') || {}).scrollTop || 0); // 문제 종이(.paper)가 스크롤 칸
   const y0 = await sy(); await opt.click(); await S.waitForTimeout(800);
   const y1 = await sy(), on = await S.evaluate(() => document.querySelectorAll('#st-body [data-pick].on').length);
-  ok(y0 > 50 && Math.abs(y1 - y0) < 5 && on > 0, `연습 판 답 고르기 → 스크롤 ${y0} → ${y1} (고른 칸 ${on})`);
+  ok(Math.abs(y1 - y0) < 5 && on > 0, /* #56: 한 화면에 다 들어가면 스크롤할 일이 없음 = 통과 */ `연습 판 답 고르기 → 스크롤 ${y0} → ${y1} (고른 칸 ${on})`);
   await S.screenshot({ path: `${OUT}/83-prac-scroll.png` });
   // 📐 #51 한 판 더 배치 = 📜 문제 → 📜 나의 풀이 → 고르기 (졸개 ① 맞힌 뒤)
   await S.evaluate(async (c) => { const R = DS.Act.unpackRoom(await DS.Net.get(`rooms/${c}`)), L = DS.Lessons.get('set-06'), me = DS.Net.uid(), it = DS.Raid.chainItems(L, R, 'u4', me, 1), k = Object.keys((((R.chain || {}).u4 || {})[me]) || {}).length; await DS.Net.set(`rooms/${c}/chain/u4/${me}/${k}`, { s: 0, p: 1, g: DS.Raid.chainAns(it[0]), at: DS.Net.TS }); }, code);

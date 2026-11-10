@@ -2990,9 +2990,9 @@ html body .sc-gem, html body .sc-gem .sc-gn, html body .sc-gem b { font-weight: 
 .cr-story li.cr-new, .cr-story li.cr-new * { color: #d0182b !important; }
 .quiz-grp-h { flex-basis: 100%; width: 100%; margin: 8px 0 2px; font-weight: 700; font-size: 14px; color: #ebb84f; border-top: 1px dashed #b08d5788; padding-top: 6px; } /* 🔁 #48 성채 두 칸 고르기 */
 /* ⚔ #50 소레이드 아래 칸 (2026-11-10): 위 = 재도전 하트 · 아래 = 「⚔ 공격 / 🔥 한 판 더」 + 「✍ 서술형 도전 📸」 반반 */
-.st-dock.cr-dock { flex-wrap: wrap; row-gap: 6px; }
-.st-dock.cr-dock .dock-tries { flex: 1 1 100% !important; justify-content: center; }
-.cr-dbtns { flex: 1 1 100%; display: flex; gap: 8px; min-width: 0; }
+.st-dock.cr-dock { flex-wrap: nowrap; gap: 6px; padding-left: 8px; padding-right: 8px; } /* 📱 #56 한 줄 (하트 작게 · 공격 · 서술형) */
+.st-dock.cr-dock .dock-tries { flex: none !important; padding: 4px 6px; gap: 3px; } .st-dock.cr-dock .dock-tries .dt-l { display: none; } .st-dock.cr-dock .ch { width: 13px; height: 12px; } .st-dock.cr-dock .dock-tries .dt-n { font-size: 15px; }
+.cr-dbtns { flex: 1 1 auto; display: flex; gap: 6px; min-width: 0; }
 .st-dock .cr-dbtns > * { flex: 1 1 0 !important; min-width: 0; width: auto; margin: 0 !important; padding: 10px 6px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2; }
 .cr-dbtns:empty { display: none; }
 .st-dock .cr-dbtns .dock-go { font-size: 16px !important; }
@@ -3022,3 +3022,23 @@ body:has(#test-bar) #screen-student.st-battle .wrap:has(.cr-dock) { padding-bott
 .fresh-box b { display: block; font-size: 20px; margin-bottom: 8px; } .fresh-box p { margin: 0; } .fresh-box .btn { margin-top: 12px; }
 .fresh-band { position: fixed; left: 8px; right: 8px; top: 8px; z-index: 9400; padding: 8px 12px; border-radius: 10px; background: #2d4f78; color: #fff; font: 700 14px var(--math, sans-serif); text-align: center; box-shadow: 0 4px 12px rgba(0, 0, 0, .35); pointer-events: none; }
 .t-old { margin: 0 0 8px; padding: 6px 10px; border-radius: 8px; background: #fff1c2; color: #6b4a00; }
+
+/* 📱 #56 소레이드 학생 폰 배치 1단계 (2026-11-10): 문제 푸는 동안(cr-q) 장면 = 얇은 띠 · 공격 순간(cr-big)만 크게 · 고르는 칸이 먼저 자리 */
+.cr-scw { position: relative; }
+#screen-student.st-battle .ch-wrap.cr-q:not(.cr-big) .scene.enc { height: 104px; min-height: 104px; margin-bottom: 4px; }
+.ch-wrap.cr-q:not(.cr-big) .scene .sc-stage { display: none; }
+.ch-wrap.cr-q:not(.cr-big) .scene .sc-hp { top: 8px; left: 52px; right: 116px; padding: 3px 6px 4px; }
+#screen-student.st-battle .ch-wrap.cr-q:not(.cr-big) .enc-hero { bottom: 2px; left: 14%; } #screen-student.st-battle .ch-wrap.cr-q:not(.cr-big) .enc-hero .art { width: 54px; height: 54px; }
+.ch-wrap.cr-q:not(.cr-big) .enc-hero .sc-plate { display: none; }
+#screen-student.st-battle .ch-wrap.cr-q:not(.cr-big) .enc-mon { width: 76px; bottom: 0; right: 12%; }
+.cr-scw .cr-cheer { position: absolute; left: 50%; bottom: 6px; transform: translateX(-50%); z-index: 8; margin: 0 !important; padding: 2px 10px; border-radius: 8px; background: rgba(42, 26, 6, .86); font-size: 12px; white-space: nowrap; }
+.ch-wrap.cr-q .cr-chips { margin: 0 0 4px; flex: none; }
+.ch-wrap.cr-q .cr-prob, .ch-wrap.cr-q .cr-story { flex: none; margin: 0 0 4px; }
+.ch-wrap.cr-q .cr-prob:not([open]) summary { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cr-story { position: relative; } .cr-story .cr-sf { position: absolute; right: 8px; top: 6px; padding: 1px 8px; font-size: 12px; border-radius: 8px; border: 1px solid #b8873a; background: #fff3d6; color: #6b4a14; }
+.cr-story.cr-fold ol li:not(:last-child) { display: none; } .cr-story.cr-fold { padding-top: 6px; padding-bottom: 6px; }
+.ch-wrap.cr-q .paper-h small { display: none; } .ch-wrap.cr-q .paper-h b { font-size: 16px; }
+.ch-wrap .paper .choice { min-height: 46px; }
+.ch-wrap.cr-q:not(.cr-big) .scene .sc-gem { display: none; } .ch-wrap.cr-q:not(.cr-big) .scene .sc-hp { right: 52px; } /* 📱 #56 띠에선 💎 숨김 (HP 와 겹침) */
+.cr-story.cr-fold ol li { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .cr-story.cr-fold ol { margin-top: 2px; margin-bottom: 0; } /* 📱 #56 접힌 풀이 = 한 줄 */
+.ch-wrap.cr-q .paper { padding-top: 8px; padding-bottom: 8px; } .ch-wrap.cr-q .paper .item { padding-top: 6px !important; padding-bottom: 6px !important; }
