@@ -46,6 +46,7 @@ DS.Camp = (function () {
     if (DS.Survey && !m.test) DS.Survey.watch(m, () => svDraw());
     if (riftStop) riftStop(); riftStop = m.test ? null : DS.Net.watch(`rift/${ck(m.c)}`, (v) => { const had = !!riftNow(); rifts = v || {}; if (document.getElementById('camp-gate')) drawGate(); if (!had && riftNow() && !(live && live.open)) DS.UI.toast(`⏳ ${riftNow().no}차시 이어하기 포털이 열렸어요! 오른쪽 문에서 남은 문제를 마저 해요`, 4200); });
     if (code0) setTimeout(codeGate, 300); // QR 로 들어왔으면 코드 창을 바로
+    if (DS.Mail && DS.Mail.noticePop && !code0) setTimeout(() => DS.Mail.noticePop(m, { ok: () => document.getElementById('screen-camp').classList.contains('active') && ![...document.querySelectorAll('.modal:not(.nt-pop)')].some((e) => !e.hidden && getComputedStyle(e).display !== 'none'), openMail: () => { const z = document.getElementById('camp-mail'); if (z) z.click(); else DS.Mail.open(m); } }).catch(() => {}), 900); // 📢 #61 안 읽은 공지 팝업 = 캠프 📮 와 같은 창
   }
   const D = () => DS.ASSETS.dungeons;
   // 📝 수업 설문 (v0.9.8.2): 선생님이 우리 반 설문을 열었고 아직 안 했으면 아래 칸에 버튼 (수업 대기실에서 못 한 학생도 여기서)

@@ -14,6 +14,10 @@ DS.Mail = (() => {
   const seenKey = (m) => `citadel-mail-seen-${ck(m.c)}-${m.n}`;
   const seenGet = (m) => { try { return Number(localStorage.getItem(seenKey(m))) || 0; } catch (e) { return 0; } };
   const seenSet = (m, t) => { try { localStorage.setItem(seenKey(m), String(t)); } catch (e) { /* 이 기기만 */ } };
+  // 📢 #61 공지 팝업: 마지막으로 본 공지 시각 (우편함을 열었으면 그때까지도 본 것)
+  const ntKey = (m) => `citadel-notice-seen-${ck(m.c)}-${m.n}`;
+  const ntGet = (m) => { try { return Math.max(Number(localStorage.getItem(ntKey(m))) || 0, seenGet(m)); } catch (e) { return seenGet(m); } };
+  const ntSet = (m, t) => { try { localStorage.setItem(ntKey(m), String(t)); } catch (e) { /* 이 기기만 */ } };
   const giftOn = async (c) => (await N().get(`gcfg/giftOn/${ck(c)}`).catch(() => null)) === true;
 
   // 받은 소식 목록 (최근 순)
@@ -87,6 +91,33 @@ DS.Mail = (() => {
     };
     await draw();
   }
+  // 📢 #61 공지 팝업 (캠프 · 대기실에 들어올 때 · 안 읽은 공지만 · 선물 · 답장은 띄우지 않음)
+  //   「📮 우편함 열기」 = 캠프 📮 와 같은 창 · 두 단추 모두 그 공지까지 본 것으로
+  let popBusy = false;
+  async function noticeUnread(m) {
+    if (!m || m.teacher || m.c == null || !m.n) return [];
+    const nt = (await N().get(`notice/${ck(m.c)}`).catch(() => null)) || {}, s = ntGet(m);
+    return Object.values(nt).filter((x) => x && x.t && (Number(x.at) || 0) > s).sort((a, b) => (Number(b.at) || 0) - (Number(a.at) || 0));
+  }
+  async function noticePop(m, opt = {}) {
+    if (popBusy || document.querySelector('.nt-pop')) return false;
+    popBusy = true;
+    try {
+      const list = await noticeUnread(m);
+      if (!list.length || (opt.ok && !opt.ok())) return false;
+      const top = list[0], until = Number(top.at) || Date.now();
+      const el = document.createElement('div'); el.className = 'modal camp-modal nt-pop'; document.body.appendChild(el);
+      el.innerHTML = `<div class="quiz-box framed rs-box nt-box"><div class="quiz-head"><b>📢 선생님 공지</b></div>
+        ${list.length > 1 ? `<p class="nt-n">새 공지 ${list.length}개</p>` : ''}<p class="nt-t">${esc(top.t)}</p><p class="muted small">${md(top.at)}</p>
+        <div class="nt-btns"><button class="btn primary" id="nt-mail">📮 우편함 열기</button><button class="btn" id="nt-x">닫기</button></div></div>`;
+      const done = () => { ntSet(m, until); el.remove(); };
+      el.querySelector('#nt-x').onclick = done;
+      if (DS.UI.frame) DS.UI.frame(el); el.querySelector('#nt-x').classList.remove('ui-x-src'); // 🪟 창 공통 틀(✕ · 바깥 누르면 닫힘) + 아래 「닫기」 도 보이게 (#61 확정 두 단추)
+      el.querySelector('#nt-mail').onclick = () => { done(); if (opt.openMail) opt.openMail(); else DS.Control.run(() => open(m)); };
+      return true;
+    } finally { popBusy = false; }
+  }
+  const noticeClose = () => document.querySelectorAll('.nt-pop').forEach((e) => e.remove());
   // 🎁 친구 선물 창
   async function giftDlg(m, done) {
     const masks = (await N().get(`rosterMask/${ck(m.c)}`).catch(() => null)) || {};
@@ -150,5 +181,5 @@ DS.Mail = (() => {
     };
     await draw();
   }
-  return { GIFT, inbox, unread, claim, send, open, giftDlg, notice, noticeAll, reply, setGift, giftOn, giftLog, teacher };
+  return { GIFT, inbox, unread, claim, send, open, giftDlg, notice, noticeAll, noticeUnread, noticePop, noticeClose, reply, setGift, giftOn, giftLog, teacher };
 })();

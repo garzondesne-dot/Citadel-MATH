@@ -18,12 +18,12 @@ DS.Student = (function () {
 
   let info0 = null, focusWas = false, cleared0 = false, locked = false;
   let heroFx = null, heroFxT = null, heroBack = ['idle', 'huff']; // v2 용사 잠깐 동작 (힐 받음 · 힐 쓰기) · 끝나면 돌아갈 자세
-  let test = null;
+  let test = null; let ntAsked = ''; // 📢 #61 이 수업 대기실에서 공지 팝업을 물었나
   const real = () => true; // 🧪 #47 (2026-11-09 선생님 「테스트 모드 = 학생과 같은 과정」): 테스트 · 체험판도 학생과 같은 길 (💎 · EXP · 기록 · 필살기 · 상자) — 기록은 테스트 저장소(이 기기 · 시작마다 비움) · 체험판은 메모리
   async function enter(c, info, opt = {}) {
     if (DS.Fresh && !(await DS.Fresh.gate())) return; // 🔄 #55 ② 옛 판이면 입장 잠금 → 새 판으로 바꾼 뒤 (다시 이 수업으로 들어옴)
     test = opt.test || null;
-    cleared0 = false; resulted = false; drawn = ''; shown = ''; form = null; retrying = ''; bossSet = 1; othersSeen = {};
+    cleared0 = false; resulted = false; drawn = ''; shown = ''; ntAsked = ''; form = null; retrying = ''; bossSet = 1; othersSeen = {};
     an = null; thSeen = null; phaseWas = 0; chestDone = {}; chestQ = []; chestBusy = false; batPaid = ''; endPaid = ''; // v0.9.11
     if (DS.Gem && info && info.cls != null && info.num) { const gd = await DS.Gem.mine({ c: info.cls, n: info.num }).catch(() => null); if (gd && gd.enh) info.enh = Number(gd.enh); } // 🔨 강화 단계 → 교실 TV 이름표 · 빛
     await DS.Act.join(c, info);
@@ -206,6 +206,7 @@ DS.Student = (function () {
     const body = $('#st-body');
     const st0 = Raid().stepOf(L, R);
     if (!st0 || st0.kind !== 'monster') drawn = '';
+    { const lob = Raid().isLobby(R) || (myP().lobby && (R.active || {})[me]); if (DS.Mail && DS.Mail.noticePop) { if (lob) { if (ntAsked !== code) { ntAsked = code; const m0 = acc(); DS.Mail.noticePop(m0, { ok: () => !!R && (Raid().isLobby(R) || !!myP().lobby) && document.getElementById('screen-student').classList.contains('active') }).catch(() => {}); } } else DS.Mail.noticeClose(); } } // 📢 #61 대기실에 들어올 때 안 읽은 공지 한 번 · 문제 · 레이드 화면에선 닫음
     if (Raid().isLobby(R)) return lobbyView(body, false);
     if (Raid().restOn(R)) return DS.Fun && DS.Fun.on(R) ? DS.Fun.phone(body, R, me, code) : restView(body); // 🏕 쉼터: 쓰던 답(form)은 그대로 두고 장면만
     if (!(R.active || {})[me]) { body.innerHTML = '<div class="panel framed center"><p>⏳ 늦게 들어왔어요 — <b>다음 몬스터부터</b> 함께해요!</p><p class="muted small">잠시 뒤에도 그대로면 선생님께 말씀드려요 (선생님 폰이나 큰 화면이 켜져 있어야 들어가져요)</p></div>'; return; }

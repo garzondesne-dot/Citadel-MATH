@@ -3073,3 +3073,11 @@ body:has(#test-bar) #screen-student.st-battle .wrap:has(.cr-dock) { padding-bott
 .sv-ack b { color: #ff9a3c; } .sv-ack.on { border-style: solid; border-color: #6fe3a5; background: #12301f; color: #d8ffe8; } .sv-ack.on b { color: #6fe3a5; }
 .sv-ack.nope { animation: svNope .4s; } @keyframes svNope { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
 .sv-a.sv-lock { opacity: .4; filter: grayscale(.6); }
+/* 📢 #61 공지 팝업 · 교사 「모든 반에 보내기」 */
+.nt-pop { z-index: 70; }
+.nt-box { max-width: 360px; }
+.nt-box .nt-n { margin: 6px 0 0; color: var(--gold, #f5c542); font-weight: 700; font-size: 14px; }
+.nt-box .nt-t { margin: 10px 0 4px; font-size: 17px; line-height: 1.5; white-space: pre-wrap; word-break: keep-all; }
+.nt-btns { display: flex; gap: 8px; margin-top: 12px; } .nt-btns .btn { flex: 1; margin: 0 !important; }
+.tm-sendrow { display: flex; gap: 8px; flex-wrap: wrap; } .tm-sendrow .btn { flex: 1; }
+.tm-all { color: var(--gold, #f5c542); font-size: 12px; border: 1px solid currentColor; border-radius: 6px; padding: 0 4px; }

@@ -27,6 +27,8 @@ DS.Test = (function () {
     else { try { prep = (await DS.Net.get(`prep/${lessonId}`)) || {}; } catch (e) { prep = {}; } }
     let photoCfg = null, photoRub = null; // 📷 #47 사진 채점 설정 · 기준표도 실제 서버에서 읽어 테스트 저장소에 (채점은 진짜 중계소)
     if (!trial && !demo) { try { [photoCfg, photoRub] = await Promise.all([DS.Net.get('gcfg/photo'), DS.Net.get('photo_rubric')]); } catch (e) { /* 없음 */ } }
+    let ntCopy = null; // 📢 #61 테스트도 학생과 같은 길: 실제 공지 중 가장 최근 것(모든 반 중) → 테스트 반 공지로 (팝업 · 우편함 확인)
+    if (!trial && !demo) { try { const all = (await DS.Net.get('notice')) || {}, by = {}; Object.values(all).forEach((c) => Object.entries(c || {}).forEach(([id, x]) => { if (x && x.t) by[id] = x; })); const top = Object.entries(by).sort((a, b) => (Number(b[1].at) || 0) - (Number(a[1].at) || 0))[0]; if (top) ntCopy = { [top[0]]: top[1] }; } catch (e) { /* 없음 */ } }
     // 2) 이 기기 안의 테스트 저장소로 바꿔 끼움 (실제 수업 · 계정에는 손대지 않음)
     real = DS.Net.impl;
     local = DS.Net.LocalNet('citadel-test-db');
@@ -34,6 +36,7 @@ DS.Test = (function () {
     local.wipe();
     await local.init(); local.setUid('test-teacher');
     if (trial && prep && typeof prep === 'object') await local.set(`prep/${lessonId}`, prep).catch(() => {});
+    if (ntCopy) await local.set(`notice/${CLS0}`, ntCopy).catch(() => {});
     if (photoCfg) await local.set('gcfg/photo', photoCfg).catch(() => {}); if (photoRub) await local.set('photo_rubric', photoRub).catch(() => {}); if (DS.Photo && DS.Photo.load) DS.Photo.load(true).catch(() => {}); // 👩‍🏫 체험판: 위 TV(종합상황실)도 학습지 그림 · 영상을 읽게 (메모리 저장소라 용량 걱정 없음 · 교사 테스트는 localStorage 라 넣지 않음)
     look = demo ? { hero: demo.hero ?? 16, fx: demo.fx || 'flame' } : { hero: 0, fx: 'flame' };
     if (trial) { // 👩‍🏫 메모리 저장소 안에 진짜 학생 계정 하나 (기록 · 💎 · EXP · 오답노트 · 성채가 실제처럼 · 탭을 닫으면 사라짐)
