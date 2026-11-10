@@ -14,7 +14,7 @@ const U = 'http://localhost:8765/index.html?local';
     for (const id of ids) {
       await p.evaluate((i) => { window.__errs = []; document.querySelector(`[data-fight="${i}"]`).click(); }, id); await p.waitForTimeout(500);
       const go = p.locator('#bf-go'); if (await go.count()) { await go.click(); await p.waitForTimeout(600); }
-      const st = await p.evaluate(() => ({ quiz: !document.getElementById('quiz').classList.contains('hidden') && document.getElementById('quiz-q').textContent.trim().length > 0, err: (window.__errs || []).join(' / ') }));
+      const st = await p.evaluate(() => ({ quiz: (!document.getElementById('quiz').classList.contains('hidden') && document.getElementById('quiz-q').textContent.trim().length > 0) || document.querySelectorAll('.bn-fight .bf-paper .item').length > 0 || !!document.querySelector('.bn-fight .cr-q, .bn-fight .ch-wrap'), /* 🧩 A안: 일반 방 = 한 장(양피지) */ err: (window.__errs || []).join(' / ') }));
       n++; if (!st.quiz || st.err) bad.push(`${train ? '허수아비' : '보강'} ${id}: ${st.quiz ? '' : '문제 창 없음 '}${st.err}`);
       await p.evaluate(() => { document.getElementById('quiz').classList.add('hidden'); document.querySelectorAll('.bn-fight, .modal:not(#quiz)').forEach((e) => e.remove()); });
       await p.evaluate((t) => DS.Bonus.enter({ c: '교사', n: 0, name: '선생님', hero: 0, fx: 'flame', preview: true }, { preview: true, train: t, no: 99 }), train); await p.waitForTimeout(400);
