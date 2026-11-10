@@ -286,7 +286,7 @@
 
 ## 📄 9차시 (2026-11-10 #66) — `lessons/set-09.js` (#64 꼴 첫 차시)
 - 순서 intro · c1 · cp1(➕ 사각형) · m1 · m2 · c2 · m3 · c3 · m4 · cp2(➕ 수) · m5(⚔ 소레이드) · boss · 시험 `tests/lesson9.test.js` (문제 글을 읽어 독립 판정) · e2e100.
-- m4 봉인 석상 = 그림 오기 전 `keyvault:2@h200` 임시 → m09-04 그림이 오면 `monsters-keyvault` 3번 줄을 채우고 `sprite: 'keyvault:3'`.
+- m4 봉인 석상 = `keyvault:3` (2026-11-10 그림 넣음 · `monsters-keyvault-v2.webp` · 대기 칸에 공격 빛 조각이 들어가지 않게 칸 나누기 650 · 1400).
 - 영상 43 · 44 · 45 = 모션 방 주문 중 → `DATA.videos` 에 연결 (c1 · m1 · m2 = 43 · c2 · c3 · m3 · m4 · m5 = 44 · cp1 · cp2 = 45).
 - 📸 기준표 `rubrics.js set-09/m5` (raid · on) → Firebase `photo_rubric` 은 교사 「기준표 올리기」.
 

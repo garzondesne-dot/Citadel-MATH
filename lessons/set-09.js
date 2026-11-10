@@ -34,7 +34,7 @@
         book: { gen: 'truthCounter', a: 1, s: 0, c: 6 }, retry: { gen: 'truthCounter', a: [2, 3, 4, 5], s: [1, 2, 3], c: [3, 4, 5, 7] } },
       m3: { title: '문제 3 · 역과 대우', sprite: 'keyvault:1' /* 열쇠 유령 */, note: '역 = 앞뒤만 바꿈 · 대우 = 앞뒤를 바꾸고 둘 다 부정',
         book: { gen: 'convContra', rows: [0, 1] }, retry: { gen: 'convContra', from: 2 } },
-      m4: { title: '문제 4 · 대우로 참 · 거짓', sprite: 'keyvault:2@h200' /* 봉인 석상 그림 오기 전 임시 = 사슬 기사 색 변형 → 오면 keyvault:3 */, note: '명제와 그 대우는 참 · 거짓이 같아요',
+      m4: { title: '문제 4 · 대우로 참 · 거짓', sprite: 'keyvault:3' /* 봉인 석상 (2026-11-10 그림 넣음) */, note: '명제와 그 대우는 참 · 거짓이 같아요',
         book: { gen: 'multContra', k: 4, m: 2 }, retry: { gen: 'multContra', pairs: [[6, 3], [6, 4], [9, 3], [8, 4], [10, 5], [4, 8], [12, 6], [6, 9]] } },
       m5: { title: '문제 5 · 역과 대우 (중단원)', sprite: 'keyvault:4' /* 뒤집개 박쥐 */, evalQ: true, chain: true, note: '역 · 대우를 하나씩 · 반례는 모두 골라요',
         book: { gen: 'numSets', row: 0 }, retry: { gen: 'numSets', from: 1 } },

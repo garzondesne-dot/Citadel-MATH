@@ -78,7 +78,7 @@ DS.ASSETS = {
   monstersMirrorBoss8: { src: 'monsters-mirrorboss-v3.webp', cols: 3, rows: 1, poses: { idle: 0, attack: 1, down: 2 }, names: ['부정의 수정 여왕'] }, // 👑 8차시 보스 (2026-11-08 선생님 그림 · 하늘색 기준선 지움 · demagenta + cut_grid 384) — 'mirrorboss8:0' · 대우의 거울 마왕(monstersMirrorBoss)은 10차시용
   // 9차시 🔑 열쇠와 자물쇠의 묘실 (2026-11-10 · 선생님 그림 · 에셋 작업대 m09-01~05 · b09-01 · demagenta + 하늘색 기준선 · 칸 선 지움 + cut_grid · 칸 192 · 보스 384): 'keyvault:번호' · 보스 'keyvaultboss:0'
   //   3번(봉인 석상 m09-04)은 그림이 아직 없어 빈 줄 · 열쇠 유령 쓰러짐 칸은 받은 그림의 흐린 분홍이 배경과 함께 지워져 대기 모습을 흐리게 가라앉혀 만듦
-  monstersKeyvault: { src: 'monsters-keyvault-v1.webp', cols: 3, rows: 5, poses: { idle: 0, attack: 1, down: 2 }, names: ['자물쇠 미믹', '열쇠 유령', '사슬 기사', '봉인 석상', '뒤집개 박쥐'] },
+  monstersKeyvault: { src: 'monsters-keyvault-v2.webp', cols: 3, rows: 5, poses: { idle: 0, attack: 1, down: 2 }, names: ['자물쇠 미믹', '열쇠 유령', '사슬 기사', '봉인 석상', '뒤집개 박쥐'] },
   monstersKeyvaultBoss: { src: 'monsters-keyvaultboss-v1.webp', cols: 3, rows: 1, poses: { idle: 0, attack: 1, down: 2 }, names: ['역과 대우의 문지기'] },
   // 10차시 ⚖ 저울의 공중 정원 (2026-11-10 · m10-01~04 · 칸 192): 'garden:번호' (m10-01~05) · 보스 b10-01 = 'gardenboss:0' (칸 384)
   monstersGarden: { src: 'monsters-skygarden-v2.webp', cols: 3, rows: 5, poses: { idle: 0, attack: 1, down: 2 }, names: ['천칭 가고일', '필요 덩굴', '충분 나비', '쌍둥이 구름 정령', '거울 웅덩이 두꺼비'] },
