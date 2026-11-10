@@ -21,7 +21,7 @@ rows.forEach(([sym, easy, def, memo], i) => { const r = S.ROWS[i] || {};
 // ①-3 명제 단원 (#62): SYMBOL-TALK 「명제 단원」 표 그대로 (쪽 8x) · 붙는 곳
 { const sec8 = md.slice(md.indexOf('## 명제 단원'), md.indexOf('### 9차시')); const pr = sec8.split('\n').filter((l) => /^\| .* \| 8\d \|$/.test(l)) /* 8차시 표만 (9차시 = #66) */.map((l) => l.split('|').slice(1, -1).map((c) => c.trim().replace(/\*\*/g, '')));
   const ids = ['neg', 'prop', 'cond', 'truth'];
-  check(pr.length === 4 && S.PROP.length === 4 && S.PROP.map((r) => r.id).join() === ids.join(), `명제 4줄 (문서 ${pr.length} · 코드 ${S.PROP.length})`);
+  check(pr.length === 4 && S.PROP.length === 8 && S.PROP.slice(0, 4).map((r) => r.id).join() === ids.join(), `명제 4줄 (문서 ${pr.length} · 코드 ${S.PROP.length})`);
   pr.forEach(([, easy, def, memo], i) => { const r = S.PROP[i] || {};
     check(r.easy === easy, `${r.id} ① 「${r.easy}」 = 「${easy}」`); check(r.def === def, `${r.id} ② 「${r.def}」 = 「${def}」`); check(r.memo === memo, `${r.id} ③ 「${r.memo}」 = 「${memo}」`); });
   const H = (t, w) => S.propHits(t, w).map((h) => `${t.substr(h.i, h.len)}:${h.id}`).join(' ');
@@ -30,6 +30,15 @@ rows.forEach(([sym, easy, def, memo], i) => { const r = S.ROWS[i] || {};
   check(H('조건제시법으로 나타내면') === '', '「조건제시법」 은 안 붙음');
   check(H('Pᶜ = {2, 4}', '진리집합') === 'P:truth' && H('Pᶜ = {2, 4}', '집합 P') === '' && H('APB') === '', 'P = 「진리집합」 낱말이 같은 문제 글에 있을 때만');
   check(H('다음 중 명제인 것은?') === '명제:prop', '「명제」 낱말'); }
+// ①-4 9차시 (#66): SYMBOL-TALK 「9차시」 표 그대로 · p → q · 반례 · 역 · 대우
+{ const sec9 = md.slice(md.indexOf('### 9차시'), md.indexOf('## 개념 톡')), pr = sec9.split('\n').filter((l) => /^\| .* \| 8\d \|$/.test(l)).map((l) => l.split('|').slice(1, -1).map((c) => c.trim().replace(/\*\*/g, '')));
+  const P9 = S.PROP.slice(4), ids = ['imp', 'counter', 'conv', 'contra'];
+  check(pr.length === 4 && P9.map((r) => r.id).join() === ids.join(), `9차시 4줄 (문서 ${pr.length} · 코드 ${P9.map((r) => r.id)})`);
+  pr.forEach(([, easy, def, memo], i) => { const r = P9[i] || {}; check(r.easy === easy, `${r.id} ① 「${r.easy}」 = 「${easy}」`); check(r.def === def, `${r.id} ② 「${r.def}」 = 「${def}」`); check(r.memo === memo, `${r.id} ③ 「${r.memo}」 = 「${memo}」`); });
+  const H = (t) => S.propHits(t).map((h) => `${t.substr(h.i, h.len)}:${h.id}`).join(' ');
+  check(H('명제 p → q 의 역은 q → p') === '명제:prop →:imp 역:conv →:imp', `p → q · 역 (${H('명제 p → q 의 역은 q → p')})`);
+  check(H('대우 ~q → ~p') === '대우:contra ~:neg →:imp ~:neg' && H('반례를 모두 고르시오') === '반례:counter', '대우 · 반례');
+  check(H('역사는 지역') === '' && H('x² = 4 → x = 2') === '', '「역사 · 지역」 · 식 사이 → 는 안 붙음'); }
 // ② 문맥 (요청 #54 예: 「A ∩ B = ∅」 → 서로소 · 「n(A ∪ B)」 → 개수 공식 · 「Aᶜ」 → 여집합 · 「A − B」 → 차집합 · 「a ∈ A」 → 속한다)
 const at = (t, ch, k = 0) => { let i = -1; for (let j = 0; j <= k; j++) i = t.indexOf(ch, i + 1); return S.pick(t, i); };
 const T = [

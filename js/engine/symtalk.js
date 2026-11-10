@@ -36,14 +36,20 @@ DS.SymTalk = (function () {
     { id: 'prop', sym: '명제', easy: '참 · 거짓이 딱 정해지는 말', def: '참 또는 거짓을 명확하게 판별할 수 있는 문장이나 식', memo: '「아름답다」 · 「높다」처럼 기준이 사람마다 다르면 명제가 아님' },
     { id: 'cond', sym: '조건', easy: 'x가 정해져야 참 · 거짓이 정해지는 말', def: '변수의 값에 따라 참, 거짓을 판별할 수 있는 문장이나 식', memo: '「x는 3의 배수」 → x = 6이면 참, x = 5이면 거짓' },
     { id: 'truth', sym: '진리집합 P', easy: 'U에서 조건을 통과한 것만 모은 집합', def: '전체집합 U의 원소 중 조건 p를 참이 되게 하는 모든 원소의 집합', memo: 'U가 바뀌면 진리집합도 바뀜(x² = 4 → 자연수면 {2}, 정수면 {−2, 2}) · ~p의 진리집합 = Pᶜ' },
+    // 9차시 (#66 · SYMBOL-TALK 「9차시」 표 그대로)
+    { id: 'imp', sym: 'p → q', easy: 'p이면 q (p일 때 꼭 q)', def: '명제 「p이면 q이다」를 기호로 나타낸 것 · p = 가정, q = 결론', memo: 'P ⊂ Q이면 참 · 하나라도 어긋나면 거짓' },
+    { id: 'counter', sym: '반례', easy: '「아닌데?」 하나면 끝', def: '명제가 거짓임을 보이는 예', memo: '「소수는 홀수」 → 2' },
+    { id: 'conv', sym: '역', easy: '앞뒤를 바꾼 말', def: 'p → q의 가정과 결론을 서로 바꾼 명제 q → p', memo: '원래가 참이어도 역은 거짓일 수 있음' },
+    { id: 'contra', sym: '대우', easy: '앞뒤를 바꾸고 둘 다 뒤집은 말', def: 'p → q의 가정과 결론을 각각 부정하여 서로 바꾼 명제 ~q → ~p', memo: '원래 명제와 참 · 거짓이 같음' },
   ];
   const BY = Object.fromEntries([...ROWS, ...CONCEPTS, ...PROP].map((r) => [r.id, r]));
+  const WORDY = new Set(['prop', 'cond', 'truth', 'counter', 'conv', 'contra']); // 낱말 톡 = 보기 단추 안엔 안 붙임 (고르기를 막지 않게) · ~ · → 기호는 붙임
   const propOn = () => { const id = ctx && ctx.lesson; if (!id) return false; if (id === 'eval-2') return true; const L = DS.Lessons && DS.Lessons.get && DS.Lessons.get(id); return !!(L && !L.eval && Number(L.no) >= 8); };
   // 명제 낱말 · 기호 찾기: text 한 줄 · whole = 문제 글 전체 → [{ i, len, id }]
   function propHits(t, whole) {
-    const out = [], re = /~(?=\s*[pqr](?![A-Za-z]))|진리집합|명제|조건(?!제시)|(?<![A-Za-z])P(?![A-Za-z])/g; let m;
+    const out = [], re = /~(?=\s*[pqr](?![A-Za-z]))|(?<=~?[pqr] )→(?= ~?[pqr](?![A-Za-z]))|반례|(?<![가-힣])대우(?=[은는이가를와의도]|[\s」:.,]|$)|(?<![가-힣])역(?=[은는이을과의도]|[\s」:.,]|$)|진리집합|명제|조건(?!제시)|(?<![A-Za-z])P(?![A-Za-z])/g; let m;
     const tp = /진리집합/.test(whole || t);
-    while ((m = re.exec(t))) { const w = m[0]; const id = w === '~' ? 'neg' : w === '명제' ? 'prop' : w === '조건' ? 'cond' : 'truth'; if (w === 'P' && !tp) continue; out.push({ i: m.index, len: w.length, id }); }
+    while ((m = re.exec(t))) { const w = m[0]; const id = w === '~' ? 'neg' : w === '→' ? 'imp' : w === '반례' ? 'counter' : w === '역' ? 'conv' : w === '대우' ? 'contra' : w === '명제' ? 'prop' : w === '조건' ? 'cond' : 'truth'; if (w === 'P' && !tp) continue; out.push({ i: m.index, len: w.length, id }); }
     return out;
   }
   const esc = (s) => (DS.UI ? DS.UI.esc(s) : String(s));
@@ -113,7 +119,7 @@ DS.SymTalk = (function () {
         if (at.sup) { if (at.sup.closest('.sym-t') || at.sup.closest(SKIP)) return; const w = document.createElement('span'); w.className = 'sym-t'; w.dataset.st = h.id; at.sup.replaceWith(w); w.appendChild(at.sup); return; }
         if (!at.node.parentNode || (at.node.parentElement && at.node.parentElement.closest(SKIP))) return;
         const len = h.len || 1, last = map[h.i + len - 1]; if (!last || last.node !== at.node) return; // 낱말이 두 칸에 걸치면 건너뜀
-        if (len > 1 && at.node.parentElement && at.node.parentElement.closest('button, .choice, label')) return; // #62 명제 낱말은 보기 단추 안엔 안 붙임 (「명제 · 참」 보기마다 있어 고르기를 막음 · ~ 기호는 붙임)
+        if (WORDY.has(h.id) && at.node.parentElement && at.node.parentElement.closest('button, .choice, label')) return; // #62 명제 낱말은 보기 단추 안엔 안 붙임 (「명제 · 참」 보기마다 있어 고르기를 막음 · ~ 기호는 붙임)
         const tail = at.node.splitText(at.off), rest = tail.splitText(len), w = document.createElement('span'); w.className = 'sym-t'; w.dataset.st = h.id;
         tail.replaceWith(w); w.appendChild(tail); void rest;
       });
