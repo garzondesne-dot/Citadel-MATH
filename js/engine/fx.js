@@ -47,7 +47,12 @@ DS.FX = (function () {
   const AFFINITY = { 0: 'cut', 16: 'cut', 3: 'wind', 6: 'smash', 9: 'smash', 5: 'sweep', 10: 'sweep', 13: 'sweep', 2: 'wind', 7: 'fire', 12: 'fire', 11: 'spark', 14: 'frost', 15: 'frost', 4: 'star', 8: 'star', 1: 'magic', 17: 'magic', 18: 'cut', 19: 'math', 20: 'math', 21: 'smash', 22: 'spark', 23: 'fire', 24: 'spark', 25: 'magic', 26: 'wind', 27: 'magic', 28: 'frost', 29: 'star', 30: 'spark', 31: 'sweep', 32: 'fire', 33: 'star' }; // 2026-11-07 새 용사: 흑기사 ⚔ · 수식 책사 남 · 여 📐 · 메카닉 🔨 · 해커 ⚡ · 용기사 🔥
   const affOf = (hero) => FAMS.find((f) => f.id === AFFINITY[Number(hero)]) || FAMS[0];
   const crystalOf = (hero, socket) => { const k = (socket || {})[Number(hero)]; return KINDS.includes(k) ? k : affOf(hero).ids[0]; }; // 빈 칸 = 친화 계열 Ⅰ
-  const resonates = (hero, k) => { const f = famOf(k); return !!f && f.id === AFFINITY[Number(hero)]; };
+  // 🤝 #74-1 공통 특화 (2026-11-11 HERO-ATTR 4절): 근접 = ⚔ 베기 · 원거리 = 🔮 마법 — 자기 속성 + 공통 특화 두 가지와 공명 (효과 같음 · 연출만)
+  const COMMON = { melee: 'cut', ranged: 'magic' };
+  const commonOf = (hero) => ((((window.DS || {}).ASSETS || {}).ranged || {})[Number(hero)] ? COMMON.ranged : COMMON.melee);
+  const ownReso = (hero, k) => { const f = famOf(k); return !!f && f.id === AFFINITY[Number(hero)]; };
+  const commonReso = (hero, k) => { const f = famOf(k); return !!f && f.id === commonOf(hero) && f.id !== AFFINITY[Number(hero)]; };
+  const resonates = (hero, k) => ownReso(hero, k) || commonReso(hero, k);
   const tierOf = (k) => { const f = famOf(k); return f ? f.ids.indexOf(k) : ACHV.includes(k) ? 's' : -1; };
   // 잠긴 이펙트를 가진 계정은 같은 계열 Ⅰ 로 (해금되면 그대로 씀)
   const BASE_OF = Object.fromEntries(KINDS.map((k) => [k, (famOf(k) || { ids: ['twinkle'] }).ids[0]]));
@@ -132,5 +137,5 @@ DS.FX = (function () {
     const drawIt = () => { g.clearRect(0, 0, cv.width, cv.height); g.imageSmoothingEnabled = false; const k = Math.min(cv.width / sp.w, cv.height / sp.h); g.drawImage(im, i * sp.w, 0, sp.w, sp.h, (cv.width - sp.w * k) / 2, (cv.height - sp.h * k) / 2, sp.w * k, sp.h * k); };
     if (im.complete && im.naturalWidth) drawIt(); else im.addEventListener('load', drawIt, { once: true });
   }
-  return { q4, place, modeOf, GROUND, SHOT, FAMS, TIER_NAMES, TIER_SCALE, AFFINITY, affOf, crystalOf, resonates, KINDS, BASE, SKILL, FANCY, LEGEND, ACHV, NAMES, BASE_OF, famOf, tierOf, usable, spec, strip, play, still, preload, load };
+  return { q4, place, modeOf, GROUND, SHOT, FAMS, TIER_NAMES, TIER_SCALE, AFFINITY, affOf, crystalOf, resonates, ownReso, commonReso, commonOf, COMMON, KINDS, BASE, SKILL, FANCY, LEGEND, ACHV, NAMES, BASE_OF, famOf, tierOf, usable, spec, strip, play, still, preload, load };
 })();
