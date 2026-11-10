@@ -1,4 +1,4 @@
-// 8차시 「명제와 조건」 (2026-11-08 · 요청 #5): 교사 폰 · 학생 폰 · 종합실 — 생각 열기부터 형성평가(부정의 수정 여왕)까지 모든 단계 · 몬스터마다 정답 제출 · 오류 0
+// 8차시 「명제와 조건」 (2026-11-08 · 요청 #5): 교사 폰 · 학생 폰 · 종합실 — (v5 · #60 · 🔁 전시 확인 도입 · 몬스터 4) 도입부터 형성평가(부정의 수정 여왕)까지 모든 단계 · 몬스터마다 정답 제출 · 오류 0
 //   node tools/e2e/e2e77.js <출력 폴더>  (로컬 서버 http://localhost:8765)
 const { chromium } = require('playwright');
 const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
@@ -53,6 +53,6 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   const info = await T.evaluate(async () => { const code = DS.Teacher.code(); const R = DS.Act.unpackRoom(await DS.Net.get(`rooms/${code}`)); const L = DS.Lessons.get(R.meta.lesson); return { lesson: L.id, boss: L.boss.title, sprite: L.boss.sprite }; });
   const bossArt = await H.evaluate(() => { const a = document.querySelector('#rm .art.monster'); return a ? a.dataset.sh : null; });
   console.log('단계', seen.join(' → '), '·', JSON.stringify(info), '· 종합실 보스 그림', bossArt);
-  const ok = seen.filter((x) => /^m\d/.test(x)).join(',') === 'm1,m2,m3,m4,m5' && seen.includes('boss') && info.lesson === 'set-08' && bossArt === 'monstersMirrorBoss8';
+  const ok = seen.filter((x) => /^m\d/.test(x)).join(',') === 'm1,m2,m3,m4' && seen.includes('boss') && seen[0] === 'intro' && info.lesson === 'set-08' && bossArt === 'monstersMirrorBoss8';
   console.log(ok ? '✅ 통과' : '❌ 기대와 다름'); console.log('errors', errs.length ? errs.slice(0, 5) : 'none'); await b.close(); if (!ok || errs.length) process.exit(1);
 })();
