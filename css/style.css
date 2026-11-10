@@ -3046,3 +3046,10 @@ body:has(#test-bar) #screen-student.st-battle .wrap:has(.cr-dock) { padding-bott
 .ph-hand { margin: 6px 0; padding: 6px 10px; border-radius: 8px; background: #fff1c2; color: #5a3a00; font-size: 14px; line-height: 1.45; } /* ✍ #58 A 손글씨만 */
 /* 🐞 #57 ② 아이폰 사파리: 글자 16px 미만 입력칸을 누르면 화면이 확대되고 안 풀림 (이의 신청 칸 15px) → 아이폰에서만 입력칸 16px 이상 */
 @supports (-webkit-touch-callout: none) { textarea, .p-video input, .ph-lim input, .ph-set input[type=url], .sv-q textarea, input.sv-no { font-size: 16px !important; } }
+/* 👁 #57 ⑩ 얼굴 그림 컷인 눈빛: 두 눈 자리에서 십자 빛 + 가로 줄 (0.3초 뒤 · 둘째 눈 0.08초 늦게) */
+.ult .u-facepic .u-glint { position: absolute; width: 0; height: 0; z-index: 2; }
+.ult .u-facepic .u-glint::before, .ult .u-facepic .u-glint::after { content: ''; position: absolute; left: 0; top: 0; border-radius: 50%; background: radial-gradient(#fff 0 30%, transparent 70%); transform: translate(-50%, -50%) scale(0); opacity: 0; animation: uGlint .6s .3s ease-out forwards; }
+.ult .u-facepic .u-glint::before { width: 140px; height: 8px; border-radius: 4px; background: linear-gradient(90deg, transparent, #fff, transparent); box-shadow: 0 0 18px #fff, 0 0 32px var(--uc, #ffd25a); }
+.ult .u-facepic .u-glint::after { width: 8px; height: 70px; border-radius: 4px; background: linear-gradient(transparent, #fff, transparent); box-shadow: 0 0 14px #fff, 0 0 26px var(--uc, #ffd25a); }
+.ult .u-facepic .u-glint + .u-glint::before, .ult .u-facepic .u-glint + .u-glint::after { animation-delay: .38s; }
+@keyframes uGlint { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.2); } 35% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.6); } }

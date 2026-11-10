@@ -97,10 +97,12 @@ DS.Attack = (function () {
   let faceImg = null;
   function preloadFaces() { const F = A().heroFaces; if (!F || !F.src || faceImg || typeof Image === 'undefined') return; faceImg = new Image(); faceImg.src = A().base + F.src; }
   const faceReady = () => !!(faceImg && faceImg.complete && faceImg.naturalWidth);
+  // 👁 #57 ⑩ (2026-11-10 선생님 「원래 눈빛 하이라이트가 딱 나와야 되는데」): 얼굴 그림이면 그 용사의 두 눈 자리(manifest heroFaces.eyes)에서 번쩍
+  const eyesOf = (F, n) => { const e = (F.eyes || [])[n]; return e ? `<i class="u-glint" style="left:${e[0] * 100}%;top:${e[1] * 100}%"></i><i class="u-glint" style="left:${e[2] * 100}%;top:${e[3] * 100}%;animation-delay:.38s"></i>` : ''; };
   function faceHtml(hero) {
     const F = A().heroFaces, n = Number(hero) || 0;
     preloadFaces(); // 아직 못 받았으면 아래 확대 도트 얼굴로 (빈 띠 대신)
-    if (F && F.src && n < F.cols * F.rows && faceReady()) { const c = n % F.cols, r = Math.floor(n / F.cols); return `<i class="u-facepic" style="background-image:url('${A().base}${F.src}');background-size:${F.cols * 100}% ${F.rows * 100}%;background-position:${F.cols > 1 ? (c / (F.cols - 1)) * 100 : 0}% ${F.rows > 1 ? (r / (F.rows - 1)) * 100 : 0}%"></i>`; }
+    if (F && F.src && n < F.cols * F.rows && faceReady()) { const c = n % F.cols, r = Math.floor(n / F.cols); return `<i class="u-facepic" style="background-image:url('${A().base}${F.src}');background-size:${F.cols * 100}% ${F.rows * 100}%;background-position:${F.cols > 1 ? (c / (F.cols - 1)) * 100 : 0}% ${F.rows > 1 ? (r / (F.rows - 1)) * 100 : 0}%">${eyesOf(F, n)}</i>`; }
     return `<div class="u-face">${DS.Art.hero(hero, 'idle')}</div>`;
   }
   // opt.gold = 🌟 진필살기 (2026-11-06): 금빛 띠 · 「眞」 · 조금 더 길게
