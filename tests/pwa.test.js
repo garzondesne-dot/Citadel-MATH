@@ -6,6 +6,8 @@ const DS = require('./load')(['js/config.js']);
 const sw = read('sw.js');
 const cache = sw.match(/const CACHE = '([^']+)'/)[1];
 assert.strictEqual(cache, 'ds-' + DS.VERSION, `sw.js 캐시 이름 ${cache} ≠ ds-${DS.VERSION}`);
+assert.strictEqual(JSON.parse(read('version.json')).v, DS.VERSION, `🔄 #55 version.json 이 ${DS.VERSION} 가 아님 → 배포 때 version.json 도 같이 올릴 것 (옛 판 학생이 새 판을 못 알아챔)`);
+assert.ok(/\/version\.json'\)\) return;/.test(sw), 'sw.js 가 version.json 을 저장하면 안 됨 (늘 인터넷)');
 const list = (name) => [...sw.match(new RegExp(`const ${name} = \\[([\\s\\S]*?)\\];`))[1].matchAll(/'\.\/([^']*)'/g)].map((m) => m[1]).filter(Boolean);
 const core = list('CORE'), stat = list('STATIC');
 for (const f of [...core, ...stat]) assert.ok(fs.existsSync(path.join(root, f)), `서비스 워커 목록의 파일이 없음: ${f}`);

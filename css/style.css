@@ -3016,3 +3016,9 @@ body:has(#test-bar) #screen-student.st-battle .wrap:has(.cr-dock) { padding-bott
 .st-bub .st-more { margin-top: 6px; padding: 2px 8px; font-size: 12px; border-radius: 8px; border: 1px solid #c9a86a; background: #fff3d6; color: #6b4a14; }
 .st-bub .st-memo { display: block; margin-top: 6px; font-size: 12px; color: #6b5a40; }
 @keyframes stPop { from { transform: translateY(4px) scale(.96); opacity: 0; } }
+/* 🔄 #55 옛 판 → 새 판 (2026-11-10) */
+.fresh-cover { position: fixed; inset: 0; z-index: 9500; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(12, 10, 8, .88); }
+.fresh-box { max-width: 420px; padding: 18px 16px; border-radius: 14px; background: #fffaf0; color: #2a1d0c; border: 3px solid #b8873a; text-align: center; font: 15px/1.5 var(--math, sans-serif); }
+.fresh-box b { display: block; font-size: 20px; margin-bottom: 8px; } .fresh-box p { margin: 0; } .fresh-box .btn { margin-top: 12px; }
+.fresh-band { position: fixed; left: 8px; right: 8px; top: 8px; z-index: 9400; padding: 8px 12px; border-radius: 10px; background: #2d4f78; color: #fff; font: 700 14px var(--math, sans-serif); text-align: center; box-shadow: 0 4px 12px rgba(0, 0, 0, .35); pointer-events: none; }
+.t-old { margin: 0 0 8px; padding: 6px 10px; border-radius: 8px; background: #fff1c2; color: #6b4a00; }

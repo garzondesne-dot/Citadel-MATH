@@ -72,7 +72,7 @@ DS.Bots = (function () {
     const st = DS.Raid.stepOf(L, R);
     ids().forEach((u, i) => {
       const pp = per(i), slow = pp.slow || 1;
-      if (DS.Raid.isLobby(R) || (pp.late && !(R.players || {})[u])) later(`join|${u}`, pp.late ? pp.late * speed : 300 + i * rand(150, 450), () => N().set(P(`players/${u}`), { num: i + 2, nick: pp.nick || NICK[i % NICK.length], hero: pp.hero != null ? pp.hero : Math.floor(Math.random() * 7), fx: pp.fx || (DS.FX ? DS.FX.BASE[i % 6] : 'flame'), cls: (R.meta || {}).cls || '1-1', at: N().TS }).then(() => N().set(P(`online/${u}`), true)).then(() => { if (!DS.Raid.isLobby(R)) N().set(P(`active/${u}`), true).catch(() => {}); })); // 💤 늦게 온 친구: 들어오면 바로 함께
+      if (DS.Raid.isLobby(R) || (pp.late && !(R.players || {})[u])) later(`join|${u}`, pp.late ? pp.late * speed : 300 + i * rand(150, 450), () => N().set(P(`players/${u}`), { ver: DS.VERSION, num: i + 2, nick: pp.nick || NICK[i % NICK.length], hero: pp.hero != null ? pp.hero : Math.floor(Math.random() * 7), fx: pp.fx || (DS.FX ? DS.FX.BASE[i % 6] : 'flame'), cls: (R.meta || {}).cls || '1-1', at: N().TS }).then(() => N().set(P(`online/${u}`), true)).then(() => { if (!DS.Raid.isLobby(R)) N().set(P(`active/${u}`), true).catch(() => {}); })); // 💤 늦게 온 친구: 들어오면 바로 함께
       if (!(R.active || {})[u]) return;
       // 마무리: 대기실로 이동 → 한마디
       if (DS.Raid.isFinale(L, R) || (st && st.kind === 'boss' && DS.Raid.canLobby(L, R, u))) {

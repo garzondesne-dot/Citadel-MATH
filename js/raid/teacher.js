@@ -141,7 +141,8 @@ DS.Teacher = (function () {
   function helpPanel() {
     const list = Raid().helpList(L, R, DS.Net.now());
     const why = { 2: 'lv2', 1: 'lv1', 0: 'lv0' };
-    return `<div class="panel framed"><p class="t-help-head"><b>도움 필요 <span class="gold">${list.length}</span></b><span class="muted small">해결하면 저절로 사라져요</span></p>
+    const old = DS.Fresh ? DS.Fresh.oldIn(R, Raid().activeIds(R).filter((u) => u !== Raid().teacherUid(R))) : [], oldLine = old.length ? `<p class="t-old">🔄 옛 판 <b>${old.length}</b>명: ${old.map((o) => `${o.num}번`).join(' · ')} <span class="muted small">(새 판으로 바뀌면 저절로 사라져요 · 안 바뀌면 앱을 껐다 켜게)</span></p>` : ''; // 🔄 #55 ④
+    return `<div class="panel framed">${oldLine}<p class="t-help-head"><b>도움 필요 <span class="gold">${list.length}</span></b><span class="muted small">해결하면 저절로 사라져요</span></p>
       ${list.map((h) => `<button class="t-help ${why[h.level]}" data-help="${h.uid}"><b>${esc(C().name(R, h.uid))}</b><span>${esc(h.why)}</span></button>`).join('') || '<p class="muted small">지금은 없어요 👍</p>'}</div>`;
   }
 

@@ -21,6 +21,7 @@ DS.Student = (function () {
   let test = null;
   const real = () => true; // 🧪 #47 (2026-11-09 선생님 「테스트 모드 = 학생과 같은 과정」): 테스트 · 체험판도 학생과 같은 길 (💎 · EXP · 기록 · 필살기 · 상자) — 기록은 테스트 저장소(이 기기 · 시작마다 비움) · 체험판은 메모리
   async function enter(c, info, opt = {}) {
+    if (DS.Fresh && !(await DS.Fresh.gate())) return; // 🔄 #55 ② 옛 판이면 입장 잠금 → 새 판으로 바꾼 뒤 (다시 이 수업으로 들어옴)
     test = opt.test || null;
     cleared0 = false; resulted = false; drawn = ''; shown = ''; form = null; retrying = ''; bossSet = 1; othersSeen = {};
     an = null; thSeen = null; phaseWas = 0; chestDone = {}; chestQ = []; chestBusy = false; batPaid = ''; endPaid = ''; // v0.9.11
@@ -35,6 +36,7 @@ DS.Student = (function () {
     DS.UI.show('screen-student'); atkStart();
     if (!test) DS.Scene.save({ role: 'student', code: c });
     DS.Act.presence(c).catch(() => {});
+    DS.Net.set(`rooms/${c}/players/${me}/ver`, DS.VERSION).catch(() => {}); // 🔄 #55 리모컨 「옛 판 n명」
     if (DS.Survey && !test && info.cls != null) DS.Survey.watch({ c: info.cls, n: info.num }, () => { if (R && L) { drawn = ''; render(); } });
     locked = !!(info.cls && (await DS.Net.get(`wordLock/${String(info.cls).replace(/[.#$/[\]]/g, '_')}/${info.num}`).catch(() => null)));
     if (stop) stop();
@@ -193,6 +195,7 @@ DS.Student = (function () {
   function bindHelp() {}
 
   function render() {
+    if (DS.Fresh) DS.Fresh.inClass(`${(R.state || {}).step}|${(R.state || {}).lesson || ''}`, { test: !!test }); // 🔄 #55 ③ 다음 단계로 넘어가는 순간 새 판
     if (DS.SymTalk) DS.SymTalk.setCtx(Object.assign(acc(), { test: !!test }), L && L.id); // 📖 #54 기호 톡 기록 = 이 차시 (테스트는 안 셈)
     if (Raid().isClosed(R)) return toCamp();
     if (!R.players || !R.players[me]) { $('#st-body').innerHTML = '<div class="panel"><p>입장 정보가 없어요. 처음 화면에서 다시 입장해 주세요.</p></div>'; return; }

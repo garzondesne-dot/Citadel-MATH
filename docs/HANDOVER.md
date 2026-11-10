@@ -227,3 +227,8 @@
 - 문구 = `docs/SYMBOL-TALK.md` 표 그대로(`tests/symtalk.test.js` 가 한 글자씩 비교 · 문구를 고치면 둘 다). 명제 단원 기호를 더하면 ROWS 에 줄 추가 + `pick()` 문맥 규칙.
 - 화면 코드는 손대지 않음: MutationObserver 가 `#st-body`(수업 · 소레이드 · 형성평가 · ✍ 쓰기) · `#quiz`(성채 · 허수아비 문제 창) · `.bn-fight` 나의 풀이 글자에 점선 칸(`.sym-t`)을 씌움 → 새 화면도 이 안에 그리면 저절로 됨.
 - 톡 = document 캡처 단계에서 가로채 말풍선(보기 단추 안 기호를 눌러도 그 보기는 안 고름) · 기록 `xp/{반}/{번호}/st/{차시}/{기호}` (자기 칸 · 규칙 변경 없음 · 테스트 · 미리 보기는 안 셈) · 대시보드 「📖 기호 톡」.
+
+## 🔄 옛 판 → 새 판 (2026-11-10 #55) — `js/engine/fresh.js` · `version.json`
+- **배포 절차 추가: 버전을 올릴 때 `js/config.js` VERSION · `sw.js` 캐시 이름 · `version.json` {"v"} 셋을 같이** (`tests/pwa.test.js` 가 셋이 같은지 확인). 학생 앱은 version.json(서비스 워커가 저장 안 함 · no-store)을 물어 최신 판을 앎.
+- ① 앱 켤 때 · 1분마다(수업 밖 화면) 옛 판이면 서비스 워커 갱신 → 새로 고침 ② `Student.enter` · 성채 · 허수아비 `fight` = 문지기(옛 판이면 들어가지 않고 바꿈) ③ 수업 중 = 띠 → `R.state.step` 이 바뀌면 새로 고침(장면 복구 = 다시 그 수업 · 기록은 서버) · 🧪 테스트는 띠만 ④ 같은 판→같은 최신으로 두 번 실패(`localStorage ds-fresh` n ≥ 2) = 「앱을 완전히 껐다 다시 켜 주세요」 · 리모컨 「🔄 옛 판 n명」 = `players/{나}/ver` 가 최신과 다름(없음 = #55 전 판).
+- 시험 `tools/e2e/e2e89.js` (서비스 워커 막고 version.json · config.js 흉내).
