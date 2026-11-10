@@ -3053,3 +3053,11 @@ body:has(#test-bar) #screen-student.st-battle .wrap:has(.cr-dock) { padding-bott
 .ult .u-facepic .u-glint::after { width: 8px; height: 70px; border-radius: 4px; background: linear-gradient(transparent, #fff, transparent); box-shadow: 0 0 14px #fff, 0 0 26px var(--uc, #ffd25a); }
 .ult .u-facepic .u-glint + .u-glint::before, .ult .u-facepic .u-glint + .u-glint::after { animation-delay: .38s; }
 @keyframes uGlint { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.2); } 35% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.6); } }
+/* 🙊 #57 ⑪ 눈치게임 종합실 (2026-11-10 선생님 「캐릭터가 너무 아래 · 두 줄로 · 더 장난스럽게」): 제목은 위 고정 · 숫자 + 캐릭터 두 줄을 가운데 · 빙글 도는 햇살 + 색 점 배경 (그림 없음 · CSS) */
+.nn-wrap { justify-content: center; gap: clamp(8px, 2.5vh, 26px); padding-top: 44px; background: radial-gradient(circle at 18% 22%, #ff6fa833 0 6px, transparent 7px) 0 0 / 90px 90px, radial-gradient(circle at 62% 70%, #6cf0ff33 0 5px, transparent 6px) 0 0 / 70px 70px, radial-gradient(circle at 40% 40%, #ffe27a33 0 4px, transparent 5px) 0 0 / 54px 54px, radial-gradient(ellipse at 50% 40%, #4a2d6e, #1d1530 78%); }
+.nn-wrap::before { content: ''; position: absolute; left: 50%; top: 38%; width: 180vmax; height: 180vmax; transform: translate(-50%, -50%); background: repeating-conic-gradient(#ffffff0d 0 9deg, transparent 9deg 18deg); animation: nnSun 40s linear infinite; pointer-events: none; z-index: 0; }
+@keyframes nnSun { to { transform: translate(-50%, -50%) rotate(360deg); } }
+.nn-wrap > * { position: relative; z-index: 1; } .nn-wrap > .nn-emos { position: absolute; }
+.nn-wrap > .nn-top { position: absolute; top: 10px; left: 0; right: 0; }
+.nn-row { display: grid; grid-template-columns: repeat(var(--cols, 8), minmax(0, auto)); justify-content: center; gap: clamp(12px, 3vh, 26px) clamp(6px, 1.4vw, 18px); width: auto; max-width: 100%; }
+.nn-center .nn-big { color: #ffd84a; text-shadow: 0 4px 0 #7a2bb0, 0 0 22px #ff6fa866; }

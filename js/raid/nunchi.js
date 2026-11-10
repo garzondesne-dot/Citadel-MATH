@@ -96,7 +96,7 @@ DS.Nunchi = (() => {
       : `<h1 class="nn-big win">🏆 눈치 백단!</h1><p>${(f.win || []).map((u) => `<b>${esc(nameOf(R, u))}</b>`).join(' · ') || '우승자 없음 — 모두 아쉬웠어요'}</p>`;
     const emo = Object.values((R.nunE || {})[f.g] || {}).slice(-12).map((e, i) => `<i class="nn-emo" style="left:${(i * 37) % 92 + 3}%;animation-delay:${(i % 4) * 0.3}s">${esc(e.e || '👏')}</i>`).join('');
     el.innerHTML = `<div class="nn-wrap ph-${f.phase}"><div class="nn-top"><b>🙊 눈치 게임</b><span>${f.round} / ${ROUNDS}판 · 남은 ${ids.filter((u) => !out[u]).length}명</span></div>
-      <div class="nn-center">${big}</div><div class="nn-row">${ids.map(hero).join('')}</div><div class="nn-emos">${emo}</div></div>`;
+      <div class="nn-center">${big}</div><div class="nn-row" style="--cols:${Math.max(1, Math.ceil(ids.length / 2))}">${ids.map(hero).join('')}</div><div class="nn-emos">${emo}</div></div>`;
   }
 
   // ── 학생 폰 ─────────────────────────────────────────────
