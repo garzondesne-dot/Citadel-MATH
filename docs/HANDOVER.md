@@ -282,3 +282,10 @@
 - m4 봉인 석상 = 그림 오기 전 `keyvault:2@h200` 임시 → m09-04 그림이 오면 `monsters-keyvault` 3번 줄을 채우고 `sprite: 'keyvault:3'`.
 - 영상 43 · 44 · 45 = 모션 방 주문 중 → `DATA.videos` 에 연결 (c1 · m1 · m2 = 43 · c2 · c3 · m3 · m4 · m5 = 44 · cp1 · cp2 = 45).
 - 📸 기준표 `rubrics.js set-09/m5` (raid · on) → Firebase `photo_rubric` 은 교사 「기준표 올리기」.
+
+## 🧪 시험 계정 (2026-11-11 #67)
+- 저장 `tester/{반}/{번호} = true` (교사만 씀 · 로그인하면 읽기 · DB 규칙 `tester` 새로 · 게시 필요) · 학생 관리 표의 「🧪 시험 계정」 단추.
+- 입장 때 `players/{uid}/tester` → 체력 머릿수(`state/headcount` · `Raid.headcount`)에서 빠짐 · 공격 데미지는 그대로 · 이름표 옆 🧪 (`Titles.nameHtml`).
+- 빠지는 곳: 대시보드(`dash.js one()` 이 명단에서 거름 → 랭킹 · 반 통계 · 대항전 · 기호 톡 순위 · 주의 학생) · 학급 결과(`sharecard classStats`) · 설문 응답 집계(`survey.submit` 이 surveyA 에 안 씀). 기록은 지우지 않음 · 끄면 다시 들어감.
+- 못 거르는 것: 켜기 **전에** 낸 수업 설문 응답(익명이라 누가 냈는지 모름) · 설문 「응답 n/명」 의 응답 표시 수.
+- 6반 1번 = 켜 둠 (11/11 · Firebase 직접).
