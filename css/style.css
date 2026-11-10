@@ -3283,3 +3283,8 @@ body:has(#test-bar) #screen-student.st-battle .wrap:has(.cr-dock) { padding-bott
 .fx-fam.shut { display: block; } .fx-fam .fam-h { cursor: pointer; } .fx-fam .fam-h small { color: #ebb84f; font-size: 11px; } .fx-fam .fam-n { float: right; font-weight: 400; font-size: 12px; color: var(--muted); }
 .fx-fam.shut .fam-h { display: block; padding: 4px 2px; }
 .fx-fam:not(.shut) .fam-n { float: none; display: block; font-size: 10px; margin-top: 2px; }
+
+/* 💬 #76 용사의 한마디: 소개 카드 말풍선 · 첫 눌림 컷인 자막 */
+.hero-card .hc-say { margin-top: 5px !important; padding: 4px 8px; border-radius: 10px; background: #fffaf0; border: 1px solid #c9b28a; font-weight: 700; color: #5a3a10; position: relative; }
+.hero-card .hc-say::before { content: ''; position: absolute; left: 14px; top: -6px; border: 6px solid transparent; border-top: 0; border-bottom-color: #c9b28a; }
+.ult .u-name .u-sub { display: block; margin-top: 4px; font-size: .38em; -webkit-text-stroke: 0; letter-spacing: 0; color: #fff3d6; text-shadow: 0 2px 0 #000, 0 0 10px #000; }

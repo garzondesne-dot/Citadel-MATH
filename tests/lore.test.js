@@ -10,5 +10,7 @@ check(Object.keys(rows).length === 34 && ids.every((n) => DS.Lore.of(n)), `34명
 Object.entries(rows).forEach(([n, r]) => { const h = DS.Lore.of(n); check(h && ['name', 'job', 'nick', 'a', 'b'].every((k) => h[k] === r[k]), `${n} 표와 같음`); });
 check(new Set(Object.values(DS.Lore.H).map((h) => h.name)).size === 34, '이름 겹침 없음');
 ids.filter((n) => n !== 16).forEach((n) => check(DS.Lore.of(n).job === DS.ASSETS.heroesV2.list[n].name, `${n} 직업 = 게임 이름 (${DS.Lore.of(n).job} / ${DS.ASSETS.heroesV2.list[n].name})`));
+const sec = md.slice(md.indexOf('## 8.')), says = {}; sec.split('\n').forEach((l) => { const m = /^\| (\d+) \| [^|]+ \| 「(.+)」 \|$/.exec(l); if (m) says[m[1]] = m[2]; });
+check(Object.keys(says).length === 34 && Object.entries(says).every(([n, t]) => DS.Lore.of(n).say === t), '💬 한마디 34줄 = 8절 표 (#76)');
 check(DS.Lore.label(0) === '로안 · 검사' && DS.Lore.label(24) === '케라운 · 마검사', '표시 = 「이름 · 직업」');
 console.log(fail ? `❌ 용사 이야기 실패 ${fail}` : `✅ 용사 이야기: 확인 ${ok}개 · 실패 0`); if (fail) process.exit(1);
