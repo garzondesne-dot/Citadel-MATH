@@ -3157,3 +3157,14 @@ body:has(#test-bar) #screen-student.st-battle .wrap:has(.cr-dock) { padding-bott
 #quiz.q-compact .sol { background: #fffaf0cc !important; color: #1b130a !important; border: 1.5px dashed #6b4a1e; }
 #quiz.q-compact .sol * { color: #1b130a !important; } #quiz.q-compact .sol .ng-note { color: #9a2a1a !important; }
 #quiz.q-compact .q-submit:disabled { opacity: .55; }
+
+/* 🛡 #72 홀리 방패 눈빛 컷인 (2026-11-10): 진필살기(금빛)와 구분 = 흰 · 하늘빛 띠 + 금 테두리 + 방패 모양 · 0.8초 (transform/opacity 위주) */
+.ult.guard .u-dim { animation-duration: .95s; }
+.ult.guard .u-band { border-color: #ffe9a6; background: linear-gradient(90deg, #0b2440, #cfeeff 42%, #ffffff 50%, #cfeeff 58%, #0b2440); animation-duration: .8s; }
+.ult.guard .u-facepic { animation-duration: .8s; }
+.ult.guard .u-glint { animation-delay: .18s; }
+.ult.guard .u-name { color: #fff; -webkit-text-stroke: 2px #6cc4ff; text-shadow: 0 0 16px #9fdcff, 0 0 4px #ffd25a, 4px 4px 0 #0b2440; animation-duration: .55s; animation-delay: .22s; letter-spacing: .06em; }
+.ult.guard .u-tear, .ult.guard .u-flash { animation-delay: .7s; }
+.ult.guard .u-shield { position: absolute; left: 50%; top: 47%; width: min(46vh, 340px); aspect-ratio: 5 / 6; transform: translate(-50%, -50%) scale(.6); clip-path: polygon(50% 0, 100% 14%, 94% 58%, 50% 100%, 6% 58%, 0 14%); background: radial-gradient(ellipse at 50% 35%, #ffffff55, #9fdcff22 60%, transparent 75%); box-shadow: inset 0 0 0 6px #ffe9a6; opacity: 0; z-index: 2; animation: uShield .8s ease-out forwards; }
+.ult.guard .u-shield::before { content: ''; position: absolute; inset: 6px; clip-path: inherit; background: linear-gradient(180deg, #ffe9a6, #fff6d0 30%, transparent 31%, transparent 69%, #fff6d0 70%, #ffe9a6); opacity: .35; }
+@keyframes uShield { 0% { opacity: 0; transform: translate(-50%, -50%) scale(.6); } 30% { opacity: .9; transform: translate(-50%, -50%) scale(1); } 75% { opacity: .7; } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.12); } }

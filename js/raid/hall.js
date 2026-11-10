@@ -532,6 +532,12 @@ DS.Hall = (function () {
   }
   // 🛡 홀리 방패 막기 (2026-11-09): 켠 용사 모두 날개 · 방패 (여럿이어도 효과 같음) · 반 전체 안 멈춤 (피격 · 헉헉 없음) → 석화 10초
   function hallGuard(c, us) {
+    // 🛡 #72 (2026-11-10): 막는 순간 처음 켠 용사의 얼굴 컷인 + 눈빛 (흰 · 하늘빛 · 0.8초) → 이어서 날개 · 방패
+    const first = us.slice().sort((a, b) => Number(((R.players[a] || {}).hg || {}).at || 0) - Number(((R.players[b] || {}).hg || {}).at || 0))[0], fp = (R.players || {})[first] || {};
+    if (DS.Attack && DS.Attack.cutin && !hallGuard.busy) { hallGuard.busy = 1; return DS.Attack.cutin(fp.hero || 0, fp.fx || 'twinkle', { guard: true }).then(() => { hallGuard.busy = 0; hallGuard2(c, us); }); }
+    return hallGuard2(c, us);
+  }
+  function hallGuard2(c, us) {
     const arena = $('#raid'), m = $('#rm'), names = us.map((u) => esc(((R.players || {})[u] || {}).nick || '친구')).join(' · ');
     const hit = () => {
       const b = document.createElement('div'); b.className = 'atk-banner guard'; b.innerHTML = `🛡 ${names}의 홀리 방패! <small>막았다! 몬스터 ${Raid().HOLY_SEC}초 석화</small>`; arena.appendChild(b); setTimeout(() => b.remove(), 1800);
