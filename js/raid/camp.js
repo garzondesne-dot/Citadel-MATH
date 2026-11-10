@@ -46,7 +46,7 @@ DS.Camp = (function () {
     if (DS.Survey && !m.test) DS.Survey.watch(m, () => svDraw());
     if (riftStop) riftStop(); riftStop = m.test ? null : DS.Net.watch(`rift/${ck(m.c)}`, (v) => { const had = !!riftNow(); rifts = v || {}; if (document.getElementById('camp-gate')) drawGate(); if (!had && riftNow() && !(live && live.open)) DS.UI.toast(`⏳ ${riftNow().no}차시 이어하기 포털이 열렸어요! 오른쪽 문에서 남은 문제를 마저 해요`, 4200); });
     if (code0) setTimeout(codeGate, 300); // QR 로 들어왔으면 코드 창을 바로
-    if (DS.Mail && DS.Mail.noticePop && !code0) setTimeout(() => DS.Mail.noticePop(m, { ok: () => document.getElementById('screen-camp').classList.contains('active') && ![...document.querySelectorAll('.modal:not(.nt-pop)')].some((e) => !e.hidden && getComputedStyle(e).display !== 'none'), openMail: () => { const z = document.getElementById('camp-mail'); if (z) z.click(); else DS.Mail.open(m); } }).catch(() => {}), 900); // 📢 #61 안 읽은 공지 팝업 = 캠프 📮 와 같은 창
+    if (!code0) { const fromL = afterL; afterL = null; setTimeout(() => campQueue(m, fromL).catch(() => {}), 900); } // 🏰 #69 캠프 알림 차례로 (성채 해금 → 공지 → 새 호칭 → 확인도장 띠)
   }
   const D = () => DS.ASSETS.dungeons;
   // 📝 수업 설문 (v0.9.8.2): 선생님이 우리 반 설문을 열었고 아직 안 했으면 아래 칸에 버튼 (수업 대기실에서 못 한 학생도 여기서)
@@ -157,7 +157,6 @@ DS.Camp = (function () {
     const c = C(), S = DS.CampScene;
     const chip = !me.teacher; // 🧹 2026-11-07 정돈판: 캠프 위 = 던전과 같게 「◀ · · · 💬 · 💎 n」 (선생님은 🧙 선생님 모습)
     $('#camp').innerHTML = `<div class="camp-top${chip ? ' chip' : ''}">${chip && !me.test && !me.trial ? '<button class="sc-rb sm" id="camp-fb" aria-label="의견 보내기">💬</button>' : ''}${chip ? '<button class="sc-gem camp-set" id="camp-set" aria-label="💎 마정석 · 내 용사">💎 <b class="sc-gn">0</b><i>＋</i></button>' : '<button class="btn small camp-set" id="camp-set">🧙 선생님 모습</button>'}</div>
-      ${stampToday() && !stampSeen() ? '<div class="stamp-bar" id="camp-stamp" title="누르면 닫혀요">📮 반드시 학습지 확인도장 받아가세요. <small>✕</small></div>' : ''}
       <div class="camp-stage cs-v2" style="background-image:url('${base()}${c.bg}');aspect-ratio:${c.size[0]} / ${c.size[1]}">
         ${S.layers()}
         ${S.zone('camp-castle', 'castle', '🏰 성채던전')}${S.zone('camp-tent', 'tent', me.teacher ? '⛺ 텐트 · 책장' : '⛺ 출제 공방')}
@@ -183,12 +182,10 @@ DS.Camp = (function () {
       else DS.UI.toast('아직 열린 던전이 없어요. 선생님이 수업을 열면 오른쪽 문에 빛이 들어와요.', 3200);
     };
     // v0.9.7.0: 이름표의 Lv 는 뺌 (사용자 — 캠프에서 이질적). 레벨은 아래 상태창에만
-    newTitles();
     { const fb = $('#camp-fb'); if (fb) fb.onclick = () => DS.Feedback.open({ c: me.c, n: me.n, name: me.name }, { where: 'camp' }); } // 💬 2026-11-06 · 2026-11-07 캠프 위로
     $('#camp-mail').onclick = () => pick('#camp-mail', () => { if (me.teacher) return DS.Control.run(() => DS.Dash.enter()); if (cues.mark) cues.mark('mail'); DS.Control.run(() => (DS.Mail && !me.test ? DS.Mail.open(me, { onClose: () => status() }) : note())); }); // 교사 = 📊 학급 대시보드 · 2026-11-07 6판: 우편함 = 소식 + 보내기 (오답노트는 🎯 허수아비로)
     $('#camp-tent').onclick = () => (DS.CampScene.objOn(document.querySelector('#camp .camp-stage'), 'tent', true), pick('#camp-tent', () => { if (cues.mark) cues.mark('tent'); DS.Control.run(() => (DS.Quest && !me.teacher ? DS.Quest.open(me) : shelf())); setTimeout(() => DS.CampScene.objOn(document.querySelector('#camp .camp-stage'), 'tent', false), 1500); })); // ⛺ 텐트 = ✏ 출제 공방 (2026-11-07 6판 · 책장은 🎯 허수아비 차시 카드로)
     $('#camp-dummy').onclick = () => pick('#camp-dummy', () => DS.Control.run(() => DS.Bonus.enter(me, { train: true })));
-    { const sb = $('#camp-stamp'); if (sb) { stampMarkSeen(); sb.onclick = () => sb.remove(); setTimeout(() => { if (sb.isConnected) sb.remove(); }, 15000); } } // 한 번 보여 주고 15초 뒤 · 누르면 닫힘
     $('#camp-set').onclick = () => (me.teacher ? settings({ teacher: true, onSave: async (v) => { me.hero = v.hero; me.fx = v.fx; me.title = v.title; const t = me.teacher; if (t.code) { try { await DS.Net.set(`rooms/${t.code}/state/tlook`, { hero: v.hero, fx: v.fx, at: DS.Net.TS }).catch(() => {}); /* 2026-11-06: 종합상황실도 쓸 수 있는 칸 → 수업 화면이 이 모습을 먼저 씀 */ const R0 = await DS.Net.get(`rooms/${t.code}/meta`); if (R0 && R0.teacher === DS.Net.uid()) await DS.Net.update(`rooms/${t.code}/players/${R0.teacher}`, { hero: v.hero, fx: v.fx }); } catch (e) { /* 다음 수업부터 */ } } render(); drawGate(); } }) : settings({ buy: true }));
     drawGate();
     animateFire();
@@ -420,13 +417,67 @@ DS.Camp = (function () {
   }
   // v0.9.2: 호칭은 자동으로 달지 않는다 → 새로 얻은 호칭만 알려 주고 ⚙ 설정에서 스스로 고르게 (레벨 칭호는 알리지 않음)
   async function newTitles() {
-    if (!DS.Titles || (me.test && !(DS.Test && DS.Test.active && DS.Test.active()))) return; // #47
+    if (!DS.Titles || (me.test && !(DS.Test && DS.Test.active && DS.Test.active()))) return false; // #47
     const k = `citadel-ttl-seen-${me.c}-${me.n}`;
     let seen = null; try { seen = JSON.parse(localStorage.getItem(k)); } catch (e) { /* 무시 */ }
     const got = DS.Titles.earned(await DS.Titles.data(me).catch(() => ({}))).filter((t) => !/^lv\d/.test(t.id));
     const fresh = got.filter((t) => !(seen || []).includes(t.id));
     try { localStorage.setItem(k, JSON.stringify(got.map((t) => t.id))); } catch (e) { /* 무시 */ }
-    if (fresh.length) DS.UI.toast(`🏅 새 호칭 ${fresh.slice(0, 2).map((t) => `[${t.name}]`).join(' ')}${fresh.length > 2 ? ` 외 ${fresh.length - 2}개` : ''} 획득! 💎 상점에서 이름 앞에 달 수 있어요`, 4200);
+    if (!fresh.length) return false;
+    DS.UI.toast(`🏅 새 호칭 ${fresh.slice(0, 2).map((t) => `[${t.name}]`).join(' ')}${fresh.length > 2 ? ` 외 ${fresh.length - 2}개` : ''} 획득! 💎 상점에서 이름 앞에 달 수 있어요`, 4200);
+    return true;
+  }
+  // 🏰 #69 (2026-11-11 선생님 「차시가 끝나면 성채 해금 팝업 · 던전 나오자마자」): 캠프 알림은 한 번에 하나씩 차례로 (닫으면 다음)
+  //   ① 🏰 성채 해금(수업에서 막 나왔을 때만 · 전리품에서 이미 봤으면 건너뜀) → ② 📢 선생님 공지 → ③ 🏅 새 호칭 → ④ 📮 확인도장 띠 · 캠프 화면일 때만
+  let afterL = null;
+  const afterClass = (lid) => { afterL = lid || null; };
+  const onCamp = () => document.getElementById('screen-camp').classList.contains('active') && ![...document.querySelectorAll('.modal:not(.nt-pop):not(.cq-pop)')].some((e) => !e.hidden && getComputedStyle(e).display !== 'none');
+  const waitGone = (sel, max = 120e3) => new Promise((res) => { const t0 = Date.now(); const iv = setInterval(() => { if (!document.querySelector(sel) || Date.now() - t0 > max) { clearInterval(iv); res(); } }, 300); });
+  let qTok = 0; // 캠프에 다시 들어오면 앞 차례는 멈춤 (두 줄이 겹쳐 뜨지 않게)
+  async function campQueue(m, fromL) {
+    if (!m || m.teacher) return;
+    const tok = ++qTok, live = () => tok === qTok && onCamp();
+    if (fromL) await castlePop(m, fromL);
+    if (!live()) return;
+    if (DS.Mail && DS.Mail.noticePop) { const shown = await DS.Mail.noticePop(m, { ok: live, openMail: () => { const z = document.getElementById('camp-mail'); if (z) z.click(); else DS.Mail.open(m); } }).catch(() => false); if (shown) await waitGone('.nt-pop'); }
+    if (!live()) return;
+    if (await newTitles()) await new Promise((r) => setTimeout(r, 4300));
+    if (!live()) return;
+    stampBand();
+  }
+  function stampBand() {
+    if (!stampToday() || stampSeen() || document.getElementById('camp-stamp')) return;
+    const box = document.querySelector('#camp .camp-stage'); if (!box) return;
+    box.insertAdjacentHTML('beforebegin', '<div class="stamp-bar" id="camp-stamp" title="누르면 닫혀요">📮 반드시 학습지 확인도장 받아가세요. <small>✕</small></div>');
+    const sb = $('#camp-stamp'); stampMarkSeen(); sb.onclick = () => sb.remove(); setTimeout(() => { if (sb.isConnected) sb.remove(); }, 15000); // 한 번 보여 주고 15초 뒤 · 누르면 닫힘
+  }
+  async function castlePop(m, lid) {
+    const L0 = DS.Lessons.get(lid); if (!L0 || !L0.no || L0.eval || !DS.Bonus || !DS.Bonus.roomsState) return;
+    const flag = DS.Result && DS.Result.lootKey ? DS.Result.lootKey(m, L0) : ''; let seen = false; try { seen = !!(flag && localStorage.getItem(flag)); } catch (e) { /* 무시 */ }
+    const k = ck(m.c), T = m.test && DS.Test && DS.Test.active && DS.Test.active();
+    const [bonus, no] = await Promise.all([DS.Net.get(`bonus/${k}/${m.n}`).catch(() => null), T ? Promise.resolve(L0.no) : DS.Net.get(`unlock/${k}`).catch(() => 0)]);
+    if (DS.Bonus.loadLocks) await DS.Bonus.loadLocks().catch(() => {});
+    const upto = Math.max(Number(no) || 0, L0.no), rooms = [], bosses = [];
+    const bk = `citadel-castle-bossopen-${k}-${m.n}`; let bseen = {}; try { bseen = JSON.parse(localStorage.getItem(bk)) || {}; } catch (e) { /* 무시 */ }
+    (DS.Bonus.FLOORS || []).filter((f) => !DS.Bonus.floorIsOpen || DS.Bonus.floorIsOpen(f.id)).map((f) => DS.Lessons.get(f.id)).filter(Boolean).forEach((CL) => {
+      const S = DS.Bonus.roomsState(CL, bonus || {}, upto);
+      S.rooms.filter((r) => !r.boss && r.no === L0.no && S.isOpen(r)).forEach((r) => rooms.push(r.title || r.id));
+      if (S.boss && S.bossOpen && !bseen[CL.id]) { bosses.push(CL.title || CL.id); bseen[CL.id] = 1; }
+    });
+    try { localStorage.setItem(bk, JSON.stringify(bseen)); if (flag) localStorage.setItem(flag, '1'); } catch (e) { /* 무시 */ }
+    if ((seen || !rooms.length) && !bosses.length) return;
+    if (!document.getElementById('screen-camp').classList.contains('active')) return;
+    const list = seen ? [] : rooms;
+    const el = document.createElement('div'); el.className = 'modal camp-modal cq-pop';
+    el.innerHTML = `<div class="quiz-box framed rs-box cq-box"><h2>🏰 ${list.length ? `성채던전 새 방 ${list.length}개가 열렸어요!` : '성채던전 소식'}</h2>
+      ${bosses.length ? `<p class="cq-boss">👑 보스 방이 열렸어요! <small>${bosses.map(esc).join(' · ')}</small></p>` : ''}
+      ${list.length ? `<ul class="cq-list">${list.slice(0, 3).map((t) => `<li>${esc(t)}</li>`).join('')}${list.length > 3 ? `<li class="muted">외 ${list.length - 3}개</li>` : ''}</ul>` : ''}
+      <div class="row"><button class="btn primary" id="cq-go">🏰 성채로 가기</button><button class="btn" id="cq-x">닫기</button></div></div>`;
+    document.body.appendChild(el); if (DS.Sound && DS.Sound.correct) DS.Sound.correct();
+    await new Promise((res) => {
+      el.querySelector('#cq-x').onclick = () => { el.remove(); res(); };
+      el.querySelector('#cq-go').onclick = () => { el.remove(); res(); const z = document.getElementById('camp-castle'); if (z) z.click(); };
+    });
   }
   // ⚙ 설정: 용사 · 공격 이펙트 (잠긴 것은 🔒 + 조건)
   // ⚙ 설정 — opt.teacher (2026-11-04): 교사 캠프에서 선생님 모습 고르기 = 용사 18명 · 이펙트 · 호칭 모두 열림 · 이 기기에 저장 (수업 중이면 그 방 선생님 용사도 바로)
@@ -535,5 +586,5 @@ DS.Camp = (function () {
     draw(); document.body.appendChild(el); if (tab !== 'ttl') demo();
   }
   const back = () => (me ? enter(me) : null);
-  return { teacher: () => !!(me && me.teacher), noteDemo, enter, back, settings, shelf: (all, only) => shelf(all, only), refresh: () => { if (document.getElementById('camp-forge')) status(); }, stampToday, markStamp: () => { try { localStorage.setItem('citadel-stamp', today()); } catch (e) { /* 무시 */ } } };
+  return { afterClass, teacher: () => !!(me && me.teacher), noteDemo, enter, back, settings, shelf: (all, only) => shelf(all, only), refresh: () => { if (document.getElementById('camp-forge')) status(); }, stampToday, markStamp: () => { try { localStorage.setItem('citadel-stamp', today()); } catch (e) { /* 무시 */ } } };
 })();

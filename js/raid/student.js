@@ -146,6 +146,7 @@ DS.Student = (function () {
     endRewards();
     if (stop) stop(); stop = null; focus(false); atkStop(); DS.Thrill && DS.Thrill.batPhone(null); { const cb = document.getElementById('st-combo'); if (cb) cb.innerHTML = ''; }
     const t = test; test = null;
+    if (DS.Camp && DS.Camp.afterClass && L) DS.Camp.afterClass(L.id); // 🏰 #69 캠프에 들어가면 성채 해금 팝업부터
     const go = (bonus) => { if (t) { t.exit(); return; } if (bonus && DS.Bonus) DS.Bonus.enter(acc(), { train: true }); else DS.Camp.enter(acc()); };
     if (DS.Result && L && R && me && Raid().activeIds(R).includes(me)) return DS.Result.show(L, R, me, t ? null : acc(), code, go, {}).catch(() => go()); // #68 B (2026-11-11): 전투 결과는 한 번 — 형성평가 뒤 이미 봤으면 바로 캠프 · 못 본 학생만 여기서 (기록 저장은 그대로)
     go();
