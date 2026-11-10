@@ -125,6 +125,8 @@ DS.FX = (function () {
     return new Promise((res) => setTimeout(() => res(el), (sp.n / sp.fps) * 1000));
   }
   function still(cv, kind) {
+    const S = A().fxStills, si = S && S.idx ? S.idx[kind] : null; // ⚔ #73-5 정지 그림표 한 장 (큰 띠 그림을 안 받음)
+    if (cv && si != null) { const g = cv.getContext('2d'), im = load(S); const drawS = () => { g.clearRect(0, 0, cv.width, cv.height); g.imageSmoothingEnabled = false; const k = Math.min(cv.width / S.w, cv.height / S.h); g.drawImage(im, (si % S.cols) * S.w, Math.floor(si / S.cols) * S.h, S.w, S.h, (cv.width - S.w * k) / 2, (cv.height - S.h * k) / 2, S.w * k, S.h * k); }; if (im.complete && im.naturalWidth) drawS(); else im.addEventListener('load', drawS, { once: true }); return; }
     const sp = spec(kind); if (!sp || !cv) return;
     const g = cv.getContext('2d'), im = load(sp), i = sp.pk ?? Math.min(sp.n - 1, Math.floor(sp.n * 0.38));
     const drawIt = () => { g.clearRect(0, 0, cv.width, cv.height); g.imageSmoothingEnabled = false; const k = Math.min(cv.width / sp.w, cv.height / sp.h); g.drawImage(im, i * sp.w, 0, sp.w, sp.h, (cv.width - sp.w * k) / 2, (cv.height - sp.h * k) / 2, sp.w * k, sp.h * k); };

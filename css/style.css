@@ -3279,3 +3279,7 @@ body:has(#test-bar) #screen-student.st-battle .wrap:has(.cr-dock) { padding-bott
 .hpick.peek-on { outline: 2px solid #ebb84f; outline-offset: -2px; }
 /* 🐞 내 용사 창 제목 줄: 「오늘 받은 💎」 이 제목과 한 줄에 끼어 「내 용사」 가 세로로 눌리던 것 → 아래 줄로 (2026-11-11) */
 .set-head { flex-wrap: wrap; } .set-head .me-day { flex: 1 1 100%; order: 3; margin: 0; }
+/* ⚔ #73-5 스킬 탭 속성 접기 */
+.fx-fam.shut { display: block; } .fx-fam .fam-h { cursor: pointer; } .fx-fam .fam-h small { color: #ebb84f; font-size: 11px; } .fx-fam .fam-n { float: right; font-weight: 400; font-size: 12px; color: var(--muted); }
+.fx-fam.shut .fam-h { display: block; padding: 4px 2px; }
+.fx-fam:not(.shut) .fam-n { float: none; display: block; font-size: 10px; margin-top: 2px; }
