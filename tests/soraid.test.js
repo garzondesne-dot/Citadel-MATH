@@ -176,4 +176,12 @@ for (let i = 0; i < 8; i++) add('c', 1, false); d = X.chainDown(L, Q, 'u4'); che
   for (let k = 1; k <= 30; k++) { const p = L.chainItems('u7', `x${k}`, k); check(p[1].why && p[1].why.text === w.text && p[4].why, `연습 판 ${k}: 근거 줄 2개 그대로`); }
   check(X.whyStages(it).length === 2, '문제 7 = 근거 줄 2개 (🧩 n/2)');
   check(L.crops.u7[0].p === 3 && Math.abs(L.crops.u7[0].h - 0.3523) < 1e-6 && /7차시 레이드용 v4/.test(L.sheet), `칸 u7 v4 h ${L.crops.u7[0].h} · 판 ${L.sheet}`); }
+// ⑮ 📝 #58 문구 (2026-11-10 7차시 수업 관찰): G 문제 5 졸개3 · 대장 · H 문제 7 졸개3 · J 성채 q12 졸개2 = 드모르간 (첫 판 · 연습 판 같게)
+{ const DSx = require('./load')(['js/engine/ui.js', 'js/engine/setgen.js', 'js/engine/quiz.js', 'js/engine/lessons.js', 'lessons/eval-1.js']), E = DSx.Lessons.get('eval-1');
+  for (const [lab, f] of [['수업', (id, p) => L.chainItems(id === 'q08' ? 'u5' : 'u7', `g${p}`, p)], ['성채', (id, p) => E.chainItems(id, `g${p}`, p)]]) for (let p = 0; p <= 20; p++) {
+    const a = f('q08', p), b = f('q12', p);
+    check(/, 이 식만 만족시키는 x 를 모두 고르시오\.$/.test(a[2].question) && /^x = x² \+ \d+x, /.test(a[2].question), `${lab} 문제 5 졸개3 판 ${p}: ${a[2].question}`);
+    check(/^x = \d+ 도 넣어, A ∩ B = B 를 만족시키는 정수 x 를 모두 고르시오\.$/.test(a[3].question), `${lab} 문제 5 대장 판 ${p}: ${a[3].question}`);
+    check(/^A ∩ B\(= \d+의 배수이면서 \d+(로|으로) 나눈 나머지가 \d+ 인 수\)의 가장 작은 원소는\?$/.test(b[2].question), `${lab} 문제 7 졸개3 판 ${p}: ${b[2].question}`);
+    check(/드모르간의 법칙에 의해 Aᶜ ∪ Bᶜ = \(A ∩ B\)ᶜ 이다\.$/.test(b[1].say), `${lab} 문제 7 졸개2 나의 풀이 판 ${p}`); } }
 console.log(fail ? `❌ 소레이드 실패 ${fail}` : `✅ 소레이드: 확인 ${ok}개 · 실패 0`); if (fail) process.exit(1);
