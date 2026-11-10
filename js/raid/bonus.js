@@ -385,6 +385,11 @@ DS.Bonus = (function () {
         const act = draw('miss', '<p class="gold">기회를 모두 썼어요. 해설을 다시 보고 다음에 새 문제로 도전해요! (벌은 없어요)</p>');
         act.innerHTML = `<button class="btn primary" id="bf-out">${castle ? '성채 방 목록으로' : '허수아비로'}</button>`;
         act.querySelector('#bf-out').onclick = () => { el.remove(); render(); };
+      if (mid === 'boss' && !castle && L.boss && L.boss.make) { // 🔥 #65-4 형성평가 재대결 처치 뒤 「한 판 더」 3판 (하루 · 차시마다)
+        const bk = `re|${me ? `${me.c}|${me.n}` : 'p'}|${L.id}|${new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10)}`;
+        const drawBp = () => { const old = act.querySelector('#bp-go, .dock-wait'); if (old) old.remove(); act.insertAdjacentHTML('afterbegin', bossPracBtn(bk)); const b = act.querySelector('#bp-go'); if (b) { b.disabled = true; setTimeout(() => { if (b.isConnected) b.disabled = false; }, 1500); b.onclick = () => DS.Control.run(async () => { await bossPrac(L, preview ? null : me, bk); drawBp(); }); } };
+        drawBp();
+      }
         return null;
       }
       const act = draw('', `<p>맞힌 소문제 <b>${solved.filter(Boolean).length} / ${n}</b> — 틀린 것만 새 숫자로 다시!</p>`);
@@ -542,5 +547,24 @@ DS.Bonus = (function () {
     el.querySelector('[data-x]').onclick = () => el.remove();
     document.body.appendChild(el);
   }
-  return { enter, seals, fxOpen, fxCond, UNLOCK, FLOORS, BOSS_PCT, LEGACY, roomsState, roomRec, newRooms, loadLocks, floorIsOpen, FLOOR_DEFAULT };
+  // 🔥 #65-4 👑 형성평가 「한 판 더」 (수업 · 허수아비 재대결 공용 · 소레이드 한 판 더와 같은 규칙): 3판까지 · 판마다 숫자를 바꾼 형성평가(체력 문항 전부) · 문항마다 한 번
+  //   판을 다 맞히면 +1 EXP · 틀린 문항은 해설 · 데미지 · 기록 없음 · 저절로 다음 판으로 넘어가지 않음(누를 때만) · 판 수 = 이 기기(localStorage)
+  const BP_MAX = 3, bpKey = (key) => `citadel-bprac|${key}`;
+  const bpUsed = (key) => { try { return Number(localStorage.getItem(bpKey(key))) || 0; } catch (e) { return 0; } };
+  async function bossPrac(L, m, key) {
+    const used = bpUsed(key); if (used >= BP_MAX || !L.boss || !L.boss.make) return null;
+    const pass = used + 1, n = L.boss.hpItems || L.boss.items; let right = 0;
+    try { localStorage.setItem(bpKey(key), String(pass)); } catch (e) { /* 무시 */ }
+    for (let i = 0; i < n; i++) {
+      const q = L.boss.make(i, pass, DS.Rng(`${key}|bprac|${pass}|${i}`));
+      const ok = await DS.Quiz.ask({ name: `${i + 1}번 / ${n}`, formula: `🔥 한 판 더 ${pass} / ${BP_MAX} · 숫자가 바뀐 형성평가 (연습 · 데미지 없음)` }, q, { tag: '👑 연습' });
+      if (ok === null) return { pass, right, n, quit: true };
+      if (ok) right++;
+    }
+    if (right === n && DS.Grow && m) DS.Grow.add(m, { chainPrac: 1 }, `bprac_${String(key).replace(/[.#$/[\]|]/g, '_')}_${pass}`).catch(() => {});
+    DS.UI.toast(right === n ? `✔ 연습 형성평가 ${pass}판 완성! +1 EXP` : `✏ ${right} / ${n} — 이번 판은 끝 (EXP 없음) · 해설을 학습지에 정리해요`, 3800);
+    return { pass, right, n };
+  }
+  const bossPracBtn = (key, id = 'bp-go') => { const left = BP_MAX - bpUsed(key); return left > 0 ? `<button class="btn primary big" id="${id}">🔥 한 판 더 <small>${left}/${BP_MAX}</small></button>` : `<span class="dock-wait">🔥 연습 ${BP_MAX}판 끝!</span>`; };
+  return { enter, seals, fxOpen, fxCond, UNLOCK, FLOORS, BOSS_PCT, LEGACY, roomsState, roomRec, newRooms, loadLocks, floorIsOpen, FLOOR_DEFAULT, bossPrac, bossPracBtn, bpUsed, BP_MAX };
 })();

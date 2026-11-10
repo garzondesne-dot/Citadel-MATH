@@ -659,7 +659,7 @@ DS.Student = (function () {
     };
   }
   // ⚔ 소레이드 화면 (2026-11-09 #18): 진행 칩 ①②③👑 · 지금 단계 문제 하나 · 「📜 나의 풀이」가 한 줄씩 쌓임 · 기회 반 칸 · 1칸 남으면 🙋 선생님 확인
-  let cform = null; const chainPrac = {}, writeMode = {}, probShut = {}, probOpen = {}, storyOpen = {}, pracArm = {};
+  let cform = null; const bpArm = {}; const chainPrac = {}, writeMode = {}, probShut = {}, probOpen = {}, storyOpen = {}, pracArm = {};
   // ✨ 「📜 나의 풀이」 새 줄 (#46 모래 글씨 → 2026-11-10 선생님 「픽셀 디졸브 인 · 새 문장은 빨간색 · 다음 단계에서 다시 검정」)
   //   새 줄만 · 종이색 픽셀 칸이 흩어지듯 사라지며 글씨가 드러남 (왼쪽부터 조금 먼저 · 약 0.9초 · 한 줄씩 차례로) · 그 단계에서 생긴 줄 = 빨강 → 다음 단계 줄이 생기면 검정
   //   이미 있던 줄 · 다시 들어온 첫 화면은 연출 없이 · 화면을 다시 그려도 이어서(시작 시각 기억 · 칸 순서는 줄마다 고정) · 그림 파일 없음 (캔버스 1장)
@@ -876,6 +876,7 @@ DS.Student = (function () {
     { const lk = Raid().solveLock(L, R, DS.Net.now()); if (lk && lk.on && !Raid().bossAnswered(R, me)) { scoutWas = lk.id; return frozenView(body, Raid().stepOf(L, R), lk); } scoutAppear('boss'); } // ❄ 형성평가도 선생님이 켜면
     const S = Raid().bossState(L, R, me), hp = Raid().bossHp(L, R), N0 = Raid().BOSS_TRIES;
     const lab = (s) => (s.ok ? '✔ 도달' : !s.n ? '풀기' : s.left ? `✘ 다시 · 기회 ${s.left}` : '해설 보기');
+    const bpk = `${code}|${me}`, bpOn = !!(DS.Bonus && DS.Bonus.bossPracBtn && L.boss.make && (hp.won || S.slice(0, L.boss.hpItems).every((x) => x.ok || !x.left))); // 🔥 #65-4 형성평가를 마쳤거나 보스 처치 뒤 = 한 판 더 3판
     body.innerHTML = `<div class="panel framed">
       <div class="scene enc bg-scene th-${L.theme || ''} boss${hp.won ? '' : ' quake-once'}">${scTop()}${hpBox(hp.left, hp.max, hp.won ? '' : GAUGE, '👑 HP')}
         <div class="enc-hero">${heroNow(hp.won ? pose2(true, '') : 'think', hp.won ? 'pairhop' : 'huff')}<i class="shadow"></i>${plate()}</div>
@@ -883,8 +884,10 @@ DS.Student = (function () {
       ${hp.won ? '<h2 class="okc center">🎉 보스 격파! 모두 함께 이겼어요!</h2>' : ''}
       <div class="boss-items">${S.map((s, i) => `<button class="bitem${s.ok ? ' ok' : s.n ? (s.left ? ' tried' : ' spent') : ''}${i >= L.boss.hpItems ? ' bonus' : ''}" data-i="${i}"><b>${i + 1}번${i >= L.boss.hpItems ? ' ⭐' : ''}</b> ${lab(s)}</button>`).join('')}</div>
       <p class="muted small">처음엔 학습지 형성평가와 같은 문제 · 틀리면 숫자가 바뀐 새 문제로 ${N0 - 1}번 더 (문항마다 기회 ${N0}번). 맞힌 문항마다 보스에게 1 데미지!${L.boss.items > L.boss.hpItems ? ` ⭐ ${L.boss.hpItems + 1}번부터는 보너스.` : ''}</p>
+      ${bpOn ? `<div class="row bp-row">${DS.Bonus.bossPracBtn(bpk)}</div><p class="muted small">🔥 숫자가 바뀐 형성평가로 연습 (데미지 · 기록 없음 · 다 맞히면 +1 EXP)</p>` : ''}
       ${Raid().canLobby(L, R, me) ? `<div class="stamp-bar">📮 반드시 학습지 확인도장 받아가세요.</div>${lobbyBtn()}` : ''}</div>`;
     bindLobby(); bindTop();
+    { const b = body.querySelector('#bp-go'); if (b) { const armed = bpArm[bpk] && Date.now() > bpArm[bpk]; if (!bpArm[bpk]) bpArm[bpk] = Date.now() + 1500; b.disabled = !armed; if (!armed) setTimeout(() => { const x = document.querySelector('#bp-go'); if (x) x.disabled = false; }, Math.max(0, bpArm[bpk] - Date.now())); b.onclick = () => DS.Control.run(async () => { await DS.Bonus.bossPrac(L, acc(), bpk); render(); }); } } // 🔥 #65-4
     body.querySelectorAll('.bitem').forEach((b) => b.addEventListener('click', async () => {
       const i = Number(b.dataset.i), st = Raid().bossState(L, R, me)[i];
       if (st.ok) { DS.UI.toast('이미 도달한 문항이에요.'); return; }
