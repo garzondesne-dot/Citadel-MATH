@@ -3043,3 +3043,4 @@ body:has(#test-bar) #screen-student.st-battle .wrap:has(.cr-dock) { padding-bott
 .cr-story.cr-fold ol li { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .cr-story.cr-fold ol { margin-top: 2px; margin-bottom: 0; } /* 📱 #56 접힌 풀이 = 한 줄 */
 .ch-wrap.cr-q .paper { padding-top: 8px; padding-bottom: 8px; } .ch-wrap.cr-q .paper .item { padding-top: 6px !important; padding-bottom: 6px !important; }
 .sym-t.sym-c { display: inline-block; margin-left: 4px; padding: 0 7px; border-radius: 8px; background: #fff1c2; color: #6b4a00; font-weight: 800; font-size: .9em; text-decoration: none; border: 1.5px dashed #b8873a; } /* 📖 #58 F 개념 톡 칩 */
+.ph-hand { margin: 6px 0; padding: 6px 10px; border-radius: 8px; background: #fff1c2; color: #5a3a00; font-size: 14px; line-height: 1.45; } /* ✍ #58 A 손글씨만 */

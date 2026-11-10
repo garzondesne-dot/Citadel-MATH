@@ -741,7 +741,7 @@ DS.Student = (function () {
       if (scoutImg[mid] === undefined) { scoutImg[mid] = null; DS.Net.get(`prep/${L.id}/img/${mid}`).then((u) => { if (u) { scoutImg[mid] = u; drawn = ''; render(); } }).catch(() => {}); }
       paint(body, `write|${mid}|${wm.peek ? 1 : 0}`, `<div class="panel framed st-fight ch-wrap cr-writing">${scene(step, rec, hp, '', '')}<div class="paper"><div class="paper-h"><b>✍ ${esc(step.title)}</b><small>${wm.peek ? '✍ 연습 쓰기 (진필살기 없음)' : '게임 풀이를 보지 말고 처음부터 · 학습지 숫자 그대로'}</small></div>
         ${img ? `<img class="scout-img" src="${img}" alt="학습지 문제">` : `<p>${esc((((DS.Rubrics || {})[L.id] || {})[mid] || {}).ask || step.title)}</p>`}
-        ${wm.peek ? story(rec.says) : ''}<p class="muted small">종이에 풀이를 처음부터 끝까지 쓰고 📸 찍어요 (이 소레이드 ${Math.max(0, DS.Photo.raidMax() - phN)}장 남음)</p></div>
+        ${wm.peek ? story(rec.says) : ''}<p class="ph-hand">✍ 학습지 서술형 칸에 <b>직접 손으로 쓴 풀이</b>만 찍어요 · 화면 · 인쇄 글은 통과 안 돼요</p><p class="muted small">종이에 풀이를 처음부터 끝까지 쓰고 📸 찍어요 (이 소레이드 ${Math.max(0, DS.Photo.raidMax() - phN)}장 남음)</p></div>
         <div class="row cr-wbtns"><button class="btn primary big" id="wr-snap"${phN >= DS.Photo.raidMax() ? ' disabled' : ''}>📸 찍어서 채점</button>${wm.peek ? '' : '<button class="btn" id="wr-peek">📜 풀이 다시 보기</button>'}<button class="btn" id="wr-x">✕ 그만 쓰기</button></div></div>`);
       bindTop();
       $('#wr-x').onclick = () => { delete writeMode[mid]; drawn = ''; render(); };

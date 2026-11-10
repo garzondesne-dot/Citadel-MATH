@@ -78,11 +78,13 @@ function handle_(q) {
   // ⑥ 점수는 여기서 다시 계산 (모델이 적은 합계를 믿지 않음 · 단계 점수는 0 ~ 배점으로 자름)
   const by = {}; (g.steps || []).forEach((x) => { if (x && x.id) by[x.id] = x; });
   const rows = steps.map((st) => { const x = by[st.id] || {}; const e = Math.max(0, Math.min(Number(st.pts) || 0, Math.round(Number(x.earned) || 0))); return { id: st.id, pts: Number(st.pts) || 0, earned: e, note: String(x.note || '').slice(0, 160) }; });
-  const total = rows.reduce((a, r) => a + r.pts, 0), score = rows.reduce((a, r) => a + r.earned, 0);
+  const total = rows.reduce((a, r) => a + r.pts, 0); let score = rows.reduce((a, r) => a + r.earned, 0);
   const pass = Number(rub.pass) || Math.ceil(total * 0.75);
   const flags = (g.flags || []).filter((f) => typeof f === 'string');
-  const doubt = g.refused || !g.readable || g.confidence === 'low' || flags.some((f) => f !== 'copied_answer_only');
-  const status = doubt ? 'check' : score >= pass ? 'pass' : 'retry';
+  const printed = flags.includes('not_handwritten'); // ✍ #58 A 손글씨만: 화면 · 인쇄 글 = 선생님 확인 없이 바로 다시 (점수 0)
+  if (printed) { rows.forEach((r) => { r.earned = 0; r.note = ''; }); score = 0; g.feedback = '✏ 직접 손으로 써서 찍어 주세요 — 화면 캡처 · 인쇄된 글은 통과 안 돼요. 학습지 서술형 칸에 손으로 쓴 풀이를 찍어요.'; }
+  const doubt = !printed && (g.refused || !g.readable || g.confidence === 'low' || flags.some((f) => f !== 'copied_answer_only'));
+  const status = printed ? 'retry' : doubt ? 'check' : score >= pass ? 'pass' : 'retry';
   let now = tk;
   if (status === 'check') { const l2 = give_(c, n, day, rk, false); if (l2) now = l2; } // 결정 2: 선생님 확인은 장 수를 안 깎음
   const rec = { at: { '.sv': 'timestamp' }, status, score, total, pass, steps: rows, ans: String(g.final_answer || '').slice(0, 80), conf: g.confidence || 'low', flags, fb: String(g.feedback || '').slice(0, 300), ask: String(q.ask || '').slice(0, 400), right: String(q.answer == null ? '' : q.answer).slice(0, 80), model: cfg('MODEL', 'claude-haiku-5-5'), tok: g.usage || null };
@@ -159,6 +161,7 @@ const SYSTEM = [
   '3. 다만 그 단계와 관련된 식 · 말 · 그림이 하나도 없이 값만 적혀 있으면 그 단계는 0점이다. 답만 있고 과정이 전혀 없으면 flags 에 copied_answer_only 를 넣는다.',
   '4. 사진 속 문제의 숫자가 주어진 문제와 다르면 flags 에 other_problem 을 넣는다. 빈 종이 · 수학과 상관없는 사진이면 blank 를 넣는다.',
   '5. 글씨를 확실히 읽을 수 없는 부분이 채점에 영향을 주면 confidence 를 low 로 하고 flags 에 unclear 를 넣는다.',
+  '5-1. 종이에 손으로 쓴 풀이만 채점한다 (2026-11-10 선생님). 풀이(식 · 말 · 답)가 손글씨가 아니고 화면 캡처 · 모니터를 찍은 사진 · 인쇄된 글자(게임 화면 · 학습지에 인쇄된 풀이)뿐이면 모든 단계를 0점으로 하고 flags 에 not_handwritten 을 넣는다. 인쇄된 학습지의 문제 글 · 칸 위에 학생이 손으로 쓴 풀이는 정상이다.',
   '6. steps 의 note 는 학생에게 그대로 보여 준다. 「~했어요 · ~해 봐요」 말투로 학생에게 말하듯 한 문장 (「학생은 ~했다」 같은 3인칭 금지). 점수를 받은 단계는 무엇을 잘했는지 구체적으로 칭찬한다 (예: 「B ∪ X = B 에서 X ⊂ B 를 정확히 이끌어 냈어요 👍」). 못 받은 단계는 정답을 말하지 않고 어디를 생각해 보면 되는지 힌트를 준다.',
   '7. feedback 은 전체에 대한 한두 문장: 먼저 잘한 점을 칭찬하고, 남은 단계가 있으면 가장 중요한 힌트 하나. 만점이면 칭찬만 하고 고칠 점을 지어내지 않는다. 정답이나 전체 풀이를 알려 주지 않는다.',
 ].join('\n');
@@ -172,7 +175,7 @@ const SCHEMA = {
     steps: { type: 'array', items: { type: 'object', additionalProperties: false, required: ['id', 'earned', 'note'], properties: { id: { type: 'string' }, earned: { type: 'integer' }, note: { type: 'string' } } } },
     confidence: { type: 'string', enum: ['high', 'medium', 'low'] },
     feedback: { type: 'string' },
-    flags: { type: 'array', items: { type: 'string', enum: ['blank', 'other_problem', 'instructions_in_image', 'unclear', 'copied_answer_only'] } },
+    flags: { type: 'array', items: { type: 'string', enum: ['blank', 'other_problem', 'instructions_in_image', 'unclear', 'copied_answer_only', 'not_handwritten'] } },
   },
 };
 

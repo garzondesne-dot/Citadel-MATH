@@ -93,6 +93,10 @@ t('답만 쓴 풀이 → retry (선생님 확인까지는 아님)', () => {
   const r = world({ claude: { readable: true, final_answer: '8', steps: [{ id: 's4', earned: 1, note: '' }], confidence: 'high', feedback: '', flags: ['copied_answer_only'] } }).post(REQ);
   assert.strictEqual(r.status, 'retry'); assert.strictEqual(r.score, 1);
 });
+t('✍ #58 A 손글씨가 아님(화면 · 인쇄 글) → 다 맞아도 0점 retry · 「직접 손으로」 안내 · 선생님 확인 안 감', () => {
+  const r = world({ claude: { readable: true, final_answer: '8', steps: [{ id: 's1', earned: 1, note: '' }, { id: 's2', earned: 1, note: '' }, { id: 's3', earned: 1, note: '' }, { id: 's4', earned: 1, note: '' }], confidence: 'high', feedback: '잘했어요', flags: ['not_handwritten'] } }).post(REQ);
+  assert.strictEqual(r.status, 'retry'); assert.strictEqual(r.score, 0); assert.ok(/직접 손으로 써서 찍어/.test(r.feedback)); assert.ok(r.steps.every((x) => x.earned === 0));
+});
 t('로그인 토큰 · 다른 학생 · 기준표 없음 · 꺼짐 · 모양', () => {
   assert.strictEqual(world().post({ ...REQ, idToken: 'bad' }).err, 'auth');
   assert.strictEqual(world().post({ ...REQ, idToken: 'other' }).err, 'who');
