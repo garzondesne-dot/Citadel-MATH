@@ -333,14 +333,15 @@ DS.Raid = (function () {
   const holyUsed = (R, mid, uid) => Number(((((R.players || {})[uid] || {}).holy) || {})[mid]) || 0;
   function holyCan(L, R, uid) {
     const step = stepOf(L, R), p = (R.players || {})[uid] || {};
-    if (!step || Number(p.enh) < 10) return false;
+    if (!step || !awake(p)) return false; // 🐞 2026-11-10 1-1반: enh 가 없으면(0강) Number(undefined) = NaN → NaN < 10 이 거짓이라 0강이 통과했음
     if (step.kind === 'boss') return !!L.boss && !holyUsed(R, 'boss', uid) && !bossHp(L, R).won && (() => { const b = bossState(L, R, uid); return b.length > 0 && b.every((s) => s.ok); })(); // 👑 보스 = 형성평가 모든 문항 도달 (재도전에서 맞혀도 됨) (2026-11-09 「일반 · 보스도 사용 가능」)
     if (step.kind !== 'monster' || !L.monsters[step.id] || holyUsed(R, step.id, uid) || cleared(L, R, step.id)) return false;
     // ✨ 퍼펙트일 때만 (2026-11-09 선생님 「퍼펙트하면 발동 · 너무 남발되겠다」 → 「재도전도 퍼펙트면 가능」): 일반 = 한 번의 시도에서 소문제를 모두 맞힘(첫 시도 · 재도전 상관없음) · 소레이드 = 틀림 없이 사슬 완성
     if (isChain(L, R, step.id)) { const cr = chainRecord(L, R, step.id, uid); return !!(cr.done && cr.perfect); }
     return !!record(L, R, step.id, uid).perfect;
   }
-  const holyOn = (R, mid, uid) => { const h = ((R.players || {})[uid] || {}).hg; return !!(h && h.mid === mid && !holyUsed(R, mid, uid)); };
+  const awake = (p) => Number((p || {}).enh) >= 10; // +10 각성만 (없음 · 0 ~ 9 = 아님)
+  const holyOn = (R, mid, uid) => { const p = (R.players || {})[uid] || {}, h = p.hg; return !!(h && h.mid === mid && awake(p) && !holyUsed(R, mid, uid)); }; // 켜 둔 기록이 있어도 +10 이 아니면 막지 않음 (옛 기록 · 잘못 켠 것)
   function holyArmed(R, mid, now, per) {
     const t = teacherUid(R);
     return activeIds(R).filter((u) => u !== t && holyOn(R, mid, u) && (per == null || now - Number(R.players[u].hg.at || 0) <= per * 1000 + 3000));

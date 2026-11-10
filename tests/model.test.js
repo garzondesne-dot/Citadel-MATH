@@ -187,6 +187,8 @@ check(X.online(R2, 'a') && !X.online(R2, 'b'), '접속 표시');
     check(X.holyCan(L, Q, 'b') === true, '🛡 b: 재도전에서 한 번에 다 맞힘 = 퍼펙트 → 버튼 (선생님 「재도전도 퍼펙트면 가능」)');
     { const s0 = Q.subs; Q.subs = { m4: { a: { 0: answer(Q, 'm4', 'a', 0, 2), 1: answer(Q, 'm4', 'a', 1, 3) } } }; check(X.holyCan(L, Q, 'a') === false, '🛡 어느 시도에서도 다 맞히지 못함 → 버튼 없음'); Q.subs = s0; }
     Q.players.a.enh = 9; check(X.holyCan(L, Q, 'a') === false, '🛡 +9 는 없음'); Q.players.a.enh = 10;
+    { const e0 = Q.players.a.enh; delete Q.players.a.enh; check(X.holyCan(L, Q, 'a') === false, '🐞 🛡 강화 기록 없음(0강 · enh 없음) → 없음 (NaN < 10 이 거짓이라 통과하던 것 · 2026-11-10 1-1반)'); Q.players.a.enh = 0; check(X.holyCan(L, Q, 'a') === false, '🛡 0강 → 없음');
+      Q.players.a.hg = { mid: 'm4', at: 1 }; delete Q.players.a.enh; check(X.holyOn(Q, 'm4', 'a') === false, '🐞 🛡 0강이 켠 기록이 남아 있어도 막지 않음'); Q.players.a.enh = 10; check(X.holyOn(Q, 'm4', 'a') === true, '🛡 +10 이 켜면 막음'); delete Q.players.a.hg; Q.players.a.enh = e0; }
     Q.players.a.holy = { m4: 1 }; check(X.holyCan(L, Q, 'a') === false, '🛡 이 몬스터에서 이미 씀 → 없음');
     Q.players = pl; }
   c = X.atkClock(L, Q, 50000); const hp = X.monsterHp(L, Q, 'm4');
