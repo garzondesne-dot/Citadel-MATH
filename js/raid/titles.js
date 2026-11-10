@@ -66,12 +66,75 @@ DS.Titles = (function () {
   // 이름표: [메달][호칭] 번호 이름 (호칭이 없거나 'none' 이면 이름만)
   // opt.short (v0.9.2): 좁은 칸(종합상황실 · 교사 칩)은 호칭 글자 없이 메달 + 이름만 — 이름이 가려지지 않게
   function nameHtml(p, opt = {}) {
-    const t = p && p.title && p.title !== 'none' ? get(p.title) : null, cls = t ? TIER[t.tier].cls : '';
+    const t = p && p.title && p.title !== 'none' ? get(p.title) : null, cls = t ? TIER[t.tier].cls : '', ic = t ? icon(p, opt.uid) : '';
     const num = p && p.num != null && opt.num !== false ? `${p.num}${opt.beon ? '번' : ''} ` : '';
-    if (opt.stack) return `${t ? `<span class="ttl ttl-line ${cls}">${medal(t, opt.size || 18)}${esc(t.name)}</span>` : ''}<span class="tname ${cls}">${num}${esc((p && (p.nick || p.name)) || '')}</span>`; // 2026-11-09 선생님: 종합실 = 위 칸 호칭 · 아래 칸 이름 (호칭 때문에 이름이 가려지지 않게)
+    if (opt.stack) return `${t ? `<span class="ttl ttl-line ${cls}">${medal(t, opt.size || 18)}${esc(t.name)}${ic}</span>` : ''}<span class="tname ${cls}">${num}${esc((p && (p.nick || p.name)) || '')}</span>`; // 2026-11-09 선생님: 종합실 = 위 칸 호칭 · 아래 칸 이름 (호칭 때문에 이름이 가려지지 않게)
     const tag = !t ? '' : opt.short ? (t.medal ? `${medal(t, opt.size || 18)} ` : '') : `<span class="ttl ${cls}">${medal(t, opt.size || 18)}[${esc(t.name)}]</span> `;
     const en = ''; // 🔨 2026-11-08 사용자 「아이디 옆 강화 횟수는 지워 · 대신 은은한 오라」 → 용사 둘레 오라 1~10 (DS.Gem.auraCls)
-    return `${tag}<span class="tname ${cls}">${num}${esc((p && (p.nick || p.name)) || '')}</span>${en}`;
+    return `${tag}<span class="tname ${cls}">${num}${esc((p && (p.nick || p.name)) || '')}</span>${opt.stack ? '' : ic}${en}`;
   }
-  return { TIER, all, get, data, earned, medal, nameHtml, BASE, photoPass, fixedOutside };
+  // ── 🏅 #63 칭호 작은 기능 (C안 · 보이는 연출만 · 고른 칭호 하나만) ─────────────────────────
+  //   평소 = 이름표 옆 멈춘 기호(.tfx-ic) · 사건 때 한 번(1초 안 · transform/opacity 만) · 종합실 = 동시에 움직이는 이름표 최대 5(줄 서기)
+  //   종합실 설정 「칭호 효과 끄기」(localStorage ds-tfx-off · 기본 켬) · prefers-reduced-motion = 움직임 없음
+  const ICON = { dawn: '✦', first: '✦', slayer: '⚔', grit: '💪', steady: '🔁', smith: '⚒', collector: '⚒', magic: '⚒', rare: '⚒', sage: '⚒', gambler: '🎲', nunchi: '🙊', oxsurv: '⭕', quester: '✏', writer: '✍', hunter: '🎯', wall: '🛡', awake: '⚡' };
+  const UNIT = { king: { sym: '∩', from: 2, to: 7 }, detective: { sym: '→', from: 8, to: 13 }, sovereign: { sym: '∴', from: 2, to: 13 } }; // 그 단원 차시 레이드에서만
+  // 사건 → 그 사건에 반응하는 칭호
+  const EVENT = { boss: ['slayer'], bossStart: ['king', 'detective', 'sovereign'], grit: ['grit'], forge: ['smith', 'collector', 'magic', 'rare', 'sage'], fun: ['gambler'], nun: ['gambler', 'nunchi'], ox: ['gambler', 'oxsurv'], photo: ['writer'], fix: ['hunter'], td: ['wall'], holy: ['awake'], quest: ['quester'] };
+  let curNo = null; const setNo = (n) => { curNo = Number(n) || null; };
+  const unitOn = (id) => { const u = UNIT[id]; return !!(u && curNo && curNo >= u.from && curNo <= u.to); };
+  function icon(p, uid) {
+    const id = p && p.title; if (!id || id === 'none') return '';
+    const sym = UNIT[id] ? (unitOn(id) ? UNIT[id].sym : '') : id === 'steady' ? `🔁${Number(p.stk) > 0 ? Number(p.stk) : ''}` : ICON[id] || '';
+    return sym ? `<i class="tfx-ic${UNIT[id] ? ' tfx-unit' : ''}" data-tfx="${id}"${uid ? ` data-tu="${esc(uid)}"` : ''}>${esc(sym)}</i>` : '';
+  }
+  const off = () => { try { return localStorage.getItem('ds-tfx-off') === '1'; } catch (e) { return false; } };
+  const setOff = (v) => { try { if (v) localStorage.setItem('ds-tfx-off', '1'); else localStorage.removeItem('ds-tfx-off'); } catch (e) { /* 무시 */ } if (typeof document !== 'undefined') document.documentElement.classList.toggle('tfx-off', !!v); };
+  const still = () => typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const HALL_MAX = 5; let hallLive = 0; const hallQ = [];
+  function play(el, cls, ms) { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); return new Promise((r) => setTimeout(() => { el.classList.remove(cls); r(); }, ms)); }
+  function hallNext() { while (hallLive < HALL_MAX && hallQ.length) { const el = hallQ.shift(); if (!el.isConnected) continue; hallLive++; play(el, 'tfx-pop', 900).then(() => { hallLive--; hallNext(); }); } }
+  // 한 사람(uid) 이름표 기호 한 번 반짝 (종합실 = 줄 서기 · 폰 = 바로)
+  function pulse(uid, opt = {}) {
+    if (still() || typeof document === 'undefined') return 0;
+    const els = [...document.querySelectorAll(`.tfx-ic[data-tu="${String(uid).replace(/"/g, '')}"]`)].filter((e) => e.offsetParent !== null || e.getClientRects().length);
+    let n = 0;
+    els.forEach((el) => { const hall = !!el.closest('#screen-hall'); if (hall && off()) return; n++; if (hall) hallQ.push(el); else play(el, opt.cls || 'tfx-pop', 900); });
+    hallNext(); return n;
+  }
+  // 방 안 사람들: 그 사건에 맞는 칭호를 단 사람만
+  function room(R, kind, ids) {
+    const want = EVENT[kind] || [], ps = (R && R.players) || {};
+    (ids || Object.keys(ps)).forEach((u) => { const p = ps[u]; if (!p || p.teacher || !want.includes(p.title)) return; if (kind === 'bossStart' && !unitOn(p.title)) return; api.pulse(u); });
+  }
+  // 나(폰): 내 이름표가 보이면 반짝 · 없으면 위쪽 작은 칩 1초 · say = 「끈기!」 같은 짧은 톡
+  function me(title, kind, say) {
+    if (!title || !(EVENT[kind] || []).includes(title) || typeof document === 'undefined') return false;
+    if (kind === 'bossStart' && !unitOn(title)) return false;
+    const n = api.pulse('me');
+    if (say || !n) { if (still() && !say) return true; const c = document.createElement('div'); c.className = 'tfx-say'; c.textContent = `${ICON[title] || (UNIT[title] || {}).sym || ''} ${say || ''}`.trim(); document.body.appendChild(c); setTimeout(() => c.remove(), still() ? 1200 : 1000); }
+    return true;
+  }
+  // 띠 한 줄 (✏ ○○ 출제) · 1초 남짓
+  function band(text) { if (typeof document === 'undefined') return; const c = document.createElement('div'); c.className = 'tfx-say tfx-band'; c.textContent = text; document.body.appendChild(c); setTimeout(() => c.remove(), 1600); }
+  // 방 상태가 바뀌는 순간 (종합실 · 학생 폰 render 마다 부름 · 처음 본 상태는 쏘지 않음)
+  const seenBy = {};
+  function watch(R, L, who, code) {
+    if (!R || !L || !DS.Raid) return;
+    const key = `${who || 'h'}|${code || ''}`, was = seenBy[key], now = {};
+    try {
+      const st = DS.Raid.stepOf(L, R); now.boss = !!(st && st.kind === 'boss'); now.won = !!DS.Raid.bossHp(L, R).won;
+      const f = R.fun || {}; now.fun = f.g && f.phase && f.phase !== 'end' ? `${f.kind || 'bal'}|${f.g}` : '';
+      const pt = st && DS.Raid.stone ? DS.Raid.stone(R, st.id) : null; now.holy = pt && pt.holy ? `${pt.until}` : ''; now.holyBy = pt && pt.holy ? (pt.all || [pt.by]) : [];
+    } catch (e) { return; }
+    seenBy[key] = now; if (!was) return;
+    const fire = (kind, ids) => (who && who !== 'h' ? api.me(((R.players || {})[who] || {}).title, kind) : api.room(R, kind, ids));
+    const mine = (ids) => !who || who === 'h' || (ids || []).includes(who);
+    if (now.won && !was.won) fire('boss');
+    if (now.boss && !was.boss) fire('bossStart');
+    if (now.fun && now.fun !== was.fun) { const k = now.fun.split('|')[0]; fire(k === 'td' ? 'td' : k === 'nun' ? 'nun' : k === 'ox' || k === 'quiz' ? 'ox' : 'fun'); }
+    if (now.holy && now.holy !== was.holy && mine(now.holyBy)) fire('holy', now.holyBy);
+  }
+  if (typeof document !== 'undefined' && off()) document.documentElement.classList.add('tfx-off');
+  const api = { TIER, all, get, data, earned, medal, nameHtml, BASE, photoPass, fixedOutside, ICON, UNIT, EVENT, icon, setNo, pulse, room, me, band, watch, off, setOff, HALL_MAX, _hall: () => ({ live: hallLive, q: hallQ.length }) };
+  return api;
 })();

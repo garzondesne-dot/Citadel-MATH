@@ -3081,3 +3081,19 @@ body:has(#test-bar) #screen-student.st-battle .wrap:has(.cr-dock) { padding-bott
 .nt-btns { display: flex; gap: 8px; margin-top: 12px; } .nt-btns .btn { flex: 1; margin: 0 !important; }
 .tm-sendrow { display: flex; gap: 8px; flex-wrap: wrap; } .tm-sendrow .btn { flex: 1; }
 .tm-all { color: var(--gold, #f5c542); font-size: 12px; border: 1px solid currentColor; border-radius: 6px; padding: 0 4px; }
+/* 🏅 #63 칭호 작은 기능 (C안 · 멈춘 기호 · 사건 때 한 번 · transform/opacity 만) */
+.tfx-ic { display: inline-block; margin-left: 3px; font-style: normal; font-size: .85em; line-height: 1; vertical-align: baseline; opacity: .9; }
+.tfx-ic.tfx-unit { font-weight: 700; color: #ffd76a; }
+.tfx-ic.tfx-pop { animation: tfx-pop .85s ease-out 1; }
+@keyframes tfx-pop { 0% { transform: scale(1); opacity: .9; } 30% { transform: scale(1.9); opacity: 1; } 100% { transform: scale(1); opacity: .9; } }
+.tfx-say { position: fixed; left: 50%; top: 18%; z-index: 90; transform: translateX(-50%); padding: 6px 14px; border-radius: 999px; background: rgba(20, 16, 12, .92); border: 2px solid #ffcf5a; color: #ffe7a3; font-weight: 700; font-size: 16px; pointer-events: none; animation: tfx-say 1s ease-out 1 forwards; }
+.tfx-band { top: 12%; border-radius: 8px; animation-duration: 1.6s; }
+@keyframes tfx-say { 0% { opacity: 0; transform: translate(-50%, 8px) scale(.9); } 20% { opacity: 1; transform: translate(-50%, 0) scale(1.05); } 80% { opacity: 1; transform: translate(-50%, 0) scale(1); } 100% { opacity: 0; transform: translate(-50%, -6px) scale(1); } }
+/* 등급: 보라 = 이름 글자 멈춘 그라데이션 · 주황 = 폰에서만 느린 반짝임 · 종합실 = 멈춘 금테 */
+.tname.t-p { background: linear-gradient(90deg, #d9b3ff, #8fb8ff); -webkit-background-clip: text; background-clip: text; color: transparent; text-shadow: none !important; filter: drop-shadow(1px 1px 0 #000); }
+#screen-student .tname.t-o, #screen-camp .tname.t-o, #screen-bonus .tname.t-o { position: relative; display: inline-block; overflow: hidden; vertical-align: bottom; }
+#screen-student .tname.t-o::after, #screen-camp .tname.t-o::after, #screen-bonus .tname.t-o::after { content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 40%; background: linear-gradient(90deg, transparent, rgba(255, 240, 200, .55), transparent); transform: translateX(-120%); animation: tfx-shine 4.5s ease-in-out infinite; pointer-events: none; }
+@keyframes tfx-shine { 0%, 60% { transform: translateX(-120%); } 100% { transform: translateX(300%); } }
+#screen-hall .tname.t-o { box-shadow: 0 0 0 1px #ffcf5a; border-radius: 3px; padding: 0 2px; }
+.tfx-off #screen-hall .tfx-ic { display: none; }
+@media (prefers-reduced-motion: reduce) { .tfx-ic.tfx-pop, .tfx-say { animation: none !important; } .tname.t-o::after { display: none !important; } }

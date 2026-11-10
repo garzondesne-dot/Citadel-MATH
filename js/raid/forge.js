@@ -180,6 +180,7 @@ DS.Forge = (function () {
       <b class="fg-name">${esc(c.name)}</b>${first && !preview ? `<b class="fg-gem3">💎 +${DS.Gem ? DS.Gem.G.card : 3} · 마정석을 받았어요</b>` : ''}${(() => { const p = perkOf(c); if (!p) return `<span class="muted small">도감 ${n} / ${opened().length}</span>`; const cs = perkCards(p), got = cs.filter((x) => owned[x.id] || (first && x.id === c.id)).length; return `<span class="muted small">🧑 ${esc(heroName(p.id))}까지 ${cs.length - got}장 · ${got} / ${cs.length}</span>`; })()}<button class="btn primary big" id="fg-keep">${first ? '🃏 내 카드에 넣기' : '확인'}</button>`;
     $('#forge').appendChild(el);
     DS.Sound.correct();
+    if (me && !me.teacher && DS.Titles && DS.Titles.me) DS.Titles.me(me.title, 'forge', '연성 성공!'); // 🏅 #63 ⚒ 연성 칭호: 모루 연성 성공 때 불꽃 (캠프만)
     el.querySelector('#fg-keep').onclick = () => DS.Control.run(async () => {
       if (first) { if (!preview) { await N().set(`cards/${key(me.c)}/${me.n}/${c.id}`, true); if (DS.Grow) DS.Grow.add(me, { card: 1 }, `card_${c.id}`).catch(() => {}); if (DS.Gem) DS.Gem.add(me, DS.Gem.G.card, `card_${c.id}`, '첫 카드', { free: true }).catch(() => {}); } owned[c.id] = true; }
       slots = { l: null, op: null, r: null }; pick = 'l'; el.remove(); render();

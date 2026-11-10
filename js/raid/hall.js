@@ -191,6 +191,7 @@ DS.Hall = (function () {
   if (typeof window !== 'undefined') window.addEventListener('ds-roster', () => { try { if (R && L) render(); } catch (e) { /* 무시 */ } }); // 🧮 명단 번호를 받으면 다시 그림
   function render() {
     const i = R.state.step ?? -1;
+    if (DS.Titles && DS.Titles.watch) { DS.Titles.setNo(L && !L.eval ? L.no : null); setTimeout(() => DS.Titles.watch(R, L, 'h', code), 0); } // 🏅 #63 칭호 사건 (그린 뒤 · 동시 5 줄 서기)
     // 2026-11-07 정돈판 비교 1~3: 위 한 줄 = 「n차시 · 단계」 · 4단계 · 시간 막대 · 🚪 코드 · ⚙ (메뉴화면 · 선생님 모습 · 캠프 보기 · 전체 화면은 ⚙ 안)
     $('#h-top').innerHTML = `<b>${L.no ? `${DS.Lessons.noText(L.no)}차시 · ` : ''}${esc(Raid().isLobby(R) ? '대기실' : C().stepName(L, R))}</b>${stepChips(i)}<span class="h-tb2" id="h-tb2"></span><button class="h-code-chip" id="h-code-big" title="늦게 온 학생 · 다시 들어오는 학생용 — 누르면 크게">🚪 코드 <b>${code}</b></button><button class="h-gear" id="h-gear" title="메뉴화면 · 선생님 모습 · 캠프 보기 · 전체 화면">⚙</button>
       <div class="h-gmenu" id="h-gmenu"${gearOpen ? '' : ' hidden'}><button class="btn small" id="h-menu">◀ 메뉴화면</button><button class="btn small" id="h-set">🧙 선생님 모습</button>${!Raid().isClosed(R) && !Raid().isLobby(R) ? '<button class="btn small" id="h-camp">🏕 캠프 보기</button>' : ''}${DS.UI.fs.btn('h-fs')}<span class="muted small" id="h-close-at"></span></div>`;
@@ -247,7 +248,7 @@ DS.Hall = (function () {
     const on = list.filter(([u]) => Raid().online(R, u)).length;
     $('#h-heroes').innerHTML = `<p class="shelf-title">⚔ 용사단 <span class="muted">${Raid().isLobby(R) ? `입장 ${list.length}` : `접속 ${on} / ${list.length}`}</span></p>
       <div class="hrow teach">${DS.Art.hero(DS.Art.teacherHero(R), 'idle', 'mini')}<b>선생님</b><i class="dot"></i></div>
-      ${list.map(([u, p]) => `<div class="hrow">${DS.Art.hero(p.hero, 'idle', 'mini')}<span>${DS.Titles.nameHtml(p, { size: 16, short: true })}</span>${st(u, p)}<i class="dot${Raid().online(R, u) || Raid().isLobby(R) ? '' : ' off'}"></i></div>`).join('')}
+      ${list.map(([u, p]) => `<div class="hrow">${DS.Art.hero(p.hero, 'idle', 'mini')}<span>${DS.Titles.nameHtml(p, { size: 16, short: true, uid: u })}</span>${st(u, p)}<i class="dot${Raid().online(R, u) || Raid().isLobby(R) ? '' : ' off'}"></i></div>`).join('')}
       <p class="muted small h-legend">● 접속 · ○ 끊김 — 정답·오답 글자는 띄우지 않아요</p>`;
   }
 
@@ -273,7 +274,7 @@ DS.Hall = (function () {
       ${finale ? `<div class="lb2-cnt">💬 ${words.length} / ${n}</div>` : `<div class="lb2-qr"><div id="h-qr" class="qr"></div><b>${code}</b><span>QR · 수업 코드</span></div><div class="lb2-cnt lb2-on">👥 접속 <b>${onN}</b>명 · 입장 ${n}명</div>${mis ? `<div class="lb2-miss">${mis}</div>` : ''}`}
       <div class="lb2-say teacher">${finale ? '모두 수고했네! 오늘 배운 것 한마디씩 남기게' : `${L.no ? `${DS.Lessons.noText(L.no)}차시 ` : ''}${esc(L.title.split('·')[0].trim())} 던전에 온 것을 환영하네!`}</div>
       <div class="lb2-h teacher" style="left:50%;top:60%">${DS.Art.hero(DS.Art.teacherHero(R), finale ? 'attack' : 'idle', finale ? 'pairhop' : 'huff')}<i class="shadow"></i><span class="nm gold">선생님</span></div>
-      ${pos.map((o, i) => `<div class="lb2-h${enhCls(o.p)}" style="left:${o.x}%;top:${o.y}%;z-index:${5 + Math.round(o.y / 10)};--sz:${size}px;animation-delay:${(i * 0.13) % 0.9}s"><span class="nm stk">${DS.Titles.nameHtml(o.p, { size: 14, stack: true })}</span><div class="${(finale ? i % 2 === 1 : o.flip) ? 'face-l' : ''}">${DS.Art.hero(o.p.hero, 'idle', finale ? 'pairhop' : 'huff')}</div><i class="shadow"></i>${finale && words.includes(o.u) ? `<span class="lb2-bub" data-u="${o.u}">${esc(R.words[o.u].t)}</span>` : ''}</div>`).join('')}
+      ${pos.map((o, i) => `<div class="lb2-h${enhCls(o.p)}" style="left:${o.x}%;top:${o.y}%;z-index:${5 + Math.round(o.y / 10)};--sz:${size}px;animation-delay:${(i * 0.13) % 0.9}s"><span class="nm stk">${DS.Titles.nameHtml(o.p, { size: 14, stack: true, uid: o.u })}</span><div class="${(finale ? i % 2 === 1 : o.flip) ? 'face-l' : ''}">${DS.Art.hero(o.p.hero, 'idle', finale ? 'pairhop' : 'huff')}</div><i class="shadow"></i>${finale && words.includes(o.u) ? `<span class="lb2-bub" data-u="${o.u}">${esc(R.words[o.u].t)}</span>` : ''}</div>`).join('')}
       ${finale ? '<div class="stamp-bar wide">📮 반드시 학습지 확인도장 받아가세요.</div>' : ''}
       ${Raid().focusOn(R) ? '<div class="h-focus-badge">⚠ 집중모드</div>' : ''}
       <div class="h-acts corner${finale ? '' : ' below-qr'}">${finale ? klassBtn() + punchBtn() : `<button class="btn small" id="h-tcamp">🏛 교사 캠프</button>${(R.meta || {}).otShow && DS.Punch && !DS.Act.punchOff(R) ? '<button class="btn small" id="h-ot">⏳ 연장전 결과</button>' : ''}`}</div></div>`;
@@ -297,7 +298,7 @@ DS.Hall = (function () {
       <div class="rest-fire"><i class="camp-glow"></i><i class="camp-glow g2"></i><i class="camp-fire-img" style="background-image:url('${DS.ASSETS.base}${c.fire.src}');background-size:${c.fire.cols * 100}% ${(c.fire.rows || 1) * 100}%;background-position:0 0"></i></div>
       <div class="lb2-say teacher">잠깐 쉬었다 가세! 🔥</div>
       <div class="lb2-h teacher" style="left:50%;top:44%">${DS.Art.hero(DS.Art.teacherHero(R), 'sit', 'huff')}<i class="shadow"></i><span class="nm gold">선생님</span></div>
-      ${pos.map((o, i) => `<div class="lb2-h${enhCls(o.p)}" style="left:${o.x}%;top:${o.y}%;z-index:${5 + Math.round(o.y / 10)};--sz:${size}px;animation-delay:${(i * 0.13) % 0.9}s"><span class="nm stk">${DS.Titles.nameHtml(o.p, { size: 14, stack: true })}</span><div class="${o.flip ? 'face-l' : ''}">${DS.Art.hero(o.p.hero, 'sit', 'huff')}</div><i class="shadow"></i></div>`).join('')}</div>`;
+      ${pos.map((o, i) => `<div class="lb2-h${enhCls(o.p)}" style="left:${o.x}%;top:${o.y}%;z-index:${5 + Math.round(o.y / 10)};--sz:${size}px;animation-delay:${(i * 0.13) % 0.9}s"><span class="nm stk">${DS.Titles.nameHtml(o.p, { size: 14, stack: true, uid: o.u })}</span><div class="${o.flip ? 'face-l' : ''}">${DS.Art.hero(o.p.hero, 'sit', 'huff')}</div><i class="shadow"></i></div>`).join('')}</div>`;
     const f = c.fire; let k = 0; clearInterval(restFireT);
     restFireT = setInterval(() => { const e = document.querySelector('#h-arena .rest-fire .camp-fire-img'); if (!e) { clearInterval(restFireT); return; } k = (k + 1) % f.frames; e.style.backgroundPosition = `${((k % f.cols) / Math.max(1, f.cols - 1)) * 100}% ${(Math.floor(k / f.cols) / Math.max(1, (f.rows || 1) - 1)) * 100}%`; }, f.ms);
   }
@@ -342,7 +343,7 @@ DS.Hall = (function () {
       <div class="raid-top"><b>${step.kind === 'boss' ? '👑 ' : step.special ? '⭐ ' : step.review ? '📖 ' : ''}${esc(f.title)}</b></div>
       ${step.special ? '<div class="raid-banner">⭐ 스페셜 몬스터 난입!</div>' : step.kind === 'boss' ? '<div class="raid-banner boss">👑 보스 출현!</div>' : ''}
       <div class="raid2-shadow"></div><div class="raid2-mon" id="rm"><div class="raid-bars over-head"><div class="raid-hp"><i id="rh-bar"></i><span id="rh-txt"></span></div><div class="raid-atk" id="rh-atk" title="몬스터 공격 게이지 (학생 폰과 같은 시계)"><i></i><span></span></div></div>${DS.Art.monster(f.sprite, 'idle', 'float')}<div id="rm-fx"></div></div>
-      ${pos.map((o) => `<div class="fh2${enhCls(o.p)}" id="fh-${o.u}" style="left:${o.x}%;top:${o.y}%;z-index:${5 + Math.round(o.y / 10)}"><span class="fh-name stk">${DS.Titles.nameHtml(o.p, { size: 14, stack: true })}</span><div class="${o.x > 50 ? 'face-l' : ''}">${DS.Art.hero(o.p.hero, 'idle')}</div><i class="shadow"></i></div>`).join('')}
+      ${pos.map((o) => `<div class="fh2${enhCls(o.p)}" id="fh-${o.u}" style="left:${o.x}%;top:${o.y}%;z-index:${5 + Math.round(o.y / 10)}"><span class="fh-name stk">${DS.Titles.nameHtml(o.p, { size: 14, stack: true, uid: o.u })}</span><div class="${o.x > 50 ? 'face-l' : ''}">${DS.Art.hero(o.p.hero, 'idle')}</div><i class="shadow"></i></div>`).join('')}
       <div class="h-leg" id="h-leg"></div><div class="raid-clear" id="r-clear" hidden></div><div class="h-focus-badge">⚠ 집중모드</div><div class="h-combo" id="h-combo"></div>
     </div>`;
     seen = attacks(step);

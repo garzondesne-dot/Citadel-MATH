@@ -177,6 +177,7 @@ DS.Photo = (function () {
         const fb = (res.feedback ? `<p class="ph-fb">💬 ${esc(res.feedback)}</p>` : '') + stepList(res.steps);
         if (res.status === 'pass') {
           if (DS.Sound) DS.Sound.correct();
+          if (DS.Titles && DS.Titles.me) setTimeout(() => DS.Titles.me(m.title, 'photo', '서술 통과!'), 700); // 🏅 #63 ✍ 서술의 현자
           el.innerHTML = `<div class="quiz-box framed ph-box">${head('🎉 풀이 통과!')}${sc}${fb}<div class="row"><button class="btn primary big" id="ph-ok">⚔ 처치하러!</button></div></div>`;
           const pv = { status: 'pass', id: res.id, score: res.score, total: res.total };
           bindX(); el.querySelector('#ph-ok').onclick = () => close(pv);

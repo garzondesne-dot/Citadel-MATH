@@ -26,6 +26,7 @@ DS.Student = (function () {
     cleared0 = false; resulted = false; drawn = ''; shown = ''; ntAsked = ''; form = null; retrying = ''; bossSet = 1; othersSeen = {};
     an = null; thSeen = null; phaseWas = 0; chestDone = {}; chestQ = []; chestBusy = false; batPaid = ''; endPaid = ''; // v0.9.11
     if (DS.Gem && info && info.cls != null && info.num) { const gd = await DS.Gem.mine({ c: info.cls, n: info.num }).catch(() => null); if (gd && gd.enh) info.enh = Number(gd.enh); } // 🔨 강화 단계 → 교실 TV 이름표 · 빛
+    if (info && info.title === 'steady' && DS.Gem && DS.Gem.streak && !opt.test && info.cls != null && info.num) { const [rr, hh] = await Promise.all([DS.Net.get(`records/${String(info.cls).replace(/[.#$/[\]]/g, '_')}/${info.num}`).catch(() => null), DS.Net.get(`held/${String(info.cls).replace(/[.#$/[\]]/g, '_')}`).catch(() => null)]); info.stk = DS.Gem.streak(rr || {}, hh); } // 🏅 #63 🔁n
     await DS.Act.join(c, info);
     if (DS.Attack && DS.Attack.preloadFaces && DS.Attack.canUlt(info.fx, info.hero)) DS.Attack.preloadFaces(); // ⚡ 필살기 조건이면 얼굴 그림 미리
     if (DS.Gem && DS.Gem.watchGifts && !test) DS.Gem.watchGifts({ c: info.cls, n: info.num });
@@ -186,7 +187,7 @@ DS.Student = (function () {
     if (battleNow()) { $('#st-head').innerHTML = ''; return; }
     // 2026-11-07 정돈판 비교 10: 대기실 · 설명 · 마무리도 전투와 같은 위 칸 (동그란 ◀ · 무대 이름 · 💬 · 💎 칩) — 장면 대신 얇은 띠
     const badge = Raid().isLobby(R) || myP().lobby ? '대기실' : Raid().isEnd(L, R) ? '마무리' : step.kind === 'boss' ? '보스' : step.kind === 'monster' ? (step.special ? '스페셜' : '전투') : '설명';
-    $('#st-head').innerHTML = `<div class="sc-top flat">${scTop().replace(/^<div class="sc-top">/, '').replace(/<\/div>$/, '')}</div><div class="st-plate">${DS.Art.hero(p.hero || 0, 'idle', 'me')}<b>${DS.Titles ? DS.Titles.nameHtml(p, { beon: true }) : `${p.num}번 ${esc(p.nick || '')}`}</b><span class="st-badge">${badge}</span></div>`;
+    $('#st-head').innerHTML = `<div class="sc-top flat">${scTop().replace(/^<div class="sc-top">/, '').replace(/<\/div>$/, '')}</div><div class="st-plate">${DS.Art.hero(p.hero || 0, 'idle', 'me')}<b>${DS.Titles ? DS.Titles.nameHtml(p, { beon: true, uid: 'me' }) : `${p.num}번 ${esc(p.nick || '')}`}</b><span class="st-badge">${badge}</span></div>`;
     bindTop(); // 💬 버그 · 의견 (2026-11-06) · 💎 = 내 용사 창
   }
   const focusLock = () => !!(R && Raid().focusOn(R) && !Raid().isLobby(R)); // 👀 집중모드: 학생 설정 잠금 (2026-11-06 사용자)
@@ -196,7 +197,8 @@ DS.Student = (function () {
 
   function render() {
     if (DS.Fresh) DS.Fresh.inClass(`${(R.state || {}).step}|${(R.state || {}).lesson || ''}`, { test: !!test }); // 🔄 #55 ③ 다음 단계로 넘어가는 순간 새 판
-    if (DS.SymTalk) DS.SymTalk.setCtx(Object.assign(acc(), { test: !!test }), L && L.id); // 📖 #54 기호 톡 기록 = 이 차시 (테스트는 안 셈)
+    if (DS.SymTalk) DS.SymTalk.setCtx(Object.assign(acc(), { test: !!test }), L && L.id);
+    if (DS.Titles && DS.Titles.watch) { DS.Titles.setNo(L && !L.eval ? L.no : null); DS.Titles.watch(R, L, me, code); } // 🏅 #63 칭호 사건 (보스 격파 · 보스전 시작 · 놀이 · 디펜스 · 홀리 방패) = 내 칭호만 // 📖 #54 기호 톡 기록 = 이 차시 (테스트는 안 셈)
     if (Raid().isClosed(R)) return toCamp();
     if (!R.players || !R.players[me]) { $('#st-body').innerHTML = '<div class="panel"><p>입장 정보가 없어요. 처음 화면에서 다시 입장해 주세요.</p></div>'; return; }
     header();
@@ -528,6 +530,7 @@ DS.Student = (function () {
     const autoUlt = !!(fx && !prac && real() && t.attempt === 0 && t.total > 0 && t.correct === t.total && DS.Attack && DS.Attack.canUlt(myP().fx, myP().hero));
     // 🔥 끈기의 일격: 두 번 넘게 틀린 뒤 드디어 다 맞힘 (연출만)
     const grit = !!(fx && !prac && t.attempt >= 2 && rec.perfectAt === t.attempt);
+    if (fx && !prac && t.attempt >= 1 && rec.perfectAt === t.attempt && DS.Titles && DS.Titles.me) setTimeout(() => DS.Titles.me(myP().title, 'grit', '끈기!'), 900); // 🏅 #63 💪 끈기의 용사: 재도전으로 맞히는 순간
     if (finish) setTimeout(() => { const sc = body.querySelector('.scene'); if (sc) { sc.classList.add('fin-flash'); DS.FX.play(sc, myP().fx || 'flame', { perfect: true, scale: 0.6 }); } DS.Sound.correct(); }, atk ? 1300 : 500);
     const head = prac && rec.v3 ? (t.correct === t.total ? `✔ 새 문제 해결! <span class="small muted">기회는 그대로</span>` : `✏ 틀린 부분이 있습니다. 고쳐 보세요. <span class="small muted">(기회 −1)</span>`) : prac ? `몬스터 묶기 ${t.correct}/${t.total} — 지금까지 <b>${Raid().bindOf(L, R, mid, me)}초</b> 묶음 <span class="small muted">(최대 ${Raid().BIND_MAX}초)</span>` : { success: '⚔ 공격 성공!', partial: `⚔ 부분 성공 (${t.correct}/${t.total})`, fail: '💨 공격 실패…' }[label];
     const done = Raid().cleared(L, R, mid);

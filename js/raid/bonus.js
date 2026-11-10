@@ -286,6 +286,7 @@ DS.Bonus = (function () {
     if (castle && me && !all()) seenAdd(me, `${L.id}/${mid}`); // NEW 끔
     const first = !rec.tries && !rec.clear, clearedBefore = !!rec.clear, sealedBefore = seals(mine).includes(L.id);
     const wasOpen = (() => { const x = !castle && isField(L, mid) ? noteOf(L) : null; const st = x && !x.none ? x.mons[x.ids.indexOf(mid)] : null; return !!(st && (DS.Note.OPEN[st] || st === 'a')); })(); // 📕 틀림 · 안 풂이었던 문제
+    if (fo.quest && DS.Titles && DS.Titles.band && me) N().get(`accounts/${ck(me.c)}/${fo.quest.n}/title`).then((t) => { if (t === 'quester') setTimeout(() => DS.Titles.band(`✏ ${String(fo.quest.name || `${fo.quest.n}번`).slice(0, 8)} 출제`), 500); }).catch(() => {}); // 🏅 #63 ✏ 출제자: 내 문제가 몬스터로 나올 때 띠
     const seed = fo.quest ? fo.quest.seed : `${N().uid()}|${Date.now()}`; // ✏ 친구가 낸 문제 = 친구가 고른 숫자 그대로 (첫 판)
     let attempt = fo.quest ? 1 : first && !isField(L, mid) ? 0 : 1, left = TRIES; // 📕 수업 문제 복습은 처음부터 숫자를 바꿈
     const chainRoom = castle && !fo.quest && (L.chain || []).includes(mid); // ⚔ 소레이드 방 (2026-11-09 #23 · 혼자 · 성채용 규칙)
@@ -374,8 +375,10 @@ DS.Bonus = (function () {
       if (DS.Mis && wrongs.length) { // 오개념: 이번 판에서 틀린 소문제 → 그 소문제를 결국 맞혔으면 「바로잡음」
         const acc = DS.Mis.merge({}, misBase); wrongs.forEach((w) => DS.Mis.add(acc, w.codes, !!solved[w.i])); if (Object.keys(acc).length) patch.mis = acc;
       }
+      const ntBefore = cleared && !castle && !preview ? noteOf(L).left : 0; // 🏅 #63 🎯 오답 사냥꾼: 빨간 칸이 줄어드는 순간
       if (!preview) await N().update(`bonus/${ck(me.c)}/${me.n}/${L.id}/${mid}`, patch).catch(() => {});
       mine[L.id] = mine[L.id] || {}, mine[L.id][mid] = Object.assign({}, mine[L.id][mid], { tries, clear: (cleared && !photoRoom) || (mine[L.id][mid] || {}).clear }, patch.mis ? { mis: patch.mis } : {}, patch.ans ? { ans: patch.ans } : {});
+      if (ntBefore && noteOf(L).left < ntBefore && DS.Titles && DS.Titles.me) setTimeout(() => DS.Titles.me(me.title, 'fix', '빨간 칸 해결!'), 600);
       if (cleared && photoRoom) return photoStage(items, true);
       if (cleared) return win();
       if (left <= 0) {

@@ -164,7 +164,7 @@ DS.Camp = (function () {
         <button class="cs-zone camp-gate-z" id="camp-gate" style="${S.box(c.zones.gate)}" aria-label="차시 던전"><span class="camp-label">🔒 차시 던전</span></button>
         <button class="camp-anvil cs-int" id="camp-anvil" aria-label="모루">${sheet(c.anvil, c.anvil.states.idle, 0, 'camp-anvil-img')}<span class="camp-label">⚒ 모루</span></button>
         <div class="camp-fire"><i class="camp-glow"></i><i class="camp-glow g2"></i>${sheet(c.fire, 0, 0, 'camp-fire-img', '')}</div>
-        <div class="camp-hero">${DS.Art.hero(me.hero, 'sit', 'huff')}<i class="shadow"></i><div class="camp-plate"><span class="nm">${DS.Titles ? DS.Titles.nameHtml({ title: me.title || 'none', nick: me.name }, { num: false, size: 14 }) : esc(me.name)}</span></div></div>
+        <div class="camp-hero">${DS.Art.hero(me.hero, 'sit', 'huff')}<i class="shadow"></i><div class="camp-plate"><span class="nm">${DS.Titles ? DS.Titles.nameHtml({ title: me.title || 'none', nick: me.name, stk: me.stk }, { num: false, size: 14, uid: 'me' }) : esc(me.name)}</span></div></div>
         ${prop('dummy', '🎯', '복습 허수아비', '')}${prop('mail', '📮', '우편함', '')}
       </div>
       <div class="camp-bar"><span id="camp-sv"></span></div>
@@ -285,6 +285,7 @@ DS.Camp = (function () {
     // 📕 오답노트 배지: 남은 문제(틀림 + 안 풂) 수는 📮 우편함 한 곳에만 (0 이면 금색 도장) · 🎯 허수아비엔 작은 점 (2026-11-05 정신없음 줄이기)
     if (DS.Note && (!me.test || (DS.Test && DS.Test.active && DS.Test.active()))) { // #47
       const held = await DS.Net.get(`held/${k}`).catch(() => null), nt = DS.Note.all(rec || {}, bonus || {}, no, held);
+      if (me.title === 'steady' && DS.Gem && DS.Gem.streak) { me.stk = DS.Gem.streak(rec || {}, held); const ic = document.querySelector('.camp-plate .tfx-ic[data-tfx="steady"]'); if (ic) ic.textContent = `🔁${me.stk || ''}`; } // 🏅 #63 🔁n 연속 참여 수
       // 2026-11-07 6판: 남은 복습 수 = 🎯 허수아비 위 · 📮 우편함 = 안 읽은 소식 수
       const d = document.getElementById('camp-dummy'); if (d) { const old = d.querySelector('.nt-badge'); if (old) old.remove(); if (nt.list.length) d.insertAdjacentHTML('beforeend', DS.Note.badge(nt.left)); }
       const z = document.getElementById('camp-mail'); if (z && DS.Mail) { const un = await DS.Mail.unread(me).catch(() => 0), old = z.querySelector('.ml-badge'); if (old) old.remove(); if (un) z.insertAdjacentHTML('beforeend', `<span class="ml-badge">${un}</span>`); }
