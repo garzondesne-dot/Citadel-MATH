@@ -18,7 +18,7 @@ DS.Forge = (function () {
   // 📖 도감 특전 3줄 (2026-11-07 모루 시안): 🧑 성기사 = 1~3차시(「부분집합의 개수」 빼고) · 무희 = 4~6 · 음유시인 = 7~10 · 💎 60 먼저 열기 → 다 모으면 돌려받음
   const PERKS = [{ id: 8, a: 1, b: 3, skip: 'subcount' }, { id: 10, a: 4, b: 6 }, { id: 11, a: 8, b: 11 }];
   const perkCards = (p) => U().CARDS.filter((c) => c.no >= p.a && c.no <= p.b && c.id !== p.skip);
-  const heroName = (id) => ((DS.ASSETS.heroesV2.list[id] || {}).name || '용사');
+  const heroName = (id) => (DS.Lore ? DS.Lore.label(id) : (DS.ASSETS.heroesV2.list[id] || {}).name || '용사'); // 🧙 #73
   const perkOf = (c) => PERKS.find((p) => perkCards(p).some((x) => x.id === c.id));
   const bought = (id) => !!(gemD && DS.Gem && DS.Gem.owns(gemD, 'hero', id));
   function perksHtml() {

@@ -247,7 +247,7 @@ DS.Camp = (function () {
   // 🎁 다음 보상: 가장 가까운 하나 (용사 해금 · 화려한 이펙트)
   function nextReward(L, owned, seals) {
     const cand = [], U = DS.Unit ? DS.Unit.CARDS : [], range = (a, b) => U.filter((c) => c.no >= a && c.no <= b), hasN = (arr) => arr.filter((c) => owned[c.id]).length;
-    const hn = (id) => ((DS.ASSETS.heroesV2.list[id] || {}).name || '용사');
+    const hn = (id) => (DS.Lore ? DS.Lore.label(id) : (DS.ASSETS.heroesV2.list[id] || {}).name || '용사'); // 🧙 #73
     const lock = (id) => !((L.heroes || []).find((h) => h.id === id) || {}).open;
     if (lock(16)) cand.push([3 - seals, `업적 ${3 - seals}개 더 모으면 <b class="gold">${hn(16)}</b> 해금!`]);
     const need3 = U.filter((c) => c.no <= 3 && c.id !== 'subcount'); if (lock(8) && need3.length) cand.push([need3.length - hasN(need3), `카드 ${need3.length - hasN(need3)}장 더 → 🧑 <b class="gold">${hn(8)}</b>`]);
@@ -504,7 +504,7 @@ DS.Camp = (function () {
     if (!T && !me.test && me.c != null && me.n) { const k = ck(me.c), g0 = (p) => DS.Net.get(`${p}/${k}/${me.n}`).catch(() => null); const [rec, bonus, cards] = await Promise.all([g0('records'), g0('bonus'), g0('cards')]); const gr = DS.Grow ? await DS.Grow.mine(me).catch(() => null) : null; ST = { st: statsOf(rec, bonus, cards), cards: cards || {}, seals: DS.Bonus ? DS.Bonus.seals(bonus || {}).length : 0, g: gr }; }
     const TD = !T && DS.Titles ? await DS.Titles.data(me).catch(() => ({})) : {}, got = DS.Titles ? (T || me.test ? DS.Titles.all().map((t) => t.id) : DS.Titles.earned(TD).map((t) => t.id)) : []; // 🧪 체험판 · 교사: 호칭 모두
     const nmOf = (id) => (DS.FX.NAMES[id] || id).replace(/^\S+\s/, ''), tierTag = (id) => { const t = DS.FX.tierOf(id); return t === 's' ? '★' : ['Ⅰ', 'Ⅱ', 'Ⅲ', 'Ⅳ'][t] || ''; };
-    const heroName = (h) => esc(((DS.ASSETS.heroesV2.list[h] || {}).name) || '');
+    const heroName = (h) => esc(DS.Lore ? DS.Lore.label(h) : ((DS.ASSETS.heroesV2.list[h] || {}).name) || ''); // 🧙 #73 「이름 · 직업」
     const fxCell = (id) => { const f = L.fx.find((x) => x.id === id) || { id, open: false, cond: '' };
       return `<button class="fxpick${id === fxNow() ? ' on' : ''}${f.open ? '' : f.got ? ' got' : ' lock'}" data-fx="${id}"><i class="tier">${tierTag(id)}</i><canvas width="120" height="70" data-still="${id}"></canvas><span>${f.open ? '' : f.got ? '🏆 ' : '🔒 '}${esc(nmOf(id))}</span>${f.open ? '' : `<small>${esc(f.cond || '추후 공개')}</small>`}</button>`; };
     let demoN = 0; // ⚔ 미리보기: 고른 용사가 고른 스킬로 공격 (근접 = 돌진 · 원거리 = 탄)

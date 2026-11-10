@@ -208,7 +208,7 @@ DS.Test = (function () {
     let box = sp.querySelector('.trial-pick');
     if (!box) { box = document.createElement('div'); box.className = 'trial-pick'; sp.appendChild(box); }
     box.innerHTML = `<p class="tp-h">👩‍🏫 선생님 체험판 · ${DS.Lessons.noText(L0.no)}차시 「${esc(L0.title)}」</p><input id="tp-name" maxlength="8" placeholder="이름 (예: 김선생)" autocomplete="off">
-      <div class="tp-heroes">${HEROES.map((n) => `<button class="tp-h1${n === pick ? ' on' : ''}" data-h="${n}">${DS.Art.hero(n, 'idle')}<span>${esc((DS.ASSETS.heroesV2.list[n] || {}).name || '')}</span></button>`).join('')}</div>
+      <div class="tp-heroes">${HEROES.map((n) => `<button class="tp-h1${n === pick ? ' on' : ''}" data-h="${n}">${DS.Art.hero(n, 'idle')}<span>${esc(DS.Lore ? DS.Lore.label(n) : (DS.ASSETS.heroesV2.list[n] || {}).name || '')}</span></button>`).join('')}</div>
       <button class="btn primary big" id="tp-go">⚔ 모험 시작</button><p class="tp-n">학생이 되어 한 차시를 직접! · 기록은 남지 않아요</p><p class="tp-ver">v${String(DS.VERSION || '').replace(/^citadel-/, '')} · ${DS.CREDIT || ''}</p>`; // 2026-11-08 사용자 「체험판 버전 확인이 어려워」: 첫 화면 꼬리표는 고르기 칸에 가려서 칸 안에
     box.onclick = (e) => e.stopPropagation();
     box.querySelectorAll('[data-h]').forEach((b) => (b.onclick = () => { pick = Number(b.dataset.h); box.querySelectorAll('[data-h]').forEach((x) => x.classList.toggle('on', x === b)); DS.Sound.clank(); }));

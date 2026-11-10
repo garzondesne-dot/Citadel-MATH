@@ -224,7 +224,7 @@ DS.App = (function () {
   function teacherSkin() {
     const el = $('#t-skin'); if (!el) return;
     const cur = DS.Art.teacherHero(), list = DS.ASSETS.heroes.teacherSkins || [DS.ASSETS.heroes.teacher];
-    const name = (n) => ((DS.ASSETS.heroesV2.list[n] || {}).name || '선생님');
+    const name = (n) => (DS.Lore && DS.Lore.of(n) ? DS.Lore.label(n) : (DS.ASSETS.heroesV2.list[n] || {}).name || '선생님'); // 🧙 #73 「이름 · 직업」
     el.innerHTML = list.map((n) => `<button type="button" class="hpick${n === cur ? ' on' : ''}" data-h="${n}">${DS.Art.hero(n, n === cur ? 'attack' : 'idle')}<span class="small">${esc(name(n))}</span></button>`).join('');
     el.querySelectorAll('.hpick').forEach((b) => (b.onclick = async () => {
       const n = Number(b.dataset.h); DS.Art.setTeacherHero(n); DS.Sound.clank(); teacherSkin();
