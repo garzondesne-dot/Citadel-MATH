@@ -118,6 +118,8 @@ DS.Mail = (() => {
 
   // ── 교사: 📢 공지 · 💌 답장 · 🎁 친구 선물 켜기 · 기록 ─────────
   async function notice(cls, t) { t = String(t || '').trim().slice(0, 300); if (!t) return; const id = Date.now().toString(36); await N().set(`notice/${ck(cls)}/${id}`, { t, at: N().TS }); }
+  // 📢 #61 모든 반에 같은 공지 (같은 id · all 표시 = 교사 목록 「전체」)
+  async function noticeAll(classes, t) { t = String(t || '').trim().slice(0, 300); if (!t || !classes.length) return 0; const id = Date.now().toString(36); await Promise.all(classes.map((c) => N().set(`notice/${ck(c)}/${id}`, { t, at: N().TS, all: true }))); return classes.length; }
   async function reply(c, n, fbId, t, q) { t = String(t || '').trim().slice(0, 300); if (!t) return; await N().set(`fbr/${ck(c)}/${n}/${fbId}`, { t, at: N().TS, q: String(q || '').slice(0, 60) }); }
   async function setGift(cls, on) { await N().set(`gcfg/giftOn/${ck(cls)}`, on ? true : null); }
   async function giftLog(cls) {
@@ -134,18 +136,19 @@ DS.Mail = (() => {
       el.innerHTML = `<div class="quiz-box framed rs-box"><div class="quiz-head"><b>📮 우편함 보내기 (교사)</b><button class="btn small" id="tm-x">✕ 닫기</button></div>
         <label>반 <select id="tm-cls">${cls.map((c) => `<option${c === cur ? ' selected' : ''}>${esc(c)}</option>`).join('')}</select></label>
         <p class="mail-sub"><b>📢 공지</b><span class="muted small">이 반 학생 우편함에 「새 소식」으로</span></p>
-        <textarea id="tm-t" maxlength="300" rows="2" placeholder="예: 내일 6차시 형성평가 있어요"></textarea><button class="btn primary" id="tm-send">📢 공지 보내기</button>
-        <div class="mail-list">${Object.entries(nts).sort((a, b) => (b[1].at || 0) - (a[1].at || 0)).slice(0, 5).map(([id, x]) => `<div class="mi"><span class="ico2">📢</span><span class="tx">${esc(x.t)}<small>${md(x.at)}</small></span><button class="btn small" data-del="${id}">🗑</button></div>`).join('')}</div>
+        <textarea id="tm-t" maxlength="300" rows="2" placeholder="예: 내일 6차시 형성평가 있어요"></textarea><div class="tm-sendrow"><button class="btn primary" id="tm-send">📢 공지 보내기</button><button class="btn" id="tm-all"${cls.length ? '' : ' disabled'}>📢 모든 반에 보내기</button></div>
+        <div class="mail-list">${Object.entries(nts).sort((a, b) => (b[1].at || 0) - (a[1].at || 0)).slice(0, 5).map(([id, x]) => `<div class="mi"><span class="ico2">📢</span><span class="tx">${x.all ? '<b class="tm-all">전체</b> ' : ''}${esc(x.t)}<small>${md(x.at)}${x.all ? ' · 모든 반' : ''}</small></span><button class="btn small" data-del="${id}">🗑</button></div>`).join('')}</div>
         <p class="mail-sub"><b>🎁 친구 선물</b><span class="muted small">반마다 처음엔 꺼짐 · 하루 보내기 · 받기 💎 ${GIFT.sendDay}</span></p>
         <button class="btn${on ? ' primary' : ''}" id="tm-gift">${on ? '🎁 켜짐 → 끄기' : '🎁 꺼짐 → 켜기'}</button>
         <div class="mail-list">${log.slice(0, 20).map((x) => `<div class="mi"><span class="ico2">🎁</span><span class="tx">${esc(x.fromName || '')} → ${x.to}번 · 💎 ${x.g}${x.msg ? ` · 「${esc(x.msg)}」` : ''}<small>${md(x.at)}${x.got ? ' · 받음' : ' · 아직 안 받음'}</small></span></div>`).join('') || '<p class="muted small">아직 친구 선물 기록이 없어요.</p>'}</div></div>`;
       el.querySelector('#tm-x').onclick = () => el.remove();
       el.querySelector('#tm-cls').onchange = (e) => { cur = e.target.value; draw(); };
       el.querySelector('#tm-send').onclick = () => DS.Control.run(async () => { await notice(cur, el.querySelector('#tm-t').value); DS.UI.toast('📢 공지를 보냈어요'); draw(); });
+      el.querySelector('#tm-all').onclick = () => DS.Control.run(async () => { const t = el.querySelector('#tm-t').value.trim(); if (!t) return DS.UI.toast('공지 글을 먼저 써 주세요'); if (!confirm(`${cls.length}개 반에 보낼까요?`)) return; const n = await noticeAll(cls, t); DS.UI.toast(`📢 ${n}개 반에 공지를 보냈어요`); draw(); });
       el.querySelector('#tm-gift').onclick = () => DS.Control.run(async () => { await setGift(cur, !on); draw(); });
       el.querySelectorAll('[data-del]').forEach((b) => (b.onclick = () => DS.Control.run(async () => { await N().set(`notice/${ck(cur)}/${b.dataset.del}`, null); draw(); })));
     };
     await draw();
   }
-  return { GIFT, inbox, unread, claim, send, open, giftDlg, notice, reply, setGift, giftOn, giftLog, teacher };
+  return { GIFT, inbox, unread, claim, send, open, giftDlg, notice, noticeAll, reply, setGift, giftOn, giftLog, teacher };
 })();
