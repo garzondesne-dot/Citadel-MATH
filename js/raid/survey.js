@@ -114,15 +114,20 @@ DS.Survey = (function () {
       <p class="sv-anon">🔒 이름 · 번호가 저장되지 않아요. <b>선생님도 누가 뭐라고 답했는지 볼 수 없어요.</b> 점수와도 상관없으니 솔직하게!</p>
       <p class="sv-h">A. 『<b class="sv-pre-em">2학기 중간고사 전</b>』 수학 시간과 『<b class="sv-now-em">지금</b>』 던전 수업을 각각 골라요 · <b class="sv-not1">1학기가 아니에요!</b></p>
       <p class="sv-pre-big">🕰 2학기 중간고사 전 <small>(게임 없이 하던 수업)</small></p>
+      <label class="sv-ack" id="sv-ack"><input type="checkbox" id="sv-ack-c"><span>네, <b>2학기 중간고사 전</b>(게임 없이 하던 수업)과 <b>지금</b>을 비교한다는 걸 알았어요</span></label>
+      <div class="sv-a sv-lock">
       <p class="sv-legend muted small">1 전혀 아니다 · 2 아니다 · 3 보통 · 4 그렇다 · 5 매우 그렇다</p>
-      ${PAIR.map((q, i) => `<div class="sv-q"><p><b>${i + 1}.</b> ${q}</p>${scale(i, 0)}${scale(i, 1)}</div>`).join('')}
+      ${PAIR.map((q, i) => `<div class="sv-q"><p><b>${i + 1}.</b> ${q}</p>${scale(i, 0)}${scale(i, 1)}</div>`).join('')}</div>
       <p class="sv-h">B. 지금 던전 수업</p>
       <div class="sv-q"><p><b>8.</b> 가장 도움이 된 것 <span class="muted small">(2개까지)</span></p><div class="chips sv-picks">${PICKS.map((t, i) => `<button type="button" class="chip" data-pick="${i}">${t}</button>`).join('')}</div></div>
       <div class="sv-q"><p><b>9.</b> 쉼터 놀이를 예전 5분 퀴즈와 비교하면</p><div class="chips sv-cmp">${CMP.map((t, i) => `<button type="button" class="chip" data-cmp="${i}">${t}</button>`).join('')}</div></div>
       <div class="sv-q"><p><b>10.</b> 던전 수업에서 내가 달라진 점 한 가지 <span class="muted small">(안 써도 돼요)</span></p><textarea id="sv-say" maxlength="${MAXT}" rows="2"></textarea></div>
       <div class="sv-q"><p><b>11.</b> 바꿨으면 하는 점 <span class="muted small">(안 써도 돼요)</span></p><textarea id="sv-want" maxlength="${MAXT}" rows="2"></textarea></div>
-      <div class="sv-foot"><button class="btn" id="sv-x">나중에</button><button class="btn primary" id="sv-go">📝 보내기</button></div></div>`;
+      <div class="sv-foot"><button class="btn" id="sv-x">나중에</button><button class="btn primary" id="sv-send">📝 보내기</button></div></div>`;
     document.body.appendChild(el);
+    let ack = false; const ackB = el.querySelector('#sv-ack'), boxA = el.querySelector('.sv-a');
+    const ackC = el.querySelector('#sv-ack-c'); ackC.onchange = () => { ack = ackC.checked; ackB.classList.toggle('on', ack); boxA.classList.toggle('sv-lock', !ack); if (ack && DS.Sound && DS.Sound.clank) DS.Sound.clank(); }; // ☑ 체크 = 동의 · 풀면 다시 잠금
+    boxA.addEventListener('click', (e) => { if (!ack) { e.preventDefault(); e.stopPropagation(); ackB.classList.remove('nope'); void ackB.offsetWidth; ackB.classList.add('nope'); DS.UI.toast('먼저 위의 「☐ 네, 2학기 중간고사 전과 … 알았어요」에 체크해 주세요', 2600); } }, true);
     el.querySelectorAll('.sv-scale').forEach((row) => row.querySelectorAll('.sv-o').forEach((b) => (b.onclick = () => {
       a.r[Number(row.dataset.i)][Number(row.dataset.w)] = Number(b.dataset.v);
       row.querySelectorAll('.sv-o').forEach((x) => x.classList.toggle('on', x === b));
@@ -134,11 +139,12 @@ DS.Survey = (function () {
     }));
     el.querySelectorAll('[data-cmp]').forEach((b) => (b.onclick = () => { a.cmp = Number(b.dataset.cmp); el.querySelectorAll('[data-cmp]').forEach((x) => x.classList.toggle('on', x === b)); }));
     el.querySelector('#sv-x').onclick = () => el.remove();
-    el.querySelector('#sv-go').onclick = () => DS.Control.run(async () => {
+    el.querySelector('#sv-send').onclick = () => DS.Control.run(async () => {
       a.say = el.querySelector('#sv-say').value; a.want = el.querySelector('#sv-want').value;
+      if (!ack) { ackB.scrollIntoView({ block: 'center', behavior: 'smooth' }); ackB.classList.remove('nope'); void ackB.offsetWidth; ackB.classList.add('nope'); DS.UI.toast('먼저 「☐ 네, 2학기 중간고사 전과 … 알았어요」에 체크해 주세요', 2600); return; }
       const err = check(a);
       if (err) { const i = a.r.findIndex((p) => !p[0] || !p[1]); const q = el.querySelectorAll('.sv-q')[i >= 0 ? i : a.pick.length ? 8 : 7]; if (q) { q.scrollIntoView({ block: 'center', behavior: 'smooth' }); q.classList.remove('nope'); void q.offsetWidth; q.classList.add('nope'); } throw Object.assign(new Error(err), { user: true }); }
-      const btn = el.querySelector('#sv-go'); btn.disabled = true;
+      const btn = el.querySelector('#sv-send'); btn.disabled = true;
       try { await submit(m, a, no); } catch (e) { btn.disabled = false; throw e; }
       el.remove(); pend = 0; subs.forEach((f) => f(0));
       if (DS.Sound) DS.Sound.correct();

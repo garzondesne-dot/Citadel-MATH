@@ -27,13 +27,15 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   await S.waitForSelector('#camp-sv-btn', { timeout: 8000 }); await S.screenshot({ path: `${OUT}/2-camp-btn.png` });
   await S.click('#camp-sv-btn'); await S.waitForTimeout(600);
   await S.screenshot({ path: `${OUT}/3-survey-top.png` });
-  await S.click('#sv-go'); await S.waitForTimeout(500); const still = !!(await S.$('.sv-modal')); // 빈 채로 → 막힘
+  await S.click('#sv-send'); await S.waitForTimeout(500); const still = !!(await S.$('.sv-modal')); // 빈 채로 → 막힘
+  { const r0 = await S.$('.sv-scale .sv-o'); await r0.click({ force: true }); await S.waitForTimeout(150); const lockOk = (await S.$$('.sv-o.on')).length === 0; console.log(`${lockOk ? '✔' : '✘'} 📝 「네, 2학기 중간고사 전과 … 비교할게요」 누르기 전엔 A 문항을 못 고름`); }
+  await S.click('#sv-ack'); await S.waitForTimeout(200);
   const rows = await S.$$('.sv-scale');
   for (let i = 0; i < rows.length; i++) await (await rows[i].$(`.sv-o[data-v="${i % 2 ? 4 : 2}"]`)).click();
   await S.click('[data-pick="0"]'); await S.click('[data-pick="3"]'); await S.click('[data-cmp="0"]');
   await S.fill('#sv-say', '틀린 문제를 다시 풀게 됐어요');
   await S.evaluate(() => document.querySelector('#sv-say').scrollIntoView({ block: 'center' })); await S.screenshot({ path: `${OUT}/4-survey-bottom.png` });
-  await S.click('#sv-go'); await S.waitForTimeout(1500);
+  await S.click('#sv-send'); await S.waitForTimeout(1500);
   const gone = !(await S.$('.sv-modal')) && !(await S.$('#camp-sv-btn'));
   const db = await T.evaluate(async () => ({ a: await DS.Net.get('surveyA/1-3'), d: await DS.Net.get('surveyDone/1-3'), xp: await DS.Net.get('xp/1-3/1/log/survey') }));
   const ans = await T.evaluate((a) => DS.Survey.norm(a), Object.values(db.a || {})[0] || {});

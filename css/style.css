@@ -3067,3 +3067,9 @@ body:has(#test-bar) #screen-student.st-battle .wrap:has(.cr-dock) { padding-bott
 .sv-pre-em { color: #ff9a3c; } .sv-now-em { color: #6fe3a5; } .sv-not1 { color: #ff6b6b; }
 .sv-pre-big { margin: 6px 0 8px; padding: 6px 10px; border-radius: 10px; background: #3a2410; border: 2px solid #ff9a3c; color: #ffcf9a; font-size: 18px; font-weight: 800; text-align: center; } .sv-pre-big small { font-size: 13px; font-weight: 600; color: #ffd9b0; }
 .sv-when { width: 92px; line-height: 1.2; } .sv-when.pre { color: #ff9a3c; font-weight: 800; } .sv-when.now { color: #6fe3a5; font-weight: 800; }
+/* 📝 2026-11-10 선생님 「2학기 중간고사 전과 비교한다는 걸 인지했는지 동의 버튼」 — 누르기 전 A 문항은 흐리게 · 못 고름 */
+.sv-ack { display: flex; align-items: flex-start; gap: 10px; box-sizing: border-box; width: 100%; margin: 0 0 8px; padding: 10px 12px; border-radius: 10px; border: 2px dashed #ff9a3c; background: #2a1c10; color: #ffe2c2; font-size: 15px; text-align: left; line-height: 1.4; cursor: pointer; }
+.sv-ack input { flex: none; width: 26px !important; height: 26px; margin: 0 !important; padding: 0; accent-color: #6fe3a5; display: inline-block; }
+.sv-ack b { color: #ff9a3c; } .sv-ack.on { border-style: solid; border-color: #6fe3a5; background: #12301f; color: #d8ffe8; } .sv-ack.on b { color: #6fe3a5; }
+.sv-ack.nope { animation: svNope .4s; } @keyframes svNope { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
+.sv-a.sv-lock { opacity: .4; filter: grayscale(.6); }
