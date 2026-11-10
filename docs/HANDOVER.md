@@ -253,3 +253,12 @@
 - 사건: `watch(R, L, who, code)` (종합실 'h' = 방 전체 · 폰 = 나) 가 보스 격파 · 보스전 시작 · 놀이(fun kind) · 디펜스 · 홀리 방패를 **바뀌는 순간만**(처음 본 상태 안 쏨) · 그 밖 = `me(title, kind, 말)` (끈기 · 연성 · 서술 · 빨간 칸) · `band()` (출제 띠).
 - 종합실 = 동시 5 (`HALL_MAX` · 줄 서기) · ⚙ `#h-tfx` = localStorage `ds-tfx-off` → `html.tfx-off` · reduced-motion 이면 움직임 없음. 시험 = `tests/titles-fx.test.js` · e2e95.
 - 🔁n = 입장 때 `players/{uid}/stk` (꾸준한 용사를 단 학생만 · 캠프는 기록에서 계산).
+
+## 📦 9차시부터 차시 파일 꼴 = 데이터 위 · 계산 아래 (2026-11-10 #64 · 차시 팩 준비 · 2~8차시는 그대로)
+새 `lessons/set-NN.js`(9~17차시)는 이 순서로 쓴다. 학생 화면 · 규칙 · `DS.Lessons.register` 모양은 지금과 같다(팩 엔진은 겨울방학 초).
+1. **데이터 묶음** `const DATA = { … }` — JSON 으로 옮길 수 있는 값만: 개념 칸(제목 · say) · 몬스터(이름 · 그림 칸 · 소문제 글 틀 · 보기 · 첫 시도 숫자 · 정답 · 풀이 · 💡 힌트 · 근거 줄) · 형성평가 문항 · `crops` · `videos` · 기호 톡 연결. 함수 · 정규식 ✕.
+   - 재도전은 이름으로: `retry: { gen: 'negSet', range: [10, 20], k: [2, 3] }` — 「어떤 생성기를 어떤 매개변수로」.
+2. **계산 코드** — `const GEN = { negSet(p, rng) { … } }` 재도전 숫자 바꾸기 · 오개념 보기 · 정답 계산. `make: (a, r) => (a === 0 ? first(DATA.m1) : GEN[DATA.m1.retry.gen](DATA.m1.retry, r))` 처럼 데이터를 읽어 몬스터를 만든다.
+3. 두 차시 이상이 같은 생성기를 쓰면 공용 파일(`js/engine/gens.js` 예정 · index.html · sw.js CORE)로 옮긴다 = 나중에 팩 엔진의 「형식」.
+- 독립 검산(`tests/lessonN.test.js`)은 지금처럼 · 더해서 「DATA 가 JSON.stringify → parse 해도 같다」를 한 줄 확인.
+- 9차시 일정이 빠듯하면 9차시는 옛 꼴로 하고 이 절에 「10차시부터」로 고쳐 적는다.
