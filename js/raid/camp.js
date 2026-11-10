@@ -87,7 +87,7 @@ DS.Camp = (function () {
     ['#camp-dummy', '🎯 복습 허수아비', '배운 차시를 <b>복습</b>해요. 수업 문제를 숫자만 바꿔 다시 풀고, 틀림 · 안 푼 문제를 맞히면 📕 오답노트에 복습 완료! 👑 형성평가 재대결을 처치하면 🏆 업적.'],
     ['#camp-tent', '⛺ 출제 공방', '배운 문제 틀로 <b>내가 문제를 만들어</b> 친구들 복습에 내요. 선생님이 확인하면 출제!'],
     ['#camp-mail', '📮 우편함', '<b>선생님 소식</b>(선물 · 공지 · 답장)이 오고, 편지 · 설문 · 친구 선물을 <b>보내는</b> 곳이에요.'],
-    ['#camp-anvil', '⚒ 모루', '수업에서 배운 개념으로 <b>카드를 만드는 대장간</b>이에요. 수업이 없을 때 여기서만 열려요.'],
+    ['#camp-anvil', '⚒ 모루', '수업에서 배운 개념으로 <b>카드를 만드는 대장간</b>이에요. 언제든 열려요.'],
   ];
   function tutClear() {
     tutMode = ''; const stg = document.querySelector('#camp .camp-stage'); const co = document.getElementById('tut-coach'); if (co) co.remove();

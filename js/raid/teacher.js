@@ -89,7 +89,7 @@ DS.Teacher = (function () {
     const cb = $('#t-tcamp'); if (cb) cb.onclick = () => C().run(() => { if (stop) stop(); stop = null; clearInterval(tick); return DS.TCamp.enter({ code, hallKey: curKey }); });
     body.querySelectorAll('[data-help]').forEach((b) => (b.onclick = () => C().run(() => DS.Act.clearHelp(code, b.dataset.help))));
     $('#t-fwd').onclick = () => C().run(() => C().forward(code, R, L));
-    $('#t-back').onclick = () => C().run(() => C().back(code, R, L));
+    $('#t-back').onclick = () => C().run(() => C().back(code, R, L, () => { if (stop) stop(); stop = null; clearInterval(tick); return DS.TCamp.enter({ code, hallKey: curKey }); }));
   }
   // 💎 마정석 선물 (2026-11-06 사용자 · 교사 폰 리모컨에서만): +10 기준 · 5개씩 조정 · 고른 학생 또는 모두에게 (하루 한도 밖)
   function giftModal() {

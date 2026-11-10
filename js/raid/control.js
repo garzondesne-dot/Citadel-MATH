@@ -47,7 +47,7 @@ DS.Control = (function () {
     armed = '';
     await Act().go(code, R, L, 1);
   }
-  const back = (code, R, L) => { armed = ''; if (Raid().isClosed(R)) return DS.Net.set(`rooms/${code}/state/closed`, null); return Act().go(code, R, L, -1); };
+  const back = (code, R, L, out) => { armed = ''; if (Raid().isClosed(R)) return out ? out() : null; return Act().go(code, R, L, -1); }; // 🏁 #68 C①: 끝난 수업에서 ◀ = 다시 열지 않고 교사 캠프 · 메뉴로 (예전: closed 를 지워 끝난 수업이 다시 열림)
   // 마무리에서 ▶ = 수업 끝: 한 번 더 확인
   async function forwardEnd(code, R, L) {
     if (armed !== 'end') { armed = 'end'; DS.UI.toast('▶ 를 한 번 더 누르면 수업을 끝내고 학생들은 내 캠프로 돌아가요', 4200); return true; }
