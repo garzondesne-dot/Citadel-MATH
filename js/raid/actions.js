@@ -103,7 +103,7 @@ DS.Act = (function () {
       // ⏳ 2026-11-06 사용자 「50분 제한이 안 보임」: 방을 교시 밖에서 열어 문 닫힘 시각이 없으면 → 수업 시작 때 그 교시 끝(없으면 지금 + 50분)
       const dl0 = (!R.meta.deadline || R.meta.deadline < N().now() + 5 * 60e3) && !R.meta.noLimit ? ((DS.Sched && DS.Sched.periodEnd(N().now())) || N().now() + 50 * 60e3) : null;
       if (dl0) await N().set(P(code, 'state/deadline'), dl0).catch(() => {}); // 2026-11-06 검증: 지난 교시 끝에 방을 만들어 둔 경우(마감이 이미 지났거나 5분 안)도 수업 시작 시각 기준으로 다시 잡음 (바로 「문을 닫았다」 방지)
-      await N().update(P(code), { active: Object.fromEntries(studs.map((u) => [u, true])), 'state/headcount': studs.length, 'state/step': s0, 'state/stepAt': N().TS, 'state/focus': f0, 'state/focusAt': f0 ? N().now() : null, 'state/pauseMs': null, 'state/batPlan': plan, 'state/cpAt': f0 ? N().now() : null, 'state/cpMs': 0 });
+      await N().update(P(code), { active: Object.fromEntries(studs.map((u) => [u, true])), 'state/headcount': Math.max(1, studs.filter((u) => !(R.players[u] || {}).tester).length), /* 🧪 #67 시험 계정은 체력 머릿수에서 빠짐 (공격 데미지는 그대로) */ 'state/step': s0, 'state/stepAt': N().TS, 'state/focus': f0, 'state/focusAt': f0 ? N().now() : null, 'state/pauseMs': null, 'state/batPlan': plan, 'state/cpAt': f0 ? N().now() : null, 'state/cpMs': 0 });
       const clss = [...new Set(studs.map((u) => (R.players[u] || {}).cls).filter(Boolean))];
       await unlockFor(L, clss);
       clss.forEach((c) => N().set(`held/${ck(c)}/${L.id}`, true).catch(() => {}));
@@ -376,7 +376,7 @@ DS.Act = (function () {
     const dup = Object.entries(R.players || {}).find(([u, p]) => u !== me && !p.teacher && Number(p.num) === Number(info.num));
     if (dup) fail(`${info.num}번은 이미 입장했어요. 번호를 확인해 주세요.`);
     const was = (R.players || {})[me] || {};
-    await N().set(P(code, `players/${me}`), { v: String(DS.VERSION || ''), num: Number(info.num), nick: String(info.nick).slice(0, 8), hero: Number(info.hero) || 0, /* v = 앱 판 (🔄 #24 옛 판 알아보기) */ fx: info.fx || 'flame', ...(info.cls ? { cls: String(info.cls) } : {}), ...(info.title ? { title: String(info.title).slice(0, 24) } : {}), ...(Number(info.enh) > 0 ? { enh: Math.min(10, Number(info.enh)) } : {}), ...(Number(info.stk) > 0 ? { stk: Math.min(99, Math.floor(Number(info.stk))) } : {}), ...(was.lobby ? { lobby: true } : {}), at: N().TS, first: was.first || N().TS }); // first = 처음 들어온 시각 (출석부)
+    await N().set(P(code, `players/${me}`), { v: String(DS.VERSION || ''), num: Number(info.num), nick: String(info.nick).slice(0, 8), hero: Number(info.hero) || 0, /* v = 앱 판 (🔄 #24 옛 판 알아보기) */ fx: info.fx || 'flame', ...(info.cls ? { cls: String(info.cls) } : {}), ...(info.title ? { title: String(info.title).slice(0, 24) } : {}), ...(Number(info.enh) > 0 ? { enh: Math.min(10, Number(info.enh)) } : {}), ...(Number(info.stk) > 0 ? { stk: Math.min(99, Math.floor(Number(info.stk))) } : {}), ...(info.tester ? { tester: true } : {}), /* 🧪 #67 */ ...(was.lobby ? { lobby: true } : {}), at: N().TS, first: was.first || N().TS }); // first = 처음 들어온 시각 (출석부)
     return R.meta;
   }
   // 접속 표시: 연결이 끊기면 서버가 지운다 (Firebase onDisconnect)

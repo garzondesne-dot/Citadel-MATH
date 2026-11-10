@@ -606,6 +606,15 @@
           }
         }
       }
+    },
+    "tester": {
+      ".read": "auth != null",
+      "$c": {
+        ".write": "auth != null && root.child('admins/'+auth.uid).val() === true",
+        "$n": {
+          ".validate": "!newData.exists() || newData.isBoolean()"
+        }
+      }
     }
   }
 }

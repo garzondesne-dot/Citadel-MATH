@@ -68,10 +68,10 @@ DS.Titles = (function () {
   function nameHtml(p, opt = {}) {
     const t = p && p.title && p.title !== 'none' ? get(p.title) : null, cls = t ? TIER[t.tier].cls : '', ic = t ? icon(p, opt.uid) : '';
     const num = p && p.num != null && opt.num !== false ? `${p.num}${opt.beon ? '번' : ''} ` : '';
-    if (opt.stack) return `${t ? `<span class="ttl ttl-line ${cls}">${medal(t, opt.size || 18)}${esc(t.name)}${ic}</span>` : ''}<span class="tname ${cls}">${num}${esc((p && (p.nick || p.name)) || '')}</span>`; // 2026-11-09 선생님: 종합실 = 위 칸 호칭 · 아래 칸 이름 (호칭 때문에 이름이 가려지지 않게)
+    if (opt.stack) return `${t ? `<span class="ttl ttl-line ${cls}">${medal(t, opt.size || 18)}${esc(t.name)}${ic}</span>` : ''}<span class="tname ${cls}">${num}${esc((p && (p.nick || p.name)) || '')}${p && p.tester ? '<i class="tst-ic" title="시험 계정">🧪</i>' : ''}</span>`; // 2026-11-09 선생님: 종합실 = 위 칸 호칭 · 아래 칸 이름 (호칭 때문에 이름이 가려지지 않게)
     const tag = !t ? '' : opt.short ? (t.medal ? `${medal(t, opt.size || 18)} ` : '') : `<span class="ttl ${cls}">${medal(t, opt.size || 18)}[${esc(t.name)}]</span> `;
     const en = ''; // 🔨 2026-11-08 사용자 「아이디 옆 강화 횟수는 지워 · 대신 은은한 오라」 → 용사 둘레 오라 1~10 (DS.Gem.auraCls)
-    return `${tag}<span class="tname ${cls}">${num}${esc((p && (p.nick || p.name)) || '')}</span>${opt.stack ? '' : ic}${en}`;
+    return `${tag}<span class="tname ${cls}">${num}${esc((p && (p.nick || p.name)) || '')}</span>${opt.stack ? '' : ic}${en}${p && p.tester ? '<i class="tst-ic" title="시험 계정">🧪</i>' : ''}`;
   }
   // ── 🏅 #63 칭호 작은 기능 (C안 · 보이는 연출만 · 고른 칭호 하나만) ─────────────────────────
   //   평소 = 이름표 옆 멈춘 기호(.tfx-ic) · 사건 때 한 번(1초 안 · transform/opacity 만) · 종합실 = 동시에 움직이는 이름표 최대 5(줄 서기)

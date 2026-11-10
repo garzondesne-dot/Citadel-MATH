@@ -23,8 +23,9 @@ DS.Dash = (function () {
   const isAll = () => cls === ALL;
   async function one(c) {
     const k = A().classKey(c);
-    const [records, xp, cards, bonus] = await Promise.all(['records', 'xp', 'cards', 'bonus'].map((p) => DS.Net.get(`${p}/${k}`).catch(() => null)));
-    const d = build(roster[c] || {}, records || {}, xp || {}, cards || {}, bonus || {});
+    const [records, xp, cards, bonus, tst] = await Promise.all(['records', 'xp', 'cards', 'bonus', 'tester'].map((p) => DS.Net.get(`${p}/${k}`).catch(() => null)));
+    const T = tst || {}, byN = Object.fromEntries(Object.entries(roster[c] || {}).filter(([n]) => !T[n])); // 🧪 #67 시험 계정 = 랭킹 · 반 통계 · 대항전 · 기호 톡 순위에서 빠짐 (지난 기록 포함 · 기록은 그대로)
+    const d = build(byN, records || {}, xp || {}, cards || {}, bonus || {}); d.testers = Object.keys(T).filter((n) => T[n] && (roster[c] || {})[n]).length;
     d.studs.forEach((st) => { st.cls = c; st.key = `${c}|${st.n}`; st.held = d.held; st.symt = (((xp || {})[st.n]) || {}).st || {}; }); // 📖 #54 기호 톡 횟수
     if (d.held.length) DS.Net.update(`held/${k}`, Object.fromEntries(d.held.map((l) => [l.id, true]))).catch(() => {}); // 📕 옛 수업도 「한 차시」로 (학생 오답노트 불참 판단 · v0.9.7.9)
     return d;
@@ -80,7 +81,7 @@ DS.Dash = (function () {
     el.innerHTML = `<div class="panel framed"><h2>📊 학급 대시보드 <span class="muted small">교사만 · 학생 화면과 종합상황실에는 나오지 않아요</span></h2>
         <div class="tabs st-cls">${classes.length > 1 ? `<button class="tab${isAll() ? ' on' : ''}" data-cls="${ALL}">🏫 전체</button>` : ''}${classes.map((c) => `<button class="tab${c === cls ? ' on' : ''}" data-cls="${esc(c)}">${esc(c)}</button>`).join('') || '<span class="muted">명단이 없어요 — 학생 관리에서 먼저 올려 주세요</span>'}</div>
         <div class="tabs dash-tabs">${TABS.map(([k, t]) => `<button class="tab${k === tab ? ' on' : ''}" data-tab="${k}">${t}</button>`).join('')}</div></div>
-      <div class="panel framed dash-main">${!cls ? '' : !data ? '<p class="muted">불러오는 중…</p>' : !data.held.length && tab !== 'sv' && tab !== 'use' && tab !== 'photo' && tab !== 'sym' ? '<p class="muted">아직 저장된 수업 기록이 없어요. (학생이 수업 끝 결과를 보면 저장돼요)</p>' : VIEW[tab]()}</div>`;
+      <div class="panel framed dash-main">${(() => { const tn = data ? (data.testers || 0) + (data.classes || []).reduce((x, c) => x + (c.d.testers || 0), 0) : 0; return tn ? `<p class="muted small tst-note">🧪 시험 계정 ${tn}명은 랭킹 · 반 통계에서 빠졌어요 (학생 관리에서 켜고 끔)</p>` : ''; })()}${!cls ? '' : !data ? '<p class="muted">불러오는 중…</p>' : !data.held.length && tab !== 'sv' && tab !== 'use' && tab !== 'photo' && tab !== 'sym' ? '<p class="muted">아직 저장된 수업 기록이 없어요. (학생이 수업 끝 결과를 보면 저장돼요)</p>' : VIEW[tab]()}</div>`;
     el.querySelectorAll('[data-cls]').forEach((b) => (b.onclick = () => { cls = b.dataset.cls; words = null; useData = null; useFor = ''; load(); }));
     el.querySelectorAll('[data-tab]').forEach((b) => (b.onclick = () => { tab = b.dataset.tab; render(); }));
     el.querySelectorAll('[data-sort]').forEach((b) => (b.onclick = () => { const k = b.dataset.sort; sortDir = sortKey === k ? -sortDir : (k === 'n' || k === 'name' ? 1 : -1); sortKey = k; render(); }));

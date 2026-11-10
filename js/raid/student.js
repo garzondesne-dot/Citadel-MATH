@@ -27,6 +27,7 @@ DS.Student = (function () {
     an = null; thSeen = null; phaseWas = 0; chestDone = {}; chestQ = []; chestBusy = false; batPaid = ''; endPaid = ''; // v0.9.11
     if (DS.Gem && info && info.cls != null && info.num) { const gd = await DS.Gem.mine({ c: info.cls, n: info.num }).catch(() => null); if (gd && gd.enh) info.enh = Number(gd.enh); } // 🔨 강화 단계 → 교실 TV 이름표 · 빛
     if (info && info.title === 'steady' && DS.Gem && DS.Gem.streak && !opt.test && info.cls != null && info.num) { const [rr, hh] = await Promise.all([DS.Net.get(`records/${String(info.cls).replace(/[.#$/[\]]/g, '_')}/${info.num}`).catch(() => null), DS.Net.get(`held/${String(info.cls).replace(/[.#$/[\]]/g, '_')}`).catch(() => null)]); info.stk = DS.Gem.streak(rr || {}, hh); } // 🏅 #63 🔁n
+    if (info && !opt.test && info.cls != null && info.num && DS.Account) info.tester = (await DS.Net.get(`tester/${DS.Account.classKey(info.cls)}/${info.num}`).catch(() => null)) === true; // 🧪 #67 시험 계정 표시
     await DS.Act.join(c, info);
     if (DS.Attack && DS.Attack.preloadFaces && DS.Attack.canUlt(info.fx, info.hero)) DS.Attack.preloadFaces(); // ⚡ 필살기 조건이면 얼굴 그림 미리
     if (DS.Gem && DS.Gem.watchGifts && !test) DS.Gem.watchGifts({ c: info.cls, n: info.num });

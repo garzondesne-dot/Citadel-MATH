@@ -7,7 +7,7 @@ DS.Students = (function () {
   const $ = (s) => document.querySelector(s);
   const { esc } = DS.UI;
   const A = () => DS.Account;
-  let roster = {}, accounts = {}, cls = '', stops = [], extra = {};
+  let roster = {}, accounts = {}, testers = {}, cls = '', stops = [], extra = {};
 
   async function enter() {
     if (!(await A().isAdmin())) throw Object.assign(new Error('교사 계정으로 로그인해야 해요.'), { user: true });
@@ -16,6 +16,7 @@ DS.Students = (function () {
     stops.forEach((f) => f()); stops = [
       DS.Net.watch('roster', (v) => { roster = v || {}; if (!cls || !roster[cls]) cls = Object.keys(roster).sort()[0] || ''; render(); loadExtra(); }),
       DS.Net.watch('accounts', (v) => { accounts = v || {}; render(); }),
+      DS.Net.watch('tester', (v) => { testers = v || {}; render(); }), // 🧪 #67 시험 계정
     ];
   }
   // 반마다: 레벨(xp) · 도감(cards) · 보강 인장(bonus) — 표에 함께 보여 준다
@@ -42,8 +43,9 @@ DS.Students = (function () {
     const row = (n) => {
       const a = acc[n];
       const st = !a ? '<span class="muted">미가입</span>' : a.reset ? '<span class="gold">초기화됨 (0000)</span>' : '<span class="okc">가입</span>';
-      return `<tr><td>${n}</td><td><button class="linkish" data-who="${n}">${esc(byN[n])}</button></td><td>${st}</td>${cells(n)}
-        <td class="st-act"><button class="btn small" data-ren="${n}">이름 고치기</button>${a && !a.reset ? `<button class="btn small" data-reset="${n}">비밀번호 초기화</button>` : ''}<button class="btn small" data-rm="${n}">빼기</button></td></tr>`;
+      const tst = !!((testers[A().classKey(cls)] || {})[n]);
+      return `<tr${tst ? ' class="st-tester"' : ''}><td>${n}</td><td><button class="linkish" data-who="${n}">${esc(byN[n])}</button>${tst ? ' <b class="tst-ic" title="시험 계정 · 통계에서 빠짐">🧪</b>' : ''}</td><td>${st}</td>${cells(n)}
+        <td class="st-act"><button class="btn small" data-ren="${n}">이름 고치기</button>${a && !a.reset ? `<button class="btn small" data-reset="${n}">비밀번호 초기화</button>` : ''}<button class="btn small${tst ? ' primary' : ''}" data-tst="${n}">${tst ? '🧪 시험 계정 끄기' : '🧪 시험 계정'}</button><button class="btn small" data-rm="${n}">빼기</button></td></tr>`;
     };
     el.innerHTML = `<div class="panel framed"><h2>👥 학생 관리</h2><p class="muted small">명단은 Firebase 에만 저장돼요 (저장소에는 올라가지 않아요). 학생 이름을 누르면 개인 기록을 볼 수 있어요 — 성적이 아니라 참여 기록이에요.</p>
         <div class="tabs st-cls">${classes.map((c) => `<button class="tab${c === cls ? ' on' : ''}" data-cls="${esc(c)}">${esc(c)} <span class="muted small">${Object.keys(roster[c] || {}).length}</span></button>`).join('') || '<span class="muted">아직 반이 없어요 — 아래에서 새 반 명단을 붙여 넣어요.</span>'}</div></div>
@@ -73,6 +75,11 @@ DS.Students = (function () {
       if (!name || name === byN[n]) return;
       if (name.length > 8) throw Object.assign(new Error('이름은 8자 이내로 넣어 주세요.'), { user: true });
       await A().uploadRoster([{ c: A().classKey(cls), n, name }]); DS.UI.toast('이름을 고쳤어요.');
+    })));
+    document.querySelectorAll('[data-tst]').forEach((b) => (b.onclick = () => DS.Control.run(async () => { // 🧪 #67: 켜면 지난 기록까지 통계 · 랭킹 · 체력 머릿수에서 빠짐 (기록은 지우지 않음)
+      const n = Number(b.dataset.tst), k = A().classKey(cls), on = !((testers[k] || {})[n]);
+      if (!confirm(on ? `${cls} ${n}번을 🧪 시험 계정으로 할까요?\n학생과 똑같이 하지만 랭킹 · 반 통계 · 몬스터 체력 계산 · 설문 집계에서 빠져요 (지난 기록 포함 · 지우지는 않음).` : `${cls} ${n}번 🧪 시험 계정을 끌까요? 다시 통계에 들어가요.`)) return;
+      await DS.Net.set(`tester/${k}/${n}`, on ? true : null); DS.UI.toast(on ? '🧪 시험 계정으로 했어요' : '🧪 시험 계정을 껐어요');
     })));
     document.querySelectorAll('[data-reset]').forEach((b) => (b.onclick = () => DS.Control.run(async () => {
       const n = Number(b.dataset.reset);

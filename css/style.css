@@ -3110,3 +3110,5 @@ body:has(#test-bar) #screen-student.st-battle .wrap:has(.cr-dock) { padding-bott
 @keyframes pen-gone { 0% { opacity: 1; } 100% { opacity: 0; transform: translateX(6px); } }
 @media (prefers-reduced-motion: reduce) { .pen-res li.pen-gone { animation: none; opacity: 0; } }
 .pen-box ol { list-style: none; padding-left: 0.2em; }
+/* 🧪 #67 시험 계정 표시 */
+.tst-ic { font-style: normal; font-size: .8em; margin-left: 2px; opacity: .85; } .st-tester td { background: #2a3a2a33; } .tst-note { margin: 0 0 6px; }

@@ -133,7 +133,7 @@ DS.ShareCard = (function () {
 
   // ── 🏫 우리 반 수업 소식 (반 전체 공유용 · 이름 없음) ──────────────
   function classStats(L, R) {
-    const X = DS.Raid, ids = X.activeIds(R), conc = {}, byFix = {};
+    const X = DS.Raid, ids = X.activeIds(R).filter((u) => !(X.isTester && X.isTester(R, u))), conc = {}, byFix = {}; // 🧪 #67 학급 결과에서 빠짐
     let fixed = 0, tried = 0;
     ids.forEach((u) => {
       const r = DS.Result.compute(L, R, u); if (r.mons.some((m) => m.tried) || r.boss.tried) tried++;
