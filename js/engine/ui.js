@@ -16,11 +16,20 @@ DS.UI = {
   },
   // v0.9.3 긴급: 화면 꺼짐 방지 (교사 폰 리모컨 · 유튜브처럼) — Screen Wake Lock. 안드로이드 크롬 · 삼성 인터넷 · iOS 16.4+ 사파리
   //   다른 앱을 보다 돌아오면 다시 켠다 (브라우저가 화면이 가려지면 자동으로 풀기 때문)
+  WAKE_SCREENS: ['screen-student', 'screen-bonus', 'screen-teacher', 'screen-tcamp', 'screen-hall'],
   wake: {
     lock: null, want: false,
     async on() {
       DS.UI.wake.want = true;
-      try { if (typeof navigator !== 'undefined' && navigator.wakeLock && !DS.UI.wake.lock && document.visibilityState === 'visible') { DS.UI.wake.lock = await navigator.wakeLock.request('screen'); DS.UI.wake.lock.addEventListener('release', () => { DS.UI.wake.lock = null; }); } } catch (e) { /* 지원 안 함 · 배터리 절약 모드 */ }
+      try { if (typeof navigator !== 'undefined' && navigator.wakeLock && !DS.UI.wake.lock && document.visibilityState === 'visible') { DS.UI.wake.lock = await navigator.wakeLock.request('screen'); DS.UI.wake.lock.addEventListener('release', () => { DS.UI.wake.lock = null; }); } } catch (e) { DS.UI.wake.failed = true; /* 지원 안 함 · 배터리 절약 모드 */ }
+      return !!DS.UI.wake.lock;
+    },
+    // 📱 #70 지원 안 되는 폰(wakeLock 없음 · 실패 · 앱 안 브라우저): 수업 입장 때 한 번만 띠 (이 기기 기록 · 다시 안 뜸)
+    async tip() {
+      if (typeof navigator === 'undefined') return;
+      const okNow = await DS.UI.wake.on(); if (okNow || (navigator.wakeLock && !DS.UI.wake.failed)) return;
+      try { if (localStorage.getItem('ds-wake-tip')) return; localStorage.setItem('ds-wake-tip', '1'); } catch (e) { return; }
+      DS.UI.toast('📱 화면이 자꾸 꺼지면: 설정 → 화면 자동 잠금을 길게 · 또는 📲 앱으로 설치', 6000);
     },
     off() { DS.UI.wake.want = false; if (DS.UI.wake.lock) DS.UI.wake.lock.release().catch(() => {}); DS.UI.wake.lock = null; },
   },
@@ -78,6 +87,7 @@ DS.UI = {
   },
   show(id) {
     document.querySelectorAll('.screen').forEach((s) => s.classList.toggle('active', s.id === id));
+    if (DS.UI.wake) { if (DS.UI.WAKE_SCREENS.includes(id)) DS.UI.wake.on(); else DS.UI.wake.off(); } // 📱 #70 수업 · 성채 · 허수아비 · 교사 화면 = 화면 꺼짐 방지 · 캠프 · 메뉴 · 로그인 = 끔
     window.scrollTo(0, 0);
   },
 };

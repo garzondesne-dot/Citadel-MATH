@@ -35,7 +35,7 @@ DS.Student = (function () {
     code = c; info0 = info; lastStep = null; lastOx = null; dirty = false; clearTimeout(saveT);
     me = DS.Net.uid();
     if (!test) { try { localStorage.setItem('citadel-student', JSON.stringify({ code: c, ...info })); } catch (e) { /* 무시 */ } }
-    DS.UI.show('screen-student'); atkStart();
+    DS.UI.show('screen-student'); atkStart(); if (DS.UI.wake && DS.UI.wake.tip) DS.UI.wake.tip(); // 📱 #70 수업 화면 꺼짐 방지 (안 되는 폰은 안내 한 번)
     if (!test) DS.Scene.save({ role: 'student', code: c });
     DS.Act.presence(c).catch(() => {});
     DS.Net.set(`rooms/${c}/players/${me}/ver`, DS.VERSION).catch(() => {}); // 🔄 #55 리모컨 「옛 판 n명」
