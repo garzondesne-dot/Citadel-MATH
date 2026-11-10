@@ -69,13 +69,17 @@ DS.ASSETS = {
   //   3번(봉인 석상 m09-04)은 그림이 아직 없어 빈 줄 · 열쇠 유령 쓰러짐 칸은 받은 그림의 흐린 분홍이 배경과 함께 지워져 대기 모습을 흐리게 가라앉혀 만듦
   monstersKeyvault: { src: 'monsters-keyvault-v1.webp', cols: 3, rows: 5, poses: { idle: 0, attack: 1, down: 2 }, names: ['자물쇠 미믹', '열쇠 유령', '사슬 기사', '봉인 석상', '뒤집개 박쥐'] },
   monstersKeyvaultBoss: { src: 'monsters-keyvaultboss-v1.webp', cols: 3, rows: 1, poses: { idle: 0, attack: 1, down: 2 }, names: ['역과 대우의 문지기'] },
+  // 10차시 ⚖ 저울의 공중 정원 (2026-11-10 · m10-01~04 · 칸 192): 'garden:번호' — 4번(거울 웅덩이 두꺼비 m10-05) 그림 아직 없음 · 빈 줄
+  monstersGarden: { src: 'monsters-skygarden-v1.webp', cols: 3, rows: 5, poses: { idle: 0, attack: 1, down: 2 }, names: ['천칭 가고일', '필요 덩굴', '충분 나비', '쌍둥이 구름 정령', '거울 웅덩이 두꺼비'] },
+  // 11차시 🌊 모순의 수중 신전 (2026-11-10 · m11-01 · 02 · 칸 192): 'undersea:번호' — 2 ~ 4번(m11-03 ~ 05) 그림 아직 없음 · 빈 줄
+  monstersUndersea: { src: 'monsters-undersea-v1.webp', cols: 3, rows: 5, poses: { idle: 0, attack: 1, down: 2 }, names: ['모순 문어', '역설 해파리', '부등호 가오리', '거품 골렘', '산호 미믹'] },
   monstersMirrorBoss: { src: 'monsters-mirrorboss-v2.webp', cols: 3, rows: 1, poses: { idle: 0, attack: 1, down: 2 }, names: ['대우의 거울 마왕'] },
   monstersCrown: { src: 'monsters-crown-v1.webp', cols: 3, rows: 10, poses: { idle: 0, attack: 1, down: 2 },
     names: ['에메랄드 왕관 슬라임', '루비 박쥐', '사파이어 뿔벌레', '자수정 뼈뱀', '버섯 전사', '자수정 눈알 문어', '이끼 골렘', '서리 왕관 늑대', '덩굴 미믹', '청록 수정룡'] },
   // 던전 테마 10종: 던전 안 전투 배경(dg-). 차시 파일의 theme 으로 고른다 (2026-11-08 요청 #8: 화면에 안 나오던 테마 포털 portal- 10장 · 특수 차원문 dportal- 3장은 assets/_old 로 옮김)
   dungeons: { ids: ['01-burrow', '02-deep-forest', '03-dimensional', '04-mine', '05-ruins', '06-frost', '07-volcano', '08-crypt', '09-underwater', '10-sky', '11-keyvault', '12-skygarden'], // 11 · 12 = 9 · 10차시 새 테마 (2026-11-10 · bg-09 · bg-10)
     names: ['땅굴', '깊은 숲 성역', '차원 균열 지대', '폐광 갱도', '고대 유적 심장부', '빙결 동굴', '화산 심연', '망자의 지하 묘실', '수중 신전', '천공 성소', '열쇠와 자물쇠의 묘실', '저울의 공중 정원'],
-    bg: (id) => ({ '03-dimensional': 'dg-03-dimensional-v2.webp', '04-mine': 'dg-04-mine-v2.webp' })[id] || `dg-${id}-v1.webp`  // v2 도트 배경이 온 테마만 바꿔 씀 (2026-11-03: 03 차원 균열)
+    bg: (id) => ({ '03-dimensional': 'dg-03-dimensional-v2.webp', '04-mine': 'dg-04-mine-v2.webp', '09-underwater': 'dg-09-underwater-v2.webp' })[id] || `dg-${id}-v1.webp`  // v2 도트 배경이 온 테마만 바꿔 씀 (2026-11-03: 03 차원 균열)
   },
   // 메달 (v0.9.1 · 사용자 제공 · 5열 × 2행): rank = 업적 · 성장 10종, dungeon = 던전 테마 01~10 정복
   medals: { rank: { src: 'medals-rank-v1.webp', cols: 5, rows: 2 }, dungeon: { src: 'medals-dungeon-v1.webp', cols: 5, rows: 2 } },
