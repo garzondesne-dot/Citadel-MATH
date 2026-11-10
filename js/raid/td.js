@@ -185,7 +185,10 @@ DS.TD = (function () {
     el.innerHTML = `<div class="td-wrap"><div class="td-stage"><canvas class="td-bg"></canvas><div class="td-dom"></div><canvas class="td-fx"></canvas><div class="td-hud"></div><div class="td-big"></div></div></div>`;
     const h = { g: f.g, root: el.querySelector('.td-wrap'), map, el, R, f, mons: new Map(), tw: new Map(), cut: [], cutBusy: false };
     h.stage = h.root.querySelector('.td-stage'); if (artOf(map)) h.stage.classList.add('td-art'); h.bg = h.root.querySelector('.td-bg'); h.fx = h.root.querySelector('.td-fx'); h.dom = h.root.querySelector('.td-dom'); h.hud = h.root.querySelector('.td-hud'); h.big = h.root.querySelector('.td-big');
-    const fit = () => { const W = el.clientWidth || 1280, Hh = el.clientHeight || 720, w = Math.min(W, Hh * 16 / 9); h.U = w / 16; h.stage.style.setProperty('--u', `${h.U}px`); h.stage.style.width = `${w}px`; h.stage.style.height = `${w * 9 / 16}px`; [h.bg, h.fx].forEach((c) => { c.width = Math.round(w); c.height = Math.round(w * 9 / 16); }); drawMap(h); h.tw.clear(); h.dom.innerHTML = ''; h.mons.clear(); };
+    const fit = () => { const W = el.clientWidth || 1280, Hh = el.clientHeight || 720, w = Math.min(W, Hh * 16 / 9); h.U = w / 16; h.stage.style.setProperty('--u', `${h.U}px`); h.stage.style.width = `${w}px`; h.stage.style.height = `${w * 9 / 16}px`; [h.bg, h.fx].forEach((c) => { c.width = Math.round(w); c.height = Math.round(w * 9 / 16); }); drawMap(h);
+      // 🐞 #59 (2026-11-10 7차시): 전체 화면을 켜고 끄면(창 크기 바뀜) 놀이 중 용사 · 처치 수가 사라지던 것 → 놀이 중이면 지우지 않고 새 크기로 자리만 옮김 (몬스터는 매 프레임 새 크기로 그림)
+      if (h.S) h.S.towers.forEach((T) => { const d = h.tw.get(T.uid); if (!d) return; d.style.left = `${T.x * h.U}px`; d.style.top = `${T.y * h.U}px`; const rg = d.querySelector('.td-rg'); if (rg) { rg.style.width = rg.style.height = `${T.range * 2 * h.U}px`; } });
+      else { h.tw.clear(); h.dom.innerHTML = ''; h.mons.clear(); } };
     h.fit = fit; fit(); window.addEventListener('resize', () => { if (H === h) fit(); });
     return h;
   }
