@@ -64,6 +64,8 @@ const jpegSize = (buf) => { let i = 2; while (i < buf.length) { if (buf[i] !== 0
   const solve = async () => {
     for (let k = 0; k < 6; k++) {
       await S.waitForTimeout(500);
+      const fm = await S.evaluate(() => { const f = DS.Bonus._form; if (!f || !document.querySelector('.bn-fight .bf-paper .item')) return false; f.todo.forEach((i) => { const q = f.items[i]; f.G[i] = q.type === 'choice' ? q.answerIndex : q.type === 'multi' ? q.answer.slice() : q.answer; }); DS.Bonus._form = null; f.submit(); return true; }); // 🧩 A안 한 장 꼴
+      if (fm) { for (let w = 0; w < 20 && !(await S.$('#bf-photo')); w++) await S.waitForTimeout(300); continue; }
       const open = await S.evaluate(() => !document.getElementById('quiz').classList.contains('hidden'));
       if (!open) { if (await S.$('#bf-photo')) return true; continue; }
       const ans = String(await S.evaluate(() => DS.Quiz.last.answer));
