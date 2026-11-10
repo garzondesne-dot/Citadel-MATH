@@ -44,7 +44,7 @@ DS.FX = (function () {
   //   친화 계열 ★ = 용사마다 1개 — 친화 결정석을 끼우면 「공명」(이펙트 조금 크게 + 용사 빛) · 연출만, 데미지 · 보상 같음
   //   2026-11-06 🌬 바람 = 엘프 궁수 · 닌자 (질풍 닌자)
   //   2026-11-06 (근접 계열 2개 추가): 근접 용사는 근접 계열로 다시 짝지음 — 드워프 · 격투가 = 🔨 강타 · 창술사 · 무희 · 해적 = 🌪 연격 · 연금술사 = 🔥 불 · 성기사 = ✨ 별
-  const AFFINITY = { 0: 'cut', 16: 'cut', 3: 'wind', 6: 'smash', 9: 'smash', 5: 'sweep', 10: 'sweep', 13: 'sweep', 2: 'wind', 7: 'fire', 12: 'fire', 11: 'spark', 14: 'frost', 15: 'frost', 4: 'star', 8: 'star', 1: 'magic', 17: 'magic', 18: 'cut', 19: 'math', 20: 'math', 21: 'smash', 22: 'spark', 23: 'fire' }; // 2026-11-07 새 용사: 흑기사 ⚔ · 수식 책사 남 · 여 📐 · 메카닉 🔨 · 해커 ⚡ · 용기사 🔥
+  const AFFINITY = { 0: 'cut', 16: 'cut', 3: 'wind', 6: 'smash', 9: 'smash', 5: 'sweep', 10: 'sweep', 13: 'sweep', 2: 'wind', 7: 'fire', 12: 'fire', 11: 'spark', 14: 'frost', 15: 'frost', 4: 'star', 8: 'star', 1: 'magic', 17: 'magic', 18: 'cut', 19: 'math', 20: 'math', 21: 'smash', 22: 'spark', 23: 'fire', 24: 'spark', 25: 'magic', 26: 'wind', 27: 'magic', 28: 'frost', 29: 'star', 30: 'spark', 31: 'sweep', 32: 'fire', 33: 'star' }; // 2026-11-07 새 용사: 흑기사 ⚔ · 수식 책사 남 · 여 📐 · 메카닉 🔨 · 해커 ⚡ · 용기사 🔥
   const affOf = (hero) => FAMS.find((f) => f.id === AFFINITY[Number(hero)]) || FAMS[0];
   const crystalOf = (hero, socket) => { const k = (socket || {})[Number(hero)]; return KINDS.includes(k) ? k : affOf(hero).ids[0]; }; // 빈 칸 = 친화 계열 Ⅰ
   const resonates = (hero, k) => { const f = famOf(k); return !!f && f.id === AFFINITY[Number(hero)]; };

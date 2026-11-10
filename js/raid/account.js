@@ -156,6 +156,7 @@ DS.Account = (function () {
     const fo = DS.Bonus ? DS.Bonus.fxOpen(bonus) : {}, seals = DS.Bonus ? DS.Bonus.seals(bonus).length : 0;
     heroes.push({ id: 16, open: seals >= 3, cond: `🏆 업적 ${Math.min(seals, 3)} / 3 — 🎯 허수아비 👑 형성평가 재대결 · 🏰 성채 보스 방을 처치하면 하나씩` }); // 2026-11-03 사용자 결정: 금발 검사 = 인장 3개
     [18, 19, 20, 21, 22, 23].forEach((id) => heroes.push({ id, open: false, cond: '💎 조각으로 해금' })); // 2026-11-07 새 용사 6 (흑기사 · 메카닉 · 해커 · 용기사 = 💎 상점 · gem.js SHOP)
+    [24, 25, 26, 27, 28, 29, 30, 31, 32, 33].forEach((id) => heroes.push({ id, open: false, cond: '🔒 여는 방법은 곧 알려 줄게요' })); // 2026-11-10 새 용사 10 (마검사 ~ 별점술사) · 해금 조건 = 머리 방 결정 기다림 (선생님 「머리 방에서 정하기」)
     // ⚔ 이펙트 v2 (2026-11-06): 계열 6 × 단계 4 — Ⅰ 열림 · Ⅱ 💎 · Ⅲ 인장(또는 💎) · Ⅳ 💎 + 같은 계열 Ⅲ 필요 · 특별(업적)
     const fx = [];
     DS.FX.FAMS.forEach((fam) => fam.ids.forEach((k, t) => {

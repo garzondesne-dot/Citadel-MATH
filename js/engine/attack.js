@@ -102,7 +102,7 @@ DS.Attack = (function () {
   function faceHtml(hero) {
     const F = A().heroFaces, n = Number(hero) || 0;
     preloadFaces(); // 아직 못 받았으면 아래 확대 도트 얼굴로 (빈 띠 대신)
-    if (F && F.src && n < F.cols * F.rows && faceReady()) { const c = n % F.cols, r = Math.floor(n / F.cols); return `<i class="u-facepic" style="background-image:url('${A().base}${F.src}');background-size:${F.cols * 100}% ${F.rows * 100}%;background-position:${F.cols > 1 ? (c / (F.cols - 1)) * 100 : 0}% ${F.rows > 1 ? (r / (F.rows - 1)) * 100 : 0}%">${eyesOf(F, n)}</i>`; }
+    if (F && F.src && n < F.cols * F.rows && !(F.eyes && F.eyes[n] === null) && faceReady()) { const c = n % F.cols, r = Math.floor(n / F.cols); return `<i class="u-facepic" style="background-image:url('${A().base}${F.src}');background-size:${F.cols * 100}% ${F.rows * 100}%;background-position:${F.cols > 1 ? (c / (F.cols - 1)) * 100 : 0}% ${F.rows > 1 ? (r / (F.rows - 1)) * 100 : 0}%">${eyesOf(F, n)}</i>`; }
     return `<div class="u-face">${DS.Art.hero(hero, 'idle')}</div>`;
   }
   // opt.gold = 🌟 진필살기 (2026-11-06): 금빛 띠 · 「眞」 · 조금 더 길게
