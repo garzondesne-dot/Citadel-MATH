@@ -343,7 +343,7 @@
     videos: { // 🎬 40 명제와 부정 · 41 진리집합과 조건의 부정 (#60 v5 · 42 모든과 어떤 = 9차시 · KEEP9.video)
       c1: 'assets/video/v08-40-v2.mp4', m1: 'assets/video/v08-40-v2.mp4',
       c2: 'assets/video/v08-41-v2.mp4', m2: 'assets/video/v08-41-v2.mp4', m3: 'assets/video/v08-41-v2.mp4', c3: 'assets/video/v08-41-v2.mp4', m4: 'assets/video/v08-41-v2.mp4',
-      cp1: 'assets/video/v06-37-v2.mp4', // #85 ➕ 사각형의 포함 관계
+      cp1: 'assets/video/v08-37.mp4', // #85 ➕ 사각형의 포함 관계 · 2026-11-11 모션 방 새 판 (30초 · 꼭짓점을 끌어 사다리꼴 → 정사각형)
       c4: 'assets/video/v08-42-v2.mp4', m5: 'assets/video/v08-42-v2.mp4' }, // v6 (#65): 42 모든과 어떤 = 8차시로 다시
     goal: '명제와 그 부정의 뜻을 안다 · 조건의 진리집합과 조건의 부정을 구할 수 있다 · ‘모든’, ‘어떤’을 포함한 명제의 참 · 거짓을 판별할 수 있다',
     defaultPct: 90,
