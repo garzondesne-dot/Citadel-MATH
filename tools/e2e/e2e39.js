@@ -15,7 +15,7 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   await p.evaluate(async (m) => { localStorage.setItem('citadel-tut-1-1-3', JSON.stringify({ a: 1, b: 1 })); await DS.Net.set('unlock/1-1', 5); await DS.Camp.enter(m); }, me);
   await shot('01-camp');
   await p.evaluate(() => DS.Camp.settings()); await p.waitForTimeout(800); await shot('02-settings'); await xCheck('설정'); await p.screenshot({ path: `${OUT}/02b-settings-scrolled.png` });
-  await p.click('.hpick:not(.lock) >> nth=1'); await p.waitForTimeout(400); log.push('설정 다시 그린 뒤 ✕: ' + (await p.locator('.modal .ui-x').count()) + ' · 저장 아래 고정: ' + (await p.locator('.modal .ui-foot #set-ok').count()));
+  await p.click('.set-tabs [data-tab="gem"]'); await p.waitForTimeout(400); log.push('설정 다시 그린 뒤 ✕: ' + (await p.locator('.modal .ui-x').count()) + ' · (#98 저장 = 고른 것이 있을 때만 아래 막대)');
   await close();
   await p.click('#camp-tent'); await p.waitForTimeout(1200); await shot('03-shelf'); await xCheck('책장'); await close();
   await p.click('#camp-mail'); await p.waitForTimeout(1200); await shot('04-mail'); await xCheck('우편함');
