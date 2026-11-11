@@ -635,7 +635,7 @@ DS.Student = (function () {
   function draftMark(k) { if (test || !code || !me || draftKey === (k || '')) return; draftKey = k || ''; DS.Net.set(`rooms/${code}/players/${me}/draft`, k || null).catch(() => {}); }
   // ✍ #65-2 일반 몬스터 「나의 풀이」: 고르는 동안 연필 글씨(옅은 회색) · 빼면 바로 지워짐 · 제출 뒤 맞힌 줄 = 픽셀 디졸브로 진하게 · 틀린 줄 = 스르르 지워짐 (정답 여부는 제출 전에 알리지 않음)
   //   접힘 = 한 줄(방금 고친 줄)만 · ▾ 모두 · 고르는 칸 아래에 둠 (P5 「고르는 칸이 먼저」)
-  const penOpen = {}, penLast = {}, penShown = {};
+  const penLast = {}, penShown = {};
   function penLine(q, g, i) {
     const no = (/^\s*(\([^)]*\)|\d+-\(\d+\)|문제 \d+ \(\d+\)|문제 \d+\))/.exec(DS.UI.plain(q.question || '')) || [])[1] || `(${i + 1})`;
     let v = '';
@@ -649,7 +649,8 @@ DS.Student = (function () {
     else { if (g == null) return null; v = String(g); }
     return `${no} ${v}`;
   }
-  const penBox = (key, lines, cls = '') => (lines.length ? `<div class="cr-story pen-box${penOpen[key] || cls ? '' : ' cr-fold'}${cls}" data-pk="${esc(key)}"><b>${/pen-res/.test(cls) ? '📜 나의 답안' : '✍ 나의 풀이'}</b>${lines.length > 1 && !cls ? `<button class="cr-sf pen-sf" type="button">${penOpen[key] ? '▴ 접기' : `▾ 모두 ${lines.length}줄`}</button>` : ''}<ol>${lines.map((l, k) => `<li class="${l.cls || ''}"${/pen-res/.test(cls) ? ` style="--d:${(k * STAMP_GAP) / 1000}s"` : ''}>${pretty(l.t)}</li>`).join('')}</ol></div>` : '');
+  // ✍ #94 (2026-11-11 선생님 「일반 몬스터도 펼쳐서」): 나의 풀이 · 나의 답안 = 늘 모두 펼침 · 접기 단추 없음 (소레이드 #93 과 같음)
+  const penBox = (key, lines, cls = '') => (lines.length ? `<div class="cr-story pen-box${cls}" data-pk="${esc(key)}"><b>${/pen-res/.test(cls) ? '📜 나의 답안' : '✍ 나의 풀이'}</b><ol>${lines.map((l, k) => `<li class="${l.cls || ''}"${/pen-res/.test(cls) ? ` style="--d:${(k * STAMP_GAP) / 1000}s"` : ''}>${pretty(l.t)}</li>`).join('')}</ol></div>` : '');
   // ✍ 문제마다 「나의 답」 한 줄 (2026-11-11 선생님 「문제마다 나의 풀이 칸 · 공격 때 하나로 합쳐 채점」): 고르기 전 = 점선 빈칸 · 고르면 연필 글씨
   const STAMP_GAP = 400, stampMs = (n) => (n ? n * STAMP_GAP + 450 : 0); // 채점 도장 한 줄 0.4초 → 끝나면 공격
   const NO_RE = /^(\([^)]*\)|\d+-\(\d+\)|문제 \d+ \(\d+\)|문제 \d+\))\s/;
@@ -703,7 +704,6 @@ DS.Student = (function () {
       else form.given[k] = [v];
       penLast[mid] = k; form.touched = true; DS.Sound.clank(); render();
     }));
-    body.querySelectorAll('.pen-sf').forEach((b) => (b.onclick = (e) => { e.stopPropagation(); const k = b.closest('.pen-box').dataset.pk; penOpen[k] = !penOpen[k]; drawn = ''; render(); })); // ✍ 접기 · 펼치기
     body.querySelectorAll('[data-hint]').forEach((b) => b.addEventListener('click', () => { hintTap(b.dataset.hint); drawn = ''; render(); }));
     // 단답 입력: 다시 그리지 않고 값만 기억 (글자 입력 중에 화면이 바뀌지 않게) · 공격 버튼만 켜고 끔
     body.querySelectorAll('[data-text]').forEach((inp) => inp.addEventListener('input', () => {
@@ -985,5 +985,5 @@ DS.Student = (function () {
     bindLobby();
   }
   // v0.9.3 종합상황실 시연: 학생 폰과 같은 문항 칸 · 해설 줄
-  return { enter, stop: stop0, itemHtml: (q, i, G) => itemHtml(q, i, false, null, G, true), ansLine, solOf, itemText, hintCount, penLine, penBox, pixIn, withAns, mergeAnim, stampMs, STAMP_GAP, penToggle: (k) => { penOpen[k] = !penOpen[k]; }, penMark: (k, i) => { penLast[k] = i; } }; // 🧩 A안 (11/11): 성채 · 허수아비 전투도 같은 부품
+  return { enter, stop: stop0, itemHtml: (q, i, G) => itemHtml(q, i, false, null, G, true), ansLine, solOf, itemText, hintCount, penLine, penBox, pixIn, withAns, mergeAnim, stampMs, STAMP_GAP, penMark: (k, i) => { penLast[k] = i; } }; // 🧩 A안 (11/11): 성채 · 허수아비 전투도 같은 부품
 })();

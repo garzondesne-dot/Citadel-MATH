@@ -39,6 +39,8 @@ const OUT = process.argv[2] || '.', U = 'http://localhost:8765/index.html?local'
   await tap('#st-go'); await S.waitForTimeout(2600);
   const rec = await S.evaluate(async (c) => { const R = DS.Act.unpackRoom(await DS.Net.get(`rooms/${c}`)), L = DS.Lessons.get('set-06'); const r = DS.Raid.record(L, R, 'm2', DS.Net.uid()); return { best: r.best, total: r.total }; }, code);
   ok(rec.best === rec.total && rec.total === 3, `${tag} 룬으로 낸 답 = 모두 맞음 (${rec.best}/${rec.total})`);
+  { await S.waitForTimeout(1500); await S.screenshot({ path: `${OUT}/114-${tag}-m2-result.png` }); const pb = await S.evaluate(() => [...document.querySelectorAll('#st-body .pen-box')].map((x) => ({ fold: x.classList.contains('cr-fold'), btn: !!x.querySelector('.pen-sf'), all: x.querySelectorAll('li').length, shown: [...x.querySelectorAll('li')].filter((l) => l.offsetHeight > 0).length })));
+    ok(pb.length > 0 && pb.every((x) => !x.fold && !x.btn && x.shown === x.all), `${tag} ✍ #94 일반 몬스터 결과 「📜 나의 답안」 늘 모두 펼침 ${JSON.stringify(pb)}`); }
   // ② 소레이드 문제 7 졸개① (숫자)
   await goStep('u7'); await S.waitForTimeout(2600); await clr();
   const a7 = await S.evaluate(async (c) => { const R = DS.Act.unpackRoom(await DS.Net.get(`rooms/${c}`)), L = DS.Lessons.get('set-06'); return DS.Raid.chainItems(L, R, 'u7', DS.Net.uid(), 0)[0].answer; }, code);
