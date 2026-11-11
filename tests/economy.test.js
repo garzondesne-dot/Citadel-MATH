@@ -1,6 +1,6 @@
 // 💎 경제 자동 시험 (2026-11-06 사용자 「모든 컨텐츠를 했다고 가정했을 때 양이 적당한지 계산하면서 뿌리고 있어?」)
 //   기말(12/11)까지 학생 유형별로 모을 수 있는 💎 를 G(적립표) · 콘텐츠 수로 계산 → 상점(용사 + 스킬) 💎 합과 비교
-//   목표 (DECISIONS 2026-11-06): 다 함 ≈ 80~90% · 꾸준 ≈ 35~50% · 수업만 ≈ 10~22% · 실력 갈래와 노력 갈래가 비슷한 크기
+//   목표 (🪜 #96 2026-11-11 선생님 A안 · 옛 띠 80~92 · 35~50 · 10~22): 상점 = 💎 용사 + 14갈래 사다리 4칸(강화는 따로) · 다 함 65~75% · 꾸준 28~38% · 수업만 9~15% · 실력 갈래와 노력 갈래가 비슷한 크기
 //   보상 · 값을 바꾸면 node tests/economy.test.js 로 목표 안인지 확인
 global.window = global; global.DS = { Net: {} }; require('../js/raid/gem.js');
 const G = DS.Gem.G, SHOP = DS.Gem.SHOP;
@@ -8,9 +8,8 @@ const G = DS.Gem.G, SHOP = DS.Gem.SHOP;
 //   성채 · 서술형 · 카드 = 지금 게임 값 (아래 시험이 차시 파일과 같은지 확인) · fixes = 차시마다 오답 고치기 약 3 (옛 9차시 27 과 같은 비율)
 const C = { lessons: 15, rooms: 37, bossRooms: 3, photoRooms: 7, cards: 54, fixes: 45 };
 // 📚 도감 특전 용사(CARD_HEROES)는 카드를 다 모으면 💎 를 돌려받으므로 상점 합계에서 뺌 (2026-11-07)
-// 🌈 #74-3a-2 A1 (2026-11-11 선생님 「A1」 · DECISIONS 「💎 경제 시험 기준」): 새 속성 4갈래(☀ 🌑 ⚙ 🌊) 스킬은 그 8명 용사용이라 상점 합계에서 뺌 (목표 띠 그대로)
-const NEW_ATTR = ['radiant', 'bulwark', 'holysword', 'skylance', 'shade', 'claw', 'phantom', 'eclipse', 'wrench', 'cog', 'piston', 'drill', 'aqua', 'wave', 'anchor', 'tsunami'];
-const shop = Object.entries(SHOP).reduce((a, [kind, k]) => a + Object.entries(k).reduce((b, [id, v]) => b + ((kind === 'hero' && DS.Gem.CARD_HEROES.includes(Number(id))) || (kind === 'fx' && NEW_ATTR.includes(id)) ? 0 : v), 0), 0);
+// 🪜 #96 (2026-11-11): 스킬 = 용사 사다리 4칸뿐 · 모든 갈래에 용사가 있으니 14갈래 모두 셈 (옛 A1 「새 4갈래 뺌」 없앰) · 합체 칸 없음
+const shop = Object.entries(SHOP).reduce((a, [kind, k]) => a + Object.entries(k).reduce((b, [id, v]) => b + (kind === 'hero' && DS.Gem.CARD_HEROES.includes(Number(id)) ? 0 : v), 0), 0);
 // 갈래별 적립 (f = 하는 비율)
 function earn(f) {
   const skill = C.lessons * (f.solved * G.solvedMax + f.perfect * G.perfect + f.perfect * G.bossPerfect + f.boss * G.bossRe) + C.rooms * f.rooms * f.first * G.roomFirst + C.photoRooms * f.photo * G.photo; // 🧠 실력
@@ -23,9 +22,9 @@ const TYPES = {
   '꾸준': { solved: 0.75, perfect: 0.4, boss: 0.5, rooms: 0.4, first: 0.4, photo: 0.3, note: 0.4, seal: 0.4, review: 0.5, cards: 0.2, fun: 0.6, streak: 0.6 },
   '수업만': { solved: 0.6, perfect: 0.2, boss: 0, rooms: 0, first: 0, photo: 0, note: 0, seal: 0, review: 0, cards: 0, fun: 0.5, streak: 0.3 },
 };
-const BAND = { '다 함': [0.8, 0.92], '꾸준': [0.35, 0.5], '수업만': [0.1, 0.22] };
+const BAND = { '다 함': [0.65, 0.75], '꾸준': [0.28, 0.38], '수업만': [0.09, 0.15] };
 let fail = 0; const pct = (x) => `${Math.round(x * 100)}%`;
-console.log(`상점(용사 + 스킬 · 새 속성 4갈래 뺌) 💎 ${shop}`);
+console.log(`상점(💎 용사 + 14갈래 사다리) 💎 ${shop}`);
 Object.entries(TYPES).forEach(([k, f]) => { const e = earn(f), r = e.total / shop, [lo, hi] = BAND[k], ok = r >= lo && r <= hi; if (!ok) fail++;
   console.log(`${ok ? '✔' : '✘'} ${k}: 💎 ${Math.round(e.total)} (실력 ${Math.round(e.skill)} · 노력 ${Math.round(e.effort)} · 그 밖 ${Math.round(e.etc)}) = 상점의 ${pct(r)} (목표 ${pct(lo)}~${pct(hi)})`); });
 const all = earn(TYPES['다 함']), ratio = all.effort / all.skill;

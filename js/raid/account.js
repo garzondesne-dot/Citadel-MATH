@@ -108,7 +108,7 @@ DS.Account = (function () {
     for (const [c, byN] of Object.entries(all)) for (const [n, a] of Object.entries(byN || {})) {
       if (a && a.uid === uid) {
         // 2026-11-03 (저녁): 0번 = 갈색머리 검사 v3 · 16번 = 금발 검사(추가 용사, 중단원던전 인장 3개) — 예전 「16 → 0 옮김」은 없앰
-        const name = await N().get(`roster/${c}/${n}`); cache = { uid, c, n: Number(n), name: name || '', title: a.title || 'none', hero: a.hero || 0, fx: DS.FX ? (DS.FX.KINDS.includes(a.fx) ? a.fx : 'flame') : a.fx || 'flame', socket: a.socket || {} }; return cache; }
+        const name = await N().get(`roster/${c}/${n}`); cache = { uid, c, n: Number(n), name: name || '', title: a.title || 'none', hero: a.hero || 0, fx: DS.FX ? (DS.FX.fit ? DS.FX.fit(a.hero || 0, a.fx) : DS.FX.KINDS.includes(a.fx) ? a.fx : 'flame') : a.fx || 'flame', socket: a.socket || {} }; return cache; }
     }
     return null;
   }
@@ -212,8 +212,7 @@ DS.Account = (function () {
         f.cond = sealGot ? `🏆 받음 · ${TN[t - 1]} 열면 사용` : `💎${f.shop ? f.shop.price : ''} · ${TN[t - 1]}먼저`; f.got = sealGot; // #31 A안: 받은 것 = 금빛 (잠김 아님)
       }));
     }
-    // 🌳 #78 합체 칸 3개: 두 재료 Ⅱ 를 다 가지면 💎 없이 저절로 열림 (단계 Ⅱ · 필살기 없음)
-    Object.entries(DS.FX.COMBO || {}).forEach(([id, c]) => { const a = fx.find((x) => x.id === c.mats[0]), b = fx.find((x) => x.id === c.mats[1]); fx.push({ id, fam: c.fam, tier: 1, combo: true, open: !!(a && a.open && b && b.open), cond: `${DS.FX.NAMES[c.mats[0]]} + ${DS.FX.NAMES[c.mats[1]]} 를 열면 저절로` }); });
+    // 🪜 #96 합체 칸 없앰 (2026-11-11 · 사다리 4칸만)
     // 🪶 황금 날개 (v0.9.11 업적 전용): 🎁 보물 상자에서 황금 깃털 5개
     const fe = DS.Gem ? DS.Gem.rareOf(gem) : 0;
     if (DS.FX.ACHV) fx.push({ id: 'wings', tier: 's', open: fe >= 5, cond: `🏆 🎁 보물 상자 영웅 · 전설 ${Math.min(fe, 5)} / 5번` });

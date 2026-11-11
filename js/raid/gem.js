@@ -124,7 +124,7 @@ DS.Gem = (function () {
     return g;
   }
   // 아직 안 본 선물 합계 (학생 캠프 알림용 · seen = 마지막으로 본 시각)
-  const giftsSince = (d, seen) => Object.values((d || {}).log || {}).filter((x) => x && x.gift && Number(x.at) > (Number(seen) || 0)).reduce((a, x) => ({ g: a.g + (Number(x.g) || 0), at: Math.max(a.at, Number(x.at) || 0) }), { g: 0, at: 0 });
+  const giftsSince = (d, seen) => Object.values((d || {}).log || {}).filter((x) => x && x.gift && !x.nopop && Number(x.at) > (Number(seen) || 0)).reduce((a, x) => ({ g: a.g + (Number(x.g) || 0), at: Math.max(a.at, Number(x.at) || 0) }), { g: 0, at: 0 });
   // 🎁 선물 알림 어디서나 (2026-11-06 사용자 A: 「선물 줬지? → 안 줬어요 · 우편함에 뭐가?」): 학생 계정 하나당 한 번 지켜봄 → 캠프 · 대기실 · 던전 어디서든 바로 큰 알림
   let giftStop = null, giftFor = '';
   function watchGifts(m) {
@@ -159,7 +159,7 @@ DS.Gem = (function () {
     if ((d.buy || {})[key]) throw Object.assign(new Error('이미 해금했어요.'), { user: true });
     if ((Number(d.total) || 0) < p) throw Object.assign(new Error(`💎 조각이 ${p - (Number(d.total) || 0)}개 모자라요.`), { user: true });
     const sc = scrollOf(kind, id); if (sc && (Number(d.scroll) || 0) < sc) throw Object.assign(new Error(`📜 서술 조각이 ${sc - (Number(d.scroll) || 0)}개 모자라요 — 성채 서술형 방에서 풀이 사진을 통과하면 모여요.`), { user: true });
-    await N().update(path(m), { total: (Number(d.total) || 0) - p, ...(sc ? { scroll: (Number(d.scroll) || 0) - sc } : {}), [`buy/${key}`]: N().TS, [`log/buy_${key}`]: { g: -p, ...(sc ? { s: -sc } : {}), at: N().TS, why: '상점 해금' } });
+    await N().update(path(m), { total: (Number(d.total) || 0) - p, ...(sc ? { scroll: (Number(d.scroll) || 0) - sc } : {}), [`buy/${key}`]: N().TS, [`log/buy_${key}`]: { g: -p, ...(sc ? { s: -sc } : {}), at: N().TS, why: '상점 해금', v: 96 } }); // 🪜 #96 v: 96 = 개편 뒤 구매 (refund96 이 돌려주지 않음)
     return true;
   }
   const owns = (d, kind, id) => !!((d || {}).buy || {})[itemKey(kind, id)];
