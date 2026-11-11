@@ -60,9 +60,9 @@
       c3: [{ p: 1, x: 0.507, y: 0.5973, w: 0.452, h: 0.1337 }], m4: [{ p: 1, x: 0.507, y: 0.728, w: 0.452, h: 0.227 }], cp2: [{ p: 2, x: 0.045, y: 0.1017, w: 0.455, h: 0.3024 }],
       m5: [{ p: 2, x: 0.045, y: 0.4011, w: 0.455, h: 0.39 }], boss: [{ p: 2, x: 0.507, y: 0.115, w: 0.452, h: 0.56 }] },
     videos: { // 🎬 #83 (2026-11-11): 43 p → q · 반례 · 44 역과 대우 · 45 포함 관계로 보는 명제 (드라이브 05 원본 · K.C.W 워터마크 없는 판이 오면 -v2 로 바꿔 끼움)
-      c1: 'assets/video/v09-43.mp4', m1: 'assets/video/v09-43.mp4', m2: 'assets/video/v09-43.mp4',
-      c2: 'assets/video/v09-44.mp4', c3: 'assets/video/v09-44.mp4', m3: 'assets/video/v09-44.mp4', m4: 'assets/video/v09-44.mp4', m5: 'assets/video/v09-44.mp4',
-      cp1: 'assets/video/v09-45.mp4', cp2: 'assets/video/v09-45.mp4' },
+      c1: 'assets/video/v09-43-v2.mp4', m1: 'assets/video/v09-43-v2.mp4', m2: 'assets/video/v09-43-v2.mp4',
+      c2: 'assets/video/v09-44-v2.mp4', c3: 'assets/video/v09-44-v2.mp4', m3: 'assets/video/v09-44-v2.mp4', m4: 'assets/video/v09-44-v2.mp4', m5: 'assets/video/v09-44-v2.mp4',
+      cp1: 'assets/video/v09-45-v2.mp4', cp2: 'assets/video/v09-45-v2.mp4' },
     next: { title: '10차시 · 충분조건과 필요조건', ask: '「비가 오면 땅이 젖는다」 — 땅이 젖으려면 비가 꼭 와야 할까?', link: '오늘 배운 p → q 의 참 · 거짓으로 충분조건 · 필요조건을 알아봐요' },
   };
 
