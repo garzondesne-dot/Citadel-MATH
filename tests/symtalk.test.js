@@ -43,13 +43,13 @@ rows.forEach(([sym, easy, def, memo], i) => { const r = S.ROWS[i] || {};
 const at = (t, ch, k = 0) => { let i = -1; for (let j = 0; j <= k; j++) i = t.indexOf(ch, i + 1); return S.pick(t, i); };
 const T = [
   ['A ∩ B = ∅ 이므로', '∩', 'disj'], ['A ∩ B = ∅ 이므로', '∅', 'disj'], ['A ∩ B = ∅ 이므로', '=', 'disj'],
-  ['X ⊂ B − A = {12, 16, 20}', '⊂', 'sub'], ['X ⊂ B − A = {12, 16, 20}', '−', 'diff'], ['X ⊂ B − A = {12, 16, 20}', '{', 'list'],
+  ['X ⊂ B − A = {12, 16, 20}', '⊂', 'sub'], ['X ⊂ B − A = {12, 16, 20}', '−', 'diff'], ['X ⊂ B − A = {12, 16, 20}', '{', null], ['X ⊂ B − A = {12, 16, 20}', '=', null],
   ['n(A ∪ B) = n(A) + n(B) − n(A ∩ B)', '∪', 'ncup'], ['n(A ∪ B) = n(A) + n(B) − n(A ∩ B)', 'n', 'ncup'], ['n(A ∪ B) = n(A) + n(B) − n(A ∩ B)', '−', null],
   ['n(A) = 4', 'n', 'n'], ['n(A) = 4', '=', null], ['99 − 3 = 96', '−', null], ['99 − 3 = 96', '=', null],
   ['a ∈ A', '∈', 'in'], ['b ∉ A', '∉', 'notin'], ['A ⊄ B', '⊄', 'nsub'], ['A ∩ B 의 원소', '∩', 'cap'], ['A ∪ B = B 이므로', '∪', 'cup'], ['A ∪ B = B 이므로', '=', 'eq'],
   ['Aᶜ ∪ Bᶜ = (A ∩ B)ᶜ', 'ᶜ', 'compl'], ['Aᶜ ∪ Bᶜ = (A ∩ B)ᶜ', '∪', 'cup'], ['Aᶜ ∪ Bᶜ = (A ∩ B)ᶜ', '=', 'eq'],
-  ['A = {x | x는 8의 약수}', '{', 'build'], ['A = {x | x는 8의 약수}', '|', 'build'], ['A = {x | x는 8의 약수}', '=', null],
-  ['U = 100 미만의 자연수', 'U', 'U'], ['n(U) = 99', 'U', 'U'], ['n(∅) = 0', '∅', 'empty'], ['A − B ≠ B − A', '−', 'diff'],
+  ['A = {x | x는 8의 약수}', '{', null], ['A = {x | x는 8의 약수}', '|', null], ['U = {1, 2, 3}', '=', null], ['A = B', '=', 'eq'], ['Aᶜ = (A ∪ B)', '=', 'eq'], ['A = {x | x는 8의 약수}', '=', null],
+  ['U = 100 미만의 자연수', 'U', null], ['n(U) = 99', 'U', null], ['n(∅) = 0', '∅', 'empty'], ['A − B ≠ B − A', '−', 'diff'],
 ];
 T.forEach(([t, ch, want]) => { const got = at(t, ch); check(got === want, `「${t}」의 ${ch} → ${want} (${got})`); });
 check(Object.keys(S.BY).every((k) => S.ROWS.some((r) => r.id === k) || S.CONCEPTS.some((r) => r.id === k) || S.PROP.some((r) => r.id === k)), '모든 id = 기호 16줄 + 개념 톡 + 명제');

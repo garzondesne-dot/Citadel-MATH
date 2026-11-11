@@ -77,15 +77,12 @@ DS.SymTalk = (function () {
     if (c === '∩') return isDisj(t, i) ? 'disj' : 'cap';
     if (c === '∪') return inNum(t, i) ? 'ncup' : 'cup';
     if (c === 'ᶜ') return 'compl';
-    if (c === '=') { if (isDisj(t, i)) return 'disj'; return setLeft(t, i) && !inNum(t, i) && setRight(t, i) && !/^\{[^}]*\|/.test(after(t, i)) ? 'eq' : null; }
+    if (c === '=') { if (isDisj(t, i)) return 'disj'; return setLeft(t, i) && !inNum(t, i) && /^[A-Z(∅]/.test(after(t, i)) && !/^n\(/.test(after(t, i)) ? 'eq' : null; } // 🖍 #109 「U = {…}」 「A = {x | …}」 의 = 는 안 칠함 · 집합끼리 A = B 만
     if (c === '−') return setLeft(t, i) && setRight(t, i) && !inNum(t, i) ? 'diff' : null;
-    if (c === 'U') return /[A-Za-z가-힣]/.test(t[i - 1] || '') || /[A-Za-z]/.test(t[i + 1] || '') ? null : 'U';
     if (c === 'n' && t[i + 1] === '(' && !/[A-Za-z]/.test(t[i - 1] || '')) { const close = t.indexOf(')', i); return /∪/.test(t.slice(i, close < 0 ? undefined : close)) ? 'ncup' : 'n'; }
-    if (c === '{') { const close = t.indexOf('}', i), inner = t.slice(i + 1, close < 0 ? undefined : close); if (/\|/.test(inner)) return 'build'; return /,/.test(inner) || /^\s*[0-9a-z]/.test(inner) ? 'list' : null; }
-    if (c === '|') { const o = t.lastIndexOf('{', i), cl = t.lastIndexOf('}', i); return o > cl ? 'build' : null; }
     return null;
   }
-  const CH = /[∈∉⊂⊄∅∩∪=−U{|]|n(?=\()/g;
+  const CH = /[∈∉⊂⊄∅∩∪=−]|n(?=\()/g; // 🖍 #109 (2026-11-12 선생님 「2A」 · 테스트 #1 규칙 v2 와 같음): 칠하는 것 = 연산 기호만 · U · { · | 는 안 칠함(집합 이름 · 정의 기호)
 
   // ── 표시 (화면에 그린 뒤 텍스트에 점선 밑줄 칸을 씌움) ──
   const ROOTS = '#st-body .paper, #st-body .cr-story, #st-body .cr-prob, #st-body .cr-why, #st-body .items, #st-body .st-res, #quiz-q, #quiz-choices, .bn-fight .cr-story, .bn-fight .bf-body > p';
