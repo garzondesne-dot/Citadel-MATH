@@ -3293,3 +3293,8 @@ body:has(#test-bar) #screen-student.st-battle .wrap:has(.cr-dock) { padding-bott
 .atk-echo > * { pointer-events: none; }
 @keyframes atkEcho { 0% { opacity: .55; } 100% { opacity: 0; transform: translateX(-6px); } }
 @media (prefers-reduced-motion: reduce) { .atk-echo { display: none; } }
+/* 🐞 2026-11-11 선생님 캡처 · ⚔ 스킬 탭 깨진 곳 (내 용사 창)
+   ① 위 제목 줄(오늘 받은 💎) 뒤로 아래 글(지금 살 수 있는 것)이 비침 → 제목 줄 바탕을 꽉 채움
+   ②③ 펼친 속성 줄 머리글이 첫 칸(62px)에 눌려 「베기 공!」 「1 / 강타 4」 → 펼치면 머리글 = 한 줄 전체 · 스킬 칸 4개는 그 아래
+   ④ 💾 저장 아래로 버전 꼬리표 · 다음 줄이 비침 → 창이 열려 있으면 버전 꼬리표 숨김 · 저장 칸 바탕 꽉 채움 */
+.set-box .set-head { background: var(--panel); box-shadow: 0 6px 8px -4px var(--panel); }
