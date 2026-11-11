@@ -3298,3 +3298,7 @@ body:has(#test-bar) #screen-student.st-battle .wrap:has(.cr-dock) { padding-bott
    ②③ 펼친 속성 줄 머리글이 첫 칸(62px)에 눌려 「베기 공!」 「1 / 강타 4」 → 펼치면 머리글 = 한 줄 전체 · 스킬 칸 4개는 그 아래
    ④ 💾 저장 아래로 버전 꼬리표 · 다음 줄이 비침 → 창이 열려 있으면 버전 꼬리표 숨김 · 저장 칸 바탕 꽉 채움 */
 .set-box .set-head { background: var(--panel); box-shadow: 0 6px 8px -4px var(--panel); }
+.fx-fam:not(.shut) { grid-template-columns: repeat(4, 1fr); }
+.fx-fam.sp:not(.shut) { grid-template-columns: repeat(2, 1fr) 2fr; }
+.fx-fam:not(.shut) > .fam-h { grid-column: 1 / -1; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 2px 2px 0; }
+.fx-fam:not(.shut) .fam-n { display: inline; margin: 0 0 0 auto; font-size: 12px; }
