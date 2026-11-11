@@ -44,14 +44,21 @@ DS.FX = (function () {
   //   친화 계열 ★ = 용사마다 1개 — 친화 결정석을 끼우면 「공명」(이펙트 조금 크게 + 용사 빛) · 연출만, 데미지 · 보상 같음
   //   2026-11-06 🌬 바람 = 엘프 궁수 · 닌자 (질풍 닌자)
   //   2026-11-06 (근접 계열 2개 추가): 근접 용사는 근접 계열로 다시 짝지음 — 드워프 · 격투가 = 🔨 강타 · 창술사 · 무희 · 해적 = 🌪 연격 · 연금술사 = 🔥 불 · 성기사 = ✨ 별
-  const AFFINITY = { 0: 'cut', 16: 'cut', 3: 'wind', 6: 'smash', 9: 'smash', 5: 'sweep', 10: 'sweep', 13: 'sweep', 2: 'wind', 7: 'fire', 12: 'fire', 11: 'spark', 14: 'frost', 15: 'frost', 4: 'star', 8: 'star', 1: 'magic', 17: 'magic', 18: 'cut', 19: 'math', 20: 'math', 21: 'smash', 22: 'spark', 23: 'fire', 24: 'spark', 25: 'magic', 26: 'wind', 27: 'magic', 28: 'frost', 29: 'star', 30: 'spark', 31: 'sweep', 32: 'fire', 33: 'star' }; // 2026-11-07 새 용사: 흑기사 ⚔ · 수식 책사 남 · 여 📐 · 메카닉 🔨 · 해커 ⚡ · 용기사 🔥
-  const affOf = (hero) => FAMS.find((f) => f.id === AFFINITY[Number(hero)]) || FAMS[0];
+  const AFFINITY = { 0: 'cut', 16: 'cut', 3: 'wind', 6: 'smash', 9: 'smash', 5: 'sweep', 10: 'sweep', 13: 'sweep', 2: 'wind', 7: 'fire', 12: 'fire', 11: 'spark', 14: 'frost', 15: 'frost', 4: 'star', 8: 'star', 1: 'magic', 17: 'math', 18: 'cut', 19: 'math', 20: 'math', 21: 'smash', 22: 'spark', 23: 'fire', 24: 'spark', 25: 'magic', 26: 'wind', 27: 'math', 28: 'math', 29: 'star', 30: 'spark', 31: 'sweep', 32: 'fire', 33: 'star' }; // 2026-11-07 새 용사: 흑기사 ⚔ · 수식 책사 남 · 여 📐 · 메카닉 🔨 · 해커 ⚡ · 용기사 🔥
+  // 🧙 #84 (2026-11-11 DECISIONS 「속성 이동 = 옛 속성도 공명」): 속성이 바뀌는 용사 11명 = 옛 속성 + 새 속성 + 공통 특화 모두 공명
+  //   NEXT = 새 속성(☀ sun · 🌑 dark · ⚙ gear · 🌊 water) — 그 갈래가 FAMS 에 들어오면(#74-3) 저절로 자기 속성 · 기본 스킬이 됨, 그 전에는 옛 속성(AFFINITY)
+  const NEXT = { 4: 'sun', 8: 'sun', 31: 'sun', 13: 'water', 18: 'dark', 25: 'dark', 21: 'gear', 30: 'gear' };
+  const OLD = { 4: 'star', 8: 'star', 13: 'sweep', 18: 'cut', 21: 'smash', 17: 'magic', 25: 'magic', 27: 'magic', 28: 'frost', 30: 'spark', 31: 'sweep' };
+  const famById = (id) => FAMS.find((f) => f.id === id) || null;
+  const attrOf = (hero) => { const h = Number(hero); return (NEXT[h] && famById(NEXT[h])) ? NEXT[h] : AFFINITY[h]; }; // 지금 자기 속성(갈래 id)
+  const nextOf = (hero) => NEXT[Number(hero)] || null; // 새 속성 (그림이 아직 없으면 attrOf 와 다름)
+  const affOf = (hero) => famById(attrOf(hero)) || FAMS[0];
   const crystalOf = (hero, socket) => { const k = (socket || {})[Number(hero)]; return KINDS.includes(k) ? k : affOf(hero).ids[0]; }; // 빈 칸 = 친화 계열 Ⅰ
   // 🤝 #74-1 공통 특화 (2026-11-11 HERO-ATTR 4절): 근접 = ⚔ 베기 · 원거리 = 🔮 마법 — 자기 속성 + 공통 특화 두 가지와 공명 (효과 같음 · 연출만)
   const COMMON = { melee: 'cut', ranged: 'magic' };
   const commonOf = (hero) => ((((window.DS || {}).ASSETS || {}).ranged || {})[Number(hero)] ? COMMON.ranged : COMMON.melee);
-  const ownReso = (hero, k) => { const f = famOf(k); return !!f && f.id === AFFINITY[Number(hero)]; };
-  const commonReso = (hero, k) => { const f = famOf(k); return !!f && f.id === commonOf(hero) && f.id !== AFFINITY[Number(hero)]; };
+  const ownReso = (hero, k) => { const f = famOf(k), h = Number(hero); return !!f && (f.id === attrOf(h) || f.id === AFFINITY[h] || f.id === OLD[h] || f.id === NEXT[h]); }; // #84 옛 · 새 속성 모두
+  const commonReso = (hero, k) => { const f = famOf(k); return !!f && f.id === commonOf(hero) && !ownReso(hero, k); };
   const resonates = (hero, k) => ownReso(hero, k) || commonReso(hero, k);
   const tierOf = (k) => { const f = famOf(k); return f ? f.ids.indexOf(k) : ACHV.includes(k) ? 's' : -1; };
   // 잠긴 이펙트를 가진 계정은 같은 계열 Ⅰ 로 (해금되면 그대로 씀)
@@ -147,5 +154,5 @@ DS.FX = (function () {
     const drawIt = () => { g.clearRect(0, 0, cv.width, cv.height); g.imageSmoothingEnabled = false; const k = Math.min(cv.width / sp.w, cv.height / sp.h); g.drawImage(im, i * sp.w, 0, sp.w, sp.h, (cv.width - sp.w * k) / 2, (cv.height - sp.h * k) / 2, sp.w * k, sp.h * k); };
     if (im.complete && im.naturalWidth) drawIt(); else im.addEventListener('load', drawIt, { once: true });
   }
-  return { q4, place, modeOf, GROUND, SHOT, FAMS, TIER_NAMES, TIER_SCALE, AFFINITY, affOf, crystalOf, resonates, ownReso, commonReso, commonOf, COMMON, KINDS, BASE, SKILL, FANCY, LEGEND, ACHV, NAMES, BASE_OF, famOf, tierOf, usable, spec, strip, play, still, preload, load };
+  return { q4, place, modeOf, GROUND, SHOT, FAMS, TIER_NAMES, TIER_SCALE, AFFINITY, NEXT, OLD, attrOf, nextOf, affOf, crystalOf, resonates, ownReso, commonReso, commonOf, COMMON, KINDS, BASE, SKILL, FANCY, LEGEND, ACHV, NAMES, BASE_OF, famOf, tierOf, usable, spec, strip, play, still, preload, load };
 })();
