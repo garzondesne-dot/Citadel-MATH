@@ -790,7 +790,7 @@ DS.Hall = (function () {
     };
   }
   // ⚡ 선생님 필살기 (2026-11-06 사용자 확정): 시연을 다 맞히면 선생님이 「⚔ 일반 공격」 · 「⚡ 필살기」 중 고름 (홍보용으로 가끔)
-  //   필살기 = 선생님 스킬이 Ⅳ 전설(9개 모두 · 용사 계열 상관없음) 또는 🪶 특별(황금 날개 · 심판의 빛)일 때만 · 아니면 버튼 잠김
+  //   필살기 = 선생님 스킬이 Ⅳ 전설(모든 갈래 · 용사 계열 상관없음) 또는 🪶 특별(황금 날개 · 심판의 빛)일 때만 · 아니면 버튼 잠김
   const tFx = () => DS.FX.usable(DS.Art.teacherFx(R), Object.fromEntries(DS.FX.KINDS.map((k) => [k, true])));
   const tCanUlt = () => { const t = DS.FX.tierOf(tFx()); return t === 3 || t === 's'; };
   function strikeHtml() {
