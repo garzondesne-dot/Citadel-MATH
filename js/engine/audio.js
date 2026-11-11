@@ -116,6 +116,10 @@ DS.Sound = (function () {
   // 첫 터치 때 소리 장치를 깨우고 녹음 소리를 미리 받음 (0.5MB 안쪽 · 배경음은 성채 · 허수아비에서만)
   if (typeof document !== 'undefined') document.addEventListener('pointerdown', () => { ensure(); preload(); }, { once: true, capture: true });
   if (typeof document !== 'undefined') document.addEventListener('visibilitychange', () => bgmApply()); // 🎵 화면 숨김이면 멈춤 · 돌아오면 다시
+  // 🔘 #87a 단추 딸깍 (2026-11-11 선생님 「추천대로」 = A): 화면이 바뀌는 큰 단추만 — 메뉴 · 뒤로 · 탭 · 나무 · 입장 · 저장 · 다음 ▶ / ◀ · 캠프 물건(모루 · 허수아비 · 설정)
+  //   답 고르기 · 원소 칩 · ⚔ 공격(공격 소리) · 차원문 · 성채 문(door 소리) 처럼 이미 소리가 나는 단추는 안 붙임 · 한 곳에서(테스트 모드 · 체험판 같은 길)
+  const CLICK_SEL = '.nav-back, [data-tab], [data-tree], .role, #s-go, #set-ok, #tb-next, #tb-back, #t-fwd, #t-back, #h-fwd, #h-back, #h-menu, #tut-next, #qs-next, #tc-next, #bn-back, #st-back, #st-lobby, [data-go], #camp-anvil, #camp-dummy, #camp-set';
+  if (typeof document !== 'undefined') document.addEventListener('click', (e) => { const b = e.target && e.target.closest && e.target.closest(CLICK_SEL); if (b && !b.disabled && window.DS && DS.Sound && DS.Sound.click) DS.Sound.click(); }, true);
   // 🎵 #91 🎬 영상 · 📄 학습지 창이 열려 있으면 배경음 멈춤 (창 종류마다 따로 고치지 않고 한 곳에서 · 닫히면 다시)
   if (typeof document !== 'undefined' && typeof MutationObserver === 'function') { let was = false; const chk = () => { const on = !!document.querySelector('.video-modal, .sheet-modal, .t-sheet-modal'); if (on !== was) { was = on; bgmHold('modal', on); } }; const go = () => new MutationObserver(chk).observe(document.body, { childList: true }); if (document.body) go(); else document.addEventListener('DOMContentLoaded', go); }
   // 공격 계열 → 맞는 소리
@@ -157,6 +161,7 @@ DS.Sound = (function () {
     door() { sample('door', 0.75); },
     holy() { sample('holy', 0.8, () => this.clank()); },
     awaken() { sample('awaken', 0.9, () => this.levelup()); },
+    click() { sample('click', 0.5); },
     sand() { noise({ dur: 0.55, vol: 0.07, freq: 7000, sweepTo: 2200, q: 0.9 }); }, // ✨ 모래 글씨 「사르륵」 (#46)
     tick() { tone({ type: 'square', f0: 1300, f1: 1250, dur: 0.025, vol: 0.05 }); }, // 🥊 펀치 기계 숫자 돌기 (v0.9.11)
     // ⚖ 쉼터 놀이 (v0.9.8.0): 탈락 버저 · 스프링 띠용

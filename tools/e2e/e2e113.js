@@ -12,13 +12,16 @@ const OUT = process.argv[2] || '.', U = 'http://localhost:8765/trial/';
   const next = async (ms = 2500) => { await shut(); await p.click('#tb-next'); await p.waitForTimeout(ms); };
   await p.goto(U); await p.waitForTimeout(3500);
   let n = await now(); check(n.phone === 'camp' && !n.tv, `첫 화면 = camp (${JSON.stringify(n)})`);
+  await p.evaluate(() => { window.__clk = 0; const f = DS.Sound.click; DS.Sound.click = () => { window.__clk++; f.call(DS.Sound); }; }); // 🔘 #87a
   await p.fill('#tp-name', '박선생'); await p.click('[data-go="set-03"]'); await p.waitForTimeout(3500);
   n = await now(); check(n.phone === 'camp' && n.playing === 'camp', `캠프 = camp (${JSON.stringify(n)})`);
+  { const c0 = await p.evaluate(() => window.__clk); check(c0 >= 1, `🔘 [data-go] 시작 단추 = 딸깍 (${c0})`); }
   await shut(); await p.click('#camp-gate'); await p.waitForTimeout(4000);
   n = await now(); check(n.tv === 'lobby' && n.playing === 'lobby', `대기실 = lobby · TV 쪽만 (${JSON.stringify(n)})`);
   for (let k = 0; k < 15; k++) { if (/수업 시작 ▶ \(5/.test(await p.evaluate(() => (document.querySelector('#test-bar') || {}).innerText || ''))) break; await p.waitForTimeout(1000); }
   await next(); await next(3000); n = await now(); check(n.playing === null, `개념 = 없음 (${JSON.stringify(n)})`);
-  await next(3000); await p.waitForTimeout(1500); n = await now(); check(n.playing === 'raid-1' && n.scale <= 0.2, `몬스터 1 = raid-1 · 체력 가득 = 작게 (${JSON.stringify(n)})`);
+  { const c1 = await p.evaluate(() => window.__clk); await next(3000); const c2 = await p.evaluate(() => window.__clk); check(c2 === c1 + 1, `🔘 다음 ▶ = 딸깍 (${c1} → ${c2})`); }
+  await p.waitForTimeout(1500); n = await now(); check(n.playing === 'raid-1' && n.scale <= 0.2, `몬스터 1 = raid-1 · 체력 가득 = 작게 (${JSON.stringify(n)})`);
   await p.evaluate(async () => { const c = Object.keys((await DS.Net.get('rooms')) || {}).pop(), R = DS.Act.unpackRoom(await DS.Net.get(`rooms/${c}`)), L = DS.Lessons.get(R.meta.lesson), st = DS.Raid.stepOf(L, R), me = DS.Net.uid(); const items = DS.Raid.itemsFor(L, R, st.id, me, 0); await DS.Net.set(`rooms/${c}/subs/${st.id}/${me}/0`, DS.Net.pack(items.map((q) => DS.Bots.given(q, true)))); });
   await p.waitForTimeout(5000); n = await now(); check(n.playing === 'raid-1' && n.scale > 0.2, `맞힐수록 음량 커짐 (${JSON.stringify(n)})`);
   await p.evaluate(() => { const b = document.querySelector('#tb-sheet, [data-sheet]'); if (b) b.click(); }); await p.waitForTimeout(1500); n = await now();
