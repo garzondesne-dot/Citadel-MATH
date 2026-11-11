@@ -126,6 +126,16 @@ DS.Sound = (function () {
     get muted() { return sfxOff; },
 
     card() { noise({ dur: 0.06, vol: 0.15, freq: 5000 }); },
+    // 🔊 #87 (2026-11-11) 🆕 소리 틀 곳: boss 1 = 수업 형성평가 보스 · 2 = 🏰 성채 보스 방 · 3 = 🎯 허수아비 형성평가 / die = 번갈아 / 나머지 1개 · 1위만 (파일이 없으면 예전 소리 · 합성음)
+    boss(rank = 1) { sample('boss', 0.8, () => tone({ type: 'sawtooth', f0: 110, f1: 55, dur: 0.8, vol: 0.18 }), rank); },
+    hurt() { sample('hurt', 0.55); },
+    die() { sample('die', 0.7); },
+    anvil() { sample('anvil', 0.85, () => this.hit()); },
+    cardMade() { sample('card', 0.85, () => this.correct()); },
+    hint() { sample('hint', 0.7, () => tone({ type: 'triangle', f0: 880, f1: 1320, dur: 0.15, vol: 0.12 })); },
+    door() { sample('door', 0.75); },
+    holy() { sample('holy', 0.8, () => this.clank()); },
+    awaken() { sample('awaken', 0.9, () => this.levelup()); },
     sand() { noise({ dur: 0.55, vol: 0.07, freq: 7000, sweepTo: 2200, q: 0.9 }); }, // ✨ 모래 글씨 「사르륵」 (#46)
     tick() { tone({ type: 'square', f0: 1300, f1: 1250, dur: 0.025, vol: 0.05 }); }, // 🥊 펀치 기계 숫자 돌기 (v0.9.11)
     // ⚖ 쉼터 놀이 (v0.9.8.0): 탈락 버저 · 스프링 띠용

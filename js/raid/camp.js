@@ -198,6 +198,7 @@ DS.Camp = (function () {
   // pose: 그쪽으로 가는 동안의 용사 동작 (기본 걷기 · 차원문 = 뒷모습으로 들어가기 → 작아지며 사라짐)
   const heroArt = (pose, cls = '') => { const a = document.querySelector('.camp-hero .art'); if (a) a.outerHTML = DS.Art.hero(DS.Art.look(me), pose, cls); }; // 🌟 #73 각성한 로안
   function pick(sel, then, pose = 'walk') {
+    if ((pose === 'portal' || pose === 'castle') && DS.Sound && DS.Sound.door) DS.Sound.door(); // 🔊 #87 던전 입장 · 차원문 · 성채 문
     const el = document.querySelector(sel); if (!el || picking) return;
     picking = true;
     el.classList.remove('picked'); void el.offsetWidth; el.classList.add('picked');
@@ -615,7 +616,7 @@ DS.Camp = (function () {
         eg.disabled = true; const st = el.querySelector('#enh-stage');
         const r = await DS.Gem.enhance(me).catch((e) => { eg.disabled = false; throw e; });
         for (let i = 0; i < 3; i++) { if (st) { st.classList.remove('hit'); void st.offsetWidth; st.classList.add('hit'); } if (DS.Sound && DS.Sound.clank) DS.Sound.clank(); await new Promise((res) => setTimeout(res, 330)); }
-        if (DS.Sound) DS.Sound.correct(); if (st && DS.FX) DS.FX.play(st, r.great ? 'stars' : 'flame', { scale: r.great ? 0.9 : 0.5 });
+        if (DS.Sound) { if (r.lv === 10 && DS.Sound.awaken) DS.Sound.awaken(); else DS.Sound.correct(); } if (st && DS.FX) DS.FX.play(st, r.great ? 'stars' : 'flame', { scale: r.great ? 0.9 : 0.5 }); // 🔊 #87 각성(10강) 성공 = awaken
         DS.UI.toast(r.great ? `🌟 대성공! +${r.lv} · 💎 ${r.back}개 돌려받았어요!` : `🔨 +${r.lv} 강화 성공!`, 3200);
         L = await DS.Account.looks(me); me.enh = r.lv; draw();
       }); }

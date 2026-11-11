@@ -164,7 +164,7 @@ DS.Forge = (function () {
       h.animate([{ transform: 'translateY(-150%) scale(1)', opacity: 0 }, { transform: 'translateY(-20%) scale(1.04)', opacity: 1, offset: 0.3 }, { transform: 'translateY(92%) scale(.96)', opacity: 1, offset: 0.5 }, { transform: 'translateY(88%) scale(1)', opacity: 1, offset: 0.75 }, { transform: 'translateY(-60%) scale(1)', opacity: 0 }], { duration: 1300, easing: 'cubic-bezier(.5,0,.5,1)' });
       sh.animate([{ opacity: 0 }, { opacity: 0, offset: 0.4 }, { opacity: 1, offset: 0.5 }, { opacity: 0 }], { duration: 1300 });
       setTimeout(() => {
-        DS.Sound.hit(); if (navigator.vibrate) navigator.vibrate(70);
+        if (DS.Sound.anvil) DS.Sound.anvil(); else DS.Sound.hit(); if (navigator.vibrate) navigator.vibrate(70); // 🔊 #87 모루 연성
         st.classList.remove('impact'); void st.offsetWidth; st.classList.add('impact');
         ring.animate([{ opacity: 1, transform: 'scale(.3)' }, { opacity: 0, transform: 'scale(1.3)' }], { duration: 600, easing: 'ease-out' });
         for (let i = 0; i < 18; i++) { const s = document.createElement('i'); s.className = 'fc-spark'; s.style.left = `${50 + (Math.random() - 0.5) * 40}%`; s.style.top = '62%'; sp.appendChild(s);
@@ -179,7 +179,7 @@ DS.Forge = (function () {
     el.innerHTML = `<div class="fg-burst"></div><b class="fg-new">${first ? 'NEW CARD!' : '이미 가진 카드'}</b>${DS.Card.html(c, { w: Math.min(260, innerWidth * 0.62) })}
       <b class="fg-name">${esc(c.name)}</b>${first && !preview ? `<b class="fg-gem3">💎 +${DS.Gem ? DS.Gem.G.card : 3} · 마정석을 받았어요</b>` : ''}${(() => { const p = perkOf(c); if (!p) return `<span class="muted small">도감 ${n} / ${opened().length}</span>`; const cs = perkCards(p), got = cs.filter((x) => owned[x.id] || (first && x.id === c.id)).length; return `<span class="muted small">🧑 ${esc(heroName(p.id))}까지 ${cs.length - got}장 · ${got} / ${cs.length}</span>`; })()}<button class="btn primary big" id="fg-keep">${first ? '🃏 내 카드에 넣기' : '확인'}</button>`;
     $('#forge').appendChild(el);
-    DS.Sound.correct();
+    if (first && DS.Sound.cardMade) DS.Sound.cardMade(); else DS.Sound.correct(); // 🔊 #87 처음 만든 카드(예제를 맞힌 뒤) = card
     if (me && !me.teacher && DS.Titles && DS.Titles.me) DS.Titles.me(me.title, 'forge', '연성 성공!'); // 🏅 #63 ⚒ 연성 칭호: 모루 연성 성공 때 불꽃 (캠프만)
     el.querySelector('#fg-keep').onclick = () => DS.Control.run(async () => {
       if (first) { if (!preview) { await N().set(`cards/${key(me.c)}/${me.n}/${c.id}`, true); if (DS.Grow) DS.Grow.add(me, { card: 1 }, `card_${c.id}`).catch(() => {}); if (DS.Gem) DS.Gem.add(me, DS.Gem.G.card, `card_${c.id}`, '첫 카드', { free: true }).catch(() => {}); } owned[c.id] = true; }

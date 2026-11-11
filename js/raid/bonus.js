@@ -284,6 +284,7 @@ DS.Bonus = (function () {
     if (DS.SymTalk) DS.SymTalk.setCtx(preview || all() ? null : me, L.id); // 📖 #54 기호 톡 기록 = 성채 층 · 허수아비 차시
     const mon = monOf(L, mid), castle = !!L.rooms, photoRoom = castle && !!((L.rooms || []).find((r) => r.id === mid) || {}).photo, rec = Object.assign({}, castle ? roomRec(mine, L, mid) : (mine[L.id] || {})[mid] || {}), prep = await prepOf(L.id);
     if (castle && me && !all()) seenAdd(me, `${L.id}/${mid}`); // NEW 끔
+    if (DS.Sound && DS.Sound.boss) { if (castle && ((L.rooms || []).find((r) => r.id === mid) || {}).boss) DS.Sound.boss(2); else if (!castle && mid === 'boss') DS.Sound.boss(3); } // 🔊 #87 🏰 성채 보스 방 = boss 2위 · 🎯 허수아비 형성평가 = 3위
     const first = !rec.tries && !rec.clear, clearedBefore = !!rec.clear, sealedBefore = seals(mine).includes(L.id);
     const wasOpen = (() => { const x = !castle && isField(L, mid) ? noteOf(L) : null; const st = x && !x.none ? x.mons[x.ids.indexOf(mid)] : null; return !!(st && (DS.Note.OPEN[st] || st === 'a')); })(); // 📕 틀림 · 안 풂이었던 문제
     if (fo.quest && DS.Titles && DS.Titles.band && me) N().get(`accounts/${ck(me.c)}/${fo.quest.n}/title`).then((t) => { if (t === 'quester') setTimeout(() => DS.Titles.band(`✏ ${String(fo.quest.name || `${fo.quest.n}번`).slice(0, 8)} 출제`), 500); }).catch(() => {}); // 🏅 #63 ✏ 출제자: 내 문제가 몬스터로 나올 때 띠

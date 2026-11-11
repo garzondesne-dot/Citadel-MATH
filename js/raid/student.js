@@ -225,7 +225,7 @@ DS.Student = (function () {
     if (Raid().isEnd(L, R)) return endView(body);
     const step = Raid().stepOf(L, R);
     if (step.kind === 'monster') { const pt = Raid().petrify(R, step.id); sage = !!(pt && DS.Net.now() < pt.until && !Raid().record(L, R, step.id, me).perfect); monsterView(body, step); petri(body, step); if (test || Raid().activeIds(R).length <= 6) othersFx(step, body); return; }
-    if (step.kind === 'boss') { bossView(body); petri(body, { id: 'boss' }); return; } // 🗿 보스도 홀리 방패 석화
+    if (step.kind === 'boss') { if (bossSnd !== code && DS.Sound && DS.Sound.boss) { bossSnd = code; DS.Sound.boss(1); } bossView(body); petri(body, { id: 'boss' }); return; } // 🔊 #87 👑 보스 등장 = boss 1위 (수업마다 한 번) // 🗿 보스도 홀리 방패 석화
     if (test) { // 테스트 모드: 개념 설명 = 학습지 이미지를 폰에 크게
       const img = (test.prep.img || {})[step.img || step.id], sig = `concept|${step.id}|${img ? img.length : 0}`;
       if (drawn === sig && body.querySelector('.t-concept')) return;
@@ -404,7 +404,7 @@ DS.Student = (function () {
     if (!can) { if (old) old.remove(); return; }
     const b = old || document.createElement('button'); b.className = `holy-btn${on ? ' on' : ''}`; b.type = 'button';
     b.innerHTML = on ? '🛡 <b>준비됨</b><small>다음 공격을 막습니다 · 누르면 끄기</small>' : '🛡 <b>홀리 방패</b><small>누르면 다음 공격을 막아요</small>';
-    b.onclick = async () => { b.disabled = true; try { await DS.Act.holyArm(code, mid, !on); DS.Sound.clank(); if (navigator.vibrate) navigator.vibrate(30); } catch (e) { DS.UI.toast('잠깐 뒤 다시 눌러 주세요'); } b.disabled = false; };
+    b.onclick = async () => { b.disabled = true; try { await DS.Act.holyArm(code, mid, !on); if (!on && DS.Sound.holy) DS.Sound.holy(); else DS.Sound.clank(); /* 🔊 #87 켤 때 = holy */ if (navigator.vibrate) navigator.vibrate(30); } catch (e) { DS.UI.toast('잠깐 뒤 다시 눌러 주세요'); } b.disabled = false; };
     if (!old) sc.appendChild(b);
   }
   // 🛡 홀리 방패 막기: 켠 용사가 있으면 반 전체 안 멈춤 · 내가 켰으면 내 용사 날개 · 방패 + 막은 기록(→ 🗿 석화 10초) · 다른 폰 = 알림만
@@ -879,7 +879,7 @@ DS.Student = (function () {
       const r2 = await DS.Act.chainSubmit(code, raw, mid, stage, pass, g); cform = null; drawn = '';
       const okNow = prac ? (r2.pass === pass && r2.pStage > stage) : r2.stage > stage;
       chainAtk = { ok: okNow, big: !prac && r2.done, perfect: !prac && r2.done && r2.perfect, prac }; // ⚔ 2026-11-09 선생님 「졸개 공격도 모션」: 다시 그린 뒤 돌진 · 탄 (아래 render 뒤)
-      if (okNow) { if (!DS.Attack) { DS.Sound.slash(); setTimeout(() => DS.Sound.hit(), 160); } DS.UI.toast(stage === pItems.length - 1 ? (prac ? '✔ 연습 사슬 완성! 🔥 경험치 +1' : r2.perfect ? '🌟 퍼펙트 사슬!' : '👑 대장 처치!') : `✔ 졸개 ${'①②③④⑤⑥'[stage]} 처치!`); }
+      if (okNow) { if (!DS.Attack) { DS.Sound.slash(); setTimeout(() => DS.Sound.hit(), 160); } if (stage < pItems.length - 1 && DS.Sound.die) setTimeout(() => DS.Sound.die(), 900); /* 🔊 #87 졸개가 사라질 때 (공격 연출 뒤 · 대장은 finish) */ DS.UI.toast(stage === pItems.length - 1 ? (prac ? '✔ 연습 사슬 완성! 🔥 경험치 +1' : r2.perfect ? '🌟 퍼펙트 사슬!' : '👑 대장 처치!') : `✔ 졸개 ${'①②③④⑤⑥'[stage]} 처치!`); }
       else { if (!DS.Attack) DS.Sound.squish(); if (!prac) DS.UI.toast(r2.locked ? '🙋 기회 1칸 — 선생님 확인을 기다려요' : r2.fail ? '기회를 다 썼어요' : `✘ 틀렸어요 · 기회 −${stage === n - 1 ? 1 : 0.5}`); else DS.UI.toast(r2.pFail ? '✘ 이번 연습 판은 기회를 다 썼어요' : `✘ 틀렸어요 · 연습 기회 −${stage === pItems.length - 1 ? 1 : 0.5}`); }
       render(); chainAttack();
     });
@@ -892,7 +892,7 @@ DS.Student = (function () {
   const hintCount = (c = code) => { try { return Number(localStorage.getItem(`citadel-hints-${c || ''}`)) || 0; } catch (e) { return 0; } };
   function hintTap(k) {
     if (hintOpen.has(k)) hintOpen.delete(k); else {
-      hintOpen.add(k);
+      hintOpen.add(k); if (DS.Sound && DS.Sound.hint) DS.Sound.hint(); // 🔊 #87 💡 힌트 열기
       try { const c = `citadel-hints-${code || ''}`, seen = `${c}|seen`, s = new Set(JSON.parse(localStorage.getItem(seen) || '[]')); if (!s.has(k)) { s.add(k); localStorage.setItem(seen, JSON.stringify([...s])); localStorage.setItem(c, String(s.size)); } } catch (e) { /* 무시 */ }
     }
   }
@@ -933,6 +933,7 @@ DS.Student = (function () {
   }
 
   // ── 보스: 형성평가 1~7번 (2026-11-05 사용자 (나): 문항마다 첫 시도 = 학습지 그대로 · 재도전 3번은 숫자 · 문자가 바뀐 새 문제) ──
+  let bossSnd = null;
   function bossView(body) {
     { const lk = Raid().solveLock(L, R, DS.Net.now()); if (lk && lk.on && !Raid().bossAnswered(R, me)) { scoutWas = lk.id; return frozenView(body, Raid().stepOf(L, R), lk); } scoutAppear('boss'); } // ❄ 형성평가도 선생님이 켜면
     const S = Raid().bossState(L, R, me), hp = Raid().bossHp(L, R), N0 = Raid().BOSS_TRIES;

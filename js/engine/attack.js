@@ -47,7 +47,7 @@ DS.Attack = (function () {
     knock(monBox, o.finish ? 24 : 12); shake(scene, Math.max(2, hit[3] || 2) * (o.finish ? 2 : 1.2), Math.max(0.14, hit[2] || 0.18) * (o.finish ? 2000 : 1000));
     if (!o.noDmg) dmg(scene, cx, B.y0 + 6);
     if (o.finish) wave(scene, cx, floor);
-    if (DS.Sound) { if (o.finish && DS.Sound.finish) DS.Sound.finish(); else if (DS.Sound.fxHit) DS.Sound.fxHit(fx); else if (DS.Sound.hit) DS.Sound.hit(); }
+    if (DS.Sound) { if (o.finish && DS.Sound.finish) DS.Sound.finish(); else if (DS.Sound.fxHit) DS.Sound.fxHit(fx); else if (DS.Sound.hit) DS.Sound.hit(); if (!o.noDmg && DS.Sound.hurt) setTimeout(() => DS.Sound.hurt(), 70); } // 🔊 #87 hurt = 공격 소리 바로 뒤 (폰 · 혼자 하는 곳만 · 종합실 TV 는 30명이 겹쳐 빼 둠 ❓)
     await hitstop(scene, (o.finish ? 0.32 : Math.max(0.05, hit[1] || 0.08)) * 1000);
   }
   // 근접 돌진: heroBox 를 dx 만큼 (잔상 남김)
