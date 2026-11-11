@@ -28,7 +28,7 @@ DS.Mail = (() => {
       N().get(`fgift/${k}/${m.n}`).catch(() => null), N().get(`notice/${k}`).catch(() => null), N().get(`fbr/${k}/${m.n}`).catch(() => null),
     ]);
     const out = [];
-    (DS.Gem && DS.Gem.giftList ? DS.Gem.giftList(gem) : []).forEach((x) => out.push({ k: 'tgift', at: Number(x.at) || 0, g: x.g, t: x.why || '선생님 선물', got: true }));
+    (DS.Gem && DS.Gem.giftList ? DS.Gem.giftList(gem) : []).forEach((x) => out.push({ k: 'tgift', at: Number(x.at) || 0, g: x.g, s: x.s, t: x.why || '선생님 선물', got: true }));
     Object.entries(fg || {}).forEach(([id, x]) => x && out.push({ k: 'fgift', id, at: Number(x.at) || 0, g: x.g, t: `${x.fromName || '친구'} · 💎 ${x.g}${x.msg ? ` · 「${x.msg}」` : ''}`, got: !!x.got }));
     Object.entries(nt || {}).forEach(([id, x]) => x && x.t && out.push({ k: 'notice', id, at: Number(x.at) || 0, t: x.t }));
     Object.entries(rp || {}).forEach(([id, x]) => x && x.t && out.push({ k: 'reply', id, at: Number(x.at) || 0, t: x.t, q: x.q || '' }));
@@ -76,7 +76,7 @@ DS.Mail = (() => {
       const s = seenGet(m), un = list.filter((x) => x.at > s || (x.k === 'fgift' && !x.got)).length;
       el.innerHTML = `<div class="quiz-box framed rs-box mail-box"><div class="quiz-head"><b>📮 우편함</b><span class="mail-gem">💎 ${Number(gem.total) || 0}</span><button class="btn small" id="ml-x">✕ 닫기</button></div>
         <p class="mail-sub"><b>받은 소식</b><span class="muted small">${un ? `안 읽음 ${un}` : '모두 읽음'}</span></p>
-        <div class="mail-list">${list.length ? list.slice(0, 30).map((x) => `<div class="mi${x.at > s || (x.k === 'fgift' && !x.got) ? ' unread' : ''}"><span class="ico2">${ICON[x.k]}</span><span class="tx">${esc(x.k === 'tgift' ? `${x.t} · 💎 ${x.g}` : x.t)}${x.k === 'reply' && x.q ? `<small>내 편지 「${esc(String(x.q).slice(0, 24))}…」</small>` : ''}<small>${KIND[x.k]} · ${md(x.at)}</small></span>${x.k === 'fgift' && !x.got ? `<button class="btn small primary" data-claim="${x.id}">받기</button>` : x.k === 'fgift' || x.k === 'tgift' ? '<span class="muted small">✔ 받음</span>' : ''}</div>`).join('') : '<p class="muted small">아직 받은 소식이 없어요.</p>'}</div>
+        <div class="mail-list">${list.length ? list.slice(0, 30).map((x) => `<div class="mi${x.at > s || (x.k === 'fgift' && !x.got) ? ' unread' : ''}"><span class="ico2">${ICON[x.k]}</span><span class="tx">${esc(x.k === 'tgift' ? `${x.t}${x.g ? ` · 💎 ${x.g}` : ''}${x.s ? ` · 📜 ${x.s}` : ''}` : x.t)}${x.k === 'reply' && x.q ? `<small>내 편지 「${esc(String(x.q).slice(0, 24))}…」</small>` : ''}<small>${KIND[x.k]} · ${md(x.at)}</small></span>${x.k === 'fgift' && !x.got ? `<button class="btn small primary" data-claim="${x.id}">받기</button>` : x.k === 'fgift' || x.k === 'tgift' ? '<span class="muted small">✔ 받음</span>' : ''}</div>`).join('') : '<p class="muted small">아직 받은 소식이 없어요.</p>'}</div>
         <p class="mail-sub"><b>보내기</b></p>
         <div class="sendrow"><button class="btn" id="ml-letter"><i>💌</i>편지</button><button class="btn" id="ml-sv"${sv ? '' : ' disabled'}><i>📝</i>설문${sv ? `<b class="mk-bd">${sv}</b>` : ''}</button><button class="btn" id="ml-gift"${on ? '' : ' disabled'} title="${on ? '' : '선생님이 켜면 보낼 수 있어요'}"><i>🎁</i>친구 선물</button></div>
         <p class="muted small">편지 = 선생님께 · 버그 · 아이디어 · 기타 · 위 💬 단추로도 바로 써요${on ? '' : ' · 🎁 친구 선물은 선생님이 켜면 열려요'}</p>
