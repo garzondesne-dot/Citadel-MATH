@@ -203,6 +203,11 @@ DS.Attack = (function () {
       await dash(scene, heroBox, { x: 0, y: 0 }, to, 240, true);
       if (!scene.isConnected) return;
       setPose(heroBox, hero, 'attack');
+      // 🔨 #74-4 망치 내려치기 · 대지 분쇄 = 뛰어올라 사라졌다가 그림과 함께 떨어짐 (HERO-ATTR 3-4 · 0.26초)
+      const leap = !o.miss && (fx === 'hammer' || fx === 'quake') && heroBox.animate;
+      if (leap) { heroBox.animate([{ translate: `${to.x}px ${to.y}px`, opacity: 1 }, { translate: `${to.x}px ${to.y - 150}px`, opacity: 0 }], { duration: 260, easing: 'ease-out', fill: 'forwards' }); await wait(260); }
+      // ✨ #74-4 속성 무기 ④: 근접 용사가 속성 스킬(🔥 ⚡ ❄ 🌬 ✨ 🔮 📐)을 끼우면 무기 궤적이 그 색으로 빛남 → 끝에 그 속성 이펙트 (새 그림 없이 색 궤적 한 장)
+      if (!o.miss && !leap) trail(scene, B, dir, fx);
       await wait(110);
       for (let k = 0; k < hits - 1 && scene.isConnected; k++) { // 앞 타들: 가볍게 · 마지막 타 = 아래 impact (마무리)
         DS.FX.place(scene, fx, { body: B, mult: mult * 0.8, dir }); await wait(90);
@@ -211,6 +216,7 @@ DS.Attack = (function () {
       }
       if (o.miss) { if (DS.Sound && DS.Sound.block) DS.Sound.block(); await dash(scene, heroBox, to, { x: to.x - dir * 18, y: to.y }, 120, false); if (monBox.animate) monBox.animate([{ scale: '1' }, { scale: '1.08' }, { scale: '1' }], { duration: 260 }); shake(scene, 2, 120); await wait(140); }
       else await impact(scene, monBox, fx, Object.assign({}, hitO, { dir, n: hits, onHit: o.onHit ? () => o.onHit({ k: hits - 1, n: hits }) : null }));
+      if (leap) { heroBox.getAnimations().forEach((an) => an.cancel()); heroBox.animate([{ translate: `${to.x}px ${to.y - 40}px`, opacity: 0 }, { translate: `${to.x}px ${to.y}px`, opacity: 1 }], { duration: 160, easing: 'ease-in' }); } // 착지
       await wait(o.ultimate ? 700 : 140);
       if (!scene.isConnected) return;
       setPose(heroBox, hero, 'walk');
@@ -220,6 +226,17 @@ DS.Attack = (function () {
     heroBox.style.translate = '';
     setPose(heroBox, hero, rest, rest === 'think' ? 'huff' : '');
   }
+  // ✨ #74-4 속성 무기 궤적: 근접 계열(⚔ 🔨 🌪 ☀ 🌑 ⚙ 🌊)이 아닌 스킬일 때만 · 몸통 앞을 크게 긋는 빛 호 0.28초 (번쩍임 없음)
+  const TRAIL_C = { fire: '#ff7a1a', spark: '#ffe14a', frost: '#7fd3ff', wind: '#9ef0ff', star: '#fff3a0', magic: '#c08aff', math: '#ffd25a' };
+  function trail(scene, B, dir, fx) {
+    const f = DS.FX && DS.FX.famOf(fx), col = f && TRAIL_C[f.id]; if (!col || !scene.isConnected) return;
+    const el = document.createElement('i'); el.className = 'atk-trail';
+    const w = B.w * 0.75, h = B.h * 0.95, x = dir > 0 ? B.x0 + B.w * 0.4 - w : B.x1 - B.w * 0.4, y = B.y0 + B.h * 0.02; // 몸통 앞(용사 쪽)을 긋는 호
+    el.style.cssText = `position:absolute;left:${Math.round(x)}px;top:${Math.round(y)}px;width:${Math.round(w)}px;height:${Math.round(h)}px;border-radius:50%;border:0 solid transparent;border-${dir > 0 ? 'right' : 'left'}:10px solid ${col};box-shadow:${dir > 0 ? '' : '-'}8px 0 14px -4px ${col}, inset ${dir > 0 ? '-' : ''}3px 0 0 -1px #fff;pointer-events:none;z-index:19;`;
+    scene.appendChild(el);
+    if (el.animate) el.animate([{ opacity: 0, transform: `rotate(${-50 * dir}deg) scale(.7)` }, { opacity: 1, offset: 0.35 }, { opacity: 0, transform: `rotate(${40 * dir}deg) scale(1.05)` }], { duration: 280, easing: 'ease-out' });
+    setTimeout(() => el.remove(), 300);
+  }
   const preload = (hero, fx) => { if (!DS.FX) return; DS.FX.preload(fx); const p = projOf(hero); if (p) DS.FX.preload(p); if (canUlt(fx, hero)) preloadFaces(); }; // 필살기 쓸 수 있으면 얼굴 그림도 미리
   // 필살기 조건: Ⅳ 전설 · 특화 스킬 + 퍼펙트(그 전투 첫 판에 하나도 안 틀리고 모두 맞힘) — 퍼펙트가 완성되는 공격에서 (2026-11-06: 「마지막 일격」 조건은 뺌)
   // 2026-11-06 사용자 「필살기 그리고 특화일 때만」: Ⅳ 전설 + 그 용사의 친화(특화) 계열 스킬일 때만
@@ -228,5 +245,5 @@ DS.Attack = (function () {
   // 🤝 #74-1: 자기 속성 = Ⅲ 이상 그대로 · 공통 특화 = Ⅳ + 퍼펙트 · 🌟 진필살기 = 자기 속성 Ⅳ 그대로 (공통 특화로는 안 남)
   const canUlt = (fx, hero) => !!(DS.FX && ((tierN(fx) >= 2 && (DS.FX.ownReso || DS.FX.resonates)(hero, fx)) || (tierN(fx) === 3 && DS.FX.commonReso && DS.FX.commonReso(hero, fx))));
   const canTrue = (fx, hero) => !!(DS.FX && tierN(fx) === 3 && (DS.FX.ownReso || DS.FX.resonates)(hero, fx));
-  return { projOf, isRanged, body, play, impact, fly, preload, preloadFaces, shake, knock, cutin, canUlt, canTrue, ultBlast };
+  return { projOf, isRanged, body, play, impact, fly, preload, preloadFaces, shake, knock, cutin, canUlt, canTrue, ultBlast, trail, TRAIL_C };
 })();
