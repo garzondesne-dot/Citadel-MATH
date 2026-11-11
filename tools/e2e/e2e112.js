@@ -2,7 +2,7 @@
 //   🔨 망치 내려치기 · 대지 분쇄 = 용사가 뛰어올라 사라졌다가(투명) 떨어짐 · 원거리 용사는 궤적 없음 · 🔮 마법탄 · ⚡ 연쇄처럼 쏘는 기술은 원래 제자리라 궤적 없음 · 캡처 3장
 //   python3 -m http.server 8765 뒤 node tools/e2e/e2e112.js <출력 폴더>
 const { chromium } = require('playwright');
-const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
+const OUT = process.argv[2], U = `http://localhost:${process.env.PORT || 8765}/index.html?local`;
 (async () => {
   const b = await chromium.launch(); const p = await (await b.newContext({ viewport: { width: 900, height: 600 } })).newPage(); const errs = []; let ok = 0, fail = 0;
   const check = (c, m) => { if (c) ok++; else { fail++; console.log('FAIL:', m); } };

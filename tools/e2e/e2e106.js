@@ -3,7 +3,7 @@
 //   강화 · 스킬 해금 · 용사 사기 · 출전 바꾸기 = 「고름」(💎 화면에서만 빠짐) → 저장 막대 [되돌리기] [저장] · 저장 = 서버에 한 번에 · 저장 안 하고 닫으면 한 번 물음
 //   사용: python3 -m http.server 8765 뒤 node tools/e2e/e2e106.js <출력 폴더>
 const { chromium } = require('playwright');
-const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
+const OUT = process.argv[2], U = `http://localhost:${process.env.PORT || 8765}/index.html?local`;
 (async () => {
   const b = await chromium.launch(); const ctx = await b.newContext({ viewport: { width: 390, height: 844 } }); const errs = []; let ok = 0, fail = 0;
   const check = (c, m) => { if (c) ok++; else { fail++; console.log('FAIL:', m); } };
@@ -28,6 +28,7 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   check(/로안/.test(u.top) && /김민준/.test(u.top) && /베기/.test(u.top) && /바꾸기/.test(u.top), `맨 위 = 출전 용사 · 이름표 · 속성 (${u.top.slice(0, 60)})`);
   check(u.party >= 20 && u.plock > 0 && /\+0/.test(u.lv) && /함께/.test(u.lv) && !u.bar, `강화 = 모든 용사 한 판 (${u.party} · 잠김 ${u.plock}) · 막대 없음`);
   check(u.sw <= u.iw + 1, '가로 넘침 없음');
+  check(await S.evaluate(() => !!document.querySelector('[data-tab="enh"] .mh-dot') && !!document.querySelector('[data-tab="gem"] .mh-dot') && !!document.querySelector('#mh-top .mh-dot') && !document.querySelector('.me-buy')), '살 수 있는 것 = 탭 · 맨 위 파란 점 (옛 「지금 살 수 있는 것」 줄 없음)');
   await S.screenshot({ path: `${OUT}/106-enh.png` });
   // ① 강화 고름 → 💎 화면에서만 빠짐 → 되돌리기
   const g0 = Number(u.gem.replace(/\D/g, ''));
@@ -53,6 +54,11 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   const det = await S.evaluate(() => ({ t: (document.querySelector('.mh-det') || {}).textContent || '', b: [...document.querySelectorAll('.mh-hs-b .btn')].map((x) => x.textContent).join('|') }));
   check(/→/.test(det.t) && /사기/.test(det.b), `잠긴 용사 = 상세 · 4칸 줄 · 「사기」 (${det.b})`);
   await S.screenshot({ path: `${OUT}/106-sheet.png` });
+  check(await S.evaluate(() => !!document.querySelector('.mh-hc[data-hp="12"] .mh-dot')), '살 수 있는 용사 칸 = 파란 점');
+  await S.click('.mh-hc[data-awk]'); await S.waitForTimeout(400);
+  const aw = await S.evaluate(() => (document.querySelector('.mh-det') || {}).textContent || '');
+  check(/깨어나는/.test(aw) && /10강/.test(aw) && /호칭/.test(aw), `각성한 로안 칸 = 조건 4개 (${aw.slice(0, 50)})`);
+  await S.click('.mh-hc[data-hp="12"]'); await S.waitForTimeout(400);
   await S.click('#hs-buy'); await S.waitForTimeout(300);
   await S.click('.mh-hc[data-hp="2"]'); await S.waitForTimeout(400); await S.click('#hs-set'); await S.waitForTimeout(500); u = await ui();
   check(!u.sheet && /리아넬/.test(u.top) && /고름/.test(u.top) && /용사 사기/.test(u.bar) && /출전 용사/.test(u.bar), `출전 = 리아넬 고름 · 막대에 사기 · 출전 (${u.bar.slice(0, 60)})`);

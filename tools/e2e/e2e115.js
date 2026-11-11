@@ -1,7 +1,7 @@
 // 📣 #96 개편 안내 창 (2026-11-11): 옛 구매가 남아 있으면(일괄 환불 전) 안 뜸 → 환불 기록(refund96_…)이 생기면 첫 접속 한 번 · 3줄 + 돌려받은 💎 · 📜 · 용사 ○ + 스킬 ○ · 확인 = seen96 → 다시 안 뜸
 //   사용: python3 -m http.server 8765 뒤 node tools/e2e/e2e115.js <출력 폴더>
 const { chromium } = require('playwright');
-const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
+const OUT = process.argv[2], U = `http://localhost:${process.env.PORT || 8765}/index.html?local`;
 (async () => {
   const b = await chromium.launch(); const ctx = await b.newContext({ viewport: { width: 390, height: 844 } }); const errs = []; let ok = 0, fail = 0;
   const check = (c, m) => { if (c) ok++; else { fail++; console.log('FAIL:', m); } };

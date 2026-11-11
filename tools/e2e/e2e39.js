@@ -1,6 +1,6 @@
 // 🪟 경험 통일 (2026-11-04): 화면 14곳 윗부분 (뒤로 · ✕ 자리) + 긴 창을 끝까지 내려도 ✕ 가 보이는지 — node tools/e2e/e2e39.js <출력 폴더>
 const { chromium } = require('playwright');
-const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
+const OUT = process.argv[2], U = `http://localhost:${process.env.PORT || 8765}/index.html?local`;
 (async () => {
   const b = await chromium.launch(); const ctx = await b.newContext({ viewport: { width: 360, height: 780 } }); const errs = [], log = [];
   const p = await ctx.newPage(); p.on('pageerror', (e) => errs.push(e.message)); p.on('dialog', (d) => d.accept());

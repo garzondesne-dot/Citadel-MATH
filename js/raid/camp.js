@@ -534,6 +534,11 @@ DS.Camp = (function () {
     const stageOf = (h) => { const lad = DS.FX.ladder(h); let n = 0; lad.forEach((id, i) => { if (ownsF(id, h)) n = i + 1; }); return n; };
     const dirty = () => !!(P.heroes.length || P.enh || P.sk.length || hero !== H0 || JSON.stringify(sock) !== SOCK0 || title !== TTL0);
     const afIc = (h) => DS.FX.affOf(h).name.split(' ')[0];
+    // 🔵 #98 ⑦ 「지금 살 수 있는 것 n개」 줄 대신 = 칸 · 탭의 파란 점
+    const dot = (on) => (on ? '<i class="mh-dot" title="지금 살 수 있어요"></i>' : '');
+    const canH = (id) => { const h = hOf(id); return !T && !ownsH(id) && !!h.shop && gemLeft() >= h.shop.price; };
+    const canEnh = () => { const nx = !T && ENH[lvNow() + 1]; return !!nx && gemLeft() >= nx.g && scrLeft() >= (nx.s || 0); };
+    const canSk = () => { if (T) return false; const lad = DS.FX.ladder(hero), i = lad.findIndex((id) => !ownsF(id)); if (i < 0) return false; const f = fxOf(lad[i]); return !!f.shop && gemLeft() >= f.shop.price && scrLeft() >= (f.shop.scroll || 0); };
     const MOVED96 = [7, 27, 28, 32], NEW96 = () => Date.now() < Date.parse('2026-11-19T23:59:59+09:00'); // ✨ #96 옮긴 4명 · 사다리 위 한 줄 = 개편 뒤 1주
     const achOpen = (h) => !T && DS.FX.ladder(h).some((id) => { const f = fxOf(id); return (f.open || f.got) && !f.bought && !f.free && DS.FX.FANCY.includes(id); }); // 🏆 이미 열린 칸
     let demoN = 0; // ⚔ 미리보기: 고른 용사가 고른 스킬로 공격 (근접 = 돌진 · 원거리 = 탄)
@@ -545,7 +550,7 @@ DS.Camp = (function () {
     const meTop = () => { const lo = DS.Lore ? DS.Lore.of(hero) : null, st = stageOf(hero), lv = T ? 0 : lvNow();
       const nm = DS.Titles ? DS.Titles.nameHtml({ title, nick: T ? '선생님' : me.name, num: T ? null : me.n }, { size: 16 }) : esc(T ? '선생님' : me.name || '');
       return `<button class="mh-top" id="mh-top" type="button"><div class="mh-stage enh-stage${DS.Gem.auraCls(lv)}">${DS.Art.hero(hero, 'idle', 'huff')}</div>
-        <div class="mh-txt"><div class="mh-plate">${!T && ST && ST.g ? `<span class="mh-lv">Lv ${ST.g.lv}</span>` : ''}${nm}</div><b>${esc(lo ? lo.name : '')}${pend(hero !== H0)}</b><small>${esc(lo ? lo.job : '')} · ${esc(DS.FX.affOf(hero).name)} · 스킬 ${TN[st]}${!T && lv ? ` · +${lv}` : ''}</small><small class="mh-chg">🔄 용사 바꾸기${T ? '' : ' · 새로 사기'}</small></div></button>`; };
+        <div class="mh-txt"><div class="mh-plate">${!T && ST && ST.g ? `<span class="mh-lv">Lv ${ST.g.lv}</span>` : ''}${nm}</div><b>${esc(lo ? lo.name : '')}${pend(hero !== H0)}</b><small>${esc(lo ? lo.job : '')} · ${esc(DS.FX.affOf(hero).name)} · 스킬 ${TN[st]}${!T && lv ? ` · +${lv}` : ''}</small><small class="mh-chg">🔄 용사 바꾸기${T ? '' : ' · 새로 사기'}${dot(L.heroes.some((x) => canH(x.id)))}</small></div></button>`; };
     // ── 🔨 강화 = 모든 용사 한 판 ──
     const enhTab = () => { const lv = lvNow(), nx = ENH[lv + 1];
       const cells = L.heroes.map((h) => { const o = ownsH(h.id), st = o ? stageOf(h.id) : 0; return `<span class="mh-pc${o ? '' : ' lock'}${h.id === hero ? ' cur' : ''}"><u>${afIc(h.id)}</u>${DS.Art.hero(h.id, 'idle')}${o ? `<em>${TN[st]}</em><i>+${lv}</i>` : '<i>🔒</i>'}</span>`; }).join('');
@@ -574,13 +579,18 @@ DS.Camp = (function () {
     let pickH = hero, sheetOn = false;
     const portrait = (n) => { const Pt = DS.ASSETS.heroPortraits, c = Pt && Pt.list && Pt.list[n]; return c ? `<i class="hc-img" style="background-image:url('${DS.ASSETS.base}${Pt.src}');background-size:${Pt.cols * 100}% ${Pt.rows * 100}%;background-position:${(c[0] / Math.max(1, Pt.cols - 1)) * 100}% ${(c[1] / Math.max(1, Pt.rows - 1)) * 100}%"></i>` : DS.Art.hero(n, 'idle'); };
     const ladLine = (h) => DS.FX.ladder(h).map((id, i) => `${esc(nmOf(id))} ${TN[i + 1]}${ULT(DS.FX.tierOf(id)).join('')}`).join(' → ');
+    const awkDet = () => { // 🌟 #73 각성한 로안 = 고르는 칸이 아님 · 조건 4개 체크 (로안 · 10강 · 쌍월 참 · 호칭)
+      const AW = DS.Art.AWAKE, on = DS.Art.awake({ hero, enh: lvNow(), fx: fxNow(), title }), lo = DS.Lore && DS.Lore.of(AW.to), t2 = DS.Titles && DS.Titles.get(AW.title);
+      const ck = [[hero === AW.hero, '로안'], [lvNow() >= AW.enh, `${AW.enh}강`], [DS.FX.crystalOf(AW.hero, sock) === AW.fx, nmOf(AW.fx)], [title === AW.title, '호칭']];
+      return `<div class="mh-det"><div class="hc-port${on ? '' : ' dim'}">${portrait(AW.to)}</div><div><b>${on && lo ? esc(lo.name) : '???'}</b><small>호칭으로 깨어나는 모습 · 모습만 바뀌고 데미지 · 보상은 같아요</small>${on && lo ? `<em>「${esc(lo.nick)}」</em><p>${esc(lo.a)}</p>` : `<p>🏅 호칭 「${esc(t2 ? t2.name : '만 번째 베기')}」</p>`}<p class="awk-ck">${ck.map(([ok, t]) => `<span class="${ok ? 'ok' : 'no'}">${ok ? '✔' : '✕'} ${esc(t)}</span>`).join(' ')}</p></div></div>`; };
     const sheetHtml = () => { const h = hOf(pickH), lo = DS.Lore ? DS.Lore.of(pickH) : null, o = ownsH(pickH), r = DS.Attack && DS.Attack.isRanged(pickH), af = DS.FX.affOf(pickH);
       let cta;
       if (o) cta = pickH === hero ? '<button class="btn big" disabled>✔ 지금 출전 중</button>' : '<button class="btn primary big" id="hs-set">⚔ 이 용사로 출전</button>';
       else if (h.shop) cta = P.heroes.includes(pickH) ? '<button class="btn big" disabled>고름 ✔</button>' : `<button class="btn primary big" id="hs-buy"${gemLeft() >= h.shop.price ? '' : ' disabled'}>💎 ${h.shop.price} · 사기</button>`;
       else cta = '<button class="btn big" disabled>🔒 조건으로 열어요</button>';
       const cond = o || !h ? '' : h.chal ? `🔓 ${esc(((DS.Account.CHAL || {})[pickH] || {}).cond || h.cond || '')} · ${h.chal.n} / ${h.chal.need}` : !h.shop ? esc(h.cond || '') : '';
-      const list = L.heroes.map((x) => { const ox = ownsH(x.id); return `<button class="mh-hc${ox ? '' : ' lock'}${x.id === pickH ? ' sel' : ''}${x.id === hero ? ' cur' : ''}" data-hp="${x.id}"><u>${afIc(x.id)}</u>${DS.Art.hero(x.id, 'idle')}<small>${ox ? `스킬 ${TN[stageOf(x.id)]}` : x.shop ? `🔒 💎${x.shop.price}` : '🔒'}</small>${P.heroes.includes(x.id) ? '<i class="mh-pend">고름</i>' : ''}</button>`; }).join('');
+      const list = L.heroes.map((x) => { const ox = ownsH(x.id); return `<button class="mh-hc${ox ? '' : ' lock'}${x.id === pickH ? ' sel' : ''}${x.id === hero ? ' cur' : ''}" data-hp="${x.id}"><u>${afIc(x.id)}</u>${DS.Art.hero(x.id, 'idle')}<small>${ox ? `스킬 ${TN[stageOf(x.id)]}` : x.shop ? `🔒 💎${x.shop.price}` : '🔒'}</small>${P.heroes.includes(x.id) ? '<i class="mh-pend">고름</i>' : dot(canH(x.id))}</button>`; }).join('') + (T ? '' : `<button class="mh-hc lock${pickH === DS.Art.AWAKE.to ? ' sel' : ''}" data-hp="${DS.Art.AWAKE.to}" data-awk="1">${DS.Art.hero(DS.Art.AWAKE.to, 'idle')}<small>?</small></button>`);
+      if (pickH === DS.Art.AWAKE.to) return `<div class="mh-sheet" id="mh-sheet">${awkDet()}<div class="row mh-hs-b"><button class="btn big" id="hs-x">↩ 돌아가기</button><button class="btn big" disabled>🌟 조건을 채우면 저절로</button></div><div class="mh-list">${list}</div></div>`;
       return `<div class="mh-sheet" id="mh-sheet"><div class="mh-det"><div class="hc-port${o ? '' : ' dim'}">${portrait(pickH)}</div><div><b>${esc(o && lo ? lo.name : lo ? lo.name : '')}</b><small>${esc(lo ? lo.job : '')} · ${r ? '🏹 원거리' : '🗡 근접'} · ${esc(af.name)}${o ? ` · 스킬 ${TN[stageOf(pickH)]}` : ''}</small>${lo ? `<em>「${esc(lo.nick)}」</em><p>${esc(lo.a)}</p>` : ''}<p class="mh-lad">${ladLine(pickH)}</p>${MOVED96.includes(pickH) && NEW96() ? '<i class="hc-new">속성 바뀜 ✨</i> ' : ''}${achOpen(pickH) ? '<i class="hc-ach">🏆 이미 열린 칸</i>' : ''}${cond ? `<p class="mh-cond">${cond}</p>` : ''}</div></div>
         <div class="row mh-hs-b"><button class="btn big" id="hs-x">↩ 돌아가기</button>${cta}</div><div class="mh-list">${list}</div></div>`; };
     // ── 저장 막대 ──
@@ -624,7 +634,7 @@ DS.Camp = (function () {
       const a = document.createElement('div'); a.className = 'mh-ask'; a.innerHTML = '<div class="framed"><p>저장 안 한 것이 있어요</p><div class="row"><button class="btn big" id="ask-drop">버리기</button><button class="btn primary big" id="ask-save">💾 저장</button></div></div>';
       el.appendChild(a); a.querySelector('#ask-drop').onclick = () => el.remove(); a.querySelector('#ask-save').onclick = () => { a.remove(); DS.Control.run(saveAll); }; a.onclick = (e) => { if (e.target === a) a.remove(); }; };
     const draw = () => { const sb = el.querySelector('.set-box'), keep = sb ? sb.scrollTop : 0;
-      const tabs = T ? [['gem', '⚔ 스킬'], ['ttl', `🏅 호칭 <small>${got.length}</small>`]] : [['enh', '🔨 강화'], ['gem', '⚔ 스킬'], ['ttl', '🏅 기록']];
+      const tabs = T ? [['gem', '⚔ 스킬'], ['ttl', `🏅 호칭 <small>${got.length}</small>`]] : [['enh', `🔨 강화${dot(canEnh())}`], ['gem', `⚔ 스킬${dot(canSk())}`], ['ttl', '🏅 기록']];
       el.innerHTML = `<div class="quiz-box framed set-box mh-box"><div class="set-head">${T ? '<h2>🧙 선생님 모습</h2>' : `<h2 class="me-h"><span>🧙 내 용사</span><b class="g">💎 ${gemLeft()}</b><b class="s">📜 ${scrLeft()}</b></h2>`}<button class="btn" id="set-x" aria-label="닫기">✕</button></div>
         ${meTop()}<div class="set-tabs">${tabs.map(([k, n]) => `<button data-tab="${k}" class="${tab === k ? 'on' : ''}">${n}</button>`).join('')}</div>
         ${tab === 'enh' && !T ? enhTab() : tab === 'gem' ? gemTab() : recTab()}

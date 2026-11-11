@@ -1,7 +1,7 @@
 // 👩‍🏫 #98 체험판 (2026-11-11): 3차시 선물 💎 620 · 📜 8 로 🔨 10강(홀리 방패) + 내 속성 Ⅱ~Ⅳ 를 「고름」 → 💾 저장 한 번에 · 🧪 같은 창
 //   사용: python3 -m http.server 8765 뒤 node tools/e2e/e2e116.js <출력 폴더>
 const { chromium } = require('playwright');
-const OUT = process.argv[2] || '.', U = 'http://localhost:8765/trial/';
+const OUT = process.argv[2] || '.', U = `http://localhost:${process.env.PORT || 8765}/trial/`;
 (async () => {
   const b = await chromium.launch(); const p = await (await b.newContext({ viewport: { width: 390, height: 844 } })).newPage(); const errs = []; let ok = 0, fail = 0;
   const check = (c, m) => { if (c) ok++; else { fail++; console.log('FAIL:', m); } };
