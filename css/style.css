@@ -3347,3 +3347,6 @@ body:has(.modal:not([hidden])) #ver-tag { display: none; }
 .rune.lit { color: #fff; box-shadow: 0 0 14px #7fd6ff, inset 0 0 10px #7fd6ff; border-color: #bfeaff; }
 .rune-del { aspect-ratio: auto; width: 64px; border-radius: 10px; font: 26px system-ui, sans-serif; color: #ffd27a; }
 @media (prefers-reduced-motion: reduce) { .rune-slot.carve, .rune-slot.cast { animation: none; } }
+/* ⌨ #97 문제 창(DS.Quiz) 룬: 맞음 · 틀림 색 · − 룬 */
+.rune-slot.right { border-color: #5fd18b; color: #b8ffd0; } .rune-slot.wrong { border-color: #ff7a6b; color: #ffc2b8; }
+.rune-neg { color: #bfeaff !important; }

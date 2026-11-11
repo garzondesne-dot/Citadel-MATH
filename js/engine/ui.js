@@ -118,26 +118,31 @@ if (typeof document !== 'undefined') document.addEventListener('visibilitychange
 //   학생 · 🧪 테스트 · 👩‍🏫 체험판 · 선생님 시연(🪞) 모두 이 두 함수: runeHtml(문항, 값) 으로 그리고 runes(root, get, set) 으로 붙임
 //   화면 전체를 다시 그리지 않고 답 칸만 바꾼다 (set 안에서 공격 단추만 켜고 끔) · 내기 = 화면마다 있던 공격 단추 그대로 + runeCast(시전 빛)
 DS.UI.RUNE_MAX = 99;
-DS.UI.runeHtml = function (i, v) {
+//   opt (#97 문제 창): len = 자리 수(기본 2 = 0~99 · 문제 창 4) · neg = 「−」 룬 (답이 음수인 문제만) · 값 = 숫자 · null(빈 칸) · '-'(− 만 누름)
+const runeShow = (v) => String(v).replace('-', '−');
+DS.UI.runeHtml = function (i, v, opt = {}) {
   const has = v != null && v !== '';
-  return `<div class="runepad" data-rp="${i}"><div class="rune-row"><div class="rune-slot${has ? '' : ' empty'}" data-rv="${i}" aria-live="polite">${has ? Number(v) : '<span class="rune-ph">숫자를 넣어 주세요</span>'}</div><button type="button" class="rune rune-del" data-rune="${i}|x" aria-label="지우기">⌫</button></div>`
+  return `<div class="runepad" data-rp="${i}"><div class="rune-row"><div class="rune-slot${has ? '' : ' empty'}" data-rv="${i}" aria-live="polite">${has ? runeShow(v) : '<span class="rune-ph">숫자를 넣어 주세요</span>'}</div>${opt.neg ? `<button type="button" class="rune rune-del rune-neg" data-rune="${i}|m" aria-label="빼기 부호">−</button>` : ''}<button type="button" class="rune rune-del" data-rune="${i}|x" aria-label="지우기">⌫</button></div>`
     + `<div class="rune-keys">${[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((n) => `<button type="button" class="rune" data-rune="${i}|${n}" aria-label="룬 ${n}">${n}</button>`).join('')}</div></div>`;
 };
-DS.UI.runeNext = function (cur, key) { // 순수 계산 (시험용): 지금 값 + 누른 룬 → 새 값 (null = 비어 있음)
-  const s = cur == null || cur === '' ? '' : String(Number(cur));
-  if (key === 'x') { const t = s.slice(0, -1); return t === '' ? null : Number(t); }
-  const t = s === '0' ? String(key) : s + key; // 0 다음 숫자 = 바꿔 씀 (07 ✕)
-  return Number(t) > DS.UI.RUNE_MAX ? (cur == null || cur === '' ? null : Number(cur)) : Number(t);
+DS.UI.runeNext = function (cur, key, opt = {}) { // 순수 계산 (시험용): 지금 값 + 누른 룬 → 새 값 (null = 비어 있음)
+  const len = opt.len || 2, s0 = cur == null || cur === '' ? '' : String(cur), neg = s0.startsWith('-'), d = neg ? s0.slice(1) : s0;
+  let nd = d, nn = neg;
+  if (key === 'x') { if (d) nd = d.slice(0, -1); else nn = false; }
+  else if (key === 'm') nn = !neg;
+  else { if (d.length >= len && d !== '0') return cur == null || cur === '' ? null : cur; nd = d === '0' ? String(key) : d + key; } // 0 다음 숫자 = 바꿔 씀 (07 ✕) · 자리 수 넘음 = 그대로
+  if (!nd) return nn ? '-' : null;
+  return Number((nn ? '-' : '') + nd);
 };
-DS.UI.runes = function (root, get, set) {
+DS.UI.runes = function (root, get, set, opt = {}) {
   root.querySelectorAll('[data-rune]').forEach((b) => {
     b.addEventListener('click', () => {
-      const [si, key] = b.dataset.rune.split('|'), i = Number(si), cur = get(i), v = DS.UI.runeNext(cur, key);
+      const [si, key] = b.dataset.rune.split('|'), i = Number(si), cur = get(i), was = cur == null || cur === '' ? null : cur, v = DS.UI.runeNext(cur, key, opt);
       b.classList.remove('lit'); void b.offsetWidth; b.classList.add('lit'); setTimeout(() => b.classList.remove('lit'), 380);
-      if (v === (cur == null || cur === '' ? null : Number(cur))) return; // 두 자리 넘음 · 빈 칸에서 ⌫
+      if (v === was) return; // 자리 수 넘음 · 빈 칸에서 ⌫
       set(i, v);
       const slot = root.querySelector(`[data-rv="${i}"]`);
-      if (slot) { slot.classList.toggle('empty', v == null); slot.innerHTML = v == null ? '<span class="rune-ph">숫자를 넣어 주세요</span>' : String(v); if (v != null && key !== 'x') { slot.classList.remove('carve'); void slot.offsetWidth; slot.classList.add('carve'); } }
+      if (slot) { slot.classList.toggle('empty', v == null); slot.innerHTML = v == null ? '<span class="rune-ph">숫자를 넣어 주세요</span>' : runeShow(v); if (v != null && key !== 'x') { slot.classList.remove('carve'); void slot.offsetWidth; slot.classList.add('carve'); } }
       if (DS.Sound) DS.Sound.clank();
     });
     b.addEventListener('contextmenu', (e) => e.preventDefault());

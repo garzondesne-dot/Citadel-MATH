@@ -1,6 +1,6 @@
 // ⌨ #92 룬 키패드 (2026-11-11): 숫자 답 = 룬 0~9 + ⌫ · 빈 칸이면 공격 잠김 · 세 자리 ✕ · 일반 몬스터(6차시 m2 숫자 3칸) · 소레이드(문제 7 졸개① 숫자) · 선생님 시연 칸도 같은 룬 · node tools/e2e/e2e114.js <출력 폴더>
 const { chromium, devices } = require('playwright');
-const OUT = process.argv[2] || '.', U = 'http://localhost:8765/index.html?local';
+const OUT = process.argv[2] || '.', U = `http://localhost:${process.env.PORT || 8765}/index.html?local`;
 (async () => {
   const b = await chromium.launch(); const VW = (process.env.VW || '375x667').split('x').map(Number); const ctx = await b.newContext({ ...devices['iPhone SE'], viewport: { width: VW[0], height: VW[1] } }); const errs = [], log = []; let bad = 0;
   const ok = (c, s) => { log.push((c ? '✔ ' : '✘ ') + s); if (!c) bad++; };
