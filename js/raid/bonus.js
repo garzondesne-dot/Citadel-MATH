@@ -240,7 +240,7 @@ DS.Bonus = (function () {
     const sl = seals(mine), open = lessons().filter((l) => (rift ? l.id === rift.lesson : all() || l.no <= no)).sort((a, b) => (noteOf(b).left ? 1 : 0) - (noteOf(a).left ? 1 : 0) || b.no - a.no);
     const card = (l) => {
       const x = noteOf(l), rec = mine[l.id] || {}, sealed = sl.includes(l.id);
-      const ids = [...fieldIds(l), 'boss'];
+      const ids = [...fieldIds(l), ...(l.boss && (l.boss.hpItems || l.boss.items) ? ['boss'] : [])]; // 👩‍🏫 #80 체험판 7차시 = 형성평가 없음 (보스 자리 = 문제 7 몬스터)
       const stOf = (id) => (id === 'boss' || x.none ? null : x.mons[x.ids.indexOf(id)]);
       const order = ids.slice().sort((a, b) => { const o = (id) => { const s = stOf(id); return s && (DS.Note.OPEN[s] || s === 'a') ? 0 : id === 'boss' ? 1 : 2; }; return o(a) - o(b); });
       return `<div class="panel framed bn-card${sealed ? ' sealed' : ''}${x.left ? ' nt-left' : ''}"><p class="bn-h"><b>🎯 복습! ${DS.Lessons.noText(l.no)}차시 · ${esc(l.title)}</b>${x.none ? '' : x.left ? `<span class="nt-cnt">❗ 남은 문제 ${x.left}</span>${!gLog(`note_${l.id}`) ? gTag(DS.Gem.G.note, ' 다 풀면') : ''}` : '<span class="nt-cnt ok">✔ 복습 완료</span>'}${sealed ? '<span class="bn-stamp">🏆 업적</span>' : ''}</p>

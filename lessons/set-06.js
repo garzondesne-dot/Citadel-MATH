@@ -420,6 +420,47 @@
   const CROPS_V5 = { c1: [{ p: 1, x: 0.045, y: 0.151, w: 0.455, h: 0.1692 }], m1: [{ p: 1, x: 0.045, y: 0.3112, w: 0.455, h: 0.192 }], c2: [{ p: 1, x: 0.045, y: 0.5002, w: 0.455, h: 0.1017 }], m2: [{ p: 1, x: 0.045, y: 0.5989, w: 0.455, h: 0.1288 }], c3: [{ p: 1, x: 0.045, y: 0.7247, w: 0.455, h: 0.0892 }], m3: [{ p: 1, x: 0.045, y: 0.8109, w: 0.455, h: 0.1334 }],
     c4: [{ p: 1, x: 0.507, y: 0.151, w: 0.452, h: 0.2383 }], u4: [{ p: 2, x: 0.045, y: 0.1303, w: 0.455, h: 0.2753 }], u5: [{ p: 2, x: 0.507, y: 0.1303, w: 0.452, h: 0.237 }],
     u6: [{ p: 3, x: 0.045, y: 0.0992, w: 0.455, h: 0.3572 }], u7: [{ p: 3, x: 0.507, y: 0.0992, w: 0.452, h: 0.3523 }], boss: [{ p: 4, x: 0.045, y: 0.1115, w: 0.455, h: 0.6342 }] };
+  // 👩‍🏫 #80 체험판 7차시 (2026-11-11 DECISIONS 「체험판 7차시」 · CLAUDE.md 체험판 규칙): 도입 → 문제 4 → (🏕 쉼터) → 문제 6 → 👑 문제 7 (보스 자리 · 소레이드 한 문항) → 결과
+  //   첫 판 숫자 = 체험판 학습지 v1 (전달함 ws/trial07-v1.pdf) 그대로 고정 · 한 판 더 = 실제 수업과 같은 꼴 새 숫자(교과서 · 체험판 숫자 빼고) · 문제 꼴 · 단계 · 근거 줄 = 실제 수업과 같은 함수
+  //   체험판에서만 등록 (DS.Test.trialBoot) · 학습지 칸 그림 = Firebase prep/trial-07 (tools/auto/fbprep.js trial-07 <pdf>)
+  const TRIAL7 = { u4: [6, 3, 18], u6: [36, 25, 18], u7: [50, 3, 4, 1] };
+  const sameArgs = (a, b) => a.length === b.length && a.every((x, i) => x === b[i]);
+  const trialRetry = (id) => (r) => { for (;;) { const a = RETRY_ARGS[id](r); if (!sameArgs(a, TRIAL7[id])) return a; } };
+  const MAKE7 = { u4: u4Make, u6: u6Make, u7: u7Make };
+  function trial7() {
+    const chain7 = (id) => (pass, r) => { const args = pass === 0 ? TRIAL7[id] : trialRetry(id)(r), items = CHAIN_FN[id](args, r); if (pass > 0) items.forEach((it) => { it.problem = PROB[id](...args); }); return items; };
+    const C7 = { u4: chain7('u4'), u6: chain7('u6'), u7: chain7('u7') };
+    const mons = {
+      u4: Object.assign({}, MONSTERS.u4, { make: (a, r) => MAKE7.u4(...(a === 0 ? TRIAL7.u4 : trialRetry('u4')(r))) }),
+      u6: Object.assign({}, MONSTERS.u6, { make: (a, r) => MAKE7.u6(...(a === 0 ? TRIAL7.u6 : trialRetry('u6')(r))) }),
+      u7: Object.assign({}, MONSTERS.u7, { title: '👑 보스 · 문제 7 · 「~이 아니거나」', make: (a, r) => MAKE7.u7(...(a === 0 ? TRIAL7.u7 : trialRetry('u7')(r))) }),
+    };
+    const steps = [
+      { kind: 'intro', id: 'intro', title: '도입 · 집합 중단원 마무리 (체험판)', say: '체험판 학습지의 문제 4 · 6 · 7 — 몬스터가 나오기 전 정찰 시간에 ① ② ③ · 👑 칸을 종이에 먼저 풀고, 폰에서 졸개 → 대장 순서로 공격해요' },
+      { kind: 'monster', id: 'u4' }, { kind: 'monster', id: 'u6' }, { kind: 'monster', id: 'u7' },
+    ];
+    steps.forEach((x) => { if (x.kind === 'monster') Object.assign(x, { title: mons[x.id].title, special: !!mons[x.id].special }); });
+    return {
+      id: 'trial-07', no: 7, trial: true,
+      title: '집합 중단원 마무리 (체험판)',
+      unit: '공통수학2 Ⅱ. 집합과 명제 · 7차시 (체험판)',
+      sheet: '체험판 7차시 v1',
+      // 칸 위치 (체험판 학습지 v1 · crops_pdf · ✍ 서술형 칸 바로 위까지 · 💡 근거 줄 포함 · 칸 그림 눈 확인)
+      crops: { u4: [{ p: 1, x: 0.045, y: 0.1392, w: 0.455, h: 0.2435 }], u6: [{ p: 1, x: 0.507, y: 0.1392, w: 0.452, h: 0.366 }], u7: [{ p: 2, x: 0.045, y: 0.0902, w: 0.455, h: 0.339 }] },
+      theme: '01-burrow',
+      videos: { u4: 'assets/video/e1-34.mp4', u6: 'assets/video/e1-36-v3.mp4', u7: 'assets/video/v06-39-v2.mp4' },
+      goal: '집합 단원(중단원 마무리) 문제를 단계를 밟아 해결하고, 풀이를 서술할 수 있다',
+      defaultPct: 90,
+      steps,
+      monsters: mons,
+      items(id, seed, attempt) { return mons[id].make(attempt, DS.Rng(`${seed}|${id}|${attempt}`)); },
+      chain: Object.keys(C7),
+      chainItems(id, seed, pass) { return C7[id] ? C7[id](pass, DS.Rng(`${seed}|${id}|chain|${pass}`)) : []; },
+      next: { title: '8차시 · 명제와 조건', ask: '「x 는 짝수이다」 는 참일까 거짓일까? x 가 정해지면?', link: '집합에서 배운 「모임」을 이용해 참 · 거짓을 판단해요' },
+      boss: { title: '👑 보스 · 문제 7', sprite: MONSTERS.u7.sprite, items: 0, hpItems: 0, sets: { 1: [], 2: [] }, tags: [], make() { return null; } }, // 보스 자리 = 문제 7 몬스터 (형성평가 없음)
+    };
+  }
+
   DS.Lessons.register({
     id: 'set-06', no: 6,
     title: '드모르간의 법칙 · 집합 중단원 마무리',
@@ -444,7 +485,8 @@
     // 보강(bonus)은 2026-11-05 사용자 결정으로 삭제 — b1 · v2 명제 몬스터는 게임에 나오지 않음 (지난 기록 이어 셈용)
     items(id, seed, attempt) { return MONSTERS[id].make(attempt, DS.Rng(`${seed}|${id}|${attempt}`)); },
     chain: Object.keys(CHAIN), // ⚔ 소레이드 (방 version 3) · 단계 = chainItems
-    chainRaw: { u6: u6Chain, u5: u5Chain, u7: u7Chain }, // 🧪 시험용 (#44: 문제 6 a ≤ b 경우 · 문제 5 보기 함정 검사)
+    chainRaw: { u6: u6Chain, u5: u5Chain, u7: u7Chain },
+    trial7, TRIAL7, // 👩‍🏫 #80 체험판 7차시 판 (체험판에서만 등록) // 🧪 시험용 (#44: 문제 6 a ≤ b 경우 · 문제 5 보기 함정 검사)
     chainItems(id, seed, pass) { return CHAIN[id] ? CHAIN[id](pass, DS.Rng(`${seed}|${id}|chain|${pass}`)) : []; },
     WORDS: { TRUE, FALSE, NONE, NEG, SYL, PROP_EXTRA, NONE2, QD, QREP },
     next: { title: '8차시 · 명제와 조건 (7차시 = 6차시 이어서 · 설문 · 사진 채점)', ask: '「x 는 짝수이다」 는 참일까 거짓일까? x 가 정해지면?', link: '집합에서 배운 「모임」을 이용해 참 · 거짓을 가리는 문장(명제)과 조건, 진리집합을 배워요.' }, // 다음 수업

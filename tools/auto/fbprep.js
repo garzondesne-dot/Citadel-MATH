@@ -1,7 +1,7 @@
 // 학습지 PDF → 칸별 이미지 → Firebase prep/{차시}/img · has (v0.9.6 차시 자동화)
 // 수업 준비 「PDF 한 번에 넣기」와 똑같은 코드로 자른다: 이 기기 체험 모드(?local)에서 PDF 를 넣고 → 나온 이미지를 Firebase 에 쓴다
 // 먼저 저장소 폴더에서 python3 -m http.server 8765 를 띄운다.
-// node tools/auto/fbprep.js <차시 id 예: set-06> <레이드용 PDF> [--dry]   (--dry = Firebase 에 쓰지 않고 칸 수 · 크기만)
+// node tools/auto/fbprep.js <차시 id 예: set-06 · 체험판 7차시 = trial-07> <레이드용 PDF> [--dry]   (--dry = Firebase 에 쓰지 않고 칸 수 · 크기만)
 const fs = require('fs');
 const { chromium } = require('playwright');
 const { firebaseToken } = require('./google');
@@ -11,7 +11,9 @@ const [lesson, pdf] = process.argv.slice(2), dry = process.argv.includes('--dry'
   const b = await chromium.launch(); const p = await (await b.newContext({ viewport: { width: 1280, height: 900 } })).newPage();
   p.on('dialog', (d) => d.accept());
   await p.goto('http://localhost:8765/index.html?local&role=teacher'); await p.waitForTimeout(1200);
+  if (lesson === 'trial-07') await p.evaluate(() => { const S6 = DS.Lessons.get('set-06'); if (S6 && S6.trial7 && !DS.Lessons.get('trial-07')) DS.Lessons.register(S6.trial7()); }); // 👩‍🏫 #80 체험판 7차시 판 (체험판에서만 등록 · 칸 그림 = prep/trial-07)
   await p.fill('#f-teacher .t-id', 'auto'); await p.fill('#f-teacher .t-pw', '909090'); await p.click('#f-teacher .t-login'); await p.waitForTimeout(1000);
+  if (lesson === 'trial-07') await p.evaluate(() => { const s = document.querySelector('#p-lesson'); if (s && !s.querySelector('[value="trial-07"]')) s.insertAdjacentHTML('beforeend', '<option value="trial-07">체험판 7차시</option>'); });
   await p.selectOption('#p-lesson', lesson); await p.click('#p-go'); await p.waitForTimeout(800);
   const b64 = fs.readFileSync(pdf).toString('base64');
   await p.evaluate((b64) => { const bin = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)); const dt = new DataTransfer(); dt.items.add(new File([bin], 'w.pdf', { type: 'application/pdf' })); const i = document.querySelector('#p-pdf'); i.files = dt.files; i.dispatchEvent(new Event('change')); }, b64);

@@ -18,7 +18,7 @@ if (typeof location !== 'undefined' && (/\/trial\/(index\.html)?$/.test(location
   const mem = () => { const m = new Map(); return { getItem: (k) => (m.has(String(k)) ? m.get(String(k)) : null), setItem: (k, v) => { m.set(String(k), String(v)); }, removeItem: (k) => { m.delete(String(k)); }, clear: () => m.clear(), key: (i) => Array.from(m.keys())[i] ?? null, get length() { return m.size; } }; };
   try { Object.defineProperty(window, 'localStorage', { value: mem(), configurable: true }); Object.defineProperty(window, 'sessionStorage', { value: mem(), configurable: true }); } catch (e) { /* 못 바꾸면 그대로 */ }
   document.documentElement.classList.add('trial'); // CSS: 체험판 화면 다듬기
-  DS.TRIAL = { lesson: 'set-03', lessons: ['set-03'], castle: 'eval-1', cls: '체험' }; // v2 (2026-11-07): 테스트 모드 기준 · 3차시
+  DS.TRIAL = { lesson: 'set-03', lessons: ['set-03', 'trial-07'], castle: 'eval-1', cls: '체험' }; // v2 (2026-11-07): 테스트 모드 기준 · 3차시
 }
 DS.VERSION = 'citadel-0.9.45.0';
 // 🕶 익명 보기 (2026-11-09 #36 · 미래교육상 제출용): 주소 뒤 ?anon → 개발자 이름을 모든 화면에서 숨김 · 한 번 열면 그 탭 안에서 유지(sessionStorage · 체험판은 주소에 남음)

@@ -23,7 +23,11 @@ DS.Photo = (function () {
   const raidMax = () => Number((cfg || {}).raid) || 2; // ⚔ 수업 소레이드 📸 진필살기 · 학생 한 명 · 소레이드 하나 장 수 (2026-11-09 #26 · 선생님: 흐린 첫 장 대비 기본 2 · ⏳ 선생님 확인으로 넘어간 장은 안 셈)
   const roomMax = () => Number((cfg || {}).room) || ROOM0; // A: 방 하나 하루 장 수
   const coolSec = () => ((cfg || {}).cool != null && (cfg || {}).cool !== '' ? Number(cfg.cool) : COOL0); // D: 결과 뒤 쉬는 초
-  const ready = (lid, rid) => !!(cfg && cfg.on && cfg.url) && (!lid || !!(((rub || {})[lid] || {})[rid] || {}).on);
+  const ready0 = (lid, rid) => !!(cfg && cfg.on && cfg.url) && (!lid || !!(((rub || {})[lid] || {})[rid] || {}).on);
+  // 👩‍🏫 #80 체험판 (CLAUDE.md 체험판 규칙): ✍ 서술형 📸 = 「✔ 테스트: 사진 통과로 보기」 단추 · 사진을 받지 않음 (원래 수업은 손글씨 사진을 AI 가 채점) · 체험판 7차시 소레이드 3개
+  const TRIAL_PH = { 'trial-07': ['u4', 'u6', 'u7'] };
+  const trialOn = () => !!DS.TRIAL;
+  const ready = (lid, rid) => (trialOn() ? !lid || (TRIAL_PH[lid] || []).includes(rid) : ready0(lid, rid));
   const keyOf = (lid, rid) => `${lid}_${rid}`;
 
   // 문제 글 · 정답 · 모범 풀이 · 숫자 (학생이 지금 푼 그 숫자 그대로)
@@ -94,6 +98,7 @@ DS.Photo = (function () {
 
   // ── 학생: 채점 창 · ctx = { lesson, room, title, items } → Promise<{ status, id } | null> ─────────
   function grade(m, ctx) {
+    if (trialOn()) return trialGrade(ctx);
     return new Promise((done) => {
       const P = pack(ctx.items), r0 = ((rub || {})[ctx.lesson] || {})[ctx.room] || {};
       const el = document.createElement('div'); el.className = 'modal camp-modal ph-modal'; document.body.appendChild(el);
@@ -306,6 +311,19 @@ DS.Photo = (function () {
       })));
     };
     draw();
+  }
+  function trialGrade(ctx) { // 👩‍🏫 체험판: 사진 없이 통과 장면만 (진필살기 · 서술 조각 · 남은 단계 처치는 실제 수업과 같은 길)
+    return new Promise((done) => {
+      const el = document.createElement('div'); el.className = 'modal camp-modal ph-modal'; document.body.appendChild(el);
+      const close = (v) => { el.remove(); done(v); };
+      el.innerHTML = `<div class="quiz-box framed ph-box"><div class="set-head"><h2>📷 풀이 사진 올리기</h2><button class="btn" data-x>✕ 닫기</button></div>
+        <p class="ph-q"><b>${esc(ctx.title || '')}</b></p>
+        <p class="ph-hand">✍ 실제 수업에서는 학습지 서술형 칸에 <b>직접 손으로 쓴 풀이</b>를 📸 찍으면 AI 가 기준표대로 채점하고, 통과하면 🌟 진필살기가 나가요.</p>
+        <p class="muted small">👩‍🏫 체험판은 사진을 받지 않아요 — 아래 단추로 「통과」 장면을 봐요.</p>
+        <div class="row"><button class="btn primary big" id="ph-trial">✔ 테스트: 사진 통과로 보기</button></div></div>`;
+      el.querySelector('[data-x]').onclick = () => close(null);
+      el.querySelector('#ph-trial').onclick = () => { if (DS.Sound) DS.Sound.correct(); close({ status: 'pass', id: 'trial', score: 1, total: 1, scores: [1] }); };
+    });
   }
   return { precheck, raidMax, load, ready, pack, grade, pendState, settings, board, pending, all, keyOf, day, usage, useHtml, daily };
 })();
