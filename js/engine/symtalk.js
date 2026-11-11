@@ -140,7 +140,7 @@ DS.SymTalk = (function () {
   function open(el) {
     close(); const r = BY[el.dataset.st]; if (!r) return;
     bub = document.createElement('div'); bub.className = 'st-bub'; bub.setAttribute('role', 'tooltip');
-    bub.innerHTML = `<b class="st-def"><span class="st-sym">${pretty(r.sym)}</span> ${pretty(r.def)}</b><i class="st-easy">💬 쉽게 말하면 ${pretty(r.easy)}</i>${r.memo ? `<button class="st-more" type="button">더 보기 ▾</button><small class="st-memo" hidden>${pretty(r.memo)}</small>` : ''}`;
+    bub.innerHTML = `<b class="st-def"><span class="st-sym">${pretty(r.sym)}</span> ${pretty(r.def)}</b><i class="st-easy">💬 쉽게 말하면 ${pretty(r.easy)}</i>${r.memo ? `<button class="st-more" type="button">더 보기 ▾</button><small class="st-memo" hidden>${pretty(r.memo)}</small>` : ''}${wishRow(r.id)}`;
     document.body.appendChild(bub);
     const a = el.getBoundingClientRect(), bw = Math.min(320, window.innerWidth - 16);
     bub.style.width = `${bw}px`;
@@ -148,6 +148,7 @@ DS.SymTalk = (function () {
     const up = a.top - h - 10 >= 4; bub.style.left = `${x}px`; bub.style.top = `${up ? a.top - h - 10 : a.bottom + 10}px`; bub.classList.add(up ? 'up' : 'down');
     bub.style.setProperty('--ax', `${Math.round(a.left + a.width / 2 - x)}px`);
     const mb = bub.querySelector('.st-more'); if (mb) mb.onclick = (e) => { e.stopPropagation(); const mm = bub.querySelector('.st-memo'); mm.hidden = false; mb.remove(); clearTimeout(timer); }; // 펼치면 닫을 때까지
+    const wb = bub.querySelector('[data-wc]'); if (wb) wb.onclick = (e) => { e.stopPropagation(); clearTimeout(timer); timer = setTimeout(close, 4000); toggleWish(wb.dataset.wc, wb); };
     timer = setTimeout(close, 4000);
     count(r.id); markSeen(r.id);
   }
@@ -172,9 +173,25 @@ DS.SymTalk = (function () {
   const seenCls = (id) => (seen.has(id) ? 'sym-t seen' : 'sym-t');
   function paintSeen() { if (typeof document === 'undefined') return; document.querySelectorAll('.sym-t:not(.sym-c)').forEach((x) => x.classList.toggle('seen', seen.has(x.dataset.st))); }
   function markSeen(id) { if (!recOK(ctx) || seen.has(id)) return; seen.add(id); paintSeen(); }
+  // ⭐ #106 기호 톡 찜 → 모루 배지 (2026-11-12 선생님 「진행 1없음 2정식」): 기호 ↔ 모루 카드(unit-set) 짝 = 그 기호의 「첫 카드」 하나 (HANDOVER 표) · 짝이 없는 기호(U · = · − 등) = 찜 줄 없음
+  const CARD_OF = { in: 'belong', notin: 'notbelong', list: 'roster', build: 'builder', n: 'count', empty: 'empty', sub: 'subset', nsub: 'notsubset', eq: 'equal', cap: 'inter', cup: 'union', disj: 'disjoint', ncup: 'unioncount', compl: 'comp', diff: 'diff', '2^n': 'subcount', neg: 'neg', prop: 'prop', cond: 'cond', truth: 'truth', imp: 'imp', counter: 'counter', conv: 'conv', contra: 'contra' };
+  let wish = {}, owned = {}; // 찜 = xp/{반}/{번호}/wish/{카드} (기호 톡 기록과 같은 칸 · 규칙 그대로) · 가진 카드 = cards/{반}/{번호}
+  const cardOf = (id) => { const cid = CARD_OF[id], U = DS.Unit; return cid && U && U.card ? U.card(cid) : null; };
+  const artOf = (c) => { const k = ((DS.ASSETS || {}).cardKit || {}).arts; if (!k || !c) return ''; const i = k.map && k.map[c.id] != null ? k.map[c.id] : 0, col = i % k.cols, row = Math.floor(i / k.cols); return `background-image:url('${(DS.ASSETS.base || 'assets/art/')}${k.src}');background-size:${k.cols * 100}% ${k.rows * 100}%;background-position:${(col / Math.max(1, k.cols - 1)) * 100}% ${k.rows > 1 ? (row / (k.rows - 1)) * 100 : 0}%`; };
+  function wishRow(id) {
+    const c = cardOf(id); if (!c || !recOK(ctx)) return ''; // 🪞 선생님 · 미리 보기 = 찜 줄 없음
+    return `<div class="st-wish"><i class="st-wc" style="${artOf(c)}"></i><b>${esc(c.name)}</b>${owned[c.id] ? '<span class="st-have">✅ 가짐</span>' : `<button class="st-wb${wish[c.id] ? ' on' : ''}" type="button" data-wc="${c.id}">${wish[c.id] ? '★ 찜함' : '☆ 찜'}</button>`}</div>`;
+  }
+  async function toggleWish(cid, b) {
+    const c = ctx; if (!recOK(c)) return; const on = !wish[cid]; if (on) wish[cid] = true; else delete wish[cid];
+    if (b) { b.classList.toggle('on', on); b.textContent = on ? '★ 찜함' : '☆ 찜'; }
+    if (DS.Sound && DS.Sound.clank) DS.Sound.clank();
+    try { await DS.Net.set(`xp/${ck(c.m.c)}/${c.m.n}/wish/${cid}`, on ? true : null); } catch (e) { /* 다음에 다시 */ }
+  }
   async function loadSeen() {
     const c = ctx, k = recOK(c) ? `${ck(c.m.c)}/${c.m.n}` : '';
-    if (k === seenKey) return; seenKey = k; seen = new Set(); paintSeen(); if (!k) return;
+    if (k === seenKey) return; seenKey = k; seen = new Set(); wish = {}; owned = {}; paintSeen(); if (!k) return;
+    DS.Net.get(`xp/${k}/wish`).then((w) => { if (seenKey === k) wish = w || {}; }).catch(() => {}); DS.Net.get(`cards/${k}`).then((o) => { if (seenKey === k) owned = o || {}; }).catch(() => {});
     try { const st = (await DS.Net.get(`xp/${k}/st`)) || {}; if (seenKey !== k) return; Object.values(st).forEach((by) => Object.entries(by || {}).forEach(([id, n]) => { if (Number(n) >= 1) seen.add(id); })); paintSeen(); } catch (e) { /* 기록은 덤 */ }
   } // #62: 계정이 없어도(성채 미리 보기 · 테스트) 차시는 기억 = 명제 낱말 표시 · 기록은 계정 있을 때만
   const ck = (c) => String(c).replace(/[.#$/[\]]/g, '_');
@@ -204,5 +221,5 @@ DS.SymTalk = (function () {
     scan();
   }
   if (typeof document !== 'undefined') { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start(); }
-  return { ROWS, CONCEPTS, PROP, BY, pick, propHits, propOn, setCtx, rank, scan, close, flush, _markEl: markEl, _seen: () => seen };
+  return { ROWS, CONCEPTS, PROP, BY, pick, propHits, propOn, setCtx, rank, scan, close, flush, _markEl: markEl, _seen: () => seen, CARD_OF, wishOf: () => wish };
 })();

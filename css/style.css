@@ -3414,3 +3414,13 @@ body:has(.modal:not([hidden])) #ver-tag { display: none; }
 /* 🔵 #98 ⑦ 살 수 있는 것 = 파란 점 */
 .mh-dot { display: inline-block; width: 8px; height: 8px; margin-left: 4px; border-radius: 50%; background: #4aa3ff; box-shadow: 0 0 6px #4aa3ff; vertical-align: middle; }
 .mh-hc .mh-dot { position: absolute; top: 3px; right: 3px; margin: 0; }
+/* ⭐ #106 기호 톡 찜 → 모루 배지 */
+.st-wish { display: flex; align-items: center; gap: 6px; margin-top: 6px; padding-top: 6px; border-top: 1px dashed #c8a96a88; font-size: 13px; }
+.st-wish .st-wc { flex: none; width: 34px; height: 28px; border-radius: 4px; image-rendering: pixelated; box-shadow: 0 0 0 1px #8a6a3a; }
+.st-wish b { flex: 1; min-width: 0; }
+.st-wb { flex: none; padding: 3px 10px; border-radius: 99px; border: 1.5px solid #b8873a; background: #fff8e4; color: #6b4a00; font-weight: 800; cursor: pointer; }
+.st-wb.on { background: #f5b84a; border-color: #a86b10; color: #3a2204; }
+.st-have { flex: none; color: #2e7d46; font-weight: 700; }
+.cf-wish, .fg-wish { display: inline-block; margin-left: 4px; padding: 0 5px; border-radius: 8px; background: #f5b84a; color: #3a2204; font-style: normal; font-weight: 800; font-size: .85em; line-height: 1.4; }
+.fg-cw { position: relative; } .fg-cw > .fg-wish { position: absolute; top: 2px; left: 2px; z-index: 2; margin: 0; }
+.fc-hint.wish { box-shadow: inset 3px 0 0 #f5b84a; }

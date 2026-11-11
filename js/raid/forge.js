@@ -25,11 +25,14 @@ DS.Forge = (function () {
     return `<div class="fg-perks">${PERKS.map((p) => { const cs = perkCards(p), got = cs.filter((c) => owned[c.id]).length, done = cs.length && got === cs.length, price = DS.Gem ? DS.Gem.price('hero', p.id) : null;
       return `<div class="fg-perk${done ? ' done' : ''}">${DS.Art.hero(p.id, 'idle')}<span class="tx"><b>🧑 ${esc(heroName(p.id))}</b><small>${p.a}~${p.b}차시 카드 ${got} / ${cs.length}</small><i class="fg-pbar"><i style="width:${cs.length ? (100 * got) / cs.length : 0}%"></i></i></span>${done ? '<span class="fg-pok">✔ 열림</span>' : bought(p.id) ? '<span class="fg-pok">💎 로 열림 · 다 모으면 돌려받음</span>' : price != null && !preview && gemD ? `<button class="btn small" data-perk="${p.id}">💎 ${price} 먼저 열기</button>` : ''}</div>`; }).join('')}</div>`;
   }
+  let wish = {}; // ⭐ #106 찜 { 카드id: true } (만들면 저절로 풀림)
+  const wished = (c) => !!wish[c.id] && !owned[c.id], wfirst = (cs) => cs.filter(wished).concat(cs.filter((c) => !wished(c))), star = (c) => (wished(c) ? '<i class="fg-wish" title="기호 톡에서 찜한 카드">★</i>' : '');
   let preview = false; // 교사 대기공간: 모든 차시 미리 보기 (저장하지 않음)
   async function open(m, opt = {}) {
     me = m; tab = 'forge'; slots = { l: null, op: null, r: null }; pick = 'l'; preview = !!opt.preview;
     no = 99; // 2026-11-05 사용자: 연성 도감은 진도(unlock)와 상관없이 모두 해금 가능 (처음 만든 카드는 예제를 맞혀야 완성 · 그대로)
     owned = preview ? {} : (await N().get(`cards/${key(m.c)}/${m.n}`).catch(() => null)) || {};
+    wish = preview ? {} : (await N().get(`xp/${key(m.c)}/${m.n}/wish`).catch(() => null)) || {}; // ⭐ #106 기호 톡에서 찜한 카드
     gemD = preview || !DS.Gem || m.test ? null : await DS.Gem.mine(m).catch(() => null);
     $('#forge').hidden = false; document.body.classList.add('forge-open');
     render();
@@ -81,7 +84,7 @@ DS.Forge = (function () {
       </div>
       <p class="fg-msg" id="fg-msg">${o && o.unary ? `${esc(o.sym)} 는 한 칸 연산 — 재료 하나만 올려요.` : '연산을 고르고 재료 · 연산 · 재료를 올려 연성하세요.'}</p>
       <div class="fc-mats">${U().MATS.map((m) => tile(pretty(m.sym), `mat mini${m.sym.length > 3 ? ' long' : ''}${/[가-힣]/.test(m.sym) ? ' ko' : ''}`, `data-put="${m.id}" title="${esc(m.tip)}"`)).join('')}${have().map((c) => tile(`<span class="fc-cardname fm${cardFm(c).length > 8 ? ' long xl' : cardFm(c).length > 5 ? ' long' : ''}">${pretty(cardFm(c))}</span>`, 'mat mini card', `data-put="card:${c.id}" title="${esc(c.name)}"`)).join('')}</div>
-      <div class="fc-foot"><button class="btn small" id="fg-hints">💡 만들 수 있는 카드 · 힌트 <b class="fc-ptsn">${h.pts}</b></button><button class="btn small" id="fg-clear">비우기</button></div>
+      <div class="fc-foot"><button class="btn small" id="fg-hints">💡 만들 수 있는 카드 · 힌트 <b class="fc-ptsn">${h.pts}</b>${opened().filter(wished).length ? ` <i class="fg-wish">★${opened().filter(wished).length}</i>` : ''}</button><button class="btn small" id="fg-clear">비우기</button></div>
     </div>`;
   }
   // 💡 만들 수 있는 카드 (v0.9.0): 이름은 ??? · 힌트 한 줄 + 모양(칸 수). 연성에 실패하면 💡 힌트 조각 +1 → 조각으로 한 단계씩 더 연다 (1단계: 재료 · 2단계: 연산까지)
@@ -95,16 +98,16 @@ DS.Forge = (function () {
     const row = (c) => {
       const lv = Number(h.lv[c.id] || 0), op = U().opOf(c.op), opChip = `<b class="fc-chip op">${lv >= 2 ? pretty(op.sym) : '?'}</b>`;
       const shape = op.unary ? `${opChip}${chip(c.in[0], lv >= 1)}` : `${chip(c.in[0], lv >= 1)}${opChip}${chip(c.in[1], lv >= 1)}`;
-      return `<div class="fc-hint g${c.grade}"><div><b>??? <span class="muted small">${esc(c.sec)}</span></b><p class="small">${esc(c.hint)}</p></div><div class="fc-shape">${shape}</div>
+      return `<div class="fc-hint g${c.grade}${wished(c) ? ' wish' : ''}"><div><b>${star(c)}??? <span class="muted small">${esc(c.sec)}</span></b><p class="small">${esc(c.hint)}</p></div><div class="fc-shape">${shape}</div>
         ${lv < 2 ? `<button class="btn small" data-hint="${c.id}"${h.pts ? '' : ' disabled'}>💡 ${lv ? '연산 보기' : '재료 보기'}</button>` : '<span class="muted small">모두 공개</span>'}</div>`;
     };
     const nos = [...new Set(opened().map((c) => c.no))].sort((a, b) => a - b);
     let firstOpen = false;
     const groups = nos.map((n) => {
       const cs = opened().filter((c) => c.no === n), got = cs.filter((c) => owned[c.id]).length, todo = cs.filter((c) => !owned[c.id]);
-      const open = !firstOpen && todo.length ? (firstOpen = true) : false;
+      const open = (!firstOpen && todo.length ? (firstOpen = true) : false) || todo.some(wished); // ⭐ 찜한 카드가 있는 차시는 펼침
       return `<details class="fc-hgroup"${open ? ' open' : ''}><summary><b>${n}차시</b> <span class="muted small">${esc([...new Set(cs.map((c) => c.sec))].join(' · '))}</span><span class="fc-unlock${got === cs.length ? ' done' : ''}">해금 ${got} / ${cs.length}</span></summary>
-        ${todo.length ? todo.map(row).join('') : '<p class="okc small">🎉 이 차시 카드를 모두 만들었어요!</p>'}</details>`;
+        ${todo.length ? wfirst(todo).map(row).join('') : '<p class="okc small">🎉 이 차시 카드를 모두 만들었어요!</p>'}</details>`;
     }).join('');
     return `<div class="fc-row"><b class="fc-h">💡 만들 수 있는 카드</b><span class="fc-pts">💡 힌트 조각 <b>${h.pts}</b></span><button class="btn small" id="fg-hx">✕ 닫기</button></div>
       <p class="muted small">연성에 실패하면 힌트 조각이 1개 생겨요 (벌이 아니라 단서!). 조각으로 재료 → 연산 순서로 열어요.</p>${groups || '<p class="muted">열린 레시피가 없어요.</p>'}`;
@@ -182,7 +185,7 @@ DS.Forge = (function () {
     if (first && DS.Sound.cardMade) DS.Sound.cardMade(); else DS.Sound.correct(); // 🔊 #87 처음 만든 카드(예제를 맞힌 뒤) = card
     if (me && !me.teacher && DS.Titles && DS.Titles.me) DS.Titles.me(me.title, 'forge', '연성 성공!'); // 🏅 #63 ⚒ 연성 칭호: 모루 연성 성공 때 불꽃 (캠프만)
     el.querySelector('#fg-keep').onclick = () => DS.Control.run(async () => {
-      if (first) { if (!preview) { await N().set(`cards/${key(me.c)}/${me.n}/${c.id}`, true); if (DS.Grow) DS.Grow.add(me, { card: 1 }, `card_${c.id}`).catch(() => {}); if (DS.Gem) DS.Gem.add(me, DS.Gem.G.card, `card_${c.id}`, '첫 카드', { free: true }).catch(() => {}); } owned[c.id] = true; }
+      if (first) { if (!preview) { await N().set(`cards/${key(me.c)}/${me.n}/${c.id}`, true); if (DS.Grow) DS.Grow.add(me, { card: 1 }, `card_${c.id}`).catch(() => {}); if (DS.Gem) DS.Gem.add(me, DS.Gem.G.card, `card_${c.id}`, '첫 카드', { free: true }).catch(() => {}); if (wish[c.id]) N().set(`xp/${key(me.c)}/${me.n}/wish/${c.id}`, null).catch(() => {}); } owned[c.id] = true; delete wish[c.id]; } // ⭐ #106 만들면 찜 풀림
       slots = { l: null, op: null, r: null }; pick = 'l'; el.remove(); render();
       const pk = first ? perkOf(c) : null; if (pk && perkCards(pk).every((x) => owned[x.id])) DS.UI.toast(`🎉 🧑 ${heroName(pk.id)} 열림!${bought(pk.id) ? ` · 💎 ${DS.Gem.price('hero', pk.id)} 돌려받았어요 (캠프에 들어가면 우편함으로)` : ''}`, 4500);
       else if (first && have().length === opened().length) DS.UI.toast('🎉 열린 레시피를 모두 모았어요!', 4000);
@@ -196,7 +199,7 @@ DS.Forge = (function () {
       const cs = U().CARDS.filter((c) => c.sec === s);
       if (cs[0].no > no) return '';
       const got = cs.filter((c) => owned[c.id]).length; // v0.9.3: 도감도 차시별 접기 · 해금 개수
-      return `<details class="fc-hgroup" open><summary><b>${esc(s)}</b><span class="fc-unlock${got === cs.length ? ' done' : ''}">해금 ${got} / ${cs.length}</span></summary><div class="fg-grid">${cs.map((c) => `<div class="fg-cw">${DS.Card.html(c, { w: 104, unknown: !owned[c.id] })}${owned[c.id] ? '' : '<i class="fg-g3">💎+3</i>'}</div>`).join('')}</div></details>`;
+      return `<details class="fc-hgroup" open><summary><b>${esc(s)}</b><span class="fc-unlock${got === cs.length ? ' done' : ''}">해금 ${got} / ${cs.length}</span></summary><div class="fg-grid">${wfirst(cs).map((c) => `<div class="fg-cw${wished(c) ? ' wish' : ''}">${star(c)}${DS.Card.html(c, { w: 104, unknown: !owned[c.id] })}${owned[c.id] ? '' : '<i class="fg-g3">💎+3</i>'}</div>`).join('')}</div></details>`;
     }).join('') + (U().CARDS.some((c) => c.no > no) ? '<p class="fg-lock">🔒 다음 소단원은 선생님이 차시를 배포하면 나타나요</p>' : '');
   }
   function mine() {

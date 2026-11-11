@@ -261,6 +261,7 @@ DS.Camp = (function () {
     const el = document.getElementById('camp-forge'); if (!el) return;
     const k = ck(me.c), get = (p) => DS.Net.get(`${p}/${k}/${me.n}`).catch(() => null);
     const [rec, bonus, cards, no] = await Promise.all([get('records'), get('bonus'), get('cards'), DS.Net.get(`unlock/${k}`).catch(() => 0)]);
+    { const w = me.teacher ? null : await DS.Net.get(`xp/${k}/${me.n}/wish`).catch(() => null), n = Object.keys(w || {}).filter((id) => !(cards || {})[id]).length, al = document.querySelector('#camp-anvil .camp-label'); if (al) al.innerHTML = `⚒ 모루${n ? `<i class="cf-wish" title="기호 톡에서 찜했지만 아직 안 만든 카드">★${n}</i>` : ''}`; } // ⭐ #106 모루 이름표 배지
     const L = DS.Account ? await DS.Account.looks(me).catch(() => ({ heroes: [], seals: 0 })) : { heroes: [], seals: 0 };
     if (L.enh != null && Number(me.enh || 0) !== Number(L.enh || 0)) { const was = DS.Art.look(me); me.enh = Number(L.enh) || 0; if (DS.Art.look(me) !== was) { const a = document.querySelector('.camp-hero .art'); if (a) a.outerHTML = DS.Art.hero(DS.Art.look(me), 'sit', 'huff'); } } // 🌟 #73 강화 단계 → 각성 모습
     const g = DS.Grow ? await DS.Grow.mine(me).catch(() => null) : null;
