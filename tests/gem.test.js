@@ -34,11 +34,12 @@ const G = DS.Gem, m = { c: '1-3', n: 5 };
   const m3 = { c: '8-8', n: 2 }; db.gem['8-8'] = { 2: {} };
   check(await G.addScroll(m3, 1, 'ph_a') === 1 && await G.addScroll(m3, 1, 'ph_a') === 0 && await G.addScroll(m3, 2, 'ph_a', '', { upsert: true }) === 1, '📜 같은 키 한 번 · upsert');
   await G.add(m3, 500, 'big', '', { free: true });
-  check(G.price('fx', 'twin') === 80 && G.scrollOf('fx', 'twin') === 3, 'Ⅳ = 💎80 + 📜3');
-  err = ''; try { await G.buy(m3, 'fx', 'twin'); } catch (e) { err = e.message; } check(/📜/.test(err), '📜 모자라면 Ⅳ 못 삼');
+  check(G.price('fx', 'twin') === 80 && G.scrollOf('fx', 'twin') === 2 && G.scrollOf('fx', 'tsunami') === 2 && G.price('fx', 'skylance') === 80, 'Ⅳ = 💎80 + 📜2 (#74-3 · 새 속성 Ⅳ 도)');
+  { const m4 = { c: '8-8', n: 4 }; db.gem['8-8'][4] = {}; await G.add(m4, 500, 'big', '', { free: true }); await G.addScroll(m4, 1, 'one'); await G.buy(m4, 'fx', 'fire');
+    err = ''; try { await G.buy(m4, 'fx', 'pillar'); } catch (e) { err = e.message; } check(/📜/.test(err), '📜 모자라면(1 < 2) Ⅳ 못 삼'); }
   await G.addScroll(m3, 9, 'more'); await G.buy(m3, 'fx', 'twin'); let d3 = await G.mine(m3);
-  check(d3.total === 420 && d3.scroll === 8 && G.owns(d3, 'fx', 'twin'), `Ⅳ 사면 💎80 · 📜3 줄어듦 (${d3.total} · ${d3.scroll})`);
-  check(await G.sell(m3, 'fx', 'twin') === 56 && (await G.mine(m3)).scroll === 8, '되팔기 = 낸 💎 의 70% · 📜 는 안 돌려줌');
+  check(d3.total === 420 && d3.scroll === 9 && G.owns(d3, 'fx', 'twin'), `Ⅳ 사면 💎80 · 📜2 줄어듦 (${d3.total} · ${d3.scroll})`);
+  check(await G.sell(m3, 'fx', 'twin') === 56 && (await G.mine(m3)).scroll === 9, '되팔기 = 낸 💎 의 70% · 📜 는 안 돌려줌');
   let r1 = await G.enhance(m3, () => 0.5); d3 = await G.mine(m3);
   check(r1.lv === 1 && !r1.great && d3.enh === 1 && d3.total === 476 - 10, `강화 +1 = 💎10 (${d3.total})`);
   const r2 = await G.enhance(m3, () => 0.05); d3 = await G.mine(m3);

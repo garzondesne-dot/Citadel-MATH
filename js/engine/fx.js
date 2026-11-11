@@ -16,6 +16,11 @@ DS.FX = (function () {
     { id: 'star', name: '✨ 별', ids: ['twinkle', 'mana', 'stars', 'meteor'] },
     { id: 'magic', name: '🔮 마법', ids: ['orb', 'crit', 'vortex', 'void'] },
     { id: 'math', name: '📐 수식', ids: ['ruler', 'compass', 'venn', 'qed'] },   // 2026-11-07 수식 책사(남 · 여) 특화 (사용자 「수학 도구 · 수식으로 멋지게」) · tools/pfx/custom/math-*.js
+    // 🌈 #74-3 새 속성 4개 (2026-11-11 HERO-ATTR 3-4 · tools/pfx/attr_gen.py) — 이 갈래가 생기면 #84 NEXT 의 용사 8명(4 · 8 · 31 ☀ / 18 · 25 🌑 / 21 · 30 ⚙ / 13 🌊)이 저절로 새 속성이 자기 속성 · 기본 스킬
+    { id: 'sun', name: '☀ 빛', ids: ['radiant', 'bulwark', 'holysword', 'skylance'] },
+    { id: 'dark', name: '🌑 어둠', ids: ['shade', 'claw', 'phantom', 'eclipse'] },
+    { id: 'gear', name: '⚙ 기계', ids: ['wrench', 'cog', 'piston', 'drill'] },
+    { id: 'water', name: '🌊 물', ids: ['aqua', 'wave', 'anchor', 'tsunami'] },
   ];
   const TIER_NAMES = ['Ⅰ 기본', 'Ⅱ 숙련', 'Ⅲ 화려', 'Ⅳ 전설'];
   const TIER_SCALE = [1, 1.15, 1.3, 1.5];                                    // Ⅰ → Ⅳ 크기 배율
@@ -38,6 +43,10 @@ DS.FX = (function () {
     orb: '🔮 마법탄', crit: '🔮 치명 섬광', vortex: '🌀 차원 소용돌이', void: '🌀 블랙홀',
     ruler: '📐 눈금 베기', compass: '📐 컴퍼스 원', venn: '📐 벤 다이어그램', qed: '📐 증명 완료 ∎',
     wings: '🪶 황금 날개', smite: '☀ 심판의 빛',
+    radiant: '☀ 빛 베기', bulwark: '☀ 방패 강타', holysword: '☀ 성검 낙하', skylance: '☀ 천상의 창',
+    shade: '🌑 그림자 베기', claw: '🌑 어둠 손톱', phantom: '🌑 그림자 분신', eclipse: '🌑 월식 참',
+    wrench: '⚙ 스패너 치기', cog: '⚙ 톱니 던지기', piston: '⚙ 증기 해머', drill: '⚙ 드릴 돌파',
+    aqua: '🌊 물 베기', wave: '🌊 파도 치기', anchor: '🌊 닻 내려찍기', tsunami: '🌊 해일 베기',
   };
   const famOf = (k) => FAMS.find((f) => f.ids.includes(k)) || null;
   // 💎 결정석 (2026-11-06 사용자 확정 C): 용사마다 결정석 1칸 · 같은 결정석을 여러 용사에 동시에 · 빼면 보관함으로 (회수, 비용 0)

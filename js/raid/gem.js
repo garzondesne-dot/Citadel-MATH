@@ -56,14 +56,16 @@ DS.Gem = (function () {
       moon: 20, ring: 20, chain: 20, spikes: 20, mana: 20, crit: 20, // Ⅱ 숙련 (2026-11-06)
       twin: 80, pillar: 80, thunder: 80, nova: 80, meteor: 80, void: 80, // Ⅳ 전설 = 같은 계열 Ⅲ 이 있어야 (account.js need) · 2026-11-06: 💎120 → 💎80 + 📜3
       upper: 20, sweep: 20, hammer: 60, spin: 60, quake: 80, reap: 80,
-      gale: 20, leaf: 60, cyclone: 80, compass: 20, venn: 60, qed: 80 }, // 🌬 바람 (2026-11-06) // 🔨 강타 · 🌪 연격 (2026-11-06 · Ⅲ 은 인장 없이 💎60)
+      gale: 20, leaf: 60, cyclone: 80, compass: 20, venn: 60, qed: 80,
+      bulwark: 20, holysword: 60, skylance: 80, claw: 20, phantom: 60, eclipse: 80, cog: 20, piston: 60, drill: 80, wave: 20, anchor: 60, tsunami: 80 }, // 🌈 #74-3 새 속성 ☀ 🌑 ⚙ 🌊 (Ⅱ 20 · Ⅲ 60 · Ⅳ 80 = 다른 속성과 같음) // 🌬 바람 (2026-11-06) // 🔨 강타 · 🌪 연격 (2026-11-06 · Ⅲ 은 인장 없이 💎60)
   };
   // 📚 도감 특전 용사 (2026-11-07 사용자 「모루 💎」): 성기사 8 · 무희 10 · 음유시인 11 = 💎 60 으로 먼저 열 수 있음 → 그 도감 카드를 다 모으면 💎 60 돌려받음 · 되팔기 불가
   const CARD_HEROES = [8, 10, 11];
   const itemKey = (kind, id) => `${kind}_${id}`;
   const price = (kind, id) => (SHOP[kind] || {})[id] ?? null;
   // 📜 서술 조각 (2026-11-06): 서술형 사진 채점에서만 · 전설 Ⅳ · 강화 +7~ 에 함께 듦
-  const SCROLL_NEED = { fx: { twin: 3, pillar: 3, thunder: 3, nova: 3, meteor: 3, void: 3, quake: 3, reap: 3, cyclone: 3, qed: 3 } };
+  // #77 ③ · #74-3 (2026-11-11): 모든 Ⅳ 전설 📜 3 → 2 (새 속성 Ⅳ 4개도 2)
+  const SCROLL_NEED = { fx: { twin: 2, pillar: 2, thunder: 2, nova: 2, meteor: 2, void: 2, quake: 2, reap: 2, cyclone: 2, qed: 2, skylance: 2, eclipse: 2, drill: 2, tsunami: 2 } };
   // 🧑‍🎓 수식 책사 남 · 여 (2026-11-07 사용자 「서술형 찍어서 정답 처리되면 해금」): 📷 사진 통과 기록(📜 s_ph_… · 하루 💎 한도와 상관없이 남음)이 하나라도 있으면
   const PHOTO_HEROES = [19, 20];
   const photoPassed = (d) => Object.keys((d && d.log) || {}).some((k) => k.startsWith('s_ph_'));

@@ -95,7 +95,7 @@ DS.Sound = (function () {
   if (typeof document !== 'undefined') document.addEventListener('pointerdown', () => { ensure(); preload(); }, { once: true, capture: true });
   if (typeof document !== 'undefined') document.addEventListener('visibilitychange', () => { if (!bgmEl) return; if (document.hidden) bgmEl.pause(); else if (!bgmOff) bgmEl.play().catch(() => {}); });
   // 공격 계열 → 맞는 소리
-  const FAM_SFX = { cut: 'cut', smash: 'smash', sweep: 'sweep', wind: 'wind', fire: 'fire', spark: 'spark', frost: 'frost', star: 'star', magic: 'magic', math: 'magic' };
+  const FAM_SFX = { cut: 'cut', smash: 'smash', sweep: 'sweep', wind: 'wind', fire: 'fire', spark: 'spark', frost: 'frost', star: 'star', magic: 'magic', math: 'magic', sun: 'star', dark: 'cut', gear: 'smash', water: 'wind' }; // 🌈 #74-3 새 속성 = 새 효과음이 오기 전까지 비슷한 소리
 
   return {
     unlock() { const c = ensure(); preload(); return c; },

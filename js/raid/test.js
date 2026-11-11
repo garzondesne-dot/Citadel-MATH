@@ -45,7 +45,7 @@ DS.Test = (function () {
       await local.set(`roster/${DS.TRIAL.cls}/1`, trial.name);
       await local.set(`accounts/${DS.TRIAL.cls}/1`, { uid: local.uid(), gen: 1, hero: look.hero, fx: look.fx });
       tme = Object.assign({}, (await DS.Account.me()) || { c: DS.TRIAL.cls, n: 1, name: trial.name, hero: look.hero, fx: look.fx }, { trial: true });
-      try { await DS.Gem.add(tme, 200, 'trial_gift', '🎁 체험판 선물', { free: true }); } catch (e) { /* 무시 */ } // 👩‍🏫 #80: 시작 💎 200 (3차시를 끝내면 한 번 💎 620 · 📜 9)
+      try { await DS.Gem.add(tme, 200, 'trial_gift', '🎁 체험판 선물', { free: true }); } catch (e) { /* 무시 */ } // 👩‍🏫 #80: 시작 💎 200 (3차시를 끝내면 한 번 💎 620 · 📜 8 · #74-3 Ⅳ 📜 2)
       tme = Object.assign({}, (await DS.Account.me().catch(() => null)) || tme, { trial: true });
       where = 'camp'; bar(true);
       await DS.Camp.enter(tme);
@@ -248,11 +248,11 @@ DS.Test = (function () {
     const L1 = L, given = !!(L1 && L1.id === 'set-03' && !gift3);
     if (given) {
       gift3 = true;
-      try { await DS.Gem.add(tme, 620, 'trial_gift3', '🎁 체험판 3차시 선물', { free: true }); await DS.Gem.addScroll(tme, 9, 'trial_scroll3', '🎁 체험판 3차시 선물'); } catch (e) { /* 무시 */ }
+      try { await DS.Gem.add(tme, 620, 'trial_gift3', '🎁 체험판 3차시 선물', { free: true }); await DS.Gem.addScroll(tme, 8, 'trial_scroll3', '🎁 체험판 3차시 선물'); } catch (e) { /* 무시 */ }
     }
     tme = Object.assign({}, (await DS.Account.me().catch(() => null)) || tme, { trial: true });
     await DS.Camp.enter(tme);
-    DS.UI.toast(given ? '🏆 체험 수업 끝! 🎁 💎 620 · 📜 9 — 💎 상점에서 10강 🛡 홀리 방패 · 내 속성 Ⅳ 🌟 진필살기까지 해 봐요 · 아래 「⚔ 7차시로」도!' : '🏆 체험 수업 끝! — 내 캠프로 돌아왔어요', 5200);
+    DS.UI.toast(given ? '🏆 체험 수업 끝! 🎁 💎 620 · 📜 8 — 💎 상점에서 10강 🛡 홀리 방패 · 내 속성 Ⅳ 🌟 진필살기까지 해 봐요 · 아래 「⚔ 7차시로」도!' : '🏆 체험 수업 끝! — 내 캠프로 돌아왔어요', 5200);
   }
   // 위 TV 창 = 종합상황실 (실제 교실 TV 화면을 1280×720 그대로 그려 줄임)
   function tvHall(on) {

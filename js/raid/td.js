@@ -22,6 +22,9 @@ DS.TD = (function () {
     frost: { slow: [0.15, 0.25, 0.35, 0.45, 0.55] }, star: { crit: [0.1, 0.15, 0.2, 0.25, 0.3] }, magic: { boss: [0.2, 0.3, 0.4, 0.5, 0.6] },
     math: { proof: [0.1, 0.13, 0.16, 0.2, 0.24] }, // 📐 증명: 같은 몬스터를 연달아 맞힐 때마다 +% (3번까지 쌓임 · 2026-11-07)
   };
+  // 🌈 #74-3 새 속성 (⏳ 머리 방 결정 전 임시): 디펜스 효과 · 색 · 설명 = 그 속성 용사들이 쓰던 옛 속성과 같게 (☀ → ✨ · 🌑 → ⚔ · ⚙ → 🔨 · 🌊 → 🌪)
+  const ALIAS = { sun: 'star', dark: 'cut', gear: 'smash', water: 'sweep' };
+  Object.entries(ALIAS).forEach(([k, v]) => { if (!FAM[k]) FAM[k] = FAM[v]; });
   const HP_K = 0.42; // 몬스터 체력 계수 (tests/td.test.js 로 이길 확률 ≈ 70% 에 맞춤)
   // ── 시드 무작위 ────────────────────────────────────────
   const rng = (seed) => { let a = 0; for (const ch of String(seed)) a = (Math.imul(a ^ ch.charCodeAt(0), 2654435761) >>> 0); return () => { a = (a + 0x6d2b79f5) >>> 0; let t = a; t = Math.imul(t ^ (t >>> 15), t | 1); t ^= t + Math.imul(t ^ (t >>> 7), t | 61); return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; };
@@ -142,8 +145,9 @@ DS.TD = (function () {
   const studentsIn = (R) => Object.keys(R.players || {}).filter((u) => !R.players[u].teacher && (R.active || {})[u]);
   const kst = () => { const d = new Date(Date.now() + 9 * 3600e3); return `${d.getUTCFullYear()}${String(d.getUTCMonth() + 1).padStart(2, '0')}${String(d.getUTCDate()).padStart(2, '0')}`; };
   const ranged = (h) => !!(DS.Attack && DS.Attack.isRanged && DS.Attack.isRanged(Number(h) || 0));
-  const FAMC = { cut: '#e8eef8', smash: '#ffb14a', sweep: '#7dffa8', wind: '#9ef0ff', fire: '#ff7a1a', spark: '#ffe14a', frost: '#7fd3ff', star: '#fff3a0', magic: '#c08aff', math: '#ffd25a' };
+  const FAMC = { sun: '#fff0a0', dark: '#b078ff', gear: '#ff9a3c', water: '#78ece4', cut: '#e8eef8', smash: '#ffb14a', sweep: '#7dffa8', wind: '#9ef0ff', fire: '#ff7a1a', spark: '#ffe14a', frost: '#7fd3ff', star: '#fff3a0', magic: '#c08aff', math: '#ffd25a' };
   const FAMN = { cut: '⚔ 베기 · 한 마리에 강하게', smash: '🔨 강타 · 기절', sweep: '🌪 연격 · 주변도 함께', wind: '🌬 바람 · 뒤로 밀기', fire: '🔥 불 · 불태우기', spark: '⚡ 번개 · 옆으로 튐', frost: '❄ 얼음 · 느리게', star: '✨ 별 · 치명타', magic: '🔮 마법 · 보스에게 강함', math: '📐 수식 · 같은 적을 연달아 맞히면 점점 강하게' };
+  Object.entries(ALIAS).forEach(([k, v]) => { if (!FAMN[k] && FAMN[v]) FAMN[k] = FAMN[v].replace(/^\S+ \S+/, (DS.FX && (DS.FX.FAMS.find((f) => f.id === k) || {}).name) || k); });
   const UPN = { a: '⚔ 공격 +25%', b: '⚡ 속도 +20%', c: '✨ 특기 한 단계' };
   const TIERN = ['Ⅰ', 'Ⅱ', 'Ⅲ', 'Ⅳ', 'Ⅴ'];
   const mapOf = (f) => M().get(f.map) || M().MAPS[0];
