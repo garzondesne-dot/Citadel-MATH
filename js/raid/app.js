@@ -194,7 +194,7 @@ DS.App = (function () {
       $('#s-new').onclick = () => { sMode = 'signup'; drawForm(); };
     } else if (sMode === 'signup') {
       f.innerHTML = sForm(c(), n(), `<p class="muted small">이름이 맞는지 꼭 확인하고 가입해요. 한 번호는 한 명만 가입할 수 있어요.</p>
-        <div class="row2"><label>비밀번호 4자리 ${pinInput('s-p1', '숫자 4자리', 'new-password')}</label><label>한 번 더 ${pinInput('s-p2', '다시', 'new-password')}</label></div>${heroPicker()}${fxPicker()}
+        <div class="row2"><label>비밀번호 4자리 ${pinInput('s-p1', '숫자 4자리', 'new-password')}</label><label>한 번 더 ${pinInput('s-p2', '다시', 'new-password')}</label></div>${heroPicker()}
         <p class="muted small">용사·이펙트는 나중에 내 캠프 💎 상점에서 언제든 바꿀 수 있어요.</p>
         <button id="s-make" type="submit" class="btn primary big">✨ 가입하기</button><button id="s-back" type="button" class="btn small">← 로그인으로</button>`);
       bindHeroes(() => { const a = $('#s-p1').value, b = $('#s-p2').value; drawForm(); $('#s-p1').value = a; $('#s-p2').value = b; });
@@ -202,7 +202,7 @@ DS.App = (function () {
       $('#s-make').onclick = go(async () => {
         const a = $('#s-p1').value, b = $('#s-p2').value;
         if (a !== b) throw Object.assign(new Error('두 비밀번호가 달라요.'), { user: true });
-        await A().signUp(c(), n(), a, hero, fx);
+        await A().signUp(c(), n(), a, hero, DS.FX.fit ? DS.FX.ladder(hero)[0] : fx); // 🪜 #96 첫 스킬 = 고른 용사 사다리 Ⅰ
         savePw(`${c()}반 ${n()}번`, a); DS.UI.toast('가입했어요! 비밀번호 4자리를 꼭 기억해요.', 3200); studentAuth();
       });
       $('#s-back').onclick = () => { sMode = 'login'; drawForm(); };

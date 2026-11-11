@@ -14,14 +14,15 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
     const tm = setInterval(() => { seen.minOp = Math.min(seen.minOp, Number(getComputedStyle(hb).opacity)); }, 20);
     await DS.Attack.play(sc, { heroBox: hb, monBox: sc.querySelector('.enc-mon'), hero, fx, hits: 1 }); mo.disconnect(); clearInterval(tm); seen.endOp = Number(getComputedStyle(hb).opacity); return seen; }, [fx, hero]);
   await setup(0); await p.waitForTimeout(600);
-  for (const fx of ['flame', 'spark', 'frost', 'gale', 'twinkle', 'crit', 'ruler']) { const r = await run(fx, 0); check(r.trail === 1, `로안 + ${fx} = 색 궤적 (${JSON.stringify(r)})`); }
-  for (const fx of ['flamecut', 'boltthrust', 'frostsmash']) { const r = await run(fx, 0); check(r.trail === 1, `🌳 #78 합체 ${fx} = 색 궤적 (${JSON.stringify(r)})`); }
-  for (const fx of ['cut', 'radiant', 'bash', 'thrust', 'wave']) { const r = await run(fx, 0); check(r.trail === 0, `로안 + ${fx} = 근접 계열 · 궤적 없음 (${JSON.stringify(r)})`); }
+  // 🪜 #96: 스킬 = 내 용사 사다리만 → 속성 궤적은 그 속성이 자기 속성인 근접 용사로 (용기사 23 🔥 · 24 ⚡ · 15 ❄ · 3 🌬) · 합체 칸 없앰
+  for (const [fx, h] of [['flame', 23], ['spark', 24], ['frost', 15], ['gale', 3]]) { await setup(h); await p.waitForTimeout(400); const r = await run(fx, h); check(r.trail === 1, `근접 ${h} + 내 속성 ${fx} = 색 궤적 (${JSON.stringify(r)})`); }
+  for (const [fx, h] of [['cut', 0], ['radiant', 8], ['bash', 6], ['thrust', 5], ['wave', 13]]) { await setup(h); await p.waitForTimeout(400); const r = await run(fx, h); check(r.trail === 0, `근접 ${h} + ${fx} = 근접 계열 · 궤적 없음 (${JSON.stringify(r)})`); }
+  { await setup(0); await p.waitForTimeout(400); const r = await run('flame', 0); check(r.trail === 0, `🪜 로안 + 사다리 밖 불 = 베기 Ⅰ 로 (궤적 없음) (${JSON.stringify(r)})`); }
   for (const fx of ['hammer', 'quake']) { const r = await run(fx, 6); check(r.minOp < 0.2 && r.endOp === 1 && r.trail === 0, `${fx} 뛰어올라 사라짐 → 다시 보임 (${JSON.stringify(r)})`); }
   await setup(1); await p.waitForTimeout(600); { const r = await run('flame', 1); check(r.trail === 0, `원거리 누아 + 불 = 궤적 없음 (${JSON.stringify(r)})`); }
-  await setup(0); await p.waitForTimeout(600);
-  p.evaluate(() => { const sc = document.getElementById('tsc'); DS.Attack.play(sc, { heroBox: sc.querySelector('.enc-hero'), monBox: sc.querySelector('.enc-mon'), hero: 0, fx: 'spark', hits: 1 }); }); await p.waitForTimeout(470); await p.screenshot({ path: `${OUT}/112-trail-spark.png` }); await p.waitForTimeout(1800);
-  p.evaluate(() => { const sc = document.getElementById('tsc'); DS.Attack.play(sc, { heroBox: sc.querySelector('.enc-hero'), monBox: sc.querySelector('.enc-mon'), hero: 0, fx: 'flame', hits: 1 }); }); await p.waitForTimeout(470); await p.screenshot({ path: `${OUT}/112-trail-fire.png` }); await p.waitForTimeout(1800);
+  await setup(24); await p.waitForTimeout(600);
+  p.evaluate(() => { const sc = document.getElementById('tsc'); DS.Attack.play(sc, { heroBox: sc.querySelector('.enc-hero'), monBox: sc.querySelector('.enc-mon'), hero: 24, fx: 'spark', hits: 1 }); }); await p.waitForTimeout(470); await p.screenshot({ path: `${OUT}/112-trail-spark.png` }); await p.waitForTimeout(1800);
+  p.evaluate(() => { const sc = document.getElementById('tsc'); DS.Attack.play(sc, { heroBox: sc.querySelector('.enc-hero'), monBox: sc.querySelector('.enc-mon'), hero: 23, fx: 'flame', hits: 1 }); }); await p.waitForTimeout(470); await p.screenshot({ path: `${OUT}/112-trail-fire.png` }); await p.waitForTimeout(1800);
   await setup(6); await p.waitForTimeout(600);
   p.evaluate(() => { const sc = document.getElementById('tsc'); DS.Attack.play(sc, { heroBox: sc.querySelector('.enc-hero'), monBox: sc.querySelector('.enc-mon'), hero: 6, fx: 'quake', hits: 1 }); }); await p.waitForTimeout(560); await p.screenshot({ path: `${OUT}/112-quake.png` });
   console.log(`e2e112: 확인 ${ok} · 실패 ${fail}`, 'errors:', errs.length ? errs : 'none'); await b.close(); if (fail || errs.length) process.exit(1);

@@ -3347,3 +3347,32 @@ body:has(.modal:not([hidden])) #ver-tag { display: none; }
 .rune.lit { color: #fff; box-shadow: 0 0 14px #7fd6ff, inset 0 0 10px #7fd6ff; border-color: #bfeaff; }
 .rune-del { aspect-ratio: auto; width: 64px; border-radius: 10px; font: 26px system-ui, sans-serif; color: #ffd27a; }
 @media (prefers-reduced-motion: reduce) { .rune-slot.carve, .rune-slot.cast { animation: none; } }
+/* 🪜 #96 스킬 사다리 4칸 (위 Ⅰ → 아래 Ⅳ) · 다음 칸 크게 · 판정 한 줄 · 규칙 상자 · 용사 카드 미리 보기 */
+.lad { display: flex; flex-direction: column; align-items: stretch; max-width: 360px; margin: 0 auto; }
+.lad .fxpick.lad-c { display: grid; grid-template-columns: 34px 96px 1fr; align-items: center; gap: 6px; width: 100%; min-height: 0; padding: 4px 8px; border-radius: 10px; text-align: left; }
+.lad .fxpick.lad-c .tier { position: static; font-size: 16px; font-style: normal; color: var(--gold); text-align: center; }
+.lad .fxpick.lad-c canvas { width: 96px; height: 56px; grid-row: 1 / span 2; grid-column: 2; }
+.lad .fxpick.lad-c span { grid-column: 3; font-size: 14px; } .lad .fxpick.lad-c small { grid-column: 3; font-size: 12px; }
+.lad .fxpick.lad-c .tier { grid-row: 1 / span 2; grid-column: 1; }
+.lad .fxpick.lad-c .sk-ult { position: static; display: inline; font-style: normal; font-size: 13px; }
+.lad .fxpick.lad-c.pk { outline: 2px dashed #7fd6ff; outline-offset: 1px; }
+.lad .sk-line { height: 10px; }
+.lad-next { display: flex; gap: 10px; align-items: center; margin: 8px 0; padding: 8px 10px; border: 2px solid #4aa3ff; border-radius: 12px; background: #102236; }
+.lad-next canvas { width: 140px; height: 84px; flex: none; }
+.lad-next > div { display: flex; flex-direction: column; gap: 3px; min-width: 0; } .lad-next b { font-size: 17px; } .lad-next .row { gap: 6px; flex-wrap: wrap; }
+.lad-done { text-align: center; color: var(--gold); margin: 8px 0; }
+.lad-verdict { margin: 6px 0; padding: 6px 10px; border-radius: 8px; background: #1e1a14; border-left: 4px solid #7fd6ff; font-size: 14px; }
+.lad-rule { display: flex; flex-direction: column; gap: 2px; margin: 8px 0; padding: 8px 10px; border: 1px solid #5a4c3c; border-radius: 10px; font-size: 13px; }
+.lad-rule b { color: var(--gold); }
+.lad-peek { display: grid; grid-template-columns: repeat(auto-fit, minmax(62px, 1fr)); gap: 4px; margin-top: 6px; } .lad-peek > small { grid-column: 1 / -1; color: var(--muted); }
+.lad-peek span { display: flex; flex-direction: column; align-items: center; font-size: 10.5px; line-height: 1.15; text-align: center; } .lad-peek canvas { width: 64px; height: 38px; } .lad-peek i { font-style: normal; color: var(--gold); }
+@media (max-width: 380px) { .lad-next canvas { width: 110px; height: 66px; } .lad .fxpick.lad-c { grid-template-columns: 28px 80px 1fr; } .lad .fxpick.lad-c canvas { width: 80px; height: 47px; } }
+/* 📣 #96 개편 안내 창 · 사다리 위 한 줄 · 용사 카드 표시 */
+.rv96-box { max-width: 420px; display: flex; flex-direction: column; gap: 10px; }
+.rv96-box h2 { margin: 0; text-align: center; }
+.rv96-l { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 6px; line-height: 1.45; }
+.rv96-r { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px; border: 2px solid var(--gold); border-radius: 10px; background: #2e240c; }
+.rv96-r span { font-size: 22px; color: var(--gold); } .rv96-r small { color: var(--muted); }
+.rv96-n { margin: 0; font-size: 13px; color: var(--muted); text-align: center; }
+.lad-tip { margin: 6px 0; padding: 6px 10px; border-radius: 8px; background: #102236; font-size: 13px; }
+.hero-card .hc-tags i.hc-new { border-color: #4aa3ff; color: #1d5a8a; background: #e3f1ff; } .hero-card .hc-tags i.hc-ach { border-color: #c79a2a; color: #7a5a10; background: #fff3cf; }
