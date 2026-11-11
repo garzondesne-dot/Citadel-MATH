@@ -26,6 +26,11 @@ const OUT = process.argv[2], U = `http://localhost:${process.env.PORT || 8765}/i
   check(/새로워졌어요/.test(t) && /자기 속성 스킬 4칸만 배우고/.test(t) && /공통 특화/.test(t) && /아바쿠/.test(t), `바뀐 것 3줄 (${t.slice(0, 80)})`);
   check(/80/.test(t) && /3/.test(t) && /용사 1명/.test(t) && /스킬 2개/.test(t) && /내 스킬 보러 가기/.test(t) && /사면 끝/.test(t), '돌려받은 💎 80 · 📜 3 · 용사 1 + 스킬 2 · 「사면 끝」');
   await S.waitForTimeout(1500); check(await S.evaluate(() => !document.querySelector('.gift-note')), '선물 축하 창이 겹치지 않음');
+  // 🐞 #115 확인 안 하고 수업 화면으로 가면 저절로 닫힘 → 다음 캠프에서 다시
+  await S.evaluate(() => { document.getElementById('screen-camp').classList.remove('active'); }); await S.waitForTimeout(900);
+  check(!(await pop()), '캠프를 떠나면 안내 창 저절로 닫힘');
+  check(await S.evaluate(async () => { const m = await DS.Account.me(); return !(await DS.Net.get(`accounts/${m.c}/${m.n}/seen96`)); }), '확인 안 함 = 아직 안 본 것으로');
+  await camp(); check(/새로워졌어요/.test(await pop()), '다음 캠프에서 다시 뜸');
   await S.click('.rv96 .ui-x'); await S.waitForTimeout(800);
   check(await S.evaluate(async () => { const m = await DS.Account.me(); return (await DS.Net.get(`accounts/${m.c}/${m.n}/seen96`)) === true; }), '확인 = seen96 저장');
   await camp(); check(!(await pop()), '다시 들어와도 안 뜸');

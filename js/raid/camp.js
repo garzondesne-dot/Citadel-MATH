@@ -450,6 +450,7 @@ DS.Camp = (function () {
     document.body.appendChild(el);
     const done = () => { el.remove(); DS.Net.update(`accounts/${ck(m.c)}/${m.n}`, { seen96: true, uid: a.uid }).catch(() => {}); };
     el.querySelector('#rv96-ok').onclick = done;
+    { const iv = setInterval(() => { if (!el.isConnected) { clearInterval(iv); return; } if (!document.getElementById('screen-camp').classList.contains('active')) { clearInterval(iv); el.remove(); } }, 400); } // 🐞 #115 캠프를 떠나 수업 화면으로 가면 저절로 닫힘(확인 안 한 것 = 다음 캠프에서 다시 · 「확인」 · ✕ = 다시 안 뜸)
     el.querySelector('#rv96-sk').onclick = () => { done(); settings({ tab: 'gem' }); };
     return true;
   }
