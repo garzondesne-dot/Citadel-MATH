@@ -8,7 +8,9 @@ const G = DS.Gem.G, SHOP = DS.Gem.SHOP;
 //   성채 · 서술형 · 카드 = 지금 게임 값 (아래 시험이 차시 파일과 같은지 확인) · fixes = 차시마다 오답 고치기 약 3 (옛 9차시 27 과 같은 비율)
 const C = { lessons: 15, rooms: 37, bossRooms: 3, photoRooms: 7, cards: 54, fixes: 45 };
 // 📚 도감 특전 용사(CARD_HEROES)는 카드를 다 모으면 💎 를 돌려받으므로 상점 합계에서 뺌 (2026-11-07)
-const shop = Object.entries(SHOP).reduce((a, [kind, k]) => a + Object.entries(k).reduce((b, [id, v]) => b + (kind === 'hero' && DS.Gem.CARD_HEROES.includes(Number(id)) ? 0 : v), 0), 0);
+// 🌈 #74-3a-2 A1 (2026-11-11 선생님 「A1」 · DECISIONS 「💎 경제 시험 기준」): 새 속성 4갈래(☀ 🌑 ⚙ 🌊) 스킬은 그 8명 용사용이라 상점 합계에서 뺌 (목표 띠 그대로)
+const NEW_ATTR = ['radiant', 'bulwark', 'holysword', 'skylance', 'shade', 'claw', 'phantom', 'eclipse', 'wrench', 'cog', 'piston', 'drill', 'aqua', 'wave', 'anchor', 'tsunami'];
+const shop = Object.entries(SHOP).reduce((a, [kind, k]) => a + Object.entries(k).reduce((b, [id, v]) => b + ((kind === 'hero' && DS.Gem.CARD_HEROES.includes(Number(id))) || (kind === 'fx' && NEW_ATTR.includes(id)) ? 0 : v), 0), 0);
 // 갈래별 적립 (f = 하는 비율)
 function earn(f) {
   const skill = C.lessons * (f.solved * G.solvedMax + f.perfect * G.perfect + f.perfect * G.bossPerfect + f.boss * G.bossRe) + C.rooms * f.rooms * f.first * G.roomFirst + C.photoRooms * f.photo * G.photo; // 🧠 실력
@@ -23,7 +25,7 @@ const TYPES = {
 };
 const BAND = { '다 함': [0.8, 0.92], '꾸준': [0.35, 0.5], '수업만': [0.1, 0.22] };
 let fail = 0; const pct = (x) => `${Math.round(x * 100)}%`;
-console.log(`상점(용사 + 스킬) 💎 ${shop}`);
+console.log(`상점(용사 + 스킬 · 새 속성 4갈래 뺌) 💎 ${shop}`);
 Object.entries(TYPES).forEach(([k, f]) => { const e = earn(f), r = e.total / shop, [lo, hi] = BAND[k], ok = r >= lo && r <= hi; if (!ok) fail++;
   console.log(`${ok ? '✔' : '✘'} ${k}: 💎 ${Math.round(e.total)} (실력 ${Math.round(e.skill)} · 노력 ${Math.round(e.effort)} · 그 밖 ${Math.round(e.etc)}) = 상점의 ${pct(r)} (목표 ${pct(lo)}~${pct(hi)})`); });
 const all = earn(TYPES['다 함']), ratio = all.effort / all.skill;
