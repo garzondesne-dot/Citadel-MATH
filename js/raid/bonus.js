@@ -375,7 +375,6 @@ DS.Bonus = (function () {
         el.querySelectorAll('[data-text]').forEach((inp) => inp.addEventListener('input', () => { G[Number(inp.dataset.text)] = inp.value; const go = el.querySelector('#bf-go2'); const ok = todo.every((i) => filled(items[i], G[i])); if (go) { go.disabled = !ok; go.classList.toggle('go-pulse', ok); } }));
         DS.UI.runes(el, (i) => G[i], (i, v) => { G[i] = v; S.penMark(penKey(), i); const al = el.querySelector(`.ans-line[data-al="${i}"]`); if (al) al.outerHTML = S.ansLine(items[i], v, i); const go = el.querySelector('#bf-go2'); const ok = todo.every((k) => filled(items[k], G[k])); if (go) { go.disabled = !ok; go.classList.toggle('go-pulse', ok); } });
         el.querySelectorAll('[data-hint]').forEach((b) => (b.onclick = () => { const k = Number(String(b.dataset.hint).replace(/^bf/, '')); if (hOpen.has(k)) hOpen.delete(k); else hOpen.add(k); DS.Sound.clank(); paint(); }));
-        el.querySelectorAll('.pen-sf').forEach((b) => (b.onclick = (e) => { e.stopPropagation(); S.penToggle(penKey()); paint(); }));
         const go = el.querySelector('#bf-go2'); if (go) go.onclick = () => { go.disabled = true; DS.UI.runeCast(el); S.mergeAnim(el).then(() => resolve(G.map((g, i) => (items[i].type === 'number' ? Number(g) : g)))); }; // ✍ → 📜 하나로 모임
         DS.Bonus._form = { items, todo, G, submit: () => resolve(G.map((g, i) => (items[i].type === 'number' ? Number(g) : g))) }; // 🧪 시험용 고리 (자동 풀이 · 화면에는 영향 없음)
       };
