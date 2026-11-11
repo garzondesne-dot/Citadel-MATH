@@ -720,7 +720,7 @@ DS.Student = (function () {
     };
   }
   // ⚔ 소레이드 화면 (2026-11-09 #18): 진행 칩 ①②③👑 · 지금 단계 문제 하나 · 「📜 나의 풀이」가 한 줄씩 쌓임 · 기회 반 칸 · 1칸 남으면 🙋 선생님 확인
-  let cform = null; const bpArm = {}; const chainPrac = {}, writeMode = {}, probShut = {}, probOpen = {}, storyOpen = {}, pracArm = {};
+  let cform = null; const bpArm = {}; const chainPrac = {}, writeMode = {}, probShut = {}, probOpen = {}, pracArm = {};
   // ✨ 「📜 나의 풀이」 새 줄 (#46 모래 글씨 → 2026-11-10 선생님 「픽셀 디졸브 인 · 새 문장은 빨간색 · 다음 단계에서 다시 검정」)
   //   새 줄만 · 종이색 픽셀 칸이 흩어지듯 사라지며 글씨가 드러남 (왼쪽부터 조금 먼저 · 약 0.9초 · 한 줄씩 차례로) · 그 단계에서 생긴 줄 = 빨강 → 다음 단계 줄이 생기면 검정
   //   이미 있던 줄 · 다시 들어온 첫 화면은 연출 없이 · 화면을 다시 그려도 이어서(시작 시각 기억 · 칸 순서는 줄마다 고정) · 그림 파일 없음 (캔버스 1장)
@@ -787,8 +787,8 @@ DS.Student = (function () {
     drawn = sig;
     const chips = pItems.map((_, i) => `<span class="cr-chip ${i < stage || (!prac && rec.done) ? 'ok' : i === stage ? 'now' : ''}${!prac && dns.includes(i) ? ' down' : ''}">${!prac && dns.includes(i) ? '💀' : ''}${i === pItems.length - 1 ? '👑' : '①②③④⑤⑥'[i]}${i < stage || (!prac && rec.done) ? '✔' : i === stage ? '⚔' : ''}</span>`).join('<i>›</i>');
     const story = (arr) => (arr.length ? `<div class="cr-story"><b>📜 나의 풀이</b><ol>${arr.map((t) => `<li>${pretty(t)}</li>`).join('')}</ol></div>` : '');
-    // 📱 #56 ③ 문제 푸는 동안 「나의 풀이」 = 가장 최근 한 줄 + 「n줄 ▼」 (누르면 모두 · 다시 그려도 유지)
-    const sfKey = `${mid}|${pass}`, storyF = (arr) => (arr.length ? `<div class="cr-story${storyOpen[sfKey] ? '' : ' cr-fold'}" data-sf="${esc(sfKey)}"><b>📜 나의 풀이</b>${arr.length > 1 ? `<button type="button" class="cr-sf">${storyOpen[sfKey] ? '접기 ▲' : `${arr.length}줄 ▼`}</button>` : ''}<ol>${arr.map((t, k) => `<li value="${k + 1}">${pretty(t)}</li>`).join('')}</ol></div>` : '');
+    // ✍ #93 (2026-11-11 선생님 「나의 풀이 알아서 접혀져 있던데 안 접히게」): 「📜 나의 풀이」 = 늘 모두 펼침 (#56 ③ 「최근 한 줄 + n줄 ▼」 접기 없앰)
+    const storyF = (arr) => (arr.length ? `<div class="cr-story"><b>📜 나의 풀이</b><ol>${arr.map((t, k) => `<li value="${k + 1}">${pretty(t)}</li>`).join('')}</ol></div>` : '');
     const lastWrong = !prac && rec.lastWrong && rec.lastWrong.s === stage, cheer = !prac && !rec.done && !rec.fail && dns.includes(stage) ? '<p class="cr-more cr-cheer">💥 친구들은 이 졸개를 넘었어요! 힘내요</p>' : ''; // 📱 #56 ④ 장면 띠 위에 겹침
     if (!photoLoaded && DS.Photo) { photoLoaded = true; DS.Photo.load().then(() => { drawn = ''; render(); }).catch(() => {}); }
     const pendPh = (myP().pp || {})[mid] && wrOk !== 'ok' ? '<p class="ph-hand cr-pend-ph">⏳ 서술형 사진은 <b>선생님이 직접 확인</b>하고 있어요 (AI 가 확신하지 못함) · 더 또렷하게 다시 찍어도 돼요</p>' : ''; // 🐞 #57 ② 「알겠어요」 뒤 결과가 사라진 것처럼 보임 → 남김
@@ -862,7 +862,6 @@ DS.Student = (function () {
     chargeBtn(body);
     const hb = $('#cr-hint'); if (hb) hb.onclick = () => DS.Control.run(async () => { hb.disabled = true; await DS.Act.giveHint(code, raw, mid, Number(hb.dataset.s)); DS.Sound.clank(); DS.UI.toast('💡 힌트를 TV 에 띄웠어요 · EXP +1'); drawn = ''; render(); });
     body.querySelectorAll('.cr-prob').forEach((d) => d.addEventListener('toggle', () => { probOpen[d.dataset.pm] = d.open; })); // 📜 접기 기억 (단계마다 · #56)
-    body.querySelectorAll('.cr-sf').forEach((b) => (b.onclick = (e) => { e.stopPropagation(); const st = b.closest('.cr-story'), k = st.dataset.sf; storyOpen[k] = !storyOpen[k]; st.classList.toggle('cr-fold', !storyOpen[k]); b.textContent = storyOpen[k] ? '접기 ▲' : `${st.querySelectorAll('li').length}줄 ▼`; })); // 📱 #56 ③ 다시 그리지 않고 그 자리에서
     sandApply(body, `${mid}|${prac ? pass : 0}`); // ✨ 모래 글씨
     const pb = $('#cr-prac');
     if (pb) { const ak = `${mid}|${pass}|${pDone || pFail || !prac}`; if (!pracArm[ak]) pracArm[ak] = Date.now(); const wait = 1500 - (Date.now() - pracArm[ak]); if (wait > 0) { pb.disabled = true; setTimeout(() => { if (pb.isConnected) pb.disabled = false; }, wait); } } // 🐞 #50 ①: 대장을 잡은 그 손가락이 같은 자리 「🔥 한 판 더」를 눌러 저절로 넘어가던 것 → 나타난 뒤 1.5초 잠깐 잠금

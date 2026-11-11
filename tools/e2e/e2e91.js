@@ -22,22 +22,26 @@ const OUT = process.argv[2] || '.', U = 'http://localhost:8765/index.html?local'
   const look = () => S.evaluate(() => { const dock = document.querySelector('.st-dock'), dt = dock ? dock.getBoundingClientRect().top : innerHeight, bs = [...document.querySelectorAll('#st-body [data-pick]')];
     return { n: bs.length, seen: bs.filter((x) => { const r = x.getBoundingClientRect(), pp = x.closest('.paper'), pr = pp ? pp.getBoundingClientRect() : { top: 0, bottom: 1e9 }; return r.top >= Math.max(0, pr.top) - 1 && r.bottom <= Math.min(dt, pr.bottom) + 1; }).length, minH: Math.round(Math.min(...bs.map((x) => x.getBoundingClientRect().height))), sy: Math.round(scrollY), paper: (() => { const p = document.querySelector('#st-body .paper'); return p ? Math.round(p.scrollHeight - p.clientHeight) : -1; })(), sc: Math.round((document.querySelector('#st-body .scene') || { getBoundingClientRect: () => ({ height: 0 }) }).getBoundingClientRect().height) }; });
   const tag = `${VW[0]}x${VW[1]}`;
-  async function shot(name) { await S.waitForTimeout(2600); await clr(); await S.evaluate(() => window.scrollTo(0, 0)); await S.waitForTimeout(200); const v = await look(); ok(v.n >= 4 && v.seen === v.n && v.minH >= 44, `${tag} ${name}: 보기 ${v.seen}/${v.n} 보임 · 단추 ${v.minH}px · 장면 ${v.sc}px · 양피지 남은 스크롤 ${v.paper}`); await S.screenshot({ path: `${OUT}/91-${tag}-${name}.png` }); }
+  async function shot(name) { await S.waitForTimeout(2600); await clr(); await S.evaluate(() => window.scrollTo(0, 0)); await S.waitForTimeout(200); const v = await look(); let reach = v.seen === v.n; if (!reach) { await S.evaluate(() => { const pp = document.querySelector('#st-body .paper'); if (pp) pp.scrollTop = pp.scrollHeight; }); await S.waitForTimeout(250); reach = await S.evaluate(() => { const bs = [...document.querySelectorAll('#st-body [data-pick]')], b = bs[bs.length - 1], dock = document.querySelector('.st-dock'); return !!b && b.getBoundingClientRect().bottom <= (dock ? dock.getBoundingClientRect().top : innerHeight) + 1; }); await S.evaluate(() => { const pp = document.querySelector('#st-body .paper'); if (pp) pp.scrollTop = 0; }); } // ✍ #93 나의 풀이 펼침 → 작은 폰은 양피지를 내려 닿으면 됨
+    ok(v.n >= 4 && reach && v.minH >= 44, `${tag} ${name}: 보기 ${v.seen}/${v.n} 보임${v.seen === v.n ? '' : ' (양피지 내리면 모두)'} · 단추 ${v.minH}px · 장면 ${v.sc}px · 양피지 남은 스크롤 ${v.paper}`); await S.screenshot({ path: `${OUT}/91-${tag}-${name}.png` }); }
   await goStep('m1'); await S.waitForTimeout(3000); await clr(); { const v = await look(); ok(v.n > 0 && v.minH >= 30, `${tag} 일반 몬스터 m1 깨지지 않음(그대로) (보기 ${v.n} · 단추 ${v.minH}px)`); await S.screenshot({ path: `${OUT}/91-${tag}-m1.png` }); }
   await goStep('u5'); await S.waitForTimeout(2500); await put('u5', 0); await shot('u5-졸개2');
-  // 한 판 더 (📜 문제 상자 · 나의 풀이 접힘)
+  // 한 판 더 (📜 문제 상자 접힘 · 나의 풀이는 늘 펼침 #93)
   for (let s2 = 1; s2 < 4; s2++) await put('u5', s2); await S.waitForTimeout(2500); await clr(); await S.waitForTimeout(1600);
   await S.evaluate(() => { const b2 = document.querySelector('#cr-prac'); if (b2) b2.click(); }); await S.waitForTimeout(1500); await put('u5', 0, 1); await shot('u5-한판더-졸개2');
   const pb = await S.evaluate(() => { const d = document.querySelector('.cr-prob'), st = document.querySelector('.cr-story'); return { prob: d ? d.open : null, fold: st ? st.classList.contains('cr-fold') : null, shown: st ? [...st.querySelectorAll('li')].filter((l) => l.offsetHeight > 0).length : 0 }; });
-  ok(pb.prob === false && pb.fold === true && pb.shown === 1, `${tag} 한 판 더 졸개②: 📜 문제 접힘 · 나의 풀이 한 줄 (${JSON.stringify(pb)})`);
+  ok(pb.prob === false && pb.fold === false && pb.shown >= 1, `${tag} 한 판 더 졸개②: 📜 문제 접힘 · 나의 풀이 펼침 (${JSON.stringify(pb)})`);
   await goStep('u7'); await S.waitForTimeout(2500); for (let s2 = 0; s2 < 3; s2++) await put('u7', s2);
-  await S.waitForTimeout(2000); await shot('u7-졸개4');
+  await S.waitForTimeout(2000); await S.waitForTimeout(2600); await clr(); await S.evaluate(() => window.scrollTo(0, 0)); await S.waitForTimeout(200); await S.screenshot({ path: `${OUT}/91-${tag}-u7-졸개4.png` });
+  { // ✍ #93: 나의 풀이 4줄이 다 펼쳐져 보기는 양피지 아래 — 양피지를 내리면 모두 보여야 함
+    await S.evaluate(() => { const pp = document.querySelector('#st-body .paper'); if (pp) pp.scrollTop = pp.scrollHeight; }); await S.waitForTimeout(300);
+    const v = await look(); ok(v.n >= 4 && v.minH >= 44 && v.seen >= 1, `${tag} u7-졸개4: 양피지를 내리면 보기 ${v.seen}/${v.n} · 단추 ${v.minH}px`);
+    const last = await S.evaluate(() => { const bs = [...document.querySelectorAll('#st-body [data-pick]')], b = bs[bs.length - 1], dock = document.querySelector('.st-dock'); return b && b.getBoundingClientRect().bottom <= (dock ? dock.getBoundingClientRect().top : innerHeight) + 1; }); ok(last, `${tag} u7-졸개4: 마지막 보기까지 닿음`);
+    await S.evaluate(() => { const pp = document.querySelector('#st-body .paper'); if (pp) pp.scrollTop = 0; }); }
   { const f = await S.evaluate(() => { const st = document.querySelector('.cr-story'); return { fold: st && st.classList.contains('cr-fold'), shown: st ? [...st.querySelectorAll('li')].filter((l) => l.offsetHeight > 0).length : 0, all: st ? st.querySelectorAll('li').length : 0, btn: (document.querySelector('.cr-sf') || {}).textContent }; });
-    ok(f.fold && f.shown === 1 && f.all >= 3 && /줄 ▼/.test(f.btn || ''), `${tag} 문제 7 졸개④: 나의 풀이 최근 한 줄 · 「${f.btn}」 (${f.all}줄)`);
-    const y0 = await S.evaluate(() => scrollY); await S.evaluate(() => document.querySelector('.cr-sf').click()); await S.waitForTimeout(300);
-    const pe = await S.evaluate(() => [...document.querySelectorAll('.cr-story li')].filter((l) => l.offsetHeight > 0).length); ok(pe === f.all, `${tag} 「n줄 ▼」 누르면 모두 (${pe}줄)`);
+    ok(!f.fold && f.all >= 3 && f.shown === f.all && !f.btn, `${tag} 문제 7 졸개④: ✍ #93 나의 풀이 늘 펼침 (${f.shown}/${f.all}줄 · 접기 단추 없음)`);
     await S.evaluate(async (c) => { await DS.Net.set(`rooms/${c}/players/${DS.Net.uid()}/x`, Date.now()); }, code); await S.waitForTimeout(1200);
-    const keep = await S.evaluate(() => [...document.querySelectorAll('.cr-story li')].filter((l) => l.offsetHeight > 0).length); ok(keep === f.all, `${tag} 다시 그려도 펼침 유지 (${keep}줄)`); void y0; }
+    const keep = await S.evaluate(() => [...document.querySelectorAll('.cr-story li')].filter((l) => l.offsetHeight > 0).length); ok(keep === f.all, `${tag} 다시 그려도 펼침 (${keep}줄)`); }
   // ② 공격 순간만 장면 크게 → 끝나면 띠
   await S.evaluate(() => { const c = document.querySelector('#st-body [data-pick]'); c.click(); }); await S.waitForTimeout(300);
   const scH = () => S.evaluate(() => Math.round(document.querySelector('#st-body .scene').getBoundingClientRect().height));
