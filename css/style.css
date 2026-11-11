@@ -3407,3 +3407,6 @@ body:has(.modal:not([hidden])) #ver-tag { display: none; }
 .mh-hc.lock .art { filter: grayscale(.9) brightness(.55); } .mh-hc.sel { border: 2px solid #7fd6ff; } .mh-hc.cur { box-shadow: inset 0 0 0 2px var(--gold); } .mh-hc .mh-pend { position: absolute; top: 1px; right: 1px; margin: 0; }
 .mh-ask { position: fixed; inset: 0; z-index: 95; display: grid; place-items: center; background: #0008; } .mh-ask > div { padding: 16px; text-align: center; min-width: 260px; } .mh-ask .row { gap: 8px; justify-content: center; }
 @media (prefers-reduced-motion: reduce) { .mh-party.glow .mh-pc { animation: none; } }
+/* ⌨ #97 문제 창(DS.Quiz) 룬: 맞음 · 틀림 색 · − 룬 */
+.rune-slot.right { border-color: #5fd18b; color: #b8ffd0; } .rune-slot.wrong { border-color: #ff7a6b; color: #ffc2b8; }
+.rune-neg { color: #bfeaff !important; }

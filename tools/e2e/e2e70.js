@@ -69,7 +69,7 @@ const jpegSize = (buf) => { let i = 2; while (i < buf.length) { if (buf[i] !== 0
       const open = await S.evaluate(() => !document.getElementById('quiz').classList.contains('hidden'));
       if (!open) { if (await S.$('#bf-photo')) return true; continue; }
       const ans = String(await S.evaluate(() => DS.Quiz.last.answer));
-      for (const ch of ans) await S.click(`#quiz-choices .num-pad button:text-is("${ch === '-' ? '−' : ch}")`);
+      for (const ch of ans) await S.click(`#quiz [data-rune="0|${ch === '-' ? 'm' : ch}"]`); // ⌨ #97 룬
       await S.click('#quiz-choices .q-submit'); await S.waitForTimeout(1600);
       for (let w = 0; w < 20 && !(await S.$('#bf-photo')) && (await S.evaluate(() => document.getElementById('quiz').classList.contains('hidden'))); w++) await S.waitForTimeout(300);
     }

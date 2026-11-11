@@ -2,7 +2,7 @@
 //   → 도입 → 문제 4(소레이드 · 체험판 숫자 6 · 3 · 18 · 정찰 5초) → ✍ 📸 = 「✔ 테스트: 사진 통과로 보기」 → 🏕 → 문제 6 → 👑 문제 7 → 결과 → 내 캠프(「⚔ 3차시로」 · 💎 620 없음)
 //   → 허수아비 7차시(형성평가 칸 없음) · 폰 360 · PC 1280 첫 화면 캡처 · node tools/e2e/e2e110.js <출력 폴더>   (로컬 서버 http://localhost:8765)
 const { chromium } = require('playwright');
-const OUT = process.argv[2] || '.', U = 'http://localhost:8765/trial/';
+const OUT = process.argv[2] || '.', U = `http://localhost:${process.env.PORT || 8765}/trial/`;
 (async () => {
   const b = await chromium.launch(); const errs = []; let pass = 0, fail = 0;
   const ok = (c, m) => { if (c) pass++; else fail++; console.log(`${c ? '✔' : '✘'} ${m}`); };

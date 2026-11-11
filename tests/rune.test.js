@@ -19,3 +19,11 @@ assert.ok(h0.includes('data-rune="0|x"'), '⌫');
 assert.ok(/data-rv="2"[^>]*>18</.test(h1), '값이 새겨짐');
 assert.ok(!U.dial, '옛 다이얼은 없앰 (모든 곳 = 룬)');
 console.log('✔ rune.test (룬 키패드)');
+// #97 문제 창: 4자리 · − 룬
+{ const q = (keys, o) => keys.reduce((c, k) => U.runeNext(c, k, o), null), o4 = { len: 4 };
+  assert.strictEqual(q([1, 2, 3, 4, 5], o4), 1234, '4자리까지');
+  assert.strictEqual(q(['m', 7], o4), -7, '− 7 = −7'); assert.strictEqual(q(['m'], o4), '-', '− 만 = 아직 숫자 아님');
+  assert.strictEqual(q(['m', 'x'], o4), null, '− 지우기 = 빈 칸'); assert.strictEqual(q([1, 2, 'm'], o4), -12, '숫자 뒤 − = 부호만 바뀜');
+  assert.strictEqual(q(['m', 3, 'x'], o4), '-', '−3 ⌫ = −');
+  assert.ok(/data-rune="0\|m"/.test(U.runeHtml(0, null, { neg: true })) && !/data-rune="0\|m"/.test(U.runeHtml(0, null)), '− 룬 = 음수 답 문제만'); }
+console.log('✔ rune.test #97 (문제 창 4자리 · −)');

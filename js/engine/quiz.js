@@ -158,34 +158,16 @@ DS.Quiz = (function () {
           box.appendChild(b);
         });
       } else if (t === 'number') {
-        // 숫자 패드 (폰에서 키보드가 화면을 가리지 않게)
-        let v = '';
-        const disp = document.createElement('div');
-        disp.className = 'num-disp';
-        disp.textContent = '?';
-        box.appendChild(disp);
-        const pad = document.createElement('div');
-        pad.className = 'num-pad';
-        ['1', '2', '3', '4', '5', '6', '7', '8', '9', '−', '0', '⌫'].forEach((k) => {
-          const b = document.createElement('button');
-          b.className = 'choice key';
-          b.textContent = k;
-          b.addEventListener('click', () => {
-            if (done) return;
-            if (k === '⌫') v = v.slice(0, -1);
-            else if (k === '−') v = v.startsWith('-') ? v.slice(1) : '-' + v;
-            else if (v.replace('-', '').length < 4) v += k;
-            disp.textContent = v ? v.replace('-', '−') : '?';
-            sub.disabled = !/\d/.test(v);
-            DS.Sound.clank();
-          });
-          pad.appendChild(b);
-        });
-        box.appendChild(pad);
+        // ⌨ #97 숫자 = 룬 키패드 (2026-11-12 선생님 A · #92 와 같은 함수 DS.UI.runeHtml · runes): 자리 수 4 그대로 · 답이 음수인 문제만 「−」 룬 · 빈 채로 내기 막음
+        let v = null;
+        const rp = document.createElement('div'); rp.innerHTML = DS.UI.runeHtml(0, null, { neg: Number(prob.answer) < 0 }); box.appendChild(rp.firstElementChild);
+        DS.UI.runes(box, () => v, (i, nv) => { v = nv; sub.disabled = done || typeof v !== 'number'; }, { len: 4 });
         const sub = submitBtn('제출', () => {
+          if (typeof v !== 'number') return;
+          DS.UI.runeCast(box);
           if (collect(Number(v))) return;
           const ok = grade(prob, Number(v));
-          disp.classList.add(ok ? 'right' : 'wrong');
+          const disp = box.querySelector('.rune-slot'); if (disp) disp.classList.add(ok ? 'right' : 'wrong');
           finish(ok, ok ? '' : `정답은 ${String(prob.answer).replace('-', '−')}`);
         });
         sub.disabled = true;
