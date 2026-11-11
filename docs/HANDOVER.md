@@ -308,6 +308,9 @@
 - 영상 43 · 44 · 45 = 모션 방 주문 중 → `DATA.videos` 에 연결 (c1 · m1 · m2 = 43 · c2 · c3 · m3 · m4 · m5 = 44 · cp1 · cp2 = 45).
 - 📸 기준표 `rubrics.js set-09/m5` (raid · on) → Firebase `photo_rubric` 은 교사 「기준표 올리기」.
 
+## 🧪 배포 전 시험 (2026-11-11 #89)
+- `bash tools/test-all.sh` = `tests/*.test.js` 전부 · 단 🏰 디펜스 균형 시험(`tests/td.test.js` · 1~10분)은 지난 배포 뒤 `js/engine/fx.js` · `js/raid/td-maps.js` · `js/raid/td.js` 중 하나가 바뀐 때만(`git diff --quiet origin/main -- <세 파일>`). 셋 다 그대로면 배포 보고에 「디펜스 균형 시험 건너뜀(관련 파일 그대로)」 한 줄. td.test.js 가 다른 파일을 불러오게 되면 스크립트의 `TD_FILES` 에 더함. 나머지 시험은 매번.
+
 ## 🧪 시험 계정 (2026-11-11 #67)
 - 저장 `tester/{반}/{번호} = true` (교사만 씀 · 로그인하면 읽기 · DB 규칙 `tester` 새로 · 게시 필요) · 학생 관리 표의 「🧪 시험 계정」 단추.
 - 입장 때 `players/{uid}/tester` → 체력 머릿수(`state/headcount` · `Raid.headcount`)에서 빠짐 · 공격 데미지는 그대로 · 이름표 옆 🧪 (`Titles.nameHtml`).
