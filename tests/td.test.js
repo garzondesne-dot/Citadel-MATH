@@ -1,6 +1,7 @@
 // 🏰 타워 디펜스 균형 시험 (2026-11-07): 반 구성을 바꿔 가며 여러 판을 돌려 이길 확률을 잼 — node tests/td.test.js
 //   목표: 지도마다 평균 이길 확률 55~90% (확정안 ≈ 70% · 반 구성 5가지 평균) · 어느 구성도 25% 밑으로 안 내려감 · 모든 판 225초 안에 끝 · 지도 5종
 //   반 구성: 보통 20명 · 보통 12명 · 약한 20명 · 강한 20명 · 4명 (선생님 타워 · 방패 · 응원 · 기술 · 판 안 업그레이드 포함) · TD_N=판 수 (기본 12)
+//   ⏱ #89 (2026-11-11 선생님 「매번 균형 시험 · 시간이 너무 많이」): 「배포」 때 지난 배포(main) 뒤 아래 require 세 파일(js/engine/fx.js · js/raid/td-maps.js · js/raid/td.js) 중 하나가 바뀐 때만 돌림 — tools/test-all.sh 가 판단 · 이 시험이 다른 파일을 불러오게 되면 그 목록(TD_FILES)에도 더할 것
 global.window = global; global.DS = {}; global.document = undefined;
 require('../js/engine/fx.js'); require('../js/raid/td-maps.js'); require('../js/raid/td.js');
 const TD = DS.TD, MAPS = DS.TDMaps.MAPS;
@@ -29,9 +30,10 @@ const N = Number(process.env.TD_N) || 12;
 for (const map of MAPS.filter((m) => !process.env.TD_MAP || m.id === process.env.TD_MAP)) { // TD_MAP=지도 하나만 (맞추기용)
   const row = { map: map.id };
   for (const [n, kind] of [[20, 'mid'], [12, 'mid'], [20, 'weak'], [20, 'strong'], [4, 'mid']]) {
-    let win = 0, tmax = 0, life = 0; for (let s = 0; s < N; s++) { const S = play(map, n, kind, s); if (S.win) win++; tmax = Math.max(tmax, S.t); life += S.life; }
-    row[`${kind}${n}`] = `${Math.round((100 * win) / N)}%`; row[`t${kind}${n}`] = Math.round(tmax);
-    const w = win / N; (row.ws = row.ws || []).push(w);
+    const Nk = n <= 4 ? N * 2 : N; // 📏 4명 판은 표본이 작아 흔들림(12판 = 1판에 8%p) → 2배 (빨라서 시간은 거의 안 늘어남 · 2026-11-11 #74-3)
+    let win = 0, tmax = 0, life = 0; for (let s = 0; s < Nk; s++) { const S = play(map, n, kind, s); if (S.win) win++; tmax = Math.max(tmax, S.t); life += S.life; }
+    row[`${kind}${n}`] = `${Math.round((100 * win) / Nk)}%`; row[`t${kind}${n}`] = Math.round(tmax);
+    const w = win / Nk; (row.ws = row.ws || []).push(w);
     if (tmax > TD.LIMIT + 1) { fail++; console.log(`✘ ${map.id} ${kind}${n}: 시간 넘음 ${tmax}`); }
     if (w < 0.25) { fail++; console.log(`✘ ${map.id} ${kind}${n}: 너무 어려움 ${Math.round(w * 100)}%`); }
   }
