@@ -28,8 +28,8 @@ DS.Result = (function () {
     const mons = L.steps.filter((s) => s.kind === 'monster').map((s) => {
       const rec = X.record(L, R, s.id, uid);
       const n = rec.total, first = rec.tries[0];
-      const firstOk = Array.from({ length: n }, (_, i) => !!(first && first.attempt === 0 && first.marks[i]));
-      const everOk = Array.from({ length: n }, (_, i) => rec.tries.some((t) => t.marks[i]));
+      const firstOk = rec.chain ? rec.stFirst.slice() : Array.from({ length: n }, (_, i) => !!(first && first.attempt === 0 && first.marks[i])); // ⚔ 소레이드 = 단계별 (model chainRecord stFirst · stOk)
+      const everOk = rec.chain ? rec.stOk.slice() : Array.from({ length: n }, (_, i) => rec.tries.some((t) => t.marks[i]));
       const sp = (L.split || {})[s.id]; // v0.9.6.18: 한 몬스터에 두 개념이면 소문제마다 (5차시 문제 3 · 4)
       if (rec.submitted) firstOk.forEach((ok, i) => bump((sp && sp[i]) || map[s.id], ok)); // 안 한 몬스터는 개념 이해도에 넣지 않는다 (늦게 들어온 학생)
       submits += rec.tries.length; best += rec.best; if (rec.chain) chainPrac += rec.pDoneN || 0; // 🔥 소레이드 연습 사슬 완성

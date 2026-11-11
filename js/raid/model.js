@@ -120,7 +120,7 @@ DS.Raid = (function () {
   function chainRecord(L, R, mid, uid) {
     const items = chainItems(L, R, mid, uid, 0), n = items.length, subs = chainSubs(R, mid, uid);
     const ok = !!((((R.chainOk || {})[mid]) || {})[uid]);
-    let stage = 0, cost = 0, wrong = 0, lastWrong = null, byPh = false, leftAt = -1; const says = [];
+    let stage = 0, cost = 0, wrong = 0, lastWrong = null, byPh = false, leftAt = -1; const says = [], wrongAt = {}; // 📕 wrongAt = 단계마다 첫 판에서 틀린 적 (결과 · 오답노트 칸)
     const healed = healsReceived(R, mid, uid, L), slots = CHAIN_SLOTS + healed; // 💚 #50 친구 힐 = 첫 판 기회 +1칸 (받는 수 상한 HEAL_MAX)
     let pCost = 0; // 🔥 #40 (2026-11-09): 연습 판마다 새 기회 4칸 · 졸개 오답 0.5 · 대장 오답 1 · 0 = 그 판 끝(EXP 없음) · 근거 빈칸 오답은 안 깎음
     let pass = 0, pStage = 0, pItems = null, pSays = [], pDoneN = 0, pWhy = -1, whyOk = false; const whySet = new Set(); // 🧩 #52 ② 근거 줄 여러 개: 연습 판에서 맞힌 근거 줄(단계 번호) // 💡 pWhy = 연습 판에서 근거 빈칸을 기다리는 단계 · whyOk = 근거 줄을 한 번이라도 맞힘(💡 힌트 주기 열림) // pDoneN = 연습 사슬 완성 횟수 (🔥 1번당 EXP +1 · 2026-11-09 선생님)
@@ -132,7 +132,7 @@ DS.Raid = (function () {
       if (!t.p) {
         if (stage >= n || cost >= slots || t.s !== stage) return;
         if (DS.Quiz.grade(items[stage], given)) { says.push(items[stage].say || ''); if (items[stage].why) says.push(items[stage].why.text); stage += 1; lastWrong = null; if (stage >= n) leftAt = slots - cost; } // 💡 첫 판 = 근거 줄을 완성 문장으로
-        else { cost += stage === n - 1 ? 1 : 0.5; wrong += 1; lastWrong = { s: stage, given }; }
+        else { cost += stage === n - 1 ? 1 : 0.5; wrong += 1; wrongAt[stage] = true; lastWrong = { s: stage, given }; }
       } else {
         if (t.p !== pass) { pass = t.p; pStage = 0; pSays = []; pWhy = -1; pCost = 0; pItems = chainItems(L, R, mid, uid, pass); }
         if (t.w) { const q = pItems[t.s]; if (t.s === pWhy && q && q.why && Number(raw0) === q.why.answer) { pSays.push(q.why.text); pWhy = -1; whyOk = true; whySet.add(t.s); if (pStage >= pItems.length) pDoneN += 1; } return; } // 💡 근거 빈칸 (틀려도 벌 없음 · 다시 고름)
@@ -146,7 +146,9 @@ DS.Raid = (function () {
     const tokens = done ? Math.floor(Math.max(0, leftAt >= 0 ? leftAt : slots - cost)) : 0, tokLeft = Math.max(0, tokens - Object.values(healsOf(R, mid)[uid] || {}).filter((v) => !isTrue(v) && !isTcut(v)).length); // 🌟 진필살기 · 금빛 컷인 칸은 묶기 · 힐이 아님
     const locked = !done && !fail && left <= 1 && !ok;
     const whyM = whyStages(items).length, whyDone = [...whySet].sort((a, b) => a - b);
-    return { chain: true, whyM, whyN: whyDone.length, whyDone, whyAll: whyM > 0 && whyDone.length >= whyM, items, n, stage, cost, left, slots, wrong, lastWrong, says, done, fail, locked, ok, byPh, perfect: done && wrong === 0 && !byPh, perfectAt: done && wrong === 0 && !byPh ? 0 : -1, tokens, tokLeft,
+    // 📕 결과 · 오답노트용 단계별 맞힘 (2026-11-11 #80 점검에서 찾음: tries 가 비어 대장까지 잡아도 「틀림 (기회를 다 씀)」 · 개념 이해도 0% 로 셈) — stOk = 첫 판에서 푼 단계 · stFirst = 그 단계를 한 번도 안 틀리고
+    const stOk = Array.from({ length: n }, (_, i) => i < stage), stFirst = stOk.map((v, i) => v && !wrongAt[i]);
+    return { chain: true, stOk, stFirst, whyM, whyN: whyDone.length, whyDone, whyAll: whyM > 0 && whyDone.length >= whyM, items, n, stage, cost, left, slots, wrong, lastWrong, says, done, fail, locked, ok, byPh, perfect: done && wrong === 0 && !byPh, perfectAt: done && wrong === 0 && !byPh ? 0 : -1, tokens, tokLeft,
       best: stage, total: n, submitted: subs.length > 0, tries: [], last: null, allRight: done, practice: pass > 0, pass, pStage, pSays, pItems, pDoneN, pWhy, whyOk, pLeft: Math.max(0, CHAIN_SLOTS - pCost), pFail: pass > 0 && pCost >= CHAIN_SLOTS && pStage < (pItems || []).length,
       healed, canRetry: false, canHeal: tokLeft > 0, nextAttempt: subs.length, nextK: subs.length ? subs[subs.length - 1].k + 1 : 0 };
   }

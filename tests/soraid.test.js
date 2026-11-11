@@ -61,6 +61,9 @@ sub('b', 3, false); r = X.record(L, R, 'u4', 'b'); check(r.left === 0.5 && r.loc
 (R.chainOk = { u4: { b: true } }); r = X.record(L, R, 'u4', 'b'); check(!r.locked && r.ok, '선생님 풀어주기 → 잠김 풀림');
 sub('b', 3, false); r = X.record(L, R, 'u4', 'b'); check(r.fail && !r.done && r.best === 3, '마지막 칸까지 틀림 = 못 맞힘 · 데미지 3');
 check(X.monsterHp(L, R, 'u4').dmg === 7, '반 체력 피해 = 4 + 3');
+{ const ra = X.record(L, R, 'u4', 'a'), rb = X.record(L, R, 'u4', 'b'); // 📕 #80 점검: 결과 · 오답노트 = 단계별 (대장까지 잡으면 「틀림」 아님)
+  check(ra.stOk.join() === 'true,true,true,true' && ra.stFirst.every(Boolean), `퍼펙트 = 모든 단계 한 번에 (${ra.stFirst})`);
+  check(rb.stOk.join() === 'true,true,true,false' && rb.stFirst.join() === 'false,true,true,false', `b = ① 고쳐서 · ② ③ 한 번에 · 대장 못 맞힘 (${rb.stOk} / ${rb.stFirst})`); }
 // ④ 🔥 연습 사슬 EXP (2026-11-09 선생님: 사슬 완성 1번당 +1)
 const psub = (u, p, s, good) => { const q = X.chainItems(L, R, 'u4', u, p)[s]; const a = R.chain.u4[u]; a[Object.keys(a).length] = { s, p, g: good ? right(q) : wrongOf(q) }; };
 const pwhy = (u, p, g) => { const a = R.chain.u4[u]; a[Object.keys(a).length] = { s: 3, p, g, w: 1 }; }; // #44 근거 = 대장 뒤
