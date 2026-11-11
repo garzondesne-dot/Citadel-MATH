@@ -1,7 +1,7 @@
 // 📖 #62 기호 톡 명제 (2026-11-10): 🧪 테스트 모드 8차시 문제 1 에서 「명제」 · ~ 에 점선 → 톡 = 말풍선 (SYMBOL-TALK 문구)
 //   · 2차시 「조건제시법」 에는 안 붙음 — node tools/e2e/e2e94.js <출력 폴더>
 const { chromium } = require('playwright');
-const OUT = process.argv[2] || '.', U = 'http://localhost:8765/index.html?local';
+const OUT = process.argv[2] || '.', U = `http://localhost:${process.env.PORT || 8765}/index.html?local`;
 (async () => {
   const b = await chromium.launch(); const ctx = await b.newContext({ viewport: { width: 390, height: 844 } }); const errs = [], log = []; let bad = 0;
   const ok = (c, s) => { log.push((c ? '✔ ' : '✘ ') + s); if (!c) bad++; };

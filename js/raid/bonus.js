@@ -280,7 +280,7 @@ DS.Bonus = (function () {
   // ── 1:1 전투 ───────────────────────────────────────────
   async function fight(L, mid, fo = {}) {
     if (DS.Fresh && !preview && !(await DS.Fresh.gate())) return; // 🔄 #55 ⑤ 성채 · 허수아비 방도 옛 판이면 새 판으로 바꾼 뒤
-    if (DS.SymTalk) DS.SymTalk.setCtx(preview || all() ? null : me, L.id); // 📖 #54 기호 톡 기록 = 성채 층 · 허수아비 차시
+    if (DS.SymTalk) DS.SymTalk.setCtx(preview ? null : me, L.id); // #105 🧪 테스트도 학생과 같은 길(본 기호 회색) // 📖 #54 기호 톡 기록 = 성채 층 · 허수아비 차시
     const mon = monOf(L, mid), castle = !!L.rooms, photoRoom = castle && !!((L.rooms || []).find((r) => r.id === mid) || {}).photo, rec = Object.assign({}, castle ? roomRec(mine, L, mid) : (mine[L.id] || {})[mid] || {}), prep = await prepOf(L.id);
     if (castle && me && !all()) seenAdd(me, `${L.id}/${mid}`); // NEW 끔
     if (DS.Sound && DS.Sound.boss) { if (castle && ((L.rooms || []).find((r) => r.id === mid) || {}).boss) DS.Sound.boss(2); else if (!castle && mid === 'boss') DS.Sound.boss(3); } // 🔊 #87 🏰 성채 보스 방 = boss 2위 · 🎯 허수아비 형성평가 = 3위

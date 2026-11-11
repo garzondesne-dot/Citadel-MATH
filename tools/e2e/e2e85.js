@@ -1,6 +1,6 @@
 // ⚔ #50 성채 소레이드 (2026-11-10): ✍ 서술형 도전 📸 = 시작 전 · 문제 창 안(도중) · 도중 통과 = 남은 단계 처치 → 🔥 한 판 더 (누를 때만 · 제한 없음) — node tools/e2e/e2e85.js <출력 폴더>
 const { chromium } = require('playwright');
-const OUT = process.argv[2] || '.', U = 'http://localhost:8765/index.html?local';
+const OUT = process.argv[2] || '.', U = `http://localhost:${process.env.PORT || 8765}/index.html?local`;
 (async () => {
   const b = await chromium.launch(); const ctx = await b.newContext({ viewport: { width: 390, height: 844 } }); const errs = [], log = []; let bad = 0;
   const ok = (c, s) => { log.push((c ? '✔ ' : '✘ ') + s); if (!c) bad++; };

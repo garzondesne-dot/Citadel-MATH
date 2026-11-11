@@ -1,6 +1,6 @@
 // 📖 #54 기호 톡 (2026-11-10): 문제 속 기호 톡 → 말풍선(정확한 뜻 · 💬 쉽게 말하면 · 더 보기) · 4초 뒤 닫힘 · 보기 안 기호는 고르지 않음 · 기록 xp/반/번호/st · 성채 문제 창 — node tools/e2e/e2e87.js <출력 폴더>
 const { chromium } = require('playwright');
-const OUT = process.argv[2] || '.', U = 'http://localhost:8765/index.html?local';
+const OUT = process.argv[2] || '.', U = `http://localhost:${process.env.PORT || 8765}/index.html?local`;
 (async () => {
   const b = await chromium.launch(); const ctx = await b.newContext({ viewport: { width: 390, height: 844 } }); const errs = [], log = []; let bad = 0;
   const ok = (c, s) => { log.push((c ? '✔ ' : '✘ ') + s); if (!c) bad++; };

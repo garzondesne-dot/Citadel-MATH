@@ -1,6 +1,6 @@
 // 📄 #66 9차시 레이드용 v1 (2026-11-10): 🧪 테스트 모드로 처음부터 끝까지 넘기기 · 원소 칩 · 소레이드 m5 · 형성평가 · 기호 톡 역 · 대우 — node tools/e2e/e2e100.js <출력 폴더>
 const { chromium } = require('playwright');
-const OUT = process.argv[2] || '.', U = 'http://localhost:8765/index.html?local';
+const OUT = process.argv[2] || '.', U = `http://localhost:${process.env.PORT || 8765}/index.html?local`;
 (async () => {
   const b = await chromium.launch(); const ctx = await b.newContext({ viewport: { width: 390, height: 844 } }); const errs = [], log = []; let bad = 0;
   const ok = (c, s) => { log.push((c ? '✔ ' : '✘ ') + s); if (!c) bad++; };

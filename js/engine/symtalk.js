@@ -117,11 +117,11 @@ DS.SymTalk = (function () {
       if (pOn) propHits(s, whole).forEach((h) => hits.push(h));
       hits.sort((a, b) => b.i - a.i).forEach((h) => { // 뒤에서부터 (앞 자리 그대로)
         const at = map[h.i]; if (!at) return;
-        if (at.sup) { if (at.sup.closest('.sym-t') || at.sup.closest(SKIP) || at.sup.closest(ANS)) return; const w = document.createElement('span'); w.className = 'sym-t'; w.dataset.st = h.id; at.sup.replaceWith(w); w.appendChild(at.sup); return; }
+        if (at.sup) { if (at.sup.closest('.sym-t') || at.sup.closest(SKIP) || at.sup.closest(ANS)) return; const w = document.createElement('span'); w.className = seenCls(h.id); w.dataset.st = h.id; at.sup.replaceWith(w); w.appendChild(at.sup); return; }
         if (!at.node.parentNode || (at.node.parentElement && at.node.parentElement.closest(SKIP))) return;
         const len = h.len || 1, last = map[h.i + len - 1]; if (!last || last.node !== at.node) return; // 낱말이 두 칸에 걸치면 건너뜀
         if (at.node.parentElement && at.node.parentElement.closest(ANS)) return; // 답 칸 안 = 기호 · 낱말 모두 안 붙임 (옛 #62 = 낱말만 뺐음) // #62 명제 낱말은 보기 단추 안엔 안 붙임 (「명제 · 참」 보기마다 있어 고르기를 막음 · ~ 기호는 붙임)
-        const tail = at.node.splitText(at.off), rest = tail.splitText(len), w = document.createElement('span'); w.className = 'sym-t'; w.dataset.st = h.id;
+        const tail = at.node.splitText(at.off), rest = tail.splitText(len), w = document.createElement('span'); w.className = seenCls(h.id); w.dataset.st = h.id;
         tail.replaceWith(w); w.appendChild(tail); void rest;
       });
     });
@@ -149,11 +149,15 @@ DS.SymTalk = (function () {
     bub.style.setProperty('--ax', `${Math.round(a.left + a.width / 2 - x)}px`);
     const mb = bub.querySelector('.st-more'); if (mb) mb.onclick = (e) => { e.stopPropagation(); const mm = bub.querySelector('.st-memo'); mm.hidden = false; mb.remove(); clearTimeout(timer); }; // 펼치면 닫을 때까지
     timer = setTimeout(close, 4000);
-    count(r.id);
+    count(r.id); markSeen(r.id);
   }
   // 눌렀을 때: 기호 칸이면 말풍선 (보기 단추 안이어도 고르기는 안 함) · 말풍선 안은 그대로 · 바깥 = 닫기
   function onTap(e) {
-    const t = e.target, s = t && t.closest && t.closest('.sym-t');
+    const t = e.target; let s = t && t.closest && t.closest('.sym-t');
+    if (s && document.elementsFromPoint && e.clientX != null) { // 📖 #105 누르는 칸을 넓혀(위아래 12 · 좌우 8px) 이웃 기호와 겹치면 = 손가락에 가장 가까운 기호
+      const cs = document.elementsFromPoint(e.clientX, e.clientY).filter((x) => x.classList && x.classList.contains('sym-t'));
+      if (cs.length > 1) { const d = (x) => { const r = x.getBoundingClientRect(), dx = Math.max(r.left - e.clientX, 0, e.clientX - r.right), dy = Math.max(r.top - e.clientY, 0, e.clientY - r.bottom); return dx * dx + dy * dy; }; s = cs.sort((a, b) => d(a) - d(b))[0]; }
+    }
     if (bub && t && bub.contains(t)) return;
     if (s && on() && !s.closest(ANS)) { e.preventDefault(); e.stopPropagation(); open(s); return; } // 답 칸 안에 이미 붙은 톡이 있어도 누르면 그냥 고르기
     if (bub) close();
@@ -161,11 +165,22 @@ DS.SymTalk = (function () {
 
   // ── 기록 ──
   let ctx = null; // { m: 계정 { c, n, test }, lesson }
-  const setCtx = (m, lesson) => { ctx = lesson ? { m: m || null, lesson } : null; }; // #62: 계정이 없어도(성채 미리 보기 · 테스트) 차시는 기억 = 명제 낱말 표시 · 기록은 계정 있을 때만
+  const setCtx = (m, lesson) => { ctx = lesson ? { m: m || null, lesson } : null; loadSeen(); };
+  // 🩶 #105 한 번 본 기호 = 옅은 회색 형광펜: 학생별 · 기호별 · 지금 쌓는 기록(xp/…/st/차시/기호 ≥ 1)이면 회색 · 차시 · 단원이 바뀌어도 · 선생님 = 기록이 없으니 늘 금빛
+  let seen = new Set(), seenKey = '';
+  const recOK = (c) => !!(c && c.m && c.m.c != null && c.m.n && !c.m.teacher && DS.Net);
+  const seenCls = (id) => (seen.has(id) ? 'sym-t seen' : 'sym-t');
+  function paintSeen() { if (typeof document === 'undefined') return; document.querySelectorAll('.sym-t:not(.sym-c)').forEach((x) => x.classList.toggle('seen', seen.has(x.dataset.st))); }
+  function markSeen(id) { if (!recOK(ctx) || seen.has(id)) return; seen.add(id); paintSeen(); }
+  async function loadSeen() {
+    const c = ctx, k = recOK(c) ? `${ck(c.m.c)}/${c.m.n}` : '';
+    if (k === seenKey) return; seenKey = k; seen = new Set(); paintSeen(); if (!k) return;
+    try { const st = (await DS.Net.get(`xp/${k}/st`)) || {}; if (seenKey !== k) return; Object.values(st).forEach((by) => Object.entries(by || {}).forEach(([id, n]) => { if (Number(n) >= 1) seen.add(id); })); paintSeen(); } catch (e) { /* 기록은 덤 */ }
+  } // #62: 계정이 없어도(성채 미리 보기 · 테스트) 차시는 기억 = 명제 낱말 표시 · 기록은 계정 있을 때만
   const ck = (c) => String(c).replace(/[.#$/[\]]/g, '_');
   const pend = {}; let ptimer = 0;
   function count(id) {
-    const c = ctx; if (!c || !c.m || c.m.c == null || !c.m.n || c.m.test || c.m.teacher || !DS.Net) return;
+    const c = ctx; if (!recOK(c)) return; // #105 🧪 테스트 · 👩‍🏫 체험판도 학생과 같은 길(그 저장소에 기록)
     const p = `xp/${ck(c.m.c)}/${c.m.n}/st/${ck(c.lesson)}/${id}`; pend[p] = (pend[p] || 0) + 1;
     clearTimeout(ptimer); ptimer = setTimeout(flush, 1500); // 모아서 한 번에 (가벼움)
   }
@@ -189,5 +204,5 @@ DS.SymTalk = (function () {
     scan();
   }
   if (typeof document !== 'undefined') { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start(); }
-  return { ROWS, CONCEPTS, PROP, BY, pick, propHits, propOn, setCtx, rank, scan, close, flush, _markEl: markEl };
+  return { ROWS, CONCEPTS, PROP, BY, pick, propHits, propOn, setCtx, rank, scan, close, flush, _markEl: markEl, _seen: () => seen };
 })();

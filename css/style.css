@@ -2995,8 +2995,9 @@ body:has(#test-bar) #screen-student.st-battle .wrap:has(.cr-dock) { padding-bott
 .cr-chips .cr-whyn { margin-left: 6px; font: 700 12px var(--math); color: #7a4a00; background: #fff1c2; border-radius: 8px; padding: 1px 6px; white-space: nowrap; } /* 🧩 #52 근거 줄 n/m */
 .cr-pad { height: 120px; } /* 🐞 2026-11-10: 아래 칸(두 줄)에 맨 끝 단추(💡 힌트 주기)가 가려 누를 수 없던 것 → 끝에 빈 자리 */
 /* 📖 기호 톡 (#54 · 2026-11-10): 누를 수 있는 기호 = 옅은 점선 밑줄 · 말풍선 = ① 정확한 뜻 굵게 ② 💬 쉽게 말하면 기울임 · 옅은 다른 색 ③ 더 보기 작게 */
-.sym-t { text-decoration: underline dotted rgba(122, 90, 40, .55); text-underline-offset: 3px; text-decoration-thickness: 1.5px; cursor: help; border-radius: 3px; -webkit-tap-highlight-color: rgba(255, 210, 120, .35); }
-#quiz .sym-t { text-decoration-color: rgba(255, 224, 160, .55); }
+.sym-t { position: relative; text-decoration: none; padding: 0 3px; cursor: help; border-radius: 2px; -webkit-box-decoration-break: clone; box-decoration-break: clone; background: linear-gradient(to bottom, transparent 52%, rgba(245, 184, 74, .42) 52%, rgba(245, 184, 74, .42) 92%, transparent 92%); -webkit-tap-highlight-color: rgba(255, 210, 120, .35); } /* 📖 #105 형광펜 (기호 아랫부분 52~92% 금빛 띠 · 좌우 안쪽 3px · 글자색 · 굵기 그대로 · 어두운 문제 창도 같음) */
+.sym-t::before { content: ''; position: absolute; top: -12px; bottom: -12px; left: -8px; right: -8px; } /* #105 누르는 칸 = 위아래 12 · 좌우 8px 넓힘 (보이는 모양 그대로 · 겹치면 가까운 기호 = symtalk.js) */
+.sym-t.seen { background: linear-gradient(to bottom, transparent 60%, rgba(140, 150, 170, .30) 60%, rgba(140, 150, 170, .30) 90%, transparent 90%); } /* #105 한 번 본 기호 = 옅은 회색 */
 .st-bub { position: fixed; z-index: 9000; box-sizing: border-box; padding: 10px 12px 9px; border-radius: 12px; background: #fffaf0; color: #2a1d0c; border: 2px solid #b8873a; box-shadow: 0 6px 18px rgba(0, 0, 0, .35); font: 14px/1.45 var(--math, sans-serif); animation: stPop .14s ease-out; }
 .st-bub::after { content: ''; position: absolute; left: calc(var(--ax, 50%) - 8px); width: 0; height: 0; border: 8px solid transparent; }
 .st-bub.up::after { top: 100%; border-top-color: #b8873a; } .st-bub.down::after { bottom: 100%; border-bottom-color: #b8873a; }
