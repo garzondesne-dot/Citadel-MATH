@@ -22,6 +22,12 @@ DS.FX = (function () {
     { id: 'gear', name: '⚙ 기계', ids: ['wrench', 'cog', 'piston', 'drill'] },
     { id: 'water', name: '🌊 물', ids: ['aqua', 'wave', 'anchor', 'tsunami'] },
   ];
+  // 🌳 #78 합체 칸 3개 (HERO-ATTR 6 · 4번): 근접 재료 Ⅱ + 속성 재료 Ⅱ 를 다 가지면 💎 없이 열림 · 단계 Ⅱ · 공명 = 근접 재료 속성 · 그림 = 근접 재료 Ⅱ + 속성 색 궤적 + 끝에 속성 Ⅱ (#74-4 장치 ④)
+  const COMBO = {
+    flamecut: { fam: 'cut', base: 'moon', elem: 'fire', efx: 'ring', mats: ['moon', 'ring'] },
+    boltthrust: { fam: 'sweep', base: 'sweep', elem: 'spark', efx: 'chain', mats: ['sweep', 'chain'] },
+    frostsmash: { fam: 'smash', base: 'upper', elem: 'frost', efx: 'spikes', mats: ['upper', 'spikes'] },
+  };
   const TIER_NAMES = ['Ⅰ 기본', 'Ⅱ 숙련', 'Ⅲ 화려', 'Ⅳ 전설'];
   const TIER_SCALE = [1, 1.15, 1.3, 1.5];                                    // Ⅰ → Ⅳ 크기 배율
   const BASE = FAMS.map((f) => f.ids[0]);                                     // Ⅰ 기본 (열림)
@@ -30,7 +36,7 @@ DS.FX = (function () {
   const LEGEND = FAMS.map((f) => f.ids[3]);                                   // Ⅳ 전설 (💎 · 같은 계열 Ⅲ 필요)
   const ACHV = ['wings', 'smite'];                                            // 🪶 특별 (업적)
   const THIRD = FAMS.map((f) => f.ids[2]);                                   // Ⅲ 전부 (FANCY = 그중 인장으로 열리는 6개)
-  const KINDS = BASE.concat(SKILL, THIRD, LEGEND, ACHV);
+  const KINDS = BASE.concat(SKILL, THIRD, LEGEND, ACHV, Object.keys(COMBO));
   const NAMES = {
     cut: '⚔ 베기', moon: '⚔ 달빛 베기', slash: '⚔ 삼연 참격', twin: '⚔ 쌍월 참',
     bash: '🔨 강타', upper: '🔨 올려치기', hammer: '🔨 망치 내려치기', quake: '🔨 대지 분쇄',
@@ -43,12 +49,13 @@ DS.FX = (function () {
     orb: '🔮 마법탄', crit: '🔮 치명 섬광', vortex: '🌀 차원 소용돌이', void: '🌀 블랙홀',
     ruler: '📐 눈금 베기', compass: '📐 컴퍼스 원', venn: '📐 벤 다이어그램', qed: '📐 증명 완료 ∎',
     wings: '🪶 황금 날개', smite: '☀ 심판의 빛',
+    flamecut: '🔥 불꽃 베기', boltthrust: '⚡ 번개 찌르기', frostsmash: '❄ 얼음 강타', // 🌳 #78 합체
     radiant: '☀ 빛 베기', bulwark: '☀ 방패 강타', holysword: '☀ 성검 낙하', skylance: '☀ 천상의 창',
     shade: '🌑 그림자 베기', claw: '🌑 어둠 손톱', phantom: '🌑 그림자 분신', eclipse: '🌑 월식 참',
     wrench: '⚙ 스패너 치기', cog: '⚙ 톱니 던지기', piston: '⚙ 증기 해머', drill: '⚙ 드릴 돌파',
     aqua: '🌊 물 베기', wave: '🌊 파도 치기', anchor: '🌊 닻 내려찍기', tsunami: '🌊 해일 베기',
   };
-  const famOf = (k) => FAMS.find((f) => f.ids.includes(k)) || null;
+  const famOf = (k) => FAMS.find((f) => f.ids.includes(k)) || (COMBO[k] ? FAMS.find((f) => f.id === COMBO[k].fam) : null) || null;
   // 💎 결정석 (2026-11-06 사용자 확정 C): 용사마다 결정석 1칸 · 같은 결정석을 여러 용사에 동시에 · 빼면 보관함으로 (회수, 비용 0)
   //   친화 계열 ★ = 용사마다 1개 — 친화 결정석을 끼우면 「공명」(이펙트 조금 크게 + 용사 빛) · 연출만, 데미지 · 보상 같음
   //   2026-11-06 🌬 바람 = 엘프 궁수 · 닌자 (질풍 닌자)
@@ -69,12 +76,12 @@ DS.FX = (function () {
   const ownReso = (hero, k) => { const f = famOf(k), h = Number(hero); return !!f && (f.id === attrOf(h) || f.id === AFFINITY[h] || f.id === OLD[h] || f.id === NEXT[h]); }; // #84 옛 · 새 속성 모두
   const commonReso = (hero, k) => { const f = famOf(k); return !!f && f.id === commonOf(hero) && !ownReso(hero, k); };
   const resonates = (hero, k) => ownReso(hero, k) || commonReso(hero, k);
-  const tierOf = (k) => { const f = famOf(k); return f ? f.ids.indexOf(k) : ACHV.includes(k) ? 's' : -1; };
+  const tierOf = (k) => { if (COMBO[k]) return 1; const f = famOf(k); return f ? f.ids.indexOf(k) : ACHV.includes(k) ? 's' : -1; };
   // 잠긴 이펙트를 가진 계정은 같은 계열 Ⅰ 로 (해금되면 그대로 씀)
   const BASE_OF = Object.fromEntries(KINDS.map((k) => [k, (famOf(k) || { ids: ['twinkle'] }).ids[0]]));
   const usable = (k, unlocked = {}) => (BASE.includes(k) || (KINDS.includes(k) && unlocked[k]) ? k : BASE_OF[k] || 'flame');
   const A = () => DS.ASSETS || {};
-  const spec = (k) => ((A().fx2 || {}).fx || {})[k] || null;
+  const spec = (k) => ((A().fx2 || {}).fx || {})[k] || (COMBO[k] ? ((A().fx2 || {}).fx || {})[COMBO[k].base] || null : null);
   const url = (sp) => `${A().base || 'assets/art/'}${sp.src}`;
   const imgs = {};
   const load = (sp) => { const u = url(sp); if (!imgs[u]) { const im = new Image(); im.src = u; imgs[u] = im; } return imgs[u]; };
@@ -163,5 +170,5 @@ DS.FX = (function () {
     const drawIt = () => { g.clearRect(0, 0, cv.width, cv.height); g.imageSmoothingEnabled = false; const k = Math.min(cv.width / sp.w, cv.height / sp.h); g.drawImage(im, i * sp.w, 0, sp.w, sp.h, (cv.width - sp.w * k) / 2, (cv.height - sp.h * k) / 2, sp.w * k, sp.h * k); };
     if (im.complete && im.naturalWidth) drawIt(); else im.addEventListener('load', drawIt, { once: true });
   }
-  return { q4, place, modeOf, GROUND, SHOT, FAMS, TIER_NAMES, TIER_SCALE, AFFINITY, NEXT, OLD, attrOf, nextOf, affOf, crystalOf, resonates, ownReso, commonReso, commonOf, COMMON, KINDS, BASE, SKILL, FANCY, LEGEND, ACHV, NAMES, BASE_OF, famOf, tierOf, usable, spec, strip, play, still, preload, load };
+  return { q4, place, modeOf, GROUND, SHOT, FAMS, TIER_NAMES, TIER_SCALE, AFFINITY, NEXT, OLD, COMBO, attrOf, nextOf, affOf, crystalOf, resonates, ownReso, commonReso, commonOf, COMMON, KINDS, BASE, SKILL, FANCY, LEGEND, ACHV, NAMES, BASE_OF, famOf, tierOf, usable, spec, strip, play, still, preload, load };
 })();

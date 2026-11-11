@@ -15,6 +15,7 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
     await DS.Attack.play(sc, { heroBox: hb, monBox: sc.querySelector('.enc-mon'), hero, fx, hits: 1 }); mo.disconnect(); clearInterval(tm); seen.endOp = Number(getComputedStyle(hb).opacity); return seen; }, [fx, hero]);
   await setup(0); await p.waitForTimeout(600);
   for (const fx of ['flame', 'spark', 'frost', 'gale', 'twinkle', 'crit', 'ruler']) { const r = await run(fx, 0); check(r.trail === 1, `로안 + ${fx} = 색 궤적 (${JSON.stringify(r)})`); }
+  for (const fx of ['flamecut', 'boltthrust', 'frostsmash']) { const r = await run(fx, 0); check(r.trail === 1, `🌳 #78 합체 ${fx} = 색 궤적 (${JSON.stringify(r)})`); }
   for (const fx of ['cut', 'radiant', 'bash', 'thrust', 'wave']) { const r = await run(fx, 0); check(r.trail === 0, `로안 + ${fx} = 근접 계열 · 궤적 없음 (${JSON.stringify(r)})`); }
   for (const fx of ['hammer', 'quake']) { const r = await run(fx, 6); check(r.minOp < 0.2 && r.endOp === 1 && r.trail === 0, `${fx} 뛰어올라 사라짐 → 다시 보임 (${JSON.stringify(r)})`); }
   await setup(1); await p.waitForTimeout(600); { const r = await run('flame', 1); check(r.trail === 0, `원거리 누아 + 불 = 궤적 없음 (${JSON.stringify(r)})`); }

@@ -229,7 +229,8 @@ DS.Attack = (function () {
   // ✨ #74-4 속성 무기 궤적: 근접 계열(⚔ 🔨 🌪 ☀ 🌑 ⚙ 🌊)이 아닌 스킬일 때만 · 몸통 앞을 크게 긋는 빛 호 0.28초 (번쩍임 없음)
   const TRAIL_C = { fire: '#ff7a1a', spark: '#ffe14a', frost: '#7fd3ff', wind: '#9ef0ff', star: '#fff3a0', magic: '#c08aff', math: '#ffd25a' };
   function trail(scene, B, dir, fx) {
-    const f = DS.FX && DS.FX.famOf(fx), col = f && TRAIL_C[f.id]; if (!col || !scene.isConnected) return;
+    const cb = DS.FX && DS.FX.COMBO && DS.FX.COMBO[fx], f = DS.FX && DS.FX.famOf(fx), col = cb ? TRAIL_C[cb.elem] : f && TRAIL_C[f.id]; if (!col || !scene.isConnected) return;
+    if (cb) setTimeout(() => { if (scene.isConnected) DS.FX.place(scene, cb.efx, { body: B, dir }); }, 330); // 🌳 #78 합체: 끝에 속성 Ⅱ 이펙트
     const el = document.createElement('i'); el.className = 'atk-trail';
     const w = B.w * 0.75, h = B.h * 0.95, x = dir > 0 ? B.x0 + B.w * 0.4 - w : B.x1 - B.w * 0.4, y = B.y0 + B.h * 0.02; // 몸통 앞(용사 쪽)을 긋는 호
     el.style.cssText = `position:absolute;left:${Math.round(x)}px;top:${Math.round(y)}px;width:${Math.round(w)}px;height:${Math.round(h)}px;border-radius:50%;border:0 solid transparent;border-${dir > 0 ? 'right' : 'left'}:10px solid ${col};box-shadow:${dir > 0 ? '' : '-'}8px 0 14px -4px ${col}, inset ${dir > 0 ? '-' : ''}3px 0 0 -1px #fff;pointer-events:none;z-index:19;`;

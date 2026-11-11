@@ -525,8 +525,10 @@ DS.Camp = (function () {
     const portrait = (n) => { const P = DS.ASSETS.heroPortraits, c = P && P.list && P.list[n]; return c ? `<i class="hc-img" style="background-image:url('${DS.ASSETS.base}${P.src}');background-size:${P.cols * 100}% ${P.rows * 100}%;background-position:${(c[0] / Math.max(1, P.cols - 1)) * 100}% ${(c[1] / Math.max(1, P.rows - 1)) * 100}%"></i>` : DS.Art.hero(n, 'idle'); }; // 초상(port-1~9)이 오기 전 = 도트를 키움
     const heroCard = () => {
       if (pickH === DS.Art.AWAKE.to && !T) { // 🌟 #73 각성한 로안: 따로 고르는 칸이 아님 · 조건이 맞으면 저절로
+        // 🌳 #78 ⑥ 조건 4개를 체크로 (로안 · 10강 · 쌍월 참 · 호칭)
+        const AW = DS.Art.AWAKE, awkChecks = () => { const ck = [[hero === AW.hero, '로안'], [(L.enh || 0) >= AW.enh, `${AW.enh}강`], [DS.FX.crystalOf(AW.hero, sock) === AW.fx, nmOf(AW.fx)], [title === AW.title, '호칭']]; return `<p class="awk-ck">${ck.map(([ok, t]) => `<span class="${ok ? 'ok' : 'no'}">${ok ? '✔' : '✕'} ${esc(t)}</span>`).join(' ')}</p>`; };
         const on = DS.Art.awake({ hero, enh: L.enh, fx: fxNow(), title }), lo2 = DS.Lore && DS.Lore.of(16), t2 = DS.Titles && DS.Titles.get('slash10k');
-        return `<div class="hero-card${on ? '' : ' lock'}"><div class="hc-port${on ? '' : ' dim'}">${portrait(16)}${on ? '' : '<small>?</small>'}</div><div class="hc-txt"><h3>${on && lo2 ? esc(lo2.name) : '???'} <small>· 호칭으로 깨어나는 모습</small></h3>${on && lo2 ? `<div class="hc-nick">「${esc(lo2.nick)}」</div><p>${esc(lo2.a)}</p><p>${esc(lo2.b)}</p>${lo2.say ? `<p class="hc-say">💬 「${esc(lo2.say)}」</p>` : ''}` : `<p>🏅 호칭 「${esc(t2 ? t2.name : '만 번째 베기')}」 — ${esc((t2 && t2.desc) || '')}</p>`}</div>${on ? '<div class="hc-cond">🌟 지금 각성한 모습이에요 · 모습만 바뀌고 데미지 · 보상은 같아요</div>' : ''}</div>`;
+        return `<div class="hero-card${on ? '' : ' lock'}"><div class="hc-port${on ? '' : ' dim'}">${portrait(16)}${on ? '' : '<small>?</small>'}</div><div class="hc-txt"><h3>${on && lo2 ? esc(lo2.name) : '???'} <small>· 호칭으로 깨어나는 모습</small></h3>${on && lo2 ? `<div class="hc-nick">「${esc(lo2.nick)}」</div><p>${esc(lo2.a)}</p><p>${esc(lo2.b)}</p>${lo2.say ? `<p class="hc-say">💬 「${esc(lo2.say)}」</p>` : ''}` : `<p>🏅 호칭 「${esc(t2 ? t2.name : '만 번째 베기')}」 — ${esc((t2 && t2.desc) || '')}</p>${awkChecks()}`}</div>${on ? '<div class="hc-cond">🌟 지금 각성한 모습이에요 · 모습만 바뀌고 데미지 · 보상은 같아요</div>' : ''}</div>`;
       }
       const h = L.heroes.find((x) => x.id === pickH) || { id: pickH, open: true }, lo = DS.Lore ? DS.Lore.of(pickH) : null, open = T || h.open;
       const r = DS.Attack && DS.Attack.isRanged(pickH), af = DS.FX.affOf(pickH);
@@ -550,12 +552,45 @@ DS.Camp = (function () {
     const heroTab0 = () => `${heroCard()}<div class="heroes set-grid">${L.heroes.map((h) => { const r = DS.Attack && DS.Attack.isRanged(h.id), af = DS.FX.affOf(h.id); return `<button class="hpick${h.id === hero ? ' on' : ''}${h.id === pickH && pickH !== hero ? ' peek-on' : ''}${h.open ? '' : ' lock'}" data-h="${h.id}" title="${esc(h.cond || '')}"><b class="atk-badge${r ? ' r' : ''}">${r ? '🏹' : '🗡'}</b>${sock[h.id] ? '<i class="gemdot" title="스킬 고름"></i>' : ''}<b class="aff" title="속성">${af.name.split(' ')[0]}</b>${DS.Art.hero(h.id, h.id === hero ? 'attack' : 'idle')}${h.open ? '' : '<b class="lk">🔒</b>'}</button>`; }).join('')}</div>
         <p class="muted small">🗡 근접 = 다가가서 · 🏹 원거리 = 탄을 날려서 · 오른쪽 아래 = 속성 (같은 속성 · 공통 특화 스킬을 고르면 ★ 공명) · 파란 점 = 스킬 고름 · 데미지 · 보상은 모두 같아요</p>
         ${T ? '' : `<p class="muted small">✨ 업적 용사: ① 1~3차시 도감 <b>${L.got} / ${L.need}</b>장 · ② 🎁 첫 레이드 · ③ 4~6차시 도감 · ④ 8~11차시 도감 · 🏆 업적 3개 = 🏅 호칭 「만 번째 베기」 / 💎 상점 용사 = 조각으로</p>`}`;
-    const gemTab = () => { const fx = fxNow(), aff = DS.FX.affOf(hero), reso = DS.FX.resonates(hero, fx), set = sock[hero] != null;
+    // 🌳 #78 스킬 지도 (2026-11-11 HERO-ATTR 6 · 6-1 · 6-2): 위 「⚔ 근접 나무 / 🏹 원거리 나무」 · 왼쪽 고정 금빛 줄기 = 공통 특화 · 오른쪽 가지 6개(옆으로 밀어 봄) · 아래 Ⅰ → 위 Ⅳ
+    //   칸 색: 초록 = 가짐 · 금빛 = 끼움 · 파랑 = 지금 살 수 있음 · 회색 = 앞 칸 먼저 · ⚡ = 지금 용사로 필살기 · ✔ 덤 = 윗 칸을 가져서 무료로 채움 · 합체 3칸(근접 나무 아래) · 🪶 특별 한 줄
+    const TREES = { melee: { root: 'cut', br: ['smash', 'sweep', 'sun', 'dark', 'gear', 'water'], name: '⚔ 근접 나무' }, ranged: { root: 'magic', br: ['fire', 'spark', 'frost', 'star', 'wind', 'math'], name: '🏹 원거리 나무' } };
+    let tree = null, treeFor = null;
+    const myTree = (h) => (DS.Attack && DS.Attack.isRanged(h) ? 'ranged' : 'melee');
+    const treeOf = (famId) => (TREES.ranged.root === famId || TREES.ranged.br.includes(famId) ? 'ranged' : 'melee');
+    const skCell = (id) => {
+      const f = L.fx.find((x) => x.id === id) || { id, open: false, cond: '' }, t = DS.FX.tierOf(id), on = id === fxNow(), buy = can(f);
+      const ult = typeof t === 'number' && t >= 2 && DS.Attack && DS.Attack.canUlt(id, hero), fi = DS.FX.FANCY.indexOf(id);
+      const st = (f.open ? 'have' : buy ? 'buy' : f.locked ? 'gate' : f.got ? 'got' : 'shut') + (on ? ' on' : ''); // on = 끼움 (gemPatch 가 on 만 바꿈)
+      const sub = f.open ? (f.free ? '✔ 덤' : f.combo ? '✔ 합체' : '') : f.combo ? '재료 Ⅱ 둘' : f.locked ? `${['Ⅰ', 'Ⅱ', 'Ⅲ', 'Ⅳ'][t - 1] || ''} 먼저` : f.got ? '🏆 받음' : fi >= 0 && f.shop && DS.Bonus ? `💎 ${f.shop.price} 또는 🏆 업적 ${DS.Bonus.UNLOCK[fi]}개` : f.shop ? `💎 ${f.shop.price}${f.shop.scroll ? ` · 📜 ${f.shop.scroll}` : ''}` : f.cond || '';
+      return `<button class="fxpick sk-c ${st}" data-fx="${id}" title="${esc(f.cond || '')}"><i class="tier">${tierTag(id)}</i>${ult ? '<i class="sk-ult" title="지금 용사로 필살기">⚡</i>' : ''}<canvas width="96" height="56" data-still="${id}" data-lazy="1"></canvas><span>${esc(nmOf(id))}</span>${sub ? `<small>${esc(sub)}</small>` : ''}</button>`;
+    };
+    const skCol = (famId) => { const fam = DS.FX.FAMS.find((x) => x.id === famId); return fam ? fam.ids.slice().reverse().map(skCell).join('<i class="sk-line"></i>') : ''; };
+    const gemTab = () => {
+      if (treeFor !== hero || !tree) { treeFor = hero; const own = DS.FX.attrOf(hero); tree = treeOf(own) !== myTree(hero) ? treeOf(own) : myTree(hero); } // 내 속성이 다른 나무에 있으면 그 나무부터
+      const T0 = TREES[tree], own = DS.FX.attrOf(hero), old = (DS.FX.OLD || {})[hero], famN = (id) => (DS.FX.FAMS.find((x) => x.id === id) || {}).name || id;
+      const br = T0.br.slice().sort((a, b) => (b === own) - (a === own)), root = T0.root, rootCom = root === DS.FX.commonOf(hero);
+      const combos = Object.entries(DS.FX.COMBO || {});
       return `<div id="gem-top">${gemTop()}</div>
-        <div class="fx-fams">${DS.FX.FAMS.map((fam) => famBlock(fam, aff)).join('')}${famBlock({ id: 'sp', name: '🪶 특별', ids: DS.FX.ACHV }, aff)}</div>`; };
+        <div class="tree-tabs">${['melee', 'ranged'].map((k) => `<button class="btn small${tree === k ? ' primary' : ''}" data-tree="${k}">${TREES[k].name}${k === myTree(hero) ? ' <small>내 계열</small>' : ''}</button>`).join('')}</div>
+        <div class="sk-map"><div class="sk-root${root === own ? ' own' : ''}"><b class="sk-h">${famN(root)}${root === own ? ' ★' : ''}<small>${rootCom ? '공통 · 내 계열' : '공통'}</small></b>${skCol(root)}</div>
+          <div class="sk-brs">${br.map((id) => `<div class="sk-br${id === own ? ' own' : ''}${id === old ? ' old' : ''}"><b class="sk-h">${famN(id)}${id === own ? ' ★' : ''}${id === old ? '<small>옛 속성</small>' : ''}</b>${skCol(id)}</div>`).join('')}</div></div>
+        ${tree === 'melee' ? `<p class="me-sec">🔗 합체 칸 <small>두 재료 Ⅱ 를 다 열면 💎 없이 저절로 · 단계 Ⅱ</small></p><div class="sk-combo">${combos.map(([id, c]) => `<div class="sk-cb">${skCell(id)}<small>${esc(nmOf(c.mats[0]))} + ${esc(nmOf(c.mats[1]))}</small></div>`).join('')}</div>` : ''}
+        <p class="me-sec">🪶 특별 <small>업적으로만</small></p><div class="sk-sp">${DS.FX.ACHV.map(skCell).join('')}</div>
+        <p class="muted small sk-legend"><b class="lg have">가짐</b> <b class="lg on">끼움</b> <b class="lg buy">살 수 있음</b> <b class="lg gate">앞 칸 먼저</b> · ⚡ 지금 용사로 필살기 · ★ 내 속성 · ✔ 덤 = 윗 칸을 가져서 무료 · 다른 나무의 스킬도 끼울 수 있어요(공명만 없음)</p>`; };
     // ⚔ #73-5 스킬 탭 (2026-11-11 버벅임): A 내 속성 + 공통 특화만 펼침 · 나머지는 「🔥 불 2 / 4 ▾」 한 줄(누른 속성만 그림) · B 정지 그림표 한 장(fx.js still) · C 스킬을 누르면 위 칸 · 미리보기 · 고른 칸만 다시
     let famOpen = null, famFor = null;
     const commonFam = (h) => (DS.Attack && DS.Attack.isRanged(h) ? 'magic' : 'cut'); // #74 공통 특화 (근접 ⚔ 베기 · 원거리 🔮 마법)
+    // 🌳 #78 그림 불러오기 = 보이는 칸만 (지도는 옆으로 밀어 봄 · #73 버벅임 방지)
+    let skIO = null;
+    const paintStills = (root) => {
+      root.querySelectorAll('canvas[data-still]:not([data-lazy])').forEach((c) => DS.FX.still(c, c.dataset.still));
+      const lz = [...root.querySelectorAll('canvas[data-still][data-lazy]')]; if (!lz.length) return;
+      if (typeof IntersectionObserver !== 'function') { lz.forEach((c) => DS.FX.still(c, c.dataset.still)); return; }
+      if (skIO) skIO.disconnect();
+      skIO = new IntersectionObserver((es) => es.forEach((e) => { if (!e.isIntersecting) return; skIO.unobserve(e.target); DS.FX.still(e.target, e.target.dataset.still); }), { rootMargin: '60px' });
+      lz.forEach((c) => skIO.observe(c));
+    };
     const famBlock = (fam, aff) => {
       if (famFor !== hero || !famOpen) { famFor = hero; famOpen = new Set([aff.id, commonFam(hero)]); }
       const open = famOpen.has(fam.id), n = fam.ids.filter((id) => (L.fx.find((x) => x.id === id) || {}).open).length, com = fam.id === commonFam(hero);
@@ -587,7 +622,7 @@ DS.Camp = (function () {
       </div>`;
       if (!T && DS.Gem && DS.Gem.showLeft) DS.Gem.mine(me).then(DS.Gem.showLeft).catch(() => {}); // 💎 오늘 받은 한도 (상점 안 · 2026-11-09) // 2026-11-07 정돈판: 위 = 제목 · 💎 · 📜 · ✕ / 아래 = 💾 저장 (늘 보임)
       { const sb2 = el.querySelector('.set-box'); if (sb2) sb2.scrollTop = keep; }
-      el.querySelectorAll('canvas[data-still]').forEach((c) => DS.FX.still(c, c.dataset.still));
+      paintStills(el);
       { const ap = el.querySelector('#ap'); if (ap) ap.onclick = demo; }
       el.querySelectorAll('[data-tab]').forEach((b) => (b.onclick = () => { tab = b.dataset.tab; try { localStorage.setItem('citadel-settab', tab); } catch (e) { /* 이 기기에만 */ } DS.Sound.clank(); const sb3 = el.querySelector('.set-box'); if (sb3) sb3.scrollTop = 0; draw(); if (tab !== 'ttl') demo(); }));
       el.querySelectorAll('[data-h]').forEach((b) => (b.onclick = () => { const h = L.heroes.find((x) => x.id === Number(b.dataset.h)); if (!h) return; pickH = h.id; DS.Sound.clank(); peek(h.id); draw(); { const hc = el.querySelector('.hero-card'); if (hc) hc.scrollIntoView({ block: 'nearest' }); } })); // 🧙 #73 칸 = 소개 카드만 바꿈
@@ -609,6 +644,7 @@ DS.Camp = (function () {
       };
       const bindFx = () => {
       el.querySelectorAll('[data-fx]').forEach((b) => (b.onclick = () => { const f = L.fx.find((x) => x.id === b.dataset.fx); if (!f) return; if (!f.open) { if (f.got) { DS.UI.toast(`🏆 받은 이펙트예요 · ${f.locked.replace(/^먼저 /, '')} 를 열면 바로 쓸 수 있어요`, 3600); return; } if (f.locked) { DS.UI.toast(`🔒 ${f.locked} 열어야 살 수 있어요`, 3200); return; } if (f.shop) { DS.Control.run(() => shopBuy(f)); return; } DS.UI.toast(`🔒 ${f.cond || '해금 조건은 추후 공개'}`, 3200); return; } sock[hero] = f.id; gemPatch(); demo(); DS.Sound.clank(); }));
+      el.querySelectorAll('[data-tree]').forEach((b) => (b.onclick = () => { tree = b.dataset.tree; DS.Sound.clank(); draw(); }));
       el.querySelectorAll('[data-famt]').forEach((b) => (b.onclick = () => { const id = b.dataset.famt; if (famOpen.has(id)) famOpen.delete(id); else famOpen.add(id); const box = b.closest('.fx-fam'), fam = id === 'sp' ? { id: 'sp', name: '🪶 특별', ids: DS.FX.ACHV } : DS.FX.FAMS.find((x) => x.id === id); if (!box || !fam) return draw(); box.outerHTML = famBlock(fam, DS.FX.affOf(hero)); DS.Sound.clank(); bindFx(); el.querySelectorAll(`[data-fam="${id}"] canvas[data-still]`).forEach((c) => DS.FX.still(c, c.dataset.still)); })); // A: 누른 속성만 그림
       };
       bindFx();

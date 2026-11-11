@@ -202,6 +202,8 @@ DS.Account = (function () {
       //   상점에서 이미 산 것은 그대로 (산 것을 빼앗지 않음) · 🟪 인장으로 받은 Ⅲ 은 같은 계열 Ⅱ 를 열어야 씀
       const TN = ['Ⅰ', 'Ⅱ', 'Ⅲ', 'Ⅳ'];
       fx.forEach((f) => { if (typeof f.tier !== 'number' || f.tier < 2) return; f.need = DS.FX.FAMS.find((x) => x.id === f.fam).ids[f.tier - 1]; });
+      // 🌳 #78 「윗 칸을 가지면 아래 칸도 가진 것」(HERO-ATTR 6-1 · 한 번 연 칸은 다시 잠기지 않음): 산 · 🏆 업적으로 받은 윗 칸 아래를 무료로 채움 → 칸에 「✔ 덤」
+      DS.FX.FAMS.forEach((fam) => { let has = false; for (let t = fam.ids.length - 1; t >= 1; t--) { const f = fx.find((x) => x.id === fam.ids[t]); if (!f) continue; if (has && !f.open) { f.open = true; f.free = true; } if (f.open) has = true; } });
       [2, 3].forEach((t) => fx.filter((f) => f.tier === t).forEach((f) => {
         const nd = fx.find((x) => x.id === f.need); if (!nd || nd.open) return;
         if (f.open && f.bought) return; // 예전에 산 것
@@ -210,6 +212,8 @@ DS.Account = (function () {
         f.cond = sealGot ? `🏆 받음 · ${TN[t - 1]} 열면 사용` : `💎${f.shop ? f.shop.price : ''} · ${TN[t - 1]}먼저`; f.got = sealGot; // #31 A안: 받은 것 = 금빛 (잠김 아님)
       }));
     }
+    // 🌳 #78 합체 칸 3개: 두 재료 Ⅱ 를 다 가지면 💎 없이 저절로 열림 (단계 Ⅱ · 필살기 없음)
+    Object.entries(DS.FX.COMBO || {}).forEach(([id, c]) => { const a = fx.find((x) => x.id === c.mats[0]), b = fx.find((x) => x.id === c.mats[1]); fx.push({ id, fam: c.fam, tier: 1, combo: true, open: !!(a && a.open && b && b.open), cond: `${DS.FX.NAMES[c.mats[0]]} + ${DS.FX.NAMES[c.mats[1]]} 를 열면 저절로` }); });
     // 🪶 황금 날개 (v0.9.11 업적 전용): 🎁 보물 상자에서 황금 깃털 5개
     const fe = DS.Gem ? DS.Gem.rareOf(gem) : 0;
     if (DS.FX.ACHV) fx.push({ id: 'wings', tier: 's', open: fe >= 5, cond: `🏆 🎁 보물 상자 영웅 · 전설 ${Math.min(fe, 5)} / 5번` });

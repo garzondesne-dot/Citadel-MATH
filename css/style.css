@@ -3322,3 +3322,22 @@ body:has(.modal:not([hidden])) #ver-tag { display: none; }
 .splash.has-key .trial-pick .tp-h1 { height: 62px; } .splash.has-key .trial-pick .tp-h1 .art { width: 46px; height: 46px; }
 @media (min-aspect-ratio: 4/3) { .splash.has-key .trial-pick { left: auto; right: 2vw; bottom: 2vh; max-width: 400px; } }
 .splash.has-key .sp-logo, .splash.has-key .splash-logo { display: none; } /* 👩‍🏫 #80 제목은 아래 판에 · 로고가 용 얼굴을 가리지 않게 */
+/* 🌳 #78 스킬 지도 (2026-11-11): 왼쪽 고정 줄기(공통 특화) + 옆으로 미는 가지 6개 · 아래 Ⅰ → 위 Ⅳ · 칸 사이 선 */
+.tree-tabs { display: flex; gap: 6px; margin: 8px 0 6px; } .tree-tabs .btn { flex: 1; } .tree-tabs small { font-size: 10px; opacity: .85; }
+.sk-map { display: flex; gap: 6px; align-items: stretch; }
+.sk-root, .sk-br { display: flex; flex-direction: column; align-items: stretch; width: 82px; flex: 0 0 82px; padding: 4px 3px; border-radius: 10px; background: #17130f; border: 2px solid #3a3128; }
+.sk-root { border-color: #d6a83a; background: linear-gradient(#2a2110, #17130f); box-shadow: 0 0 8px #d6a83a55; }
+.sk-brs { display: flex; gap: 6px; overflow-x: auto; overscroll-behavior-x: contain; padding-bottom: 4px; flex: 1; min-width: 0; scroll-snap-type: x proximity; }
+.sk-br { scroll-snap-align: start; } .sk-br.own { border-color: #ffd25a; box-shadow: 0 0 10px #ffd25a77; } .sk-br.old { border-style: dashed; }
+.sk-h { display: block; text-align: center; font-size: 11.5px; line-height: 1.2; margin-bottom: 3px; color: #f0e6d0; } .sk-h small { display: block; font-size: 9.5px; color: #c9b896; font-weight: 400; }
+.sk-line { display: block; width: 3px; height: 8px; margin: 0 auto; background: #5a4c3c; border-radius: 2px; }
+.sk-map .fxpick.sk-c, .sk-combo .fxpick.sk-c, .sk-sp .fxpick.sk-c { width: 100%; padding: 0 2px 3px; border-radius: 8px; min-height: 0; }
+.fxpick.sk-c canvas { height: 40px; } .fxpick.sk-c span { font-size: 10.5px; line-height: 1.15; } .fxpick.sk-c small { font-size: 9.5px; line-height: 1.15; }
+.fxpick.sk-c.have { border-color: #4caf6a; background: #15241a; } .fxpick.sk-c.buy { border-color: #4aa3ff; background: #102236; } .fxpick.sk-c.buy small { color: #9fd0ff; font-weight: 700; }
+.fxpick.sk-c.gate, .fxpick.sk-c.shut { filter: grayscale(.9) brightness(.6); } .fxpick.sk-c.got { border-color: var(--gold); }
+.fxpick.sk-c.on { border-color: var(--gold); background: #2e240c; box-shadow: 0 0 10px var(--gold); filter: none; }
+.fxpick.sk-c .sk-ult { position: absolute; right: 3px; top: 1px; font-style: normal; font-size: 12px; text-shadow: 0 0 4px #ffd25a; }
+.sk-combo { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; } .sk-cb { display: flex; flex-direction: column; gap: 2px; text-align: center; } .sk-cb > small { font-size: 9.5px; color: #c9b896; }
+.sk-sp { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.sk-legend .lg { display: inline-block; padding: 0 5px; border-radius: 4px; border: 2px solid; font-weight: 400; } .sk-legend .lg.have { border-color: #4caf6a; } .sk-legend .lg.on { border-color: var(--gold); } .sk-legend .lg.buy { border-color: #4aa3ff; } .sk-legend .lg.gate { border-color: #666; color: #999; }
+.awk-ck { display: flex; flex-wrap: wrap; gap: 4px 8px; margin: 4px 0 0; font-size: 12.5px; } .awk-ck .ok { color: #7ee08a; font-weight: 700; } .awk-ck .no { color: #c0b3a0; } /* 🌳 #78 각성한 로안 조건 체크 */
