@@ -82,21 +82,42 @@ DS.Sound = (function () {
     load(k); if (fb) fb(); return false;
   }
   const preload = () => { const c = sfxCfg(); if (c) c.keys.forEach(load); };
-  // 🎵 배경음: 성채 · 허수아비에서만 · 작게 · 소리 끄기 · 화면 숨김이면 멈춤
-  let bgmEl = null, bgmKey = null;
-  // 🎵 배경음 없앰 (2026-11-09 선생님 「안 어울려 · 효과음은 놔두고 다 지워」): 부르는 곳은 그대로 두고 아무것도 틀지 않음 (틀던 것은 멈춤)
-  function bgm(k) {
-    if (bgmEl) { bgmEl.pause(); bgmEl = null; } bgmKey = null; return; // eslint-disable-line no-unreachable
-    if (typeof Audio === 'undefined') return;
-    if (bgmKey === k && bgmEl) { if (!bgmOff && bgmEl.paused && !document.hidden) bgmEl.play().catch(() => {}); return; }
-    if (bgmEl) { bgmEl.pause(); bgmEl = null; } bgmKey = k || null;
-    const u = k && sfxUrl(k); if (!u) return;
-    bgmEl = new Audio(u); bgmEl.loop = true; bgmEl.volume = vol === 'low' ? 0.08 : 0.16;
-    if (!bgmOff && !document.hidden) bgmEl.play().catch(() => {});
+  // 🎵 #91 배경음 다시 (2026-11-11 DECISIONS 「🎵 배경음 다시 넣기」): 학생 폰 = 첫 화면 · 캠프만 · 종합실 TV = 장면별 · 체험판(TV + 폰 한 화면)은 TV 쪽만
+  //   두 자리(phone · tv) 중 tv 가 있으면 tv · 장면이 바뀌면 0.8초 엇갈려 바뀜 · 반복 = 끝나기 0.3초 전 새 재생으로 엇갈림(파일도 이음매를 녹여 둠) · 🎚 전투 음량 = scale(0.1 ~ 0.7)
+  //   🔇 배경음 끄기 · 화면 숨김 · 🎬 영상 · 📄 학습지 창(hold) = 멈춤 · 파일 = 필요할 때 불러오기 (manifest bgm)
+  const BGM = { phone: null, tv: null, hold: {} }; let bgmCur = null, bgmScale = 1, bgmScaleT = 1, bgmTick = 0, bgmWinDone = '';
+  const bgmCfg = () => (window.DS && DS.ASSETS && DS.ASSETS.bgm) || null;
+  const bgmMax = () => (vol === 'low' ? 0.08 : 0.16);
+  const bgmWant = () => { const k = BGM.tv !== null ? BGM.tv : BGM.phone; return bgmOff || (typeof document !== 'undefined' && document.hidden) || Object.keys(BGM.hold).length ? null : k; };
+  function bgmEl2(k) { const c = bgmCfg(), f = c && c.files && c.files[k]; if (!f || typeof Audio === 'undefined') return null; const a = new Audio(`${c.dir}${f}`); a.preload = 'auto'; a.volume = 0; a._k = k; return a; }
+  function bgmFade(a, to, ms, done) { if (!a) return; const from = a.volume, t0 = Date.now(); const st = () => { const k = Math.min(1, (Date.now() - t0) / ms); try { a.volume = Math.max(0, Math.min(1, from + (to - from) * k)); } catch (e) { /* 무시 */ } if (k < 1) a._fade = setTimeout(st, 40); else if (done) done(); }; clearTimeout(a._fade); st(); }
+  const bgmVol = () => bgmMax() * bgmScale;
+  function bgmStart(k) {
+    const a = bgmEl2(k); if (!a) return null; const once = (bgmCfg().once || []).includes(k);
+    a.addEventListener('timeupdate', () => { if (once || bgmCur !== a || a._x || !a.duration) return; if (a.duration - a.currentTime < 0.3) { a._x = true; const b = bgmStart(k); if (b) { bgmCur = b; bgmFade(b, bgmVol(), 300); } bgmFade(a, 0, 300, () => a.pause()); } });
+    a.addEventListener('ended', () => { if (bgmCur === a && once) { bgmCur = null; bgmWinDone = k; } });
+    a.play().catch(() => {}); return a;
   }
+  function bgmApply() {
+    const k = bgmWant(); if (k && (bgmCfg() || {}).once && bgmCfg().once.includes(k) && bgmWinDone === k && !bgmCur) return; // 🎉 승리 = 한 번만
+    if (bgmCur && bgmCur._k === k) { bgmFade(bgmCur, bgmVol(), 400); return; }
+    const old = bgmCur; bgmCur = null; if (old) bgmFade(old, 0, 800, () => old.pause());
+    if (!k) return; bgmWinDone = ''; bgmCur = bgmStart(k); if (bgmCur) bgmFade(bgmCur, bgmVol(), 800);
+  }
+  // where = 'phone' | 'tv' · k = 곡 자리(null = 없음) · opt.scale = 🎚 전투 음량(0.1 ~ 0.7 · 없으면 1)
+  function bgm(k, where = 'phone', opt = {}) {
+    if (where !== 'tv') where = 'phone';
+    const want = k || null, sc = opt.scale != null ? Math.max(0, Math.min(1, opt.scale)) : 1;
+    if (BGM[where] !== want) { BGM[where] = want; if (sc !== bgmScaleT) { bgmScaleT = sc; bgmScale = sc; } bgmApply(); }
+    if (sc !== bgmScaleT) { bgmScaleT = sc; clearInterval(bgmTick); bgmTick = setInterval(() => { bgmScale += (bgmScaleT - bgmScale) * 0.15; if (Math.abs(bgmScaleT - bgmScale) < 0.01) { bgmScale = bgmScaleT; clearInterval(bgmTick); } if (bgmCur && !bgmCur._fade) try { bgmCur.volume = bgmVol(); } catch (e) { /* 무시 */ } }, 80); } // 체력이 바뀌면 부드럽게
+  }
+  const bgmHold = (why, on) => { if (on) BGM.hold[why] = 1; else delete BGM.hold[why]; bgmApply(); }; // 🎬 영상 · 📄 학습지 창
+  const bgmNow = () => ({ phone: BGM.phone, tv: BGM.tv, playing: bgmCur ? bgmCur._k : null, hold: Object.keys(BGM.hold), scale: +bgmScale.toFixed(2) });
   // 첫 터치 때 소리 장치를 깨우고 녹음 소리를 미리 받음 (0.5MB 안쪽 · 배경음은 성채 · 허수아비에서만)
   if (typeof document !== 'undefined') document.addEventListener('pointerdown', () => { ensure(); preload(); }, { once: true, capture: true });
-  if (typeof document !== 'undefined') document.addEventListener('visibilitychange', () => { if (!bgmEl) return; if (document.hidden) bgmEl.pause(); else if (!bgmOff) bgmEl.play().catch(() => {}); });
+  if (typeof document !== 'undefined') document.addEventListener('visibilitychange', () => bgmApply()); // 🎵 화면 숨김이면 멈춤 · 돌아오면 다시
+  // 🎵 #91 🎬 영상 · 📄 학습지 창이 열려 있으면 배경음 멈춤 (창 종류마다 따로 고치지 않고 한 곳에서 · 닫히면 다시)
+  if (typeof document !== 'undefined' && typeof MutationObserver === 'function') { let was = false; const chk = () => { const on = !!document.querySelector('.video-modal, .sheet-modal, .t-sheet-modal'); if (on !== was) { was = on; bgmHold('modal', on); } }; const go = () => new MutationObserver(chk).observe(document.body, { childList: true }); if (document.body) go(); else document.addEventListener('DOMContentLoaded', go); }
   // 공격 계열 → 맞는 소리
   const FAM_SFX = { cut: 'cut', smash: 'smash', sweep: 'sweep', wind: 'wind', fire: 'fire', spark: 'spark', frost: 'frost', star: 'star', magic: 'magic', math: 'magic', sun: 'star', dark: 'cut', gear: 'smash', water: 'wind' }; // 🌈 #74-3 새 속성 = 새 효과음이 오기 전까지 비슷한 소리
 
@@ -106,16 +127,16 @@ DS.Sound = (function () {
     toggle() { const off = !(sfxOff && bgmOff); this.setSfx(!off); this.setBgm(!off); return off; },
     // 🔇 효과음 · 배경음 따로 (on = 켜기) · keep = false 면 이 기기에 저장 안 함 (교사 리모컨이 종합실을 바꿀 때)
     setSfx(on, keep = true) { sfxOff = !on; if (keep) LS('ds-sfx-off', sfxOff); changed(); },
-    setBgm(on, keep = true) { bgmOff = !on; if (keep) LS('ds-bgm-off', bgmOff); if (bgmEl) { if (bgmOff) bgmEl.pause(); else if (!document.hidden) bgmEl.play().catch(() => {}); } changed(); },
-    setVol(v, keep = true) { vol = v === 'low' ? 'low' : 'mid'; if (master) master.gain.value = VOL[vol]; if (bgmEl) bgmEl.volume = vol === 'low' ? 0.08 : 0.16; if (keep) { try { localStorage.setItem('ds-vol', vol); } catch (e) { /* 무시 */ } } changed(); },
+    setBgm(on, keep = true) { bgmOff = !on; if (keep) LS('ds-bgm-off', bgmOff); bgmApply(); changed(); },
+    setVol(v, keep = true) { vol = v === 'low' ? 'low' : 'mid'; if (master) master.gain.value = VOL[vol]; if (bgmCur) bgmFade(bgmCur, bgmVol(), 200); if (keep) { try { localStorage.setItem('ds-vol', vol); } catch (e) { /* 무시 */ } } changed(); },
     get vol() { return vol; },
     // 🔇 / 작게 / 보통 한 번에 (종합실 구석 · 리모컨)
     setLevel(l, keep = true) { if (l === 'off') { this.setSfx(false, keep); this.setBgm(false, keep); return; } this.setVol(l, keep); this.setSfx(true, keep); this.setBgm(true, keep); },
-    get level() { return sfxOff ? 'off' : vol; }, // 🎵 배경음 없음 → 효과음만으로
+    get level() { return sfxOff && bgmOff ? 'off' : vol; }, // 🎵 #91 배경음 다시
     get sfxOn() { return !sfxOff; },
     get bgmOn() { return !bgmOff; },
     onChange(f) { listeners.push(f); },
-    sample, preload, bgm,
+    sample, preload, bgm, bgmHold, bgmNow,
     // ⚔ 공격 소리 (attack.js): 휘두름 · 발사 · 맞음(이펙트 계열) · 막힘 · 처치
     swing() { sample('swing', 0.6, () => noise({ dur: 0.25, vol: 0.25, freq: 600, sweepTo: 3500, q: 0.8 })); },
     launch() { sample('launch', 0.6, () => noise({ dur: 0.2, vol: 0.2, freq: 1500, sweepTo: 5000, q: 1 })); },

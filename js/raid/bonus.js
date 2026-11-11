@@ -104,7 +104,6 @@ DS.Bonus = (function () {
     if (!preview && me) await photoSync().catch(() => {}); // #47 테스트도 학생과 같게 // ⏳ 선생님 확인 결과 → 처치 / 다시
     await loadLocks(); isAdm = all() && DS.Account ? await DS.Account.isAdmin().catch(() => false) : false; // 📕 오답노트 (null = 미리 보기 · 테스트: 표시 안 함)
     DS.UI.show('screen-bonus');
-    if (DS.Sound && DS.Sound.bgm) DS.Sound.bgm(train || rift ? 'bgm-dummy' : 'bgm-castle'); // 🎵 2026-11-06: 성채 · 허수아비 배경음 (작게)
     render();
     if (opt.go) { const L = DS.Lessons.get(opt.go[0]); if (L) DS.Control.run(() => fight(L, opt.go[1])); }
   }
@@ -155,7 +154,7 @@ DS.Bonus = (function () {
     document.querySelectorAll('[data-qfight]').forEach((b) => (b.onclick = () => { const q = quests.find((x) => x.id === b.dataset.qfight); if (q) DS.Control.run(() => fight(DS.Lessons.get(q.lesson), q.mid, { quest: q })); }));
     document.querySelectorAll('[data-forge]').forEach((b) => (b.onclick = () => DS.Forge.open(me))); // ⚒ 모루로 (개인 캠프 밖이지만 혼자 하는 곳 · 2026-11-03 결정: 모루는 언제나 열림)
     document.querySelectorAll('[data-shelf]').forEach((b) => (b.onclick = () => DS.Control.run(() => DS.Camp.shelf(all() ? 99 : null, b.dataset.shelf)))); // 📚 텐트 책장 → 허수아비 (2026-11-07)
-    $('#bn-back').onclick = () => { if (DS.Sound && DS.Sound.bgm) DS.Sound.bgm(null); return preview ? DS.TCamp.back() : DS.Camp.enter(me); };
+    $('#bn-back').onclick = () => { return preview ? DS.TCamp.back() : DS.Camp.enter(me); };
   }
   // 💎 받을 수 있는 마정석 꼬리표 (처음 처치에만 · 이미 받았으면 안 보임 · 오늘 한도가 차면 「내일」)
   const gLog = (k) => !!((gemD || {}).log || {})[String(k).replace(/[.#$/[\]]/g, '_')];

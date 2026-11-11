@@ -88,6 +88,7 @@ DS.UI = {
   show(id) {
     document.querySelectorAll('.screen').forEach((s) => s.classList.toggle('active', s.id === id));
     if (DS.UI.wake) { if (DS.UI.WAKE_SCREENS.includes(id)) DS.UI.wake.on(); else DS.UI.wake.off(); } // 📱 #70 수업 · 성채 · 허수아비 · 교사 화면 = 화면 꺼짐 방지 · 캠프 · 메뉴 · 로그인 = 끔
+    if (DS.Sound && DS.Sound.bgm) DS.Sound.bgm(['screen-splash', 'screen-home', 'screen-camp'].includes(id) ? 'camp' : null, 'phone'); // 🎵 #91 학생 폰 배경음 = 첫 화면 · 캠프(모루 창 포함)만
     window.scrollTo(0, 0);
   },
 };

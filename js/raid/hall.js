@@ -191,7 +191,24 @@ DS.Hall = (function () {
   }
   let gearOpen = false; // ⚙ 종합실 메뉴 (메뉴화면 · 선생님 모습 · 캠프 보기 · 전체 화면 · 보스 문 닫힘 시각)
   if (typeof window !== 'undefined') window.addEventListener('ds-roster', () => { try { if (R && L) render(); } catch (e) { /* 무시 */ } }); // 🧮 명단 번호를 받으면 다시 그림
+  // 🎵 #91 종합실 TV 배경음 (2026-11-11 DECISIONS): 대기실 lobby · 몬스터 raid-1 → 2 → 3(몬스터마다 다음) · 👑 보스 boss-1 / boss-2(수업마다 번갈아) · 🎉 승리 win 한 번 · 🏕 쉼터 rest · 놀이 bal · rev · ox · nun · td
+  //   🎚 전투 음량 = 10% + 60% × (1 − 남은 체력 비율) · 개념 · 도입 = 없음(설명 시간) · 수업 끝 = 없음
+  const FUN_BGM = { bal: 'bal', rev: 'rev', ox: 'ox', quiz: 'ox', nun: 'nun', td: 'td' };
+  function hallBgm() {
+    const S = DS.Sound; if (!S || !S.bgm || !R || !L) return; // 체험판 위 TV(embed)는 효과음만 끄고 배경음은 TV 쪽이 냄
+    const st = Raid().stepOf(L, R), sc = (hp) => (hp && hp.max ? 0.1 + 0.6 * (1 - Math.max(0, hp.left) / hp.max) : 0.1);
+    let k = null, scale;
+    if (Raid().isClosed(R)) k = null;
+    else if (Raid().isLobby(R)) k = 'lobby';
+    else if (Raid().restOn(R)) k = (R.fun && FUN_BGM[R.fun.kind]) || 'rest';
+    else if (st && st.kind === 'monster') { const n = L.steps.filter((x) => x.kind === 'monster').findIndex((x) => x.id === st.id); k = `raid-${(Math.max(0, n) % 3) + 1}`; scale = sc(Raid().monsterHp(L, R, st.id)); }
+    else if (st && st.kind === 'boss') { const bh = Raid().bossHp(L, R); if (bh.won) k = 'win'; else { let alt = 1; try { const key = 'ds-boss-bgm', m = JSON.parse(localStorage.getItem(key) || '{}'); if (m[code] == null) { m.n = (m.n || 0) + 1; m[code] = m.n % 2 ? 1 : 2; localStorage.setItem(key, JSON.stringify(m)); } alt = m[code]; } catch (e) { /* 이 기기만 */ } k = `boss-${alt}`; scale = sc(bh); } }
+    else if (Raid().isEnd(L, R) && Raid().bossHp(L, R).won) k = 'win';
+    S.bgm(k, 'tv', scale != null ? { scale } : {});
+    if (S.bgmHold) S.bgmHold('hall', !!(st && (Raid().videoOn(R, st.id) || Raid().sheetOn(R)))); // 🎬 영상 · 📄 학습지 창 = 멈춤
+  }
   function render() {
+    hallBgm();
     const i = R.state.step ?? -1;
     if (DS.Titles && DS.Titles.watch) { DS.Titles.setNo(L && !L.eval ? L.no : null); setTimeout(() => DS.Titles.watch(R, L, 'h', code), 0); } // 🏅 #63 칭호 사건 (그린 뒤 · 동시 5 줄 서기)
     // 2026-11-07 정돈판 비교 1~3: 위 한 줄 = 「n차시 · 단계」 · 4단계 · 시간 막대 · 🚪 코드 · ⚙ (메뉴화면 · 선생님 모습 · 캠프 보기 · 전체 화면은 ⚙ 안)
@@ -821,6 +838,6 @@ DS.Hall = (function () {
     setTimeout(() => t.remove(), 1500);
   }
 
-  function leave() { embed = false; if (stop) stop(); stop = null; if (stopPrep) stopPrep(); stopPrep = null; clearInterval(atkT); atkT = 0; clearInterval(bubbleT); built = ''; } // 👩‍🏫 체험판 TV 창 닫기 (남은 연출 타이머가 R 을 읽어도 되게 R · L 은 그대로)
+  function leave() { if (DS.Sound && DS.Sound.bgm) DS.Sound.bgm(null, 'tv'); embed = false; if (stop) stop(); stop = null; if (stopPrep) stopPrep(); stopPrep = null; clearInterval(atkT); atkT = 0; clearInterval(bubbleT); built = ''; } // 👩‍🏫 체험판 TV 창 닫기 (남은 연출 타이머가 R 을 읽어도 되게 R · L 은 그대로)
   return { enter, leave };
 })();

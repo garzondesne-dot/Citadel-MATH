@@ -22,7 +22,6 @@ DS.TCamp = (function () {
   const studentUrl = () => `${location.origin}${location.pathname.replace(/[^/]*$/, '')}index.html?role=student&code=${code}${DS.Net.mode === 'local' ? '&local' : ''}`;
 
   async function enter(o = {}) {
-    if (DS.Sound && DS.Sound.bgm) DS.Sound.bgm(null); // 🎵 캠프로 오면 성채 · 허수아비 배경음 끔
     hall = !!o.hall;
     if (!hall && !(await DS.Account.isAdmin())) throw Object.assign(new Error('교사 계정으로 로그인해야 해요.'), { user: true });
     code = o.code || ''; hallKey = o.hallKey || ''; R = null; L = null; wasLobby = null; shownHero = null;

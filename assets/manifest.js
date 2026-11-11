@@ -140,6 +140,8 @@ DS.ASSETS = {
   // 🎨 UI 키트 v1 (2026-11-04 사용자 제공 · 이름은 tools/sprite/ui_cut.py 가 붙임): 도트 아이콘 40칸(64×64) + 버튼 · 틀 조각 — 화면에는 아직 안 씀 (다음 단계에서 이모지 · 버튼을 바꿈)
   // UI 키트 (2026-11-04 · 2판): 돌 무늬 없는 정사각 9칸 조각 — 높은 카드 · 긴 버튼 모두 늘려 씀. 창도 같은 키트
   // 🔊 녹음 효과음 · 배경음 (2026-11-06 · Ninja Adventure CC0 + Leohpaz RPG Essentials 3개(spark · frost · block, 무료 사용 · 팩 재배포 금지라 다듬은 소리만) · mono mp3): js/engine/audio.js sample() · bgm()
+  // 🎵 #91 배경음 (2026-11-11 DECISIONS 「🎵 배경음 다시 넣기」 · tools/bgm_prep.py · 모노 56k · 반복 이음매 녹임 · 필요할 때 불러오기) · 출처 = assets/bgm/CREDITS.md
+  bgm: { dir: 'assets/bgm/', once: ['win'], files: { camp: 'camp-v1.mp3', lobby: 'lobby-v1.mp3', 'raid-1': 'raid-1-v1.mp3', 'raid-2': 'raid-2-v1.mp3', 'raid-3': 'raid-3-v1.mp3', 'boss-1': 'boss-1-v1.mp3', 'boss-2': 'boss-2-v1.mp3', win: 'win-v1.mp3', rest: 'rest-v1.mp3', bal: 'bal-v1.mp3', rev: 'rev-v1.mp3', ox: 'ox-v1.mp3', nun: 'nun-v1.mp3', td: 'td-v1.mp3' } },
   sfx: { dir: 'assets/sfx/', keys: ["swing", "launch", "cut", "smash", "sweep", "wind", "fire", "spark", "frost", "star", "magic", "special", "block", "finish", "correct", "wrong", "coin", "levelup", "victory", "boss", "hurt", "die", "anvil", "card", "hint", "door", "holy", "awaken"], // 🔊 #86 (2026-11-11 ElevenLabs 새 소리 · 음량 맞춤 · 순위 순 · coin · levelup = 지금 그대로)
     rotate: ['swing', 'launch', 'cut', 'smash', 'wind', 'fire', 'spark', 'frost', 'star', 'block', 'die'], // 🔁 칠 때마다 번갈아 (die 는 #87 에서 틀 곳을 붙임)
     later: ["click"], // 🆕 #87: 나머지 9자리는 틀 곳을 붙여 keys 로 · click 은 ⏳ 머리 방 결정 기다림(단추마다 나면 시끄러울 수 있음)

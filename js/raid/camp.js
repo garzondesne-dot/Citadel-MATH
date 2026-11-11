@@ -20,7 +20,6 @@ DS.Camp = (function () {
   const stampMarkSeen = () => { try { localStorage.setItem('citadel-stamp-seen', today()); } catch (e) { /* 무시 */ } };
 
   async function enter(m, code) {
-    if (DS.Sound && DS.Sound.bgm) DS.Sound.bgm(null); // 🎵 캠프로 오면 성채 · 허수아비 배경음 끔
     if (m && DS.Usage) DS.Usage.visit(m); // 📈 하루 첫 접속 (2026-11-06)
     if (m && DS.Gem && DS.Gem.watchGifts) DS.Gem.watchGifts(m); // 🎁 선물 알림 = 어디서나 (2026-11-06 · gem.js watchGifts)
     me = m; code0 = code || '';
