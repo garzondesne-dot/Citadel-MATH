@@ -31,7 +31,7 @@ const OUT = process.argv[2] || '.', U = 'http://localhost:8765/trial/';
   ok(g0.gem === 200 && /3차시로/.test(g0.bar) && /7차시/.test(g0.gate), `내 캠프 💎 ${g0.gem} · 막대 「${g0.bar.replace(/\n/g, ' ')}」 · 관문 「${g0.gate}」`);
   await shut(); await p.click('#camp-gate'); await p.waitForTimeout(4000);
   for (let k = 0; k < 15; k++) { if (/수업 시작 ▶ \(5/.test(await bar())) break; await p.waitForTimeout(1000); }
-  let R = await room(); ok(R.meta.lesson === 'trial-07' && Number(R.meta.solve) === 5, `방 = 체험판 7차시 · 정찰 ${R.meta.solve}초`);
+  let R = await room(); ok(R.meta.lesson === 'trial-07' && Number(R.meta.solve) === 5, `방 = 체험판 7차시 · 정찰 ${R.meta.solve}초`); ok(Number(R.meta.pct) === 100, `👩‍🏫 #92 체험판 성취 기준 = ${R.meta.pct} (100 · 원래 수업 90)`);
   await next(); await shot('2-intro'); await next(4000);
   R = await room(); const st1 = DS_step(R);
   function DS_step(R) { return (R.state || {}).step; }

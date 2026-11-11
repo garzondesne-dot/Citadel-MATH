@@ -62,7 +62,7 @@ DS.Test = (function () {
   }
   // 선생님이 「새 수업 만들기」를 누른 것과 같음 → live/테스트 에 차원문이 실시간으로 나타난다
   async function openGate() {
-    const r = await DS.Act.createRoom(L.id, cls(), { noLimit: true, ...(demo ? {} : { solve: 5 }) }); // 🧪 테스트 모드 · 👩‍🏫 체험판 = 시간 제한 없음 · #43 정찰 5초 (CLAUDE.md 체험판 규칙 · 실제 수업은 그대로)
+    const r = await DS.Act.createRoom(L.id, cls(), { noLimit: true, ...(demo ? {} : { solve: 5 }), ...(trial ? { pct: 100 } : {}) }); // 🧪 테스트 모드 · 👩‍🏫 체험판 = 시간 제한 없음 · #43 정찰 5초 · #92 체험판 성취 기준 100 (가상 친구가 먼저 쓰러뜨리지 않게 · 실제 수업 90 그대로) (CLAUDE.md 체험판 규칙 · 실제 수업은 그대로)
     code = r.code; hallKey = r.hallKey; R = null; armed = '';
     if (demo) return;
     draw(true);

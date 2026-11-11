@@ -703,7 +703,7 @@ DS.Hall = (function () {
     // 🪞 #81 (2026-11-11 선생님 「시연 = 학생과 똑같이」): 학생 폰과 같은 함수 — 소레이드 = L.chainItems (졸개 → 대장 · 근거 줄) · 형성평가 다시 = L.boss.make (bossItem 과 같음) · 일반 = L.items
     if (!boss && Raid().isChain(L, R, step.id)) { demo = { step, attempt, chain: true, boss: false, items: L.chainItems(step.id, seed, attempt), stage: 0, says: [], why: -1, wrong: false, given: [null], shown: false }; demo.hp = demo.items.length; return demoDraw(); }
     const nb = (L.boss.sets[1] || []).length, items = boss ? (attempt ? Array.from({ length: nb }, (_, i) => (L.boss.make ? L.boss.make(i, attempt, DS.Rng(`${seed}|boss|${i}|${attempt}`)) : (L.boss.sets[2] || L.boss.sets[1])[i])) : L.boss.sets[1]) : L.items(step.id, seed, attempt);
-    demo = { step, attempt, boss, hp: boss ? L.boss.hpItems || items.length : items.length, items, given: items.map((q) => (q.type === 'multi' || q.type === 'subsets' ? [] : q.type === 'number' ? 0 : q.type === 'text' ? '' : null)), marks: null, shown: false };
+    demo = { step, attempt, boss, hp: boss ? L.boss.hpItems || items.length : items.length, items, given: items.map((q) => (q.type === 'multi' || q.type === 'subsets' ? [] : q.type === 'text' ? '' : null)), marks: null, shown: false };
     demoDraw();
   }
   function demoHero(on) {
@@ -756,12 +756,13 @@ DS.Hall = (function () {
       const i = Number(b.dataset.ask), r = await DS.Quiz.ask({ name: `${title} ${i + 1}번 (시연)`, formula: d.attempt ? '🔄 숫자가 바뀌었어요' : '학습지' }, d.items[i], { collect: true, tag: '🎮 시연' });
       if (!r || demo !== d) return; d.given[i] = r.given || []; demoDraw();
     }));
-    DS.UI.dial(ov, (i) => d.given[i], (i, v) => { d.given[i] = v; reGo(); });
+    DS.UI.runes(ov, (i) => d.given[i], (i, v) => { d.given[i] = v; reGo(); }); // ⌨ #92 학생과 같은 룬 키패드
     ov.querySelectorAll('[data-text]').forEach((inp) => inp.addEventListener('input', () => { d.given[Number(inp.dataset.text)] = inp.value; reGo(); }));
     const rv = ov.querySelector('#demo-reveal');
     if (rv) rv.onclick = () => { d.shown = true; d.marks = d.items.map(() => true); Snd().slash(); demoDraw(); };
     const go = ov.querySelector('#demo-go');
     if (go) go.onclick = () => {
+      DS.UI.runeCast(ov);
       const given = d.items.map((q, i) => (q.type === 'number' ? Number(d.given[i]) : d.given[i]));
       d.marks = d.items.map((q, i) => filled(q, given[i]) && DS.Quiz.grade(q, given[i]));
       demoDraw();
@@ -793,11 +794,12 @@ DS.Hall = (function () {
       else if (t === 'choice') d.given[0] = Number(v); else if (t === 'ox') d.given[0] = v === 'O'; else d.given[0] = [v];
       Snd().clank(); demoChain(ov);
     }));
-    DS.UI.dial(ov, () => d.given[0], (i, v) => { d.given[0] = v; const g = ov.querySelector('#demo-go'); if (g) g.disabled = !filled(q, v); });
+    DS.UI.runes(ov, () => d.given[0], (i, v) => { d.given[0] = v; const g = ov.querySelector('#demo-go'); if (g) g.disabled = !filled(q, v); }); // ⌨ #92
     ov.querySelectorAll('[data-text]').forEach((inp) => inp.addEventListener('input', () => { d.given[0] = inp.value; const g = ov.querySelector('#demo-go'); if (g) g.disabled = !filled(q, d.given[0]); }));
     const rv = ov.querySelector('#demo-reveal'); if (rv) rv.onclick = () => { d.shown = true; demoChain(ov); };
     const go = ov.querySelector('#demo-go');
     if (go) go.onclick = () => {
+      DS.UI.runeCast(ov);
       const g = q.type === 'number' ? Number(d.given[0]) : d.given[0];
       if (!DS.Quiz.grade(q, g)) { d.wrong = true; Snd().squish(); return demoChain(ov); }
       Snd().slash(); d.wrong = false; d.shown = false;

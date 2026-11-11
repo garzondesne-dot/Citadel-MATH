@@ -113,32 +113,39 @@ DS.MathGen = DS.MathGen || { shuffle: (a) => DS.Rng(Math.floor(Math.random() * 1
 if (typeof document !== 'undefined') ['fullscreenchange', 'webkitfullscreenchange'].forEach((ev) => document.addEventListener(ev, () => document.querySelectorAll('.fs-btn').forEach((b) => { b.textContent = DS.UI.fs.on() ? '⛶ 전체 화면 끄기' : '⛶ 전체 화면'; })));
 // 화면 꺼짐 방지: 다른 앱 · 탭에서 돌아오면 다시 켠다
 if (typeof document !== 'undefined') document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && DS.UI.wake.want) DS.UI.wake.on(); });
-// 🔢 숫자 다이얼 (v0.9.6.16): ▲▼ 를 누르면 바로 한 칸 · 꾹 누르고 있으면 계속 올라감/내려감
-//   화면 전체를 다시 그리지 않고 다이얼 숫자만 바꾼다 (꾹 누르는 동안 버튼이 바뀌지 않게) · 두 번 탭 확대는 CSS touch-action 으로 막음
-//   root 안의 [data-dial="문항|증감"] 버튼 · get(i) → 지금 값 · set(i, v) 값 저장 (0~99)
-DS.UI.dial = function (root, get, set) {
-  const step = (b) => {
-    if (!b.isConnected) return false; // 화면이 다시 그려져 버튼이 사라졌으면 멈춤
-    const [i, d] = b.dataset.dial.split('|').map(Number), v = Math.max(0, Math.min(99, Number(get(i)) + d));
-    if (v === Number(get(i))) return false;
-    set(i, v);
-    const box = b.closest('.dial'); if (box) { const bs = box.querySelectorAll('.wheel b'); if (bs[0]) bs[0].textContent = Math.floor(v / 10); if (bs[1]) bs[1].textContent = v % 10; const t = box.querySelector('.dial-val'); if (t) t.textContent = `= ${v}`; }
-    if (DS.Sound) DS.Sound.clank();
-    return true;
-  };
-  root.querySelectorAll('[data-dial]').forEach((b) => {
-    let t1 = 0, n = 0;
-    const stop = () => { clearTimeout(t1); t1 = 0; };
-    const rep = () => { n++; if (step(b)) t1 = setTimeout(rep, n > 8 ? 60 : 120); else stop(); }; // 오래 누를수록 빨라짐
-    b.addEventListener('pointerdown', (e) => {
-      if (e.button) return; e.preventDefault(); stop(); n = 0; step(b);
-      try { b.setPointerCapture(e.pointerId); } catch (x) { /* 없음 */ }
-      t1 = setTimeout(rep, 380);
+// ⌨ 숫자 답 = 룬 키패드 (🔨 #92 · 2026-11-11 선생님 「룬패드로 이제 바꾸자」 · 다이얼 대신): 빛나는 룬 0~9 (5 × 2) + ⌫
+//   누른 룬이 잠깐 빛나고 답 칸에 숫자가 새겨짐 · 범위 0~99 (두 자리까지) · 답 자리 수는 미리 보여 주지 않음 · 비어 있음 = null (공격 단추가 잠김)
+//   학생 · 🧪 테스트 · 👩‍🏫 체험판 · 선생님 시연(🪞) 모두 이 두 함수: runeHtml(문항, 값) 으로 그리고 runes(root, get, set) 으로 붙임
+//   화면 전체를 다시 그리지 않고 답 칸만 바꾼다 (set 안에서 공격 단추만 켜고 끔) · 내기 = 화면마다 있던 공격 단추 그대로 + runeCast(시전 빛)
+DS.UI.RUNE_MAX = 99;
+DS.UI.runeHtml = function (i, v) {
+  const has = v != null && v !== '';
+  return `<div class="runepad" data-rp="${i}"><div class="rune-row"><div class="rune-slot${has ? '' : ' empty'}" data-rv="${i}" aria-live="polite">${has ? Number(v) : '<span class="rune-ph">숫자를 넣어 주세요</span>'}</div><button type="button" class="rune rune-del" data-rune="${i}|x" aria-label="지우기">⌫</button></div>`
+    + `<div class="rune-keys">${[1, 2, 3, 4, 5, 6, 7, 8, 9, 0].map((n) => `<button type="button" class="rune" data-rune="${i}|${n}" aria-label="룬 ${n}">${n}</button>`).join('')}</div></div>`;
+};
+DS.UI.runeNext = function (cur, key) { // 순수 계산 (시험용): 지금 값 + 누른 룬 → 새 값 (null = 비어 있음)
+  const s = cur == null || cur === '' ? '' : String(Number(cur));
+  if (key === 'x') { const t = s.slice(0, -1); return t === '' ? null : Number(t); }
+  const t = s === '0' ? String(key) : s + key; // 0 다음 숫자 = 바꿔 씀 (07 ✕)
+  return Number(t) > DS.UI.RUNE_MAX ? (cur == null || cur === '' ? null : Number(cur)) : Number(t);
+};
+DS.UI.runes = function (root, get, set) {
+  root.querySelectorAll('[data-rune]').forEach((b) => {
+    b.addEventListener('click', () => {
+      const [si, key] = b.dataset.rune.split('|'), i = Number(si), cur = get(i), v = DS.UI.runeNext(cur, key);
+      b.classList.remove('lit'); void b.offsetWidth; b.classList.add('lit'); setTimeout(() => b.classList.remove('lit'), 380);
+      if (v === (cur == null || cur === '' ? null : Number(cur))) return; // 두 자리 넘음 · 빈 칸에서 ⌫
+      set(i, v);
+      const slot = root.querySelector(`[data-rv="${i}"]`);
+      if (slot) { slot.classList.toggle('empty', v == null); slot.innerHTML = v == null ? '<span class="rune-ph">숫자를 넣어 주세요</span>' : String(v); if (v != null && key !== 'x') { slot.classList.remove('carve'); void slot.offsetWidth; slot.classList.add('carve'); } }
+      if (DS.Sound) DS.Sound.clank();
     });
-    ['pointerup', 'pointercancel', 'lostpointercapture'].forEach((ev) => b.addEventListener(ev, stop));
-    b.addEventListener('click', (e) => { if (e.detail === 0) step(b); }); // 키보드(Enter · Space)
-    b.addEventListener('contextmenu', (e) => e.preventDefault()); // 꾹 누를 때 메뉴 안 뜨게
+    b.addEventListener('contextmenu', (e) => e.preventDefault());
   });
+};
+DS.UI.runeCast = function (root) { // ✨ 공격(내기)을 누르는 순간 답 칸이 한 번 빛남 (흐름 · 단계는 그대로)
+  if (!root) return;
+  root.querySelectorAll('.rune-slot:not(.empty)').forEach((s) => { s.classList.remove('cast'); void s.offsetWidth; s.classList.add('cast'); });
 };
 // 🪟 창 공통 틀 (2026-11-04 사용자 확정 「경험 통일」): 위에 뜨는 창은 모두 같은 모양으로 고친다
 //   ① 제목 줄(.ui-head)은 창 위에 붙어 있고(스크롤해도 ✕ 가 사라지지 않음) 오른쪽에 같은 크기의 ✕ 하나

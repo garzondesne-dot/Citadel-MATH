@@ -674,7 +674,7 @@ DS.Student = (function () {
     const mid = step.id, attempt = rec.nextAttempt, key = `${mid}|${attempt}`;
     const items = Raid().itemsFor(L, R, mid, me, attempt);
     const sameQ = rec.v3 && rec.last && (!rec.perfect || rec.fix) && Array.isArray(rec.last.given) && rec.last.given.length === items.length; // 🔁 v3: 같은 문제 → 지난 답을 채워 두고 ✘ 칸만 고치기
-    if (!form || form.key !== key) form = { key, given: sameQ ? JSON.parse(JSON.stringify(rec.last.given)).map((g, i) => (g == null ? (items[i].type === 'multi' ? [] : items[i].type === 'number' ? 0 : items[i].type === 'text' ? '' : null) : g)) : items.map((q) => (q.type === 'multi' ? [] : q.type === 'number' ? 0 : q.type === 'text' ? '' : null)) };
+    if (!form || form.key !== key) form = { key, given: sameQ ? JSON.parse(JSON.stringify(rec.last.given)).map((g, i) => (g == null ? (items[i].type === 'multi' ? [] : items[i].type === 'text' ? '' : null) : g)) : items.map((q) => (q.type === 'multi' ? [] : q.type === 'text' ? '' : null)) }; // ⌨ #92 숫자 칸 = 빈 칸(null)에서 시작 · 룬을 눌러야 공격
     const prevWrong = rec.last ? rec.last.marks.map((m) => !m) : [];
     const ready = items.every((q, i) => (q.type === 'multi' ? form.given[i].length > 0 : q.type === 'text' ? String(form.given[i] || '').trim() !== '' : form.given[i] != null));
     const down = Raid().cleared(L, R, mid); // v0.9.2: 체력 0 → 쓰러졌어도 계속 풀고 공격할 수 있다
@@ -712,10 +712,16 @@ DS.Student = (function () {
       const go = $('#st-go'); if (go) { go.disabled = !ok; go.classList.toggle('go-pulse', ok); } form.touched = true; draftMark(ok ? key : null);
       drawn = `form|${key}|${JSON.stringify(form.given)}|${(R.help || {})[me] ? 1 : 0}`;
     }));
-    DS.UI.dial(body, (i) => form.given[i], (i, v) => { form.given[i] = v; form.touched = true; if (items.every((q, j) => (q.type === 'multi' ? form.given[j].length > 0 : q.type === 'text' ? String(form.given[j] || '').trim() !== '' : form.given[j] != null))) draftMark(key); drawn = `form|${key}|${JSON.stringify(form.given)}|${(R.help || {})[me] ? 1 : 0}|${down}`; }); // 꾹 누르면 계속 · 숫자만 바꿈 (v0.9.6.16)
+    DS.UI.runes(body, (i) => form.given[i], (i, v) => { // ⌨ #92 룬: 답 칸 · 「✍ 나의 답」 줄 · 공격 단추만 바꿈 (다시 그리지 않음)
+      form.given[i] = v; form.touched = true; penLast[mid] = i;
+      const ok = items.every((q, j) => (q.type === 'multi' ? form.given[j].length > 0 : q.type === 'text' ? String(form.given[j] || '').trim() !== '' : form.given[j] != null));
+      const go = $('#st-go'); if (go) { go.disabled = !ok; go.classList.toggle('go-pulse', ok); } draftMark(ok ? key : null);
+      const al = body.querySelector(`.ans-line[data-al="${i}"]`); if (al) al.outerHTML = ansLine(items[i], v, i);
+      drawn = `form|${key}|${JSON.stringify(form.given)}|${(R.help || {})[me] ? 1 : 0}|${down}`;
+    });
     $('#st-go').onclick = async () => {
       const given = items.map((q, i) => (q.type === 'blanks' ? form.given[i] : q.type === 'number' ? Number(form.given[i]) : form.given[i]));
-      const go = $('#st-go'); if (go) go.disabled = true; await mergeAnim(body); // ✍ → 📜 하나로 모임 (이 폰에서만 · 답은 그다음 바로 저장)
+      const go = $('#st-go'); if (go) go.disabled = true; DS.UI.runeCast(body); await mergeAnim(body); // ✍ → 📜 하나로 모임 (이 폰에서만 · 답은 그다음 바로 저장)
       try { await DS.Act.submit(code, raw, mid, attempt, given); retrying = ''; form = null; dirty = true; } catch (e) { DS.UI.toast(e.message); if (go) go.disabled = false; }
     };
   }
@@ -777,7 +783,7 @@ DS.Student = (function () {
     const hintLines = wSt.map((s) => ({ s, by: Object.entries(R.players || {}).filter(([u, p]) => u !== me && hOf(p, s)).map(([, p]) => p) })).filter((x) => x.by.length), hintBy = hintLines.flatMap((x) => x.by);
     const nextHint = wSt.find((s) => (rec.whyDone || []).includes(s) && !hOf(myP(), s)), myHint = wSt.length > 0 && nextHint == null && wSt.some((s) => hOf(myP(), s)), whyTag = wSt.length > 1 ? `🧩 근거 줄 ${rec.whyN}/${rec.whyM}` : '';
     const key = `chain|${mid}|${pass}|${stage}|${rec.nextK}`;
-    if (!cform || cform.key !== key) cform = { key, given: [q.type === 'multi' ? [] : q.type === 'number' ? 0 : null] };
+    if (!cform || cform.key !== key) cform = { key, given: [q.type === 'multi' ? [] : null] }; // ⌨ #92 숫자 = 빈 칸에서
     const ready = q.type === 'multi' ? cform.given[0].length > 0 : cform.given[0] != null;
     const dns = Raid().chainDown(L, R, mid).filter((d) => d.down).map((d) => d.k); // 💥 반이 쓰러뜨린 졸개
     const wm = writeMode[mid], phN = Number((myP().ph || {})[mid]) || 0, wrOk = (myP().wr || {})[mid], canPhoto = DS.Photo && DS.Photo.ready(L.id, mid); // ✍ #50 ② 언제나 (시작 전 · 졸개 도중 · 대장 뒤 · 한 판 더 중) // #47 테스트에서도 ✍ 📸 (진짜 중계소 · 기준표 켜진 문제) // 🐞 2026-11-09: sig 보다 먼저 (예전엔 뒤에 있어 소레이드 화면이 그려지지 않음 · v0.9.34.0~)
@@ -852,7 +858,7 @@ DS.Student = (function () {
       else if (q.type === 'choice') cform.given[0] = Number(v); else cform.given[0] = [v];
       DS.Sound.clank(); render();
     }));
-    DS.UI.dial(body, () => cform.given[0], (i, v) => { cform.given[0] = v; drawn = ''; });
+    DS.UI.runes(body, () => cform.given[0], (i, v) => { cform.given[0] = v; drawn = ''; const g2 = $('#cr-go'); if (g2) { g2.disabled = v == null; g2.classList.toggle('go-pulse', v != null); } }); // ⌨ #92
     body.querySelectorAll('[data-why]').forEach((b) => (b.onclick = () => DS.Control.run(async () => {
       const r2 = await DS.Act.chainSubmit(code, raw, mid, rec.pWhy, pass, Number(b.dataset.why), 1); drawn = '';
       if (r2.pWhy < 0) { DS.Sound.correct(); DS.UI.toast('💡 근거 완성!'); } else { DS.Sound.squish(); DS.UI.toast('다시 골라 봐요 — 벌은 없어요'); }
@@ -875,6 +881,7 @@ DS.Student = (function () {
     const go = $('#cr-go');
     if (go) go.onclick = () => DS.Control.run(async () => {
       go.disabled = true; const g = q.type === 'number' ? Number(cform.given[0]) : cform.given[0];
+      if (q.type === 'number') { DS.UI.runeCast(body); await new Promise((r) => setTimeout(r, 260)); } // ✨ #92 시전 빛
       const r2 = await DS.Act.chainSubmit(code, raw, mid, stage, pass, g); cform = null; drawn = '';
       const okNow = prac ? (r2.pass === pass && r2.pStage > stage) : r2.stage > stage;
       chainAtk = { ok: okNow, big: !prac && r2.done, perfect: !prac && r2.done && r2.perfect, prac }; // ⚔ 2026-11-09 선생님 「졸개 공격도 모션」: 다시 그린 뒤 돌진 · 탄 (아래 render 뒤)
@@ -925,10 +932,8 @@ DS.Student = (function () {
     if (q.type === 'text') { // 단답: 글자 입력
       return `<div class="item">${tag}${qText(q.question)}<input class="item-text" data-text="${i}" maxlength="40" placeholder="답을 입력하세요" value="${esc(G[i] || '')}" autocomplete="off"></div>`;
     }
-    // number: 다이얼 (십의 자리 · 일의 자리)
-    const v = G[i], t = Math.floor(v / 10), o = v % 10;
-    return `<div class="item">${tag}${qText(q.question)}
-      <div class="dial"><div class="wheel"><button data-dial="${i}|10">▲</button><b>${t}</b><button data-dial="${i}|-10">▼</button></div><div class="wheel"><button data-dial="${i}|1">▲</button><b>${o}</b><button data-dial="${i}|-1">▼</button></div><span class="dial-val">= ${v}</span></div></div>`;
+    // number: ⌨ 룬 키패드 (#92 · 다이얼 대신 · DS.UI.runeHtml 하나 = 학생 · 테스트 · 체험판 · 선생님 시연)
+    return `<div class="item">${tag}${qText(q.question)}${DS.UI.runeHtml(i, G[i])}</div>`;
   }
 
   // ── 보스: 형성평가 1~7번 (2026-11-05 사용자 (나): 문항마다 첫 시도 = 학습지 그대로 · 재도전 3번은 숫자 · 문자가 바뀐 새 문제) ──
@@ -980,5 +985,5 @@ DS.Student = (function () {
     bindLobby();
   }
   // v0.9.3 종합상황실 시연: 학생 폰과 같은 문항 칸 · 해설 줄
-  return { enter, stop: stop0, itemHtml: (q, i, G) => itemHtml(q, i, false, null, G, true), solOf, itemText, hintCount, penLine, penBox, pixIn, withAns, mergeAnim, stampMs, STAMP_GAP, penToggle: (k) => { penOpen[k] = !penOpen[k]; }, penMark: (k, i) => { penLast[k] = i; } }; // 🧩 A안 (11/11): 성채 · 허수아비 전투도 같은 부품
+  return { enter, stop: stop0, itemHtml: (q, i, G) => itemHtml(q, i, false, null, G, true), ansLine, solOf, itemText, hintCount, penLine, penBox, pixIn, withAns, mergeAnim, stampMs, STAMP_GAP, penToggle: (k) => { penOpen[k] = !penOpen[k]; }, penMark: (k, i) => { penLast[k] = i; } }; // 🧩 A안 (11/11): 성채 · 허수아비 전투도 같은 부품
 })();
