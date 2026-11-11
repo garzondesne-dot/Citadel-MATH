@@ -36,7 +36,10 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
       const ans = sol.replace(/^.*정답:\s*/, '').split(' · ')[0];
       const want = ans.split(/[,{}]/).map((x) => x.trim()).filter(Boolean);
       const grp = picks.length && picks[0].closest('.quiz-grp');
-      picks.forEach((p) => { const t = p.textContent.replace(/^[①-⑳]\s*/, '').trim(); if (want.includes(t) || t === ans.trim()) p.click(); }); });
+      // 칸이 둘(A · B 원소 칩)이면 풀이 글의 {…} 를 칸마다 따로 씀 (4 · 8 처럼 두 칸에 다 있는 숫자를 엉뚱한 칸에서 고르지 않게)
+      const sets = [...sol.matchAll(/\{([^}]*)\}/g)].map((m) => m[1].split(',').map((x) => x.trim()).filter(Boolean)), grps = [...ov.querySelectorAll('.pick-grp')];
+      const wantOf = (p) => { const gi = grps.findIndex((g) => g.contains(p)); return grps.length > 1 && sets.length >= grps.length && gi >= 0 ? sets[gi] : want; };
+      picks.forEach((p) => { const t = p.textContent.replace(/^[①-⑳]\s*/, '').trim(); if (wantOf(p).includes(t) || t === ans.trim()) p.click(); }); });
     await H.waitForTimeout(150);
     await H.evaluate(() => { const g = document.querySelector('#demo-go'); if (g && !g.disabled) g.click(); }); await H.waitForTimeout(250);
   }
