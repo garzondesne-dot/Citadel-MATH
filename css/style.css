@@ -3288,3 +3288,8 @@ body:has(#test-bar) #screen-student.st-battle .wrap:has(.cr-dock) { padding-bott
 .hero-card .hc-say { margin-top: 5px !important; padding: 4px 8px; border-radius: 10px; background: #fffaf0; border: 1px solid #c9b28a; font-weight: 700; color: #5a3a10; position: relative; }
 .hero-card .hc-say::before { content: ''; position: absolute; left: 14px; top: -6px; border: 6px solid transparent; border-top: 0; border-bottom-color: #c9b28a; }
 .ult .u-name .u-sub { display: block; margin-top: 4px; font-size: .38em; -webkit-text-stroke: 0; letter-spacing: 0; color: #fff3d6; text-shadow: 0 2px 0 #000, 0 0 10px #000; }
+/* ⚔ #74-2 근접 돌진 잔상 (Ⅲ · Ⅳ) */
+.atk-echo { position: absolute; z-index: 9; pointer-events: none; opacity: 0; filter: brightness(1.6) saturate(.4) drop-shadow(0 0 4px #9fdcff); animation: atkEcho .48s ease-out both; }
+.atk-echo > * { pointer-events: none; }
+@keyframes atkEcho { 0% { opacity: .55; } 100% { opacity: 0; transform: translateX(-6px); } }
+@media (prefers-reduced-motion: reduce) { .atk-echo { display: none; } }

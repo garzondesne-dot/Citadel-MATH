@@ -39,7 +39,7 @@ DS.Attack = (function () {
   async function impact(scene, monBox, fx, o = {}) {
     const B = body(monBox, scene), cx = B.cx, floor = B.y1;
     const sp = DS.FX.spec(DS.FX.KINDS.includes(fx) ? fx : 'flame') || {}, shot = DS.FX.modeOf(fx) === 'shot';
-    if (o.ult) ultBlast(scene, monBox, fx); else if (!o.cast) DS.FX.place(scene, fx, { body: B, from: o.from, mode: shot && !o.from ? 'body' : undefined, mult: o.mult, perfect: o.finish });
+    if (o.ult) ultBlast(scene, monBox, fx); else if (!o.cast) DS.FX.place(scene, fx, { body: B, from: o.from, mode: shot && !o.from ? 'body' : undefined, mult: o.mult, perfect: o.finish, dir: o.dir });
     const hit = sp.hit || [0, 0.08, 0.18, 2];
     await wait((shot && o.from ? Math.min(0.9, hit[0] || 0.3) : Math.min(0.3, hit[0] || 0.06)) * 1000); // 쏘는 기술은 탄이 닿는 순간까지
     if (!scene.isConnected) return;
@@ -145,6 +145,17 @@ DS.Attack = (function () {
   //   ② 원거리 용사: 제자리 → 한 걸음 → 탄(손 → 몸통 가운데) → 닿은 자리에서 기술
   //   ③ 근접 용사: 몬스터 보이는 몸통 옆(가까운 쪽 · 발끝 높이)까지 돌진 → 기술 → 제자리
   //   o.onHit = 맞는 순간 부를 것 (종합실 데미지 숫자 · PERFECT) · o.noDmg · o.rest(끝 자세)
+  // ⚔ #74-2 돌진 잔상: 지나가는 자리에 용사 그림 n 개가 옅게 남았다 사라짐 (transform · opacity 만)
+  const GHOSTS = { slash: 3, twin: 2, reap: 5, spin: 2, hammer: 2, quake: 2 };
+  function ghosts(scene, heroBox, to, n) {
+    if (reduce() || !heroBox.isConnected) return;
+    const H = rel(heroBox, scene);
+    for (let i = 1; i <= n; i++) {
+      const g = document.createElement('div'), f = i / (n + 1); g.className = 'atk-echo'; g.innerHTML = heroBox.innerHTML;
+      g.style.cssText = `left:${H.x + to.x * f}px;top:${H.y + to.y * f}px;width:${H.w}px;height:${H.h}px;animation-delay:${(i * 40)}ms`;
+      scene.appendChild(g); setTimeout(() => g.remove(), 520 + i * 40);
+    }
+  }
   const handOf = (box, scene, dir) => { const a = box.querySelector('.art') || box, r = rel(a, scene); return { x: r.x + r.w * (dir > 0 ? 0.74 : 0.26), y: r.y + r.h * 0.5 }; };
   async function play(scene, o = {}) {
     const { heroBox, monBox } = o, hero = Number(o.hero) || 0, fx = o.fx || 'flame', reso = DS.FX && DS.FX.resonates && DS.FX.resonates(hero, fx), mult = (reso ? 1.15 : 1) * (o.ultimate ? 1.25 : 1) * (o.mult || 1);
@@ -186,12 +197,20 @@ DS.Attack = (function () {
       const to = { x: edge - hand0, y: Math.max(-H.y, Math.min(R.height - (H.y + H.h), B.y1 - hc.y)) };
       setPose(heroBox, hero, 'walk');
       if (DS.Sound && DS.Sound.swing) DS.Sound.swing();
+      // ⚔ #74-2 근접 3박자 (HERO-ATTR 3-2): Ⅲ · Ⅳ = ① 돌진 잔상 → ② 연타(맞힌 소문제 수 · 최대 5 · 타마다 −1) → ③ 마무리(큰 그림) · 전체 길이는 원거리 Ⅳ 안
+      const tierN0 = DS.FX.tierOf(fx), big = !o.miss && typeof tierN0 === 'number' && tierN0 >= 2, hits = big ? Math.max(1, Math.min(5, Math.floor(Number(o.hits) || 1))) : 1;
+      if (big) ghosts(scene, heroBox, to, GHOSTS[fx] || 2);
       await dash(scene, heroBox, { x: 0, y: 0 }, to, 240, true);
       if (!scene.isConnected) return;
       setPose(heroBox, hero, 'attack');
       await wait(110);
+      for (let k = 0; k < hits - 1 && scene.isConnected; k++) { // 앞 타들: 가볍게 · 마지막 타 = 아래 impact (마무리)
+        DS.FX.place(scene, fx, { body: B, mult: mult * 0.8, dir }); await wait(90);
+        if (o.onHit) o.onHit({ k, n: hits }); if (!o.noDmg) dmg(scene, B.cx + (k % 2 ? 14 : -14), B.y0 + 6 - k * 6); knock(monBox, 8); shake(scene, 2, 90);
+        if (DS.Sound && DS.Sound.fxHit) DS.Sound.fxHit(fx); await wait(70);
+      }
       if (o.miss) { if (DS.Sound && DS.Sound.block) DS.Sound.block(); await dash(scene, heroBox, to, { x: to.x - dir * 18, y: to.y }, 120, false); if (monBox.animate) monBox.animate([{ scale: '1' }, { scale: '1.08' }, { scale: '1' }], { duration: 260 }); shake(scene, 2, 120); await wait(140); }
-      else await impact(scene, monBox, fx, hitO);
+      else await impact(scene, monBox, fx, Object.assign({}, hitO, { dir, n: hits, onHit: o.onHit ? () => o.onHit({ k: hits - 1, n: hits }) : null }));
       await wait(o.ultimate ? 700 : 140);
       if (!scene.isConnected) return;
       setPose(heroBox, hero, 'walk');

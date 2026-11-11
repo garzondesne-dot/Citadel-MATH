@@ -266,6 +266,12 @@
 ## 🔐 규칙 게시 = 손발 방이 직접 (2026-11-11)
 - `firebase/database.rules.json` 을 바꾸면: 서비스 계정 토큰(`tools/auto/google.js firebaseToken`)으로 `PUT {DB}/.settings/rules.json` (읽기 → 올리기 → 다시 읽어 파일과 같은지 확인). 선생님 「규칙 올려줘」 뒤에만.
 
+## ⚔ #74-2 근접 3박자 (2026-11-11)
+- attack.js play 근접 갈래: Ⅲ · Ⅳ(tierOf ≥ 2) = 돌진 잔상 `ghosts()`(`.atk-echo` · GHOSTS 표) → 연타 `o.hits`(맞힌 수 · 최대 5 · 앞 타 가볍게 + 마지막 = impact 마무리 · onHit({k,n})) · 종합실 hit = 연타면 타마다 −1 · PERFECT 는 마지막 타 · hits 를 넘기는 곳 = 종합실(a.dmg) · 학생(gain) · 성채(맞힌 수).
+- 새 자리 = 띠 메타 `mm`: `cross`(가로지르기 · 몸통 2.4배 · dir 따라 뒤집음) · `cross-wide`(+ 키 1.9배) · `wide`(몸통 2배 · 1.9배) — fx.js place.
+- 그림 = `tools/pfx/melee_gen.py <이름> <출력>`(코드로 그리는 도트 띠 · 마지막 줄 = manifest 한 칸) · 띠를 바꾸면 fxbb · `tools/pfx/stills.py`(정지 그림표 v 번호)도 다시.
+- 1차 = ⚔ 삼연 참격 · 쌍월 참 (`fx-slash-v2` · `fx-twin-v2`). 🔨 망치 · 대지 분쇄 · 🌪 회전 · 사신의 낫은 다음 커밋.
+
 ## 🧙 #73 용사 고르기 · 이름 · 새 용사 해금 · 각성한 로안 · 스킬 탭 (2026-11-11)
 - 이름 · 이야기 = `js/engine/lore.js` (DS.Lore · docs/HERO-LORE.md 표 그대로 · `tests/lore.test.js` 가 표와 비교) · 표시 = `DS.Lore.label(n)` 「로안 · 검사」. 표를 고치면 lore.js 도 같이.
 - 소개 카드 = camp.js settings `heroCard()` (학생 · 선생님 · 테스트 같은 카드) · 칸 = 카드만 바꿈 · [이 용사로 정하기] · 💎 [n 으로 열기] · 도전 = 진행 막대 · 처음 누르면 `DS.Attack.cutin(n, fx, { peek })` 0.8초(이 기기 `citadel-hero-peek`). 초상 = manifest `heroPortraits` (`hero-portraits-v1.webp` · 칸 256 · 6 × 6 · list[n] = [열, 줄] · 11-11 port-1~9 34명 모두 · `hero-portraits-v2.webp`).

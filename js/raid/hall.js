@@ -587,15 +587,16 @@ DS.Hall = (function () {
       //   학생 폰과 같은 DS.Attack.play — 근접 = 보이는 몸통 옆까지 돌진 · 원거리 = 제자리 한 걸음 + 탄 · 🔮 쏘는 기술 = 손에서 몸통까지 · 이펙트 = 보이는 몸통 · 발끝 기준
       const prac = a.label === 'practice', ok = a.label !== 'fail', perfect = a.label === 'success';
       const hid = (R.players[a.u] || {}).hero || 0, p = (R.players[a.u] || {}).fx || 'flame';
-      const hit = () => {
-        Snd().correct && perfect && setTimeout(() => Snd().correct(), 120);
+      const hit = (info) => { // ⚔ #74-2 연타면 타마다 「−1」 · PERFECT 는 마지막 타에
+        const multi = info && info.n > 1, last = !info || info.k === info.n - 1;
+        if (last) Snd().correct && perfect && setTimeout(() => Snd().correct(), 120);
         m0.classList.remove('flash'); void m0.offsetWidth; m0.classList.add('flash');
         if (prac) { const t = document.createElement('span'); t.className = 'prac-tag'; t.textContent = '몬스터 묶기!'; if (DS.Thrill) DS.Thrill.bindFx(m0); h.appendChild(t); setTimeout(() => t.remove(), 1600); }
         const fx = $('#rm-fx');
-        if (fx && a.dmg) { const d = document.createElement('span'); d.className = `dmg${perfect ? ' big' : ''}`; d.textContent = `−${a.dmg}`; d.style.left = `${55 + Math.random() * 25}%`; fx.appendChild(d); setTimeout(() => d.remove(), 1300); }
-        if (perfect) { const t = document.createElement('div'); t.className = 'perfect'; t.textContent = 'PERFECT!'; arena.appendChild(t); setTimeout(() => t.remove(), 1300); }
+        if (fx && a.dmg) { const d = document.createElement('span'); d.className = `dmg${perfect && last ? ' big' : ''}`; d.textContent = multi ? '−1' : `−${a.dmg}`; d.style.left = `${55 + Math.random() * 25}%`; fx.appendChild(d); setTimeout(() => d.remove(), 1300); }
+        if (perfect && last) { const t = document.createElement('div'); t.className = 'perfect'; t.textContent = 'PERFECT!'; arena.appendChild(t); setTimeout(() => t.remove(), 1300); }
       };
-      const go = () => (h.isConnected && DS.Attack ? DS.Attack.play(arena, { heroBox: h, monBox: m0, hero: hid, fx: p, miss: !ok, finish: perfect, noDmg: true, rest: 'idle', onHit: hit }) : Promise.resolve()).catch((e) => console.warn('공격 연출', e));
+      const go = () => (h.isConnected && DS.Attack ? DS.Attack.play(arena, { heroBox: h, monBox: m0, hero: hid, fx: p, miss: !ok, finish: perfect, noDmg: true, rest: 'idle', onHit: hit, hits: prac ? 1 : a.dmg }) : Promise.resolve()).catch((e) => console.warn('공격 연출', e));
       h.classList.add('atk-on'); h._atk = (h._atk || Promise.resolve()).then(go).then(() => h.classList.remove('atk-on')); // 같은 용사의 공격은 차례로
       if (!ok) Snd().squish();
     }

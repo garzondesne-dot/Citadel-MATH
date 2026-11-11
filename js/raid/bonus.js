@@ -399,7 +399,7 @@ DS.Bonus = (function () {
       if (!document.body.contains(el)) return null;
       if (anyOk) DS.Sound.correct(); else DS.Sound.squish();
       // ⚔ 공격 연출 한 번 (맞힌 게 하나라도 있으면 명중 · 모두 틀리면 튕겨냄 · 벌 없음)
-      if (DS.Attack) { const sc = el.querySelector('.scene'); await DS.Attack.play(sc, { heroBox: sc && sc.querySelector('.enc-hero'), monBox: sc && sc.querySelector('.enc-mon'), hero: me.hero || 0, fx: me.fx || 'flame', miss: !anyOk, finish: anyOk && solved.every(Boolean), s: 1 }).catch(() => {}); }
+      if (DS.Attack) { const sc = el.querySelector('.scene'); await DS.Attack.play(sc, { heroBox: sc && sc.querySelector('.enc-hero'), monBox: sc && sc.querySelector('.enc-mon'), hero: me.hero || 0, fx: me.fx || 'flame', miss: !anyOk, finish: anyOk && solved.every(Boolean), s: 1, hits: todo.filter((i) => marks[i]).length }).catch(() => {}); } // ⚔ #74-2 연타 = 이번에 맞힌 수
       else if (anyOk) DS.FX.play(el.querySelector('.scene'), me.fx || 'flame', { scale: 0.3 });
       if (!document.body.contains(el)) return null;
       penRes = penRes.replace(' pen-res', ' pen-res pen-still'); // 다음 그림부터는 도장 · 지움을 다시 하지 않음

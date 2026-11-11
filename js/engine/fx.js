@@ -88,7 +88,7 @@ DS.FX = (function () {
   function stripXY(box, sp, left, top, sx, sy, opt = {}) {
     const el = document.createElement('i'); el.className = 'fx-spr';
     const W = px(sp.w * sx), H = px(sp.h * sy), dur = sp.n / sp.fps;
-    el.style.cssText = `left:${px(left)}px;top:${px(top)}px;width:${W}px;height:${H}px;background-image:url('${url(sp)}');background-size:${W * sp.n}px ${H}px;--fx-end:${-W * sp.n}px;animation-duration:${dur.toFixed(3)}s;animation-timing-function:steps(${sp.n});z-index:${opt.z || 20};${opt.rot ? `transform-origin:${opt.ox.toFixed(1)}px ${opt.oy.toFixed(1)}px;transform:rotate(${opt.rot.toFixed(3)}rad);` : ''}`;
+    el.style.cssText = `left:${px(left)}px;top:${px(top)}px;width:${W}px;height:${H}px;background-image:url('${url(sp)}');background-size:${W * sp.n}px ${H}px;--fx-end:${-W * sp.n}px;animation-duration:${dur.toFixed(3)}s;animation-timing-function:steps(${sp.n});z-index:${opt.z || 20};${opt.rot ? `transform-origin:${opt.ox.toFixed(1)}px ${opt.oy.toFixed(1)}px;transform:rotate(${opt.rot.toFixed(3)}rad);` : opt.flip ? 'transform:scaleX(-1);' : ''}`; // flip = 왼쪽으로 가로지르기
     load(sp); box.appendChild(el); setTimeout(() => el.remove(), dur * 1000 + 80);
     return el;
   }
@@ -109,6 +109,13 @@ DS.FX = (function () {
       const tx = sp.tx || bb[2], hit = { x: cx - w * 0.12, y: cy }, dx = hit.x - o.from.x, dy = hit.y - o.from.y, L = Math.max(20, Math.hypot(dx, dy));
       const sx = L / Math.max(10, tx - sp.px), sy = q4(clamp(Math.min(s, sx * 1.4), 0.6, 8)); // 길이(sx)는 몸통까지 닿게 그대로
       el = stripXY(box, sp, o.from.x - sp.px * sx, o.from.y - bcy * sy, sx, sy, { z: 21, rot: Math.atan2(dy, dx), ox: sp.px * sx, oy: bcy * sy });
+    } else if (!o.mode && (sp.mm === 'cross' || sp.mm === 'cross-wide')) {
+      // ⚔ #74-2 가로지르기 (HERO-ATTR 3-2 ②): 용사 쪽에서 몬스터를 지나 뒤까지 긴 선 · 폭 = 몸통 2.4배(장면 90% 까지) · 키 = 몸통 1.2배 (넓게 = 1.9배)
+      const R = box.getBoundingClientRect(), dir = o.dir || 1, sx = Math.min(w * 2.4, R.width * 0.9) / bw, sy = q4(clamp(Math.min(sx, (h * (sp.mm === 'cross' ? 1.2 : 1.9)) / bh) * tier * mult, 0.6, 8));
+      const left = clamp(cx + dir * w * 0.2 - (bw * sx) / 2 - bb[0] * sx, -bb[0] * sx, R.width - bb[2] * sx);
+      el = stripXY(box, sp, left, cy - bcy * sy, sx, sy, { flip: dir < 0 });
+    } else if (!o.mode && sp.mm === 'wide') { // 넓게: 몸통 폭 2배 · 키 1.9배까지
+      const s2 = q4(clamp(Math.min((w * 2) / bw, (h * 1.9) / bh) * tier * mult, 0.6, 8)); el = stripXY(box, sp, cx - bcx * s2, cy - bcy * s2, s2, s2);
     } else if (mode === 'ground') el = stripXY(box, sp, cx - bcx * s, B.y1 + h * 0.03 - bb[3] * s, s, s);
     else el = stripXY(box, sp, cx - bcx * s, cy - bcy * s, s, s);
     return new Promise((res) => setTimeout(() => res(el), (sp.n / sp.fps) * 1000));
