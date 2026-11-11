@@ -64,18 +64,21 @@ DS.Sound = (function () {
   }
 
   // 🔊 녹음 소리: 받아서 해독해 두고(buf) 바로 재생 · 아직이면 받기 시작하고 합성음(fb)으로
-  const buf = {}, loading = {};
+  const buf = {}, loading = {}, turn = {}; // buf · loading = 파일마다 · turn = 🔁 번갈아 차례
   const sfxCfg = () => (window.DS && DS.ASSETS && DS.ASSETS.sfx) || null;
-  const sfxUrl = (k) => { const c = sfxCfg(); return c && (c.keys.includes(k) || c.bgm.includes(k)) ? `${c.dir}${k}-v${c.v}.mp3` : null; };
+  // 🔊 #86 (2026-11-11): 자리마다 파일 여러 개(순위 순 · manifest sfx.files) · rotate = 칠 때마다 번갈아 · rank = 나눠 쓰기(finish 2 = 진필살기 마무리)
+  const filesOf = (k) => { const c = sfxCfg(); if (!c) return []; if (c.files && c.files[k]) return c.files[k]; return (c.keys || []).includes(k) || (c.bgm || []).includes(k) ? [`${k}-v${c.v || 1}.mp3`] : []; };
+  const sfxUrl = (k) => { const f = filesOf(k)[0]; return f ? `${sfxCfg().dir}${f}` : null; };
   function load(k) {
-    const c = ensure(), u = sfxUrl(k);
-    if (!c || !u || buf[k] || loading[k] || typeof fetch !== 'function') return;
-    loading[k] = fetch(u).then((r) => r.arrayBuffer()).then((a) => new Promise((res, rej) => c.decodeAudioData(a, res, rej))).then((b) => { buf[k] = b; }).catch(() => {}).finally(() => { delete loading[k]; });
+    const c = ensure(), cf = sfxCfg(); if (!c || !cf || typeof fetch !== 'function') return;
+    filesOf(k).forEach((f) => { if (buf[f] || loading[f]) return; loading[f] = fetch(`${cf.dir}${f}`).then((r) => r.arrayBuffer()).then((a) => new Promise((res, rej) => c.decodeAudioData(a, res, rej))).then((b) => { buf[f] = b; }).catch(() => {}).finally(() => { delete loading[f]; }); });
   }
-  function sample(k, vol = 0.9, fb) {
+  const pick = (k, rank) => { const fs = filesOf(k); if (!fs.length) return null; if (rank) return fs[Math.min(fs.length, rank) - 1]; const c = sfxCfg(); if (c && (c.rotate || []).includes(k) && fs.length > 1) { const i = (turn[k] = ((turn[k] ?? -1) + 1) % fs.length); return fs[i]; } return fs[0]; };
+  function sample(k, vol = 0.9, fb, rank) {
     if (sfxOff) return true;
     const c = ensure(); if (!c) return false;
-    if (buf[k]) { const s = c.createBufferSource(), g = c.createGain(); s.buffer = buf[k]; g.gain.value = vol; s.connect(g).connect(master); s.start(); return true; }
+    const f = pick(k, rank);
+    if (f && buf[f]) { const s = c.createBufferSource(), g = c.createGain(); s.buffer = buf[f]; g.gain.value = vol; s.connect(g).connect(master); s.start(); return true; }
     load(k); if (fb) fb(); return false;
   }
   const preload = () => { const c = sfxCfg(); if (c) c.keys.forEach(load); };
@@ -98,6 +101,7 @@ DS.Sound = (function () {
   const FAM_SFX = { cut: 'cut', smash: 'smash', sweep: 'sweep', wind: 'wind', fire: 'fire', spark: 'spark', frost: 'frost', star: 'star', magic: 'magic', math: 'magic', sun: 'star', dark: 'cut', gear: 'smash', water: 'wind' }; // 🌈 #74-3 새 속성 = 새 효과음이 오기 전까지 비슷한 소리
 
   return {
+    filesOf, pick,
     unlock() { const c = ensure(); preload(); return c; },
     toggle() { const off = !(sfxOff && bgmOff); this.setSfx(!off); this.setBgm(!off); return off; },
     // 🔇 효과음 · 배경음 따로 (on = 켜기) · keep = false 면 이 기기에 저장 안 함 (교사 리모컨이 종합실을 바꿀 때)
@@ -116,7 +120,7 @@ DS.Sound = (function () {
     swing() { sample('swing', 0.6, () => noise({ dur: 0.25, vol: 0.25, freq: 600, sweepTo: 3500, q: 0.8 })); },
     launch() { sample('launch', 0.6, () => noise({ dur: 0.2, vol: 0.2, freq: 1500, sweepTo: 5000, q: 1 })); },
     fxHit(kind) { const f = window.DS && DS.FX && DS.FX.famOf ? DS.FX.famOf(kind) : null; const k = f ? FAM_SFX[f.id] : 'special'; sample(k, 0.85, () => { noise({ dur: 0.12, vol: 0.4, freq: 900, type: 'lowpass' }); tone({ type: 'square', f0: 170, f1: 60, dur: 0.12, vol: 0.18 }); }); },
-    finish() { sample('finish', 0.95, () => { noise({ dur: 0.45, vol: 0.5, freq: 4500, sweepTo: 400 }); tone({ type: 'sine', f0: 75, f1: 30, dur: 0.45, vol: 0.6 }); }); },
+    finish(rank) { sample('finish', 0.95, () => { noise({ dur: 0.45, vol: 0.5, freq: 4500, sweepTo: 400 }); tone({ type: 'sine', f0: 75, f1: 30, dur: 0.45, vol: 0.6 }); }, rank); }, // 🎯 #86 finish 1 = 몬스터 쓰러짐 · 2 = 진필살기 1초 뒤 마무리
     coin() { sample('coin', 0.7, () => tone({ type: 'square', f0: 1320, f1: 1980, dur: 0.12, vol: 0.08 })); },
     levelup() { sample('levelup', 0.85, () => [523, 659, 784, 1047].forEach((f, i) => tone({ type: 'triangle', f0: f, dur: 0.45, vol: 0.18, delay: i * 0.12 }))); },
     get muted() { return sfxOff; },
