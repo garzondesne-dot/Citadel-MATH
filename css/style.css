@@ -3302,3 +3302,6 @@ body:has(#test-bar) #screen-student.st-battle .wrap:has(.cr-dock) { padding-bott
 .fx-fam.sp:not(.shut) { grid-template-columns: repeat(2, 1fr) 2fr; }
 .fx-fam:not(.shut) > .fam-h { grid-column: 1 / -1; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 2px 2px 0; }
 .fx-fam:not(.shut) .fam-n { display: inline; margin: 0 0 0 auto; font-size: 12px; }
+body:has(.modal:not([hidden])) #ver-tag { display: none; }
+.set-box .set-foot { background: var(--panel); box-shadow: 0 -10px 12px var(--panel); }
+.set-box .set-foot { bottom: -13px; padding-bottom: 14px; } /* ④ 창 아래 여백(12px)으로 목록이 비치던 것 — sticky 가 여백 안쪽에 멈춰서 */
