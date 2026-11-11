@@ -128,7 +128,7 @@ DS.Sound = (function () {
     card() { noise({ dur: 0.06, vol: 0.15, freq: 5000 }); },
     // 🔊 #87 (2026-11-11) 🆕 소리 틀 곳: boss 1 = 수업 형성평가 보스 · 2 = 🏰 성채 보스 방 · 3 = 🎯 허수아비 형성평가 / die = 번갈아 / 나머지 1개 · 1위만 (파일이 없으면 예전 소리 · 합성음)
     boss(rank = 1) { sample('boss', 0.8, () => tone({ type: 'sawtooth', f0: 110, f1: 55, dur: 0.8, vol: 0.18 }), rank); },
-    hurt() { sample('hurt', 0.55); },
+    hurt() { sample('hurt', 0.55, () => tone({ type: 'square', f0: 300, f1: 90, dur: 0.2, vol: 0.15 })); }, // #90: 옛 합성음(같은 이름이 뒤에 또 있어 새 소리를 덮던 것)은 파일을 못 받았을 때 대신 소리로
     die() { sample('die', 0.7); },
     anvil() { sample('anvil', 0.85, () => this.hit()); },
     cardMade() { sample('card', 0.85, () => this.correct()); },
@@ -195,7 +195,6 @@ DS.Sound = (function () {
       tone({ type: 'sawtooth', f0: 130, f1: 45, dur: 0.32, vol: 0.28 });
       noise({ dur: 0.25, vol: 0.35, freq: 500, type: 'lowpass' });
     },
-    hurt() { tone({ type: 'square', f0: 300, f1: 90, dur: 0.2, vol: 0.15 }); },
     // 테이프 되감기
     rewind() {
       tone({ type: 'sawtooth', f0: 900, f1: 80, dur: 1.2, vol: 0.1 });
