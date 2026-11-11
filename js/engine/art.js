@@ -111,6 +111,7 @@ ${a.brand.splash ? '' : `.splash{background-image:url('${a.base}${a.brand.title}
 .menu-ic{background-image:url('${a.base}${a.brand.menu.src}');background-size:${a.brand.menu.cols * 100}% 100%}
 ${Object.entries(a.brand.menu.kinds).map(([k, i]) => `.menu-ic[data-ic="${k}"]{background-position:${(i / (a.brand.menu.cols - 1)) * 100}% 0}`).join('')}` : ''}
 ${a.ui && a.ui.kit ? skin(a) : ''}
+${a.ui && a.ui.rune ? [['key', '.rune:not(.rune-del)'], ['lit', '.rune.lit:not(.rune-del)'], ['slot', '.rune-slot']].filter(([k]) => a.ui.rune[k]).map(([k, sel]) => `${sel}{background:url('${a.base}${a.ui.rune[k]}') center/100% 100% no-repeat;image-rendering:pixelated}`).join('') : ''}
 ${a.ui && a.ui.paper ? `:root{--paper-tex:url('${new URL(a.base + a.ui.paper, document.baseURI).href}')}` : ''}
 ${(a.dungeons ? a.dungeons.ids : []).map((id) => `.bg-scene.th-${id}{background-image:linear-gradient(#1a161255,#1a161200 40%,#1a1612cc),url('${a.base}${a.dungeons.bg(id)}')}`).join('\n')}`;
   }
