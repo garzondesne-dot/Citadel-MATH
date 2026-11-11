@@ -23,15 +23,15 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   // ② 일괄 환불이 지나감 (refund96 과 같은 꼴) → 첫 접속 때 뜸
   await S.evaluate(async () => { const m = await DS.Account.me(); await DS.Net.update(`gem/${m.c}/${m.n}`, { 'buy/fx_moon': null, 'log/refund96_1': { g: 80, s: 3, nh: 1, nf: 2, gift: true, nopop: true, why: 'x', at: 2 } }); });
   await camp(); const t = await pop(); await S.screenshot({ path: `${OUT}/115-popup.png` });
-  check(/개편/.test(t) && /자기 속성 스킬 4칸/.test(t) && /공통 특화/.test(t) && /4명/.test(t), `바뀐 것 3줄 (${t.slice(0, 80)})`);
-  check(/80/.test(t) && /3/.test(t) && /용사 1/.test(t) && /스킬 2/.test(t) && /사면 끝/.test(t), '돌려받은 💎 80 · 📜 3 · 용사 1 + 스킬 2 · 「사면 끝」');
+  check(/새로워졌어요/.test(t) && /자기 속성 스킬 4칸만 배우고/.test(t) && /공통 특화/.test(t) && /아바쿠/.test(t), `바뀐 것 3줄 (${t.slice(0, 80)})`);
+  check(/80/.test(t) && /3/.test(t) && /용사 1명/.test(t) && /스킬 2개/.test(t) && /내 스킬 보러 가기/.test(t) && /사면 끝/.test(t), '돌려받은 💎 80 · 📜 3 · 용사 1 + 스킬 2 · 「사면 끝」');
   await S.waitForTimeout(1500); check(await S.evaluate(() => !document.querySelector('.gift-note')), '선물 축하 창이 겹치지 않음');
-  await S.click('#rv96-ok'); await S.waitForTimeout(800);
+  await S.click('.rv96 .ui-x'); await S.waitForTimeout(800);
   check(await S.evaluate(async () => { const m = await DS.Account.me(); return (await DS.Net.get(`accounts/${m.c}/${m.n}/seen96`)) === true; }), '확인 = seen96 저장');
   await camp(); check(!(await pop()), '다시 들어와도 안 뜸');
   // ③ 스킬 탭 위 한 줄 · 옮긴 용사 카드 「속성 바뀜」
   await S.evaluate(() => DS.Camp.settings({ tab: 'gem' })); await S.waitForTimeout(1200);
-  check(await S.evaluate(() => /자기 속성 스킬 4칸/.test((document.querySelector('.lad-tip') || {}).textContent || '')), '사다리 위 안내 한 줄');
+  check(await S.evaluate(() => /자기 속성 스킬만/.test((document.querySelector('.lad-tip') || {}).textContent || '')), '사다리 위 안내 한 줄');
   await S.click('[data-tab="hero"]'); await S.waitForTimeout(600); await S.evaluate(() => { const b = document.querySelector('.hpick[data-h="28"]'); if (b) b.click(); }); await S.waitForTimeout(600);
   const tg = await S.evaluate(() => (document.querySelector('.hc-tags') || {}).textContent || '');
   check(/마법/.test(tg) && (/속성 바뀜/.test(tg) || Date.now() > Date.parse('2026-11-19T23:59:59+09:00')), `콤파 카드 = 마법 · 속성 바뀜 (${tg})`);

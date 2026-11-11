@@ -443,11 +443,13 @@ DS.Camp = (function () {
     if (Object.keys(d.buy || {}).some((k) => /^(hero|fx)_/.test(k) && !log[`refund_${k}`] && Number((log[`buy_${k}`] || {}).v) !== 96)) return false; // 환불 전
     const rf = Object.entries(log).filter(([k]) => /^refund96_/.test(k)).map(([, v]) => v || {}), g = rf.reduce((x, v) => x + (Number(v.g) || 0), 0), sc = rf.reduce((x, v) => x + (Number(v.s) || 0), 0), nh = rf.reduce((x, v) => x + (Number(v.nh) || 0), 0), nf = rf.reduce((x, v) => x + (Number(v.nf) || 0), 0);
     const el = document.createElement('div'); el.className = 'modal rv96';
-    el.innerHTML = `<div class="quiz-box framed rv96-box"><h2>📣 용사 · 스킬 개편</h2><ol class="rv96-l"><li>용사마다 <b>자기 속성 스킬 4칸</b>만 써요</li><li>공통 특화(근접 베기 · 원거리 마법)는 없어졌어요</li><li>용사 4명의 속성이 바뀌었어요 ✨ (올드윈 · 콤파 → 🔮 마법 · 칸델 → 🌊 물 · 아바쿠 → ⚙ 기계)</li></ol>
-      ${g || sc ? `<div class="rv96-r"><b>돌려받은 것</b><span>💎 ${g}${sc ? ` · 📜 ${sc}` : ''}</span><small>${nh ? `용사 ${nh}` : ''}${nh && nf ? ' + ' : ''}${nf ? `스킬 ${nf}` : ''}</small></div>` : ''}
-      <p class="rv96-n">이번 한 번만 돌려드려요 · 앞으로는 사면 끝 · 돌려받은 💎 로 다시 사면 돼요 · 값은 그대로</p><button class="btn primary big" id="rv96-ok">확인</button></div>`;
+    el.innerHTML = `<div class="quiz-box framed rv96-box"><h2>⚔ 용사 · 스킬이 새로워졌어요</h2><ol class="rv96-l"><li>용사마다 자기 속성 스킬 4칸만 배우고 써요</li><li>공통 특화(베기 · 마법)는 없어졌어요</li><li>콤파 · 올드윈 → 🔮 마법 · 칸델 → 🌊 물 · 아바쿠 → ⚙ 기계</li></ol>
+      ${g || sc ? `<div class="rv96-r"><span>💎 ${g}${sc ? ` · 📜 ${sc}` : ''} 를 돌려드렸어요</span><small>(용사 ${nh}명 + 스킬 ${nf}개)</small></div>` : ''}
+      <p class="rv96-n">이번 한 번만 돌려드려요. 앞으로는 사면 끝! 돌려받은 💎 로 다시 고르면 돼요 · 값은 그대로</p><div class="row rv96-b"><button class="btn primary big" id="rv96-sk">⚔ 내 스킬 보러 가기</button><button class="btn big" id="rv96-ok">닫기</button></div></div>`;
     document.body.appendChild(el);
-    el.querySelector('#rv96-ok').onclick = () => { el.remove(); DS.Net.update(`accounts/${ck(m.c)}/${m.n}`, { seen96: true, uid: a.uid }).catch(() => {}); };
+    const done = () => { el.remove(); DS.Net.update(`accounts/${ck(m.c)}/${m.n}`, { seen96: true, uid: a.uid }).catch(() => {}); };
+    el.querySelector('#rv96-ok').onclick = done;
+    el.querySelector('#rv96-sk').onclick = () => { done(); settings({ tab: 'gem' }); };
     return true;
   }
   let qTok = 0; // 캠프에 다시 들어오면 앞 차례는 멈춤 (두 줄이 겹쳐 뜨지 않게)
@@ -588,7 +590,7 @@ DS.Camp = (function () {
           <div class="row">${nf.locked ? `<button class="btn" disabled>🔒 ${esc(nf.locked)}</button>` : nf.shop ? `<button class="btn primary${can(nf) ? '' : ' off'}" data-lbuy="${nx}">💎 ${nf.shop.price}${nf.shop.scroll ? ` · 📜 ${nf.shop.scroll}` : ''} 로 열기</button>` : ''}<button class="btn" data-lprev="${nx}">▶ 미리 보기 공격</button></div></div></div>` : '<p class="lad-done">🌈 사다리 4칸을 모두 열었어요!</p>';
       const pk = skPick || fxNow();
       return `<div id="gem-top">${gemTop()}</div>${big}
-        <p class="lad-tip">🪜 용사마다 자기 속성 스킬 4칸만 써요 · 다른 속성은 그 속성 용사로 바꾸면 보여요</p><p class="me-sec">${esc(DS.FX.affOf(hero).name)} 사다리 <small>위 Ⅰ → 아래 Ⅳ</small></p><div class="lad">${DS.FX.ladder(hero).map(skCell).join('<i class="sk-line"></i>')}</div>
+        <p class="lad-tip">이제 용사마다 자기 속성 스킬만 · 다른 속성은 그 용사로</p><p class="me-sec">${esc(DS.FX.affOf(hero).name)} 사다리 <small>위 Ⅰ → 아래 Ⅳ</small></p><div class="lad">${DS.FX.ladder(hero).map(skCell).join('<i class="sk-line"></i>')}</div>
         <p class="lad-verdict" id="lad-v"><b>${esc(nmOf(pk))} ${tierTag(pk)}</b> · ${esc(verdict(pk))}</p>
         ${sp.length ? `<p class="me-sec">🪶 특별 <small>업적으로 얻은 것</small></p><div class="sk-sp">${sp.map(skCell).join('')}</div>` : ''}
         <div class="lad-rule"><b>판정 규칙</b><span>⚡ 필살기 = 내 속성 Ⅲ · Ⅳ 스킬 + 첫 시도 퍼펙트</span><span>🌟 진필살기 = 3연속 퍼펙트 + 내 속성 Ⅳ</span><span>연출만 달라요 · 데미지 · 보상은 같아요</span></div>
