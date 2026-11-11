@@ -17,6 +17,6 @@ const OUT = process.argv[2] || '.', U = 'http://localhost:8765/index.html?local'
       if (id === 'm1') ok(await p.evaluate(() => document.querySelectorAll('#st-body .chipset.chip-empty').length === 2), '문제 1 P · Q 원소 칩 + ∅');
       if (id === 'm5') ok(await p.evaluate(() => /역은\?/.test(document.querySelector('#st-body').textContent)), '문제 5 소레이드 졸개 ① = 역 고르기'); }
     if (id === 'boss') break; await p.click('#tb-next'); await p.waitForTimeout(900); }
-  ok(seen.filter((x, i) => x && x !== seen[i - 1]).join(',') === 'intro,c1,cp1,m1,m2,c2,m3,c3,m4,cp2,m5,boss', `단계 순서 (${seen.join(',')})`);
+  ok(seen.filter((x, i) => x && x !== seen[i - 1]).join(',') === 'intro,c1,m1,m2,c2,m3,c3,m4,cp2,m5,boss', `단계 순서 (${seen.join(',')})`);
   console.log(log.join('\n')); console.log(bad ? `❌ ${bad}` : '✅ 통과'); console.log('errors', errs.length ? errs : 'none'); await b.close(); if (bad || errs.length) process.exit(1);
 })();

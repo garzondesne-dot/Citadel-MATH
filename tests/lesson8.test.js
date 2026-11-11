@@ -104,9 +104,9 @@ function verify(mid, q, tag) {
 
 // (1) 순서 · 칸
 const order = L.steps.map((s) => s.id).join(',');
-check(order === 'intro,c1,m1,c2,m2,m3,c3,m4,c4,m5,boss', `레이드 순서 (v6) ${order}`);
+check(order === 'intro,c1,m1,cp1,c2,m2,m3,c3,m4,c4,m5,boss', `레이드 순서 (v7) ${order}`);
 check(L.steps[0].kind === 'intro' && L.steps[0].img === 'review' && L.crops.review, '도입 = 🔁 전시 확인 그림 (crops review)');
-check(/레이드용 v6/.test(L.sheet) && /p → q/.test(L.next.title) && /역과 대우/.test(L.next.title), `판 v6 · 다음 = 9차시 p → q · 역과 대우 (${L.sheet} · ${L.next.title})`);
+check(/레이드용 v7/.test(L.sheet) && L.crops.cp1 && /사각형/.test(L.steps.find((x) => x.id === 'cp1').title) && /p → q/.test(L.next.title) && /역과 대우/.test(L.next.title), `판 v7 · ➕ 사각형 칸 · 다음 = 9차시 p → q · 역과 대우 (${L.sheet} · ${L.next.title})`);
 check(/P = U 이면 참/.test(L.steps.find((x) => x.id === 'c4').say) && /P ≠ ∅ 이면 참/.test(L.steps.find((x) => x.id === 'c4').say) && /모든 ↔ 어떤/.test(L.steps.find((x) => x.id === 'c4').say), '개념 4 say (모든 · 어떤 · 부정)');
 check(L.KEEP9 && L.KEEP9.m4 && L.KEEP9.m5 && L.KEEP9.c4 && L.KEEP9.c5 && /v08-42/.test(L.KEEP9.video), '‘모든’과 ‘어떤’ = 9차시로 보관 (버리지 않음)');
 check(L.monsters.m5.sprite === 'mirror:4' && L.crops.m5.length === 2, '몬스터 5 = 반쪽 슬라임 · 칸 = 문제 7 + 문제 8 (두 칸)');

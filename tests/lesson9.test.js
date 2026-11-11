@@ -64,11 +64,11 @@ function verify(q, tag) {
 }
 
 // (1) 순서 · 칸 · 그림 · #64 꼴
-check(L.steps.map((s) => s.id).join(',') === 'intro,c1,cp1,m1,m2,c2,m3,c3,m4,cp2,m5,boss', `레이드 순서 ${L.steps.map((s) => s.id)}`);
+check(L.steps.map((s) => s.id).join(',') === 'intro,c1,m1,m2,c2,m3,c3,m4,cp2,m5,boss', `레이드 순서 ${L.steps.map((s) => s.id)}`);
 check(L.no === 9 && L.theme === '11-keyvault' && DS.ASSETS.dungeons.ids.includes(L.theme), '9차시 · 🔑 묘실 테마');
-check(/레이드용 v1/.test(L.sheet) && /충분조건과 필요조건/.test(L.next.title), '판 v1 · 다음 = 10차시 충분 · 필요');
+check(/레이드용 v2/.test(L.sheet) && /충분조건과 필요조건/.test(L.next.title), '판 v2 · 다음 = 10차시 충분 · 필요');
 L.steps.forEach((s) => check(L.crops[s.img || s.id] && L.crops[s.img || s.id][0].h > 0.04, `칸 위치 ${s.img || s.id}`));
-check(['cp1', 'cp2'].every((id) => L.steps.find((s) => s.id === id).kind === 'concept'), '개념 플러스 2칸 = 개념 칸 (몬스터 없음)');
+check(L.steps.find((s) => s.id === 'cp2').kind === 'concept' && !L.steps.some((s) => s.id === 'cp1') && !L.crops.cp1, '개념 플러스 = 수(cp2)만 · 사각형(cp1) = 8차시로 옮김 (#85)');
 check(/P ⊂ Q 이면 참/.test(L.steps.find((s) => s.id === 'c1').say) && /반례/.test(L.steps.find((s) => s.id === 'c1').say), '개념 1 say');
 check(Object.keys(L.monsters).join() === 'm1,m2,m3,m4,m5' && L.monsters.m1.sprite === 'keyvault:0' && L.monsters.m2.sprite === 'keyvault:2' && L.monsters.m3.sprite === 'keyvault:1' && /^keyvault:2@h\d+$|^keyvault:3$/.test(L.monsters.m4.sprite) && L.monsters.m5.sprite === 'keyvault:4', '몬스터 그림 (m4 = 봉인 석상 · 그림 오기 전 임시 색 변형)');
 check(L.boss.sprite === 'keyvaultboss:0' && DS.ASSETS.monstersKeyvaultBoss.names[0] === '역과 대우의 문지기', '보스 = 역과 대우의 문지기');
