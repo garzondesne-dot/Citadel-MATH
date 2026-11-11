@@ -3372,7 +3372,8 @@ body:has(.modal:not([hidden])) #ver-tag { display: none; }
 .rv96-box h2 { margin: 0; text-align: center; }
 .rv96-l { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 6px; line-height: 1.45; }
 .rv96-r { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px; border: 2px solid var(--gold); border-radius: 10px; background: #2e240c; }
-.rv96-r span { font-size: 22px; color: var(--gold); } .rv96-r small { color: var(--muted); }
+.rv96-r span { font-size: 17px; color: var(--gold); text-align: center; } .rv96-r small { color: var(--muted); }
 .rv96-n { margin: 0; font-size: 13px; color: var(--muted); text-align: center; }
 .lad-tip { margin: 6px 0; padding: 6px 10px; border-radius: 8px; background: #102236; font-size: 13px; }
 .hero-card .hc-tags i.hc-new { border-color: #4aa3ff; color: #1d5a8a; background: #e3f1ff; } .hero-card .hc-tags i.hc-ach { border-color: #c79a2a; color: #7a5a10; background: #fff3cf; }
+.rv96-b { gap: 8px; justify-content: center; }

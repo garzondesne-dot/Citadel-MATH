@@ -10,7 +10,7 @@ const DB = 'https://citadel-math-default-rtdb.asia-southeast1.firebasedatabase.a
 const go = process.argv.includes('--go');
 const X = require(path.join(__dirname, '../../tests/load'))(['assets/manifest.js', 'js/engine/fx.js']); const F = X.FX;
 global.window = global; global.DS = { Net: {} }; require('../../js/raid/gem.js'); const Gm = DS.Gem;
-const MSG = (g, s) => `스킬 · 용사 개편으로 💎 ${g}${s ? ` · 📜 ${s}` : ''} 를 돌려드려요 · 새 사다리를 보고 다시 골라 보세요`;
+const MSG = (g, s, nh, nf) => `⚔ 용사 · 스킬 개편으로 💎 ${g}${s ? ` · 📜 ${s}` : ''} 를 돌려드렸어요 (용사 ${nh}명 + 스킬 ${nf}개) · 이번 한 번만 · 앞으로는 사면 끝`; // 📣 안내 창과 같은 내역
 function planOf(d, a) {
   const log = d.log || {}, buy = d.buy || {}, items = []; let g = 0, s = 0;
   for (const k of Object.keys(buy)) {
@@ -40,7 +40,7 @@ if (require.main === module) (async () => {
   if (!go) { console.log('미리 보기만 했어요. 실제로 쓰려면 --go (선생님 허락 뒤)'); return; }
   const at = Date.now();
   for (const x of plan) {
-    const body = { total: (Number(x.d.total) || 0) + x.g, ...(x.s ? { scroll: (Number(x.d.scroll) || 0) + x.s } : {}), [`log/refund96_${at}`]: { g: x.g, ...(x.s ? { s: x.s } : {}), at: { '.sv': 'timestamp' }, why: MSG(x.g, x.s), gift: true, nopop: true, nh: x.items.filter((i) => i.kind === 'hero').length, nf: x.items.filter((i) => i.kind === 'fx').length } }; // 📣 개편 안내 창이 「용사 ○ + 스킬 ○」 로 읽음
+    const body = { total: (Number(x.d.total) || 0) + x.g, ...(x.s ? { scroll: (Number(x.d.scroll) || 0) + x.s } : {}), [`log/refund96_${at}`]: { g: x.g, ...(x.s ? { s: x.s } : {}), at: { '.sv': 'timestamp' }, why: MSG(x.g, x.s, x.items.filter((i) => i.kind === 'hero').length, x.items.filter((i) => i.kind === 'fx').length), gift: true, nopop: true, nh: x.items.filter((i) => i.kind === 'hero').length, nf: x.items.filter((i) => i.kind === 'fx').length } }; // 📣 개편 안내 창이 「용사 ○ + 스킬 ○」 로 읽음
     x.items.forEach((i) => { body[`buy/${i.k}`] = null; });
     await patch(`gem/${x.c}/${x.n}`, body);
     if (Object.keys(x.acc).length) await patch(`accounts/${x.c}/${x.n}`, x.acc);
