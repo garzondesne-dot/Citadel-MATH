@@ -32,9 +32,9 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   // ③ 스킬 탭 위 한 줄 · 옮긴 용사 카드 「속성 바뀜」
   await S.evaluate(() => DS.Camp.settings({ tab: 'gem' })); await S.waitForTimeout(1200);
   check(await S.evaluate(() => /자기 속성 스킬만/.test((document.querySelector('.lad-tip') || {}).textContent || '')), '사다리 위 안내 한 줄');
-  await S.click('[data-tab="hero"]'); await S.waitForTimeout(600); await S.evaluate(() => { const b = document.querySelector('.hpick[data-h="28"]'); if (b) b.click(); }); await S.waitForTimeout(600);
-  const tg = await S.evaluate(() => (document.querySelector('.hc-tags') || {}).textContent || '');
-  check(/마법/.test(tg) && (/속성 바뀜/.test(tg) || Date.now() > Date.parse('2026-11-19T23:59:59+09:00')), `콤파 카드 = 마법 · 속성 바뀜 (${tg})`);
+  await S.click('#mh-top'); await S.waitForTimeout(600); await S.click('.mh-hc[data-hp="28"]'); await S.waitForTimeout(600);
+  const tg = await S.evaluate(() => (document.querySelector('.mh-det') || {}).textContent || '');
+  check(/마법/.test(tg) && (/속성 바뀜/.test(tg) || Date.now() > Date.parse('2026-11-19T23:59:59+09:00')), `콤파 상세 = 마법 · 속성 바뀜 (${tg.slice(0, 60)})`);
   console.log(`e2e115: 확인 ${ok} · 실패 ${fail}`, errs.length ? `errors: ${errs.join(' | ')}` : 'errors: none');
   await b.close(); process.exit(fail || errs.length ? 1 : 0);
 })();
