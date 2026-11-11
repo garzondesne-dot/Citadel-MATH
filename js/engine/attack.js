@@ -146,7 +146,7 @@ DS.Attack = (function () {
   //   ③ 근접 용사: 몬스터 보이는 몸통 옆(가까운 쪽 · 발끝 높이)까지 돌진 → 기술 → 제자리
   //   o.onHit = 맞는 순간 부를 것 (종합실 데미지 숫자 · PERFECT) · o.noDmg · o.rest(끝 자세)
   // ⚔ #74-2 돌진 잔상: 지나가는 자리에 용사 그림 n 개가 옅게 남았다 사라짐 (transform · opacity 만)
-  const GHOSTS = { slash: 3, twin: 2, reap: 5, spin: 2, hammer: 2, quake: 2 };
+  const GHOSTS = { slash: 3, twin: 2, reap: 5, spin: 3, hammer: 2, quake: 2 }; // 잔상 수 (삼연 참격 3 · 사신의 낫 5 · HERO-ATTR 3-3)
   function ghosts(scene, heroBox, to, n) {
     if (reduce() || !heroBox.isConnected) return;
     const H = rel(heroBox, scene);

@@ -16,6 +16,8 @@ const OUT = process.argv[2], U = 'http://localhost:8765/index.html?local';
   const s5 = await run('twin', 7); check(s5.dmg === 5 && s5.hit === 5, `쌍월 참 7개 맞힘 = 최대 5타 (${JSON.stringify(s5)})`);
   const s1 = await run('moon', 4); check(s1.ghost === 0 && s1.dmg === 1, `Ⅱ 달빛 베기 = 한 박자 그대로 (${JSON.stringify(s1)})`);
   check(s3.ms < 2600 && s5.ms < 2600, `길이 원거리 Ⅳ 안 (${s3.ms} · ${s5.ms}ms)`);
+  for (const [fx, h] of [['hammer', 2], ['quake', 4], ['spin', 3], ['reap', 5]]) { const r = await run(fx, h); check(r.dmg === h && r.hit === h && r.spr >= h && r.ms < 2800, `${fx} ${h}타 (${JSON.stringify(r)})`); }
+  for (const fx of ['quake', 'reap']) { p.evaluate((fx) => { const sc = document.getElementById('tsc'); DS.Attack.play(sc, { heroBox: sc.querySelector('.enc-hero'), monBox: sc.querySelector('.enc-mon'), hero: 0, fx, hits: 1 }); }, fx); await p.waitForTimeout(1100); await p.screenshot({ path: `${OUT}/${fx}.png` }); await p.waitForTimeout(2200); }
   // 화면 확인: 쌍월 참 맞는 순간
   p.evaluate(() => { const sc = document.getElementById('tsc'); DS.Attack.play(sc, { heroBox: sc.querySelector('.enc-hero'), monBox: sc.querySelector('.enc-mon'), hero: 0, fx: 'slash', hits: 3 }); });
   await p.waitForTimeout(560); await p.screenshot({ path: `${OUT}/slash.png` });

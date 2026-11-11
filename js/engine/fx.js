@@ -114,6 +114,9 @@ DS.FX = (function () {
       const R = box.getBoundingClientRect(), dir = o.dir || 1, sx = Math.min(w * 2.4, R.width * 0.9) / bw, sy = q4(clamp(Math.min(sx, (h * (sp.mm === 'cross' ? 1.2 : 1.9)) / bh) * tier * mult, 0.6, 8));
       const left = clamp(cx + dir * w * 0.2 - (bw * sx) / 2 - bb[0] * sx, -bb[0] * sx, R.width - bb[2] * sx);
       el = stripXY(box, sp, left, cy - bcy * sy, sx, sy, { flip: dir < 0 });
+    } else if (!o.mode && (sp.mm === 'drop' || sp.mm === 'drop-wide')) { // ⚔ #74-2 내려찍기: 화면 위에서 발끝까지 떨어짐 (띠 아래 = 몬스터 발끝) · 넓게 = 몸통 2.2배
+      const sd = q4(clamp(Math.min((w * (sp.mm === 'drop' ? 1.3 : 2.2)) / bw, (B.y1 * 0.95) / Math.max(1, bb[3])) * tier * mult, 0.6, 8));
+      el = stripXY(box, sp, cx - bcx * sd, B.y1 - bb[3] * sd, sd, sd);
     } else if (!o.mode && sp.mm === 'wide') { // 넓게: 몸통 폭 2배 · 키 1.9배까지
       const s2 = q4(clamp(Math.min((w * 2) / bw, (h * 1.9) / bh) * tier * mult, 0.6, 8)); el = stripXY(box, sp, cx - bcx * s2, cy - bcy * s2, s2, s2);
     } else if (mode === 'ground') el = stripXY(box, sp, cx - bcx * s, B.y1 + h * 0.03 - bb[3] * s, s, s);
