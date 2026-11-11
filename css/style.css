@@ -3424,3 +3424,10 @@ body:has(.modal:not([hidden])) #ver-tag { display: none; }
 .cf-wish, .fg-wish { display: inline-block; margin-left: 4px; padding: 0 5px; border-radius: 8px; background: #f5b84a; color: #3a2204; font-style: normal; font-weight: 800; font-size: .85em; line-height: 1.4; }
 .fg-cw { position: relative; } .fg-cw > .fg-wish { position: absolute; top: 2px; left: 2px; z-index: 2; margin: 0; }
 .fc-hint.wish { box-shadow: inset 3px 0 0 #f5b84a; }
+/* 🔁 #112 재도전 v4: ✔ 맞힌 소문제 = 초록 잠김 · ✘ = 빨간 테두리 빈칸 */
+.paper .item.ok-lock { border: 2px solid #4caf6a !important; border-radius: 10px; background: #e8f6ea !important; opacity: .85; padding: 6px 44px 8px 8px !important; margin: 6px 0 !important; }
+.paper .item.ok-lock .rune-keys, .paper .item.ok-lock .rune-del, .paper .item.ok-lock .hint-btn, .paper .item.ok-lock .ans-line { display: none; }
+.paper .item.ok-lock .lock-tag { display: inline-block; margin-bottom: 2px; color: #2e7d46; font-size: 13px; }
+.paper .item.ok-lock button, .paper .item.ok-lock input { pointer-events: none; }
+.paper .item.redo { border: 2px solid #e5534b !important; border-radius: 10px; padding: 6px 44px 8px 8px !important; margin: 6px 0 !important; }
+.paper .redo-note { color: #b3261e; font-weight: 700; }

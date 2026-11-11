@@ -675,7 +675,8 @@ DS.Student = (function () {
     const mid = step.id, attempt = rec.nextAttempt, key = `${mid}|${attempt}`;
     const items = Raid().itemsFor(L, R, mid, me, attempt);
     const sameQ = rec.v3 && rec.last && (!rec.perfect || rec.fix) && Array.isArray(rec.last.given) && rec.last.given.length === items.length; // 🔁 v3: 같은 문제 → 지난 답을 채워 두고 ✘ 칸만 고치기
-    if (!form || form.key !== key) form = { key, given: sameQ ? JSON.parse(JSON.stringify(rec.last.given)).map((g, i) => (g == null ? (items[i].type === 'multi' ? [] : items[i].type === 'text' ? '' : null) : g)) : items.map((q) => (q.type === 'multi' ? [] : q.type === 'text' ? '' : null)) }; // ⌨ #92 숫자 칸 = 빈 칸(null)에서 시작 · 룬을 눌러야 공격
+    const blank = (q) => (q.type === 'multi' ? [] : q.type === 'text' ? '' : null), okLock = sameQ ? rec.last.marks.map(Boolean) : []; // 🔁 #112 재도전 v4: ✔ = 지난 답 그대로 잠김 · ✘ = 빈칸
+    if (!form || form.key !== key) form = { key, given: sameQ ? JSON.parse(JSON.stringify(rec.last.given)).map((g, i) => (okLock[i] && g != null ? g : blank(items[i]))) : items.map((q) => (q.type === 'multi' ? [] : q.type === 'text' ? '' : null)) }; // ⌨ #92 숫자 칸 = 빈 칸(null)에서 시작 · 룬을 눌러야 공격
     const prevWrong = rec.last ? rec.last.marks.map((m) => !m) : [];
     const ready = items.every((q, i) => (q.type === 'multi' ? form.given[i].length > 0 : q.type === 'text' ? String(form.given[i] || '').trim() !== '' : form.given[i] != null));
     const down = Raid().cleared(L, R, mid); // v0.9.2: 체력 0 → 쓰러졌어도 계속 풀고 공격할 수 있다
@@ -687,16 +688,18 @@ DS.Student = (function () {
     paint(body, `form|${key}`, `<div class="panel framed st-fight">${scene(step, rec, hp, '', down ? '' : GAUGE)}
       <div class="paper"><div class="paper-h"><b>${step.special ? '⭐ ' : step.review ? '📖 ' : ''}${esc(step.title)}</b><small>${items.length > 1 ? `(1)~(${items.length}) 모두 풀고 공격` : '풀고 공격'}</small></div>
       ${down ? '<p class="paper-note ok">🎉 몬스터는 쓰러졌어요! 그래도 풀어서 공격하면 이펙트도 뜨고 경험치가 쌓여요.</p>' : ''}
-      ${attempt && rec.v3 ? `<p class="paper-note">${rec.perfect ? (rec.fix ? '🔁 <b>같은 문제 그대로예요</b> (고장 아님!) — 종이 풀이를 고쳐서 ✘ 칸을 다시 내요 (맞히면 묶기 · 힐 한 번)' : '🆕 새 문제 (숫자가 바뀌었어요) — 맞히면 기회 그대로 + 묶기 · 힐 한 번 · 틀리면 기회 −1') : '🔁 <b>같은 문제 그대로예요</b> (고장 아님!) — 종이 풀이를 고쳐서 ✘ 칸만 다시 내요 · 지난 답은 채워져 있어요'}</p>` : attempt && rec.perfect ? `<p class="paper-note">⛓ 몬스터 묶기 — 맞힌 소문제 1개마다 반 전체의 몬스터 공격이 1초 늦어져요 (최대 ${Raid().BIND_MAX}초)</p>` : attempt ? `<p class="paper-note">🔄 재도전 ${attempt} — 숫자가 모두 바뀌었어요 · 지난번 틀린 문항은 <b class="ngc">✘</b></p>` : ''}
+      ${attempt && rec.v3 ? `<p class="paper-note">${rec.perfect ? (rec.fix ? '🔁 <b>같은 문제 그대로예요</b> (고장 아님!) — 종이 풀이를 고쳐서 ✘ 칸을 다시 내요 (맞히면 묶기 · 힐 한 번)' : '🆕 새 문제 (숫자가 바뀌었어요) — 맞히면 기회 그대로 + 묶기 · 힐 한 번 · 틀리면 기회 −1') : '🔁 <b>같은 문제 그대로예요</b> (고장 아님!) — 종이 풀이를 고쳐서 ✘ 칸만 다시 내요 · 맞힌 칸은 잠기고 ✘ 칸은 빈칸이에요'}</p>` : attempt && rec.perfect ? `<p class="paper-note">⛓ 몬스터 묶기 — 맞힌 소문제 1개마다 반 전체의 몬스터 공격이 1초 늦어져요 (최대 ${Raid().BIND_MAX}초)</p>` : attempt ? `<p class="paper-note">🔄 재도전 ${attempt} — 숫자가 모두 바뀌었어요 · 지난번 틀린 문항은 <b class="ngc">✘</b></p>` : ''}
       ${L.monsters[mid].note ? `<p class="paper-note">💡 ${esc(L.monsters[mid].note)}</p>` : ''}
-      <div class="items">${items.map((q, i) => withAns(itemHtml(q, i, prevWrong[i], null), q, form.given[i], i)).join('')}</div></div>
+      ${sameQ && !ready ? `<p class="paper-note redo-note">✘ 틀린 문제 ${okLock.filter((x) => !x).length}개를 모두 고쳐요</p>` : ''}
+      <div class="items">${items.map((q, i) => { const h = withAns(itemHtml(q, i, prevWrong[i], null), q, form.given[i], i); return !sameQ ? h : okLock[i] ? h.replace(/^<div class="item">/, '<div class="item ok-lock"><b class="lock-tag">✔ 맞힘</b>') : h.replace(/^<div class="item">/, '<div class="item redo">'); }).join('')}</div></div>
       ${dock(rec, `<button class="btn primary big dock-go${ready ? ' go-pulse' : ''}" id="st-go"${ready ? '' : ' disabled'}>⚔ 공격!</button>`)}
       ${helpBtn()}</div>`);
     chargeBtn(body); draftMark(ready && form.touched ? key : null); // ⚔ #24 (숫자 칸은 0 으로 시작하니 한 번이라도 고친 뒤에만): 다 채웠는데 공격을 안 누름 → 리모컨에 표시
     bindTop();
     bindHelp();
+    body.querySelectorAll('.item.ok-lock button, .item.ok-lock input').forEach((x) => { x.disabled = true; }); // 🔁 #112 ✔ 소문제 = 잠김
     body.querySelectorAll('[data-pick]').forEach((b) => b.addEventListener('click', () => {
-      const [i, v] = b.dataset.pick.split('|'); const k = Number(i);
+      const [i, v] = b.dataset.pick.split('|'); const k = Number(i); if (okLock[k]) return;
       const t = items[k].type;
       if (t === 'multi') { const n = Number(v); if (items[k].empty) form.given[k] = DS.Quiz.chipToggle(items[k], form.given[k], n); else { const s = new Set(form.given[k]); if (s.has(n)) s.delete(n); else s.add(n); form.given[k] = [...s].sort((a, b2) => a - b2); } } // 🔘 #65-6 ∅ 단추
       else if (t === 'choice') form.given[k] = Number(v);
@@ -709,13 +712,13 @@ DS.Student = (function () {
     body.querySelectorAll('[data-text]').forEach((inp) => inp.addEventListener('input', () => {
       form.given[Number(inp.dataset.text)] = inp.value;
       const ok = items.every((q, j) => (q.type === 'multi' ? form.given[j].length > 0 : q.type === 'text' ? String(form.given[j] || '').trim() !== '' : form.given[j] != null));
-      const go = $('#st-go'); if (go) { go.disabled = !ok; go.classList.toggle('go-pulse', ok); } form.touched = true; draftMark(ok ? key : null);
+      const go = $('#st-go'); if (go) { go.disabled = !ok; go.classList.toggle('go-pulse', ok); } form.touched = true; draftMark(ok ? key : null); { const nt = body.querySelector('.redo-note'); if (nt) nt.hidden = ok; }
       drawn = `form|${key}|${JSON.stringify(form.given)}|${(R.help || {})[me] ? 1 : 0}`;
     }));
     DS.UI.runes(body, (i) => form.given[i], (i, v) => { // ⌨ #92 룬: 답 칸 · 「✍ 나의 답」 줄 · 공격 단추만 바꿈 (다시 그리지 않음)
       form.given[i] = v; form.touched = true; penLast[mid] = i;
       const ok = items.every((q, j) => (q.type === 'multi' ? form.given[j].length > 0 : q.type === 'text' ? String(form.given[j] || '').trim() !== '' : form.given[j] != null));
-      const go = $('#st-go'); if (go) { go.disabled = !ok; go.classList.toggle('go-pulse', ok); } draftMark(ok ? key : null);
+      const go = $('#st-go'); if (go) { go.disabled = !ok; go.classList.toggle('go-pulse', ok); } draftMark(ok ? key : null); { const nt = body.querySelector('.redo-note'); if (nt) nt.hidden = ok; }
       const al = body.querySelector(`.ans-line[data-al="${i}"]`); if (al) al.outerHTML = ansLine(items[i], v, i);
       drawn = `form|${key}|${JSON.stringify(form.given)}|${(R.help || {})[me] ? 1 : 0}|${down}`;
     });
