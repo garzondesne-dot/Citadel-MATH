@@ -350,7 +350,7 @@ DS.Bonus = (function () {
     const wrongs = [], misBase = (DS.Mis && rec.mis) ? DS.Mis.merge({}, rec.mis) : {}; // 🔎 이 판에서 틀린 소문제 (판이 끝날 때마다 다시 계산 · 겹쳐 세지 않음)
     // 🧩 A안 (2026-11-11 선생님 「A안 진행」): 성채 · 허수아비 일반 방 = 차시 던전과 같은 부품 — 남은 소문제를 한 장(양피지)에 모아 풀기 · 원소 칩 · ✍ 나의 풀이 · ⚔ 공격 한 번
     //   맞힌 소문제 = 몬스터 체력 칸이 사라짐(예전과 같음) · 틀린 것만 다시(새 숫자) · 기회 · 기록 · 보상 규칙 그대로
-    const blankOf = (q) => (q.type === 'multi' || q.type === 'subsets' ? [] : q.type === 'number' ? 0 : q.type === 'text' ? '' : null);
+    const blankOf = (q) => (q.type === 'multi' || q.type === 'subsets' ? [] : q.type === 'text' ? '' : null);
     const filled = (q, g) => (q.type === 'multi' || q.type === 'subsets' ? (g || []).length > 0 : q.type === 'text' ? String(g || '').trim() !== '' : g != null);
     const penKey = () => `bf|${L.id}|${mid}|${attempt}`;
     const formRound = (items, todo) => new Promise((resolve) => {
@@ -373,10 +373,10 @@ DS.Bonus = (function () {
           else if (q.type === 'choice') G[k] = Number(v); else if (q.type === 'ox') G[k] = v === 'O'; else G[k] = [v];
           S.penMark(penKey(), k); DS.Sound.clank(); paint(); }));
         el.querySelectorAll('[data-text]').forEach((inp) => inp.addEventListener('input', () => { G[Number(inp.dataset.text)] = inp.value; const go = el.querySelector('#bf-go2'); const ok = todo.every((i) => filled(items[i], G[i])); if (go) { go.disabled = !ok; go.classList.toggle('go-pulse', ok); } }));
-        if (DS.UI.dial) DS.UI.dial(el, (i) => G[i], (i, v) => { G[i] = v; const go = el.querySelector('#bf-go2'); const ok = todo.every((k) => filled(items[k], G[k])); if (go) { go.disabled = !ok; go.classList.toggle('go-pulse', ok); } });
+        DS.UI.runes(el, (i) => G[i], (i, v) => { G[i] = v; S.penMark(penKey(), i); const al = el.querySelector(`.ans-line[data-al="${i}"]`); if (al) al.outerHTML = S.ansLine(items[i], v, i); const go = el.querySelector('#bf-go2'); const ok = todo.every((k) => filled(items[k], G[k])); if (go) { go.disabled = !ok; go.classList.toggle('go-pulse', ok); } });
         el.querySelectorAll('[data-hint]').forEach((b) => (b.onclick = () => { const k = Number(String(b.dataset.hint).replace(/^bf/, '')); if (hOpen.has(k)) hOpen.delete(k); else hOpen.add(k); DS.Sound.clank(); paint(); }));
         el.querySelectorAll('.pen-sf').forEach((b) => (b.onclick = (e) => { e.stopPropagation(); S.penToggle(penKey()); paint(); }));
-        const go = el.querySelector('#bf-go2'); if (go) go.onclick = () => { go.disabled = true; S.mergeAnim(el).then(() => resolve(G.map((g, i) => (items[i].type === 'number' ? Number(g) : g)))); }; // ✍ → 📜 하나로 모임
+        const go = el.querySelector('#bf-go2'); if (go) go.onclick = () => { go.disabled = true; DS.UI.runeCast(el); S.mergeAnim(el).then(() => resolve(G.map((g, i) => (items[i].type === 'number' ? Number(g) : g)))); }; // ✍ → 📜 하나로 모임
         DS.Bonus._form = { items, todo, G, submit: () => resolve(G.map((g, i) => (items[i].type === 'number' ? Number(g) : g))) }; // 🧪 시험용 고리 (자동 풀이 · 화면에는 영향 없음)
       };
       paint();

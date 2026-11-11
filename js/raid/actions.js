@@ -49,6 +49,7 @@ DS.Act = (function () {
     for (let i = 0; i < 20; i++) { code = String(100000 + Math.floor(Math.random() * 900000)); if (!(await N().get(P(code, 'meta')))) break; }
     let pct = null;
     try { pct = await N().get(prepPath(lessonId, 'pct')); } catch (e) { /* 준비 안 했으면 차시 기본값 */ }
+    if (opt.pct != null) pct = Number(opt.pct); // 👩‍🏫 #92 체험판 = 성취 기준 100 (수업 준비 값보다 앞섬)
     if (DS.Art && DS.Art.loadTeacherCfg) await DS.Art.loadTeacherCfg(); // 🧙 #32 선생님 모습 · 소리 = 서버 gcfg/teacher
     const room = Raid.newRoom(code, lessonId, N().uid(), N().now(), pct, DS.Art ? DS.Art.teacherHero() : 7, DS.Art && DS.Art.teacherLook ? DS.Art.teacherLook().fx : undefined);
     if (cls) room.meta.cls = String(cls);

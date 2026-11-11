@@ -327,3 +327,10 @@
 - `DS.UI.show(id)` 가 `WAKE_SCREENS`(학생 수업 · 성채 · 허수아비 · 교사 리모컨 · 교사 캠프 · 종합실) 이면 `wake.on()` · 아니면 `off()` · 다른 앱에서 돌아오면 다시 켬(visibilitychange) · 안 되는 폰 = `wake.tip()` 토스트 한 번(localStorage `ds-wake-tip`).
 - 아이폰 홈 화면 앱(PWA): Screen Wake Lock 은 iOS 16.4+ 사파리 · 18.4 부터 홈 화면 앱(standalone)도 지원 — 그 아래 판은 안내 띠가 뜸 (실기기 확인은 선생님 폰으로 · 「지금 되나?」).
 - 「수업 끝 ▶」 = `control.saveBtn(R, L)` 하나 · 확인 한 번 · 마무리 단계면 `go(+1)`(진도 끝) · 아니면 `saveEnd`(이어서 지점 저장) · 마무리의 ▶ 도 같은 확인.
+
+## ⌨ 숫자 답 = 룬 키패드 (2026-11-11 밤 #92 · 다이얼 없앰) — `js/engine/ui.js` `DS.UI.runeHtml · runes · runeNext · runeCast`
+- 숫자 칸을 그리는 곳 = `student.js` `itemHtml` 의 number 한 곳 → 학생 일반 몬스터 · 소레이드 · 🎯 허수아비 · 🏰 성채(bonus.js) · 선생님 시연(hall.js) 모두 같은 `runeHtml`. 붙이기 = `DS.UI.runes(root, get, set)` (set 안에서 그 화면의 공격 단추만 켜고 끔 · 다시 그리지 않음).
+- 빈 숫자 칸 = **null**(옛 다이얼은 0 으로 시작) → 「다 채웠나」 검사(`!= null`)가 그대로 공격을 막음 · 빈 칸 글 「숫자를 넣어 주세요」 · 0~99 · 0 다음 숫자 = 바꿔 씀 · 세 자리 ✕. 숫자 칸을 새로 만들 때 0 으로 채우지 말 것.
+- 내기 = 원래 공격 단추 + `runeCast(root)`(답 칸 한 번 빛남 · 소레이드는 0.26초 기다린 뒤 냄).
+- 🧩 `DS.Quiz.ask`(👑 형성평가 · 성채 소레이드 · 모루 예제 · 시연 「부분집합 쓰기」 창)의 숫자는 옛 계산기 패드 그대로(다이얼이 아님 · 4자리 · − 있음) — 룬으로 맞출지는 머리 방 결정.
+- 시험: `tests/rune.test.js` · e2e114(일반 · 소레이드 · 시연 칸 · 허수아비) · 체험판 성취 기준 100 = `createRoom(opt.pct)` · e2e110.
