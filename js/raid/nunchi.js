@@ -67,6 +67,7 @@ DS.Nunchi = (() => {
         if (!f || f.kind !== 'nun') { clearInterval(timer); timer = null; return; }
         if (f.phase === 'end') { if (now - (f.endAt || now) > (T().endHold || 15000) && (!f.drv || f.drv.u === me || now - (f.drv.at || 0) > 3000) && DS.Fun) await DS.Fun.stop(code); return; } // 2026-11-09: 끝 화면 15초 뒤 저절로 닫힘
         if (f.drv && f.drv.u !== me && now - (f.drv.at || 0) < 3000) return;
+        if (DS.Fun && DS.Fun.hold && await DS.Fun.hold(code, f, now)) return; // ⏸ #117 집중 = 눈치 시계 멈춤
         const presses = f.phase === 'play' ? (await N().get(P(code, `nun/${f.g}/${f.round}`)).catch(() => null)) || {} : {};
         const cheers = f.phase === 'show' && f.zz ? (await N().get(P(code, `nunE/${f.g}`)).catch(() => null)) || {} : {};
         const nx = step(f, presses, now, cheers);

@@ -366,15 +366,13 @@ DS.Raid = (function () {
     return ho.at > pt.at ? ho : pt;
   }
   // ⏳ 보스 타임바: 마감 = 교시 끝 (+5분 연장 한 번) · null = 제한 없음
-  // ⏸ #117 (2026-11-12 선생님 「집중 모드 = 모든 시간 멈춤」): 몬스터 · 보스 단계에서 켠 집중(state.fzAt) 동안 수업 남은 시간도 멈춤
-  //   state.fzMs = 지난 집중으로 멈춘 합계(수업 전체 · 단계가 바뀌어도 이어짐) · 개념 단계 자동 집중은 수업 시계를 멈추지 않음(fzAt 없음)
-  const nowOf = () => (typeof DS !== 'undefined' && DS.Net && DS.Net.now ? DS.Net.now() : Date.now());
-  const frozenMs = (R, now) => { const st = (R && R.state) || {}; return (Number(st.fzMs) || 0) + (st.fzAt != null ? Math.max(0, (now == null ? nowOf() : now) - Number(st.fzAt)) : 0); };
-  const deadline0 = (R) => { const d = R && ((R.state && R.state.deadline) || (R.meta && R.meta.deadline)); return d ? d + (Number((R.state || {}).extend) || 0) * 60e3 + (Number((R.state || {}).fzMs) || 0) : null; }; // 지금 켜진 집중은 뺀 값 (초 세기 · 다시 그리기 판단용)
-  const deadline = (R, now) => { const d = deadline0(R); return d == null ? null : d + ((R.state || {}).fzAt != null ? Math.max(0, (now == null ? nowOf() : now) - Number(R.state.fzAt)) : 0); }; // state.deadline = 수업 시작 때 잡은 50분 (2026-11-06)
-  const timeLeft = (R, now) => { const d = deadline(R, now); return d == null ? null : Math.max(0, d - now); };
+  // ⏸ #117 바로잡음 (2026-11-12 선생님 「차시 던전 문 닫는 건 그대로 시간 가야 해」): 집중 중에도 수업 남은 시간 · 보스 문 닫기는 그대로 흐름
+  const deadline = (R) => { const d = R && ((R.state && R.state.deadline) || (R.meta && R.meta.deadline)); return d ? d + (Number((R.state || {}).extend) || 0) * 60e3 : null; }; // state.deadline = 수업 시작 때 잡은 50분 (2026-11-06)
+  const deadline0 = deadline;
+  const timeLeft = (R, now) => { const d = deadline(R); return d == null ? null : Math.max(0, d - now); };
+  // ⏸ #117: state.fzAt = 몬스터 · 보스 단계에서 선생님이 켠 집중의 시작 (개념 단계 자동 집중은 없음) → 정찰 · 생각 시간 · 쉼터 놀이 시계를 멈추는 기준
   const frozeAt = (R) => { const z = ((R && R.state) || {}).fzAt; return z != null ? Number(z) : null; };
   // 던전 진행: 지나온 단계 / 전체 (마무리 = 끝)
   const progress = (L, R) => { const i = (R.state || {}).step ?? -1, n = L.steps.length; return Math.max(0, Math.min(1, (i + (isEnd(L, R) || bossHp(L, R).won ? 1 : 0)) / n)); };
-  return { frozenMs, deadline0, frozeAt, isTester, whyStages, hintKeyOf, chainAns, PRAC_MAX, pracUsed, isTcut, tcutN, chainDown, isChain, chainItems, chainSubs, CHAIN_SLOTS, readyOf, NEWR, variantOf, BIND_TOKEN, tokBinds, solveLock, BOSS_TRIES, bossItem, bossTries, bossState, bossFirst, bossAnswered, skipped, deadline, timeLeft, progress, ATK, soloAtk, BIND_PER, BIND_MAX, bindOf, bindTotal, atkClock, atkTrack, HOLY_SEC, holyUsed, holyCan, holyOn, holyArmed, holyTimes, stone, RETRIES, HEAL_MAX, healsOf, healsGiven, healsTo, healsReceived, healTarget, ultUsed, perfStreak, TRUE_SEC, isTrue, petrify, LIVE_MS, lateIds, liveOpen, roomDone, inClass, activeIds, teacherUid, num, newRoom, stepOf, isLobby, isEnd, isFinale, isClosed, focusOn, restOn, sheetOn, videoOn, autoFocus, fullMarks, canLobby, online, seedOf, itemsFor, attemptsOf, gradeAttempt, record, resultLabel, headcount, pctOf, monsterHp, waiting, allSubmitted, cleared, mastery, bossHp, helpList };
+  return { deadline0, frozeAt, isTester, whyStages, hintKeyOf, chainAns, PRAC_MAX, pracUsed, isTcut, tcutN, chainDown, isChain, chainItems, chainSubs, CHAIN_SLOTS, readyOf, NEWR, variantOf, BIND_TOKEN, tokBinds, solveLock, BOSS_TRIES, bossItem, bossTries, bossState, bossFirst, bossAnswered, skipped, deadline, timeLeft, progress, ATK, soloAtk, BIND_PER, BIND_MAX, bindOf, bindTotal, atkClock, atkTrack, HOLY_SEC, holyUsed, holyCan, holyOn, holyArmed, holyTimes, stone, RETRIES, HEAL_MAX, healsOf, healsGiven, healsTo, healsReceived, healTarget, ultUsed, perfStreak, TRUE_SEC, isTrue, petrify, LIVE_MS, lateIds, liveOpen, roomDone, inClass, activeIds, teacherUid, num, newRoom, stepOf, isLobby, isEnd, isFinale, isClosed, focusOn, restOn, sheetOn, videoOn, autoFocus, fullMarks, canLobby, online, seedOf, itemsFor, attemptsOf, gradeAttempt, record, resultLabel, headcount, pctOf, monsterHp, waiting, allSubmitted, cleared, mastery, bossHp, helpList };
 })();
