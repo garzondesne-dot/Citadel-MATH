@@ -613,21 +613,25 @@ DS.Camp = (function () {
         if (tot < c.g) throw Object.assign(new Error(`💎 조각이 ${c.g - tot}개 모자라요.`), { user: true });
         if (sc < c.s) throw Object.assign(new Error(`📜 서술 조각이 ${c.s - sc}개 모자라요.`), { user: true });
         if (lv !== lv0()) throw Object.assign(new Error('다른 화면에서 강화가 바뀌었어요 — 창을 다시 열어 주세요.'), { user: true });
-        const gp = `gem/${ck(me.c)}/${me.n}`, U = {}, TS = DS.Net.TS;
-        const buy = (kind, id, p, s) => { const k = `${kind}_${id}`; if ((d.buy || {})[k]) throw Object.assign(new Error('이미 해금한 것이 있어요 — 창을 다시 열어 주세요.'), { user: true }); U[`${gp}/buy/${k}`] = TS; U[`${gp}/log/buy_${k}`] = { g: -p, ...(s ? { s: -s } : {}), at: TS, why: '상점 해금', v: 96 }; };
+        const gp = `gem/${ck(me.c)}/${me.n}`, U = {}, TS = DS.Net.TS; // 🐞 #116 (11/12 학생 「저장 누르면 실패」): 서버 맨 위 한 번 쓰기 → 그동안 잘 되던 💎 칸 한 번 + 용사 칸 한 번
+        const buy = (kind, id, p, s) => { const k = `${kind}_${id}`; if ((d.buy || {})[k]) throw Object.assign(new Error('이미 해금한 것이 있어요 — 창을 다시 열어 주세요.'), { user: true }); U[`buy/${k}`] = TS; U[`log/buy_${k}`] = { g: -p, ...(s ? { s: -s } : {}), at: TS, why: '상점 해금', v: 96 }; };
         P.heroes.forEach((id) => buy('hero', id, hOf(id).shop.price, 0));
         P.sk.forEach((id) => { const f = fxOf(id); buy('fx', id, f.shop.price, f.shop.scroll || 0); });
         let back = 0;
-        for (let k = 1; k <= P.enh; k++) { const e = ENH[lv + k], g2 = Math.random() < DS.Gem.GREAT, b = g2 ? Math.floor(e.g / 2) : 0; back += b; if (g2) great++; U[`${gp}/log/enh_${lv + k}`] = { g: -e.g + b, ...(e.s ? { s: -e.s } : {}), at: TS, why: `🔨 강화 +${lv + k}${g2 ? ' 🌟 대성공' : ''}` }; }
-        if (P.enh) U[`${gp}/enh`] = lv + P.enh;
-        U[`${gp}/total`] = tot - c.g + back; if (c.s) U[`${gp}/scroll`] = sc - c.s;
-        if (!me.test) { const ap = `accounts/${me.c}/${me.n}`; U[`${ap}/hero`] = Number(hero); U[`${ap}/fx`] = String(fx); U[`${ap}/socket`] = sock; if (title !== TTL0) U[`${ap}/title`] = title; }
-        await DS.Net.update('', U); // 한 번에 (끊겨도 반쯤 저장되지 않음)
+        for (let k = 1; k <= P.enh; k++) { const e = ENH[lv + k], g2 = Math.random() < DS.Gem.GREAT, b = g2 ? Math.floor(e.g / 2) : 0; back += b; if (g2) great++; U[`log/enh_${lv + k}`] = { g: -e.g + b, ...(e.s ? { s: -e.s } : {}), at: TS, why: `🔨 강화 +${lv + k}${g2 ? ' 🌟 대성공' : ''}` }; }
+        if (P.enh) U.enh = lv + P.enh;
+        U.total = tot - c.g + back; if (c.s) U.scroll = sc - c.s;
+        try { await DS.Net.update(gp, U); } catch (e) { throw Object.assign(new Error(`💾 저장 실패(💎) — ${e.message || e}`), { user: true }); } // 💎 · 구매 · 강화 = 한 칸 한 번 (반쯤 저장 없음)
         if (great) setTimeout(() => DS.UI.toast(`🌟 강화 대성공 ${great}번! 💎 ${back}개 돌려받았어요`, 3600), 400);
         if (P.enh && DS.Sound) { if (lv + P.enh === 10 && DS.Sound.awaken) DS.Sound.awaken(); else DS.Sound.correct(); }
       }
       { const was = DS.Art.awake({ hero: me.hero, enh: lv0(), fx: me.fx, title: me.title }), now = DS.Art.awake({ hero, enh: lvNow(), fx, title }); let seen = false; try { seen = localStorage.getItem('citadel-awake-seen') === '1'; } catch (e) { /* 무시 */ } if (now && !was && !seen && DS.Attack && DS.Attack.cutin) { try { localStorage.setItem('citadel-awake-seen', '1'); } catch (e) { /* 무시 */ } setTimeout(() => DS.Attack.cutin(DS.Art.AWAKE.to, fx, { peek: true, name: '🌟 각성한 로안' }), 300); } } // 🌟 #73 처음 한 번 변신 컷인
-      if (me.test) DS.Test.setLook(hero, fx); else if (!(P.heroes.length || P.enh || P.sk.length)) { await DS.Account.setLook(hero, fx); await DS.Account.setSocket(sock); if (title !== TTL0) await DS.Account.setTitle(title); }
+      if (me.test) DS.Test.setLook(hero, fx);
+      else { // 용사 · 스킬 · 호칭 = 용사 칸 한 번 (옛 setLook 의 「잠긴 이펙트」 검사 대신 이 창의 가짐 판정 · 사다리 밖 = Ⅰ)
+        const fx2 = ownsF(fx) ? fx : DS.FX.ladder(hero)[0], sk2 = {}; Object.entries(sock).forEach(([h, k]) => { if (k && (DS.FX.inLadder(Number(h), k)) && (ownsF(k, Number(h)) || DS.FX.ACHV.includes(k))) sk2[h] = k; });
+        const A = { hero: Number(hero), fx: String(fx2), socket: Object.keys(sk2).length ? sk2 : null }; if (title !== TTL0) A.title = title;
+        try { await DS.Net.update(`accounts/${me.c}/${me.n}`, A); } catch (e) { throw Object.assign(new Error(`💾 저장 실패(용사) — ${e.message || e}`), { user: true }); }
+      }
       me.title = title; me.hero = hero; me.fx = fx; me.socket = sock; me.enh = lvNow(); el.remove();
       if (opt.onSave) { await opt.onSave({ hero, fx, title }); DS.UI.toast('💾 저장했어요 · 지금 던전에도 바로 적용돼요'); return; }
       DS.UI.toast('💾 저장했어요'); render();
