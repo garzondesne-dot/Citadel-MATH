@@ -62,7 +62,7 @@ DS.Dash = (function () {
         Object.entries(r.conc || {}).forEach(([c, v]) => { ok += v[0]; tot += v[1]; const key = `${l.id}|${c}`; conc[key] = { name: (r.names || {})[c] || c, lesson: l, ok: v[0], total: v[1] };
           const sd = DS.Standards ? DS.Standards.of(l.id, c, l.no) : null; if (sd) { std[sd] = std[sd] || [0, 0]; std[sd][0] += v[0]; std[sd][1] += v[1]; } });
         if (DS.Mis && r.mis) DS.Mis.merge(mis, r.mis);
-        hg += Number(r.hg) || 0; Object.entries(r.lad || {}).forEach(([m, v]) => { lad[m] = Math.max(lad[m] || 0, Number(v) || 0); }); Object.entries(r.ladW || {}).forEach(([m, v]) => { ladW[m] = v; }); // 🧩 #52 bo += Math.min(Number(r.boss) || 0, Number(r.bossN) || 0); bt += Number(r.bossN) || 0; if (r.ox) { oxo += Number(r.ox[0]) || 0; oxt += Number(r.ox[1]) || 0; } /* ⭐ 도전 문항은 따로 (옛 기록은 boss 에 섞여 있어 bossN 까지만 · v0.9.7.9) */ fixed += Number(r.fixed) || 0; perf += Number(r.perfects) || 0; hints += Number(r.hints) || 0; // 💡 그림 힌트 (v0.9.7.4 · 성적 아님)
+        hg += Number(r.hg) || 0; Object.entries(r.lad || {}).forEach(([m, v]) => { lad[m] = Math.max(lad[m] || 0, Number(v) || 0); }); Object.entries(r.ladW || {}).forEach(([m, v]) => { ladW[m] = v; }); /* 🧩 #52 */ bo += Math.min(Number(r.boss) || 0, Number(r.bossN) || 0); bt += Number(r.bossN) || 0; if (r.ox) { oxo += Number(r.ox[0]) || 0; oxt += Number(r.ox[1]) || 0; } /* ⭐ 도전 문항은 따로 (옛 기록은 boss 에 섞여 있어 bossN 까지만 · v0.9.7.9) */ fixed += Number(r.fixed) || 0; perf += Number(r.perfects) || 0; hints += Number(r.hints) || 0; // 💡 그림 힌트 (v0.9.7.4 · 성적 아님)
       });
       const total = Number((xp[n] || {}).total || 0), lv = DS.Grow ? DS.Grow.level(total) : { lv: 1, title: '' };
       const seals = DS.Bonus ? DS.Bonus.seals(bonus[n]).length : 0;
