@@ -10,7 +10,7 @@ const [lesson, pdf] = process.argv.slice(2), dry = process.argv.includes('--dry'
 (async () => {
   const b = await chromium.launch(); const p = await (await b.newContext({ viewport: { width: 1280, height: 900 } })).newPage();
   p.on('dialog', (d) => d.accept());
-  await p.goto('http://localhost:8765/index.html?local&role=teacher'); await p.waitForTimeout(1200);
+  await p.goto(`http://localhost:${process.env.PORT || 8765}/index.html?local&role=teacher`); await p.waitForTimeout(1200);
   if (lesson === 'trial-07') await p.evaluate(() => { const S6 = DS.Lessons.get('set-06'); if (S6 && S6.trial7 && !DS.Lessons.get('trial-07')) DS.Lessons.register(S6.trial7()); }); // 👩‍🏫 #80 체험판 7차시 판 (체험판에서만 등록 · 칸 그림 = prep/trial-07)
   await p.fill('#f-teacher .t-id', 'auto'); await p.fill('#f-teacher .t-pw', '909090'); await p.click('#f-teacher .t-login'); await p.waitForTimeout(1000);
   if (lesson === 'trial-07') await p.evaluate(() => { const s = document.querySelector('#p-lesson'); if (s && !s.querySelector('[value="trial-07"]')) s.insertAdjacentHTML('beforeend', '<option value="trial-07">체험판 7차시</option>'); });
