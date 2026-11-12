@@ -132,8 +132,9 @@ DS.Control = (function () {
   function tbarHtml(L, R, opt = {}) {
     const d = Raid().deadline(R); if (!d || Raid().isClosed(R) || Raid().isLobby(R)) return '';
     const prog = Raid().progress(L, R), ext = Number((R.state || {}).extend) || 0, won = Raid().bossHp(L, R).won || Raid().isEnd(L, R);
-    const total0 = TB_TOTAL + ext * 60e3, left0 = Math.max(0, d - DS.Net.now()), f0 = (Math.max(0, Math.min(1, left0 / total0)) * 100).toFixed(2), s0 = Math.ceil(left0 / 1000); // 처음 그릴 때부터 제자리 (0 에서 늘어나는 깜빡임 없음)
-    return `<div class="tb${opt.mini ? ' mini' : ''}${opt.compact ? ' compact' : ''}${won ? ' won' : ''}" data-dl="${d}" data-total="${TB_TOTAL + ext * 60e3}" data-prog="${prog}"${opt.only ? ` data-only="${opt.only}"` : ''}>
+    const d0 = Raid().deadline0(R), fz = Raid().frozeAt(R); // ⏸ #117 집중 중 = 남은 시간 멈춤 (초 세기는 fz 시각 기준)
+    const total0 = TB_TOTAL + ext * 60e3, left0 = Math.max(0, d0 - (fz != null ? fz : DS.Net.now())), f0 = (Math.max(0, Math.min(1, left0 / total0)) * 100).toFixed(2), s0 = Math.ceil(left0 / 1000); // 처음 그릴 때부터 제자리 (0 에서 늘어나는 깜빡임 없음)
+    return `<div class="tb${opt.mini ? ' mini' : ''}${opt.compact ? ' compact' : ''}${won ? ' won' : ''}" data-dl="${d0}"${fz != null ? ` data-fz="${fz}"` : ''} data-total="${TB_TOTAL + ext * 60e3}" data-prog="${prog}"${opt.only ? ` data-only="${opt.only}"` : ''}>
       <div class="tb-row"><span class="tb-t">${won ? '⏰ 시간 안에 클리어!' : `⏳ <b>${hm(d)}</b> 👑 보스가 문을 닫아요`} · 남은 <b class="tb-left">${Math.floor(s0 / 60)}:${String(s0 % 60).padStart(2, '0')}</b></span>${opt.ext && !ext && !won ? '<button class="btn small tb-ext" data-extend>⏰ +5분</button>' : ext ? '<span class="muted small">(+5분 연장)</span>' : ''}</div>
       <div class="tb-bar"><i class="tb-door">🚪</i><div class="tb-fill" style="width:${f0}%"></div><i class="tb-boss" style="left:calc(${f0}% - 10px)">👑</i></div>
       ${opt.prog ? `<div class="tb-prog"><div class="tb-pf" style="width:${(prog * 100).toFixed(1)}%"></div><span>⚔ 던전 진행 ${Math.round(prog * 100)}%</span></div>` : ''}</div>`;
@@ -156,7 +157,7 @@ DS.Control = (function () {
     const lk = Raid().solveLock(L, R, DS.Net.now()), base = (R.state || {}).solve != null ? Number(R.state.solve) : (R.meta || {}).solve != null ? Number(R.meta.solve) : 60;
     // 🌫 2026-11-09 #17: 「❄ 학생 60초 얼리기」 버튼은 없앰 → 몬스터마다 정찰 (기본 60초) · 준비 완료가 많으면 「⚔ 등장!」
     const rd = lk ? Raid().readyOf(R, lk.id).length : 0, all = Raid().activeIds(R).filter((u) => u !== (R.meta || {}).teacher).length;
-    return `<div class="sl-row${lk && lk.on ? ' sl-scout' : ''}">${lk && lk.on ? `<p class="sl-info">🌫 정찰 중 · 등장까지 <b class="sl-left" data-sl-end="${lk.end}">${Math.ceil(lk.left / 1000)}초</b> · ✋ 준비 <b>${rd}</b> / ${all}</p><div class="sl-btns"><button class="btn" data-sl="cut">−30초</button><button class="btn" data-sl="add">+30초</button><button class="btn primary big sl-now" data-sl="now">⚔ 지금 등장</button></div><button class="btn small" data-sl="add">+30초</button>`
+    return `<div class="sl-row${lk && lk.on ? ' sl-scout' : ''}">${lk && lk.on ? `<p class="sl-info">🌫 정찰 중 · 등장까지 <b class="sl-left" data-sl-end="${lk.end - lk.cur}"${lk.frz ? ` data-fz="${(R.state || {}).fzAt}"` : ''}>${Math.ceil(lk.left / 1000)}초</b> · ✋ 준비 <b>${rd}</b> / ${all}</p><div class="sl-btns"><button class="btn" data-sl="cut">−30초</button><button class="btn" data-sl="add">+30초</button><button class="btn primary big sl-now" data-sl="now">⚔ 지금 등장</button></div><button class="btn small" data-sl="add">+30초</button>`
       : `<span>🌫 정찰 시간</span><button class="btn small" data-sl="dn">−30</button><b>${base}초</b><button class="btn small" data-sl="up">+30</button><span class="muted small">다음 몬스터부터</span>`}</div>`;
   }
   const bindSolve = (el, code, R, L) => el.querySelectorAll('[data-sl]').forEach((b) => (b.onclick = () => run(async () => {
@@ -197,7 +198,7 @@ DS.Control = (function () {
   function tbTick() {
     const now = DS.Net.now(); let lastMin = false;
     document.querySelectorAll('.tb[data-dl]').forEach((e) => {
-      const dl = Number(e.dataset.dl), total = Number(e.dataset.total) || TB_TOTAL, left = Math.max(0, dl - now), frac = Math.max(0, Math.min(1, left / total));
+      const dl = Number(e.dataset.dl), total = Number(e.dataset.total) || TB_TOTAL, left = Math.max(0, dl - (e.dataset.fz ? Number(e.dataset.fz) : now)), frac = Math.max(0, Math.min(1, left / total));
       const only = Number(e.dataset.only || 0); e.hidden = !!only && left > only * 60e3 && !e.classList.contains('won');
       const s = Math.ceil(left / 1000), t = e.querySelector('.tb-left'); if (t) t.textContent = `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
       const f = e.querySelector('.tb-fill'); if (f) f.style.width = `${(frac * 100).toFixed(2)}%`;
@@ -211,7 +212,7 @@ DS.Control = (function () {
       }
       const pf = e.querySelector('.tb-pf'); if (pf) pf.parentElement.classList.toggle('behind', Number(e.dataset.prog) + 0.02 < 1 - frac);
     });
-    document.querySelectorAll('[data-sl-end]').forEach((e) => { const l = Math.max(0, Number(e.dataset.slEnd) - now); e.textContent = `${Math.ceil(l / 1000)}초`; }); // 📝 풀이 시간 남은 초
+    document.querySelectorAll('[data-sl-end]').forEach((e) => { const l = Math.max(0, Number(e.dataset.slEnd) - (e.dataset.fz ? Number(e.dataset.fz) : now)); e.textContent = `${Math.ceil(l / 1000)}초`; }); // 📝 풀이 시간 남은 초
     document.body.classList.toggle('tb-last-min', lastMin); // 이긴 뒤 · 수업 끝 · 화면 바뀜이면 붉은 테두리 끔
     Object.values(timeUpFns).forEach((fn) => { try { fn(now); } catch (err) { console.error(err); } });
     try { doorPaint(); } catch (err) { console.error(err); } // ⏰ #68 A 남은 초

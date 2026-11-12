@@ -3431,3 +3431,5 @@ body:has(.modal:not([hidden])) #ver-tag { display: none; }
 .paper .item.ok-lock button, .paper .item.ok-lock input { pointer-events: none; }
 .paper .item.redo { border: 2px solid #e5534b !important; border-radius: 10px; padding: 6px 44px 8px 8px !important; margin: 6px 0 !important; }
 .paper .redo-note { color: #b3261e; font-weight: 700; }
+/* ⏸ #117 집중 모드 = 교실 TV 전투 장면의 반복 연출(몬스터 숨쉬기 · 흔들림 · 졸개 · 불꽃)도 그 자리에서 멈춤 · 끄면 이어서 */
+.focus-on #raid, .focus-on #raid *, .focus-on #raid *::before, .focus-on #raid *::after { animation-play-state: paused !important; }

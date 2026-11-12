@@ -113,7 +113,7 @@ DS.Act = (function () {
     }
     if (dir > 0 && i >= L.steps.length) { // 마무리 → 수업 끝 (학생은 내 캠프로 · 차원문은 꺼진 채 남음)
       await savePunch(code, unpackRoom(R), L, { final: true }).catch(() => {}); // 🥊 끝내기 전에 저장 → 학생이 결과를 볼 때 이미 있음
-      await N().update(P(code, 'state'), { closed: true, focus: false, stepAt: N().TS });
+      await N().update(P(code, 'state'), { closed: true, focus: false, stepAt: N().TS, ...fzClose(R.state, N().now()) });
       const cls = (R.meta || {}).cls;
       if (cls) { const lv = await N().get(`live/${ck(cls)}`).catch(() => null); if (lv && lv.code === code) await N().set(`live/${ck(cls)}/open`, false); }
       return;
@@ -121,7 +121,7 @@ DS.Act = (function () {
     const next = Math.max(-1, Math.min(L.steps.length, i + dir));
     if (next === i) return;
     const fN = Raid.autoFocus(L.steps[next]), st0 = R.state || {};
-    await N().update(P(code, 'state'), { step: next, stepAt: N().TS, focus: fN, focusAt: fN ? N().now() : null, pauseMs: null, closed: null, sheet: null, video: null, ...cp(st0, { focus: fN, video: null }) }); // 단계가 바뀌면 문제 화면 · 영상은 닫힘
+    await N().update(P(code, 'state'), { step: next, stepAt: N().TS, focus: fN, focusAt: fN ? N().now() : null, pauseMs: null, closed: null, sheet: null, video: null, ...cp(st0, { focus: fN, video: null }), ...fzClose(st0, N().now()) }); // 단계가 바뀌면 문제 화면 · 영상은 닫힘
     if (next >= L.steps.length) savePunch(code, unpackRoom(R), L).catch(() => {}); // 🥊 마무리에 들어서면 반대항 점수 (끝낼 때 한 번 더)
   }
   // 모루 레시피는 반마다 "배포한 차시까지" 열린다: unlock/{반} = 가장 큰 차시 번호
@@ -143,12 +143,21 @@ DS.Act = (function () {
   // 🔥 콤보 시계 멈춤 (쉼터 · OX 타임 · 영상 · 집중모드): 바뀐 뒤 상태를 보고 cpAt · cpMs 를 같이 적는다
   const cp = (st, next) => (DS.Combo ? DS.Combo.cpPatch(st, next, N().now()) : {});
   // 집중모드: 켜고 끈 시각을 남겨 👾 몬스터 공격 게이지가 모두 함께 멈춘다 (state.focusAt · pauseMs)
+  // ⏸ #117 (2026-11-12 선생님 「모든 시간이 멈췄으면」): 몬스터 · 보스 단계에서 켜면 state.fzAt 도 → 수업 남은 시간 · 정찰 · 🦇 박쥐(콤보 시계)도 멈춤
+  //   끄면 멈춘 시간을 fzMs(수업 시계) · solveOn.fx(정찰) 에 더해 그 자리에서 이어감 (잃는 시간 없음) · 개념 단계 자동 집중은 수업 시계 그대로
   async function setFocus(code, on) {
-    const st = (await N().get(P(code, 'state'))) || {};
+    const room = await N().get(P(code)); const R = room ? unpackRoom(room) : null, st = (R && R.state) || {};
     if (!!on === !!st.focus) return;
-    if (on) await N().update(P(code, 'state'), { focus: true, focusAt: N().now(), ...cp(st, { focus: true }) });
-    else await N().update(P(code, 'state'), { focus: false, focusAt: null, pauseMs: (st.pauseMs || 0) + Math.max(0, N().now() - (st.focusAt || N().now())), ...cp(st, { focus: false }) });
+    const now = N().now(), L = R && R.meta && DS.Lessons ? DS.Lessons.get(R.meta.lesson) : null, step = L ? Raid.stepOf(L, R) : null;
+    if (on) { const fight = !!step && ['monster', 'boss'].includes(step.kind) && !st.closed && !Raid.isLobby(R); await N().update(P(code, 'state'), { focus: true, focusAt: now, fzAt: fight ? now : null, ...cp(st, { focus: true }) }); return; }
+    const patch = { focus: false, focusAt: null, fzAt: null, pauseMs: (st.pauseMs || 0) + Math.max(0, now - (st.focusAt || now)), ...cp(st, { focus: false }) };
+    if (st.fzAt != null) {
+      patch.fzMs = (Number(st.fzMs) || 0) + Math.max(0, now - Number(st.fzAt));
+      const lk = L ? Raid.solveLock(L, R, now) : null; if (lk && lk.cur > 0) patch[`solveOn/${lk.id}`] = { sec: lk.sec, at: lk.t0, fx: lk.fx + lk.cur }; // 정찰 중에 켠 집중 → 정찰 끝을 그만큼 뒤로
+    }
+    await N().update(P(code, 'state'), patch);
   }
+  const fzClose = (st, now) => (st && st.fzAt != null ? { fzAt: null, fzMs: (Number(st.fzMs) || 0) + Math.max(0, now - Number(st.fzAt)) } : {}); // 집중을 켠 채 단계가 바뀌거나 끝날 때
   // 🏕 쉼터: 켜면 { at, min(기본 5분) } · 끄면 쉰 시간을 pauseMs 에 더해 몬스터 공격 게이지가 이어짐 · 분 조절은 쉼터 중에
   async function setRest(code, on, min, opt = {}) { // opt.quiz (v0.9.8.1): ⭕ OX 타임 = 쉼터처럼 멈추되 이름만 다름
     const st = (await N().get(P(code, 'state'))) || {};
@@ -168,7 +177,7 @@ DS.Act = (function () {
     { const U = unpackRoom(R), Lx = DS.Lessons.get(R.meta.lesson); if (Lx) await savePunch(code, U, Lx, { final: true, ot: !!(opt.rift && R.meta.cls) }).catch(() => {}); }
     const Ue = unpackRoom(R), Le = DS.Lessons.get(Ue.meta.lesson); // 📅 진도: 마무리까지 가서 「수업 끝」= 그 차시를 끝냄 (⏸ 저장 · 시간 초과 · 중간에 끝내기 = 그대로 · 2026-11-06 사용자)
     const done = !!(Le && !opt.saved && !Raid.isLobby(Ue) && Raid.isEnd(Le, Ue)); // 마무리(마지막 한마디)까지 갔으면 = 진도를 나감 (종이 쳐서 닫혀도) · ⏸ 저장은 그대로
-    await N().update(P(code, 'state'), { closed: true, focus: false, stepAt: N().TS, ...(opt.timeUp ? { timeUp: N().TS } : {}), ...(done ? { progDone: Le.id, progDoneAt: N().TS } : {}) });
+    await N().update(P(code, 'state'), { closed: true, focus: false, stepAt: N().TS, ...fzClose(R.state, N().now()), ...(opt.timeUp ? { timeUp: N().TS } : {}), ...(done ? { progDone: Le.id, progDoneAt: N().TS } : {}) });
     const cls = R.meta.cls;
     if (done && cls && DS.Sched && DS.Sched.advance) await DS.Sched.advance(cls, Le.id).catch(() => {}); // 교사만 (종합실이면 교사 기기가 나중에 채움)
     if (R.meta.slot && R.meta.slot.extra && R.meta.slot.key) await N().remove(`sched/extra/${R.meta.slot.key}`).catch(() => {}); // ➕ 보충 칸 = 수업이 끝나면 사라짐
@@ -184,7 +193,7 @@ DS.Act = (function () {
     if (id && o.on === true) patch[`solveOn/${id}`] = { sec: Math.max(10, Number(o.onSec) || Number(patch.solve ?? (R.state || {}).solve ?? (R.meta || {}).solve ?? 60)), at: N().TS };
     if (id && o.on === false) patch[`solveOn/${id}`] = 0;
     if (id && o.now) patch[`solveEnd/${id}`] = N().TS;
-    if (id && o.add) { const lk = Raid.solveLock(L, R, N().now()); if (lk && lk.on) { if (Number(o.add) < 0 && lk.left <= -Number(o.add) * 1000) patch[`solveEnd/${id}`] = N().TS; else patch[`solveOn/${id}`] = { sec: Math.max(1, Math.round((lk.end - lk.t0) / 1000 + Number(o.add))), at: lk.t0 }; } } // 줄이기: 남은 시간보다 많이 줄이면 바로 등장
+    if (id && o.add) { const lk = Raid.solveLock(L, R, N().now()); if (lk && lk.on) { if (Number(o.add) < 0 && lk.left <= -Number(o.add) * 1000) patch[`solveEnd/${id}`] = N().TS; else patch[`solveOn/${id}`] = { sec: Math.max(1, Math.round((lk.end - lk.cur - lk.fx - lk.t0) / 1000 + Number(o.add))), at: lk.t0, ...(lk.fx ? { fx: lk.fx } : {}) }; } } // 줄이기: 남은 시간보다 많이 줄이면 바로 등장
     if (Object.keys(patch).length) await N().update(P(code, 'state'), patch);
     if (patch.solve != null && L && L.id) await N().set(prepPath(L.id, 'solve'), patch.solve).catch(() => {}); // 🧙 #32 풀이 시간 = 다음 수업에도 (차시 준비 칸)
   }

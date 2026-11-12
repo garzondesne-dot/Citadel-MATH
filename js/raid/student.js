@@ -209,7 +209,7 @@ DS.Student = (function () {
     if (Raid().isClosed(R)) return toCamp();
     if (!R.players || !R.players[me]) { $('#st-body').innerHTML = '<div class="panel"><p>입장 정보가 없어요. 처음 화면에서 다시 입장해 주세요.</p></div>'; return; }
     header();
-    { const tb = $('#st-tbar'); if (tb) { const sig = `${Raid().deadline(R)}|${Raid().isClosed(R)}|${Raid().bossHp(L, R).won}`; if (tb.dataset.sig !== sig) { tb.dataset.sig = sig; tb.innerHTML = test ? '' : DS.Control.tbarHtml(L, R, { mini: true, compact: true }); } } }
+    { const tb = $('#st-tbar'); if (tb) { const sig = `${Raid().deadline0(R)}|${Raid().frozeAt(R)}|${Raid().isClosed(R)}|${Raid().bossHp(L, R).won}`; if (tb.dataset.sig !== sig) { tb.dataset.sig = sig; tb.innerHTML = test ? '' : DS.Control.tbarHtml(L, R, { mini: true, compact: true }); } } }
     focus((!test || !!test.real) && Raid().focusOn(R) && !Raid().isLobby(R) && !Raid().restOn(R)); // 👩‍🏫 체험판은 집중모드 화면도 실제처럼
     if (test && test.onRender) test.onRender(L, R);
     const body = $('#st-body');
@@ -513,7 +513,7 @@ DS.Student = (function () {
         <div class="enc-hero">${heroNow('idle', '')}<i class="shadow"></i></div><div class="enc-mon scout-sil">${DS.Art.monster(spr, 'idle', '')}</div></div>
       <div class="sl-box scout-box"><b>🌫 학습지 「${esc(title.replace(/^👑 /, ''))}」를 먼저 풀어 보세요</b>
         ${img ? `<img class="scout-img" src="${img}" alt="학습지 칸">` : ''}
-        <p class="sl-time">몬스터 등장까지 <b class="sl-left" data-sl-end="${lk.end}">${Math.ceil(lk.left / 1000)}초</b> <span class="muted small">· 선생님이 일찍 부를 수도 있어요</span></p>
+        <p class="sl-time">몬스터 등장까지 <b class="sl-left" data-sl-end="${lk.end - lk.cur}"${lk.frz ? ` data-fz="${(R.state || {}).fzAt}"` : ''}>${Math.ceil(lk.left / 1000)}초</b> <span class="muted small">· 선생님이 일찍 부를 수도 있어요</span></p>
         ${ready ? '<p class="okc">✋ 준비 완료! 몬스터가 나타나면 다 푼 답을 옮겨 적어요</p>' : '<button class="btn primary big" id="sc-ready">✋ 준비 완료</button>'}</div></div>`;
     { const sm = body.querySelector('.enc-mon.scout-sil'); requestAnimationFrame(() => DS.Art.scoutDeco(sm)); } // 🌫 진형(대장 + 졸개 3)
     const rb = body.querySelector('#sc-ready');
