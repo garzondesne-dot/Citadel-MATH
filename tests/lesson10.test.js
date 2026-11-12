@@ -105,6 +105,11 @@ check(JSON.stringify(L.items('m2', 'x', 1)) === JSON.stringify(L.items('m2', 'x'
 check(kindOf('x는 3의 배수이다.', 'x는 9의 배수이다.') === '필요조건' && kindOf('x² ≤ 25', '|x| ≤ 5') === '필요충분조건' && kindOf('a = 0 이고 b = 0', 'ab = 0') === '충분조건' && kindOf('2x − 1 < 5', '−1 < 2 − x') === '필요충분조건', '판정기 = 교과서 답');
 check(kindOf('x ≤ 1', '−3 ≤ x ≤ 0') === '필요조건' && kindOf('a = b', 'a² = b²') === '충분조건' && kindOf('|x| ≤ 1', '−1 ≤ x ≤ 1') === '필요충분조건', '판정기 = 명제 04 답');
 
+// 🎬 영상 (#46 ~ #48) = 개념 · 문제 칸에 연결 · 파일 있음
+{ const fs = require('fs'), path = require('path'); const V = L.videos || {};
+  check(V.c1 === 'assets/video/v10-46.mp4' && V.c2 === 'assets/video/v10-47.mp4' && V.c3 === 'assets/video/v10-48.mp4' && V.m4 === 'assets/video/v10-47.mp4', '🎬 영상 칸');
+  Object.values(V).forEach((f) => check(fs.existsSync(path.join(__dirname, '..', f)) && fs.statSync(path.join(__dirname, '..', f)).size < 1.05e6, `🎬 ${f} 있음 · 1MB 이내`)); }
+
 // (4) 📸 서술형 채점 기준 (m4)
 const RB = ((DS.Rubrics || {})['set-10'] || {}).m4;
 check(RB && RB.on && RB.raid && RB.total === 4 && RB.steps.length === 4 && RB.steps.reduce((s, x) => s + x.pts, 0) === 4 && RB.pass === 3, '📸 채점 기준 4단계 · 통과 3');
