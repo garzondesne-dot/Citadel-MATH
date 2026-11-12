@@ -27,10 +27,12 @@ DS.Dash = (function () {
   const isAll = () => cls === ALL;
   async function one(c) {
     const k = A().classKey(c);
-    const [records, xp, cards, bonus, tst] = await Promise.all(['records', 'xp', 'cards', 'bonus', 'tester'].map((p) => DS.Net.get(`${p}/${k}`).catch(() => null)));
+    const [records, xp, cards, bonus, tst, photo, sdone] = await Promise.all(['records', 'xp', 'cards', 'bonus', 'tester', 'photo', 'surveyDone'].map((p) => DS.Net.get(`${p}/${k}`).catch(() => null)));
     const T = tst || {}, byN = Object.fromEntries(Object.entries(roster[c] || {}).filter(([n]) => !T[n])); // 🧪 #67 시험 계정 = 랭킹 · 반 통계 · 대항전 · 기호 톡 순위에서 빠짐 (지난 기록 포함 · 기록은 그대로)
     const d = build(byN, records || {}, xp || {}, cards || {}, bonus || {}); d.testers = Object.keys(T).filter((n) => T[n] && (roster[c] || {})[n]).length;
-    d.studs.forEach((st) => { st.cls = c; st.key = `${c}|${st.n}`; st.held = d.held; st.symt = (((xp || {})[st.n]) || {}).st || {}; }); // 📖 #54 기호 톡 횟수
+    d.studs.forEach((st) => { st.cls = c; st.key = `${c}|${st.n}`; st.held = d.held; st.symt = (((xp || {})[st.n]) || {}).st || {}; // 📖 #54 기호 톡 횟수
+      const rooms = Object.values(((photo || {})[st.n]) || {}).map((byId) => Object.values(byId || {}).filter((x) => x && x.status).length).filter(Boolean); // 📝 #126 📷 서술형: 방마다 낸 장 수 → 고쳐 쓴 횟수 = 같은 문항에 다시 낸 장
+      st.photoN = rooms.reduce((a, x) => a + x, 0); st.photoRev = rooms.reduce((a, x) => a + Math.max(0, x - 1), 0); st.surveyed = ((sdone || {})[st.n]) === true; });
     if (d.held.length) DS.Net.update(`held/${k}`, Object.fromEntries(d.held.map((l) => [l.id, true]))).catch(() => {}); // 📕 옛 수업도 「한 차시」로 (학생 오답노트 불참 판단 · v0.9.7.9)
     return d;
   }
@@ -69,8 +71,10 @@ DS.Dash = (function () {
       if (DS.Mis) Object.values(bonus[n] || {}).forEach((l) => Object.values(l || {}).forEach((m) => { if (m && m.mis) DS.Mis.merge(mis, m.mis); }));
       const left = DS.Note ? held.reduce((a, l) => { const L = DS.Lessons.get(l.id); return L && L.boss && !L.eval ? a + DS.Note.lesson(L, rec[l.id], (bonus[n] || {})[l.id]).left : a; }, 0) : 0; // 📕 남은 문제
       const tries = Object.values(bonus[n] || {}).reduce((a, l) => a + Object.values(l || {}).reduce((b, m) => b + (Number((m || {}).tries) || 0), 0), 0);
+      const triesOf = (pre) => Object.entries(bonus[n] || {}).filter(([lid]) => pre.test(lid)).reduce((a, [, l]) => a + Object.values(l || {}).reduce((b, m) => b + (Number((m || {}).tries) || 0), 0), 0); // 📝 #126 단원 평가(eval-) · 복습(set-) 따로
+      const noteDone = DS.Note ? held.reduce((a, l) => { const L = DS.Lessons.get(l.id); if (!L || !L.boss || L.eval) return a; const x = DS.Note.lesson(L, rec[l.id], (bonus[n] || {})[l.id]); return a + x.mons.filter((st) => st === 'p').length + x.boss.slice(0, x.hp).filter((st) => st === 'p').length; }, 0) : 0; // 📕 오답을 다시 풀어 보완한 문항
       return { n, name: byN[n], rec, went: went.length, heldN: held.length, part: pct(went.length, held.length), boss: pct(bo, bt), bossRaw: [bo, bt], first: pct(ok, tot), firstRaw: [ok, tot],
-        fixed, perf, hints, hg, lad, ladW, ladN: Object.values(lad).reduce((a, v) => a + v, 0), seals, tries, left, ox: pct(oxo, oxt), bon: bonus[n] || {}, cards: Object.keys(cards[n] || {}).length, xp: total, lv: lv.lv, lvTitle: lv.title, conc, std, mis };
+        fixed, perf, hints, hg, lad, ladW, ladN: Object.values(lad).reduce((a, v) => a + v, 0), seals, tries, tryEval: triesOf(/^eval-/), trySet: triesOf(/^set-/), noteDone, left, ox: pct(oxo, oxt), bon: bonus[n] || {}, cards: Object.keys(cards[n] || {}).length, xp: total, lv: lv.lv, lvTitle: lv.title, conc, std, mis };
     });
     return { held, studs };
   }
@@ -240,29 +244,55 @@ DS.Dash = (function () {
     memo() {
       return `<p class="muted small">기록에 있는 사실만으로 만든 초안이에요. 그대로 쓰지 말고 관찰 내용을 더해 다듬어 주세요.</p>
         <button class="btn" data-copy="all">📋 전체 복사</button>
-        ${data.studs.map((s) => `<div class="dash-memo"><b>${esc(who(s))}</b><p>${esc(memo(s))}</p><button class="btn small" data-copy="${s.key}">복사</button></div>`).join('')}`;
+        ${data.studs.map((s) => { const mo = memoMore(s); return `<div class="dash-memo"><b>${esc(who(s))}</b><p>${esc(memo(s))}</p>${mo.length ? `<p class="muted small dash-more">더 보기 · ${esc(mo.join(' '))}</p>` : ''}<button class="btn small" data-copy="${s.key}">복사</button></div>`; }).join('')}`;
     },
   };
 
-  // ── 세특 메모 초안: 기록에 있는 사실만 ───────────────
-  function memo(s) {
-    if (!s || !s.went) return '저장된 수업 기록이 없음.';
-    const parts = [];
-    parts.push(`게임 기반 협동 레이드 수업(집합 단원) ${s.heldN}차시 중 ${s.went}차시에 참여함${s.went === s.heldN ? '(전 차시 참여)' : ''}`);
-    const cs = Object.values(s.conc).filter((c) => c.total >= 2).map((c) => ({ ...c, p: pct(c.ok, c.total) }));
+  // ── 세특 메모 초안: 기록에 있는 사실만 · 생기부 낱말 (📝 #126 · 2026-11-12 선생님 · DECISIONS 「📝 세특 초안 = 생기부 낱말」) ───────
+  //   순서 고정 = ① 참여 ② 이해 ③ 협력 · 지원 ④ 오류 수정 · 피드백 ⑤ 자기주도 ⑥ 성찰 · 문장 끝 「-함 · -임 · -보임」 · 본문 4~6문장 · 500자 안 · 남는 문장 = 「더 보기」
+  //   게임 낱말(레이드 · 몬스터 · 보스 · 던전 · 성채 · 허수아비 · 모루 · 용사 · 레벨 · EXP · 콤보 · 랭킹 · 처치 · 💎 📜 · 등수)은 쓰지 않음 · 기록이 없으면 그 문장 없음
+  const MEMO_MAX = 6, MEMO_LEN = 500;
+  const symN = (s) => Object.values(s.symt || {}).reduce((a, by) => a + Object.values(by || {}).reduce((b, v) => b + (Number(v) || 0), 0), 0);
+  function memoParts(s) {
+    if (!s || !s.went) return { main: '저장된 수업 기록이 없음.', more: [] };
+    const S = []; // [단계, 문장]
+    // ① 참여
+    S.push([1, `모둠 협동학습 형태의 수학 수업(집합과 명제 단원) ${s.heldN}차시 중 ${s.went}차시에 참여함${s.went === s.heldN ? '(전 차시 참여)' : ''}`]);
+    // ② 이해
+    const cs = Object.values(s.conc || {}).filter((c) => c.total >= 2).map((c) => ({ ...c, p: pct(c.ok, c.total) }));
     const best = cs.filter((c) => c.p >= 80).sort((a, b) => b.p - a.p || b.total - a.total)[0];
-    if (best) parts.push(`특히 '${best.name}' 개념에서 첫 시도 정답률 ${best.p}%로 정확한 이해를 보임`);
-    if (s.boss != null) parts.push(`형성평가 평균 ${s.boss}%를 기록함`);
-    if (s.fixed) parts.push(`틀린 문제를 숫자를 바꾼 재도전 문제로 ${s.fixed}개 스스로 바로잡으며 끝까지 해결하려는 태도를 보임`);
-    if (s.tries) parts.push(`수업 뒤 중단원던전에 ${s.tries}회 도전${s.seals ? `하여 ${s.seals}개 층을 모두 해결하는` : '하는'} 등 자기주도적으로 복습함`);
-    if (s.cards) parts.push(`모루(개념 카드 만들기)에서 기호와 개념을 연결한 카드 ${s.cards}장을 완성함`);
+    if (best) S.push([2, `'${best.name}' 개념에서 첫 시도 정답률 ${best.p}%로 정확한 이해를 보임`]);
     if (DS.Standards) { const good = Object.entries(s.std || {}).filter(([, v]) => v[1] >= 4 && pct(v[0], v[1]) >= 80).map(([id, v]) => ({ sd: DS.Standards.get(id), p: pct(v[0], v[1]) })).filter((x) => x.sd).sort((a, b) => b.p - a.p);
-      if (good.length) parts.push(`${good.slice(0, 2).map((g) => `'${g.sd.name}'`).join('과 ')} 성취기준에 안정적으로 도달함(첫 시도 정답률 ${good[0].p}%)`); }
-    if (DS.Mis) { const t = DS.Mis.top(s.mis, 3).find((x) => x.fixed > 0); if (t) parts.push(`초기에 ${t.seteuk}을(를) 혼동하였으나 재도전 과제와 보충 과제를 통해 스스로 바로잡음`); }
-    const weak = cs.filter((c) => c.p < 50).sort((a, b) => a.p - b.p)[0];
-    if (weak && s.fixed) parts.push(`'${weak.name}' 개념은 처음에 어려워했으나 재도전을 통해 보완해 나감`);
-    return parts.join('. ') + '.';
+      if (good.length) S.push([2, `${good.slice(0, 2).map((g) => `'${g.sd.name}'`).join('과 ')} 성취기준에 안정적으로 도달함(첫 시도 정답률 ${good[0].p}%)`]); }
+    if (s.boss != null) S.push([2, `형성평가에서 평균 ${s.boss}%의 정답률을 보임`]);
+    // ③ 협력 · 지원
+    if (s.hg) S.push([3, '어려워하는 친구를 돕고 격려하는 모습을 보임']);
+    S.push([3, '학급 공동의 목표를 위해 친구들과 협력하며 문제를 해결함']);
+    // ④ 오류 수정 · 피드백
+    if (s.fixed) S.push([4, `틀린 문제를 유사 문항으로 다시 풀며 오류를 스스로 바로잡음(${s.fixed}개)`]);
+    if (DS.Mis) { const t = DS.Mis.top(s.mis, 3).find((x) => x.fixed > 0); if (t) S.push([4, `초기에 ${t.seteuk}을(를) 혼동하였으나 재도전과 보충 학습을 통해 바로잡음`]); }
+    if (s.photoRev) S.push([4, `풀이 과정을 근거와 함께 서술하고 교사의 피드백을 반영하여 고쳐 씀(${s.photoRev}회)`]);
+    else if (s.photoN) S.push([4, `풀이 과정을 근거와 함께 서술함(${s.photoN}회)`]);
+    if (s.hints) S.push([4, '교사가 제시한 단서를 활용해 풀이를 보완함']);
+    // ⑤ 자기주도
+    if (s.tryEval) S.push([5, `수업 외 시간에 단원 평가 문항에 ${s.tryEval}회 도전하며 스스로 단원을 정리함`]);
+    if (s.trySet) S.push([5, `배운 내용을 유사 문항으로 반복 연습함(${s.trySet}회)`]);
+    if (s.noteDone) S.push([5, `오답을 다시 풀어 보완을 완료함(${s.noteDone}문항)`]);
+    if (s.cards) S.push([5, `기호와 개념의 뜻을 연결하여 정리하는 활동을 ${s.cards}회 완료함`]);
+    if (symN(s)) S.push([5, '낯선 기호의 뜻을 스스로 찾아보며 학습함']);
+    // ⑥ 성찰
+    if (s.surveyed) S.push([6, '수업 후 배운 점과 어려웠던 점을 돌아보는 성찰에 참여함']);
+    // 본문 = 단계마다 첫 문장부터 고르게(순서는 그대로) · 6문장 · 500자 안 → 남는 문장 = 더 보기
+    const pick = new Set(), len = (ids) => ids.reduce((a, i) => a + S[i][1].length + 2, 0);
+    for (let round = 0; round < 3 && pick.size < MEMO_MAX; round++) {
+      const firstOf = {}; S.forEach(([k], i) => { if (pick.has(i)) return; if (firstOf[k] == null) firstOf[k] = i; });
+      for (const i of Object.values(firstOf).sort((a, b) => a - b)) { if (pick.size >= MEMO_MAX) break; if (len([...pick, i]) <= MEMO_LEN) pick.add(i); }
+    }
+    const main = S.map((x, i) => i).filter((i) => pick.has(i)).map((i) => S[i][1]), more = S.map((x, i) => i).filter((i) => !pick.has(i)).map((i) => S[i][1]);
+    return { main: main.join('. ') + '.', more: more.map((t) => t + '.') };
   }
+  const memo = (s) => memoParts(s).main;
+  const memoMore = (s) => memoParts(s).more;
 
   async function copy(text) {
     try { await navigator.clipboard.writeText(text); DS.UI.toast('복사했어요'); }
@@ -358,7 +388,7 @@ DS.Dash = (function () {
       <p>Lv.${s.lv} ${esc(s.lvTitle || '')} · EXP ${s.xp} · 카드 ${s.cards} · 업적 ${s.seals} · 던전 도전 ${s.tries}회</p>
       <p>형성평가 ${show(s.boss)} · 첫 시도 ${show(s.first)} · 참여 ${s.went}/${s.heldN} · 고친 수 ${s.fixed}</p>
       ${DS.Result ? DS.Result.history(s.rec || {}) : ''}
-      <div class="dash-memo"><b>세특 메모 초안</b><p>${esc(memo(s))}</p></div>
+      <div class="dash-memo"><b>세특 메모 초안</b><p>${esc(memo(s))}</p>${memoMore(s).length ? `<p class="muted small dash-more">더 보기 · ${esc(memoMore(s).join(' '))}</p>` : ''}</div>
       <div class="row"><button class="btn" id="dd-gem">💎 조각 주기</button><button class="btn" id="dd-copy">메모 복사</button><button class="btn" id="dd-x">✕ 닫기</button></div></div>`;
     document.body.appendChild(el);
     el.querySelector('#dd-x').onclick = () => el.remove();
@@ -372,5 +402,5 @@ DS.Dash = (function () {
       DS.UI.toast(`💎 ${g}개를 줬어요 · 「${why}」`);
     });
   }
-  return { enter, _build: build };
+  return { enter, _build: build, _memo: memoParts };
 })();
