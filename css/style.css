@@ -3449,3 +3449,10 @@ body:has(.modal:not([hidden])) #ver-tag { display: none; }
 .mc-wsym { color: #ffe39a; }
 .st-wish.own { flex-direction: column; align-items: center; gap: 4px; }
 .st-mine { color: #7fe08a; }
+/* 🚑 2026-11-13 체험판 = 학생 화면만 · 📺 단추로 TV 화면 ↔ 학생 화면 (TV 는 숨긴 채 계속 돌아 진행 그대로) */
+.trial .test-tv.tv-off, .test-tv.tv-hall.tv-off { visibility: hidden; pointer-events: none; }
+.test-tv.tv-hall.tv-show { top: 0; left: 0; transform: none; bottom: var(--tbh, 0px); border-bottom: 0; z-index: 46; }
+.test-tv.tv-hall.tv-show .tt-l { display: none; }
+.test-bar .tb-tvv { white-space: nowrap; border-color: #c08aff; }
+.test-bar .tb-tvv.on { background: #4a2a78; color: #fff; }
+@media (max-width: 480px) { .test-bar .tb-tvv .tvl { display: none; } } /* 폰 = 📺 / 📱 아이콘만 (막대가 넘치지 않게) */

@@ -134,7 +134,8 @@ DS.Test = (function () {
     el.dataset.sig = sig;
     el.innerHTML = `<b>${demo || trial ? (trial ? '👩‍🏫' : '🎮 체험판') : '🧪 테스트'}</b><span class="tb-step">${esc(DS.Control.stepName(L, R))}</span>
       ${media.vid ? '<button class="btn small tb-ic" id="tb-vid" title="이 단계 설명 영상">🎬</button>' : ''}${media.img ? `<button class="btn small tb-ic" id="tb-img" title="이 단계 학습지 · 문제 이미지">📄</button>` : ''}
-      ${i >= 0 && !demo && DS.Fun ? '<button class="btn small tb-ic" id="tb-rest" title="🏕 쉼터 — 쉬는 시간 놀이(⚖ 🔄 ⭕ 🏰)를 친구 봇들과 해 봐요">🏕</button>' : ''}${i >= 0 && !demo && !R.state.closed ? `<button class="btn small tb-ic${foc ? ' on' : ''}" id="tb-focus" title="👀 집중모드 — 학생 폰을 잠그고 앞(교실 TV)을 보게 해요 · 몬스터 공격도 멈춤">👀${foc && !trial ? ' 끄기' : ''}</button>` : ''}<button class="btn small" id="tb-back"${i < 0 ? ' disabled' : ''}>◀</button><button class="btn primary" id="tb-next">${next}</button><button class="btn small" id="tb-x">${trial ? '↻' : '끝내기'}</button>`;
+      ${i >= 0 && !demo && DS.Fun ? '<button class="btn small tb-ic" id="tb-rest" title="🏕 쉼터 — 쉬는 시간 놀이(⚖ 🔄 ⭕ 🏰)를 친구 봇들과 해 봐요">🏕</button>' : ''}${i >= 0 && !demo && !R.state.closed ? `<button class="btn small tb-ic${foc ? ' on' : ''}" id="tb-focus" title="👀 집중모드 — 학생 폰을 잠그고 앞(교실 TV)을 보게 해요 · 몬스터 공격도 멈춤">👀${foc && !trial ? ' 끄기' : ''}</button>` : ''}${tvBtn()}<button class="btn small" id="tb-back"${i < 0 ? ' disabled' : ''}>◀</button><button class="btn primary" id="tb-next">${next}</button><button class="btn small" id="tb-x">${trial ? '↻' : '끝내기'}</button>`;
+    tvBind();
     { const fo = $('#tb-focus'); if (fo) fo.onclick = () => DS.Control.run(() => DS.Act.setFocus(code, !foc)); } // 👀 집중모드 (2026-11-07 사용자 「체험판 막대에 집중모드」)
     // 🎬 · 📄 (2026-11-04 사용자 요청): 테스트 · 체험판에서도 그 단계에 붙은 설명 영상 · 문제(학습지) 이미지를 바로 확인
     const vb = $('#tb-vid'); if (vb) vb.onclick = () => DS.Video.open(media.vid, media.title, { lesson: L.id, slot: media.id });
@@ -157,8 +158,9 @@ DS.Test = (function () {
     const f = R.fun, sig = `rest|${f ? `${f.kind}|${f.phase}` : ''}|${tvOn}`;
     if (el.dataset.sig === sig) return;
     el.dataset.sig = sig;
-    el.innerHTML = `<b>${trial ? '🏕' : '🧪 쉼터'}</b><span class="tb-step">${f ? '놀이 중 — 친구 4명도 함께해요' : '위 줄에서 놀이를 골라요'}</span>${f && !trial ? `<button class="btn small tb-ic" id="tb-tv" title="작은 TV 창 켜기 · 끄기">📺${tvOn ? '' : ' 켜기'}</button>` : ''}<button class="btn primary" id="tb-back-class">▶ 수업으로</button><button class="btn small" id="tb-x">${trial ? '↻' : '끝내기'}</button>`;
+    el.innerHTML = `<b>${trial ? '🏕' : '🧪 쉼터'}</b><span class="tb-step">${f ? '놀이 중 — 친구 4명도 함께해요' : '위 줄에서 놀이를 골라요'}</span>${f && !trial ? `<button class="btn small tb-ic" id="tb-tv" title="작은 TV 창 켜기 · 끄기">📺${tvOn ? '' : ' 켜기'}</button>` : ''}${tvBtn()}<button class="btn primary" id="tb-back-class">▶ 수업으로</button><button class="btn small" id="tb-x">${trial ? '↻' : '끝내기'}</button>`;
     $('#tb-back-class').onclick = () => DS.Control.run(() => DS.Act.setRest(code, false));
+    tvBind();
     const t = $('#tb-tv'); if (t) t.onclick = () => { tvOn = !tvOn; el.dataset.sig = ''; draw(); };
     $('#tb-x').onclick = () => { if (trial) return again(); if (confirm('테스트를 끝내고 교사 메뉴로 돌아갈까요?')) finish(false); };
   }
@@ -255,21 +257,33 @@ DS.Test = (function () {
     DS.UI.toast(given ? '🏆 체험 수업 끝! 🎁 💎 620 · 📜 8 — 💎 상점에서 10강 🛡 홀리 방패 · 내 속성 Ⅳ 🌟 진필살기까지 해 봐요 · 아래 「⚔ 7차시로」도!' : '🏆 체험 수업 끝! — 내 캠프로 돌아왔어요', 5200);
   }
   // 위 TV 창 = 종합상황실 (실제 교실 TV 화면을 1280×720 그대로 그려 줄임)
+  let tvShown = false, tvShow = null; // 🚑 📺 TV 화면 보기 (체험판 · 2026-11-13)
+  const tvBtn = () => (trial ? `<button class="btn small tb-tvv${tvShown ? ' on' : ''}" id="tb-tvv" title="교실 TV(종합실) 화면 ↔ 학생 화면" data-tv="${tvShown ? 1 : 0}">${tvShown ? '📱<span class="tvl"> 학생 화면</span>' : '📺<span class="tvl"> TV 화면</span>'}</button>` : '');
+  const tvBind = () => { const b = document.getElementById('tb-tvv'); if (b) b.onclick = () => { if (tvShow) tvShow(!tvShown); }; };
   function tvHall(on) {
     let box = $('#test-tv'); const hs = document.getElementById('screen-hall');
     if (!on) {
       if (DS.Hall && DS.Hall.leave) DS.Hall.leave();
       if (hs && box && box.contains(hs)) { hs.classList.remove('tv-embed'); document.body.appendChild(hs); }
-      if (box) box.remove(); document.body.classList.remove('has-test-tv'); return;
+      if (box) box.remove(); document.body.classList.remove('has-test-tv', 'trial-tv'); tvShown = false; tvShow = null; return;
     }
     if (!box) {
       // ⛶ 2026-11-08 요청 #9: TV 를 누르면 가로 전체 화면 · 어디든 누르면 원래대로 (투명 누름 막 = 보기 전용 · 조작은 아래 막대)
       //   안드로이드 크롬 = requestFullscreen + 가로 고정 · 아이폰(요소 전체 화면 없음) = 화면 가득 + 세로면 90° 돌림 · PC = 전체 화면만 · 16:9 유지(남는 곳 검정)
-      box = document.createElement('div'); box.id = 'test-tv'; box.className = 'test-tv tv-hall'; box.innerHTML = '<div class="tt-in"></div><button type="button" class="tt-tap" aria-label="교실 TV 크게 보기"></button><i class="tt-l">📺 교실 TV (종합상황실) · ⛶ 누르면 크게</i><i class="tt-hint">아무 데나 누르면 돌아가요</i>';
+      // 🚑 2026-11-13 선생님 「학생 화면만 보여주고 TV 화면은 단추 하나로」: 처음 = TV 숨김(뒤에서 계속 돌아 진행 그대로) · 막대 📺 = TV 화면 ↔ 📱 학생 화면 (같은 자리)
+      box = document.createElement('div'); box.id = 'test-tv'; box.className = 'test-tv tv-hall tv-off'; box.innerHTML = '<div class="tt-in"></div><button type="button" class="tt-tap" aria-label="교실 TV 크게 보기"></button><i class="tt-l">📺 교실 TV (종합상황실) · ⛶ 누르면 크게</i><i class="tt-hint">아무 데나 누르면 돌아가요</i>';
       document.body.appendChild(box); document.body.classList.add('has-test-tv');
       let big = false, fsUsed = false;
       const fit = () => {
         const inn = box.querySelector('.tt-in');
+        if (!big && tvShown) { // 📺 TV 화면 = 아래 진행 막대 위를 가득 (막대 · 단추는 그대로 보임)
+          const bar = document.getElementById('test-bar'), bh = bar ? bar.offsetHeight : 0, vw = window.innerWidth, vh = Math.max(100, window.innerHeight - bh), rot = vh > vw * 1.15;
+          const W = rot ? vh : vw, H = rot ? vw : vh, k = Math.min(W / 1280, H / 720);
+          box.classList.toggle('rot', rot); box.style.width = `${vw}px`; box.style.height = `${vh}px`; box.style.setProperty('--tbh', `${bh}px`);
+          inn.style.transform = rot ? `translate(${((vw + 720 * k) / 2).toFixed(1)}px, ${((vh - 1280 * k) / 2).toFixed(1)}px) rotate(90deg) scale(${k})` : `translate(${((vw - 1280 * k) / 2).toFixed(1)}px, ${((vh - 720 * k) / 2).toFixed(1)}px) scale(${k})`;
+          document.body.style.setProperty('--tvh', '0px'); return;
+        }
+        if (!big) { box.classList.remove('rot'); const w = Math.min(window.innerWidth, 900), k = w / 1280; box.style.width = `${w}px`; box.style.height = `${720 * k}px`; inn.style.transform = `scale(${k})`; document.body.style.setProperty('--tvh', '0px'); return; } // 숨김 = 학생 화면 위 칸 없음
         if (big) {
           const vw = window.innerWidth, vh = window.innerHeight, rot = vh > vw; // 세로 화면이면 돌림 (가로 고정이 된 안드로이드 · PC 는 돌리지 않음)
           const W = rot ? vh : vw, H = rot ? vw : vh, k = Math.min(W / 1280, H / 720);
@@ -295,6 +309,7 @@ DS.Test = (function () {
         fit(); setTimeout(fit, 250); // 전체 화면 · 회전이 끝난 뒤 한 번 더
       };
       box.querySelector('.tt-tap').addEventListener('click', () => setBig(!big));
+      tvShow = (on) => { tvShown = on; box.classList.toggle('tv-off', !on); box.classList.toggle('tv-show', on); document.body.classList.toggle('trial-tv', on); fit(); setTimeout(fit, 120); const b = document.getElementById('tb-tvv'); if (b) { b.innerHTML = on ? '📱<span class="tvl"> 학생 화면</span>' : '📺<span class="tvl"> TV 화면</span>'; b.dataset.tv = on ? 1 : 0; b.classList.toggle('on', on); } };
       document.addEventListener('fullscreenchange', () => { if (big && fsUsed && !document.fullscreenElement) { fsUsed = false; setBig(false); } }); // 뒤로 가기 · 제스처로 나가도 맞춤
       fit(); window.addEventListener('resize', () => { if (box.isConnected) fit(); });
     }
