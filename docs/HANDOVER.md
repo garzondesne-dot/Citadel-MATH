@@ -376,3 +376,8 @@
 - 빠지는 곳: 대시보드 「전체」 · 반 비교(`liveCls`) · 설문 「전체」 · 📈 활용 추이 「전체」 · 설문 응답 집계(`survey.submit`) · 다른 반 대항전 순위(`DS.Combo.noBeta` · 그 반 자기 화면에서는 보임). 대시보드에서 그 반 칩을 누르면 그 반 기록 그대로.
 - 방 안: 베타 반 학생은 입장할 때 `players.tester = true`(`testerOf` · student.js) → #67 과 똑같이 🧪 이름표 · 체력 머릿수에서 빠짐(최소 1명분 · 선생님이 그 반에서 한 명으로 돎) · 학급 결과 카드에서 빠짐. 📷 서술형 확인 목록은 그대로(채점 확인 일이라).
 - 시험 = `tests/beta122.test.js` · e2e123.
+
+## ⭐ #128 기호 톡 ↔ 모루 (2026-11-12 · 손발 #7 · release 1c5f196 · #106 위)
+- 찜 알림 = `DS.SymTalk.toggleWish` 토스트 · 짝 기호 = `DS.SymTalk.symOfCard(카드id)`(CARD_OF 거꾸로) · 만든 카드 = `wishRow` 가 `DS.Card.html` 그림.
+- 캠프 = `#camp-anvil.wish-on` → CSS 로 이름표 opacity 1 (숨김 규칙보다 먼저) · 모루 = `.fg-wishrow` 칩(`data-wjump` → `hintOpen` + `.fc-wgroup [data-wrow]` 스크롤 · flash) · 💡 목록 · 도감 맨 위 `.fc-wgroup` · 찜 카드 = `DS.Card.html(c, { unknown, named, sym })`(이름판 · 위 칸 기호 · 수식 ? 그대로).
+- hero-v2 에는 #106(찜)이 없음 → #106 · #128 은 정식(release)에만. 시험 = e2e119(15개).
