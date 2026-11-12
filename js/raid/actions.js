@@ -143,8 +143,8 @@ DS.Act = (function () {
   // 🔥 콤보 시계 멈춤 (쉼터 · OX 타임 · 영상 · 집중모드): 바뀐 뒤 상태를 보고 cpAt · cpMs 를 같이 적는다
   const cp = (st, next) => (DS.Combo ? DS.Combo.cpPatch(st, next, N().now()) : {});
   // 집중모드: 켜고 끈 시각을 남겨 👾 몬스터 공격 게이지가 모두 함께 멈춘다 (state.focusAt · pauseMs)
-  // ⏸ #117 (2026-11-12 선생님 「모든 시간이 멈췄으면」): 몬스터 · 보스 단계에서 켜면 state.fzAt 도 → 수업 남은 시간 · 정찰 · 🦇 박쥐(콤보 시계)도 멈춤
-  //   끄면 멈춘 시간을 fzMs(수업 시계) · solveOn.fx(정찰) 에 더해 그 자리에서 이어감 (잃는 시간 없음) · 개념 단계 자동 집중은 수업 시계 그대로
+  // ⏸ #117 (2026-11-12 선생님 「모든 시간이 멈췄으면」 · 바로잡음 「차시 던전 문 닫는 건 그대로」): 몬스터 · 보스 단계에서 켜면 state.fzAt 도 → 정찰 · 생각 시간 · 쉼터 놀이 · 🦇 박쥐(콤보 시계)도 멈춤
+  //   끄면 정찰은 solveOn.fx 에 멈춘 시간을 더해 그 자리에서 이어감 (잃는 시간 없음) · 남은 수업 시간(보스 문 닫기)은 그대로 흐름
   async function setFocus(code, on) {
     const room = await N().get(P(code)); const R = room ? unpackRoom(room) : null, st = (R && R.state) || {};
     if (!!on === !!st.focus) return;
@@ -152,12 +152,11 @@ DS.Act = (function () {
     if (on) { const fight = !!step && ['monster', 'boss'].includes(step.kind) && !st.closed && !Raid.isLobby(R); await N().update(P(code, 'state'), { focus: true, focusAt: now, fzAt: fight ? now : null, ...cp(st, { focus: true }) }); return; }
     const patch = { focus: false, focusAt: null, fzAt: null, pauseMs: (st.pauseMs || 0) + Math.max(0, now - (st.focusAt || now)), ...cp(st, { focus: false }) };
     if (st.fzAt != null) {
-      patch.fzMs = (Number(st.fzMs) || 0) + Math.max(0, now - Number(st.fzAt));
       const lk = L ? Raid.solveLock(L, R, now) : null; if (lk && lk.cur > 0) patch[`solveOn/${lk.id}`] = { sec: lk.sec, at: lk.t0, fx: lk.fx + lk.cur }; // 정찰 중에 켠 집중 → 정찰 끝을 그만큼 뒤로
     }
     await N().update(P(code, 'state'), patch);
   }
-  const fzClose = (st, now) => (st && st.fzAt != null ? { fzAt: null, fzMs: (Number(st.fzMs) || 0) + Math.max(0, now - Number(st.fzAt)) } : {}); // 집중을 켠 채 단계가 바뀌거나 끝날 때
+  const fzClose = (st) => (st && st.fzAt != null ? { fzAt: null } : {}); // 집중을 켠 채 단계가 바뀌거나 끝날 때
   // 🏕 쉼터: 켜면 { at, min(기본 5분) } · 끄면 쉰 시간을 pauseMs 에 더해 몬스터 공격 게이지가 이어짐 · 분 조절은 쉼터 중에
   async function setRest(code, on, min, opt = {}) { // opt.quiz (v0.9.8.1): ⭕ OX 타임 = 쉼터처럼 멈추되 이름만 다름
     const st = (await N().get(P(code, 'state'))) || {};

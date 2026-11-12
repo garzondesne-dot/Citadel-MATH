@@ -141,6 +141,14 @@ DS.Fun = (function () {
   }
   const mark = (cls, qi) => { if (cls != null && qi != null) N().set(`funUsed/${ck(cls)}/${qi}`, true).catch(() => {}); };
   async function stop(code) { await N().set(P(code, 'fun'), null); await N().set(P(code, 'fv'), null).catch(() => {}); }
+  // ⏸ #117 (2026-11-12 선생님 「모든 시간 멈춤」): 쉼터 중에 선생님이 켠 집중(state.fzAt) 동안 놀이 시계를 멈춤 → 끄면 멈춘 만큼 to · lastAt 을 뒤로 (잃는 시간 없음)
+  //   fun/frz = 멈춘 시각 (기기가 바뀌어도 같은 값) · 🏰 디펜스(실시간 계산)는 아직 그대로
+  async function hold(code, f, now) {
+    const fz = await N().get(P(code, 'state/fzAt')).catch(() => null);
+    if (fz != null) { if (f.frz == null) await N().set(P(code, 'fun/frz'), Number(fz)).catch(() => {}); return true; }
+    if (f.frz != null) { const span = Math.max(0, now - Number(f.frz)), up = { frz: null }; ['to', 'lastAt'].forEach((k) => { if (typeof f[k] === 'number') up[k] = f[k] + span; }); await N().update(P(code, 'fun'), up).catch(() => {}); return true; }
+    return false;
+  }
   // 시계: 0.7초마다 · 맡은 기기만 씀
   const drivers = {};
   function drive(code) {
@@ -153,6 +161,7 @@ DS.Fun = (function () {
         if (!f) { clearInterval(drivers[code]); delete drivers[code]; return; }
         if (f.kind === 'td' || f.kind === 'nun') return; // 🏰 디펜스 · 🙊 눈치는 교실 TV 가 진행
         if (f.drv && f.drv.u !== me && now - (f.drv.at || 0) < 4000) return; // 다른 기기가 맡고 있음
+        if (f.phase !== 'end' && await hold(code, f, now)) return; // ⏸ #117 집중 = 놀이 시계 멈춤
         if (f.phase === 'end' && f.kind === 'quiz' && !f.saved) { await N().set(P(code, `oxq/${f.g}`), { qs: arr(f.queue).slice(0, f.n), marks: f.marks || {}, lesson: f.lesson || null, at: f.g }).catch(() => {}); await N().set(P(code, 'fun/saved'), true).catch(() => {}); } // 📊 OX 타임 결과 → 개인 기록(ox) · 대시보드
         if (f.phase === 'end') { if (now - (f.endAt || now) > 60000) await stop(code); else if (!f.drv || f.drv.u !== me || now - f.drv.at > 1500) await N().set(P(code, 'fun/drv'), { u: me, at: now }); return; }
         const votes = f.phase === 'pick' && now >= f.to ? (await N().get(P(code, `fv/${f.rk}`)).catch(() => null)) || {} : null;
@@ -349,5 +358,5 @@ DS.Fun = (function () {
   }
   const pend = {};
   const on = (R) => !!(R && R.fun && DS.Raid.restOn(R));
-  return { KIND, judge, judgeRps, tHand, RPS_AT, HANDS, queue, tilted, step, round, start, stop, drive, ctlHtml, bind, hall, phone, on, PICK, SHOW, LIMIT, MIN };
+  return { hold, KIND, judge, judgeRps, tHand, RPS_AT, HANDS, queue, tilted, step, round, start, stop, drive, ctlHtml, bind, hall, phone, on, PICK, SHOW, LIMIT, MIN };
 })();

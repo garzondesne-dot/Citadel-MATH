@@ -14,7 +14,7 @@ DS.Student = (function () {
   let form = null;          // 풀고 있는 시도 { key, given: [] }
   let retrying = '';        // '몬스터id|다음 시도' — "다시 도전"을 누른 상태
   let shown = '';           // 결과 연출을 한 번만
-  let bossSet = 1, bossThink = 0;
+  let bossSet = 1, bossThink = 0, frzSince = 0;
   let drawn = '';           // 지금 그려 둔 화면의 서명 — 다른 학생의 제출로 방 값이 바뀌어도 내 화면은 다시 그리지 않는다 (터치가 씹히지 않게)
 
   let info0 = null, focusWas = false, cleared0 = false, locked = false;
@@ -209,8 +209,9 @@ DS.Student = (function () {
     if (Raid().isClosed(R)) return toCamp();
     if (!R.players || !R.players[me]) { $('#st-body').innerHTML = '<div class="panel"><p>입장 정보가 없어요. 처음 화면에서 다시 입장해 주세요.</p></div>'; return; }
     header();
-    { const tb = $('#st-tbar'); if (tb) { const sig = `${Raid().deadline0(R)}|${Raid().frozeAt(R)}|${Raid().isClosed(R)}|${Raid().bossHp(L, R).won}`; if (tb.dataset.sig !== sig) { tb.dataset.sig = sig; tb.innerHTML = test ? '' : DS.Control.tbarHtml(L, R, { mini: true, compact: true }); } } }
-    focus((!test || !!test.real) && Raid().focusOn(R) && !Raid().isLobby(R) && !Raid().restOn(R)); // 👩‍🏫 체험판은 집중모드 화면도 실제처럼
+    { const tb = $('#st-tbar'); if (tb) { const sig = `${Raid().deadline(R)}|${Raid().isClosed(R)}|${Raid().bossHp(L, R).won}`; if (tb.dataset.sig !== sig) { tb.dataset.sig = sig; tb.innerHTML = test ? '' : DS.Control.tbarHtml(L, R, { mini: true, compact: true }); } } }
+    focus((!test || !!test.real) && Raid().focusOn(R) && !Raid().isLobby(R) && (!Raid().restOn(R) || Raid().frozeAt(R) != null)); // 👩‍🏫 체험판은 집중모드 화면도 실제처럼 · ⏸ #117 쉼터 중에 선생님이 켠 집중도 막 (놀이 시계가 멈춤)
+    { const fz = Raid().frozeAt(R) != null; if (fz && !frzSince) frzSince = Date.now(); if (!fz && frzSince) { const span = Date.now() - frzSince; frzSince = 0; Object.keys(thinkUntil).forEach((k) => { if (thinkUntil[k] > Date.now() - span) thinkUntil[k] += span; }); if (bossThink > Date.now() - span) bossThink += span; } } // ⏸ #117 🤔 생각 시간도 집중 동안 멈춤 → 끄면 남은 초 그대로 이어감
     if (test && test.onRender) test.onRender(L, R);
     const body = $('#st-body');
     const st0 = Raid().stepOf(L, R);

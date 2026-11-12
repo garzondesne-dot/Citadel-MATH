@@ -59,7 +59,7 @@ DS.Teacher = (function () {
     $('#t-head').innerHTML = `<div><b>수업 ${code}</b> <span class="muted small">${esc(L.title)}</span><br><span class="muted small">종합상황실 키 ${keyHtml()} · 입장 ${studs.length}${Raid().isLobby(R) ? '' : ` · 대기실 인원 ${Raid().headcount(R)}`}</span></div>
       <div class="phase-pill">${i < 0 ? '대기' : Raid().isClosed(R) ? '끝' : i >= total ? '마무리' : `${i + 1}/${total}`}</div>`;
     $('#t-tabs').innerHTML = '';
-    const tb = $('#t-tbar'); if (tb) { const sig = `${Raid().deadline0(R)}|${Raid().frozeAt(R)}|${Raid().isClosed(R)}|${Raid().bossHp(L, R).won}|${Raid().isLobby(R)}|${(R.state || {}).extend || 0}`; if (tb.dataset.sig !== sig) { tb.dataset.sig = sig; tb.innerHTML = C().tbarHtml(L, R, { mini: true, ext: true }); } C().bindExtend(tb, code, R); } // 2026-11-06 사용자 「교사 폰 타이머가 0으로 줄었다 늘었다」: 방이 바뀔 때마다 막대를 새로 그려 폭 0 → 제자리로 다시 늘어나던 것 → 마감 · 연장 · 승리가 바뀔 때만 다시 그림
+    const tb = $('#t-tbar'); if (tb) { const sig = `${Raid().deadline(R)}|${Raid().isClosed(R)}|${Raid().bossHp(L, R).won}|${Raid().isLobby(R)}|${(R.state || {}).extend || 0}`; if (tb.dataset.sig !== sig) { tb.dataset.sig = sig; tb.innerHTML = C().tbarHtml(L, R, { mini: true, ext: true }); } C().bindExtend(tb, code, R); } // 2026-11-06 사용자 「교사 폰 타이머가 0으로 줄었다 늘었다」: 방이 바뀔 때마다 막대를 새로 그려 폭 0 → 제자리로 다시 늘어나던 것 → 마감 · 연장 · 승리가 바뀔 때만 다시 그림
     const body = $('#t-body');
     const live = !Raid().isLobby(R) && !Raid().isClosed(R);
     // 2026-11-07 정돈판 ⑥ 비교 14: 위에서부터 [지금 · 제출 · 도움 필요] [⋯ 더보기] [⏸ 수업 끝] [단추 줄 8칸] … [◀ 뒤로 · 앞으로 ▶ 맨 아래]
