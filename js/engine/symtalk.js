@@ -177,12 +177,14 @@ DS.SymTalk = (function () {
   const artOf = (c) => { const k = ((DS.ASSETS || {}).cardKit || {}).arts; if (!k || !c) return ''; const i = k.map && k.map[c.id] != null ? k.map[c.id] : 0, col = i % k.cols, row = Math.floor(i / k.cols); return `background-image:url('${(DS.ASSETS.base || 'assets/art/')}${k.src}');background-size:${k.cols * 100}% ${k.rows * 100}%;background-position:${(col / Math.max(1, k.cols - 1)) * 100}% ${k.rows > 1 ? (row / (k.rows - 1)) * 100 : 0}%`; };
   function wishRow(id) {
     const c = cardOf(id); if (!c || !recOK(ctx)) return ''; // 🪞 선생님 · 미리 보기 = 찜 줄 없음
+    if (owned[c.id] && DS.Card && DS.Card.html) return `<div class="st-wish own"><b class="st-mine">✅ 내 카드</b>${DS.Card.html(c, { w: 112 })}</div>`; // ⭐ #128-6 만든 카드 = 카드 그림 크게
     return `<div class="st-wish"><i class="st-wc" style="${artOf(c)}"></i><b>${esc(c.name)}</b>${owned[c.id] ? '<span class="st-have">✅ 가짐</span>' : `<button class="st-wb${wish[c.id] ? ' on' : ''}" type="button" data-wc="${c.id}">${wish[c.id] ? '★ 찜함' : '☆ 찜'}</button>`}</div>`;
   }
   async function toggleWish(cid, b) {
     const c = ctx; if (!recOK(c)) return; const on = !wish[cid]; if (on) wish[cid] = true; else delete wish[cid];
     if (b) { b.classList.toggle('on', on); b.textContent = on ? '★ 찜함' : '☆ 찜'; }
     if (DS.Sound && DS.Sound.clank) DS.Sound.clank();
+    if (on && DS.UI && DS.UI.toast) DS.UI.toast('⭐ 모루에 담았어요 · 캠프 모루에서 만들어요', 1500); // ⭐ #128-1
     try { await DS.Net.set(`xp/${ck(c.m.c)}/${c.m.n}/wish/${cid}`, on ? true : null); } catch (e) { /* 다음에 다시 */ }
   }
   async function loadSeen() {
@@ -218,5 +220,6 @@ DS.SymTalk = (function () {
     scan();
   }
   if (typeof document !== 'undefined') { if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start(); }
-  return { ROWS, CONCEPTS, PROP, BY, pick, propHits, propOn, setCtx, rank, scan, close, flush, _markEl: markEl, _seen: () => seen, CARD_OF, wishOf: () => wish };
+  const symOfCard = (cid) => { const id = Object.keys(CARD_OF).find((k) => CARD_OF[k] === cid); return id && BY[id] ? BY[id].sym : ''; }; // ⭐ #128 모루에서 찜 카드 = 짝 기호
+  return { symOfCard, ROWS, CONCEPTS, PROP, BY, pick, propHits, propOn, setCtx, rank, scan, close, flush, _markEl: markEl, _seen: () => seen, CARD_OF, wishOf: () => wish };
 })();

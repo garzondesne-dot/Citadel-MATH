@@ -1,4 +1,4 @@
-// ⭐ #106 기호 톡 찜 → 모루 배지 (2026-11-12 선생님 「진행 1없음 2정식」): 말풍선 아래 카드 줄 · ☆ 찜 ↔ ★ 찜함 · 캠프 모루 이름표 ★n · 모루 💡 목록 · 도감 ★ 맨 위 · 만든 카드 = 배지에서 빠짐 · 다시 열어도 유지 · 선생님 = 찜 줄 없음 · 360px
+// ⭐ #106 + #128 (2026-11-12 · 찜 알림 · 모루 이름표 늘 보임 · 모루 첫 화면 찜 칩 · 찜 카드 이름 + 기호 · ⭐ 찜 묶음 · 만든 카드 크게) 기호 톡 찜 → 모루 배지 (2026-11-12 선생님 「진행 1없음 2정식」): 말풍선 아래 카드 줄 · ☆ 찜 ↔ ★ 찜함 · 캠프 모루 이름표 ★n · 모루 💡 목록 · 도감 ★ 맨 위 · 만든 카드 = 배지에서 빠짐 · 다시 열어도 유지 · 선생님 = 찜 줄 없음 · 360px
 //   사용: python3 -m http.server 8765 뒤 node tools/e2e/e2e119.js <출력 폴더> (PORT 로 다른 칸)
 const { chromium } = require('playwright');
 const OUT = process.argv[2], U = `http://localhost:${process.env.PORT || 8765}/index.html?local`;
@@ -24,7 +24,9 @@ const OUT = process.argv[2], U = `http://localhost:${process.env.PORT || 8765}/i
   await tapSym(S, 'cap'); await S.waitForTimeout(300); let bb = await bubble(S);
   check(bb && /교집합/.test(bb.wish) && /☆ 찜/.test(bb.btn) && bb.sw <= bb.iw + 1, `말풍선 아래 = 교집합 카드 · ☆ 찜 (${bb && bb.wish})`);
   await S.screenshot({ path: `${OUT}/119-bubble.png` });
-  await S.click('.st-bub .st-wb'); await S.waitForTimeout(600); bb = await bubble(S);
+  await S.click('.st-bub .st-wb'); await S.waitForTimeout(300);
+  check(await S.evaluate(() => [...document.querySelectorAll('.toast, #toast, .ui-toast')].some((t) => /모루에 담았어요/.test(t.textContent)) || /모루에 담았어요/.test(document.body.innerText)), '#128-1 찜 → 「⭐ 모루에 담았어요」 알림');
+  await S.waitForTimeout(300); bb = await bubble(S);
   const wsv = await S.evaluate(async () => { const m = await DS.Account.me(); return DS.Net.get(`xp/${m.c}/${m.n}/wish`); });
   check(bb && /★ 찜함/.test(bb.btn) && wsv && wsv.inter === true, `☆ 찜 → ★ 찜함 · 서버 저장 (${JSON.stringify(wsv)})`);
   await S.evaluate(() => DS.SymTalk.close());
@@ -33,8 +35,17 @@ const OUT = process.argv[2], U = `http://localhost:${process.env.PORT || 8765}/i
   await S.evaluate(() => { document.querySelectorAll('#quiz').forEach((q) => q.classList.add('hidden')); DS.Camp.back(); }); await S.waitForTimeout(3500); await S.evaluate(() => { const x = document.querySelector('.rv96 .ui-x, #rv96-ok'); if (x) x.click(); }); await S.waitForTimeout(400);
   let lab = await S.evaluate(() => (document.querySelector('#camp-anvil .camp-label') || {}).textContent || '');
   check(/★1/.test(lab), `캠프 모루 이름표 ★1 (${lab})`);
+  check(await S.evaluate(() => { const l = document.querySelector('#camp-anvil .camp-label'); return document.querySelector('#camp-anvil').classList.contains('wish-on') && getComputedStyle(l).opacity === '1'; }), '#128-2 찜이 있으면 모루 이름표 늘 보임');
   // 모루 안: 💡 목록 · 도감
   await S.evaluate(async () => { const m = await DS.Account.me(); await DS.Forge.open(m); }); await S.waitForTimeout(1200);
+  const chips = await S.evaluate(() => [...document.querySelectorAll('#forge .fg-wchip')].map((x) => x.textContent));
+  check(chips.length === 1 && /∩/.test(chips[0]) && /교집합/.test(chips[0]), `#128-3 모루 첫 화면 「⭐ 찜한 카드」 칩 = 기호 + 이름 (${chips})`);
+  await S.screenshot({ path: `${OUT}/119-forge-chips.png` });
+  await S.click('#forge .fg-wchip'); await S.waitForTimeout(700);
+  const jp = await S.evaluate(() => { const r = document.querySelector('.fg-hintov .fc-wgroup .fc-hint'); const g0 = document.querySelector('.fg-hintov .fc-hgroup'); return { first: g0 && g0.classList.contains('fc-wgroup') ? '⭐ 찜' : '', row: r ? r.querySelector('b').textContent : '', flash: !!document.querySelector('.fg-hintov .fc-hint.flash') }; });
+    check(/⭐ 찜/.test(jp.first) && jp.flash && /교집합/.test(jp.row) && !/\?\?\?/.test(jp.row), `#128-3 · 4 · 5 칩 → 💡 목록 맨 위 ⭐ 찜 묶음 · 그 카드 빛남 · 이름 + 기호 (${jp.row.slice(0, 30)})`);
+  await S.screenshot({ path: `${OUT}/119-hints.png` });
+  await S.evaluate(() => document.querySelector('#fg-hx').click()); await S.waitForTimeout(300);
   await S.click('#fg-hints'); await S.waitForTimeout(600);
   const hl = await S.evaluate(() => { const g = [...document.querySelectorAll('.fc-hgroup')].find((d) => /4차시/.test(d.querySelector('summary').textContent)); const rows = g ? [...g.querySelectorAll('.fc-hint')] : []; return { open: g && g.open, first: rows[0] ? rows[0].className + '|' + rows[0].textContent.slice(0, 20) : '' }; });
   check(hl.open && /wish/.test(hl.first) && /★/.test(hl.first), `💡 4차시 펼침 · 찜 카드 ★ 맨 위 (${hl.first})`);
@@ -42,6 +53,8 @@ const OUT = process.argv[2], U = `http://localhost:${process.env.PORT || 8765}/i
   await S.click('#forge [data-tab="book"]'); await S.waitForTimeout(600);
   const bk = await S.evaluate(() => { const g = [...document.querySelectorAll('#forge .fc-hgroup')].find((d) => d.querySelector('.fg-wish')); return g ? g.querySelector('.fg-cw').className : ''; });
   check(/wish/.test(bk), '도감 = 찜 카드 ★ 맨 위');
+  const bk2 = await S.evaluate(() => { const g = document.querySelector('#forge .fc-wgroup'); const c = g && g.querySelector('.mcard'); return { g: !!g, plate: c ? c.querySelector('.mc-plate').textContent : '', top: c ? c.querySelector('.mc-top').innerHTML : '', fm: c ? c.querySelector('.mc-fm2').textContent : '' }; });
+  check(bk2.g && /교집합/.test(bk2.plate) && /mc-wsym/.test(bk2.top) && /\?/.test(bk2.fm), `#128-4 · 5 도감 ⭐ 찜 묶음 · 카드 = 이름 + 기호 · 수식은 ? (${JSON.stringify(bk2).slice(0, 120)})`);
   await S.screenshot({ path: `${OUT}/119-forge.png` });
   await S.evaluate(() => DS.Forge.close()); await S.waitForTimeout(500);
   // 다시 열어도 유지
@@ -53,6 +66,11 @@ const OUT = process.argv[2], U = `http://localhost:${process.env.PORT || 8765}/i
   await S.evaluate(async () => { const m = await DS.Account.me(); await DS.Net.set(`cards/${m.c}/${m.n}/inter`, true); });
   await S.evaluate(() => { document.querySelectorAll('#quiz').forEach((q) => q.classList.add('hidden')); DS.Camp.back(); }); await S.waitForTimeout(3500); await S.evaluate(() => { const x = document.querySelector('.rv96 .ui-x, #rv96-ok'); if (x) x.click(); }); await S.waitForTimeout(400);
   lab = await S.evaluate(() => (document.querySelector('#camp-anvil .camp-label') || {}).textContent || ''); check(!/★/.test(lab), `만든 뒤 배지 없음 (${lab})`);
+  await S.evaluate(async () => { const m = await DS.Account.me(); DS.SymTalk.setCtx(null, 'set-04'); DS.SymTalk.setCtx(m, 'set-04'); }); await S.waitForTimeout(1200);
+  await ask(S, 'n(A∩B) = ?'); await S.waitForTimeout(900); await tapSym(S, 'cap'); await S.waitForTimeout(400);
+  const own = await S.evaluate(() => { const w = document.querySelector('.st-bub .st-wish.own'); return w ? { t: w.textContent, card: !!w.querySelector('.mcard'), sw: document.documentElement.scrollWidth, iw: innerWidth } : null; });
+    check(own && /내 카드/.test(own.t) && own.card && own.sw <= own.iw + 1, '#128-6 만든 카드 기호 톡 = 「✅ 내 카드」 + 카드 그림');
+  await S.screenshot({ path: `${OUT}/119-own.png` }); await S.evaluate(() => DS.SymTalk.close());
   // 선생님 = 찜 줄 없음
   await T.evaluate(() => DS.SymTalk.setCtx(null, 'set-04')); await ask(T, 'n(A∩B) = ?'); await T.waitForTimeout(900); await tapSym(T, 'cap'); await T.waitForTimeout(300);
   check(await T.evaluate(() => !!document.querySelector('.st-bub') && !document.querySelector('.st-bub .st-wish')), '선생님 = 찜 줄 없음');

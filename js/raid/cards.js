@@ -18,11 +18,11 @@ DS.Card = (function () {
       <div class="mcard-in" style="width:${k.w}px;height:${k.h}px;transform:scale(${s})">
         <img class="mc-fr" src="${base()}${k.frame}" alt="" style="width:${k.w}px;height:${k.h}px">
         <img class="mc-gem" src="${base()}${k.frame}" alt="" style="width:${k.w}px;height:${k.h}px;clip-path:inset(${B.gem[1]}px ${k.w - B.gem[0] - B.gem[2]}px ${k.h - B.gem[1] - B.gem[3]}px ${B.gem[0]}px);filter:${GEM[c.grade] || 'none'}">
-        <div class="mc-top" style="${box(B.top)}">${un ? '' : `<span class="mc-tag">${GN[c.grade]}</span><span class="mc-page">${esc(c.page || '')}</span>`}</div>
+        <div class="mc-top" style="${box(B.top)}">${un ? (opt.named ? `<span class="mc-tag mc-wsym">⭐ ${pretty(opt.sym || '')}</span>` : '') : `<span class="mc-tag">${GN[c.grade]}</span><span class="mc-page">${esc(c.page || '')}</span>`}</div>
         <div class="mc-art" style="${box(B.art)};${art}"></div>
         <div class="mc-desc2" style="${box(B.desc)}">${un ? `<span class="mc-hint">💡 ${esc(c.hint)}</span>` : `<span>${esc(c.desc)}</span>`}</div>
         <div class="mc-fm2" style="${box(B.fm)}">${un ? '<b class="mc-q">? ? ?</b>' : `<b class="mc-fm math${fmLen > 16 ? ' long' : fmLen > 9 ? ' mid' : ''}">${pretty(c.fm)}</b>`}</div>
-        <div class="mc-plate" style="${box(B.plate)}"><b class="${nm.length > 7 ? 'long' : ''}">${un ? '? ? ?' : esc(nm)}</b></div>
+        <div class="mc-plate" style="${box(B.plate)}"><b class="${nm.length > 7 ? 'long' : ''}">${un && !opt.named ? '? ? ?' : esc(nm)}</b></div>
       </div></div>`;
   }
   function html(c, opt = {}) {

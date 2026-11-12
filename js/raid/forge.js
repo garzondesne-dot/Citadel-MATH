@@ -26,6 +26,7 @@ DS.Forge = (function () {
       return `<div class="fg-perk${done ? ' done' : ''}">${DS.Art.hero(p.id, 'idle')}<span class="tx"><b>🧑 ${esc(heroName(p.id))}</b><small>${p.a}~${p.b}차시 카드 ${got} / ${cs.length}</small><i class="fg-pbar"><i style="width:${cs.length ? (100 * got) / cs.length : 0}%"></i></i></span>${done ? '<span class="fg-pok">✔ 열림</span>' : bought(p.id) ? '<span class="fg-pok">💎 로 열림 · 다 모으면 돌려받음</span>' : price != null && !preview && gemD ? `<button class="btn small" data-perk="${p.id}">💎 ${price} 먼저 열기</button>` : ''}</div>`; }).join('')}</div>`;
   }
   let wish = {}; // ⭐ #106 찜 { 카드id: true } (만들면 저절로 풀림)
+  const wsym = (c) => (DS.SymTalk && DS.SymTalk.symOfCard ? DS.SymTalk.symOfCard(c.id) : ''); // ⭐ #128 찜 카드의 짝 기호
   const wished = (c) => !!wish[c.id] && !owned[c.id], wfirst = (cs) => cs.filter(wished).concat(cs.filter((c) => !wished(c))), star = (c) => (wished(c) ? '<i class="fg-wish" title="기호 톡에서 찜한 카드">★</i>' : '');
   let preview = false; // 교사 대기공간: 모든 차시 미리 보기 (저장하지 않음)
   async function open(m, opt = {}) {
@@ -74,6 +75,7 @@ DS.Forge = (function () {
     const h = hintGet(), todo = opened().filter((c) => !owned[c.id]).length;
     return `<div class="fc-one">
       <div class="fc-ops">${opsOpen.map((x) => tile(pretty(x.sym), `op mini${x.sym.length > 3 ? ' long' : ''}${/[가-힣]/.test(x.sym) ? ' ko' : ''}`, `data-op="${x.id}"`)).join('')}${opsLock.map(() => tile('🔒', 'op mini lock', 'disabled title="선생님이 다음 차시를 열면 풀려요"')).join('')}</div>
+      ${(() => { const ws = U().CARDS.filter(wished); return ws.length ? `<div class="fg-wishrow"><div class="fg-wchips">${ws.map((c) => `<button class="fg-wchip" data-wjump="${c.id}"><b>${pretty(wsym(c) || '★')}</b>${esc(c.name)}</button>`).join('')}</div><p class="fg-whint">⭐ 찜한 카드 — 누르면 💡 힌트 목록에서 그 카드를 열어요</p></div>` : ''; })()}
       <div class="fc-stage" id="fc-stage">
         <img class="fc-anvil" src="${img('anvil')}" alt="모루">
         <div class="fc-slots">${slot('l')}${slot('op')}${slot('r')}</div>
@@ -98,7 +100,7 @@ DS.Forge = (function () {
     const row = (c) => {
       const lv = Number(h.lv[c.id] || 0), op = U().opOf(c.op), opChip = `<b class="fc-chip op">${lv >= 2 ? pretty(op.sym) : '?'}</b>`;
       const shape = op.unary ? `${opChip}${chip(c.in[0], lv >= 1)}` : `${chip(c.in[0], lv >= 1)}${opChip}${chip(c.in[1], lv >= 1)}`;
-      return `<div class="fc-hint g${c.grade}${wished(c) ? ' wish' : ''}"><div><b>${star(c)}??? <span class="muted small">${esc(c.sec)}</span></b><p class="small">${esc(c.hint)}</p></div><div class="fc-shape">${shape}</div>
+      return `<div class="fc-hint g${c.grade}${wished(c) ? ' wish' : ''}" data-wrow="${c.id}"><div><b>${star(c)}${wished(c) ? `<span class="fg-wsym">${pretty(wsym(c))}</span> ${esc(c.name)}` : '???'} <span class="muted small">${esc(c.sec)}</span></b><p class="small">${esc(c.hint)}</p></div><div class="fc-shape">${shape}</div>
         ${lv < 2 ? `<button class="btn small" data-hint="${c.id}"${h.pts ? '' : ' disabled'}>💡 ${lv ? '연산 보기' : '재료 보기'}</button>` : '<span class="muted small">모두 공개</span>'}</div>`;
     };
     const nos = [...new Set(opened().map((c) => c.no))].sort((a, b) => a - b);
@@ -109,8 +111,9 @@ DS.Forge = (function () {
       return `<details class="fc-hgroup"${open ? ' open' : ''}><summary><b>${n}차시</b> <span class="muted small">${esc([...new Set(cs.map((c) => c.sec))].join(' · '))}</span><span class="fc-unlock${got === cs.length ? ' done' : ''}">해금 ${got} / ${cs.length}</span></summary>
         ${todo.length ? wfirst(todo).map(row).join('') : '<p class="okc small">🎉 이 차시 카드를 모두 만들었어요!</p>'}</details>`;
     }).join('');
+    const wl = opened().filter(wished), wgroup = wl.length ? `<details class="fc-hgroup fc-wgroup" open><summary><b>⭐ 찜</b> <span class="muted small">기호 톡에서 찜한 카드 (차시와 상관없이)</span><span class="fc-unlock">${wl.length}장</span></summary>${wl.map(row).join('')}</details>` : ''; // ⭐ #128-5
     return `<div class="fc-row"><b class="fc-h">💡 만들 수 있는 카드</b><span class="fc-pts">💡 힌트 조각 <b>${h.pts}</b></span><button class="btn small" id="fg-hx">✕ 닫기</button></div>
-      <p class="muted small">연성에 실패하면 힌트 조각이 1개 생겨요 (벌이 아니라 단서!). 조각으로 재료 → 연산 순서로 열어요.</p>${groups || '<p class="muted">열린 레시피가 없어요.</p>'}`;
+      <p class="muted small">연성에 실패하면 힌트 조각이 1개 생겨요 (벌이 아니라 단서!). 조각으로 재료 → 연산 순서로 열어요.</p>${wgroup}${groups || '<p class="muted">열린 레시피가 없어요.</p>'}`;
   }
   function hintOpen() {
     let ov = document.querySelector('.fg-hintov');
@@ -124,6 +127,7 @@ DS.Forge = (function () {
   }
   function bindForge() {
     const el = $('#forge');
+    el.querySelectorAll('[data-wjump]').forEach((b) => (b.onclick = () => { hintOpen(); const r = document.querySelector(`.fg-hintov .fc-wgroup [data-wrow="${b.dataset.wjump}"]`); if (r) { r.closest('details').open = true; r.scrollIntoView({ block: 'center' }); r.classList.add('flash'); setTimeout(() => r.classList.remove('flash'), 1600); } })); // ⭐ #128-3
     el.querySelectorAll('[data-slot]').forEach((b) => (b.onclick = () => { const k = b.dataset.slot; if (slots[k]) { slots[k] = null; pick = k; } else pick = k; DS.Sound.clank(); render(); }));
     el.querySelectorAll('[data-put]').forEach((b) => (b.onclick = () => {
       const t = b.dataset.put, o = slots.op ? U().opOf(slots.op) : null;
@@ -195,11 +199,13 @@ DS.Forge = (function () {
   // ── 도감 · 내 카드 ──────────────────────────────────────
   function book() {
     const secs = [...new Set(U().CARDS.map((c) => c.sec))];
-    return perksHtml() + secs.map((s) => {
+    const wl = U().CARDS.filter((c) => c.no <= no && wished(c)), cw = (c) => `<div class="fg-cw${wished(c) ? ' wish' : ''}">${star(c)}${DS.Card.html(c, { w: 104, unknown: !owned[c.id], named: wished(c), sym: wsym(c) })}${owned[c.id] ? '' : '<i class="fg-g3">💎+3</i>'}</div>`;
+    const wgroup = wl.length ? `<details class="fc-hgroup fc-wgroup" open><summary><b>⭐ 찜</b><span class="fc-unlock">${wl.length}장</span></summary><div class="fg-grid">${wl.map(cw).join('')}</div></details>` : ''; // ⭐ #128-5
+    return perksHtml() + wgroup + secs.map((s) => {
       const cs = U().CARDS.filter((c) => c.sec === s);
       if (cs[0].no > no) return '';
       const got = cs.filter((c) => owned[c.id]).length; // v0.9.3: 도감도 차시별 접기 · 해금 개수
-      return `<details class="fc-hgroup" open><summary><b>${esc(s)}</b><span class="fc-unlock${got === cs.length ? ' done' : ''}">해금 ${got} / ${cs.length}</span></summary><div class="fg-grid">${wfirst(cs).map((c) => `<div class="fg-cw${wished(c) ? ' wish' : ''}">${star(c)}${DS.Card.html(c, { w: 104, unknown: !owned[c.id] })}${owned[c.id] ? '' : '<i class="fg-g3">💎+3</i>'}</div>`).join('')}</div></details>`;
+      return `<details class="fc-hgroup" open><summary><b>${esc(s)}</b><span class="fc-unlock${got === cs.length ? ' done' : ''}">해금 ${got} / ${cs.length}</span></summary><div class="fg-grid">${wfirst(cs).map(cw).join('')}</div></details>`;
     }).join('') + (U().CARDS.some((c) => c.no > no) ? '<p class="fg-lock">🔒 다음 소단원은 선생님이 차시를 배포하면 나타나요</p>' : '');
   }
   function mine() {
@@ -210,7 +216,7 @@ DS.Forge = (function () {
     const c = U().card(id); if (!c) return;
     const un = !owned[id];
     const el = document.createElement('div'); el.className = 'fg-zoom';
-    el.innerHTML = `${DS.Card.html(c, { w: Math.min(300, innerWidth * 0.75), unknown: un })}<p>${un ? '아직 만들지 않은 카드 — 힌트를 보고 연성해 봐요' : `<b>${esc(c.name)}</b> · ${pretty(c.fm)}`}</p>`;
+    el.innerHTML = `${DS.Card.html(c, { w: Math.min(300, innerWidth * 0.75), unknown: un, named: un && wished(c), sym: wsym(c) })}<p>${un ? '아직 만들지 않은 카드 — 힌트를 보고 연성해 봐요' : `<b>${esc(c.name)}</b> · ${pretty(c.fm)}`}</p>`;
     el.onclick = () => el.remove();
     $('#forge').appendChild(el);
   }

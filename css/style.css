@@ -3436,3 +3436,16 @@ body:has(.modal:not([hidden])) #ver-tag { display: none; }
 /* 🧪 #122 베타 반 켜기 줄 (학생 관리) */
 .st-beta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 4px 0 8px; }
 .st-beta.on { background: rgba(120, 200, 255, 0.10); border: 1px dashed #6fb7e8; border-radius: 6px; padding: 4px 8px; }
+/* ⭐ #128 기호 톡 ↔ 모루 (2026-11-12) */
+#screen-camp .camp-anvil.wish-on .camp-label { opacity: 1 !important; } /* 찜이 남아 있으면 이름표 늘 보임 (처음 · 익숙한 학생 숨김보다 먼저) */
+.fg-wishrow { margin: 2px 0 4px; }
+.fg-wchips { display: flex; gap: 6px; overflow-x: auto; padding: 2px 2px 4px; scrollbar-width: none; }
+.fg-wchip { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 5px; border: 1px solid #e3b341; background: #2a2010; color: #ffe39a; border-radius: 14px; padding: 3px 10px; font-size: 13px; }
+.fg-wchip b { font-family: 'DejaVu Serif', serif; font-style: italic; color: #fff; }
+.fg-whint { margin: 0; font-size: 11px; color: #c9b88a; }
+.fg-wsym { font-family: 'DejaVu Serif', serif; font-style: italic; color: #ffe39a; }
+.fc-hint.flash { outline: 2px solid #ffd257; box-shadow: 0 0 14px #ffb000; }
+.fc-wgroup > summary b { color: #ffd257; }
+.mc-wsym { color: #ffe39a; }
+.st-wish.own { flex-direction: column; align-items: center; gap: 4px; }
+.st-mine { color: #7fe08a; }
