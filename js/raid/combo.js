@@ -215,6 +215,11 @@ DS.Combo = (function () {
     const s = Object.entries(PUNCH_W).reduce((a, [k, w]) => a + (w * (m[k] || 0)) / 100, 0);
     return { ...entry, m, s: Math.round(s * 10), ot: null, otDone: true };
   }
+  // 🧪 #122 베타 반 = 다른 반의 대항전 순위에서 빠짐 (그 반 자기 화면에서는 보임) · beta = 반 키 목록 · keep = 보는 반 키
+  function noBeta(all, beta, keep) {
+    if (!beta || !beta.length) return all || {};
+    const out = {}; Object.entries(all || {}).forEach(([lid, byC]) => { out[lid] = Object.fromEntries(Object.entries(byC || {}).filter(([c]) => c === keep || !beta.includes(c))); }); return out;
+  }
   // 같은 차시 반들 순위 · 지난 차시 대비 · 시즌 누적 (all = punch 전체 { 차시: { 반: 기록 } })
   function board(all, lessonId, cls) {
     all = all || {};
@@ -244,6 +249,6 @@ DS.Combo = (function () {
   // 받을 조각: 1등 반 💎 +5 (그 차시를 한 반이 둘 이상일 때) · 지난 차시보다 +10% 이상 💎 +3
   const punchGems = (me, b) => (!me || me.ot ? [] : [me.rank === 1 && (!b || b.rows.filter((r) => !r.ot).length >= 2) ? ['first', 5, '🏁 반대항 1등'] : null, me.delta != null && me.delta >= 10 ? ['up', 3, `🏁 지난 차시보다 +${me.delta}%`] : null].filter(Boolean));
 
-  return { GAP, TIERS, TIER_BIND, PF_BIND, BOSS_PF_BIND, CAP_WIN, CAP, ULT_BIND, BOSS_LOCK, BAT, CHEST, PUNCH_W, PUNCH_NAMES,
+  return { noBeta, GAP, TIERS, TIER_BIND, PF_BIND, BOSS_PF_BIND, CAP_WIN, CAP, ULT_BIND, BOSS_LOCK, BAT, CHEST, PUNCH_W, PUNCH_NAMES,
     pausedNow, activeNow, cpPatch, tierOf, events, analyze, comboNow, bindFor, bossPhase, batPlan, batQ, batDue, bat, hash, rnd, chestRoll, punch, overtime, board, punchGems };
 })();

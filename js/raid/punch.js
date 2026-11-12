@@ -13,9 +13,10 @@ DS.Punch = (function () {
   const noOf = (id) => { const L = DS.Lessons && DS.Lessons.get(id); return (L && L.no) || 0; };
 
   // 이 차시 반 기록 (지금 방이면 방에서 바로 계산한 값으로 · 저장 전이어도 보이게)
+  const betas = async () => (DS.Account && DS.Account.betaKeys ? DS.Account.betaKeys((await N().get('tester').catch(() => null)) || {}) : []); // 🧪 #122
   async function load(L, R, opt = {}) {
-    const all = (await N().get('punch').catch(() => null)) || {};
     const cls = R && R.meta && R.meta.cls;
+    const all = DS.Combo.noBeta((await N().get('punch').catch(() => null)) || {}, await betas(), cls ? ck(cls) : '');
     if (cls && R.meta.lesson === L.id && !opt.overtime && DS.Combo) {
       const saved = ((all[L.id] || {})[ck(cls)]) || null;
       if (!saved || saved.code === R.meta.code || !saved.code) {
@@ -97,7 +98,7 @@ DS.Punch = (function () {
   async function reward(m, L, R, code) {
     if (!DS.Gem || !m || m.c == null || !R.meta.cls || !L.no || L.eval) return 0;
     for (let i = 0; i < 5; i++) {
-      const all = (await N().get('punch').catch(() => null)) || {}, e = ((all[L.id] || {})[ck(R.meta.cls)]);
+      const all = DS.Combo.noBeta((await N().get('punch').catch(() => null)) || {}, await betas(), ck(R.meta.cls)), e = ((all[L.id] || {})[ck(R.meta.cls)]);
       if (e && e.code === code) {
         const bd = DS.Combo.board(all, L.id, ck(R.meta.cls));
         let sum = 0; for (const [k, g, why] of DS.Combo.punchGems(bd.me, bd)) sum += (await DS.Gem.add(m, g, `punch_${L.id}_${k}`, why, { free: true, quiet: true }).catch(() => 0)) || 0;

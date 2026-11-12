@@ -3432,3 +3432,6 @@ body:has(.modal:not([hidden])) #ver-tag { display: none; }
 .paper .redo-note { color: #b3261e; font-weight: 700; }
 /* ⏸ #117 집중 모드 = 교실 TV 전투 장면의 반복 연출(몬스터 숨쉬기 · 흔들림 · 졸개 · 불꽃)도 그 자리에서 멈춤 · 끄면 이어서 */
 .focus-on #raid, .focus-on #raid *, .focus-on #raid *::before, .focus-on #raid *::after { animation-play-state: paused !important; }
+/* 🧪 #122 베타 반 켜기 줄 (학생 관리) */
+.st-beta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 4px 0 8px; }
+.st-beta.on { background: rgba(120, 200, 255, 0.10); border: 1px dashed #6fb7e8; border-radius: 6px; padding: 4px 8px; }

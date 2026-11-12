@@ -81,7 +81,7 @@ DS.Survey = (function () {
   async function submit(m, a, no) {
     const err = check(a); if (err) throw Object.assign(new Error(err), { user: true });
     if (await isDone(m)) throw Object.assign(new Error('이미 응답했어요. 고마워요!'), { user: true });
-    const tst = (await N().get(`tester/${ck(m.c)}/${m.n}`).catch(() => null)) === true; // 🧪 #67 시험 계정 = 응답 집계에 넣지 않음 (응답 표시 · 보상은 학생과 같음)
+    const tst = DS.Account && DS.Account.testerOf ? await DS.Account.testerOf(m.c, m.n) : (await N().get(`tester/${ck(m.c)}/${m.n}`).catch(() => null)) === true; // 🧪 #67 시험 계정 · #122 베타 반 = 응답 집계에 넣지 않음 (응답 표시 · 보상은 학생과 같음)
     if (!tst) await N().set(`surveyA/${ck(m.c)}/${rid()}`, clean(a, no));
     await N().set(`surveyDone/${ck(m.c)}/${m.n}`, true);
     try { localStorage.setItem(doneKey(m), '1'); } catch (e) { /* 무시 */ }

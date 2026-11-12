@@ -251,5 +251,11 @@ DS.Account = (function () {
     tsess(true);
   }
 
-  return { classKey, email, teacherEmail, pw, validPin, mask, parseRoster, uploadRoster, removeStudent, resetAccount, masks, accountOf, signUp, login, me, setHero, setFx, setLook, setSocket, setTitle, looks, CHAL, chalProgress, logout, adminExists, isAdmin, teacherCreate, teacherLogin, endStaleTeacher };
+  // 🧪 #122 베타 반 (2026-11-12 선생님 「1-6반은 베타 테스트로 · 진짜 학생 입장으로」): tester/{반}/_all = true → 그 반 전원이 통계 · 반 비교 · 설문 집계 · 다른 반 대항전에서 빠짐
+  //   게임 규칙 · 보상 · 하루 한도 · 화면 · 몬스터 체력 머릿수는 그대로 (#67 개인 시험 계정과 달리 방 안의 🧪 표시 · 머릿수 빼기는 하지 않음 — 반 전체가 빠지면 체력이 1명분이 되므로)
+  const BETA = '_all';
+  const betaKeys = (T) => Object.keys(T || {}).filter((k) => (T[k] || {})[BETA] === true);
+  const isBetaOf = (T, c) => ((T || {})[classKey(c)] || {})[BETA] === true;
+  async function testerOf(c, n) { const T = (await DS.Net.get(`tester/${classKey(c)}`).catch(() => null)) || {}; return T[n] === true || T[BETA] === true; } // 개인 시험 계정 또는 베타 반
+  return { BETA, betaKeys, isBetaOf, testerOf, classKey, email, teacherEmail, pw, validPin, mask, parseRoster, uploadRoster, removeStudent, resetAccount, masks, accountOf, signUp, login, me, setHero, setFx, setLook, setSocket, setTitle, looks, CHAL, chalProgress, logout, adminExists, isAdmin, teacherCreate, teacherLogin, endStaleTeacher };
 })();
