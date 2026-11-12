@@ -244,7 +244,8 @@ DS.App = (function () {
       document.querySelectorAll('.t-auth-out').forEach((e) => { e.innerHTML = '<div class="acc-card"><b>👩‍🏫 교사 계정</b><span class="muted small">로그인됨</span><button class="btn small t-out">로그아웃</button></div>'; });
       document.querySelectorAll('.t-out').forEach((b) => (b.onclick = go(async () => { await A().logout(); await teacherAuth(); await studentAuth(); })));
       const cs = Object.keys((await A().masks()) || {}).sort();
-      $('#t-cls').innerHTML = cs.length ? cs.map((c) => `<option>${esc(c)}</option>`).join('') : '<option value="">(명단 없음 — 수업 준비에서 올려요)</option>';
+      const TB = (await DS.Net.get('tester').catch(() => null)) || {}; // 🧪 #122 베타 반 = 반 고르기에 🧪
+      $('#t-cls').innerHTML = cs.length ? cs.map((c) => `<option value="${esc(c)}">${A().isBetaOf && A().isBetaOf(TB, c) ? '🧪 ' : ''}${esc(c)}</option>`).join('') : '<option value="">(명단 없음 — 수업 준비에서 올려요)</option>';
       $('#t-cls').onchange = () => suggestLesson().catch(() => {}); $('#lesson').onchange = () => resumeHint().catch((e) => console.warn('이어서', e)); suggestLesson().catch(() => {}); // 🔄 2026-11-06: 반을 고르면 그 반의 다음 차시로
       const t = read('citadel-teacher');
       $('#t-resume').hidden = true; // 「📋 만든 수업」 목록으로 합침 (v0.8.4)

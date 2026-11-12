@@ -48,8 +48,9 @@ DS.Students = (function () {
         <td class="st-act"><button class="btn small" data-ren="${n}">이름 고치기</button>${a && !a.reset ? `<button class="btn small" data-reset="${n}">비밀번호 초기화</button>` : ''}<button class="btn small${tst ? ' primary' : ''}" data-tst="${n}">${tst ? '🧪 시험 계정 끄기' : '🧪 시험 계정'}</button><button class="btn small" data-rm="${n}">빼기</button></td></tr>`;
     };
     el.innerHTML = `<div class="panel framed"><h2>👥 학생 관리</h2><p class="muted small">명단은 Firebase 에만 저장돼요 (저장소에는 올라가지 않아요). 학생 이름을 누르면 개인 기록을 볼 수 있어요 — 성적이 아니라 참여 기록이에요.</p>
-        <div class="tabs st-cls">${classes.map((c) => `<button class="tab${c === cls ? ' on' : ''}" data-cls="${esc(c)}">${esc(c)} <span class="muted small">${Object.keys(roster[c] || {}).length}</span></button>`).join('') || '<span class="muted">아직 반이 없어요 — 아래에서 새 반 명단을 붙여 넣어요.</span>'}</div></div>
-      ${cls ? `<div class="panel framed"><h3 class="gold">${esc(cls)} <span class="muted small">${ns.length}명 · 가입 ${ns.filter((n) => acc[n] && !acc[n].reset).length}명</span></h3>
+        <div class="tabs st-cls">${classes.map((c) => `<button class="tab${c === cls ? ' on' : ''}" data-cls="${esc(c)}">${A().isBetaOf(testers, c) ? '🧪 ' : ''}${esc(c)} <span class="muted small">${Object.keys(roster[c] || {}).length}</span></button>`).join('') || '<span class="muted">아직 반이 없어요 — 아래에서 새 반 명단을 붙여 넣어요.</span>'}</div></div>
+      ${cls ? `<div class="panel framed"><h3 class="gold">${A().isBetaOf(testers, cls) ? '🧪 ' : ''}${esc(cls)} <span class="muted small">${ns.length}명 · 가입 ${ns.filter((n) => acc[n] && !acc[n].reset).length}명</span></h3>
+        <div class="st-beta${A().isBetaOf(testers, cls) ? ' on' : ''}"><button class="btn small${A().isBetaOf(testers, cls) ? ' primary' : ''}" data-beta>${A().isBetaOf(testers, cls) ? '🧪 베타 반 끄기' : '🧪 이 반을 베타 반으로'}</button><span class="muted small">${A().isBetaOf(testers, cls) ? '베타 반 — 학생은 그대로 수업 · 「전체」 · 반 비교 · 설문 집계 · 다른 반 대항전에서 빠져요' : '반 전체를 시험용으로 — 게임 · 보상은 그대로, 통계에서만 빠져요'}</span></div>
         <div class="st-add"><label>번호 <input id="a-n" type="number" min="1" max="40" inputmode="numeric"></label><label>이름 <input id="a-name" maxlength="8"></label><button class="btn primary" id="a-go">＋ 한 명 추가</button></div>
         <div class="st-scroll"><table class="r-table"><tr><th>번호</th><th>이름</th><th>계정</th><th>레벨</th><th>도감</th><th>업적</th><th></th></tr>${ns.map(row).join('')}</table></div></div>` : ''}
       <details class="panel framed"${classes.length ? '' : ' open'}><summary><b>📋 명단 한꺼번에 붙여넣기</b> <span class="muted small">새 반 · 여러 명</span></summary>
@@ -81,6 +82,11 @@ DS.Students = (function () {
       if (!confirm(on ? `${cls} ${n}번을 🧪 시험 계정으로 할까요?\n학생과 똑같이 하지만 랭킹 · 반 통계 · 몬스터 체력 계산 · 설문 집계에서 빠져요 (지난 기록 포함 · 지우지는 않음).` : `${cls} ${n}번 🧪 시험 계정을 끌까요? 다시 통계에 들어가요.`)) return;
       await DS.Net.set(`tester/${k}/${n}`, on ? true : null); DS.UI.toast(on ? '🧪 시험 계정으로 했어요' : '🧪 시험 계정을 껐어요');
     })));
+    { const bb = document.querySelector('[data-beta]'); if (bb) bb.onclick = () => DS.Control.run(async () => { // 🧪 #122 베타 반 (2026-11-12)
+      const k = A().classKey(cls), on = !A().isBetaOf(testers, cls);
+      if (!confirm(on ? `${cls} 반을 🧪 베타 반으로 할까요?\n학생은 똑같이 수업하지만 대시보드 「전체」 · 반 비교 · 설문 집계 · 다른 반 대항전에서 빠져요 (지난 기록 포함 · 지우지는 않음).` : `${cls} 🧪 베타 반을 끌까요? 다시 통계에 들어가요.`)) return;
+      await DS.Net.set(`tester/${k}/${A().BETA}`, on ? true : null); DS.UI.toast(on ? `🧪 ${cls} = 베타 반` : `🧪 ${cls} 베타 반을 껐어요`);
+    }); }
     document.querySelectorAll('[data-reset]').forEach((b) => (b.onclick = () => DS.Control.run(async () => {
       const n = Number(b.dataset.reset);
       if (!confirm(`${cls} ${n}번 비밀번호를 0000 으로 초기화할까요? 학생은 0000 으로 들어가 새 비밀번호를 정해요.`)) return;

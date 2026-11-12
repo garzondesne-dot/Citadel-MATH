@@ -9,6 +9,9 @@ DS.Dash = (function () {
   const $ = (s) => document.querySelector(s);
   const { esc } = DS.UI;
   const A = () => DS.Account;
+  let testers = {}; // 🧪 #122 tester 전체 (베타 반 = tester/{반}/_all)
+  const isBeta = (c) => !!(DS.Account && DS.Account.isBetaOf && DS.Account.isBetaOf(testers, c));
+  const liveCls = () => Object.keys(roster).sort().filter((c) => !isBeta(c)); // 「전체」 · 반 비교 · 설문 집계에 들어가는 반
   let roster = {}, cls = '', tab = 'table', sortKey = 'n', sortDir = 1, data = null;
 
   async function enter() {
@@ -16,6 +19,7 @@ DS.Dash = (function () {
     DS.UI.show('screen-dash');
     DS.Scene.save({ role: 'dash' });
     roster = (await DS.Net.get('roster').catch(() => null)) || {};
+    testers = (await DS.Net.get('tester').catch(() => null)) || {};
     if (!cls || (cls !== ALL && !roster[cls])) cls = Object.keys(roster).sort()[0] || '';
     await load();
   }
@@ -35,9 +39,9 @@ DS.Dash = (function () {
     if (!cls) return;
     if (!isAll()) { data = await one(cls); render(); return; }
     // 🏫 전체: 반마다 따로 계산(참여율은 그 반이 수업한 차시 기준) → 합침
-    const parts = await Promise.all(Object.keys(roster).sort().map(one));
+    const cs0 = liveCls(), parts = await Promise.all(cs0.map(one)); // 🧪 #122 베타 반은 「전체」에서 빠짐 (그 반 칩을 누르면 따로 보임)
     const held = [...new Map(parts.flatMap((d) => d.held).map((l) => [l.id, l])).values()].sort((a, b) => a.no - b.no);
-    data = { held, studs: parts.flatMap((d) => d.studs), classes: parts.map((d, i) => ({ cls: Object.keys(roster).sort()[i], d })) };
+    data = { held, studs: parts.flatMap((d) => d.studs), classes: parts.map((d, i) => ({ cls: cs0[i], d })) };
     render();
   }
 
@@ -79,9 +83,9 @@ DS.Dash = (function () {
     const classes = Object.keys(roster).sort();
     const TABS = [['table', '① 한눈에 표'], ['rank', '② 랭킹'], ['watch', '③ 주의 학생'], ['weak', '④ 개념별 약점'], ['std', '⑤ 성취기준'], ['mis', '⑥ 오개념'], ['memo', '⑦ 세특 메모'], ['sv', '📝 설문'], ['use', '📈 활용 추이'], ['photo', '📷 서술형'], ['sym', '📖 기호 톡']];
     el.innerHTML = `<div class="panel framed"><h2>📊 학급 대시보드 <span class="muted small">교사만 · 학생 화면과 종합상황실에는 나오지 않아요</span></h2>
-        <div class="tabs st-cls">${classes.length > 1 ? `<button class="tab${isAll() ? ' on' : ''}" data-cls="${ALL}">🏫 전체</button>` : ''}${classes.map((c) => `<button class="tab${c === cls ? ' on' : ''}" data-cls="${esc(c)}">${esc(c)}</button>`).join('') || '<span class="muted">명단이 없어요 — 학생 관리에서 먼저 올려 주세요</span>'}</div>
+        <div class="tabs st-cls">${classes.length > 1 ? `<button class="tab${isAll() ? ' on' : ''}" data-cls="${ALL}">🏫 전체</button>` : ''}${classes.map((c) => `<button class="tab${c === cls ? ' on' : ''}" data-cls="${esc(c)}">${isBeta(c) ? '🧪 ' : ''}${esc(c)}</button>`).join('') || '<span class="muted">명단이 없어요 — 학생 관리에서 먼저 올려 주세요</span>'}</div>
         <div class="tabs dash-tabs">${TABS.map(([k, t]) => `<button class="tab${k === tab ? ' on' : ''}" data-tab="${k}">${t}</button>`).join('')}</div></div>
-      <div class="panel framed dash-main">${(() => { const tn = data ? (data.testers || 0) + (data.classes || []).reduce((x, c) => x + (c.d.testers || 0), 0) : 0; return tn ? `<p class="muted small tst-note">🧪 시험 계정 ${tn}명은 랭킹 · 반 통계에서 빠졌어요 (학생 관리에서 켜고 끔)</p>` : ''; })()}${!cls ? '' : !data ? '<p class="muted">불러오는 중…</p>' : !data.held.length && tab !== 'sv' && tab !== 'use' && tab !== 'photo' && tab !== 'sym' ? '<p class="muted">아직 저장된 수업 기록이 없어요. (학생이 수업 끝 결과를 보면 저장돼요)</p>' : VIEW[tab]()}</div>`;
+      <div class="panel framed dash-main">${(() => { const tn = data ? (data.testers || 0) + (data.classes || []).reduce((x, c) => x + (c.d.testers || 0), 0) : 0; const bc = Object.keys(roster).sort().filter(isBeta), bt = bc.length && (isAll() || !isBeta(cls)) ? ` · 베타 반 ${bc.join(' · ')} 은 빠졌어요` : isBeta(cls) ? ' · 🧪 이 반은 베타 반 — 「전체」 · 반 비교 · 설문 집계 · 다른 반 대항전에서 빠져요 (여기서는 그 반 기록을 그대로 보여요)' : ''; return tn || bt ? `<p class="muted small tst-note">🧪 시험 계정 ${tn}명은 랭킹 · 반 통계에서 빠졌어요${bt} (학생 관리에서 켜고 끔)</p>` : ''; })()}${!cls ? '' : !data ? '<p class="muted">불러오는 중…</p>' : !data.held.length && tab !== 'sv' && tab !== 'use' && tab !== 'photo' && tab !== 'sym' ? '<p class="muted">아직 저장된 수업 기록이 없어요. (학생이 수업 끝 결과를 보면 저장돼요)</p>' : VIEW[tab]()}</div>`;
     el.querySelectorAll('[data-cls]').forEach((b) => (b.onclick = () => { cls = b.dataset.cls; words = null; useData = null; useFor = ''; load(); }));
     el.querySelectorAll('[data-tab]').forEach((b) => (b.onclick = () => { tab = b.dataset.tab; render(); }));
     el.querySelectorAll('[data-sort]').forEach((b) => (b.onclick = () => { const k = b.dataset.sort; sortDir = sortKey === k ? -sortDir : (k === 'n' || k === 'name' ? 1 : -1); sortKey = k; render(); }));
@@ -104,7 +108,7 @@ DS.Dash = (function () {
   // 📈 활용 추이 (2026-11-06 사용자 「웹앱 접근량이 얼마나 늘고 있는지 · 복습 · 문제 풀이 접근 추적」): act/{반}/{날짜}/{번호} (DS.Usage) · 기록 전은 ≈ 추정
   let useData = null, useFor = '';
   async function loadUse() {
-    const cs = isAll() ? Object.keys(roster).sort() : [cls], key = cs.join(',');
+    const cs = isAll() ? liveCls() : [cls], key = cs.join(',');
     if (useFor === key && useData) return; useFor = key; useData = null;
     const parts = await Promise.all(cs.map((c) => DS.Usage.load(c, { estimate: true }).then((u) => ({ c, u }))));
     const days = {}; let since = null;
@@ -267,7 +271,7 @@ DS.Dash = (function () {
   // ── 📝 설문 탭 (v0.9.8.2): 반별 열기 · 닫기 · 응답 수 · 회고 비교(중간고사 전 → 지금) · 도움 된 것 · 서술 · CSV · 💬 마지막 한마디 모아 보기
   //   응답은 익명(이름 · 번호 · 시각 없음) — 응답 수 / 응답한 학생 수만 셈. 탭을 열 때 한 번 읽고 「새로 고침」으로 다시
   let sv = null, svFor = '', words = null;
-  const svClasses = () => (isAll() ? Object.keys(roster).sort() : [cls]);
+  const svClasses = () => (isAll() ? liveCls() : [cls]);
   async function svLoad() {
     const cs = svClasses(), key = cs.join(',');
     svFor = key; sv = null;
