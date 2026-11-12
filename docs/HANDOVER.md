@@ -370,3 +370,9 @@
 - 🤔 생각 시간(학생 폰 `thinkUntil` · `bossThink`) = 기기에서 멈춘 만큼 뒤로 · 🏕 쉼터 놀이 = `DS.Fun.hold`(fun/frz → 끄면 to · lastAt 뒤로) · 🙊 눈치도 같은 함수 · 🏰 디펜스는 아직 안 멈춤.
 - 쉼터 중에도 fzAt 이 있으면 학생 폰에 집중 막(놀이 시계가 멈췄으니) · 가상 친구(`DS.Bots`)는 집중 동안 손을 멈췄다가 끄면 차례로 · TV = `.focus-on #raid` 의 CSS 반복 연출 멈춤.
 - 남은 수업 시간 · 보스 문 닫기 = 집중 중에도 흐름(선생님 바로잡음 「차시 던전 문 닫는 건 그대로」) — `deadline` 은 손대지 않음. 시험 = `tests/focus117.test.js` · e2e122.
+
+## 🧪 #122 베타 반 (2026-11-12 · 손발 #7 · release cfc7541)
+- 저장 = `tester/{반}/_all = true` (규칙 그대로: tester/$c/$n 은 boolean · 교사만 씀 → 규칙 게시 필요 없음) · 읽기 = `DS.Account.isBetaOf(T, 반)` · `betaKeys(T)` · `testerOf(반, 번호)`(개인 시험 계정 또는 베타 반).
+- 빠지는 곳: 대시보드 「전체」 · 반 비교(`liveCls`) · 설문 「전체」 · 📈 활용 추이 「전체」 · 설문 응답 집계(`survey.submit`) · 다른 반 대항전 순위(`DS.Combo.noBeta` · 그 반 자기 화면에서는 보임). 대시보드에서 그 반 칩을 누르면 그 반 기록 그대로.
+- 방 안: 베타 반 학생은 입장할 때 `players.tester = true`(`testerOf` · student.js) → #67 과 똑같이 🧪 이름표 · 체력 머릿수에서 빠짐(최소 1명분 · 선생님이 그 반에서 한 명으로 돎) · 학급 결과 카드에서 빠짐. 📷 서술형 확인 목록은 그대로(채점 확인 일이라).
+- 시험 = `tests/beta122.test.js` · e2e123.
