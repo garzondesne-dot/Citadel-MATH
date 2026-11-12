@@ -381,3 +381,6 @@
 - 찜 알림 = `DS.SymTalk.toggleWish` 토스트 · 짝 기호 = `DS.SymTalk.symOfCard(카드id)`(CARD_OF 거꾸로) · 만든 카드 = `wishRow` 가 `DS.Card.html` 그림.
 - 캠프 = `#camp-anvil.wish-on` → CSS 로 이름표 opacity 1 (숨김 규칙보다 먼저) · 모루 = `.fg-wishrow` 칩(`data-wjump` → `hintOpen` + `.fc-wgroup [data-wrow]` 스크롤 · flash) · 💡 목록 · 도감 맨 위 `.fc-wgroup` · 찜 카드 = `DS.Card.html(c, { unknown, named, sym })`(이름판 · 위 칸 기호 · 수식 ? 그대로).
 - hero-v2 에는 #106(찜)이 없음 → #106 · #128 은 정식(release)에만. 시험 = e2e119(15개).
+
+## 🚑 체험판 화면 = 학생 폰만 · 📺 TV 단추 (2026-11-13 · 손발 #7 · release f8de1d2 · v0.9.56.0)
+- `js/raid/test.js tvHall`: TV 상자(`#test-tv`)는 처음부터 만들되 `.tv-off`(visibility hidden · 계속 돌아 진행 그대로) · `--tvh` = 0(학생 화면 위 빈칸 없음) · 진행 막대 `#tb-tvv`(📺 TV 화면 ↔ 📱 학생 화면 · `data-tv`) → `tvShow(on)` = `.tv-show`(막대 위 가득 · 세로 폰은 90° 돌림) · TV 를 누르면 ⛶ 큰 화면은 그대로 · 폰(≤480px)은 아이콘만. 체험판(trial)만 · 테스트 모드 · 실제 수업 그대로. 시험 = e2e125.
