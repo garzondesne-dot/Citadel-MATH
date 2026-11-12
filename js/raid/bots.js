@@ -11,7 +11,11 @@ DS.Bots = (function () {
   const done = new Set();
   const N = () => DS.Net, P = (s) => `rooms/${code}/${s}`;
   const ids = () => Array.from({ length: n }, (_, i) => `bot${String(i + 1).padStart(2, '0')}`);
-  const later = (key, ms, fn) => { if (done.has(key)) return; done.add(key); setTimeout(() => { if (code) fn(); }, ms / speed); };
+  // ⏸ #117 집중 모드 = 가상 친구도 손을 멈춤 (학생 폰이 잠기는 것과 같게): 집중 중에 시간이 된 일은 모아 두었다가 끄면 차례로
+  let held = [];
+  const frozen = () => !!(R && DS.Raid.focusOn(R) && !DS.Raid.isLobby(R) && !DS.Raid.restOn(R));
+  const later = (key, ms, fn) => { if (done.has(key)) return; done.add(key); const go = () => { if (!code) return; if (frozen()) { held.push(go); return; } fn(); }; setTimeout(go, ms / speed); };
+  const thaw = () => { if (frozen() || !held.length) return; const h = held; held = []; h.forEach((go, i) => setTimeout(go, (600 + i * rand(250, 700)) / speed)); };
   const rand = (a, b) => a + Math.random() * (b - a);
 
   // 문제 → 정답(또는 일부러 틀린 답)
@@ -33,7 +37,7 @@ DS.Bots = (function () {
     code = c; n = count; speed = opt.speed || 1; Object.assign(acc, opt.acc || {}); PER = opt.personas || null; if (PER) n = PER.length;
     stop = N().watch(`rooms/${code}`, (v) => { if (!v) return; R = DS.Act.unpackRoom(v); L = DS.Lessons.get(R.meta.lesson); step(); });
   }
-  function stopAll() { if (stop) stop(); stop = null; code = null; done.clear(); }
+  function stopAll() { if (stop) stop(); stop = null; code = null; done.clear(); held = []; }
 
   // 🏕 쉼터 놀이 (🧪 테스트 모드 · 2026-11-07): ⚖ 🔄 ⭕ = 고르는 시간 안에 한 번 고름 · 🏰 디펜스 = 내 능력치 · 빈 자리 선착순
   function fun() {
@@ -68,6 +72,7 @@ DS.Bots = (function () {
   }
 
   function step() {
+    if (frozen()) return; thaw();
     if (DS.Raid.restOn(R) && !DS.Raid.isLobby(R)) { if (R.fun) fun(); return; } // 쉼터: 공격은 쉬고 놀이만
     const st = DS.Raid.stepOf(L, R);
     ids().forEach((u, i) => {

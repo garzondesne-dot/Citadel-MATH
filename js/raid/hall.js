@@ -439,7 +439,7 @@ DS.Hall = (function () {
   function hallSolve() {
     const arena = $('#raid'); if (!arena || !L || !R) return;
     const lk = Raid().solveLock(L, R, DS.Net.now()), on = !!(lk && lk.on), rd = on ? Raid().readyOf(R, lk.id).length : 0, all = Raid().activeIds(R).filter((u) => u !== (R.meta || {}).teacher).length;
-    const key = on ? `${lk.id}|${lk.t0}|${lk.end}|${rd}|${all}` : '';
+    const key = on ? `${lk.id}|${lk.t0}|${lk.end - lk.cur}|${lk.frz ? 1 : 0}|${rd}|${all}` : '';
     arena.classList.toggle('scouting', on); // 🌫 #22: 정찰 동안 = 학습지 그림 오른쪽 크게 · 실루엣 진형은 왼쪽으로 비켜 섬 (그림 위에 그리지 않음)
     const mon = $('#rm'); if (on && mon && !mon.classList.contains('scout-sil')) mon.classList.add('scout-sil'); // 화면을 다시 그려도 실루엣 유지
     if (on && mon && !mon.querySelector('.sc-pack')) { const s0 = Raid().stepOf(L, R) || {}, ch = s0.kind === 'monster' && Raid().isChain(L, R, s0.id); DS.Art.scoutDeco(mon, true, ch ? { n: Raid().chainDown(L, R, s0.id).length } : {}); } // 🌫 진형(대장 + 졸개 · 소레이드는 단계 수만큼)
@@ -450,7 +450,7 @@ DS.Hall = (function () {
       const st = Raid().stepOf(L, R) || {}, img = (prep.img || {})[st.kind === 'boss' ? 'boss' : st.id] || (prep.img || {})[st.id];
       if (mon) mon.classList.add('scout-sil');
       if (!ban) { ban = document.createElement('div'); ban.className = 'h-solve h-scout'; arena.appendChild(ban); }
-      ban.innerHTML = `<b>🌫 정찰 — 학습지를 먼저 풀어요</b>${img ? `<img class="scout-img" src="${img}" alt="">` : ''}<p>✋ 준비 완료 <b>${rd}</b> / ${all} · 등장까지 <b class="sl-left" data-sl-end="${lk.end}">${Math.ceil(lk.left / 1000)}초</b></p>`;
+      ban.innerHTML = `<b>🌫 정찰 — 학습지를 먼저 풀어요</b>${img ? `<img class="scout-img" src="${img}" alt="">` : ''}<p>✋ 준비 완료 <b>${rd}</b> / ${all} · 등장까지 <b class="sl-left" data-sl-end="${lk.end - lk.cur}"${lk.frz ? ` data-fz="${(R.state || {}).fzAt}"` : ''}>${Math.ceil(lk.left / 1000)}초</b></p>`;
     } else {
       if (ban) ban.remove();
       if (mon) DS.Art.scoutDeco(mon, false);

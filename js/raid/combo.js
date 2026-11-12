@@ -157,13 +157,15 @@ DS.Combo = (function () {
   // 상태: none · live(20초 동안) · done(결과)
   function bat(L, R, now) {
     const b = (R.state || {}).bat; if (!b || typeof b.at !== 'number') return null;
-    const q = DS.FunOX && DS.FunOX.list[b.q], end = b.at + BAT.dur * 1000;
+    const q = DS.FunOX && DS.FunOX.list[b.q], hasAc = typeof b.ac === 'number', acEnd0 = (hasAc ? b.ac : b.at) + BAT.dur * 1000;
+    const acLeft = hasAc ? Math.max(0, acEnd0 - activeNow(R, now)) : Math.max(0, b.at + BAT.dur * 1000 - now); // ⏸ #117 박쥐 20초 = 콤보 시계(집중 · 쉼터 · 영상 동안 멈춤)
+    const end = acLeft > 0 ? now + acLeft : b.at + BAT.dur * 1000;
     const ans = R.batA || {}, ids = Raid().activeIds(R);
     const answered = ids.filter((u) => ans[u] === 'o' || ans[u] === 'x');
     const right = q ? answered.filter((u) => (ans[u] === 'o') === !!q.a) : [];
     const n = Number(b.n) || ids.length, need = Math.max(1, Math.ceil(n * BAT.need));
-    const live = now < end;
-    return { mid: b.mid, at: b.at, end, acEnd: (typeof b.ac === 'number' ? b.ac : b.at) + BAT.dur * 1000, q, qi: b.q, live, left: Math.max(0, end - now), answered: answered.length, right: live ? null : right, rightN: right.length, need, n, ok: !live && right.length >= need };
+    const live = acLeft > 0;
+    return { mid: b.mid, at: b.at, end, acEnd: acEnd0, q, qi: b.q, live, frz: live && pausedNow((R && R.state) || {}), left: acLeft, answered: answered.length, right: live ? null : right, rightN: right.length, need, n, ok: !live && right.length >= need };
   }
 
   // ── 🎁 보물 상자 ───────────────────────────────────────

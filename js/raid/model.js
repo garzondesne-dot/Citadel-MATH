@@ -298,8 +298,10 @@ DS.Raid = (function () {
     const man = (st.solveOn || {})[id], base = st.solve != null ? Number(st.solve) : (R.meta || {}).solve != null ? Number(R.meta.solve) : 60;
     const sec = man ? Number(man.sec) : man === 0 ? 0 : (NEWR(R) || mon.evalQ) ? base : 0; // 🌫 v3 (2026-11-09 #17): 모든 몬스터 · 보스 앞에 정찰 (기본 60초 · 선생님 「⚔ 등장!」으로 일찍)
     if (!(sec > 0)) return null;
-    const t0 = man && man.at ? Number(man.at) : st.stepAt != null ? Number(st.stepAt) : now, end = Math.min(t0 + sec * 1000, Number((st.solveEnd || {})[id]) || Infinity);
-    return { id, sec, t0, end, left: Math.max(0, end - now), on: now < end };
+    // ⏸ #117 집중 모드 = 정찰도 멈춤: 정찰 중에 켠 집중(state.fzAt)만큼 끝이 뒤로 · 끄면 그 시간을 solveOn.fx 에 남김(actions.setFocus)
+    const t0 = man && man.at ? Number(man.at) : st.stepAt != null ? Number(st.stepAt) : now, fx = man && man.fx ? Number(man.fx) : 0, e0 = t0 + sec * 1000 + fx;
+    const se = Number((st.solveEnd || {})[id]) || Infinity, cur = st.fzAt != null && Number(st.fzAt) < Math.min(e0, se) ? Math.max(0, now - Number(st.fzAt)) : 0, end = Math.min(e0 + cur, se);
+    return { id, sec, t0, end, fx, cur, fz: fx + cur, frz: cur > 0, left: Math.max(0, end - now), on: now < end };
   }
   const readyOf = (R, id) => keys(((R.ready || {})[id]) || {}).filter((u) => (R.active || {})[u]); // 🌫 정찰 「✋ 준비 완료」 누른 학생
   function atkClock(L, R, now, cfg) {
@@ -312,7 +314,7 @@ DS.Raid = (function () {
     const per = a.length >= 3 ? a[0] + (a[1] - a[0]) * (1 - ratio) : a[0];
     // 👑 보스 단계 멈춤 (v0.9.11): 체력 100~67% 4초 · 66~34% 3초 · 33~0% 2초 (시험용 cfg 를 주면 그 값 그대로)
     const phase = kind === 'boss' && !cfg && DS.Combo ? DS.Combo.bossPhase(ratio) : null, lock = phase ? phase.lock : a[a.length - 1];
-    const sl = solveLock(L, R, now), slHeld = sl ? Math.max(0, Math.min(now, sl.end) - sl.t0) : 0; // 📝 풀이 시간 동안 몬스터도 꽁꽁 (공격 시계 멈춤)
+    const sl = solveLock(L, R, now), slHeld = sl ? Math.max(0, Math.min(now, sl.end) - sl.t0 - sl.fz) : 0; // ⏸ #117 정찰 안의 집중 시간은 held(집중)에서 이미 뺌 → 두 번 빼지 않음 // 📝 풀이 시간 동안 몬스터도 꽁꽁 (공격 시계 멈춤)
     const rest = st.rest && st.rest.at != null ? st.rest : null, paused = !!st.focus || !!rest || !!(sl && sl.on), start = st.stepAt != null ? st.stepAt : now;
     const held = (st.focus ? now - (st.focusAt != null ? st.focusAt : now) : 0) + (rest ? Math.max(0, now - rest.at) : 0) + slHeld;
     const t = Math.max(0, (now - start - (st.pauseMs || 0) - held) / 1000 - bind);
@@ -364,9 +366,15 @@ DS.Raid = (function () {
     return ho.at > pt.at ? ho : pt;
   }
   // ⏳ 보스 타임바: 마감 = 교시 끝 (+5분 연장 한 번) · null = 제한 없음
-  const deadline = (R) => { const d = R && ((R.state && R.state.deadline) || (R.meta && R.meta.deadline)); return d ? d + (Number((R.state || {}).extend) || 0) * 60e3 : null; }; // state.deadline = 수업 시작 때 잡은 50분 (2026-11-06)
-  const timeLeft = (R, now) => { const d = deadline(R); return d == null ? null : Math.max(0, d - now); };
+  // ⏸ #117 (2026-11-12 선생님 「집중 모드 = 모든 시간 멈춤」): 몬스터 · 보스 단계에서 켠 집중(state.fzAt) 동안 수업 남은 시간도 멈춤
+  //   state.fzMs = 지난 집중으로 멈춘 합계(수업 전체 · 단계가 바뀌어도 이어짐) · 개념 단계 자동 집중은 수업 시계를 멈추지 않음(fzAt 없음)
+  const nowOf = () => (typeof DS !== 'undefined' && DS.Net && DS.Net.now ? DS.Net.now() : Date.now());
+  const frozenMs = (R, now) => { const st = (R && R.state) || {}; return (Number(st.fzMs) || 0) + (st.fzAt != null ? Math.max(0, (now == null ? nowOf() : now) - Number(st.fzAt)) : 0); };
+  const deadline0 = (R) => { const d = R && ((R.state && R.state.deadline) || (R.meta && R.meta.deadline)); return d ? d + (Number((R.state || {}).extend) || 0) * 60e3 + (Number((R.state || {}).fzMs) || 0) : null; }; // 지금 켜진 집중은 뺀 값 (초 세기 · 다시 그리기 판단용)
+  const deadline = (R, now) => { const d = deadline0(R); return d == null ? null : d + ((R.state || {}).fzAt != null ? Math.max(0, (now == null ? nowOf() : now) - Number(R.state.fzAt)) : 0); }; // state.deadline = 수업 시작 때 잡은 50분 (2026-11-06)
+  const timeLeft = (R, now) => { const d = deadline(R, now); return d == null ? null : Math.max(0, d - now); };
+  const frozeAt = (R) => { const z = ((R && R.state) || {}).fzAt; return z != null ? Number(z) : null; };
   // 던전 진행: 지나온 단계 / 전체 (마무리 = 끝)
   const progress = (L, R) => { const i = (R.state || {}).step ?? -1, n = L.steps.length; return Math.max(0, Math.min(1, (i + (isEnd(L, R) || bossHp(L, R).won ? 1 : 0)) / n)); };
-  return { isTester, whyStages, hintKeyOf, chainAns, PRAC_MAX, pracUsed, isTcut, tcutN, chainDown, isChain, chainItems, chainSubs, CHAIN_SLOTS, readyOf, NEWR, variantOf, BIND_TOKEN, tokBinds, solveLock, BOSS_TRIES, bossItem, bossTries, bossState, bossFirst, bossAnswered, skipped, deadline, timeLeft, progress, ATK, soloAtk, BIND_PER, BIND_MAX, bindOf, bindTotal, atkClock, atkTrack, HOLY_SEC, holyUsed, holyCan, holyOn, holyArmed, holyTimes, stone, RETRIES, HEAL_MAX, healsOf, healsGiven, healsTo, healsReceived, healTarget, ultUsed, perfStreak, TRUE_SEC, isTrue, petrify, LIVE_MS, lateIds, liveOpen, roomDone, inClass, activeIds, teacherUid, num, newRoom, stepOf, isLobby, isEnd, isFinale, isClosed, focusOn, restOn, sheetOn, videoOn, autoFocus, fullMarks, canLobby, online, seedOf, itemsFor, attemptsOf, gradeAttempt, record, resultLabel, headcount, pctOf, monsterHp, waiting, allSubmitted, cleared, mastery, bossHp, helpList };
+  return { frozenMs, deadline0, frozeAt, isTester, whyStages, hintKeyOf, chainAns, PRAC_MAX, pracUsed, isTcut, tcutN, chainDown, isChain, chainItems, chainSubs, CHAIN_SLOTS, readyOf, NEWR, variantOf, BIND_TOKEN, tokBinds, solveLock, BOSS_TRIES, bossItem, bossTries, bossState, bossFirst, bossAnswered, skipped, deadline, timeLeft, progress, ATK, soloAtk, BIND_PER, BIND_MAX, bindOf, bindTotal, atkClock, atkTrack, HOLY_SEC, holyUsed, holyCan, holyOn, holyArmed, holyTimes, stone, RETRIES, HEAL_MAX, healsOf, healsGiven, healsTo, healsReceived, healTarget, ultUsed, perfStreak, TRUE_SEC, isTrue, petrify, LIVE_MS, lateIds, liveOpen, roomDone, inClass, activeIds, teacherUid, num, newRoom, stepOf, isLobby, isEnd, isFinale, isClosed, focusOn, restOn, sheetOn, videoOn, autoFocus, fullMarks, canLobby, online, seedOf, itemsFor, attemptsOf, gradeAttempt, record, resultLabel, headcount, pctOf, monsterHp, waiting, allSubmitted, cleared, mastery, bossHp, helpList };
 })();
