@@ -1,4 +1,4 @@
-// 🎯🏰 2026-11-13: 🏰 성채 = 한 판에 모두 맞혀야 처치(B · 소레이드 = 한 단계 틀리면 숫자 바뀐 사슬로 처음부터) · 🎯 허수아비 = 같은 날 되돌림(틀린 것만 새 숫자로 다시) — PORT=8766 node tools/e2e/shots131.js <출력 폴더> <앞 이름>
+// 🎯🏰 2026-11-13: 「한 판에 모두」(B)를 같은 날 허수아비 · 성채 모두 되돌림 → 허수아비 · 성채 일반 방 = 틀린 소문제만 새 숫자로 다시 · 성채 소레이드 = 틀린 단계를 같은 문제로 다시 — PORT=8766 node tools/e2e/shots131.js <출력 폴더> <앞 이름>
 //   ① 🎯 허수아비 9차시 문제 1 (한 번 틀린 뒤) ② 🏰 성채 1층 일반 방 ③ 🏰 성채 소레이드 방 q07
 const { chromium } = require('playwright');
 const OUT = process.argv[2] || '.', U = `http://localhost:${process.env.PORT || 8765}/index.html?local`;
@@ -36,10 +36,10 @@ const OUT = process.argv[2] || '.', U = `http://localhost:${process.env.PORT || 
   await S.evaluate(() => { document.querySelectorAll('.bn-fight').forEach((e) => e.parentNode.removeChild(e)); window.__asks = []; let k = 0; DS.Quiz.ask = async (card, q) => { window.__asks.push(card.formula + '|' + JSON.stringify(q)); k++; return k !== 2; }; });
   await S.evaluate(() => DS.Control.run(async () => DS.Bonus.enter(await DS.Account.me(), { go: ['eval-1', 'q07'] }))); await S.waitForTimeout(2200);
   const intro = await S.evaluate(() => document.querySelector('.bn-fight').innerText);
-  ok(/한 판에 모두 맞혀야 처치/.test(intro), '소레이드 안내 = 한 판에 모두 맞혀야 처치');
+  ok(/틀려도 같은 문제로 다시/.test(intro) && !/한 판에 모두/.test(intro), '🏰 소레이드 안내 = 틀려도 같은 문제로 다시 (같은 날 되돌림)');
   await start(); await S.waitForTimeout(16000);
   const asks = await S.evaluate(() => window.__asks), r3 = await S.evaluate(() => DS.Net.get('bonus/1-3/1/eval-1/q07'));
-  ok(asks.length > 2 && asks[2].startsWith('졸개 ①') && asks[2] !== asks[0], `둘째 단계 틀림 → 졸개 ① 부터 숫자 바뀐 사슬 (${asks.slice(0, 3).map((a) => a.slice(0, 70)).join(' / ')})`);
+  ok(asks.length > 2 && asks[2].startsWith('졸개 ②') && asks[2] === asks[1], `둘째 단계 틀림 → 같은 졸개 ② 문제로 다시 (처음부터 아님) (${asks.slice(0, 3).map((a) => a.slice(0, 70)).join(' / ')})`);
   ok(r3 && r3.clear, `새 사슬 모두 맞힘 → 처치 (${asks.length}번 물음)`);
   await S.screenshot({ path: `${OUT}/133-castle.png` });
   console.log(log.join('\n')); console.log(bad ? `❌ ${bad}` : '✅ 통과'); console.log('errors', errs.length ? errs : 'none'); await b.close(); if (bad || errs.length) process.exit(1);
