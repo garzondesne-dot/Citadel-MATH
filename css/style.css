@@ -3293,7 +3293,7 @@ body:has(#test-bar) #screen-student.st-battle .wrap:has(.cr-dock) { padding-bott
 .fx-fam.sp:not(.shut) { grid-template-columns: repeat(2, 1fr) 2fr; }
 .fx-fam:not(.shut) > .fam-h { grid-column: 1 / -1; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; padding: 2px 2px 0; }
 .fx-fam:not(.shut) .fam-n { display: inline; margin: 0 0 0 auto; font-size: 12px; }
-body:has(.modal:not([hidden])) #ver-tag { display: none; }
+body:has(.modal:not([hidden]):not(.hidden)) #ver-tag { display: none; } /* 🐞 11/13 선생님 「어느 순간 버전 표시 사라짐」: 늘 있는 #quiz(.hidden 로 숨김)까지 창으로 쳐서 모든 화면에서 숨던 것 */
 .set-box .set-foot { background: var(--panel); box-shadow: 0 -10px 12px var(--panel); }
 .set-box .set-foot { bottom: -13px; padding-bottom: 14px; } /* ④ 창 아래 여백(12px)으로 목록이 비치던 것 — sticky 가 여백 안쪽에 멈춰서 */
 /* 👩‍🏫 #80 체험판 첫 화면 = 대표 그림 key-1 (2026-11-11): PC(가로) = 그림 전체 · 폰(세로) = 가운데 세로로 자름(용 머리 · 금빛 칼 · 로안) · 기존 아치 배경 · 로고는 숨김
