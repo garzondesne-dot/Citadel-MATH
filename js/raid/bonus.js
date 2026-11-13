@@ -142,6 +142,19 @@ DS.Bonus = (function () {
         DS.Sound.correct(); DS.UI.toast(`✔ 선생님이 「${r.title}」 풀이를 인정했어요 — 처치!${sealed ? ' 🏆 업적도!' : ''}`, 4000);
       }
     }
+    // 🎯 2026-11-13 허수아비 서술형 다시: 「⏳ 선생님 확인」이던 사진을 선생님이 ✔ → 성채 소레이드 보너스와 같은 길 (💎 📷 서술형 통과 · 📜 · 한 번씩) · ✘ → 다시 찍기 안내
+    for (const [lid, rs] of Object.entries(DS.Rubrics || {})) {
+      if (!/^set-/.test(lid)) continue; const L = DS.Lessons.get(lid); if (!L) continue;
+      for (const [mid, rb] of Object.entries(rs || {})) {
+        const rr = (mine[lid] || {})[mid]; if (!rb || !rb.raid || !rr || !rr.pend) continue;
+        const st = await DS.Photo.pendState(me, lid, mid, rr.pend); if (st === 'wait') continue;
+        const p = `bonus/${ck(me.c)}/${me.n}/${lid}/${mid}`, title = ((L.monsters || {})[mid] || {}).title || mid;
+        if (st === 'no') { await N().update(p, { pend: null }).catch(() => {}); delete rr.pend; DS.UI.toast(`✏ ${title} — 선생님이 풀이를 다시 보고 싶대요. 고쳐서 다시 찍어요!`, 3600); continue; }
+        await N().update(p, { pend: null, ph: rr.pend }).catch(() => {}); rr.ph = rr.pend; delete rr.pend;
+        if (DS.Gem) { await DS.Gem.add(me, DS.Gem.G.photo || 3, `photo_${lid}_${mid}`, '📷 서술형 통과').catch(() => 0); await scrollWin(lid, mid, null, null); }
+        DS.Sound.correct(); DS.UI.toast(`✔ 선생님이 「${title}」 풀이를 인정했어요 — 📷 보너스!`, 4000);
+      }
+    }
   }
   async function prepOf(id) {
     if (DS.Test && DS.Test.active() && DS.Test.prep(id)) return DS.Test.prep(id);
@@ -443,7 +456,7 @@ DS.Bonus = (function () {
     let photoWin = null; // 📷 통과 정보 → win() 에서 💎 · 📜
     const photoStage = (items, fresh) => {
       const r0 = mine[L.id] && mine[L.id][mid] ? mine[L.id][mid] : rec, pend = r0.pend;
-      const act = draw('', pend ? `<p class="gold">⏳ 선생님이 풀이를 확인하고 있어요.${castle ? ` 확인되면 성채에 들어올 때 ${bonusPhoto ? '📷 보너스를 받아요' : '처치로 바뀌어요'}.` : ''} 더 또렷한 사진을 다시 보내도 돼요.</p>` : bonusPhoto ? `<p class="okc">📷 <b>서술형 도전 (보너스)</b> — ${castle ? '방금 사슬의' : '방금 푼 문제의'} 풀이를 종이에 써서 찍어 올리면 💎 · 📜 서술 조각! <span class="muted small">(이 숫자 그대로 · 하루 ${DS.Photo && DS.Photo.daily ? DS.Photo.daily() : 6}장)</span></p>` : `<p class="okc">${fresh ? '✔ <b>답을 맞혔어요!</b> ' : ''}이제 <b>종이에 쓴 풀이</b>를 📷 찍어 올리면 처치예요. <span class="muted small">(이 숫자 그대로 · 하루 ${DS.Photo && DS.Photo.daily ? DS.Photo.daily() : 6}장)</span></p>`);
+      const act = draw('', pend ? `<p class="gold">⏳ 선생님이 풀이를 확인하고 있어요. 확인되면 ${castle ? '성채' : '허수아비'}에 들어올 때 ${bonusPhoto ? '📷 보너스를 받아요' : '처치로 바뀌어요'}. 더 또렷한 사진을 다시 보내도 돼요.</p>` : bonusPhoto ? `<p class="okc">📷 <b>서술형 도전 (보너스)</b> — ${castle ? '방금 사슬의' : '방금 푼 문제의'} 풀이를 종이에 써서 찍어 올리면 💎 · 📜 서술 조각! <span class="muted small">(이 숫자 그대로 · 하루 ${DS.Photo && DS.Photo.daily ? DS.Photo.daily() : 6}장)</span></p>` : `<p class="okc">${fresh ? '✔ <b>답을 맞혔어요!</b> ' : ''}이제 <b>종이에 쓴 풀이</b>를 📷 찍어 올리면 처치예요. <span class="muted small">(이 숫자 그대로 · 하루 ${DS.Photo && DS.Photo.daily ? DS.Photo.daily() : 6}장)</span></p>`);
       act.innerHTML = `<button class="btn primary big" id="bf-photo">📷 풀이 사진 올리기</button>${all() ? '<button class="btn" id="bf-pv">미리 보기: 통과로 보기</button>' : ''}<button class="btn" id="bf-later">${chainMid && !pend ? '⚔ 사슬로 돌아가기' : '나중에'}</button>`;
       act.querySelector('#bf-later').onclick = () => { if (chainMid && !pend) { chainMid = false; chainRound(); return; } el.remove(); render(); };
       const pv = act.querySelector('#bf-pv'); if (pv) pv.onclick = () => (chainMid ? midWin() : bonusPhoto ? photoBonusWin() : win());

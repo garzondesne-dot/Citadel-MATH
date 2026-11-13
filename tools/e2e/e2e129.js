@@ -44,5 +44,12 @@ const OUT = process.argv[2] || '.', U = `http://localhost:${process.env.PORT || 
   await S.evaluate(() => { const x = document.querySelector('#bf-out'); if (x) x.click(); }); await S.waitForTimeout(1200);
   await S.click('[data-fight="set-09|m1"]'); await S.waitForTimeout(1500); await start(); await fill(); await S.evaluate(() => document.querySelector('#bf-go2').click()); await S.waitForTimeout(6000);
   ok(!(await S.$('#sc-photo')), '수업 서술형이 아닌 문제(문제 1) = 사진 단추 없음');
+  // ⏳ 선생님 확인 → ✔ 하면 다음에 허수아비에 들어올 때 보상 (10차시 문제 4 칸으로)
+  await S.evaluate(async () => { await DS.Net.set('held/1-3/set-10', true); await DS.Net.set('bonus/1-3/1/set-10/m4', { tries: 1, clear: true, pend: 'chk1' }); DS.Photo.pendState = async () => 'ok'; });
+  const sc0 = Number(((await S.evaluate(() => DS.Gem.mine({ c: '1-3', n: 1 }))) || {}).scroll) || 0;
+  await S.evaluate(() => { const x = document.querySelector('#bf-out'); if (x) x.click(); }); await S.waitForTimeout(800);
+  await S.evaluate(() => DS.Control.run(async () => DS.Bonus.enter(await DS.Account.me(), { train: true }))); await S.waitForTimeout(2500);
+  const w2 = await S.evaluate(async () => ({ rec: await DS.Net.get('bonus/1-3/1/set-10/m4'), gem: await DS.Gem.mine({ c: '1-3', n: 1 }) }));
+  ok(w2.rec && w2.rec.ph === 'chk1' && !w2.rec.pend && (Number(w2.gem.scroll) || 0) > sc0, `⏳ 확인된 허수아비 사진 = 다음에 들어올 때 📷 보너스 (📜 ${sc0} → ${w2.gem.scroll})`);
   console.log(log.join('\n')); console.log(bad ? `❌ ${bad}` : '✅ 통과'); console.log('errors', errs.length ? errs : 'none'); await b.close(); if (bad || errs.length) process.exit(1);
 })();
