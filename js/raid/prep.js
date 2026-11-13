@@ -230,21 +230,21 @@ DS.Prep = (function () {
   }
   function autoRects(lines, steps) {
     const sorted = lines.slice().sort((a, b) => a.p - b.p || a.y - b.y || a.x0 - b.x0);
-    const colOf = (pg) => { const right = sorted.filter((l) => l.p === pg && l.x0 > 0.5).length; return right >= 3; };
+    const twoPg = (pg) => sorted.filter((l) => l.p === pg && l.x0 > 0.5).length >= 3, twoDoc = [...new Set(sorted.map((l) => l.p))].some(twoPg), colOf = () => twoDoc; // 학습지는 쪽마다 같은 꼴 → 한 쪽이라도 2단이면 2단
     const used = new Set(), res = {}, hits = [];
     const all = anchorsOf(steps);
     all.forEach((res0, i) => { let hit = null; for (const re of res0) { hit = sorted.find((l) => !used.has(l) && re.test(l.s)); if (hit) break; } if (hit) used.add(hit); hits[i] = hit; });
-    const isEdge = (l) => used.has(l) || ANCHOR.test(l.s);
+    const isEdge = (l, st) => used.has(l) || (ANCHOR.test(l.s) && !(st.kind === 'concept' && /^[^\p{L}\p{N}]*STEP\s*\d/u.test(l.s))); // 개념 칸 = 칸으로 안 쓴 STEP 줄을 넘어 묶음 (STEP 1 · 2 …) · 다른 칸은 STEP 줄에서 끝
     hits.forEach((hit, i) => {
       const st = steps[i];
       if (!hit) { res[st.id] = null; return; }
       const left = hit.x0 < 0.5, two = colOf(hit.p) && (left ? hit.x1 < 0.56 : true);
       const x0 = two ? (left ? 0.02 : 0.5) : 0.02, x1 = two ? (left ? 0.5 : 0.98) : 0.98;
       const inCol = (l) => l.p === hit.p && (two ? (left ? l.x0 < 0.5 : l.x0 >= 0.48) : true);
-      const own = all[i], nx = sorted.find((l) => inCol(l) && l !== hit && l.y > hit.y + 0.008 && isEdge(l) && !(!used.has(l) && own.some((re) => re.test(l.s))) && !(st.kind === 'boss' && !used.has(l) && /문제\s*\d/.test(l.s)));
+      const own = all[i], nx = sorted.find((l) => inCol(l) && l !== hit && l.y > hit.y + 0.008 && isEdge(l, st) && !(!used.has(l) && own.some((re) => re.test(l.s))) && !(st.kind === 'boss' && !used.has(l) && /문제\s*\d/.test(l.s)));
       const top = Math.max(0, hit.y - 0.008), lim = nx ? nx.y - 0.006 : 0.965, last = sorted.filter((l) => inCol(l) && l.y >= hit.y && l.y + l.h <= lim + 0.002).reduce((m, l) => Math.max(m, l.y + l.h), hit.y + hit.h);
       const bot = Math.max(top + 0.04, Math.min(lim, last + 0.012)); // 글자가 끝나는 곳 + 여백 (빈 아래쪽은 자름)
-      const lone = two && left && !sorted.some((l) => l.p === hit.p && l.x0 >= 0.5 && l.y + l.h > top && l.y < bot); // 옆 단이 비면 = 가로 전체 칸 (전시 확인 상자 등)
+      const lone = st.kind === 'intro' && two && left && sorted.some((l) => l.p === hit.p && l.x0 < 0.5 && l.x1 > 0.58 && l.y >= top && l.y < bot); // 칸 안 글줄이 가운데를 넘으면 = 가로 전체 칸 (전시 확인 상자 등)
       if (lone) { res[st.id] = [{ p: hit.p, x: 0.02, y: +top.toFixed(4), w: 0.96, h: +(Math.min(1, bot) - top).toFixed(4) }]; return; }
       res[st.id] = [{ p: hit.p, x: +x0.toFixed(4), y: +top.toFixed(4), w: +(x1 - x0).toFixed(4), h: +(Math.min(1, bot) - top).toFixed(4) }];
     });
