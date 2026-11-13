@@ -393,5 +393,5 @@
 - 그 학교 규칙 = 우리와 같은 `firebase/database.rules.json` 그대로 · 교사 = Authentication 사용자 UID → Database `admins/<UID>: true`.
 - 사진 채점 = 그 학교 `gcfg/photo` 가 없어서 처음엔 꺼짐(그대로).
 - (11/13 · 079921e) 학교판 다른 점: `DS.OFF(k)` (js/config.js · k = forge · symtalk · castle · survey · quest · ox) · `DS.SUBJECT` (과목 글자) · 차시 = `DS.Lessons.register` 가 학교판에선 엑셀 차시(sheetLesson)만 받음 · 단추 숨김 = css `.school …` · 칭호 · 첫 안내 · 용사 조건(도감 용사 = 💎 · 성채 도전 용사 숨김)도 · #55 = 학교판 수업 중엔 띠만 · 그 학교 서버 준비 전(스크립트 · 규칙) = 첫 화면 「🏫 선생님이 아직 준비 중」 · 엑셀 양식 = `assets/templates/question-bank-school-v1.xlsx` (`python3 tools/school/template.py`) · 시험 = `tools/e2e/e2e134.js` (예시 학교 페이지를 잠깐 만들고 지움).
-- 학교 목록: srzmf = ○○중학교 · 중학수학1 (a9c903c). 학교 이름 · 과목이 정해지면 schools.json 고치고 생성기 다시.
+- 학교 목록: srzmf = 무안행복중학교 · 중학수학1 (a9c903c · 이름 15ae915). 학교 이름 · 과목이 정해지면 schools.json 고치고 생성기 다시.
 
