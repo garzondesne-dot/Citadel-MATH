@@ -760,7 +760,7 @@ DS.Student = (function () {
     if (n > sandSeen[key]) { let t = Math.max(now, ...Object.keys(sandAt).filter((k) => k.startsWith(key + '|')).map((k) => sandAt[k] + SAND_MS)); for (let i = sandSeen[key]; i < n; i++) { sandAt[`${key}|${i}`] = t; setTimeout(() => { if (DS.Sound && DS.Sound.sand) DS.Sound.sand(); }, Math.max(0, t - now)); t += SAND_MS; } sandNew[key] = [sandSeen[key], n]; sandSeen[key] = n; }
     const nw = sandNew[key] || [0, 0];
     lis.forEach((li, i) => {
-      if (i >= nw[0] && i < nw[1]) li.classList.add('cr-new'); // 🔴 이번 단계에서 생긴 줄
+      if (i >= nw[0] && i < nw[1]) li.classList.add('cr-new'); // 🟢 이번 단계에서 생긴 줄 (초록 · 2026-11-13 밤)
       const t0 = sandAt[`${key}|${i}`]; if (t0 == null || now - t0 > SAND_MS + 200) return;
       li.classList.add('pix-in'); pixIn(li, t0, i + 1 + key.length * 31);
     });

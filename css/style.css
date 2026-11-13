@@ -2974,10 +2974,10 @@ html body .sc-gem, html body .sc-gem .sc-gn, html body .sc-gem b { font-weight: 
 .pick-grp { margin-top: 8px; padding: 6px 8px 8px; border: 1.5px dashed #b08d57aa; border-radius: 8px; } .pick-grp-h { display: block; font-size: 14px; margin-bottom: 4px; color: #6a4a12; } /* 🔁 #41 두 칸 고르기 */
 .cr-prob { margin: 0 0 8px; padding: 6px 10px; border: 2px solid #8a6a3a; border-radius: 8px; background: #fffaf0; color: #2b1d0e; } .cr-prob summary { cursor: pointer; font-weight: 700; } .cr-prob summary small { font-weight: 400; color: #7a6a55; } .cr-prob p { margin: 6px 0 2px; line-height: 1.5; } /* 📜 #44 한 판 더 원문 문제 */
 /* ✨ 모래 글씨 (#46): 새 「📜 나의 풀이」 줄 = 모래 알갱이가 모이며 흐림 → 선명 → 금빛 반짝 (약 1.1초 · 학생 폰만) */
-/* ✨ 나의 풀이 새 줄 (2026-11-10): 픽셀 디졸브 인 (캔버스 · student.js pixIn) · 이번 단계 줄 = 빨강 → 다음 단계에서 검정 */
+/* ✨ 나의 풀이 새 줄 (2026-11-10): 픽셀 디졸브 인 (캔버스 · student.js pixIn) · 이번 단계 줄 = 초록(맞음 색 · 2026-11-13 밤 선생님 「빨강은 틀렸다는 느낌」 · 옛 빨강) → 다음 단계에서 검정 */
 .cr-story li.pix-in { position: relative; }
 .cr-story li .pix-cv { position: absolute; left: -4px; top: -2px; width: calc(100% + 8px); height: calc(100% + 4px); image-rendering: pixelated; pointer-events: none; z-index: 1; }
-.cr-story li.cr-new, .cr-story li.cr-new * { color: #d0182b !important; }
+.cr-story li.cr-new, .cr-story li.cr-new * { color: #0b7a4a !important; } /* 🟢 맞음 초록 (ok #11a36d 를 양피지 위에서 읽히게 짙게 · 대비 약 5:1) */
 .quiz-grp-h { flex-basis: 100%; width: 100%; margin: 8px 0 2px; font-weight: 700; font-size: 14px; color: #ebb84f; border-top: 1px dashed #b08d5788; padding-top: 6px; } /* 🔁 #48 성채 두 칸 고르기 */
 /* ⚔ #50 소레이드 아래 칸 (2026-11-10): 위 = 재도전 하트 · 아래 = 「⚔ 공격 / 🔥 한 판 더」 + 「✍ 서술형 도전 📸」 반반 */
 .st-dock.cr-dock { flex-wrap: nowrap; gap: 6px; padding-left: 8px; padding-right: 8px; } /* 📱 #56 한 줄 (하트 작게 · 공격 · 서술형) */
