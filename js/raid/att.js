@@ -18,16 +18,20 @@ DS.Att = (function () {
     if (!(S() && S().isOn())) { el.innerHTML = ''; return; } // 📅 ⚙ 시간표 끔 = 오늘 수업 줄 없음
     el.innerHTML = '<p class="muted small">📅 오늘 수업 불러오는 중…</p>';
     try { await S().ensure(); } catch (e) { /* 오프라인 · 권한 → 목록만 */ }
-    const [eff, all] = await Promise.all([S().effective(), S().plan({ past: true, days: 1 }).catch(() => [])]), now = DS.Net.now();
+    const [eff, all] = await Promise.all([S().effective(), S().plan({ past: true, days: 2 }).catch(() => []) /* 🐞 2026-11-13 밤: 지난 12시간부터 보니 오전엔 어제만 보였음 → 이틀 치 보고 오늘 날짜만 */]), now = DS.Net.now();
     const list = all.filter((x) => x.date === S().kst(now).date);
     const head = `<div class="td-head"><b>📅 오늘 수업</b><span class="muted small">${list.length ? `${list.length}개 · 칸을 눌러 그 반 · 그 차시로 열기` : '오늘은 시간표 수업이 없어요'}</span><button class="btn small" data-sc>📅 시간표</button><button class="btn small" data-ex>➕ 보충</button></div>`;
     if (!Object.keys(eff.week).length && !list.length) { el.innerHTML = `<div class="td-empty"><b>📅 오늘 수업</b><span class="td-i" title="시간표를 넣으면 칸마다 「반 · 몇 차시」가 저절로 이어져요 · 보충은 ➕">ⓘ</span><button class="btn small" data-sc>📅 시간표 넣기</button><button class="btn small" data-ex>➕ 보충</button></div>`; bindSc(el); return; }
     const row = (x, i) => { const on = !x.past && now >= x.from - 10 * 60e3 && now < x.to;
       return `<div class="td-row${on ? ' now' : ''}${x.past || x.closed ? ' done' : ''}">
-        <span class="td-p"><b>${x.p}교시</b><small>${esc(S().BELLS[x.p][0])}</small></span>
+        <span class="td-p"><b>${x.p}교시</b><small>${esc((S().bell(x.dow, x.p) || [''])[0])}</small></span>
         <span class="td-c"><b>${esc(x.cls)}반</b> ${tag(x)}<br><span class="small">${x.no ? `<b>${DS.Lessons.noText(x.no)}차시</b> · ${esc(x.title)}` : esc(x.title)}${x.resume ? ` <span class="muted">(「${esc(x.resume.title || '')}」부터)</span>` : ''}</span><br><span class="small muted">${x.closed ? (x.doneL ? '✔ 끝 (다음 차시로)' : x.saved ? '⏸ 저장하고 끝 (같은 차시 이어서)' : '끝') : x.past ? '지남' : x.code ? '🟢 열림' : on ? '🟢 지금' : '⏳ 곧'}</span></span>
         <span class="td-b">${x.code && !x.closed ? `<button class="btn small primary" data-rc="${x.code}">▶ 리모컨</button>` : !x.past && x.lesson ? `<button class="btn small primary" data-go="${i}">▶ 열기</button>` : ''}${!x.past && !x.code ? (x.extra ? `<button class="btn small" data-delx="${x.key}">보충 지우기</button>` : `<button class="btn small" data-off="${x.key}">쉼</button>`) : ''}</span></div>`; };
-    el.innerHTML = head + list.map(row).join('');
+    // 📅 2026-11-13 밤 선생님 「시간표에 있는 수업이라 할지라도 교사가 단추 눌러서 열게끔」: 맨 위 한 줄 = 지금(또는 다음) 교시 추천 · ▶ 수업 열기 · 반 · 차시 바꾸기 (저절로 열리지 않음)
+    const ci = list.findIndex((x) => !x.past && !x.closed && now < x.to), cur = ci >= 0 ? list[ci] : null;
+    const one = cur ? `<div class="td-one"><span><b>${now >= cur.from - 10 * 60e3 ? '지금' : '다음'} ${cur.p}교시</b> · ${esc(cur.cls)}반 · ${cur.no ? `${DS.Lessons.noText(cur.no)}차시` : '—'}</span>${cur.code && !cur.closed ? `<button class="btn small primary" data-rc="${cur.code}">▶ 리모컨</button>` : cur.lesson ? `<button class="btn small primary" data-go="${ci}">▶ 수업 열기</button>` : ''}<button class="btn small" data-chg="${ci}">반 · 차시 바꾸기</button></div>` : '';
+    el.innerHTML = `${one}<details class="td-all"${cur ? '' : ' open'}><summary>📅 오늘 수업 ${list.length}개</summary>${head}${list.map(row).join('')}</details>`;
+    el.querySelectorAll('[data-chg]').forEach((b) => (b.onclick = () => { const x = list[Number(b.dataset.chg)], c = document.querySelector('#t-cls'), l = document.querySelector('#lesson'); if (c && x) { c.value = x.cls; c.dispatchEvent(new Event('change')); } setTimeout(() => { if (l && x && x.lesson) l.value = x.lesson; if (c) c.scrollIntoView({ block: 'center', behavior: 'smooth' }); }, 400); DS.UI.toast('반 · 차시를 바꾼 뒤 「수업 열기」를 눌러요'); }));
     bindSc(el);
     el.querySelectorAll('[data-go]').forEach((b) => (b.onclick = () => run(async () => { await S().openSlot(list[Number(b.dataset.go)]); })));
     el.querySelectorAll('[data-rc]').forEach((b) => (b.onclick = () => run(async () => { const sec = await DS.Net.get(`secrets/${b.dataset.rc}`).catch(() => null); await DS.Teacher.open(b.dataset.rc, (sec || {}).hallKey || ''); })));
@@ -41,7 +45,7 @@ DS.Att = (function () {
     const m = document.createElement('div'); m.className = 'modal';
     m.innerHTML = `<div class="quiz-box framed"><div class="quiz-head"><b>➕ 보충 수업</b><button class="btn small" data-x>✕ 닫기</button></div>
       <p class="muted small">한 번만 들어가는 수업이에요 · 그 수업이 끝나면 칸이 사라지고, 그 반 차시가 한 칸씩 당겨져요.</p>
-      <div class="sc-ex"><label>날짜 <input type="date" id="ex-d" value="${d0}"></label><label>교시 <select id="ex-p">${[1, 2, 3, 4, 5, 6, 7].map((p) => `<option value="${p}">${p}교시 (${S().BELLS[p][0]})</option>`).join('')}</select></label><label>반 <select id="ex-c">${cs.map((c) => `<option>${esc(c)}</option>`).join('')}</select></label></div>
+      <div class="sc-ex"><label>날짜 <input type="date" id="ex-d" value="${d0}"></label><label>교시 <select id="ex-p">${[...new Set([1, 2, 3, 4, 5].flatMap((d) => S().periodsOf(d)))].sort((a, b) => a - b).map((p) => `<option value="${p}">${p}교시${S().bell(1, p) ? ` (${S().bell(1, p)[0]})` : ''}</option>`).join('')}</select></label><label>반 <select id="ex-c">${cs.map((c) => `<option>${esc(c)}</option>`).join('')}</select></label></div>
       <div class="row"><button class="btn primary" id="ex-ok">➕ 보충 넣기</button></div></div>`;
     m.querySelector('[data-x]').onclick = () => m.remove();
     m.querySelector('#ex-ok').onclick = () => run(async () => { const d = m.querySelector('#ex-d').value, p = m.querySelector('#ex-p').value, c = m.querySelector('#ex-c').value; if (!d || !c) throw Object.assign(new Error('날짜와 반을 골라 주세요.'), { user: true }); await S().addExtra(d, p, c); m.remove(); DS.UI.toast(`➕ ${md(d)} ${p}교시 ${c}반 보충을 넣었어요.`); if (done) done(); });
@@ -56,18 +60,18 @@ DS.Att = (function () {
     const m = document.createElement('div'); m.className = 'modal sc-edit';
     const wk = () => { const w = { ...(eff.on ? auto : {}) }; Object.entries(man).forEach(([k, v]) => { if (v === '-') delete w[k]; else w[k] = v; }); return w; };
     const cell = (d, p) => {
-      if (!(S().PERIODS[d] || []).includes(p)) return '<td class="sc-no">—</td>';
+      if (!S().periodsOf(d).includes(p)) return '<td class="sc-no">—</td>';
       if (S().skipped(d, p)) return '<td class="sc-no" title="자율 · 동아리 (담임) — 수업으로 치지 않아요">자율·동아리</td>';
       const v = wk()[`${d}-${p}`] || '';
       return `<td${auto[`${d}-${p}`] && eff.on && !(`${d}-${p}` in man) ? ' class="sc-auto" title="🔄 컴시간에서"' : ''}><select data-dp="${d}-${p}"><option value="">—</option>${cs.map((c) => `<option${c === v ? ' selected' : ''}>${esc(c)}</option>`).join('')}</select><small class="sc-next" data-nx="${d}-${p}"></small></td>`;
     };
-    const days = [1, 2, 3, 4, 5], ps = [1, 2, 3, 4, 5, 6, 7];
+    const days = [1, 2, 3, 4, 5], ps = [...new Set(days.flatMap((d) => S().periodsOf(d)))].sort((a, b) => a - b); // 🕘 선생님이 넣은 교시 수만큼
     const progCls = () => [...new Set([...Object.values(wk()), ...cs])].filter((c) => c && c !== '-').sort();
     m.innerHTML = `<div class="quiz-box framed sc-box"><div class="quiz-head"><b>📅 시간표 · 진도 예정표</b><button class="btn small" data-x>✕ 닫기</button><button class="btn" id="sc-ex">➕ 보충</button><button class="btn primary" id="sc-save">💾 저장</button></div>
       ${false && eff.comci && (eff.comci.ok || eff.comci.week) ? `<label class="sc-comci"><input type="checkbox" id="sc-comci"${eff.on ? ' checked' : ''}> 🔄 <b>컴시간 시간표 쓰기</b> <span class="muted small">수학 ${eff.comci.n || 0}칸 · 고친 칸이 우선${Number(eff.comci.failAt) > (Number(eff.comci.at) || 0) ? ` · ⚠ ${new Date(Number(eff.comci.failAt)).toLocaleDateString('ko-KR')} 새로 받기 실패 → ${eff.comci.at ? new Date(Number(eff.comci.at)).toLocaleDateString('ko-KR') : '마지막'} 시간표 그대로` : ''}</span></label>` : eff.comci && eff.comci.err ? `<p class="ngc small">⚠ 컴시간 시간표를 받지 못했어요 (${esc(String(eff.comci.err).slice(0, 60))}) — 아래 칸에 직접 넣어 주세요</p>` : ''}
       <p class="muted small">정규 시간표는 한 번 넣으면 매주 반복 · 칸 아래 = 그 칸의 다음 수업이 몇 차시인지 (반마다 시간순으로 6 → 7 → 8 …) · <b>마무리까지 가서 「수업 끝」을 눌러야 다음 차시로</b> 넘어가요 (⏸ 저장 · 안 한 수업 = 같은 차시) · 방은 미리 만들지 않고 「오늘 수업」에서 눌러 열어요</p>
       ${cs.length ? '' : '<p class="ngc">먼저 학생 관리 → 명단 관리에서 반 명단을 올려 주세요.</p>'}
-      <div class="sc-wrap"><table class="sc-tbl"><tr><th></th>${days.map((d) => `<th>${S().DOW[d]}</th>`).join('')}</tr>${ps.map((p) => `<tr><th>${p}교시<small>${S().BELLS[p][0]}</small></th>${days.map((d) => cell(d, p)).join('')}</tr>`).join('')}</table></div>
+      <div class="sc-wrap"><table class="sc-tbl"><tr><th></th>${days.map((d) => `<th>${S().DOW[d]}</th>`).join('')}</tr>${ps.map((p) => `<tr><th>${p}교시<small>${(S().bell(1, p) || S().bell(2, p) || [''])[0]}</small></th>${days.map((d) => cell(d, p)).join('')}</tr>`).join('')}</table></div>
       <div class="sc-prog"><b>🎯 진도 맞추기</b> <span class="muted small">반마다 「다음 수업 = 몇 차시」 (처음 한 번 · 어긋났을 때)</span><div id="sc-prog"></div></div>
       <div class="sc-plan"><b>🗓 앞으로 2주</b> <span class="muted small">보충 · 쉼 · 진도가 바뀌면 저절로 밀리거나 당겨져요</span><div id="sc-plan"></div></div></div>`;
     const draw = async () => {
@@ -91,6 +95,34 @@ DS.Att = (function () {
       await DS.Net.set('sched/week', Object.keys(man).length ? man : null); await S().ensure().catch(() => {}); m.remove();
       DS.UI.toast('📅 시간표를 저장했어요 — 칸마다 차시가 이어져요.', 3000); if (done) done();
     });
+    document.body.appendChild(m); draw();
+  }
+
+  // ── 🕘 교시 시각 (2026-11-13 밤 선생님 「시간도 입력 가능하게」): 요일마다 교시 · 시작 · 끝 · 「모든 요일 같게」 · 처음 값 = 우리 학교 일과표 · 저장 = sched/bells ──
+  async function bells(done) {
+    const days = [1, 2, 3, 4, 5], cfg = {}; days.forEach((d) => { cfg[d] = Object.entries(S().bellsOf(d)).map(([p, v]) => ({ p: Number(p), s: v[0], e: v[1] })).sort((a, b) => a.p - b.p); });
+    let same = days.every((d) => JSON.stringify(cfg[d]) === JSON.stringify(cfg[1])), cur = 1;
+    const m = document.createElement('div'); m.className = 'modal sc-bells';
+    const draw = () => {
+      const rows = cfg[same ? 1 : cur];
+      m.innerHTML = `<div class="quiz-box framed"><div class="quiz-head"><b>🕘 교시 시각</b><button class="btn small" data-x>✕ 닫기</button><button class="btn primary" id="bl-save">💾 저장</button></div>
+        <label class="bl-same"><input type="checkbox" id="bl-same"${same ? ' checked' : ''}> 모든 요일 같게</label>
+        ${same ? '' : `<div class="bl-tabs">${days.map((d) => `<button class="btn small${d === cur ? ' primary' : ''}" data-d="${d}">${S().DOW[d]}</button>`).join('')}</div>`}
+        <div class="bl-rows">${rows.map((r, i) => `<div class="bl-row"><b>${i + 1}교시</b><input type="time" data-i="${i}" data-k="s" value="${esc(r.s)}"> ~ <input type="time" data-i="${i}" data-k="e" value="${esc(r.e)}"><button class="btn small" data-del="${i}" title="이 교시 지우기">✕</button></div>`).join('')}</div>
+        <div class="row"><button class="btn small" id="bl-add">＋ 교시 더하기</button><button class="btn small" id="bl-def">↺ 처음 값(우리 학교 일과표)</button></div>
+        <p class="muted small">하루 몇 교시까지 · 교시마다 시작 · 끝 시각 · 요일마다 다르면 「모든 요일 같게」를 끄고 요일을 골라요. ⏳ 보스 타임바 = 그 교시 끝.</p></div>`;
+      m.querySelector('[data-x]').onclick = () => { m.remove(); if (done) done(); };
+      m.querySelector('#bl-same').onchange = (e) => { same = e.target.checked; if (same) days.forEach((d) => { cfg[d] = cfg[cur].map((r) => ({ ...r })); }); draw(); };
+      m.querySelectorAll('[data-d]').forEach((b) => (b.onclick = () => { cur = Number(b.dataset.d); draw(); }));
+      m.querySelectorAll('input[type=time]').forEach((inp) => (inp.onchange = () => { const r = cfg[same ? 1 : cur][Number(inp.dataset.i)]; r[inp.dataset.k] = inp.value; }));
+      m.querySelectorAll('[data-del]').forEach((b) => (b.onclick = () => { cfg[same ? 1 : cur].splice(Number(b.dataset.del), 1); draw(); }));
+      m.querySelector('#bl-add').onclick = () => { const r = cfg[same ? 1 : cur], last = r[r.length - 1], hm = (t, add) => { const [h, mi] = t.split(':').map(Number), x = h * 60 + mi + add; return `${String(Math.floor(x / 60) % 24).padStart(2, '0')}:${String(x % 60).padStart(2, '0')}`; }; r.push(last ? { s: hm(last.e, 10), e: hm(last.e, 60) } : { s: '09:00', e: '09:50' }); draw(); };
+      m.querySelector('#bl-def').onclick = () => { days.forEach((d) => { cfg[d] = Object.entries(S().defBells(d)).map(([p, v]) => ({ p: Number(p), s: v[0], e: v[1] })); }); same = false; draw(); };
+      m.querySelector('#bl-save').onclick = () => run(async () => {
+        const out = {}; for (const d of days) { const r = cfg[same ? 1 : d]; if (r.some((x) => !/^\d\d:\d\d$/.test(x.s) || !/^\d\d:\d\d$/.test(x.e) || x.s >= x.e)) throw Object.assign(new Error(`${S().DOW[d]}요일: 시작이 끝보다 빨라야 해요.`), { user: true }); if (r.some((x, i) => i && x.s < r[i - 1].e)) throw Object.assign(new Error(`${S().DOW[d]}요일: 교시가 겹쳐요.`), { user: true }); out[d] = Object.fromEntries(r.map((x, i) => [i + 1, [x.s, x.e]])); }
+        await S().setBells(out); m.remove(); DS.UI.toast('🕘 교시 시각을 저장했어요', 2400); if (done) done();
+      });
+    };
     document.body.appendChild(m); draw();
   }
 
@@ -160,5 +192,5 @@ DS.Att = (function () {
     const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + rows.map((r) => r.map(q).join(',')).join('\r\n')], { type: 'text/csv;charset=utf-8' }));
     a.download = `${kind === 'att' ? '출석부' : '수업일지'}_${cls}_${S().kst(DS.Net.now()).date}.csv`; document.body.appendChild(a); a.click(); a.remove();
   }
-  return { today, editor, enter };
+  return { today, editor, bells, enter };
 })();

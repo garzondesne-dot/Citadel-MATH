@@ -3564,3 +3564,9 @@ body.trial-teach .trial-tch .tch-pc { color: #c9b896; font-size: 11px; }
 .cr-hintp { margin: 6px 0; padding: 8px 10px; border-radius: 10px; background: #fff8e6; border: 1.5px solid #e2c27a; color: #2b1d0e; } .cr-hintp p { margin: 4px 0; font-size: 14px; }
 
 .v4f .item .hint-btn { display: none; } /* 💡 C: 그림 힌트는 아래 칸 💡 단추로 (펼친 그림은 문제 칸 안에) */
+
+/* 📅 2026-11-13 밤: 시간표 켰을 때 맨 위 한 줄 추천 · 🕘 교시 시각 입력 */
+.td-one { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 8px 10px; margin: 0 0 6px; border-radius: 10px; background: #2a2218; border: 2px solid #f5b84a; color: #f5e6c8; } .td-one > span { flex: 1 1 auto; min-width: 0; }
+.td-all > summary { cursor: pointer; font-weight: 700; margin: 4px 0; }
+.sc-bells .bl-row { display: flex; align-items: center; gap: 6px; margin: 4px 0; } .sc-bells .bl-row b { width: 52px; flex: none; white-space: nowrap; font-size: 14px; } .sc-bells input[type=time] { min-width: 0; flex: 1 1 0; } .sc-bells input[type=time] { font: inherit; padding: 4px; }
+.sc-bells .bl-tabs { display: flex; gap: 4px; margin: 6px 0; } .sc-bells .bl-same { display: block; margin: 6px 0; }

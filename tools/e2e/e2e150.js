@@ -19,6 +19,22 @@ const OUT = process.argv[2] || '.', U = `http://localhost:${process.env.PORT || 
   const saved = await T.evaluate(() => DS.Net.get('sched/use'));
   ok(v.on && saved === true && v.btns && v.sched, '켜면 sched/use = true · 🕘 교시 시각 · 🗓 시간표 단추 보임');
   await T.screenshot({ path: `${OUT}/150-on.png`, fullPage: true });
+  // 🕘 교시 시각 입력 → 저장
+  await T.evaluate(() => document.querySelector('#t-bells').click()); await T.waitForTimeout(800);
+  const bl = await T.evaluate(() => ({ rows: document.querySelectorAll('.sc-bells .bl-row').length, s1: (document.querySelector('.sc-bells input[data-i="0"][data-k="s"]') || {}).value }));
+  ok(bl.rows >= 5 && bl.s1 === '09:00', `🕘 교시 시각 = 처음 값(우리 학교 일과표) ${bl.rows}교시 · 1교시 ${bl.s1}`);
+  await T.screenshot({ path: `${OUT}/150-bells.png` });
+  await T.evaluate(() => { const i = document.querySelector('.sc-bells input[data-i="0"][data-k="s"]'); i.value = '08:50'; i.dispatchEvent(new Event('change')); document.querySelector('#bl-save').click(); }); await T.waitForTimeout(1000);
+  const sb = await T.evaluate(async () => (await DS.Net.get('sched/bells')) || null);
+  ok(sb && sb[1] && sb[1][1][0] === '08:50' && sb[5] && sb[5][1][0] === '09:00', `저장 = sched/bells (월 1교시 08:50 · 금은 그대로 09:00 · 요일마다)`);
+  ok(await T.evaluate(() => DS.Sched.periodEnd(Date.parse('2026-11-16T08:55:00+09:00')) === Date.parse('2026-11-16T09:50:00+09:00')), '⏳ 보스 타임바 = 입력한 교시 끝');
+  // 🗓 시간표 칸 · 맨 위 한 줄 추천
+  await T.evaluate(() => document.querySelector('#t-week').click()); await T.waitForTimeout(1500); await T.screenshot({ path: `${OUT}/150-week.png` });
+  await T.evaluate(() => { const x = document.querySelector('.sc-edit [data-x]'); if (x) x.click(); }); await T.waitForTimeout(600);
+  await T.evaluate(async () => { DS.Net.now = () => Date.parse('2026-11-16T10:05:00+09:00'); await DS.Net.set('sched/week', { '1-2': '1-3' }); await DS.Att.today(document.querySelector('#t-today')); }); await T.waitForTimeout(1200);
+  const one = await T.evaluate(() => (document.querySelector('#t-today .td-one') || {}).textContent || '');
+  ok(/지금 2교시/.test(one) && /1-3반/.test(one) && /수업 열기/.test(one) && /바꾸기/.test(one), `맨 위 한 줄 = 「${one.trim()}」 (저절로 열리지 않음 · 누르면 열림)`);
+  await T.screenshot({ path: `${OUT}/150-one.png` });
   await T.evaluate(() => { const c = document.querySelector('#t-sched-use'); c.checked = false; c.dispatchEvent(new Event('change')); }); await T.waitForTimeout(1200);
   ok(await T.evaluate(async () => !DS.Sched.isOn() && (await DS.Net.get('sched/use')) == null), '다시 끄면 기본(끔)으로');
   console.log(log.join('\n')); console.log(bad ? `❌ ${bad}` : '✅ 통과'); console.log('errors', errs.length ? errs : 'none'); await b.close(); if (bad || errs.length) process.exit(1);

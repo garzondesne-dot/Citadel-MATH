@@ -21,15 +21,23 @@ DS.Sched = (function () {
   const ck = (c) => String(c).replace(/[.#$/[\]]/g, '_');
   const kst = (ms) => { const d = new Date(ms + KST); return { date: d.toISOString().slice(0, 10), dow: d.getUTCDay(), hm: d.toISOString().slice(11, 16) }; };
   const at = (date, hm) => Date.parse(`${date}T${hm}:00+09:00`);
-  const times = (date, p) => (BELLS[p] ? [at(date, BELLS[p][0]), at(date, BELLS[p][1]) + AFTER] : null);
-  const skipped = (d, p) => SKIP.includes(`${d}-${p}`);
-  const usable = (d, p) => (PERIODS[d] || []).includes(p) && !skipped(d, p);
+  // 🕘 교시 시각 입력 (2026-11-13 밤 선생님 「시간표 기능을 시간도 입력 가능하게」): sched/bells = { 요일 1~5: { 교시: [시작, 끝] } } · 없으면 위 우리 학교 일과표(처음 값)
+  //   선생님이 넣은 시각이 있으면 자율 · 동아리 칸(SKIP)도 선생님 시간표대로 (빈칸으로 두면 수업 없음)
+  let bellsCfg = null;
+  const dowOf = (date) => new Date(`${date}T12:00:00+09:00`).getUTCDay();
+  const defBells = (d) => Object.fromEntries((PERIODS[d] || []).map((p) => [p, BELLS[p]]));
+  const bellsOf = (d) => { const c = bellsCfg && bellsCfg[d]; if (!c) return defBells(d); const o = {}; Object.entries(c).forEach(([p, v]) => { if (Array.isArray(v) && v.length === 2 && /^\d\d:\d\d$/.test(v[0]) && /^\d\d:\d\d$/.test(v[1])) o[Number(p)] = v; }); return o; };
+  const periodsOf = (d) => Object.keys(bellsOf(d)).map(Number).sort((a, b) => a - b);
+  const bell = (d, p) => bellsOf(d)[p] || null;
+  const times = (date, p) => { const b = bell(dowOf(date), Number(p)); return b ? [at(date, b[0]), at(date, b[1]) + AFTER] : null; };
+  const skipped = (d, p) => !bellsCfg && SKIP.includes(`${d}-${p}`);
+  const usable = (d, p) => periodsOf(d).includes(p) && !skipped(d, p);
   const keyOf = (date, p) => `${date}_${p}`;
   // ⏳ 보스 타임바 (2026-11-05): 그 교시가 끝나는 시각 = 던전 문이 닫히는 시각. 시간표 수업은 그 교시 · 바로 연 수업은 지금 교시(시작 10분 전부터 그 교시로) · 교시 밖이면 null (제한 없음)
   function periodEnd(now, p) {
-    const k = kst(now);
-    if (p && BELLS[p]) return at(k.date, BELLS[p][1]);
-    for (const q of Object.keys(BELLS).map(Number)) { const [s, e] = BELLS[q]; if (now >= at(k.date, s) - 10 * 60e3 && now < at(k.date, e)) return at(k.date, e); }
+    const k = kst(now), B = bellsOf(k.dow);
+    if (p && (B[p] || BELLS[p])) return at(k.date, (B[p] || BELLS[p])[1]);
+    for (const q of Object.keys(B).map(Number)) { const [s, e] = B[q]; if (now >= at(k.date, s) - 10 * 60e3 && now < at(k.date, e)) return at(k.date, e); }
     return null;
   }
   const label = (s) => { const k = kst(s.from); return `${k.date.slice(5).replace('-', '/')}(${DOW[k.dow]}) ${s.p}교시`; };
@@ -53,7 +61,7 @@ DS.Sched = (function () {
     const out = [];
     for (let i = 0; i < AHEAD; i++) {
       const { date, dow } = kst(now + i * DAY);
-      (PERIODS[dow] || []).forEach((p) => {
+      periodsOf(dow).forEach((p) => {
         const cls = week[`${dow}-${p}`]; if (!cls || !usable(dow, p)) return;
         const key = keyOf(date, p); if (off[key]) return;
         const [from, to] = times(date, p); if (to <= now) return;
@@ -134,7 +142,7 @@ DS.Sched = (function () {
     const out = [], seen = new Set();
     for (let i = 0; i < days; i++) {
       const { date, dow } = kst(now + i * DAY);
-      (PERIODS[dow] || []).forEach((p) => {
+      periodsOf(dow).forEach((p) => {
         const key = keyOf(date, p), ex = extra[key], cls = ex ? ex.cls : week[`${dow}-${p}`];
         if (!cls || (!ex && (!usable(dow, p) || off[key]))) return;
         const [from, to] = times(date, p); if (to <= now) return;
@@ -279,10 +287,12 @@ DS.Sched = (function () {
   // 📅 ⚙ 「시간표 쓰기」 (2026-11-13 밤 선생님 「당분간 시간표기능은 끄고 … 수동 기능을 기본으로」): sched/use = true 일 때만 시간표 · 오늘 수업 · 「다음 차시」 추천 · 교시 끝 타임바
   //   끔(기본) = 반 → 차시 → 「▶ 수업 열기」 수동 · 타임바 = 수업 시작부터 50분(학교판은 제한 없음 그대로) · 켜도 수업 방은 저절로 열리지 않음(추천만)
   let useOn = false;
-  async function load() { if (!(DS.Account && (await DS.Account.isAdmin().catch(() => false)))) { useOn = false; return false; } useOn = (await N().get('sched/use').catch(() => null)) === true; return useOn; }
+  async function load() { if (!(DS.Account && (await DS.Account.isAdmin().catch(() => false)))) { useOn = false; return false; } const [u, b] = await Promise.all([N().get('sched/use').catch(() => null), N().get('sched/bells').catch(() => null)]); useOn = u === true; bellsCfg = b && typeof b === 'object' ? b : null; return useOn; }
+  async function setBells(cfg) { await N().set('sched/bells', cfg || null); bellsCfg = cfg || null; }
+  const custom = () => !!bellsCfg;
   const isOn = () => useOn === true;
   async function setUse(on) { await N().set('sched/use', on ? true : null); useOn = !!on; return useOn; }
-  const api = { _on: (v) => { useOn = !!v; }, load, isOn, setUse, plan, openSlot, pointer, advance, setNext, addExtra, removeExtra, slotsAhead, getProg, syncKeys, periodEnd, BELLS, PERIODS, SKIP, DOW, AFTER, LATE, ST, CYCLE, kst, times, usable, skipped, upcoming, nextLesson, ensure, active, today, skipSlot, relesson, logs, sheet, judge, setAtt, setMemo, setHide, when, label, getWeek, effective, comci, ck };
+  const api = { _on: (v) => { useOn = !!v; }, _bells: (v) => { bellsCfg = v || null; }, bellsOf, periodsOf, bell, defBells, setBells, custom, dowOf, load, isOn, setUse, plan, openSlot, pointer, advance, setNext, addExtra, removeExtra, slotsAhead, getProg, syncKeys, periodEnd, BELLS, PERIODS, SKIP, DOW, AFTER, LATE, ST, CYCLE, kst, times, usable, skipped, upcoming, nextLesson, ensure, active, today, skipSlot, relesson, logs, sheet, judge, setAtt, setMemo, setHide, when, label, getWeek, effective, comci, ck };
   // 📅 끔 = 일과표에 묶인 길을 막음 (예전 학교판 「시간표 숨김」과 같은 길 · 이제 우리 · 학교판 모두 ⚙ 스위치) — 보스 타임바(교시 끝) 없음 · 예약 없음 · 진도 포인터 없음
   const OFFV = { periodEnd: () => null, active: () => null, pointer: async () => null, syncKeys: async () => 0, advance: async () => null, ensure: async () => null, plan: async () => [], openSlot: async () => null };
   Object.keys(OFFV).forEach((k) => { const on = api[k], off = OFFV[k]; api[k] = (...a) => (isOn() ? on(...a) : off(...a)); });
