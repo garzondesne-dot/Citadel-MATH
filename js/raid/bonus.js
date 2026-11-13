@@ -16,6 +16,7 @@ DS.Bonus = (function () {
   const N = () => DS.Net;
   const ck = (c) => String(c).replace(/[.#$/[\]]/g, '_');
   const UNLOCK = [1, 2, 4, 6, 8, 10];             // 인장 개수 → 화려한 이펙트 FANCY[i]
+  const SP = () => DS.Student.parts; // 🪞 수업 레이드 전투 화면 부품 (HP 막대 · ❤ 재도전)
   const TRIES = (DS.Raid ? DS.Raid.RETRIES : 3) + 1; // 레이드와 같은 기회 수
   const BOSS_PCT = 60;
   const PHOTO_READY = () => !!(DS.Photo && DS.Photo.ready && DS.Photo.ready()); // 📷 서술형 사진 분석 (v0.9.10) — 생기기 전까지 서술형 방은 잠금 · 보스 60% 계산에서도 뺌 (2026-11-05 사용자)                             // 👑 보스 방: 열린 방의 60% 처치 (2026-11-05 사용자 규칙)
@@ -343,16 +344,16 @@ DS.Bonus = (function () {
     const vidNow = () => { if (!L.eval) return vid0; const i = solved.findIndex((x) => !x); return i >= 0 && cur[i] ? cur[i].video || null : null; };
     let drawN = 0;
     const draw = (cls = '', msg = '') => {
-      const pips = Array.from({ length: TRIES }, (_, i) => `<i class="${i < Math.floor(left) ? 'on' : i < left ? 'on half' : ''}"></i>`).join(''); // ⚔ 소레이드 = 반 칸
-      const segs = solved.map((s) => `<i class="${s ? 'gone' : ''}"></i>`).join('');
+      // 🪞 2026-11-13 선생님 「허수아비 · 성채 체력 표시 · 재도전 기회 표시가 옛날 거」: 수업 레이드와 같은 부품 (위 HP 막대 · 아래 ❤ 재도전 줄 · js/raid/student.js parts) · ⚔ 소레이드 = 반 칸
       const done = solved.every(Boolean);
       const cbg = castle ? ((DS.ASSETS.citadel || {})[(L.rooms.find((r) => r.id === mid) || {}).boss ? 'boss' : 'room']) : '';
       el.innerHTML = `<div class="scene enc ${cbg ? `cs-bg${cbg === (DS.ASSETS.citadel || {}).boss ? ' cs-bossroom' : ''}` : `bg-scene th-${L.theme || ''}`} ${cls}"${cbg ? ` style="background-image:url('${DS.ASSETS.base}${cbg}')"` : ''}><div class="scene-bar"><div><b>⚔ ${esc(mon.title)}</b><br><span class="muted small">${castle ? `🏰 성채던전 ${L.floor || 1}층` : `🎯 복습! ${DS.Lessons.noText(L.no)}차시`} · ${chainRoom ? `⚔ 소레이드 · 졸개 ${n - 1} + 👑 대장` : `소문제 ${n}개를 모두 맞히면 처치`}</span></div><button class="btn small" id="bf-x">✕</button></div>
-          <div class="enc-hero"><div class="enc-tries" title="남은 도전 기회">${pips}</div>${DS.Art.hero(me.hero || 0, done || cls ? 'attack' : 'think', done ? 'pairhop' : cls === 'miss' ? 'slump' : 'huff')}<i class="shadow"></i></div>
-          <div class="enc-mon">${DS.Art.monster(mon.sprite, done ? 'down' : 'idle', done ? '' : 'float')}<div class="segs">${segs}</div>${done || !castle ? '' : '<div class="atk-gauge" title="몬스터 공격 게이지"><i></i></div>'}</div></div>
+          ${SP().hpBox(n - solved.filter(Boolean).length, n, done || !castle ? '' : SP().GAUGE)}
+          <div class="enc-hero">${DS.Art.hero(me.hero || 0, done || cls ? 'attack' : 'think', done ? 'pairhop' : cls === 'miss' ? 'slump' : 'huff')}<i class="shadow"></i></div>
+          <div class="enc-mon">${DS.Art.monster(mon.sprite, done ? 'down' : 'idle', done ? '' : 'float')}</div></div>
         <div class="bf-body">${conceptLine(L, mid, prep)}${photoRoom && !mathOpen && !all() ? `<p class="bf-gift">${MATH_GIFT}</p>` : ''}${msg}${mon.note ? `<p class="muted small">💡 ${esc(mon.note)}</p>` : ''}
           <div class="row">${img ? '<button class="btn small" id="bf-sheet">📄 학습지 보기</button>' : ''}${(() => { const v = vidNow(); if (!v || !DS.Video.ok(v)) return ''; if (L.eval && !wrongSeen) return '<span class="muted small">🔒🎬 풀이 영상은 한 번 틀리면 열려요 — 먼저 스스로!</span>'; return `<button class="btn small" id="bf-vid">🎬 ${L.eval ? '풀이 영상 (예제)' : '설명 보기'}</button>`; })()}</div>
-          <div class="row" id="bf-act"></div></div>`;
+          <div class="row" id="bf-act"></div></div>${SP().dock({ slots: TRIES, left, healed: 0 }, '').replace('class="st-dock"', 'class="st-dock bf-dock"')}`;
       el.querySelector('#bf-x').onclick = () => { el.remove(); DS.Quiz.close(); render(); }; // ✕ = 열린 문제 창도 닫음
       bindConcept(el, L);
       // 공격 · 빗나감 동작은 한 번만 → 끝나면 생각하는 자세로 (2026-11-06 사용자: 공격 모션이 계속 남음)

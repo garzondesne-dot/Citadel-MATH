@@ -3471,3 +3471,7 @@ body:has(.modal:not([hidden])) #ver-tag { display: none; }
 #screen-student.st-battle #st-body > .panel > *:not(.scene):not(.paper):not(.cr-chips):not(.st-dock) { margin-left: 16px !important; margin-right: 16px !important; }
 #screen-student.st-battle .st-dock { left: 0 !important; right: 0 !important; margin: 0 !important; border-radius: 0 !important; }
 body:has(#screen-student.st-battle.active) #snd-tab { left: auto; right: 8px; top: 10px; border-left: 1px solid #776553; border-radius: 8px; }
+/* 🪞 2026-11-13 허수아비 · 성채 전투 = 수업 레이드와 같은 부품: 위 HP 막대(.sc-hp) · 아래 ❤ 재도전 줄(.st-dock) — 덮개 안이라 맨 아래에 붙임 */
+.bn-fight .scene .sc-hp { top: 50px; }
+.bn-fight .st-dock.bf-dock { position: sticky; margin-top: auto; bottom: 0; }
+body:has(#test-bar) .bn-fight .st-dock.bf-dock { bottom: 0; }
