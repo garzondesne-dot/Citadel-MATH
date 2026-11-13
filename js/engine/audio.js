@@ -7,6 +7,8 @@ DS.Sound = (function () {
   const LS = (k, v) => { try { if (v === undefined) return localStorage.getItem(k) === '1'; localStorage.setItem(k, v ? '1' : '0'); } catch (e) { /* 저장 못 하면 이번만 */ } return false; };
   let ctx = null, master = null, noiseBuf = null, sfxOff = typeof localStorage !== 'undefined' && LS('ds-sfx-off'), bgmOff = typeof localStorage !== 'undefined' && LS('ds-bgm-off');
   // 🔉 소리 크기 (2026-11-09 #24 1-4반: 시작하자마자 너무 큼) · 작게 / 보통 · 기본 = 보통(예전 0.45 → 0.28)
+  // 🔉 2026-11-13 선생님 「전투 중에 시연 누르거나 문제 누르면 소리 음소거나 10%로」: duck(이유, 켬) = 효과음 · 배경음 모두 10% (이유가 하나라도 있으면)
+  const DUCK = {}, duckK = () => (Object.keys(DUCK).length ? 0.1 : 1);
   const VOL = { low: 0.12, mid: 0.28 }; let vol = (() => { try { return localStorage.getItem('ds-vol') === 'low' ? 'low' : 'mid'; } catch (e) { return 'mid'; } })();
   const listeners = [];
   const changed = () => listeners.forEach((f) => { try { f({ sfx: !sfxOff, bgm: !bgmOff }); } catch (e) { /* 무시 */ } });
@@ -17,7 +19,7 @@ DS.Sound = (function () {
       if (!AC) return null;
       ctx = new AC();
       master = ctx.createGain();
-      master.gain.value = VOL[vol];
+      master.gain.value = VOL[vol] * duckK();
       master.connect(ctx.destination);
     }
     if (ctx.state === 'suspended') ctx.resume();
@@ -91,7 +93,7 @@ DS.Sound = (function () {
   const bgmWant = () => { const k = BGM.tv !== null ? BGM.tv : BGM.phone; return bgmOff || (typeof document !== 'undefined' && document.hidden) || Object.keys(BGM.hold).length ? null : k; };
   function bgmEl2(k) { const c = bgmCfg(), f = c && c.files && c.files[k]; if (!f || typeof Audio === 'undefined') return null; const a = new Audio(`${c.dir}${f}`); a.preload = 'auto'; a.volume = 0; a._k = k; return a; }
   function bgmFade(a, to, ms, done) { if (!a) return; const from = a.volume, t0 = Date.now(); const st = () => { const k = Math.min(1, (Date.now() - t0) / ms); try { a.volume = Math.max(0, Math.min(1, from + (to - from) * k)); } catch (e) { /* 무시 */ } if (k < 1) a._fade = setTimeout(st, 40); else if (done) done(); }; clearTimeout(a._fade); st(); }
-  const bgmVol = () => bgmMax() * bgmScale;
+  const bgmVol = () => bgmMax() * bgmScale * duckK();
   function bgmStart(k) {
     const a = bgmEl2(k); if (!a) return null; const once = (bgmCfg().once || []).includes(k);
     a.addEventListener('timeupdate', () => { if (once || bgmCur !== a || a._x || !a.duration) return; if (a.duration - a.currentTime < 0.3) { a._x = true; const b = bgmStart(k); if (b) { bgmCur = b; bgmFade(b, bgmVol(), 300); } bgmFade(a, 0, 300, () => a.pause()); } });
@@ -111,6 +113,7 @@ DS.Sound = (function () {
     if (BGM[where] !== want) { BGM[where] = want; if (sc !== bgmScaleT) { bgmScaleT = sc; bgmScale = sc; } bgmApply(); }
     if (sc !== bgmScaleT) { bgmScaleT = sc; clearInterval(bgmTick); bgmTick = setInterval(() => { bgmScale += (bgmScaleT - bgmScale) * 0.15; if (Math.abs(bgmScaleT - bgmScale) < 0.01) { bgmScale = bgmScaleT; clearInterval(bgmTick); } if (bgmCur && !bgmCur._fade) try { bgmCur.volume = bgmVol(); } catch (e) { /* 무시 */ } }, 80); } // 체력이 바뀌면 부드럽게
   }
+  const duck = (why, on) => { const was = duckK(); if (on) DUCK[why] = 1; else delete DUCK[why]; if (was === duckK()) return; if (master && ctx) { try { master.gain.setTargetAtTime(VOL[vol] * duckK(), ctx.currentTime, 0.08); } catch (e) { master.gain.value = VOL[vol] * duckK(); } } if (bgmCur) bgmFade(bgmCur, bgmVol(), 250); };
   const bgmHold = (why, on) => { if (on) BGM.hold[why] = 1; else delete BGM.hold[why]; bgmApply(); }; // 🎬 영상 · 📄 학습지 창
   const bgmNow = () => ({ phone: BGM.phone, tv: BGM.tv, playing: bgmCur ? bgmCur._k : null, hold: Object.keys(BGM.hold), scale: +bgmScale.toFixed(2) });
   // 첫 터치 때 소리 장치를 깨우고 녹음 소리를 미리 받음 (0.5MB 안쪽 · 배경음은 성채 · 허수아비에서만)
@@ -132,7 +135,7 @@ DS.Sound = (function () {
     // 🔇 효과음 · 배경음 따로 (on = 켜기) · keep = false 면 이 기기에 저장 안 함 (교사 리모컨이 종합실을 바꿀 때)
     setSfx(on, keep = true) { sfxOff = !on; if (keep) LS('ds-sfx-off', sfxOff); changed(); },
     setBgm(on, keep = true) { bgmOff = !on; if (keep) LS('ds-bgm-off', bgmOff); bgmApply(); changed(); },
-    setVol(v, keep = true) { vol = v === 'low' ? 'low' : 'mid'; if (master) master.gain.value = VOL[vol]; if (bgmCur) bgmFade(bgmCur, bgmVol(), 200); if (keep) { try { localStorage.setItem('ds-vol', vol); } catch (e) { /* 무시 */ } } changed(); },
+    setVol(v, keep = true) { vol = v === 'low' ? 'low' : 'mid'; if (master) master.gain.value = VOL[vol] * duckK(); if (bgmCur) bgmFade(bgmCur, bgmVol(), 200); if (keep) { try { localStorage.setItem('ds-vol', vol); } catch (e) { /* 무시 */ } } changed(); },
     get vol() { return vol; },
     // 🔇 / 작게 / 보통 한 번에 (종합실 구석 · 리모컨)
     setLevel(l, keep = true) { if (l === 'off') { this.setSfx(false, keep); this.setBgm(false, keep); return; } this.setVol(l, keep); this.setSfx(true, keep); this.setBgm(true, keep); },
@@ -140,7 +143,7 @@ DS.Sound = (function () {
     get sfxOn() { return !sfxOff; },
     get bgmOn() { return !bgmOff; },
     onChange(f) { listeners.push(f); },
-    sample, preload, bgm, bgmHold, bgmNow,
+    sample, preload, bgm, bgmHold, bgmNow, duck, get ducked() { return duckK() < 1; },
     // ⚔ 공격 소리 (attack.js): 휘두름 · 발사 · 맞음(이펙트 계열) · 막힘 · 처치
     swing() { sample('swing', 0.6, () => noise({ dur: 0.25, vol: 0.25, freq: 600, sweepTo: 3500, q: 0.8 })); },
     launch() { sample('launch', 0.6, () => noise({ dur: 0.2, vol: 0.2, freq: 1500, sweepTo: 5000, q: 1 })); },

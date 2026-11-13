@@ -207,6 +207,7 @@ DS.Hall = (function () {
     else if (Raid().isEnd(L, R) && Raid().bossHp(L, R).won) k = 'win';
     S.bgm(k, 'tv', scale != null ? { scale } : {});
     if (S.bgmHold) S.bgmHold('hall', !!(st && (Raid().videoOn(R, st.id) || Raid().sheetOn(R)))); // 🎬 영상 · 📄 학습지 창 = 멈춤
+    hallDuck();
   }
   function render() {
     hallBgm();
@@ -702,10 +703,10 @@ DS.Hall = (function () {
     if (!step || !['monster', 'boss'].includes(step.kind)) return;
     const boss = step.kind === 'boss', seed = `demo|${code}|${Date.now()}`;
     // 🪞 #81 (2026-11-11 선생님 「시연 = 학생과 똑같이」): 학생 폰과 같은 함수 — 소레이드 = L.chainItems (졸개 → 대장 · 근거 줄) · 형성평가 다시 = L.boss.make (bossItem 과 같음) · 일반 = L.items
-    if (!boss && Raid().isChain(L, R, step.id)) { demo = { step, attempt, chain: true, boss: false, items: L.chainItems(step.id, seed, attempt), stage: 0, says: [], why: -1, wrong: false, given: [null], shown: false }; demo.hp = demo.items.length; return demoDraw(); }
+    if (!boss && Raid().isChain(L, R, step.id)) { demo = { step, attempt, chain: true, boss: false, items: L.chainItems(step.id, seed, attempt), stage: 0, says: [], why: -1, wrong: false, given: [null], shown: false }; demo.hp = demo.items.length; demoDraw(); hallDuck(); return; }
     const nb = (L.boss.sets[1] || []).length, items = boss ? (attempt ? Array.from({ length: nb }, (_, i) => (L.boss.make ? L.boss.make(i, attempt, DS.Rng(`${seed}|boss|${i}|${attempt}`)) : (L.boss.sets[2] || L.boss.sets[1])[i])) : L.boss.sets[1]) : L.items(step.id, seed, attempt);
     demo = { step, attempt, boss, hp: boss ? L.boss.hpItems || items.length : items.length, items, given: items.map((q) => (q.type === 'multi' || q.type === 'subsets' ? [] : q.type === 'text' ? '' : null)), marks: null, shown: false };
-    demoDraw();
+    demoDraw(); hallDuck();
   }
   function demoHero(on) {
     const raid = document.getElementById('raid'); let t = document.getElementById('fh-teach');
@@ -713,7 +714,9 @@ DS.Hall = (function () {
     if (t) return;
     raid.insertAdjacentHTML('beforeend', `<div class="fh2 teach" id="fh-teach" style="left:46%;top:60%;z-index:20"><span class="dtag">🎮 시연 중</span><span class="fh-name">👩‍🏫 선생님</span><div>${DS.Art.hero(DS.Art.teacherHero(R), 'idle')}</div><i class="shadow"></i></div>`);
   }
-  function demoClose() { const ov = document.getElementById('h-demo-ov'); if (ov) ov.remove(); demo = null; demoHero(false); }
+  // 🔉 2026-11-13 선생님 「전투 중에 시연 누르거나 문제 누르면 소리 음소거나 10%로」: 몬스터 · 보스 단계에서 🎮 시연 창 · 📄 문제 창이 열려 있으면 종합실 소리 10% → 닫으면 원래대로
+  function hallDuck() { const S = Snd(), st = L && R ? Raid().stepOf(L, R) : null, fight = !!st && ['monster', 'boss'].includes(st.kind) && !Raid().isClosed(R); if (S && S.duck) S.duck('hall-demo', fight && (!!demo || Raid().sheetOn(R))); }
+  function demoClose() { const ov = document.getElementById('h-demo-ov'); if (ov) ov.remove(); demo = null; demoHero(false); hallDuck(); }
   const filled = (q, g) => (q.type === 'multi' || q.type === 'subsets' ? g.length > 0 : q.type === 'text' ? String(g || '').trim() !== '' : g != null);
   function ansText(q) { // 💡 정답 펼치기에 쓰는 정답 글
     const SG = DS.SetGen, P = DS.UI.pretty;
