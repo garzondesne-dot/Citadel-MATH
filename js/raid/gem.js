@@ -77,7 +77,9 @@ DS.Gem = (function () {
   const auraCls = (lv) => { const n = Math.max(0, Math.min(10, Math.floor(Number(lv) || 0))); return n ? ` aura aura-${n}` : ''; };
   const AURA_NAMES = ['', '은은한 흰빛', '새싹 초록', '맑은 하늘', '깊은 바다', '보랏빛 신비', '벚꽃 분홍', '황금 태양', '진홍 불꽃', '별빛 은하', '성스러운 후광'];
   const enhTier = (lv) => (lv >= 10 ? 4 : lv >= 7 ? 3 : lv >= 5 ? 2 : lv >= 3 ? 1 : 0); // 보이는 빛: 은빛(+3) · 금빛(+5) · 오라(+7) · 무지개(+10)
-  async function mine(m) { return (m && m.c != null && m.n && !tst(m) ? await N().get(path(m)).catch(() => null) : null) || {}; }
+  const TW0 = () => ({ total: 9999, scroll: 30, enh: 0, buy: {} }); // 👩‍🏫 교사 지갑 처음 값
+  const teacherWallet = () => { const t = DS.Art && DS.Art.teacherCfg ? DS.Art.teacherCfg().tw : null; return t && typeof t === 'object' ? { ...TW0(), ...t, buy: { ...(t.buy || {}) } } : TW0(); };
+  async function mine(m) { if (m && m.teacher) return teacherWallet(); return (m && m.c != null && m.n && !tst(m) ? await N().get(path(m)).catch(() => null) : null) || {}; }
   // 받기: n 개 · key 한 번만 (opt.upsert = 같은 key 는 늘어난 만큼만) · opt.free = 하루 한도 밖 → 실제로 받은 수
   async function add(m, n, key, why, opt = {}) {
     n = Math.max(0, Math.floor(Number(n) || 0)); if (!m || m.c == null || !m.n || tst(m) || !n || !key) return 0;
@@ -237,5 +239,5 @@ DS.Gem = (function () {
     await N().update(path(m), { total: (Number(d.total) || 0) + back, [`log/refund_${key}`]: { g: back, at: N().TS, why: '📚 도감 완성 → 💎 돌려받음', gift: true } });
     return back;
   }
-  return { pop, dayLeft, showLeft, capAlert, auraCls, AURA_NAMES, PHOTO_HEROES, photoPassed, SCROLL_NEED, scrollOf, ENH, ENH_MAX, GREAT, enhTier, addScroll, enhance, watchGifts, giftList, chest, feathers, rareOf, convert, CONV, cardRefund, CARD_HEROES, G, SHOP, DAY_CAP, price, mine, add, gift, giftsSince, addDaily, medal, buy, sell, refundOf, REFUND, owns, itemKey, streak, today };
+  return { teacherWallet, TW0, pop, dayLeft, showLeft, capAlert, auraCls, AURA_NAMES, PHOTO_HEROES, photoPassed, SCROLL_NEED, scrollOf, ENH, ENH_MAX, GREAT, enhTier, addScroll, enhance, watchGifts, giftList, chest, feathers, rareOf, convert, CONV, cardRefund, CARD_HEROES, G, SHOP, DAY_CAP, price, mine, add, gift, giftsSince, addDaily, medal, buy, sell, refundOf, REFUND, owns, itemKey, streak, today };
 })();

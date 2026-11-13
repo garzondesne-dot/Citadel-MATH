@@ -508,7 +508,10 @@ DS.Camp = (function () {
   async function settings(opt = {}) {
     if (opt.me && !opt.teacher) me = Object.assign({}, me || {}, opt.me); // 🏰 던전 안에서 열 때 (2026-11-06): 수업 화면의 내 정보
     const T = !!opt.teacher, tl = T ? DS.Art.teacherLook() : null;
-    let L = T ? { heroes: Object.keys(DS.ASSETS.heroesV2.list).map((i) => ({ id: Number(i), open: true })), fx: DS.FX.KINDS.map((k) => ({ id: k, open: true })), seals: 0 } : await DS.Account.looks(me);
+    // 👩‍🏫 2026-11-13 밤 (DECISIONS b5d2582 · B안): 교사 = 용사 모두 열림 · 스킬 · 강화는 학생과 같은 해금 길(교사 지갑 💎 9,999 · 📜 30 · gcfg/teacher/tw) · 「↺ 처음으로 되돌리기」
+    const TM = { teacher: true, c: '_t', n: 1 };
+    if (T && DS.Art.loadTeacherCfg) await DS.Art.loadTeacherCfg().catch(() => null);
+    let L = T ? Object.assign(await DS.Account.looks(TM), { heroes: Object.keys(DS.ASSETS.heroesV2.list).map((i) => ({ id: Number(i), open: true })) }) : await DS.Account.looks(me);
     // 2026-11-06 설정 v2: 탭 3개 (🧙 용사 · 💎 결정석 · 🏅 호칭) · 결정석 = 용사마다 1칸 (동시 사용 · 빼기 = 회수) · 친화 ★ = 공명
     let hero = T ? tl.hero : me.hero, title = T ? tl.title : me.title || 'none';
     const sock = Object.assign({}, (T ? tl.socket : me.socket) || {});
@@ -524,7 +527,7 @@ DS.Camp = (function () {
     // 🧙 #98 내 용사 창 새 구조 (2026-11-11 선생님 「좋아 이대로 진행」 · 시안 v5 · DECISIONS 「🧙 내 용사 창 = 맨 위 내 용사 · 🔨 강화 탭 먼저 · ⚔ 스킬 저장/취소」)
     //   맨 위 = 지금 출전 용사(도트 · 강화 오라 · 이름표) → 누르면 용사 고르기 창 · 탭 🔨 강화(처음) · ⚔ 스킬 · 🏅 기록
     //   용사 사기 · 출전 바꾸기 · 강화 · 스킬 해금 · 스킬 끼우기 · 호칭 = 「고름」(💎 는 화면에서만 빠져 보임) → 아래 막대 [↺ 되돌리기] [💾 저장] · 저장 = 서버에 한 번에(반쯤 저장 없음) · 🌟 대성공 = 저장할 때
-    if (!T && !['enh', 'gem', 'ttl'].includes(tab)) tab = 'enh'; if (T && tab === 'enh') tab = 'gem'; if (T && !['gem', 'ttl'].includes(tab)) tab = 'gem';
+    if (!['enh', 'gem', 'ttl'].includes(tab)) tab = T ? 'gem' : 'enh';
     const H0 = hero, SOCK0 = JSON.stringify(sock), TTL0 = title, TN = ['—', 'Ⅰ', 'Ⅱ', 'Ⅲ', 'Ⅳ'];
     let P = { heroes: [], enh: 0, sk: [] }; // 고른 것 (저장 전)
     const ENH = DS.Gem.ENH, lv0 = () => L.enh || 0, lvNow = () => lv0() + P.enh;
@@ -533,7 +536,7 @@ DS.Camp = (function () {
     const cost = () => { let g = 0, s = 0; P.heroes.forEach((id) => { const h = hOf(id); if (h.shop) g += h.shop.price; }); for (let k = 1; k <= P.enh; k++) { const c = ENH[lv0() + k]; g += c.g; s += c.s || 0; } P.sk.forEach((id) => { const f = fxOf(id); if (f.shop) { g += f.shop.price; s += f.shop.scroll || 0; } }); return { g, s }; };
     const gemLeft = () => (L.gem || 0) - cost().g, scrLeft = () => (L.scroll || 0) - cost().s;
     const ownsH = (id) => T || !!hOf(id).open || P.heroes.includes(id);
-    const ownsF = (id, h = hero) => { if (T || P.sk.includes(id)) return true; const f = fxOf(id); if (f.open) return true; if (f.got) { const lad = DS.FX.ladder(h), i = lad.indexOf(id); return i > 0 && ownsF(lad[i - 1], h); } return false; }; // 🏆 받은 칸 = 앞 칸을 가지면 씀
+    const ownsF = (id, h = hero) => { if (P.sk.includes(id)) return true; const f = fxOf(id); if (f.open) return true; if (f.got) { const lad = DS.FX.ladder(h), i = lad.indexOf(id); return i > 0 && ownsF(lad[i - 1], h); } return false; }; // 🏆 받은 칸 = 앞 칸을 가지면 씀
     const stageOf = (h) => { const lad = DS.FX.ladder(h); let n = 0; lad.forEach((id, i) => { if (ownsF(id, h)) n = i + 1; }); return n; };
     const dirty = () => !!(P.heroes.length || P.enh || P.sk.length || hero !== H0 || JSON.stringify(sock) !== SOCK0 || title !== TTL0);
     const afIc = (h) => DS.FX.affOf(h).name.split(' ')[0];
@@ -606,7 +609,11 @@ DS.Camp = (function () {
     // ── 저장 = 서버에 한 번에 ──
     async function saveAll() {
       const fx = fxNow();
-      if (T) { await DS.Art.setTeacherLook({ hero, fx, title, socket: sock }, { room: opt.room }); el.remove(); DS.UI.toast('선생님 모습을 바꿨어요!'); if (opt.onSave) await opt.onSave({ hero, fx, title }); return; }
+      if (T) { // 👩‍🏫 교사 지갑 (서버 gcfg/teacher/tw · 학생 기록과 따로) · 강화 대성공 없음(같은 값)
+        if (P.heroes.length || P.enh || P.sk.length) { const w = DS.Gem.teacherWallet(), c = cost(); if (w.total < c.g || w.scroll < c.s) throw Object.assign(new Error('💎 · 📜 가 모자라요 — ↺ 처음으로 되돌리기로 다시 채워요'), { user: true });
+          P.sk.forEach((id) => { w.buy[`fx_${id}`] = Date.now(); }); P.heroes.forEach((id) => { w.buy[`hero_${id}`] = Date.now(); }); w.total -= c.g; w.scroll -= c.s; w.enh = lvNow(); await DS.Art.saveTeacherCfg('tw', w); }
+        const fx2 = ownsF(fx) ? fx : DS.FX.ladder(hero)[0], sk2 = {}; Object.entries(sock).forEach(([h, k]) => { if (k && DS.FX.inLadder(Number(h), k) && ownsF(k, Number(h))) sk2[h] = k; });
+        await DS.Art.setTeacherLook({ hero, fx: fx2, title, socket: sk2, enh: lvNow() }, { room: opt.room }); el.remove(); DS.UI.toast('💾 선생님 모습을 저장했어요!'); if (opt.onSave) await opt.onSave({ hero, fx: fx2, title }); return; }
       const c = cost(); let great = 0;
       if (P.heroes.length || P.enh || P.sk.length) {
         if (me.test && DS.Test && !DS.Test.active()) throw Object.assign(new Error('테스트 모드에서만 살 수 있어요.'), { user: true });
@@ -641,15 +648,16 @@ DS.Camp = (function () {
       const a = document.createElement('div'); a.className = 'mh-ask'; a.innerHTML = '<div class="framed"><p>저장 안 한 것이 있어요</p><div class="row"><button class="btn big" id="ask-drop">버리기</button><button class="btn primary big" id="ask-save">💾 저장</button></div></div>';
       el.appendChild(a); a.querySelector('#ask-drop').onclick = () => el.remove(); a.querySelector('#ask-save').onclick = () => { a.remove(); DS.Control.run(saveAll); }; a.onclick = (e) => { if (e.target === a) a.remove(); }; };
     const draw = () => { const sb = el.querySelector('.set-box'), keep = sb ? sb.scrollTop : 0;
-      const tabs = T ? [['gem', '⚔ 스킬'], ['ttl', `🏅 호칭 <small>${got.length}</small>`]] : [['enh', `🔨 강화${dot(canEnh())}`], ['gem', `⚔ 스킬${dot(canSk())}`], ['ttl', '🏅 기록']];
-      el.innerHTML = `<div class="quiz-box framed set-box mh-box"><div class="set-head">${T ? '<h2>🧙 선생님 모습</h2>' : `<h2 class="me-h"><span>🧙 내 용사</span><b class="g">💎 ${gemLeft()}</b><b class="s">📜 ${scrLeft()}</b></h2>`}<button class="btn" id="set-x" aria-label="닫기">✕</button></div>
+      const tabs = T ? [['enh', '🔨 강화'], ['gem', '⚔ 스킬'], ['ttl', `🏅 호칭 <small>${got.length}</small>`]] : [['enh', `🔨 강화${dot(canEnh())}`], ['gem', `⚔ 스킬${dot(canSk())}`], ['ttl', '🏅 기록']];
+      el.innerHTML = `<div class="quiz-box framed set-box mh-box"><div class="set-head">${T ? `<h2 class="me-h"><span>🧙 선생님 모습</span><b class="g">💎 ${gemLeft()}</b><b class="s">📜 ${scrLeft()}</b></h2>` : `<h2 class="me-h"><span>🧙 내 용사</span><b class="g">💎 ${gemLeft()}</b><b class="s">📜 ${scrLeft()}</b></h2>`}<button class="btn" id="set-x" aria-label="닫기">✕</button></div>
         ${meTop()}<div class="set-tabs">${tabs.map(([k, n]) => `<button data-tab="${k}" class="${tab === k ? 'on' : ''}">${n}</button>`).join('')}</div>
-        ${tab === 'enh' && !T ? enhTab() : tab === 'gem' ? gemTab() : recTab()}
-        ${T || DS.TRIAL ? '' : '<button class="btn camp-bye" id="camp-bye">🚪 처음 화면으로 (로그아웃)</button>'}${barHtml()}${sheetOn ? sheetHtml() : ''}</div>`;
+        ${tab === 'enh' ? enhTab() : tab === 'gem' ? gemTab() : recTab()}
+        ${T ? '<button class="btn camp-bye t-reset" id="t-reset">↺ 처음으로 되돌리기 <small>스킬 · 용사 · 강화 · 💎 📜 다시 채움</small></button>' : DS.TRIAL ? '' : '<button class="btn camp-bye" id="camp-bye">🚪 처음 화면으로 (로그아웃)</button>'}${barHtml()}${sheetOn ? sheetHtml() : ''}</div>`;
       { const sb2 = el.querySelector('.set-box'); if (sb2) sb2.scrollTop = keep; }
       paintStills(el);
       { const ap = el.querySelector('#ap'); if (ap) ap.onclick = () => demo(); }
       el.querySelector('#set-x').onclick = close;
+      { const rs = el.querySelector('#t-reset'); if (rs) rs.onclick = () => DS.Control.run(async () => { if (!window.confirm('스킬(해금 · 끼운 것) · 용사(강화 · 고른 용사)를 처음으로 되돌리고 💎 9,999 · 📜 30 을 다시 채울까요?')) return; await DS.Art.saveTeacherCfg('tw', null); await DS.Art.setTeacherLook({ hero: DS.ASSETS.heroes.teacher, fx: 'twinkle', title: 'none', socket: {}, enh: 0 }); el.remove(); DS.UI.toast('↺ 처음으로 되돌렸어요 · 💎 9,999 · 📜 30', 2600); settings(opt); }); } // 👩‍🏫 교사만
       { const bye = el.querySelector('#camp-bye'); if (bye) bye.onclick = () => DS.Control.run(async () => { if (!window.confirm('로그아웃하고 처음 화면으로 갈까요?\n(다시 들어올 때 반 · 번호 · 비밀번호)')) return; await DS.Account.logout(); location.reload(); }); } // 🚪 2026-11-13 밤: 학생 「내 용사」 맨 아래 = 처음 화면
       el.querySelector('#mh-top').onclick = () => { pickH = hero; sheetOn = true; DS.Sound.clank(); draw(); };
       el.querySelectorAll('[data-tab]').forEach((b) => (b.onclick = () => { tab = b.dataset.tab; try { localStorage.setItem('citadel-settab', tab); } catch (e) { /* 이 기기에만 */ } DS.Sound.clank(); const sb3 = el.querySelector('.set-box'); if (sb3) sb3.scrollTop = 0; draw(); if (tab === 'gem') demo(); }));
