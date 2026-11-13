@@ -1,11 +1,13 @@
-// 🌟 #73 각성한 로안 (2026-11-11): 로안 + 10강 + 쌍월 참 + 호칭 「만 번째 베기」 = 금발 모습 · 하나라도 빼면 로안 · 업적 3개 = 호칭 · 16 은 고르는 칸이 아님 — node tests/awake.test.js
+// 🌟 #73 각성한 로안 (2026-11-11 · 2026-11-13 10강 뺌): 로안 + 쌍월 참 + 호칭 「만 번째 베기」 = 금발 모습 · 하나라도 빼면 로안 · 업적 3개 = 호칭 · 16 은 고르는 칸이 아님 — node tests/awake.test.js
 const fs = require('fs'), path = require('path');
 const load = require('./load');
 const DS = load(['assets/manifest.js', 'js/engine/ui.js', 'js/engine/art.js', 'js/engine/setgen.js', 'js/engine/quiz.js', 'js/engine/lessons.js', 'lessons/set-04.js', 'lessons/eval-1.js', 'lessons/eval-2.js', 'js/raid/bonus.js', 'js/raid/grow.js', 'js/raid/titles.js']);
 let ok = 0, fail = 0; const check = (c, m) => { if (c) ok++; else { fail++; console.log('FAIL:', m); } };
 const A = DS.Art, full = { hero: 0, enh: 10, fx: 'twin', title: 'slash10k' };
-check(A.awake(full) && A.look(full) === 16, '네 조건 = 금발(16)');
-[['hero', 5], ['enh', 9], ['fx', 'slash'], ['title', 'awake']].forEach(([k, v]) => check(!A.awake({ ...full, [k]: v }) && A.look({ ...full, [k]: v }) === (k === 'hero' ? 5 : 0), `${k} 빠지면 원래 모습`));
+check(A.awake(full) && A.look(full) === 16, '세 조건 = 금발(16)');
+[0, 5, 10, undefined].forEach((e) => check(A.awake({ ...full, enh: e }) && A.look({ ...full, enh: e }) === 16, `강화 ${e} 강도 금발 (10강 조건 없음 · 2026-11-13)`));
+check(!/enh/.test(String(A.awake)), '각성 판정에 강화 단계를 보지 않음');
+[['hero', 5], ['fx', 'slash'], ['title', 'awake']].forEach(([k, v]) => check(!A.awake({ ...full, [k]: v }) && A.look({ ...full, [k]: v }) === (k === 'hero' ? 5 : 0), `${k} 빠지면 원래 모습`));
 const t = DS.Titles.get('slash10k'); check(t && t.name === '만 번째 베기' && t.desc === '기본기의 검이 끝까지 벼려지면, 금빛이 깃든다.', '호칭 「만 번째 베기」 · 설명');
 const b3 = { 'eval-1': { q12: { clear: true } }, 'set-04': { boss: { clear: true } }, 'set-02': { boss: { clear: true } } };
 check(DS.Bonus.seals(b3).length >= 3 ? t.test({ bonus: b3 }) : true, '업적 3개 = 호칭');

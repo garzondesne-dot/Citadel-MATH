@@ -581,9 +581,9 @@ DS.Camp = (function () {
     let pickH = hero, sheetOn = false;
     const portrait = (n) => { const Pt = DS.ASSETS.heroPortraits, c = Pt && Pt.list && Pt.list[n]; return c ? `<i class="hc-img" style="background-image:url('${DS.ASSETS.base}${Pt.src}');background-size:${Pt.cols * 100}% ${Pt.rows * 100}%;background-position:${(c[0] / Math.max(1, Pt.cols - 1)) * 100}% ${(c[1] / Math.max(1, Pt.rows - 1)) * 100}%"></i>` : DS.Art.hero(n, 'idle'); };
     const ladLine = (h) => DS.FX.ladder(h).map((id, i) => `${esc(nmOf(id))} ${TN[i + 1]}${ULT(DS.FX.tierOf(id)).join('')}`).join(' → ');
-    const awkDet = () => { // 🌟 #73 각성한 로안 = 고르는 칸이 아님 · 조건 4개 체크 (로안 · 10강 · 쌍월 참 · 호칭)
+    const awkDet = () => { // 🌟 #73 각성한 로안 = 고르는 칸이 아님 · 조건 3개 체크 (로안 · 쌍월 참 · 호칭 · 2026-11-13 10강 뺌)
       const AW = DS.Art.AWAKE, on = DS.Art.awake({ hero, enh: lvNow(), fx: fxNow(), title }), lo = DS.Lore && DS.Lore.of(AW.to), t2 = DS.Titles && DS.Titles.get(AW.title);
-      const ck = [[hero === AW.hero, '로안'], [lvNow() >= AW.enh, `${AW.enh}강`], [DS.FX.crystalOf(AW.hero, sock) === AW.fx, nmOf(AW.fx)], [title === AW.title, '호칭']];
+      const ck = [[hero === AW.hero, '로안'], [DS.FX.crystalOf(AW.hero, sock) === AW.fx, nmOf(AW.fx)], [title === AW.title, '호칭']];
       return `<div class="mh-det"><div class="hc-port${on ? '' : ' dim'}">${portrait(AW.to)}</div><div><b>${on && lo ? esc(lo.name) : '???'}</b><small>호칭으로 깨어나는 모습 · 모습만 바뀌고 데미지 · 보상은 같아요</small>${on && lo ? `<em>「${esc(lo.nick)}」</em><p>${esc(lo.a)}</p>` : `<p>🏅 호칭 「${esc(t2 ? t2.name : '만 번째 베기')}」</p>`}<p class="awk-ck">${ck.map(([ok, t]) => `<span class="${ok ? 'ok' : 'no'}">${ok ? '✔' : '✕'} ${esc(t)}</span>`).join(' ')}</p></div></div>`; };
     const sheetHtml = () => { const h = hOf(pickH), lo = DS.Lore ? DS.Lore.of(pickH) : null, o = ownsH(pickH), r = DS.Attack && DS.Attack.isRanged(pickH), af = DS.FX.affOf(pickH);
       let cta;

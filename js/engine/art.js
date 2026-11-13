@@ -24,10 +24,10 @@ DS.Art = (function () {
     if (a === 'idle' && I8 && n < I8.rows) return `<i class="art hero hv2 ${String(cls).replace(/\bhuff\b/g, '')}" data-anim="idle"><b style="left:${left.toFixed(1)}%;width:${W}%;background-image:url('${A().base}${I8.src}');background-size:${I8.cols * 100}% ${I8.rows * 100}%;background-position:0% ${(100 * n) / (I8.rows - 1)}%;animation:hv2i8 ${I8.dur}s steps(8) ${(-((n * 0.37 + Math.random()) % 1) * I8.dur).toFixed(2)}s infinite;"></b></i>`;
     return `<i class="art hero hv2 ${String(cls).replace(/\bhuff\b/g, '')}" data-anim="${a}"><b style="left:${left.toFixed(1)}%;width:${W}%;background-image:url('${A().base}${h.src}');background-size:${v.cols * 100}% ${rows * 100}%;background-position:0% ${rows > 1 ? (100 * row) / (rows - 1) : 0}%;${run}"></b></i>`;
   }
-  // 🌟 #73 각성한 로안 (2026-11-11): 로안(0) + 🔨 10강 + ⚔ 쌍월 참(베기 Ⅳ) 장착 + 호칭 「만 번째 베기」 장착 → 금발 모습(16) · 하나라도 빼면 로안
+  // 🌟 #73 각성한 로안 (2026-11-11 · 2026-11-13 선생님 「10강 빼자」): 로안(0) + ⚔ 쌍월 참(베기 Ⅳ) 장착 + 호칭 「만 번째 베기」 장착 → 금발 모습(16) · 강화 단계와 상관없음 · 하나라도 빼면 로안
   //   모습만 바뀜(데미지 · 보상 그대로) · p = { hero, enh, fx, title } (수업 방 players · 캠프 me)
-  const AWAKE = { hero: 0, to: 16, enh: 10, fx: 'twin', title: 'slash10k' };
-  const awake = (p) => !!(p && Number(p.hero) === AWAKE.hero && Number(p.enh) >= AWAKE.enh && p.fx === AWAKE.fx && p.title === AWAKE.title);
+  const AWAKE = { hero: 0, to: 16, fx: 'twin', title: 'slash10k' };
+  const awake = (p) => !!(p && Number(p.hero) === AWAKE.hero && p.fx === AWAKE.fx && p.title === AWAKE.title);
   const look = (p) => (awake(p) ? AWAKE.to : Number((p || {}).hero) || 0);
   const hero = (n, pose = 'idle', cls = '') => {
     if (isV2(n)) return heroV2(Number(n), pose, cls);
