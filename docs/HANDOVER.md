@@ -384,3 +384,12 @@
 
 ## 🚑 체험판 화면 = 학생 폰만 · 📺 TV 단추 (2026-11-13 · 손발 #7 · release f8de1d2 · v0.9.56.0)
 - `js/raid/test.js tvHall`: TV 상자(`#test-tv`)는 처음부터 만들되 `.tv-off`(visibility hidden · 계속 돌아 진행 그대로) · `--tvh` = 0(학생 화면 위 빈칸 없음) · 진행 막대 `#tb-tvv`(📺 TV 화면 ↔ 📱 학생 화면 · `data-tv`) → `tvShow(on)` = `.tv-show`(막대 위 가득 · 세로 폰은 90° 돌림) · TV 를 누르면 ⛶ 큰 화면은 그대로 · 폰(≤480px)은 아이콘만. 체험판(trial)만 · 테스트 모드 · 실제 수업 그대로. 시험 = e2e125.
+
+## 🏫 다른 학교판 = 학교 주소 s/<코드>/ (2026-11-13 · 손발 #7 · release a445c57)
+- 학교 목록 = `schools/schools.json` { "<코드>": { name, fb: { apiKey · authDomain · databaseURL · projectId · storageBucket · messagingSenderId · appId } } } · 코드 = 영소문자 · 숫자 4~6자 무작위 · `example: true` = 파일 안 만듦(시험용).
+- 새 학교 더하기: ① 그 선생님이 보낸 firebaseConfig 7줄을 목록에 한 줄 ② `node tools/school/page.js` → `s/<코드>/index.html` · `manifest.webmanifest` 생김 ③ `node tests/school.test.js` ④ 커밋 → 선생님 「배포」 때 같이 올라감. 그다음부터는 우리 배포 때 그 학교판도 저절로 바뀜(같은 js · css · 그림 · 판 번호).
+- index.html 을 고치면 `node tools/school/page.js` 도 다시(체험판 `tools/trial/page.js` 와 같음 · 시험이 다르면 깨짐).
+- 동작: `js/config.js` = window.DS_SCHOOL 이 있으면 DS.FIREBASE ← 그 학교 · DS.HOME_FB ← 우리 · localStorage · sessionStorage 를 `s.<코드>.` 앞말로 감쌈 · 버전 꼬리표 · 제목에 학교 이름. `js/raid/net.js` = `prep/` · `prepVideo/` 읽기만 우리 서버(두 번째 Firebase 앱 'home' · 익명 로그인)를 밑에 깔고 그 학교 값이 위(쓰기는 그 학교). `sw.js` = 학교 주소 오프라인 때 우리 index.html 로 대신하지 않음.
+- 그 학교 규칙 = 우리와 같은 `firebase/database.rules.json` 그대로 · 교사 = Authentication 사용자 UID → Database `admins/<UID>: true`.
+- 사진 채점 = 그 학교 `gcfg/photo` 가 없어서 처음엔 꺼짐(그대로).
+
