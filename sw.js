@@ -50,5 +50,5 @@ self.addEventListener('fetch', (e) => {
   e.respondWith(caches.open(CACHE).then((c) => c.match(req, { ignoreSearch: req.mode === 'navigate' }).then((hit) => hit || fetch(req).then((res) => {
     if (res.ok && url.pathname.match(/\.(js|css|html|webmanifest)$|\/$/)) c.put(req, res.clone());
     return res;
-  }).catch(() => c.match(/\/trial\//.test(url.pathname) ? './trial/' : './index.html')))));
+  }).catch(() => (/\/s\/[a-z0-9]+\//.test(url.pathname) ? Response.error() : c.match(/\/trial\//.test(url.pathname) ? './trial/' : './index.html'))))));  // 🏫 학교 주소는 우리 index.html 로 대신하지 않음 (다른 서버에 붙지 않게)
 });

@@ -1,0 +1,15 @@
+{
+  "ex7q2": {
+    "name": "예시 학교",
+    "example": true,
+    "fb": {
+      "apiKey": "EXAMPLE-not-a-real-key",
+      "authDomain": "example-school.firebaseapp.com",
+      "databaseURL": "https://example-school-default-rtdb.asia-southeast1.firebasedatabase.app",
+      "projectId": "example-school",
+      "storageBucket": "example-school.firebasestorage.app",
+      "messagingSenderId": "000000000000",
+      "appId": "1:000000000000:web:0000000000000000000000"
+    }
+  }
+}

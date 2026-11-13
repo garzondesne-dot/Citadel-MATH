@@ -119,17 +119,31 @@ DS.Net = (function () {
       async idToken() { const u = firebase.auth().currentUser; return u ? u.getIdToken() : null; },
       offline() { try { if (db) db.goOffline(); } catch (e) { /* 무시 */ } }, // 👩‍🏫 체험판: 학습지 그림만 읽고 실제 서버 연결을 끊음 (동시 접속 100명 한도 · 2026-11-07) // 📷 사진 채점 중계소가 학생을 확인 (2026-11-06)
       now: () => Date.now() + offset,
-      async get(p) { return (await db.ref(p).get()).val(); },
+      async get(p) { if (homeOf(p)) { const [a, b] = await Promise.all([db.ref(p).get().then((x) => x.val()), homeGet(p)]); return mergeHome(b, a); } return (await db.ref(p).get()).val(); },
       set: (p, v) => db.ref(p).set(sv(v)),
       update: (p, obj) => db.ref(p).update(Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, sv(v)]))),
       remove: (p) => db.ref(p).remove(),
-      watch(path, cb) { const r = db.ref(path), f = (s) => cb(s.val()); r.on('value', f); return () => r.off('value', f); },
+      watch(path, cb) { const r = db.ref(path); let mine, home, gotM = false; const out = () => cb(homeOf(path) ? mergeHome(home, mine) : mine); const f = (s) => { mine = s.val(); gotM = true; out(); }; r.on('value', f); if (homeOf(path)) homeGet(path).then((h) => { home = h; if (gotM && h != null) out(); }); return () => r.off('value', f); },
       // 접속 표시: 연결될 때마다 true, 끊기면 서버가 지운다
       async presence(p) {
         const r = db.ref(p);
         db.ref('.info/connected').on('value', (s) => { if (s.val() === true) r.onDisconnect().remove().then(() => r.set(true)); });
       },
     };
+    // 🏫 다른 학교판: 학습지 칸 그림 · 영상 링크(prep · prepVideo)는 우리 서버(DS.HOME_FB)에서 읽기만 해 밑에 깔고, 그 학교가 직접 바꾼 값이 있으면 그 값이 위 (쓰기는 늘 그 학교 서버)
+    let hdb = null;
+    function homeOf(p) { return !!(DS.SCHOOL && DS.HOME_FB && DS.HOME_FB.apiKey && /^prep(Video)?\//.test(String(p))); }
+    async function homeGet(p) {
+      try {
+        if (!hdb) { const app = firebase.apps.find((a) => a.name === 'home') || firebase.initializeApp(DS.HOME_FB, 'home'); const au = app.auth(); if (!au.currentUser) await au.signInAnonymously(); hdb = app.database(); }
+        return (await hdb.ref(p).get()).val();
+      } catch (e) { return null; } // 못 읽으면 그 학교 값만
+    }
+    function mergeHome(h, m) {
+      if (m == null) return h == null ? null : h;
+      if (h && typeof h === 'object' && m && typeof m === 'object' && !Array.isArray(h) && !Array.isArray(m)) { const o = { ...h }; Object.keys(m).forEach((k) => { o[k] = mergeHome(h[k], m[k]); }); return o; }
+      return m;
+    }
     function sv(v) { // 자리표시 → Firebase 서버 시각
       if (v && typeof v === 'object') return v['.sv'] === 'timestamp' ? firebase.database.ServerValue.TIMESTAMP : Object.fromEntries(Object.entries(v).map(([k, x]) => [k, sv(x)]));
       return v;
