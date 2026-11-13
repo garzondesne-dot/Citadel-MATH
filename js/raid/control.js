@@ -171,7 +171,12 @@ DS.Control = (function () {
   })));
   // ⚔ 소레이드 리모컨 (2026-11-09 #18): 🙋 확인 필요(남은 기회 1칸 · 잠김) → 「✔ 풀어주기」 · 학생별 지금 단계
   function chainHtml(L, R) {
-    const st = Raid().stepOf(L, R); if (!st || st.kind !== 'monster' || !Raid().isChain(L, R, st.id)) return '';
+    const st = Raid().stepOf(L, R); if (!st || st.kind !== 'monster') return '';
+    if (!Raid().isChain(L, R, st.id)) { // ❤ 2026-11-13 밤: 일반 몬스터도 ❤ 0 = 🙋 잠김 → 「✔ 풀어주기」 (❤ +1)
+      const nm0 = (u) => { const p = (R.players || {})[u] || {}; return `${p.num != null ? `${p.num} ` : ''}${p.nick || ''}`; };
+      const lk = Raid().activeIds(R).filter((u) => u !== (R.meta || {}).teacher).filter((u) => Raid().record(L, R, st.id, u).locked);
+      return lk.length ? `<div class="cr-ctl"><p class="cr-need"><b>🙋 ❤ 0 · 확인 필요 ${lk.length}</b></p>${lk.map((u) => `<div class="cr-lockrow"><span>${esc(nm0(u))} · ${esc(st.title)}</span><button class="btn small primary" data-crok="${u}">✔ 풀어주기</button></div>`).join('')}</div>` : '';
+    }
     const ids = Raid().activeIds(R).filter((u) => u !== (R.meta || {}).teacher), recs = ids.map((u) => [u, Raid().record(L, R, st.id, u)]);
     const nm = (u) => { const p = (R.players || {})[u] || {}; return `${p.num != null ? `${p.num} ` : ''}${p.nick || ''}`; }, mark = (r) => (r.done ? (r.perfect ? '🌟' : '👑✔') : r.fail ? '✘' : r.stage === r.n - 1 ? '👑' : '①②③④⑤⑥'[r.stage]);
     const lock = recs.filter(([, r]) => r.locked);
@@ -182,7 +187,7 @@ DS.Control = (function () {
       ${lock.length ? `<p class="cr-need"><b>🙋 확인 필요 ${lock.length}</b></p>${lock.map(([u, r]) => `<div class="cr-lockrow"><span>${esc(nm(u))} · ${r.stage === n - 1 ? '👑 대장' : `졸개 ${'①②③④⑤⑥'[r.stage]}`}에서 막힘</span><button class="btn small primary" data-crok="${u}">✔ 풀어주기</button></div>`).join('')}` : ''}
       <details><summary>학생별 단계</summary><p class="small">${recs.map(([u, r]) => `${esc(nm(u))} ${mark(r)}`).join(' · ')}</p></details></div>`;
   }
-  const bindChain = (el, code, R, L) => (el.querySelectorAll('[data-crdown]').forEach((b) => (b.onclick = () => run(async () => { const st = Raid().stepOf(L, R); await Act().chainKnock(code, st.id, Number(b.dataset.crdown)); DS.UI.toast('💥 졸개를 쓰러뜨렸어요'); }))), el.querySelectorAll('[data-crok]')).forEach((b) => (b.onclick = () => run(async () => { const st = Raid().stepOf(L, R); await Act().chainRelease(code, st.id, b.dataset.crok); DS.UI.toast('✔ 마지막 칸을 풀어 줬어요'); })));
+  const bindChain = (el, code, R, L) => (el.querySelectorAll('[data-crdown]').forEach((b) => (b.onclick = () => run(async () => { const st = Raid().stepOf(L, R); await Act().chainKnock(code, st.id, Number(b.dataset.crdown)); DS.UI.toast('💥 졸개를 쓰러뜨렸어요'); }))), el.querySelectorAll('[data-crok]')).forEach((b) => (b.onclick = () => run(async () => { const st = Raid().stepOf(L, R); await Act().chainRelease(code, st.id, b.dataset.crok, Raid().relOf(R, st.id, b.dataset.crok) + 1); DS.UI.toast('✔ 풀어 줬어요 · ❤ +1'); })));
   // ⏸ 수업 끝 (저장) — 진행 중이면 늘 (교사 리모컨 · 종합실)
   // 📱 #70 (11/11): 「수업 끝 ▶」 하나 + 확인 한 번 · 끝내면 늘 진행 저장 (마무리까지 왔으면 그 차시 진도도 끝냄) · 교사 메뉴 「▶ 지난 수업 이어서」 · 「다른 단계부터 이어서 ▾」 그대로
   const END_ASK = '수업을 끝낼까요?\n\n진행은 저장돼요 · 다음에 「다른 단계부터 이어서」로 원하는 곳부터 시작할 수 있어요.';

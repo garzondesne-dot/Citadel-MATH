@@ -57,13 +57,17 @@ check(r.done && r.perfect && r.best === 4 && r.says.length === 5 && /그러므�
 sub('b', 0, false); r = X.record(L, R, 'u4', 'b'); check(r.left === 3.5 && r.stage === 0 && !r.locked, '졸개 오답 = 0.5칸 · 같은 단계');
 sub('b', 0, true); sub('b', 1, true); sub('b', 2, true); sub('b', 3, false); sub('b', 3, false); r = X.record(L, R, 'u4', 'b');
 check(r.left === 1.5 && r.stage === 3 && !r.locked, '대장 오답 = 1칸씩');
-sub('b', 3, false); r = X.record(L, R, 'u4', 'b'); check(r.left === 0.5 && r.locked, '남은 기회 ≤ 1 = 잠김');
-(R.chainOk = { u4: { b: true } }); r = X.record(L, R, 'u4', 'b'); check(!r.locked && r.ok, '선생님 풀어주기 → 잠김 풀림');
-sub('b', 3, false); r = X.record(L, R, 'u4', 'b'); check(r.fail && !r.done && r.best === 3, '마지막 칸까지 틀림 = 못 맞힘 · 데미지 3');
+sub('b', 3, false); r = X.record(L, R, 'u4', 'b'); check(r.left === 0.5 && !r.locked, '❤ 0.5 = 아직 풀 수 있음 (2026-11-13 밤: ❤ 0 에서만 잠김)');
+sub('b', 3, false); r = X.record(L, R, 'u4', 'b'); check(r.left === 0 && r.locked && !r.fail, '❤ 0 = 🙋 잠김 · 「못 맞힘」으로 끝나지 않음');
+(R.chainOk = { u4: { b: true } }); r = X.record(L, R, 'u4', 'b'); check(!r.locked && r.ok && r.left === 1, '선생님 풀어주기(예전 true = 1번) → ❤ 1 · 잠김 풀림');
+sub('b', 3, false); r = X.record(L, R, 'u4', 'b'); check(r.locked && !r.fail && !r.done && r.best === 3, '풀어준 뒤 또 틀림 = ❤ 0 · 다시 잠김 · 데미지 3');
 check(X.monsterHp(L, R, 'u4').dmg === 7, '반 체력 피해 = 4 + 3');
 { const ra = X.record(L, R, 'u4', 'a'), rb = X.record(L, R, 'u4', 'b'); // 📕 #80 점검: 결과 · 오답노트 = 단계별 (대장까지 잡으면 「틀림」 아님)
   check(ra.stOk.join() === 'true,true,true,true' && ra.stFirst.every(Boolean), `퍼펙트 = 모든 단계 한 번에 (${ra.stFirst})`);
   check(rb.stOk.join() === 'true,true,true,false' && rb.stFirst.join() === 'false,true,true,false', `b = ① 고쳐서 · ② ③ 한 번에 · 대장 못 맞힘 (${rb.stOk} / ${rb.stFirst})`); }
+// ❤ 풀어주기 두 번째 (2026-11-13 밤): 풀어주기 = 누른 횟수 · 한 번 = ❤ 1 · 그렇게 풀어내면 ❤ +1
+R.chainOk.u4.b = 2; r = X.record(L, R, 'u4', 'b'); check(!r.locked && r.left === 1 && r.rel === 2, '풀어주기 2번째 → ❤ 1');
+sub('b', 3, true); r = X.record(L, R, 'u4', 'b'); check(r.done && r.left === 2 && r.best === 4, `풀어준 뒤 대장 처치 = ❤ +1 → 2 (${r.left})`);
 // ④ 🔥 연습 사슬 EXP (2026-11-09 선생님: 사슬 완성 1번당 +1)
 const psub = (u, p, s, good) => { const q = X.chainItems(L, R, 'u4', u, p)[s]; const a = R.chain.u4[u]; a[Object.keys(a).length] = { s, p, g: good ? right(q) : wrongOf(q) }; };
 const pwhy = (u, p, g) => { const a = R.chain.u4[u]; a[Object.keys(a).length] = { s: 3, p, g, w: 1 }; }; // #44 근거 = 대장 뒤
@@ -87,7 +91,7 @@ check(DS.Grow && DS.Grow.XP ? DS.Grow.XP.chainPrac === 1 : true, 'EXP 표 chainP
   let d = X.chainDown(L, Q, 'u4'); check(d.length === 3 && d[0].past === 2 && d[0].need === 3 && !d[0].down, '졸개 3마리 · ① 넘은 2명 < 기준 3명(90%) = 안 쓰러짐');
   add('c', 0, true); d = X.chainDown(L, Q, 'u4'); check(d[0].down && !d[1].down, '① 3명 다 넘음 = 쓰러짐 · ② 아직');
   Q.state.chainDown = { u4: { 1: true } }; d = X.chainDown(L, Q, 'u4'); check(d[1].down && !d[2].down, '리모컨 쓰러뜨리기 = ② 쓰러짐');
-for (let i = 0; i < 8; i++) add('c', 1, false); d = X.chainDown(L, Q, 'u4'); check(d[0].all === 2, '기회 다 쓴 학생은 머릿수에서 뺌');
+for (let i = 0; i < 8; i++) add('c', 1, false); d = X.chainDown(L, Q, 'u4'); check(d[0].all === 3 && X.record(L, Q, 'u4', 'c').locked, '❤ 0 학생 = 잠김 · 풀어주기를 기다리니 머릿수에 그대로 (2026-11-13 밤 · 「못 맞힘」 없어짐)');
   check(X.chainDown(L, Q, 'm1').length === 0, '보통 몬스터 = 졸개 없음'); }
 // ⑦ 🩸 졸개 체력 막대 (#37 · 2026-11-09): 최대 = 올림(머릿수 × 기준%) · 넘은 학생마다 −1 · 0 = 쓰러짐 · 머릿수가 바뀌면 다시 계산
 { const Q = X.newRoom('999999', 'set-06', 'T', 1000), us = Array.from({ length: 20 }, (_, i) => 'p' + i); Q.active = {}; Q.players = {}; Q.chain = { u4: {} };
@@ -142,15 +146,16 @@ for (let i = 0; i < 8; i++) add('c', 1, false); d = X.chainDown(L, Q, 'u4'); che
   Q.chain.u4.a[k++] = { s: 0, p: 0, g: -999 }; it.forEach((q, s) => { Q.chain.u4.a[k++] = { s, p: 0, g: ans(q) }; });
   let r = X.record(L, Q, 'u4', 'a'); check(r.done && r.left === 3.5 && r.tokens === 3 && r.tokLeft === 3 && r.canHeal && !r.perfect, `대장 처치 · 남은 3.5 → 묶기/힐 3번 (${r.tokens})`);
   const ib = X.chainItems(L, Q, 'u4', 'b', 0); let kb = 0; for (let j = 0; j < 7; j++) Q.chain.u4.b[kb++] = { s: 0, p: 0, g: -999 }; // b: 졸개 ① 오답 7번 → 0.5 남음 · 잠김
-  let rb = X.record(L, Q, 'u4', 'b'); check(rb.left === 0.5 && rb.locked && X.healTarget(L, Q, 'u4', 'a', 0) === 'b', `막힌 친구 b (0.5 · 잠김) = 힐 받을 사람`);
+  Q.chain.u4.b[kb++] = { s: 0, p: 0, g: -999 }; // b: ❤ 0 (8번째 졸개 오답) · 잠김
+  let rb = X.record(L, Q, 'u4', 'b'); check(rb.left === 0 && rb.locked && X.healTarget(L, Q, 'u4', 'a', 0) === 'b', `막힌 친구 b (❤ 0 · 잠김) = 힐 받을 사람`);
   Q.heals = { u4: { a: { 0: 'b' } } }; rb = X.record(L, Q, 'u4', 'b'); r = X.record(L, Q, 'u4', 'a');
-  check(rb.slots === 5 && rb.left === 1.5 && !rb.locked && rb.healed === 1 && r.tokLeft === 2, `💚 힐 → b 기회 +1칸 (${rb.left}/${rb.slots}) · a 남은 2번`);
+  check(rb.slots === 4 && rb.left === 1 && !rb.locked && rb.healed === 1 && r.tokLeft === 2, `💚 힐 → b ❤ +1 (${rb.left}/${rb.slots}) · 잠김 풀림 · a 남은 2번`);
   Q.heals.u4.a[1] = '!bind@1'; r = X.record(L, Q, 'u4', 'a'); check(r.tokLeft === 1 && X.tokBinds(Q, 'u4', 'a').length === 1, '⛓ 묶기 1번 → 남은 1번');
   check(X.healTarget(L, Q, 'u4', 'b', 0) !== 'a', '대장을 잡은 a 는 힐 받는 사람이 아님');
   Q.chain.u4.b[kb++] = { s: 0, p: 0, g: ans(ib[0]) }; for (let s = 1; s < ib.length; s++) Q.chain.u4.b[kb++] = { s, p: 0, g: ans(ib[s]), ph: 1 };
   rb = X.record(L, Q, 'u4', 'b'); check(rb.done && rb.byPh && !rb.perfect && rb.stage === ib.length && rb.says.length >= ib.length && rb.tokens === 1, `서술형 통과 = 남은 ${ib.length - 1}단계 처치 · 퍼펙트 아님 · 나의 풀이 채움 · 남은 1.5 → 1번`);
   const F = X.newRoom('515151', 'set-06', 'T', 1000); F.active = { c: true }; F.players = { c: {} }; F.chain = { u4: { c: {} } }; const ic = X.chainItems(L, F, 'u4', 'c', 0); let kc = 0;
-  for (let j = 0; j < 8; j++) F.chain.u4.c[kc++] = { s: 0, p: 0, g: -999 }; check(X.record(L, F, 'u4', 'c').fail, '기회 0 = 못 맞힘');
+  for (let j = 0; j < 8; j++) F.chain.u4.c[kc++] = { s: 0, p: 0, g: -999 }; check(X.record(L, F, 'u4', 'c').locked, '❤ 0 = 잠김');
   ic.forEach((q, s) => { F.chain.u4.c[kc++] = { s, p: 0, g: ans(q), ph: 1 }; }); const rc = X.record(L, F, 'u4', 'c'); check(rc.done && !rc.fail && rc.tokens === 0, '못 맞힌 뒤에도 서술형 통과 = 처치 (묶기 · 힐 0번)');
   const st = require('fs').readFileSync(require('path').join(__dirname, '..', 'js/raid/student.js'), 'utf8');
   check(/pracArm\[ak\]/.test(st) && /1500 - \(Date\.now\(\) - pracArm/.test(st), '🔥 한 판 더 단추 = 나타난 뒤 1.5초 잠금 (저절로 넘어가지 않게)'); }

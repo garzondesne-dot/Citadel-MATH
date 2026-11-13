@@ -258,12 +258,20 @@ check(X.online(R2, 'a') && !X.online(R2, 'b'), '접속 표시');
   check(V.meta.version === 3, 'v3: 새 방 = version 3');
   sub('b', 0, 1); check(same('b', 0, 1), 'v3: 틀린 뒤 재도전 = 같은 문제');
   sub('b', 1, 2); check(same('b', 0, 2) && X.record(L, V, 'm4', 'b').left === 2, 'v3: 두 번 틀려도 같은 문제 · 기회 2 남음');
-  sub('a', 0, n); let r = X.record(L, V, 'm4', 'a'); check(r.perfect && r.left === 3 && !same('a', 0, 1), 'v3: 퍼펙트 뒤 다음 문제 = 숫자 바뀜 · 기회 3');
-  sub('a', 1, n); r = X.record(L, V, 'm4', 'a'); check(r.left === 3 && r.tokens === 1 && r.canHeal && !same('a', 1, 2), 'v3: 새 문제 맞힘 = 기회 그대로 · 힐/묶기 1번 · 그다음 또 새 문제');
-  sub('a', 2, n - 1); r = X.record(L, V, 'm4', 'a'); check(r.left === 2 && r.fix && same('a', 2, 3), 'v3: 새 문제 틀림 = 기회 −1 · 같은 문제 고치기');
-  sub('a', 3, n); r = X.record(L, V, 'm4', 'a'); check(r.left === 2 && r.tokens === 2 && !r.fix && r.best === n, 'v3: 고쳐서 맞힘 = 기회 그대로 · 힐/묶기 2번 · 데미지 그대로');
+  sub('a', 0, n); let r = X.record(L, V, 'm4', 'a'); check(r.perfect && r.left === 4 && r.firstPerfect && !same('a', 0, 1), 'v3: 퍼펙트 뒤 다음 문제 = 숫자 바뀜 · ❤ 4 그대로 (2026-11-13 밤)');
+  sub('a', 1, n); r = X.record(L, V, 'm4', 'a'); check(r.left === 4 && r.tokens === 1 && r.canHeal && !same('a', 1, 2), 'v3: 새 문제 맞힘 = ❤ 그대로 · 힐/묶기 1번 · 그다음 또 새 문제');
+  sub('a', 2, n - 1); r = X.record(L, V, 'm4', 'a'); check(r.left === 4 && r.fix && same('a', 2, 3), 'v3: 새 문제 틀림 = ❤ 안 깎임 (재도전 판은 무료) · 같은 문제 고치기');
+  sub('a', 3, n); r = X.record(L, V, 'm4', 'a'); check(r.left === 4 && r.tokens === 2 && !r.fix && r.best === n, 'v3: 고쳐서 맞힘 = ❤ 그대로 · 힐/묶기 2번 · 데미지 그대로');
   ((V.heals = {}).m4 = {}).a = { 0: '!bind@5000', 1: 'b' }; r = X.record(L, V, 'm4', 'a');
-  check(r.tokLeft === 0 && !r.canHeal && r.left === 2 && X.bindOf(L, V, 'm4', 'a') === X.BIND_TOKEN && X.record(L, V, 'm4', 'b').left === 3, 'v3: 묶기 1 · 힐 1 = 쓴 만큼 줄고 기회는 안 씀 · 힐 받은 b 기회 +1');
+  check(r.tokLeft === 0 && !r.canHeal && r.left === 4 && X.bindOf(L, V, 'm4', 'a') === X.BIND_TOKEN && X.record(L, V, 'm4', 'b').left === 3, 'v3: 묶기 1 · 힐 1 = 쓴 만큼 줄고 ❤ 는 안 씀 · 힐 받은 b ❤ +1');
+  // ❤ 2026-11-13 밤: 한 번 공격에 몇 개를 틀려도 −1 · ❤ 0 = 잠김 → 풀어주기 ❤ +1 → 다 맞히면 ❤ +1 · 힐 = +1 (상한 4)
+  sub('b', 2, 0); r = X.record(L, V, 'm4', 'b'); check(r.left === 2 && !r.locked, `b: 힐 받은 뒤 또 틀림 = ❤ 2 (${r.left})`);
+  sub('b', 3, 1); sub('b', 4, n - 1); r = X.record(L, V, 'm4', 'b'); check(r.left === 0 && r.locked && !r.canRetry, '❤ 0 = 🙋 잠김 · 다시 못 냄');
+  V.state.step = L.steps.findIndex((x) => x.id === 'm4'); check(X.helpList(L, V, 0).some((h) => h.uid === 'b' && h.level === 2), '리모컨 도움 목록 = ❤ 0 학생 (풀어주기)');
+  V.chainOk = { m4: { b: 1 } }; r = X.record(L, V, 'm4', 'b'); check(r.left === 1 && !r.locked && r.canRetry, '풀어주기 → ❤ 1 · 다시 낼 수 있음');
+  sub('b', 5, n); r = X.record(L, V, 'm4', 'b'); check(r.perfect && r.left === 2 && !r.firstPerfect, `풀어준 뒤 다 맞힘 = ❤ +1 → 2 (${r.left})`);
+  const W = newRoom3('343434', 'set-03', 'T', 1000); W.active = { c: true }; W.players = { c: { num: 1 } }; W.subs = { m4: { c: { 0: answer(W, 'm4', 'c', 0, 0) } } }; W.heals = { m4: { a: { 0: 'c', 1: 'c' } } };
+  r = X.record(L, W, 'm4', 'c'); check(r.left === 4 && r.healed === 1, `❤ 상한 4: 힐 2번 받아도 3 → 4 (${r.left} · 쓴 힐 ${r.healed})`);
 }
 if (fail) { console.error(`\n${fail}건 실패`); process.exit(1); }
 // 🟪 중단원던전 공격 = 45초마다 1초 멈춤 (2026-11-04: 「20초마다 45초 멈춤」 버그 다시 나오지 않게)

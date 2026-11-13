@@ -83,6 +83,11 @@ DS.Raid = (function () {
     return out.sort((a, b) => num(R, a.from) - num(R, b.from) || a.k - b.k);
   }
   const healsReceived = (R, mid, uid, L) => Math.min(HEAL_MAX, healsTo(R, mid, uid, L).length);
+  // ❤ 하트 (2026-11-13 밤 선생님 · 메타인지 6 · DECISIONS 「❤ · ⚡ · 🔥 재도전 최종안」): 몬스터마다 ❤ 4 (상한 4)
+  //   일반 몬스터 = 한 번 공격에 하나라도 틀리면 −1 · 소레이드 = 졸개 −0.5 · 대장 −1 · ❤ 0 = 🙋 잠김 → 리모컨 「✔ 풀어주기」 = ❤ +1 → 그렇게 풀어내면 ❤ +1
+  //   💚 친구 힐 = ❤ +1 (상한 4 · 받은 힐은 ❤ 가 3 이하로 내려가는 순간 채워짐) · 풀어주기는 chainOk/{mid}/{uid} = 누른 횟수 (예전 true = 1)
+  const HEARTS = 4;
+  const relOf = (R, mid, uid) => { const v = (((R.chainOk || {})[mid]) || {})[uid]; return v === true ? 1 : Math.max(0, Math.floor(Number(v) || 0)); };
   const ultUsed = (R, mid, uid) => Object.values(healsOf(R, mid)[uid] || {}).some((v) => v === '!ult' || isTrue(v));
   // 퍼펙트 연속: 첫 시도부터 다 맞힌 시도가 몇 번 이어졌나 (첫 시도가 아니면 0)
   const perfStreak = (rec) => { let n = 0; for (const t of rec.tries) { if (t.total > 0 && t.correct === t.total) n++; else break; } return n; };
@@ -90,7 +95,7 @@ DS.Raid = (function () {
   // → 대부분 막힌 친구에게 가지만 가끔 다른 친구에게도 가서 티가 나지 않는다. rnd = 0~1 난수 (없으면 Math.random)
   function healTarget(L, R, mid, healer, rnd) {
     const cand = activeIds(R).filter((u) => u !== healer && u !== teacherUid(R)).map((u) => ({ u, rec: record(L, R, mid, u) }))
-      .filter(({ u, rec }) => rec.submitted && (rec.chain ? !rec.done : !rec.perfect) && healsTo(R, mid, u, L).length < HEAL_MAX) // ⚔ #50 소레이드 = 대장을 아직 못 잡은 친구
+      .filter(({ u, rec }) => rec.submitted && (rec.chain ? !rec.done : !rec.perfect) && (rec.hearts ? rec.left < HEARTS : healsTo(R, mid, u, L).length < HEAL_MAX)) // ⚔ #50 소레이드 = 대장을 아직 못 잡은 친구
       .map(({ u, rec }) => ({ u, w: rec.left <= 0 ? 8 : rec.left <= 1 ? 4 : rec.left <= 2 ? 2 : 1 }));
     const sum = cand.reduce((a, c) => a + c.w, 0);
     if (!sum) return null;
@@ -119,9 +124,10 @@ DS.Raid = (function () {
   const pracUsed = (R, mid, uid, rec) => Math.max(Number((((R.players || {})[uid] || {}).pr || {})[mid]) || 0, (rec && rec.pass) || 0);
   function chainRecord(L, R, mid, uid) {
     const items = chainItems(L, R, mid, uid, 0), n = items.length, subs = chainSubs(R, mid, uid);
-    const ok = !!((((R.chainOk || {})[mid]) || {})[uid]);
     let stage = 0, cost = 0, wrong = 0, lastWrong = null, byPh = false, leftAt = -1; const says = [], wrongAt = {}; // 📕 wrongAt = 단계마다 첫 판에서 틀린 적 (결과 · 오답노트 칸)
-    const healed = healsReceived(R, mid, uid, L), slots = CHAIN_SLOTS + healed; // 💚 #50 친구 힐 = 첫 판 기회 +1칸 (받는 수 상한 HEAL_MAX)
+    // ❤ 2026-11-13 밤: ❤ 4 에서 시작 · 졸개 오답 −0.5 · 대장 −1 · 💚 받은 힐 = ❤ 가 3 이하가 되면 +1 (상한 4) · ❤ 0 = 잠김 → 풀어주기 +1 · 그 뒤 맞히면 +1
+    const slots = HEARTS, rel = relOf(R, mid, uid); let h = HEARTS, res = healsTo(R, mid, uid, L).length, relLeft = rel, bonus = false, healed = 0;
+    const refill = () => { while (h <= HEARTS - 1 && res > 0) { h = Math.min(HEARTS, h + 1); res -= 1; healed += 1; } };
     let pCost = 0; // 🔥 #40 (2026-11-09): 연습 판마다 새 기회 4칸 · 졸개 오답 0.5 · 대장 오답 1 · 0 = 그 판 끝(EXP 없음) · 근거 빈칸 오답은 안 깎음
     let pass = 0, pStage = 0, pItems = null, pSays = [], pDoneN = 0, pWhy = -1, whyOk = false; const whySet = new Set(); // 🧩 #52 ② 근거 줄 여러 개: 연습 판에서 맞힌 근거 줄(단계 번호) // 💡 pWhy = 연습 판에서 근거 빈칸을 기다리는 단계 · whyOk = 근거 줄을 한 번이라도 맞힘(💡 힌트 주기 열림) // pDoneN = 연습 사슬 완성 횟수 (🔥 1번당 EXP +1 · 2026-11-09 선생님)
     subs.forEach((t) => {
@@ -130,9 +136,10 @@ DS.Raid = (function () {
       const given = fixG(it0, raw0);
       if (!t.p && t.ph) { if (stage < n && t.s === stage) { says.push(items[stage].say || ''); if (items[stage].why) says.push(items[stage].why.text); stage += 1; lastWrong = null; byPh = true; } return; } // ✍ #50 ③ 서술형 통과 = 남은 단계 모두 푼 것으로 (기회 · 잠김과 상관없이 · 퍼펙트 아님)
       if (!t.p) {
-        if (stage >= n || cost >= slots || t.s !== stage) return;
-        if (DS.Quiz.grade(items[stage], given)) { says.push(items[stage].say || ''); if (items[stage].why) says.push(items[stage].why.text); stage += 1; lastWrong = null; if (stage >= n) leftAt = slots - cost; } // 💡 첫 판 = 근거 줄을 완성 문장으로
-        else { cost += stage === n - 1 ? 1 : 0.5; wrong += 1; wrongAt[stage] = true; lastWrong = { s: stage, given }; }
+        if (stage >= n || t.s !== stage) return;
+        if (h <= 0) { if (relLeft > 0) { relLeft -= 1; h = 1; bonus = true; } else return; } // 🙋 잠김 → 선생님 풀어주기 한 번 = ❤ 1
+        if (DS.Quiz.grade(items[stage], given)) { says.push(items[stage].say || ''); if (items[stage].why) says.push(items[stage].why.text); stage += 1; lastWrong = null; if (bonus) { h = Math.min(HEARTS, h + 1); bonus = false; } if (stage >= n) leftAt = h; } // 💡 첫 판 = 근거 줄을 완성 문장으로 · ❤ 풀어주기 뒤 풀어냄 = +1
+        else { h -= stage === n - 1 ? 1 : 0.5; cost = HEARTS - h; wrong += 1; wrongAt[stage] = true; lastWrong = { s: stage, given }; refill(); }
       } else {
         if (t.p !== pass) { pass = t.p; pStage = 0; pSays = []; pWhy = -1; pCost = 0; pItems = chainItems(L, R, mid, uid, pass); }
         if (t.w) { const q = pItems[t.s]; if (t.s === pWhy && q && q.why && Number(raw0) === q.why.answer) { pSays.push(q.why.text); pWhy = -1; whyOk = true; whySet.add(t.s); if (pStage >= pItems.length) pDoneN += 1; } return; } // 💡 근거 빈칸 (틀려도 벌 없음 · 다시 고름)
@@ -141,16 +148,18 @@ DS.Raid = (function () {
         else pCost += pStage === pItems.length - 1 ? 1 : 0.5; // #40
       }
     });
-    const left = Math.max(0, slots - cost), done = stage >= n, fail = !done && left <= 0;
+    if (stage < n && h <= 0 && relLeft > 0) h = 1; // 풀어준 뒤 아직 안 냄 = ❤ 1
+    cost = Math.max(0, HEARTS - h);
+    const left = Math.max(0, h), done = stage >= n, fail = false, ok = rel > 0; // ❤ 0 이어도 「못 맞힘」으로 끝나지 않음 — 선생님 풀어주기를 기다림
     // ⛓ 💚 #50 ①: 대장 처치 때 남은 기회의 정수 칸 = 묶기 · 힐 쓸 수 있는 수 (2.5 → 2 · 서술형으로 끝내면 그때 남은 기회)
-    const tokens = done ? Math.floor(Math.max(0, leftAt >= 0 ? leftAt : slots - cost)) : 0, tokLeft = Math.max(0, tokens - Object.values(healsOf(R, mid)[uid] || {}).filter((v) => !isTrue(v) && !isTcut(v)).length); // 🌟 진필살기 · 금빛 컷인 칸은 묶기 · 힐이 아님
-    const locked = !done && !fail && left <= 1 && !ok;
+    const tokens = done ? Math.floor(Math.max(0, leftAt >= 0 ? leftAt : h)) : 0, tokLeft = Math.max(0, tokens - Object.values(healsOf(R, mid)[uid] || {}).filter((v) => !isTrue(v) && !isTcut(v)).length); // 🌟 진필살기 · 금빛 컷인 칸은 묶기 · 힐이 아님
+    const locked = !done && h <= 0;
     const whyM = whyStages(items).length, whyDone = [...whySet].sort((a, b) => a - b);
     // 📕 결과 · 오답노트용 단계별 맞힘 (2026-11-11 #80 점검에서 찾음: tries 가 비어 대장까지 잡아도 「틀림 (기회를 다 씀)」 · 개념 이해도 0% 로 셈) — stOk = 첫 판에서 푼 단계 · stFirst = 그 단계를 한 번도 안 틀리고
     const stOk = Array.from({ length: n }, (_, i) => i < stage), stFirst = stOk.map((v, i) => v && !wrongAt[i]);
     return { chain: true, stOk, stFirst, whyM, whyN: whyDone.length, whyDone, whyAll: whyM > 0 && whyDone.length >= whyM, items, n, stage, cost, left, slots, wrong, lastWrong, says, done, fail, locked, ok, byPh, perfect: done && wrong === 0 && !byPh, perfectAt: done && wrong === 0 && !byPh ? 0 : -1, tokens, tokLeft,
       best: stage, total: n, submitted: subs.length > 0, tries: [], last: null, allRight: done, practice: pass > 0, pass, pStage, pSays, pItems, pDoneN, pWhy, whyOk, pLeft: Math.max(0, CHAIN_SLOTS - pCost), pFail: pass > 0 && pCost >= CHAIN_SLOTS && pStage < (pItems || []).length,
-      healed, canRetry: false, canHeal: tokLeft > 0, nextAttempt: subs.length, nextK: subs.length ? subs[subs.length - 1].k + 1 : 0 };
+      healed, hearts: true, rel, canRetry: false, canHeal: tokLeft > 0, nextAttempt: subs.length, nextK: subs.length ? subs[subs.length - 1].k + 1 : 0 };
   }
   const CHAIN_SLOTS = 4;
   // 🧩 #52 ② (2026-11-10): 소레이드 하나에 근거 줄 1~3개 (단계마다 why) · 💡 힌트 = 근거 줄마다 1번 · 저장 이름 = 첫 근거 줄은 예전처럼 players/{나}/hint/{mid} · 둘째부터 hint/{mid}@{단계}
@@ -177,11 +186,22 @@ DS.Raid = (function () {
     //   🔁 v3: 퍼펙트 뒤 새 문제를 맞히면 기회를 안 씀 (대신 💚 힐 / ⛓ 묶기 한 번) · 틀리면 기회 −1 · 힐 · 묶기는 기회를 안 씀
     const slots = RETRIES + 1 + healsReceived(R, mid, uid, L);
     if (NEWR(R)) {
-      const prac = perfectAt >= 0 ? tries.slice(perfectAt + 1) : [], ok = prac.filter((t) => t.total > 0 && t.correct === t.total).length;
-      const used = (perfectAt >= 0 ? perfectAt + 1 : tries.length) + (prac.length - ok), left = Math.max(0, slots - used), tokens = ok, tokLeft = Math.max(0, tokens - healsGiven(R, mid, uid));
-      const fix = perfectAt >= 0 && !!last && prac.length > 0 && last.correct < last.total; // 방금 새 문제를 틀림 → 같은 문제 고치기
-      return { tries, best, total, last, allRight, perfectAt, perfect: perfectAt >= 0, practice, submitted: tries.length > 0, slots, left, healed: healsReceived(R, mid, uid, L), v3: true, tokens, tokLeft, fix,
-        canRetry: tries.length > 0 && left > 0, canHeal: tokLeft > 0, nextAttempt: tries.length };
+      // ❤ 2026-11-13 밤: ❤ 4 · 한 번 공격에 하나라도 틀리면 −1 (몇 개를 틀려도 −1) · ❤ 0 = 🙋 잠김 → 풀어주기 ❤ +1 → 그렇게 다 맞히면 ❤ +1 · 💚 받은 힐 = ❤ +1 (상한 4)
+      const rel = relOf(R, mid, uid); let h = HEARTS, res = healsTo(R, mid, uid, L).length, relLeft = rel, bonus = false, healed = 0, pAt = -1;
+      const refill = () => { while (h <= HEARTS - 1 && res > 0) { h += 1; res -= 1; healed += 1; } };
+      for (let i = 0; i < tries.length; i++) {
+        const t = tries[i];
+        if (h <= 0) { if (relLeft > 0) { relLeft -= 1; h = 1; bonus = true; } else continue; }
+        if (t.total > 0 && t.correct === t.total) { pAt = i; if (bonus) h = Math.min(HEARTS, h + 1); break; }
+        h -= 1; refill();
+      }
+      if (pAt < 0 && h <= 0 && relLeft > 0) h = 1; // 풀어준 뒤 아직 안 냄
+      const pf = pAt >= 0 ? tries[pAt].attempt : -1, pIdx = pAt;
+      const prac = pIdx >= 0 ? tries.slice(pIdx + 1) : [], ok = prac.filter((t) => t.total > 0 && t.correct === t.total).length;
+      const left = Math.max(0, h), tokens = ok, tokLeft = Math.max(0, tokens - healsGiven(R, mid, uid)), locked = tries.length > 0 && pIdx < 0 && h <= 0;
+      const fix = pIdx >= 0 && !!last && prac.length > 0 && last.correct < last.total; // 방금 새 문제를 틀림 → 같은 문제 고치기 (❤ 안 깎임)
+      return { tries, best, total, last, allRight, perfectAt: pIdx, perfect: pIdx >= 0, practice: pIdx >= 0 && tries.length - 1 > pIdx, submitted: tries.length > 0, slots: HEARTS, left, healed, hearts: true, rel, locked, firstPerfect: pf === 0, v3: true, tokens, tokLeft, fix,
+        canRetry: tries.length > 0 && (pIdx >= 0 || h > 0), canHeal: tokLeft > 0, nextAttempt: tries.length };
     }
     const used = tries.length + healsGiven(R, mid, uid), left = Math.max(0, slots - used);
     return { tries, best, total, last, allRight, perfectAt, perfect: perfectAt >= 0, practice, submitted: tries.length > 0, slots, left, healed: healsReceived(R, mid, uid, L),
@@ -264,7 +284,8 @@ DS.Raid = (function () {
       if ((R.help || {})[u]) { out.push({ uid: u, why: '직접 요청', level: 2 }); return; }
       if (step && step.kind === 'monster') {
         const rec = record(L, R, step.id, u);
-        if (rec.submitted && !rec.canRetry && !rec.tries.some((t) => t.correct === t.total)) out.push({ uid: u, why: `재도전까지 ${rec.best}/${rec.total}`, level: 1 });
+        if (rec.locked) out.push({ uid: u, why: '❤ 0 · 풀어주기 기다림', level: 2 });
+        else if (rec.submitted && !rec.canRetry && !rec.tries.some((t) => t.correct === t.total)) out.push({ uid: u, why: `재도전까지 ${rec.best}/${rec.total}`, level: 1 });
         else if (!rec.submitted && now - ((R.state || {}).stepAt ?? now) > 120000) out.push({ uid: u, why: '2분째 미제출', level: 0 });
       }
     });
@@ -374,5 +395,5 @@ DS.Raid = (function () {
   const frozeAt = (R) => { const z = ((R && R.state) || {}).fzAt; return z != null ? Number(z) : null; };
   // 던전 진행: 지나온 단계 / 전체 (마무리 = 끝)
   const progress = (L, R) => { const i = (R.state || {}).step ?? -1, n = L.steps.length; return Math.max(0, Math.min(1, (i + (isEnd(L, R) || bossHp(L, R).won ? 1 : 0)) / n)); };
-  return { deadline0, frozeAt, isTester, whyStages, hintKeyOf, chainAns, PRAC_MAX, pracUsed, isTcut, tcutN, chainDown, isChain, chainItems, chainSubs, CHAIN_SLOTS, readyOf, NEWR, variantOf, BIND_TOKEN, tokBinds, solveLock, BOSS_TRIES, bossItem, bossTries, bossState, bossFirst, bossAnswered, skipped, deadline, timeLeft, progress, ATK, soloAtk, BIND_PER, BIND_MAX, bindOf, bindTotal, atkClock, atkTrack, HOLY_SEC, holyUsed, holyCan, holyOn, holyArmed, holyTimes, stone, RETRIES, HEAL_MAX, healsOf, healsGiven, healsTo, healsReceived, healTarget, ultUsed, perfStreak, TRUE_SEC, isTrue, petrify, LIVE_MS, lateIds, liveOpen, roomDone, inClass, activeIds, teacherUid, num, newRoom, stepOf, isLobby, isEnd, isFinale, isClosed, focusOn, restOn, sheetOn, videoOn, autoFocus, fullMarks, canLobby, online, seedOf, itemsFor, attemptsOf, gradeAttempt, record, resultLabel, headcount, pctOf, monsterHp, waiting, allSubmitted, cleared, mastery, bossHp, helpList };
+  return { HEARTS, relOf, deadline0, frozeAt, isTester, whyStages, hintKeyOf, chainAns, PRAC_MAX, pracUsed, isTcut, tcutN, chainDown, isChain, chainItems, chainSubs, CHAIN_SLOTS, readyOf, NEWR, variantOf, BIND_TOKEN, tokBinds, solveLock, BOSS_TRIES, bossItem, bossTries, bossState, bossFirst, bossAnswered, skipped, deadline, timeLeft, progress, ATK, soloAtk, BIND_PER, BIND_MAX, bindOf, bindTotal, atkClock, atkTrack, HOLY_SEC, holyUsed, holyCan, holyOn, holyArmed, holyTimes, stone, RETRIES, HEAL_MAX, healsOf, healsGiven, healsTo, healsReceived, healTarget, ultUsed, perfStreak, TRUE_SEC, isTrue, petrify, LIVE_MS, lateIds, liveOpen, roomDone, inClass, activeIds, teacherUid, num, newRoom, stepOf, isLobby, isEnd, isFinale, isClosed, focusOn, restOn, sheetOn, videoOn, autoFocus, fullMarks, canLobby, online, seedOf, itemsFor, attemptsOf, gradeAttempt, record, resultLabel, headcount, pctOf, monsterHp, waiting, allSubmitted, cleared, mastery, bossHp, helpList };
 })();

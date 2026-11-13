@@ -256,7 +256,8 @@ DS.Act = (function () {
     await N().set(P(code, `heals/${step.id}/${me}/${k}`), Raid.petrify(R, step.id) ? `!tcut@${N().now()}` : `!true@${N().now()}`);
   }
   const chainKnock = (code, mid, k) => N().set(P(code, `state/chainDown/${mid}/${k}`), true); // 💥 리모컨 「쓰러뜨리기」 (state 아래 · 규칙 바꿈 없음)
-  const chainRelease = (code, mid, uid) => N().set(P(code, `chainOk/${mid}/${uid}`), true);
+  // ✔ 풀어주기 (❤ 2026-11-13 밤): 누른 횟수를 저장 (한 번 = ❤ +1) · n = 지금 횟수 + 1 · 소레이드 · 일반 몬스터 같은 칸
+  const chainRelease = (code, mid, uid, n) => N().set(P(code, `chainOk/${mid}/${uid}`), Math.max(1, Math.floor(Number(n) || 1)));
   const scoutReady = (code, id) => N().set(P(code, `ready/${id}/${N().uid()}`), N().TS); // 🌫 정찰 ✋ 준비 완료 (2026-11-09 #17)
   async function saveEnd(code) {
     const raw = await N().get(P(code)); if (!raw || !raw.meta) return;
@@ -412,7 +413,7 @@ DS.Act = (function () {
     const step = DS.Lessons.get(R.meta.lesson).steps[R.state.step];
     if (!step || step.id !== mid) fail('지금은 이 몬스터와 싸우는 시간이 아니에요.');
     const me = N().uid();
-    if (attempt > 0 && !Raid.record(DS.Lessons.get(R.meta.lesson), unpackRoom(R), mid, me).left) fail('재도전 기회를 모두 썼어요.'); // v0.9.6: 기본 4번 + 받은 힐
+    if (attempt > 0) { const rc = Raid.record(DS.Lessons.get(R.meta.lesson), unpackRoom(R), mid, me); if (rc.locked) fail('🙋 ❤ 0 — 선생님 확인을 기다려요'); if (!rc.canRetry) fail('재도전 기회를 모두 썼어요.'); } // ❤ 2026-11-13 밤: ❤ 0 = 풀어주기 기다림
     if ((((R.subs || {})[mid] || {})[me] || {})[attempt] != null) return;
     await N().set(P(code, `subs/${mid}/${me}/${attempt}`), N().pack(given));
     await hit(code, R, `m_${mid}_${attempt}`);

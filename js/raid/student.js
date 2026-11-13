@@ -200,6 +200,9 @@ DS.Student = (function () {
   const focusLock = () => !!(R && Raid().focusOn(R) && !Raid().isLobby(R)); // 👀 집중모드: 학생 설정 잠금 (2026-11-06 사용자)
   // v0.9.3 긴급 (사용자 요청): 🙋 도움 요청 버튼 없앰 — 수업 중에는 학생이 직접 손을 든다. 교사 폰의 「재도전까지 못 맞힘 · 2분째 미제출」 알림은 그대로
   const helpBtn = () => '';
+  // 🧪 테스트 · 👩‍🏫 체험판 학생 판 (2026-11-13 밤 · ❤ 0 잠김): 풀어 줄 선생님이 없어서 「✔ 테스트: 선생님 풀어주기」 = 실제와 같은 풀어주기 한 번 (❤ +1)
+  const relTest = () => (test ? '<button class="btn small" id="st-reltest">✔ 테스트: 선생님 풀어주기</button>' : '');
+  const bindRelTest = (mid) => { const b = document.getElementById('st-reltest'); if (b) b.onclick = () => DS.Control.run(async () => { b.disabled = true; await DS.Act.chainRelease(code, mid, me, Raid().relOf(R, mid, me) + 1); drawn = ''; DS.UI.toast('✔ 풀어 줬어요 · ❤ +1'); }); };
   function bindHelp() {}
 
   function render() {
@@ -346,7 +349,7 @@ DS.Student = (function () {
   // 아래 고정 줄: 기회 ●●●● n · ⚔ 공격! (또는 지금 할 일 한 줄)
   // ❤ 재도전 기회 (2026-11-08 사용자 「남은 기회 이모티콘 · 더 잘 보이게 · 예전처럼 체력바 느낌」): 아래 줄 = 도트 하트(빨강 남음 · 초록 힐로 받음 · 회색 쓴 칸) + 「n / 전체」 · 용사 머리 위 = 체력바 칸
   const heartsOf = (rec) => { const C = DS.ASSETS.chance; return Array.from({ length: rec.slots }, (_, i) => { const st = i < rec.left ? (i < Math.min(rec.left, rec.healed) ? 1 : 0) : 2; return `<i class="ch ch-${st}${rec.left - i > 0 && rec.left - i < 1 ? ' half' : ''}"${C ? ` style="background-image:url('${DS.ASSETS.base}${C.src}');background-position:${st * 50}% 0"` : ''}></i>`; }).join(''); };
-  const dock = (rec, right) => `<div class="st-dock"><span class="dock-tries${rec.left <= 1 ? ' low' : ''}" title="재도전 기회"><b class="dt-l">재도전</b><span class="ch-row">${heartsOf(rec)}</span><b class="dt-n">${rec.left}<small>/${rec.slots}</small></b></span>${right}</div>`;
+  const dock = (rec, right) => `<div class="st-dock"><span class="dock-tries${rec.left <= 1 ? ' low' : ''}" title="${rec.hearts ? '❤ 하트' : '재도전 기회'}"><b class="dt-l">${rec.hearts ? '하트' : '재도전'}</b><span class="ch-row">${heartsOf(rec)}</span><b class="dt-n">${rec.left}<small>/${rec.slots}</small></b></span>${right}</div>`;
   const hpTries = (rec) => `<div class="enc-tries hp-tries" title="남은 재도전 기회">${pipsOf(rec)}</div>`;
   // 🧷 화면 다시 그리기 = paint (2026-11-10 · 「스크롤이 맨 위로」 재발 뿌리 제거): 같은 화면(tag 같음)을 다시 그리면 양피지(.paper) · 몸통 · 창 스크롤 자리를 그대로 둠
   //   예전엔 이 처리가 fightForm 안에만 있어서, 나중에 만든 소레이드 화면(chainView)이 body.innerHTML 을 직접 써 다시 생겼음 → 전투 화면은 모두 paint 로만 그림 (tests/soraid.test.js 가 확인)
@@ -493,9 +496,9 @@ DS.Student = (function () {
   function healNotice(mid) {
     if (!real()) return;
     let k = 0;
-    Raid().healsTo(R, mid, me, L).slice(0, Raid().HEAL_MAX).forEach((h) => {
+    Raid().healsTo(R, mid, me, L).slice(0, Raid().NEWR(R) ? 99 : Raid().HEAL_MAX).forEach((h) => {
       if (healSeen(`${code}|${mid}|${h.from}|${h.k}`)) return;
-      healPop(`+1 💚 ${nickOf(h.from)} 응원`, (k++) * 700); DS.Sound.correct(); drawn = '';
+      healPop(`❤ +1 💚 ${nickOf(h.from)} 힐`, (k++) * 700); DS.Sound.correct(); drawn = '';
       heroFx = { pose: 'healed', until: Date.now() + 1800 }; setTimeout(() => heroFlash('healed', 1600), 60);
     });
   }
@@ -578,14 +581,15 @@ DS.Student = (function () {
         : rec.perfect && rec.canRetry ? `<p class="muted small st-ask">남은 기회 <b>${rec.left}</b>번 · 무엇을 할까요?</p>
         <div class="heal-pick"><button class="btn primary big" id="st-retry">몬스터 묶기</button><button class="btn big heal-btn" id="st-heal">💚 친구 힐</button></div>
         <p class="muted small">몬스터 묶기 = 숫자 바뀐 문제를 맞힌 만큼 몬스터 공격을 늦춤 (1개 1초 · 최대 ${Raid().BIND_MAX}초) · 친구 힐 = 기회가 필요한 친구에게 도전 기회 한 칸</p>`
-        : done && rec.canRetry ? `<p class="okc big-msg">🎉 몬스터 격파!</p><p>틀린 소문제를 다시 풀어 볼까요? <span class="muted small">(남은 기회 ${rec.left}번 · ${rec.v3 ? '같은 문제에서 ✘ 칸을 고쳐요' : '숫자가 모두 바뀌어요'} · 고친 만큼 경험치가 더 쌓여요)</span></p><button class="btn primary big" id="st-retry">🔄 다시 도전</button>`
+        : rec.locked ? `${done ? '<p class="okc big-msg">🎉 몬스터 격파!</p>' : ''}<div class="cr-lock"><b>🙋 선생님 확인을 기다려요</b><p>❤ 0 — 학습지에 풀이를 정리해 두면 선생님이 와서 확인하고 풀어 줘요 (❤ +1 · 그렇게 풀어내면 ❤ +1 더)</p>${relTest()}</div>`
+        : done && rec.canRetry ? `<p class="okc big-msg">🎉 몬스터 격파!</p><p>틀린 소문제를 다시 풀어 볼까요? <span class="muted small">(❤ ${rec.left} · ${rec.v3 ? '같은 문제에서 ✘ 칸을 고쳐요' : '숫자가 모두 바뀌어요'} · 고친 만큼 경험치가 더 쌓여요)</span></p><button class="btn primary big" id="st-retry">🔄 다시 도전</button>`
         : done ? '<p class="okc big-msg">🎉 몬스터 격파! 다음 신호를 기다려요.</p>'
-        : rec.canRetry ? `<p>다시 해 보겠습니까? <span class="muted small">(남은 기회 ${rec.left}번 · ${rec.v3 ? '같은 문제에서 ✘ 칸을 고쳐요' : '숫자가 모두 바뀌어요'})</span></p><button class="btn primary big" id="st-retry">🔄 다시 도전</button>`
+        : rec.canRetry ? `<p>다시 해 보겠습니까? <span class="muted small">(❤ ${rec.left} · 틀리면 ❤ −1 · ${rec.v3 ? '같은 문제에서 ✘ 칸을 고쳐요' : '숫자가 모두 바뀌어요'})</span></p><button class="btn primary big" id="st-retry">🔄 다시 도전</button>`
         : `<p class="muted">${rec.perfect ? '멋져요! 기회를 모두 썼어요. 다른 용사들을 기다려요.' : '재도전 기회를 모두 썼어요. 해설을 보며 학습지에 정리해요.'} 데미지 <b>${rec.best}</b></p>`}
       ${test && (test.prep.img || {})[mid] ? '<button class="btn small" id="st-sheet">📄 학습지 보기 (문제 해설)</button>' : ''}
-      ${dock(rec, done && !rec.canRetry ? '<span class="dock-wait">다음 단계를 기다려요</span>' : '')}
+      ${dock(rec, rec.locked ? '<span class="dock-wait">🙋 확인 기다림</span>' : done && !rec.canRetry ? '<span class="dock-wait">다음 단계를 기다려요</span>' : '')}
       ${helpBtn()}</div>`); // #47 테스트에서도 🙋 도움 요청
-    bindHelp(); bindTop();
+    bindHelp(); bindTop(); bindRelTest(mid);
     { const pk = `${mid}|${t.attempt}`; if (!penShown[pk] && fx) penShown[pk] = Date.now(); const t0 = penShown[pk]; if (t0) body.querySelectorAll('.pen-res li').forEach((li, i) => { if (li.classList.contains('pix-in')) pixIn(li, t0 + i * STAMP_GAP + 150, i + 7); }); body.querySelectorAll('.pen-res li').forEach((li, k) => { li.style.setProperty('--d', `${(k * STAMP_GAP - Math.max(0, Date.now() - (t0 || 0))) / 1000}s`); }); /* 다시 그려도 도장 · 지움이 이어서 */ } // 다시 그려도 이어서 // ✍ 맞힌 줄 = 픽셀 디졸브로 굳음 · 틀린 줄 = CSS 로 스르르
     const sb = $('#st-sheet'); if (sb) sb.onclick = () => sheetModal(step);
     // v0.9.3 (⑤): 공격 자세는 잠깐만 → 다시 서 있는 자세 (격파됐으면 승리 자세 그대로)
@@ -845,7 +849,7 @@ DS.Student = (function () {
     else if (!prac && rec.done) mainHtml = `<p class="okc big-msg">${rec.perfect ? '🌟 퍼펙트 사슬!' : '🎉 대장 처치!'}</p>${story(says)}${rec.byPh ? '<p class="cr-more">✍ 서술형으로 남은 단계를 한 번에!</p>' : ''}${tokPick}${pendTip}${hintBtn}<p class="muted small cr-pnote">숫자만 바뀐 새 문제 · 판마다 연습 기회 4칸 (틀리면 줄어요 · 다 쓰면 그 판 끝) · 수업 기록 · 💎 그대로 · 사슬 완성마다 경험치 +1 (데미지 0)</p>`;
     else if (pFail) mainHtml = `<p class="paper-note">✘ 이번 연습 판은 기회를 다 썼어요 — 끝 (EXP 없음) · 아래 풀이를 보고 다시 해 봐요</p>${story(pItems.map((x) => x.say))}${tokPick}${pendTip}${hintBtn}`; // #40
     else if (pDone) mainHtml = `<p class="okc">✔ 연습 사슬 완성! <b class="gold">+1 EXP</b></p>${story(says)}${tokPick}${pendTip}${hintBtn}<p class="muted small cr-pnote">숫자만 바뀐 새 문제 · 판마다 연습 기회 4칸 (틀리면 줄어요 · 다 쓰면 그 판 끝) · 수업 기록 · 💎 그대로 · 맞히면 공격 이펙트가 나가요 (데미지 0)</p>`;
-    else if (rec.locked && !prac) mainHtml = `${story(says)}<div class="cr-lock"><b>🙋 선생님 확인을 기다려요</b><p>기회가 1칸 남았어요 — 학습지에 풀이를 정리해 두면 선생님이 와서 확인해 줘요.</p></div>`;
+    else if (rec.locked && !prac) mainHtml = `${story(says)}<div class="cr-lock"><b>🙋 선생님 확인을 기다려요</b><p>❤ 0 — 학습지에 풀이를 정리해 두면 선생님이 와서 확인하고 풀어 줘요 (❤ +1 · 그렇게 풀어내면 ❤ +1 더)</p>${relTest()}</div>`;
     else mainHtml = `${probBox}${storyF(says)}<div class="paper"><div class="paper-h"><b>${esc(step.title)} · ${stage === pItems.length - 1 ? '👑 대장' : `졸개 ${'①②③④⑤⑥'[stage]}`}</b><small>${prac ? '연습 (숫자 바뀜 · 데미지 없음)' : '틀려도 숫자는 그대로'}</small></div>
         ${lastWrong ? '<p class="paper-note">✘ 다시 생각해 봐요 — 같은 문제예요</p>' : ''}<div class="items">${itemHtml(q, 0, lastWrong, null, cform.given)}</div></div>`;
     // ⚔ #50 ② 아래 칸 = 왼쪽 「⚔ 공격」(대장 뒤 = 「🔥 한 판 더」) · 오른쪽 「✍ 서술형 도전 📸」
@@ -855,7 +859,7 @@ DS.Student = (function () {
     paint(body, `${key}|${needWhy ? 'w' : 'q'}`, `<div class="panel framed st-fight ch-wrap${qView || needWhy ? ' cr-q' : ' st-after'}"><div class="cr-scw">${scene(step, rec, hp, '', '')}${qView || needWhy ? cheer : ''}</div>
       <div class="cr-chips">${chips}${prac && whyTag ? `<b class="cr-whyn">${whyTag}</b>` : ''}</div>${pendPh}${qView || needWhy ? '' : cheer}${hintsBox}${mainHtml}
       ${dock(prac && !pDone && !pFail ? pDock : rec, `<div class="cr-dbtns">${dockL}${wrBtn}</div>`).replace('class="st-dock"', 'class="st-dock cr-dock"')}${helpBtn()}${qView || needWhy ? '' : '<div class="cr-pad"></div>'}</div>`); // cr-pad = 아래 칸(두 줄)에 맨 끝 단추가 가리지 않게
-    bindTop(); bindHelp();
+    bindTop(); bindHelp(); bindRelTest(mid);
     body.querySelectorAll('[data-pick]').forEach((b) => b.addEventListener('click', () => {
       const v = b.dataset.pick.split('|')[1];
       if (q.type === 'multi') { const nn = Number(v); if (q.empty) cform.given[0] = DS.Quiz.chipToggle(q, cform.given[0], nn); else { const st = new Set(cform.given[0]); if (st.has(nn)) st.delete(nn); else st.add(nn); cform.given[0] = [...st].sort((a, b2) => a - b2); } }
@@ -890,7 +894,7 @@ DS.Student = (function () {
       const okNow = prac ? (r2.pass === pass && r2.pStage > stage) : r2.stage > stage;
       chainAtk = { ok: okNow, big: !prac && r2.done, perfect: !prac && r2.done && r2.perfect, prac }; // ⚔ 2026-11-09 선생님 「졸개 공격도 모션」: 다시 그린 뒤 돌진 · 탄 (아래 render 뒤)
       if (okNow) { if (!DS.Attack) { DS.Sound.slash(); setTimeout(() => DS.Sound.hit(), 160); } if (stage < pItems.length - 1 && DS.Sound.die) setTimeout(() => DS.Sound.die(), 900); /* 🔊 #87 졸개가 사라질 때 (공격 연출 뒤 · 대장은 finish) */ DS.UI.toast(stage === pItems.length - 1 ? (prac ? '✔ 연습 사슬 완성! 🔥 경험치 +1' : r2.perfect ? '🌟 퍼펙트 사슬!' : '👑 대장 처치!') : `✔ 졸개 ${'①②③④⑤⑥'[stage]} 처치!`); }
-      else { if (!DS.Attack) DS.Sound.squish(); if (!prac) DS.UI.toast(r2.locked ? '🙋 기회 1칸 — 선생님 확인을 기다려요' : r2.fail ? '기회를 다 썼어요' : `✘ 틀렸어요 · 기회 −${stage === n - 1 ? 1 : 0.5}`); else DS.UI.toast(r2.pFail ? '✘ 이번 연습 판은 기회를 다 썼어요' : `✘ 틀렸어요 · 연습 기회 −${stage === pItems.length - 1 ? 1 : 0.5}`); }
+      else { if (!DS.Attack) DS.Sound.squish(); if (!prac) DS.UI.toast(r2.locked ? '🙋 ❤ 0 — 선생님 확인을 기다려요' : `✘ 틀렸어요 · ❤ −${stage === n - 1 ? 1 : 0.5}`); else DS.UI.toast(r2.pFail ? '✘ 이번 연습 판은 기회를 다 썼어요' : `✘ 틀렸어요 · 연습 기회 −${stage === pItems.length - 1 ? 1 : 0.5}`); }
       render(); chainAttack();
     });
   }
