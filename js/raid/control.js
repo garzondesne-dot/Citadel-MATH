@@ -29,6 +29,8 @@ DS.Control = (function () {
   // ▶ 를 눌렀을 때: 몬스터가 아직 남았으면 확인을 한 번 더 받는다 (미제출 → 빼고 판정 / 체력 남음 → 그래도 넘어가기)
   let armed = '';
   async function forward(code, R, L) {
+    // 🏕 2026-11-13 선생님 「쉼터상태에서 앞으로누르면 자동으로 수업으로」: 쉼터(놀이 중이어도) = 「쉼터 끝」과 똑같이 닫고(놀이 결과 · 보상 그대로) 이어서 다음 단계
+    if (Raid().restOn(R)) { await Act().setRest(code, false); R = Act().unpackRoom(await DS.Net.get(`rooms/${code}`)) || R; }
     if (Raid().isFinale(L, R)) return forwardEnd(code, R, L);
     const step = Raid().stepOf(L, R);
     if (step && step.kind === 'monster' && !Raid().cleared(L, R, step.id)) {
