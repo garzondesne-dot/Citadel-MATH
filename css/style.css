@@ -3570,3 +3570,7 @@ body.trial-teach .trial-tch .tch-pc { color: #c9b896; font-size: 11px; }
 .td-all > summary { cursor: pointer; font-weight: 700; margin: 4px 0; }
 .sc-bells .bl-row { display: flex; align-items: center; gap: 6px; margin: 4px 0; } .sc-bells .bl-row b { width: 52px; flex: none; white-space: nowrap; font-size: 14px; } .sc-bells input[type=time] { min-width: 0; flex: 1 1 0; } .sc-bells input[type=time] { font: inherit; padding: 4px; }
 .sc-bells .bl-tabs { display: flex; gap: 4px; margin: 6px 0; } .sc-bells .bl-same { display: block; margin: 6px 0; }
+
+/* 🚪 2026-11-13 밤: 처음 화면으로 · 로그아웃 (학생 「내 용사」 맨 아래 · 교사 화면 맨 아래) */
+.camp-bye, .t-bye { display: block; width: 100%; margin: 14px 0 4px; background: #3a2a2a !important; color: #f5e6c8 !important; border: 2px solid #8a5a4a !important; }
+.t-bye:disabled { opacity: .45; }

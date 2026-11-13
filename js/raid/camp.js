@@ -645,11 +645,12 @@ DS.Camp = (function () {
       el.innerHTML = `<div class="quiz-box framed set-box mh-box"><div class="set-head">${T ? '<h2>🧙 선생님 모습</h2>' : `<h2 class="me-h"><span>🧙 내 용사</span><b class="g">💎 ${gemLeft()}</b><b class="s">📜 ${scrLeft()}</b></h2>`}<button class="btn" id="set-x" aria-label="닫기">✕</button></div>
         ${meTop()}<div class="set-tabs">${tabs.map(([k, n]) => `<button data-tab="${k}" class="${tab === k ? 'on' : ''}">${n}</button>`).join('')}</div>
         ${tab === 'enh' && !T ? enhTab() : tab === 'gem' ? gemTab() : recTab()}
-        ${barHtml()}${sheetOn ? sheetHtml() : ''}</div>`;
+        ${T || DS.TRIAL ? '' : '<button class="btn camp-bye" id="camp-bye">🚪 처음 화면으로 (로그아웃)</button>'}${barHtml()}${sheetOn ? sheetHtml() : ''}</div>`;
       { const sb2 = el.querySelector('.set-box'); if (sb2) sb2.scrollTop = keep; }
       paintStills(el);
       { const ap = el.querySelector('#ap'); if (ap) ap.onclick = () => demo(); }
       el.querySelector('#set-x').onclick = close;
+      { const bye = el.querySelector('#camp-bye'); if (bye) bye.onclick = () => DS.Control.run(async () => { if (!window.confirm('로그아웃하고 처음 화면으로 갈까요?\n(다시 들어올 때 반 · 번호 · 비밀번호)')) return; await DS.Account.logout(); location.reload(); }); } // 🚪 2026-11-13 밤: 학생 「내 용사」 맨 아래 = 처음 화면
       el.querySelector('#mh-top').onclick = () => { pickH = hero; sheetOn = true; DS.Sound.clank(); draw(); };
       el.querySelectorAll('[data-tab]').forEach((b) => (b.onclick = () => { tab = b.dataset.tab; try { localStorage.setItem('citadel-settab', tab); } catch (e) { /* 이 기기에만 */ } DS.Sound.clank(); const sb3 = el.querySelector('.set-box'); if (sb3) sb3.scrollTop = 0; draw(); if (tab === 'gem') demo(); }));
       { const eg = el.querySelector('#enh-go'); if (eg) eg.onclick = () => { const nx = ENH[lvNow() + 1]; if (!nx || gemLeft() < nx.g || scrLeft() < (nx.s || 0)) { DS.UI.toast('💎 가 모자라요', 2000); return; } P.enh++; DS.Sound.clank(); draw(); const pa = el.querySelector('#mh-party'); if (pa) { pa.classList.remove('glow'); void pa.offsetWidth; pa.classList.add('glow'); } }; }

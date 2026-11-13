@@ -259,6 +259,11 @@ DS.App = (function () {
       document.querySelectorAll('.t-auth').forEach((e) => { e.innerHTML = ''; }); // 2026-11-07 메뉴 정돈: 로그아웃은 ⚙ 설정 안으로
       document.querySelectorAll('.t-auth-out').forEach((e) => { e.innerHTML = '<div class="acc-card"><b>👩‍🏫 교사 계정</b><span class="muted small">로그인됨</span><button class="btn small t-out">로그아웃</button></div>'; });
       document.querySelectorAll('.t-out').forEach((b) => (b.onclick = go(async () => { await A().logout(); await teacherAuth(); await studentAuth(); })));
+      { // 🚪 2026-11-13 밤 (머리 확인 요청 · 선생님 「처음 로그인 화면으로 돌아가는 과정이 전무함」): 교사 화면 맨 아래 「🚪 로그아웃 · 처음 화면」 · 확인 한 번 · 수업이 열려 있으면 흐림
+        const by = $('#t-bye'); if (by) { const lv = (await DS.Net.get('live').catch(() => null)) || {}, busy = Object.values(lv).some((v) => v && DS.Raid.liveOpen(v, Date.now()));
+          by.disabled = busy; by.title = busy ? '수업이 열려 있어요 — 수업을 끝낸 뒤 로그아웃해요' : '';
+          by.onclick = go(async () => { if (by.disabled || !window.confirm('로그아웃하고 처음 화면으로 갈까요?')) return; await A().logout(); location.reload(); }); }
+      }
       const cs = Object.keys((await A().masks()) || {}).sort();
       const TB = (await DS.Net.get('tester').catch(() => null)) || {}; // 🧪 #122 베타 반 = 반 고르기에 🧪
       $('#t-cls').innerHTML = cs.length ? cs.map((c) => `<option value="${esc(c)}">${A().isBetaOf && A().isBetaOf(TB, c) ? '🧪 ' : ''}${esc(c)}</option>`).join('') : '<option value="">(명단 없음 — 수업 준비에서 올려요)</option>';
