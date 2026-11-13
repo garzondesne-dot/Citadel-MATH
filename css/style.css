@@ -3529,3 +3529,7 @@ body.trial-teach .trial-tch .tch-pc { color: #c9b896; font-size: 11px; }
 .boss-chips { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; margin: 6px 0; }
 .bchip { min-width: 40px; height: 26px; padding: 0 8px; border-radius: 13px; background: #2a2218; border: 1px solid #5c4a30; color: #d8c8a8; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 3px; }
 .bchip.ok { background: #15382a; border-color: #2d8c5a; color: #c9f5dd; } .bchip.ng { background: #3a1717; border-color: #b8322a; color: #ffd9d6; } .bchip.bonus { border-style: dashed; }
+
+/* 🎯 허수아비 숫자 꼬리표 (2026-11-13 밤): 📄 학습지 숫자 / 🔁 바뀐 숫자 · 문제(문항) 위 작은 띠 */
+.num-tags { margin: 2px 0 4px; flex-basis: 100%; width: 100%; } .num-tag { display: inline-block; white-space: nowrap; margin: 2px 0; padding: 1px 8px; border-radius: 10px; font-size: 12px; font-weight: 700; }
+.num-tag.ws { background: #fff3d6; color: #6b4a14; border: 1px solid #b8873a; } .num-tag.ch { background: #e6f0ff; color: #1f4f8a; border: 1px solid #6a93c8; }

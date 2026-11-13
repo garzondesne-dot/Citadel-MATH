@@ -299,6 +299,10 @@ DS.Bonus = (function () {
   }
   // ✍ 학습지 숫자 문제 (2026-11-13 밤): 소레이드 = 첫 판(pass 0) 단계들 · 정답 = 대장 · 단계별 기대 중간값 (수업 ✍ 와 같은 모양) / 보통 문제 = 첫 시도(학습지) 숫자
   const wsItems = (L, mid) => { const ask = (((DS.Rubrics || {})[L.id] || {})[mid] || {}).ask; if ((L.chain || []).includes(mid) && L.chainItems) { const it = L.chainItems(mid, `ws|${mid}`, 0); return [{ question: ask || (monOf(L, mid) || {}).title || mid, answer: (it[it.length - 1] || {}).answer, solution: it.map((x) => x.say || '').filter(Boolean).join(' / '), check: Object.assign({}, ...it.map((x) => x.check || {})) }]; } const it = itemsOf(L, mid, `ws|${mid}`, 0); return ask ? it.map((q, i) => (i ? q : Object.assign({}, q, { question: ask }))) : it; };
+  // 🎯 허수아비 숫자 (2026-11-13 밤 선생님 「허수아비는 풀이기록없는 문항만 학습지 문제그대로. 풀이기록있어서 맞춘기록있으면 바뀐숫자」):
+  //   문제마다 그 학생의 수업 기록(records · 오답노트 칸) — 수업에서 맞힘(o 한 번에 · f 고쳐서) = 바뀐 숫자 / 기록 없음 · 못 맞힘 = 학습지 숫자 첫 판 · 형성평가 재대결 = 문항마다 (bossM) · ✍ 서술형은 늘 학습지 숫자
+  const classOk = (L, mid) => { const r = recs && recs[L.id]; if (!r) return false; const st = (r.mons || {})[mid]; return st === 'o' || st === 'f'; };
+  const bossShift = (L) => { const r = recs && recs[L.id], m = String((r || {}).bossM || ''); return Array.from({ length: L.boss.hpItems || L.boss.items }, (_, i) => (m[i] === 'o' ? 1 : 0)); };
   // ── 1:1 전투 ───────────────────────────────────────────
   async function fight(L, mid, fo = {}) {
     if (DS.Fresh && !preview && !(await DS.Fresh.gate())) return; // 🔄 #55 ⑤ 성채 · 허수아비 방도 옛 판이면 새 판으로 바꾼 뒤
@@ -310,12 +314,15 @@ DS.Bonus = (function () {
     const wasOpen = (() => { const x = !castle && isField(L, mid) ? noteOf(L) : null; const st = x && !x.none ? x.mons[x.ids.indexOf(mid)] : null; return !!(st && (DS.Note.OPEN[st] || st === 'a')); })(); // 📕 틀림 · 안 풂이었던 문제
     if (fo.quest && DS.Titles && DS.Titles.band && me) N().get(`accounts/${ck(me.c)}/${fo.quest.n}/title`).then((t) => { if (t === 'quester') setTimeout(() => DS.Titles.band(`✏ ${String(fo.quest.name || `${fo.quest.n}번`).slice(0, 8)} 출제`), 500); }).catch(() => {}); // 🏅 #63 ✏ 출제자: 내 문제가 몬스터로 나올 때 띠
     const seed = fo.quest ? fo.quest.seed : `${N().uid()}|${Date.now()}`; // ✏ 친구가 낸 문제 = 친구가 고른 숫자 그대로 (첫 판)
-    let attempt = fo.quest ? 1 : first && !isField(L, mid) ? 0 : 1, left = TRIES; // 📕 수업 문제 복습은 처음부터 숫자를 바꿈
+    const dummyNum = !castle && !fo.quest && (isField(L, mid) || mid === 'boss'), shift = dummyNum && mid === 'boss' ? bossShift(L) : null; // 🎯 2026-11-13 밤 허수아비 숫자
+    let attempt = fo.quest ? 1 : dummyNum ? (mid === 'boss' ? 0 : classOk(L, mid) ? 1 : 0) : first && !isField(L, mid) ? 0 : 1, left = TRIES; // 📕 수업 문제 복습은 처음부터 숫자를 바꿈 → 🎯 수업에서 맞힌 문제만 바꿈
+    const itemsAt = (a) => (shift ? itemsOf(L, mid, seed, a).map((q, i) => (shift[i] && !a ? itemsOf(L, mid, seed, 1)[i] : q)) : itemsOf(L, mid, seed, a)); // 👑 재대결: 수업에서 맞힌 문항만 첫 판부터 바뀐 숫자
+    const numTag = (i, a) => (!dummyNum ? '' : (a || (shift && shift[i])) ? '<b class="num-tag ch">🔁 바뀐 숫자</b>' : '<b class="num-tag ws">📄 학습지 숫자</b>');
     const chainRoom = castle && !fo.quest && (L.chain || []).includes(mid); // ⚔ 소레이드 방 (2026-11-09 #23 · 혼자 · 성채용 규칙)
     // 🎯 2026-11-13 선생님 「수업 서술형 문제는 허수아비가 스캔을 제공」: 그 차시 수업에서 ✍ 서술형이던 문제(채점 기준표 raid) = 답을 맞힌 뒤 「📷 종이에 쓴 풀이 찍기」 · 성채와 같은 사진 단계 · 숫자 = 허수아비 숫자 그대로
     const scPhoto = !castle && !fo.quest && (!!(((DS.Rubrics || {})[L.id] || {})[mid] || {}).raid || !!(DS.TRIAL && DS.Photo && DS.Photo.ready(L.id, mid))); // 👩‍🏫 체험판 = 그 판의 서술형 칸(TRIAL_PH)
     let pass = first ? 0 : 1, helped = false, says = [], bonusPhoto = false, chainMid = false, pracMode = false; // ✍ #50 chainMid = 사슬 도중 서술형 · 🔥 pracMode = 처치 뒤 한 판 더 (연습 · 보상 없음 · 3판)
-    const n = chainRoom ? L.chainItems(mid, seed, pass).length : itemsOf(L, mid, seed, attempt).length;
+    const n = chainRoom ? L.chainItems(mid, seed, pass).length : itemsAt(attempt).length;
     const solved = new Array(n).fill(false);
     const el = document.createElement('div'); el.className = 'bn-fight';
     document.body.appendChild(el);
@@ -348,7 +355,7 @@ DS.Bonus = (function () {
     }, 200);
     const img = DS.Act.hasImg(prep, mid), cslot = null, vslot = DS.Video.pick(L, prep.video, mid) ? mid : cslot, vid0 = DS.Video.pick(L, prep.video, vslot);
     // 🎬 꼭대기 층(평가): 소문제마다 풀이 영상(q.video) · 한 번 틀린 뒤에 열림 (예제 영상 → 다른 숫자로 직접, 2026-11-03 사용자 확정)
-    let cur = itemsOf(L, mid, seed, attempt), wrongSeen = !!rec.tries;
+    let cur = itemsAt(attempt), wrongSeen = !!rec.tries;
     const vidNow = () => { if (!L.eval) return vid0; const i = solved.findIndex((x) => !x); return i >= 0 && cur[i] ? cur[i].video || null : null; };
     let drawN = 0;
     const draw = (cls = '', msg = '') => {
@@ -385,8 +392,8 @@ DS.Bonus = (function () {
         const sc = el.querySelector('.bf-body'), keep = first ? null : { y: el.scrollTop, b: sc ? sc.scrollTop : 0, p: (el.querySelector('.bf-paper') || {}).scrollTop || 0 };
         const ready = todo.every((i) => filled(items[i], G[i]));
         const paper = `<div class="paper bf-paper"><div class="paper-h"><b>${esc(mon.title)}</b><small>${todo.length > 1 ? `남은 ${todo.length}문제 모두 풀고 공격` : '풀고 공격'}</small></div>
-          ${attempt ? `<p class="paper-note">${mid === 'boss' ? '🔄 세트가 바뀌었어요' : '🔄 숫자가 바뀌었어요'} — 틀렸던 것만 새 숫자로</p>` : ''}
-          <div class="items">${todo.map((i) => `${S.withAns(S.itemHtml(items[i], i, G), items[i], G[i], i)}${hasHint(items[i]) ? `<div class="bf-hint">${DS.Hint.html(items[i], `bf${i}`, hOpen.has(i))}</div>` : ''}`).join('')}</div></div>
+          ${attempt && (!dummyNum || roundNo > 1) ? `<p class="paper-note">${mid === 'boss' ? '🔄 세트가 바뀌었어요' : '🔄 숫자가 바뀌었어요'} — 틀렸던 것만 새 숫자로</p>` : ''}
+          ${dummyNum && mid !== 'boss' ? `<p class="num-tags">${numTag(0, attempt)}</p>` : ''}<div class="items">${todo.map((i) => `${mid === 'boss' && dummyNum ? `<p class="num-tags">${numTag(i, attempt)}</p>` : ''}${S.withAns(S.itemHtml(items[i], i, G), items[i], G[i], i)}${hasHint(items[i]) ? `<div class="bf-hint">${DS.Hint.html(items[i], `bf${i}`, hOpen.has(i))}</div>` : ''}`).join('')}</div></div>
           <div class="row bf-go-row"><button class="btn primary big dock-go${ready ? ' go-pulse' : ''}" id="bf-go2"${ready ? '' : ' disabled'}>⚔ 공격!</button></div>`;
         const act = draw('', paper); act.innerHTML = '';
         first = false;
@@ -407,7 +414,7 @@ DS.Bonus = (function () {
     let penRes = '';
     const solHtml = (items) => { const w = items.map((q, i) => (!solved[i] && q.solution ? `<li class="math">(${i + 1}) ${DS.UI.pretty(q.solution)}</li>` : '')).filter(Boolean); return w.length ? `<details class="bf-sol"><summary>📖 틀린 문제 해설 보기</summary><ul>${w.join('')}</ul></details>` : ''; };
     const round = async () => {
-      const items = itemsOf(L, mid, seed, attempt); cur = items;
+      const items = itemsAt(attempt); cur = items;
       roundNo++;
       const todo = items.map((_, i) => i).filter((i) => !solved[i]);
       const given = await formRound(items, todo);
@@ -612,7 +619,7 @@ DS.Bonus = (function () {
       const ph0 = act.querySelector('#cf-photo'); if (ph0) ph0.onclick = () => { cur = L.chainItems(mid, seed, pass); goWrite(); };
       return;
     }
-    const act = draw('', `<p>${castle ? (first ? '교과서 단원 평가를 숫자만 바꾼 문제예요. 서술형은 풀이를 학습지에 써요.' : '다시 들어오면 새 숫자로 나와요.') : mid === 'boss' ? (first ? '수업 때 형성평가 문제 그대로예요. 처치하면 🏆 업적!' : '세트를 바꿔 다시 도전해요.') : '📕 수업 때 문제를 숫자만 바꿨어요. 모두 맞히면 오답노트에 복습 완료!'} 기회 ${TRIES}번 — 틀린 소문제만 다시 풀어요.</p>`);
+    const act = draw('', `<p>${castle ? (first ? '교과서 단원 평가를 숫자만 바꾼 문제예요. 서술형은 풀이를 학습지에 써요.' : '다시 들어오면 새 숫자로 나와요.') : mid === 'boss' ? (shift ? (shift.some(Boolean) ? '수업 때 맞힌 문항은 🔁 바뀐 숫자 · 나머지는 📄 학습지 숫자 그대로예요. 처치하면 🏆 업적!' : '수업 때 형성평가 문제 그대로예요 (📄 학습지 숫자). 처치하면 🏆 업적!') : first ? '수업 때 형성평가 문제 그대로예요. 처치하면 🏆 업적!' : '세트를 바꿔 다시 도전해요.') : dummyNum && !attempt ? '📕 수업 때 못 푼 문제예요 — 📄 학습지 숫자 그대로. 모두 맞히면 오답노트에 복습 완료!' : '📕 수업 때 문제를 숫자만 바꿨어요. 모두 맞히면 오답노트에 복습 완료!'} 기회 ${TRIES}번 — 틀린 소문제만 다시 풀어요.</p>`);
     act.innerHTML = '<button class="btn primary big" id="bf-go">⚔ 전투 시작</button>';
     act.querySelector('#bf-go').onclick = () => round();
   }
