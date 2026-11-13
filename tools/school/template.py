@@ -23,6 +23,12 @@ for r in range(1, ws.max_row + 1):
     if k == '숫자':
         ws.cell(row=r, column=2).value = '정수 (룬 키패드 입력)'
 
+# 표 · 그림 문제 (2026-11-13 선생님 「표 고정, 묻는 것만 바꾸기」): 설명 탭 맨 아래 한 줄
+last = ws.max_row + 1
+ws.cell(row=last, column=1).value = '표 · 그림'
+ws.cell(row=last, column=2).value = '문제 칸에는 글만 들어가요. 도수분포표처럼 표가 필요하면 표는 수업 준비 → 그 문제 칸 「🖼 고르기」로 그림을 올려 고정하고, 버전 0 · 1 · 2… 에서는 같은 표에서 묻는 곳만 바꿔 쓰세요'
+ws.cell(row=last, column=3).value = '버전 0: 도수가 가장 큰 계급은? / 버전 1: 20 이상 30 미만의 도수는?'
+
 # 차시: 과목 · 단원 · 예시 차시
 ws = wb['차시']
 put(ws, 3, ['수학', '1. 단원 이름', '1', '예시 · 첫 차시', 'ex-1', '02-deep-forest', '90', '5'])
