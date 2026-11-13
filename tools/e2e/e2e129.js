@@ -1,5 +1,5 @@
 // 🎯 2026-11-13 선생님 「수업 서술형 문제는 허수아비가 스캔을 제공」: 허수아비 9차시 문제 5 = 답을 맞혀 처치 → 「📷 종이에 쓴 풀이 찍기」
-//   → 성채와 같은 사진 단계 (허수아비 바뀐 숫자 · own) → 통과 = 💎 · 📜 (문제마다 한 번) · 수업 서술형이 아닌 문제엔 단추 없음 — node tools/e2e/e2e129.js <출력 폴더>
+//   → 성채와 같은 사진 단계 (✍ 2026-11-13 밤: 학습지 숫자 · own 없음) → 통과 = 💎 · 📜 (문제마다 한 번) · 수업 서술형이 아닌 문제엔 단추 없음 — node tools/e2e/e2e129.js <출력 폴더>
 const { chromium } = require('playwright');
 const OUT = process.argv[2] || '.', U = `http://localhost:${process.env.PORT || 8765}/index.html?local`;
 (async () => {
@@ -18,7 +18,7 @@ const OUT = process.argv[2] || '.', U = `http://localhost:${process.env.PORT || 
   await S.evaluate(() => DS.Control.run(async () => DS.Bonus.enter(await DS.Account.me(), { train: true }))); await S.waitForTimeout(1800);
   ok(!!(await S.$('[data-fight="set-09|m5"]')), '허수아비 9차시 문제 5 칸');
   // 정답 판정을 모두 맞음으로 (연출 · 흐름만 봄)
-  await S.evaluate(() => { DS.Quiz.grade = () => true; window.__ph = []; DS.Photo.grade = async (m, c) => { window.__ph.push({ lesson: c.lesson, room: c.room, own: !!c.own, ask: (c.items || []).map((q) => q.question).join(' / ').slice(0, 80) }); return { status: 'pass', id: 'h1', score: 4, total: 4, scores: [4] }; }; });
+  await S.evaluate(() => { DS.Quiz.grade = () => true; window.__ph = []; window.__realGrade = DS.Photo.grade; DS.Photo.grade = async (m, c) => { window.__ctx = c; window.__ph.push({ lesson: c.lesson, room: c.room, own: !!c.own, ws: !!c.ws, top: String(c.top || ''), ask: (c.items || []).map((q) => q.question).join(' / ').slice(0, 80) }); return { status: 'pass', id: 'h1', score: 4, total: 4, scores: [4] }; }; });
   await S.click('[data-fight="set-09|m5"]'); await S.waitForTimeout(1500);
   const fill = async () => { const n = (await S.$$('.bn-fight .ans-line')).length; for (let i = 0; i < n; i++) { const r = await S.$(`.bn-fight [data-rune="${i}|1"]`); if (r) { await r.click(); await S.waitForTimeout(120); continue; } const bt = await S.$(`.bn-fight [data-pick^="${i}|"]`); if (bt) { await bt.click(); await S.waitForTimeout(200); } } return n; };
   const start = async () => { const g = await S.$('.bn-fight #bf-go'); if (g) { await g.click(); await S.waitForTimeout(1200); } }; // ⚔ 전투 시작
@@ -32,7 +32,8 @@ const OUT = process.argv[2] || '.', U = `http://localhost:${process.env.PORT || 
   ok(await S.isVisible('#bf-photo'), '📷 풀이 사진 올리기 (성채와 같은 사진 단계)');
   await S.click('#bf-photo'); await S.waitForTimeout(3500);
   const ph = await S.evaluate(() => window.__ph[0] || null);
-  ok(ph && ph.lesson === 'set-09' && ph.room === 'm5' && ph.own, `채점 = set-09 / m5 · 바뀐 숫자 그대로(own) (${ph && ph.ask})`);
+  ok(ph && ph.lesson === 'set-09' && ph.room === 'm5' && !ph.own && ph.ws && /^명제 「x가 자연수이면/.test(ph.ask) && /학습지 숫자 그대로 써요/.test(ph.top), `채점 = set-09 / m5 · ✍ 학습지 숫자(기준표 문제 · own 없음 · 2026-11-13 밤) (${ph && ph.ask})`);
+  { await S.evaluate(() => { window.__realGrade({ c: '1-1', n: 1 }, window.__ctx); }); await S.waitForTimeout(800); const tp = await S.evaluate(() => (document.querySelector('.ph-modal .ph-top') || {}).innerText || ''); ok(/학습지 숫자 그대로 써요/.test(tp) && /바뀐 숫자 아님/.test(tp), `사진 창 맨 위 = 「📄 학습지 숫자 그대로 써요 (바뀐 숫자 아님)」 (${tp.slice(0, 40)})`); await S.screenshot({ path: `${OUT}/129-ws-top.png` }); await S.evaluate(() => { const x = document.querySelector('.ph-modal [data-x]'); if (x) x.click(); }); await S.waitForTimeout(300); }
   const t2 = await S.evaluate(() => (document.querySelector('.bn-fight') || {}).innerText || '');
   ok(/서술형 통과/.test(t2), '통과 → 📷 서술형 통과 화면');
   await S.screenshot({ path: `${OUT}/129-pass.png` });

@@ -829,7 +829,8 @@ DS.Student = (function () {
       $('#wr-snap').onclick = () => DS.Control.run(async () => {
         const ws = $('#wr-snap'); ws.disabled = true; await DS.Act.snapStart(code, mid); if (DS.Sound && DS.Sound.clank) DS.Sound.clank();
         const items = [{ question: (((DS.Rubrics || {})[L.id] || {})[mid] || {}).ask || step.title, answer: rec.items[rec.items.length - 1].answer, solution: rec.says.join(' / '), check: Object.assign({}, ...rec.items.map((x) => x.check || {})) }]; // 학습지 숫자 · 단계별 기대 중간값
-        const res = await DS.Photo.grade(acc(), { lesson: L.id, room: mid, title: step.title, items });
+        const img = scoutImg[mid], ask = (((DS.Rubrics || {})[L.id] || {})[mid] || {}).ask || ''; // ✍ 2026-11-13 밤: 서술형 = 무조건 학습지 숫자 (🔥 재도전 판 중에 눌러도) · 사진 창 맨 위 큰 안내
+        const res = await DS.Photo.grade(acc(), { lesson: L.id, room: mid, title: step.title, items, ws: true, top: `<b>📄 학습지 숫자 그대로 써요 <span>(바뀐 숫자 아님)</span></b>${img ? `<img src="${img}" alt="학습지 문제">` : ask ? `<p>${esc(ask)}</p>` : ''}` });
         const out = await DS.Act.snapEnd(code, raw, mid, res, wm.peek);
         // 📜 서술 조각 +1 (2026-11-09 #27 → 같은 날 선생님 「통과하면 누구나 📜 1」): ✍ 📸 통과하면 누구나 (석화 · 금빛 컷인 · ⚡ 충전 · 효과 없는 5번째부터도) · 문제당 한 번 · 「다시 보기」 연습 쓰기 = 없음
         if (!wm.peek && ['true', 'cut', 'charge', 'done'].includes(out) && DS.Gem && DS.Gem.addScroll && real()) DS.Gem.addScroll(acc(), 1, `ult_${L.id}_${mid}`, '🌟 진필살기 서술').catch(() => 0);

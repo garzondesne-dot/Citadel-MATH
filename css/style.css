@@ -3508,3 +3508,8 @@ body.trial-teach .trial-tch .tch-pc { color: #c9b896; font-size: 11px; }
 .fa-wrap.big .k-rev .fa-ann, .fa-wrap.big .fa-ann { z-index: 20; } /* 🔄 안내 방송 = 이름 줄 위 */
 .nn-row { grid-template-columns: repeat(var(--cols, 8), minmax(0, clamp(64px, 7vw, 110px))); } .nn-row .nn-h { width: 100%; min-width: 0; } /* 🙊 30명이어도 화면 안 (칸이 줄어듦) */
 .school #t-sched, .school #t-today, .school #sc-ex { display: none !important; } /* 🏫 2026-11-13 학교판 = 📅 시간표 · 오늘 수업(예약) · 보충 숨김 */
+
+/* ✍ 사진 창 맨 위 큰 안내 (2026-11-13 밤 선생님 「서술형제출은 무조건 학습지 숫자」): 📄 학습지 숫자 그대로 (바뀐 숫자 아님) + 학습지 문제 그림 / 🏰 성채 숫자 */
+.ph-top { margin: 0 0 10px; padding: 10px 12px; border: 3px solid #b8873a; border-radius: 10px; background: #fff3d6; color: #2b1d0e; text-align: center; }
+.ph-top > b { display: block; font-size: 19px; line-height: 1.35; } .ph-top > b span { font-size: 15px; color: #8a4b0f; }
+.ph-top img { display: block; max-width: 100%; max-height: 38vh; margin: 8px auto 0; border-radius: 6px; } .ph-top p { margin: 6px 0 0; font-size: 14px; text-align: left; }

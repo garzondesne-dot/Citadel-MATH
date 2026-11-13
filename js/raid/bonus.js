@@ -297,6 +297,8 @@ DS.Bonus = (function () {
     el.querySelectorAll('[data-cv]').forEach((b) => (b.onclick = () => DS.Control.run(async () => { const p = await prepOf(L.id), st = L.steps.find((x) => x.id === b.dataset.cv); DS.Video.open(DS.Video.pick(L, p.video, st.id), st.title, { lesson: L.id, slot: st.id }); })));
     el.querySelectorAll('[data-ci]').forEach((b) => (b.onclick = () => DS.Control.run(async () => { const st = L.steps.find((x) => x.id === b.dataset.ci), src = await DS.Act.prepImg(L.id, st.id); if (src) sheet(src, st.title); else DS.UI.toast('아직 이 개념의 학습지 이미지가 없어요.'); })));
   }
+  // ✍ 학습지 숫자 문제 (2026-11-13 밤): 소레이드 = 첫 판(pass 0) 단계들 · 정답 = 대장 · 단계별 기대 중간값 (수업 ✍ 와 같은 모양) / 보통 문제 = 첫 시도(학습지) 숫자
+  const wsItems = (L, mid) => { const ask = (((DS.Rubrics || {})[L.id] || {})[mid] || {}).ask; if ((L.chain || []).includes(mid) && L.chainItems) { const it = L.chainItems(mid, `ws|${mid}`, 0); return [{ question: ask || (monOf(L, mid) || {}).title || mid, answer: (it[it.length - 1] || {}).answer, solution: it.map((x) => x.say || '').filter(Boolean).join(' / '), check: Object.assign({}, ...it.map((x) => x.check || {})) }]; } const it = itemsOf(L, mid, `ws|${mid}`, 0); return ask ? it.map((q, i) => (i ? q : Object.assign({}, q, { question: ask }))) : it; };
   // ── 1:1 전투 ───────────────────────────────────────────
   async function fight(L, mid, fo = {}) {
     if (DS.Fresh && !preview && !(await DS.Fresh.gate())) return; // 🔄 #55 ⑤ 성채 · 허수아비 방도 옛 판이면 새 판으로 바꾼 뒤
@@ -470,7 +472,10 @@ DS.Bonus = (function () {
       const pv = act.querySelector('#bf-pv'); if (pv) pv.onclick = () => (chainMid ? midWin() : bonusPhoto ? photoBonusWin() : win());
       act.querySelector('#bf-photo').onclick = () => DS.Control.run(async () => {
         if (all()) { DS.UI.toast('미리 보기 · 테스트에서는 사진을 보내지 않아요 — 학생 계정으로 해 보세요.', 3000); return; }
-        const res = await DS.Photo.grade(me, { lesson: L.id, room: mid, title: mon.title, items, own: !castle }); // 🎯 허수아비 = 바뀐 숫자 그대로 채점(own)
+        // ✍ 2026-11-13 밤 선생님 「서술형제출은 무조건 학습지 숫자 · 성채만 바뀐숫자 고친숫자」: 🎯 허수아비 = 학습지 숫자로 채점 (옛 「바뀐 숫자 그대로(own)」 바뀜) · 🏰 성채 = 고친 숫자 그대로
+        const ask = (((DS.Rubrics || {})[L.id] || {})[mid] || {}).ask || '', img = castle ? null : (prep.img || {})[mid];
+        const top = castle ? '<b>🏰 성채 숫자로 써요 <span>(지금 화면의 숫자)</span></b>' : `<b>📄 학습지 숫자 그대로 써요 <span>(바뀐 숫자 아님)</span></b>${img ? `<img src="${img}" alt="학습지 문제">` : ask ? `<p>${esc(ask)}</p>` : ''}`;
+        const res = await DS.Photo.grade(me, { lesson: L.id, room: mid, title: mon.title, items: castle ? items : wsItems(L, mid), ws: !castle, castle, top }); // 학습지 숫자 = 기준표 그대로 (own 없음)
         if (!document.body.contains(el) || !res) return;
         mine[L.id] = mine[L.id] || {}; // ✍ #50: 사슬 시작 전 · 도중 첫 사진이면 아직 기록이 없음
         const p = `bonus/${ck(me.c)}/${me.n}/${L.id}/${mid}`, cur = mine[L.id][mid] = mine[L.id][mid] || {};

@@ -111,10 +111,10 @@ DS.Photo = (function () {
       const bindX = () => el.querySelectorAll('[data-x]').forEach((b) => (b.onclick = () => close(null)));
       const intro = (msg = '') => {
         el.innerHTML = `<div class="quiz-box framed ph-box">${head('📷 풀이 사진 올리기')}
-          <p class="ph-q"><b>${esc(ctx.title || '')}</b><br>${esc(P.ask)}</p>
+          ${ctx.top ? `<div class="ph-top">${ctx.top}</div>` : ''}<p class="ph-q"><b>${esc(ctx.title || '')}</b>${ctx.top ? '' : `<br>${esc(P.ask)}`}</p>
           ${msg}
           <p class="ph-hand">✍ 학습지 서술형 칸에 <b>직접 손으로 쓴 풀이</b>만 찍어요 · 인쇄된 풀이 · 화면 · 칠판 사진은 통과 안 돼요</p>
-          <ul class="ph-tips"><li>📄 <b>이 숫자 그대로</b> 종이에 풀이를 처음부터 끝까지 써요</li><li>💡 밝은 곳 · 위에서 똑바로 · 종이 한 장만 보이게</li><li>🙈 이름 · 얼굴은 찍히지 않게 (사진은 저장되지 않아요)</li><li>✅ 통과 = ${r0.total || 4}점 중 <b>${r0.pass || 3}점</b> 이상 · 하루 ${daily()}장 · 이 방은 하루 ${roomMax()}장${left != null ? ` (오늘 <b>${left}</b>장 · 이 방 <b>${roomLeft}</b>장 남음)` : ''}</li></ul>
+          <ul class="ph-tips"><li>📄 <b>${ctx.ws ? '학습지 숫자 그대로' : ctx.castle ? '🏰 성채 숫자 그대로' : '이 숫자 그대로'}</b> 종이에 풀이를 처음부터 끝까지 써요</li><li>💡 밝은 곳 · 위에서 똑바로 · 종이 한 장만 보이게</li><li>🙈 이름 · 얼굴은 찍히지 않게 (사진은 저장되지 않아요)</li><li>✅ 통과 = ${r0.total || 4}점 중 <b>${r0.pass || 3}점</b> 이상 · 하루 ${daily()}장 · 이 방은 하루 ${roomMax()}장${left != null ? ` (오늘 <b>${left}</b>장 · 이 방 <b>${roomLeft}</b>장 남음)` : ''}</li></ul>
           <div class="row ph-pick"><button class="btn primary big" id="ph-cam">📷 찍기</button><button class="btn" id="ph-alb">🖼 앨범에서</button></div>
           <p class="muted small">AI 가 기준표대로 먼저 채점하고, 애매하면 선생님이 직접 확인해요. 성적에는 쓰지 않아요.</p></div>`;
         bindX();
@@ -317,7 +317,7 @@ DS.Photo = (function () {
       const el = document.createElement('div'); el.className = 'modal camp-modal ph-modal'; document.body.appendChild(el);
       const close = (v) => { el.remove(); done(v); };
       el.innerHTML = `<div class="quiz-box framed ph-box"><div class="set-head"><h2>📷 풀이 사진 올리기</h2><button class="btn" data-x>✕ 닫기</button></div>
-        <p class="ph-q"><b>${esc(ctx.title || '')}</b></p>
+        ${ctx.top ? `<div class="ph-top">${ctx.top}</div>` : ''}<p class="ph-q"><b>${esc(ctx.title || '')}</b></p>
         <p class="ph-hand">✍ 실제 수업에서는 학습지 서술형 칸에 <b>직접 손으로 쓴 풀이</b>를 📸 찍으면 AI 가 기준표대로 채점하고, 통과하면 🌟 진필살기가 나가요.</p>
         <p class="muted small">👩‍🏫 체험판은 사진을 받지 않아요 — 아래 단추로 「통과」 장면을 봐요.</p>
         <div class="row"><button class="btn primary big" id="ph-trial">✔ 테스트: 사진 통과로 보기</button></div></div>`;
