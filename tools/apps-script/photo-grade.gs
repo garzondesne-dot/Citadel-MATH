@@ -184,11 +184,13 @@ const SCHEMA = {
 function fill_(t, p) { return String(t).replace(/\{(\w+)\}/g, (m, k) => (p && p[k] != null ? String(p[k]) : m)); }
 
 function grade_(q, rub, steps, media) {
-  const ask = rub.ask ? fill_(rub.ask, q.params || {}) : String(q.ask || '').slice(0, 600);
+  const own = !!q.own && !!q.ask; // 🎯 2026-11-13 허수아비 = 숫자가 바뀐 문제 → 학생 화면의 문제 글 · 정답으로 채점 (기준표 문장 속 숫자는 원래 학습지 것)
+  const ask = own ? String(q.ask).slice(0, 600) : rub.ask ? fill_(rub.ask, q.params || {}) : String(q.ask || '').slice(0, 600);
   const text = [
     `[문제] ${ask}`,
     `[이 문제의 정답] ${q.answer == null ? '(기준표 참고)' : String(q.answer).slice(0, 80)}`,
     q.ref ? `[모범 풀이 · 참고] ${String(q.ref).slice(0, 600)}` : '',
+    own ? '[숫자가 바뀐 문제] 아래 기준표 문장 속 숫자 · 예시는 원래 학습지 문제의 것이다. 위 [문제]의 숫자로 같은 단계를 판단한다. 원래 학습지 숫자로 쓴 풀이는 flags 에 other_problem 을 넣는다.' : '',
     '[채점 기준표]',
     ...steps.map((st) => `- ${st.id} (${st.pts}점): ${st.desc}${st.key ? ` · 핵심: ${st.key}` : ''}`),
     rub.alt ? `[인정하는 다른 풀이] ${(Array.isArray(rub.alt) ? rub.alt : Object.values(rub.alt)).join(' · ')}` : '',

@@ -101,6 +101,13 @@ t('✍ 2026-11-13 「손글씨만」 지시문: 인쇄 풀이 · 미리 채운 �
   const sys = (SRC.match(/const SYSTEM = \[([\s\S]*?)\]\.join/) || [])[1] || '';
   assert.ok(/5-2\./.test(sys) && /칠판/.test(sys) && /미리 채워진 학습지 칸/.test(sys) && /새로 쓴 손글씨 풀이만 채점/.test(sys) && /not_handwritten/.test(sys));
 });
+t('🎯 2026-11-13 허수아비 own = 바뀐 숫자 문제 글로 채점 (기준표 ask 대신) · 보통은 기준표 ask 그대로', () => {
+  const textOf = (w) => { const c = w.calls.claude[0].b.messages[0].content; return (Array.isArray(c) ? c : [c]).map((x) => (typeof x === 'string' ? x : x.text || '')).join('\n'); };
+  const w1 = world(); w1.post({ ...REQ, ask: '바뀐 숫자 문제 ZZ', own: true }); const t1 = textOf(w1);
+  assert.ok(/\[문제\] 바뀐 숫자 문제 ZZ/.test(t1) && /\[숫자가 바뀐 문제\]/.test(t1), '허수아비 = 학생 문제 글 · 안내 줄');
+  const w2 = world(); w2.post({ ...REQ, ask: '바뀐 숫자 문제 ZZ' }); const t2 = textOf(w2);
+  assert.ok(!/바뀐 숫자 문제 ZZ/.test(t2) && !/\[숫자가 바뀐 문제\]/.test(t2), '수업 · 성채 = 기준표 문제 그대로');
+});
 t('로그인 토큰 · 다른 학생 · 기준표 없음 · 꺼짐 · 모양', () => {
   assert.strictEqual(world().post({ ...REQ, idToken: 'bad' }).err, 'auth');
   assert.strictEqual(world().post({ ...REQ, idToken: 'other' }).err, 'who');

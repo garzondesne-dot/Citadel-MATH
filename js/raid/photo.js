@@ -169,7 +169,7 @@ DS.Photo = (function () {
         el.innerHTML = `<div class="quiz-box framed ph-box"><h2>📨 채점 중…</h2><div class="ph-wait"><i></i></div><p class="muted">AI 가 풀이를 읽고 있어요 (10~20초) — 창을 닫지 말아 주세요.</p></div>`;
         const T = !!(DS.Test && DS.Test.testing && DS.Test.testing()); // 🧪 #47 테스트 모드 = 교사 토큰 · test 표시 (중계소가 교사 확인 · 기록 안 남김)
         const tok = await (T ? DS.Test.realToken() : N().idToken()).catch(() => null);
-        const res = await post({ idToken: tok, ...(T ? { test: true } : {}), c: m.c, n: m.n, lesson: ctx.lesson, room: ctx.room, ask: P.ask, answer: P.answer, ref: P.ref, params: P.params, image, media: 'image/jpeg' });
+        const res = await post({ idToken: tok, ...(T ? { test: true } : {}), c: m.c, n: m.n, lesson: ctx.lesson, room: ctx.room, ask: P.ask, answer: P.answer, ref: P.ref, params: P.params, ...(ctx.own ? { own: true } : {}), image, media: 'image/jpeg' }); // 🎯 own = 허수아비 바뀐 숫자 (중계소가 기준표 문제 대신 이 문제 글로)
         if (finished) return;
         if (!res || !res.ok) { if (res && res.err === 'quota') left = 0; if (res && res.err === 'roomquota') roomLeft = 0; if (res && res.err === 'wait') coolUntil = Date.now() + (Number(res.sec) || coolSec()) * 1000; intro(`<p class="ph-err">⚠ ${esc(errMsg(res))}</p>`); return; }
         if (lastHash) keepHash(lastHash);
