@@ -95,7 +95,11 @@ t('답만 쓴 풀이 → retry (선생님 확인까지는 아님)', () => {
 });
 t('✍ #58 A 손글씨가 아님(화면 · 인쇄 글) → 다 맞아도 0점 retry · 「직접 손으로」 안내 · 선생님 확인 안 감', () => {
   const r = world({ claude: { readable: true, final_answer: '8', steps: [{ id: 's1', earned: 1, note: '' }, { id: 's2', earned: 1, note: '' }, { id: 's3', earned: 1, note: '' }, { id: 's4', earned: 1, note: '' }], confidence: 'high', feedback: '잘했어요', flags: ['not_handwritten'] } }).post(REQ);
-  assert.strictEqual(r.status, 'retry'); assert.strictEqual(r.score, 0); assert.ok(/직접 손으로 써서 찍어/.test(r.feedback)); assert.ok(r.steps.every((x) => x.earned === 0));
+  assert.strictEqual(r.status, 'retry'); assert.strictEqual(r.score, 0); assert.ok(/손글씨 풀이를 찍어 주세요/.test(r.feedback) && /칠판/.test(r.feedback)); assert.ok(r.steps.every((x) => x.earned === 0));
+});
+t('✍ 2026-11-13 「손글씨만」 지시문: 인쇄 풀이 · 미리 채운 칸 · 화면 · 칠판 = 채점 안 함 → not_handwritten', () => {
+  const sys = (SRC.match(/const SYSTEM = \[([\s\S]*?)\]\.join/) || [])[1] || '';
+  assert.ok(/5-2\./.test(sys) && /칠판/.test(sys) && /미리 채워진 학습지 칸/.test(sys) && /새로 쓴 손글씨 풀이만 채점/.test(sys) && /not_handwritten/.test(sys));
 });
 t('로그인 토큰 · 다른 학생 · 기준표 없음 · 꺼짐 · 모양', () => {
   assert.strictEqual(world().post({ ...REQ, idToken: 'bad' }).err, 'auth');

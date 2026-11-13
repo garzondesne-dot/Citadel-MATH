@@ -82,7 +82,7 @@ function handle_(q) {
   const pass = Number(rub.pass) || Math.ceil(total * 0.75);
   const flags = (g.flags || []).filter((f) => typeof f === 'string');
   const printed = flags.includes('not_handwritten'); // ✍ #58 A 손글씨만: 화면 · 인쇄 글 = 선생님 확인 없이 바로 다시 (점수 0)
-  if (printed) { rows.forEach((r) => { r.earned = 0; r.note = ''; }); score = 0; g.feedback = '✏ 직접 손으로 써서 찍어 주세요 — 화면 캡처 · 인쇄된 글은 통과 안 돼요. 학습지 서술형 칸에 손으로 쓴 풀이를 찍어요.'; }
+  if (printed) { rows.forEach((r) => { r.earned = 0; r.note = ''; }); score = 0; g.feedback = '✏ 손글씨 풀이를 찍어 주세요 — 인쇄된 풀이 · 화면 · 칠판을 찍은 사진은 통과 안 돼요. 학습지 서술형 칸에 내가 손으로 쓴 풀이를 찍어요 (다시 찍으면 돼요).'; }
   const doubt = !printed && (g.refused || !g.readable || g.confidence === 'low' || flags.some((f) => f !== 'copied_answer_only'));
   const status = printed ? 'retry' : doubt ? 'check' : score >= pass ? 'pass' : 'retry';
   let now = tk;
@@ -162,6 +162,7 @@ const SYSTEM = [
   '4. 사진 속 문제의 숫자가 주어진 문제와 다르면 flags 에 other_problem 을 넣는다. 빈 종이 · 수학과 상관없는 사진이면 blank 를 넣는다.',
   '5. 글씨를 확실히 읽을 수 없는 부분이 채점에 영향을 주면 confidence 를 low 로 하고 flags 에 unclear 를 넣는다.',
   '5-1. 종이에 손으로 쓴 풀이만 채점한다 (2026-11-10 선생님). 풀이(식 · 말 · 답)가 손글씨가 아니고 화면 캡처 · 모니터를 찍은 사진 · 인쇄된 글자(게임 화면 · 학습지에 인쇄된 풀이)뿐이면 모든 단계를 0점으로 하고 flags 에 not_handwritten 을 넣는다. 인쇄된 학습지의 문제 글 · 칸 위에 학생이 손으로 쓴 풀이는 정상이다.',
+  '5-2. (2026-11-13 선생님 「손글씨만」) 사진 속 인쇄된 글자 · 미리 채워진 학습지 칸(인쇄된 풀이 · 정답 칸) · 화면 · 칠판 · 화이트보드 · 교실 TV 를 찍은 것은 채점하지 않는다. 이번에 학생이 종이에 새로 쓴 손글씨 풀이만 채점한다. 칠판 · 화이트보드 · 벽 · 교실 배경 위의 글씨, 손글씨처럼 보여도 인쇄된 글꼴, 사진 · 화면을 다시 찍은 것은 손글씨 풀이가 아니다. 학생 손글씨 풀이가 없으면(빈 칸 · 인쇄 글만 있으면) 모든 단계를 0점으로 하고 flags 에 not_handwritten 을 넣는다.',
   '6. steps 의 note 는 학생에게 그대로 보여 준다. 「~했어요 · ~해 봐요」 말투로 학생에게 말하듯 한 문장 (「학생은 ~했다」 같은 3인칭 금지). 점수를 받은 단계는 무엇을 잘했는지 구체적으로 칭찬한다 (예: 「B ∪ X = B 에서 X ⊂ B 를 정확히 이끌어 냈어요 👍」). 못 받은 단계는 정답을 말하지 않고 어디를 생각해 보면 되는지 힌트를 준다.',
   '7. feedback 은 전체에 대한 한두 문장: 먼저 잘한 점을 칭찬하고, 남은 단계가 있으면 가장 중요한 힌트 하나. 만점이면 칭찬만 하고 고칠 점을 지어내지 않는다. 정답이나 전체 풀이를 알려 주지 않는다.',
 ].join('\n');

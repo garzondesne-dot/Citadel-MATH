@@ -113,7 +113,7 @@ DS.Photo = (function () {
         el.innerHTML = `<div class="quiz-box framed ph-box">${head('📷 풀이 사진 올리기')}
           <p class="ph-q"><b>${esc(ctx.title || '')}</b><br>${esc(P.ask)}</p>
           ${msg}
-          <p class="ph-hand">✍ 학습지 서술형 칸에 <b>직접 손으로 쓴 풀이</b>만 찍어요 · 화면 · 인쇄 글은 통과 안 돼요</p>
+          <p class="ph-hand">✍ 학습지 서술형 칸에 <b>직접 손으로 쓴 풀이</b>만 찍어요 · 인쇄된 풀이 · 화면 · 칠판 사진은 통과 안 돼요</p>
           <ul class="ph-tips"><li>📄 <b>이 숫자 그대로</b> 종이에 풀이를 처음부터 끝까지 써요</li><li>💡 밝은 곳 · 위에서 똑바로 · 종이 한 장만 보이게</li><li>🙈 이름 · 얼굴은 찍히지 않게 (사진은 저장되지 않아요)</li><li>✅ 통과 = ${r0.total || 4}점 중 <b>${r0.pass || 3}점</b> 이상 · 하루 ${daily()}장 · 이 방은 하루 ${roomMax()}장${left != null ? ` (오늘 <b>${left}</b>장 · 이 방 <b>${roomLeft}</b>장 남음)` : ''}</li></ul>
           <div class="row ph-pick"><button class="btn primary big" id="ph-cam">📷 찍기</button><button class="btn" id="ph-alb">🖼 앨범에서</button></div>
           <p class="muted small">AI 가 기준표대로 먼저 채점하고, 애매하면 선생님이 직접 확인해요. 성적에는 쓰지 않아요.</p></div>`;
