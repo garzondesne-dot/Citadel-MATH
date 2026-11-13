@@ -327,6 +327,7 @@ DS.App = (function () {
       const cls = $('#t-cls').value;
       if (!cls) throw Object.assign(new Error('수업을 여는 반을 골라 주세요. (명단에 있는 반)'), { user: true });
       const lid = $('#lesson').value, held = await heldOf(cls), Lx = DS.Lessons.get(lid);
+      if (!Lx) throw noLesson();
       if (held[lid] && !confirm(`${cls}반은 ${Lx ? `${DS.Lessons.noText(Lx.no)}차시` : '이 차시'}를 이미 게임으로 수업했어요.\n그래도 이 차시로 열까요?`)) return; // 2026-11-06: 잘못 여는 것 막기
       await DS.Teacher.create(lid, cls);
     });
@@ -364,7 +365,8 @@ DS.App = (function () {
       const fixedN = v && DS.Sched && DS.Sched.syncKeys ? await DS.Sched.syncKeys().catch(() => 0) : 0; // 미리 만든 예약 방도 (2026-11-06)
       DS.UI.toast(v ? `🖥 종합상황실 비밀번호를 ${v} 로 고정했어요 (다음 수업부터${fixedN ? ` · 예약 수업 ${fixedN}개도 바꿈` : ''})` : '🖥 이제 수업마다 새 비밀번호가 생겨요', 3400);
     });
-    $('#x-go').onclick = go(async () => { if (!(await A().isAdmin())) throw Object.assign(new Error('교사 계정으로 로그인해야 해요.'), { user: true }); await DS.Test.start($('#p-lesson').value); });
+    const noLesson = () => Object.assign(new Error('아직 차시가 없어요 — 📋 수업 준비 → 「📊 엑셀로 차시 만들기」에서 첫 차시를 올려 주세요.'), { user: true }); // 🏫 2026-11-13 차시 0개 학교
+    $('#x-go').onclick = go(async () => { if (!(await A().isAdmin())) throw Object.assign(new Error('교사 계정으로 로그인해야 해요.'), { user: true }); if (!DS.Lessons.get($('#p-lesson').value)) throw noLesson(); await DS.Test.start($('#p-lesson').value); });
   }
   // (2026-11-05) 🟪 중단원던전 꼭대기 층 「열기 · 닫기」 패널은 없앰 — 🏰 성채던전 방은 그 차시 진도를 나가면 저절로 열림
   // v0.8.4: 교사 메뉴 「📋 만든 수업」 — 반 · 차시 · 코드 · 진행 중/끝남 → [↩ 들어가기] [✕ 없애기]

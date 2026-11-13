@@ -20,12 +20,18 @@ DS.Prep = (function () {
     sel = null; pages = []; thumbs = []; draft = {}; editing = null; opened = new Set();
     DS.UI.show('screen-prep');
     document.onpaste = onPaste;
-    stops.forEach((f) => f()); stops = [
+    stops.forEach((f) => f()); stops = [];
+    if (!L) { data = {}; return render(); } // 🏫 2026-11-13 학교판 첫날 = 차시 0개 → 수업 준비가 깨지던 것 (Cannot read 'id'): 엑셀로 첫 차시 올리기만 보임
+    stops = [
       DS.Net.watch(`prep/${L.id}`, (v) => { data = v || {}; render(); const miss = Object.keys(data.img || {}).filter((k) => !(data.has || {})[k]); if (miss.length) miss.forEach((k) => DS.Net.set(`prep/${L.id}/has/${k}`, true).catch(() => {})); }),
     ];
   }
   function render() {
-    if (!L) return;
+    if (!L) { // 차시 0개 (학교판 첫날 · 엑셀 차시를 모두 지운 뒤)
+      $('#p-body').innerHTML = `<div class="panel framed"><h2>📋 수업 준비</h2><p class="gold">아직 차시가 없어요 · 아래 「📊 엑셀로 차시 만들기」에서 양식을 받아 첫 차시를 올려 주세요.</p><p class="muted small">차시를 저장하면 그 차시의 이미지 · 기준% 칸이 이 화면에 나와요.</p></div>${sheetPanel()}`;
+      const sp = $('#p-sheet'); if (sp) sp.open = true;
+      bindSheet(); return;
+    }
     const slots = slotSteps();
     const sheetOpen = !!document.querySelector('#p-sheet[open]');
     $('#p-body').innerHTML = `<div class="panel framed"><h2>📋 수업 준비</h2><p class="muted small">이미지·영상 링크는 Firebase 에만 저장돼요 (저장소에는 올라가지 않아요). 학생 명단은 교사 메뉴 「👥 학생 관리」에서 관리해요.</p></div>
@@ -377,14 +383,14 @@ DS.Prep = (function () {
       if (DS.Lessons.get(p.id) && !confirm('같은 이름의 엑셀 차시가 있어요. 새 내용으로 바꿀까요?')) return;
       await DS.Net.set(`sheets/${p.id}`, p);
       DS.SheetLesson.attach(p); DS.App.fillLessons();
-      sheetDraft = null; render(); DS.UI.toast('저장했어요! 교사 메뉴의 차시 목록에 📊 로 나와요. 테스트 모드로 먼저 확인해 보세요.', 4200);
+      sheetDraft = null; if (!L) { const ps = document.getElementById('p-lesson'); if (ps) ps.value = p.id; await enter(p.id); } else render(); // 첫 차시면 그 차시 준비 화면으로 바로 DS.UI.toast('저장했어요! 교사 메뉴의 차시 목록에 📊 로 나와요. 테스트 모드로 먼저 확인해 보세요.', 4200);
     });
     const dr = $('#x-drop'); if (dr) dr.onclick = () => { sheetDraft = null; render(); };
     document.querySelectorAll('[data-xdel]').forEach((b) => (b.onclick = () => DS.Control.run(async () => {
       if (!confirm('이 엑셀 차시를 지울까요? (진행한 수업 기록은 남아요)')) return;
       await DS.Net.remove(`sheets/${b.dataset.xdel}`);
       const i = DS.Lessons.list.findIndex((l) => l.id === b.dataset.xdel); if (i >= 0) DS.Lessons.list.splice(i, 1);
-      DS.App.fillLessons(); render();
+      DS.App.fillLessons(); if (L && L.id === b.dataset.xdel) { const nx = DS.Lessons.list[0]; await enter(nx ? nx.id : null); } else render();
     })));
   }
 
