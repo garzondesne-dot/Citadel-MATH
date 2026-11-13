@@ -22,12 +22,15 @@ const OUT = process.argv[2] || '.', U = `http://localhost:${process.env.PORT || 
   const sub = (mid, good) => S.evaluate(async ([c, mid, good]) => { const R0 = await DS.Net.get(`rooms/${c}`), R = DS.Act.unpackRoom(R0), L = DS.Lessons.get('set-06'), me = DS.Net.uid(), a = DS.Raid.record(L, R, mid, me).nextAttempt; const items = DS.Raid.itemsFor(L, R, mid, me, a); const g = items.map((q, i) => (good || i > 0 ? DS.Raid.chainAns(q) : (q.type === 'number' ? Number(q.answer) + 1 : q.type === 'choice' || !q.type ? (q.answerIndex + 1) % (q.choices || [0, 0]).length : 'x'))); await DS.Act.submit(c, R0, mid, a, g); }, [code, mid, good]);
   await goStep('m2'); await S.waitForTimeout(2500); await clr();
   await T.evaluate((c) => DS.Teacher.open(c, ''), code); await T.waitForTimeout(1200);
-  for (let i = 0; i < 4; i++) { await sub('m2', false); await S.waitForTimeout(400); }
+  await sub('m2', false); let brk = false; for (let k = 0; k < 30 && !brk; k++) { await S.waitForTimeout(120); brk = await S.evaluate(() => !!document.querySelector('#st-body .dk-slot.hp .ch.brk')); }
+  ok(brk, '💔 틀리면 노란 단추 안 하트 하나가 쪼개짐 (글자 안내 없음)'); await S.screenshot({ path: `${OUT}/146-break.png` });
+  await S.waitForTimeout(1500); { const f = await S.evaluate(() => ({ form: !!document.querySelector('#st-go'), redo: document.querySelectorAll('#st-body .item.redo').length, last: !!document.querySelector('#st-body .last-ans'), notes: document.querySelectorAll('#st-body .paper-note, #st-body .st-res').length })); ok(f.form && f.redo >= 1 && f.last && f.notes === 0, `그다음 같은 문제 = ✘ 칸 빨간 테두리 · 지난 답 줄 긋기 · 안내 줄 · 배너 없음 (${JSON.stringify(f)})`); await S.screenshot({ path: `${OUT}/146-redo.png` }); }
+  for (let i = 0; i < 3; i++) { await sub('m2', false); await S.waitForTimeout(400); }
   let r = await rec('m2'); ok(r.left === 0 && r.locked && r.n === 4, `틀린 공격 4번 = ❤ 0 · 잠김 (${JSON.stringify(r)})`);
   const blocked = await S.evaluate(async (c) => { try { const R0 = await DS.Net.get(`rooms/${c}`); await DS.Act.submit(c, R0, 'm2', 4, [0, 0, 0]); return false; } catch (e) { return /선생님/.test(e.message); } }, code);
   ok(blocked, '잠김 = 다시 못 냄 (「선생님 확인을 기다려요」)');
   await S.waitForTimeout(1500); await clr();
-  const sv = await S.evaluate(() => ({ lock: !!document.querySelector('#st-body .cr-lock'), txt: (document.querySelector('#st-body .cr-lock') || {}).textContent || '', dock: (document.querySelector('#st-body .dock-wait') || {}).textContent || '' }));
+  const sv = await S.evaluate(() => ({ lock: !!document.querySelector('#st-body .cr-lock'), txt: (document.querySelector('#st-body .cr-lock') || {}).textContent || '', dock: (document.querySelector('#st-body .dock-wait, #st-body .dk-wait') || {}).textContent || '' }));
   ok(sv.lock && /❤ 0/.test(sv.txt) && /확인 기다림/.test(sv.dock), `학생 폰 = 🙋 선생님 확인 · ❤ 0 (${sv.txt.slice(0, 40)})`);
   await S.screenshot({ path: `${OUT}/146-lock.png` });
   await T.waitForTimeout(1500);
@@ -41,7 +44,11 @@ const OUT = process.argv[2] || '.', U = `http://localhost:${process.env.PORT || 
   const cid = await T.evaluate(() => { const L = DS.Lessons.get('set-06'); return (L.chain || [])[0]; });
   if (cid) {
     await goStep(cid); await S.waitForTimeout(2500); await clr();
-    for (let i = 0; i < 8; i++) { await S.evaluate(async ([c, mid]) => { const R0 = await DS.Net.get(`rooms/${c}`); await DS.Act.chainSubmit(c, R0, mid, 0, 0, -999).catch(() => {}); }, [code, cid]); await S.waitForTimeout(250); }
+    await S.evaluate(async ([c, mid]) => { const R0 = await DS.Net.get(`rooms/${c}`); await DS.Act.chainSubmit(c, R0, mid, 0, 0, -999).catch(() => {}); }, [code, cid]);
+    let cb = null; for (let k = 0; k < 25; k++) { await S.waitForTimeout(150); cb = await S.evaluate(() => ({ line: !!document.querySelector('#st-body .cr-story li.cr-wrong s'), chip: !!document.querySelector('#st-body .cr-chip.ng'), card: !!document.querySelector('#st-body .paper.cr-bad'), brk: !!document.querySelector('#st-body .dk-slot.hp .ch.brk'), note: [...document.querySelectorAll('#st-body .paper-note')].map((n) => n.textContent).join('|') })); if (cb.brk) break; }
+    ok(cb.line && cb.chip && cb.card && cb.brk && !/다시 생각/.test(cb.note), `소레이드 틀림 = 📜 이번 줄 빨강 + 줄 긋기 · 단계 칩 빨강 · 카드 빨간 테두리 · 반 하트 쪼개짐 · 안내 줄 없음 (${JSON.stringify(cb)})`);
+    await S.screenshot({ path: `${OUT}/146-chain-wrong.png` });
+    for (let i = 0; i < 7; i++) { await S.evaluate(async ([c, mid]) => { const R0 = await DS.Net.get(`rooms/${c}`); await DS.Act.chainSubmit(c, R0, mid, 0, 0, -999).catch(() => {}); }, [code, cid]); await S.waitForTimeout(250); }
     r = await rec(cid); ok(r.left === 0 && r.locked, `소레이드 졸개 오답 8번 = ❤ 0 · 잠김 (${JSON.stringify(r)})`);
     await T.waitForTimeout(1500); ok(await T.evaluate(() => !!document.querySelector('[data-crok]')), '리모컨 소레이드 ✔ 풀어주기');
     await T.evaluate(() => document.querySelector('[data-crok]').click()); await T.waitForTimeout(1200);

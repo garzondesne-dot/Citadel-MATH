@@ -41,7 +41,7 @@ const OUT = process.argv[2] || '.', U = `http://localhost:${process.env.PORT || 
   const r4 = await chainAll(); await p.waitForTimeout(5000); await shut(); await shot('4-u4-done');
   ok(/u4:true/.test(r4), `문제 4 졸개 → 대장 처치 (${r4})`);
   // ✍ 📸 체험판 = 사진 없이 통과 장면
-  const wr = await p.$('.dock-wr:not([disabled])'); ok(!!wr, '✍ 서술형 도전 단추');
+  const wr = await p.$('.dock-wr:not([disabled]), .dk-wr:not([disabled])'); ok(!!wr, '✍ 서술형 도전 단추');
   if (wr) { await wr.click(); await p.waitForTimeout(1200); const sn = await p.$('#wr-snap'); if (sn) { await sn.click(); await p.waitForTimeout(1200); } await shot('5-photo');
     const btn = await p.$('#ph-trial'); ok(!!btn && !(await p.$('#ph-cam')), '📷 창 = 「✔ 테스트: 사진 통과로 보기」 (찍기 단추 없음)');
     if (btn) { await btn.click(); await p.waitForTimeout(3500); } await shot('6-photo-pass');

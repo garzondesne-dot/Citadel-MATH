@@ -33,7 +33,7 @@ const OUT = process.argv[2] || '.', U = `http://localhost:${process.env.PORT || 
   await S.screenshot({ path: `${OUT}/148-form.png` });
   await S.evaluate(() => document.querySelector('#bs-go').click()); await S.waitForTimeout(2500); await clr();
   r = await brec(); v = await S.evaluate(() => ({ t: (document.querySelector('#st-body .st-res') || {}).textContent || '', next: !!document.querySelector('#bs-next') }));
-  ok(r.left === 3 && r.next === '0,1' && /❤ −1/.test(v.t) && v.next, `두 문항 틀림 = ❤ −1 (${r.left}) · 다음 = 틀린 문항만 (${r.next}) · 「${v.t.slice(0, 30)}」`);
+  ok(r.left === 3 && r.next === '0,1' && v.next, `두 문항 틀림 = ❤ −1 (${r.left}) · 다음 = 틀린 문항만 (${r.next}) · 「${v.t.slice(0, 30)}」`);
   await S.screenshot({ path: `${OUT}/148-res.png` });
   await S.evaluate(() => document.querySelector('#bs-next').click()); await S.waitForTimeout(800);
   v = await S.evaluate(() => document.querySelectorAll('#st-body .boss-items .bitem').length); ok(v === 2, `다시 = 틀린 2문항만 (${v})`);
@@ -42,8 +42,8 @@ const OUT = process.argv[2] || '.', U = `http://localhost:${process.env.PORT || 
   ok(r.done && r.left === 3 && r.energy === 3 && v.cards === 'heal+,bind+,true-', `다 맞힘 → ⚡ 3 · 카드 💚 ⛓ (🌟 흐림) (${v.cards})`);
   await S.screenshot({ path: `${OUT}/148-done.png` });
   await S.evaluate(() => document.querySelector('#st-body [data-sk="bind"]').click()); await S.waitForTimeout(300); await S.evaluate(() => document.querySelector('#sk-go').click()); await S.waitForTimeout(2000); await clr();
-  r = await brec(); v = await S.evaluate(() => ({ n: document.querySelectorAll('#st-body .boss-items .bitem').length, note: (document.querySelector('#st-body .paper-note') || {}).textContent || '' }));
-  ok(r.inPanel && v.n === hpN && /재도전 판 1/.test(v.note), `⛓ 묶고 → 🔥 재도전 판 1 = 체력 문항 ${v.n}개 (${v.note.slice(0, 20)})`);
+  r = await brec(); v = await S.evaluate(() => ({ n: document.querySelectorAll('#st-body .boss-items .bitem').length, note: document.querySelector('#st-body .num-tag.ch') ? '🔁 숫자 바뀜' : '' }));
+  ok(r.inPanel && v.n === hpN && /숫자 바뀜/.test(v.note), `⛓ 묶고 → 🔥 재도전 판 1 = 체력 문항 ${v.n}개 (${v.note.slice(0, 20)})`);
   await S.evaluate(() => { window.__plan.bad = [2]; }); await fillAll(); await S.evaluate(() => document.querySelector('#bs-go').click()); await S.waitForTimeout(2000); await clr();
   r = await brec(); ok(r.inPanel && r.left === 3, `재도전 판 틀림 = ❤ 그대로 (${r.left})`);
   console.log(log.join('\n')); console.log(bad ? `❌ ${bad}` : '✅ 통과'); console.log('errors', errs.length ? errs : 'none'); await b.close(); if (bad || errs.length) process.exit(1);

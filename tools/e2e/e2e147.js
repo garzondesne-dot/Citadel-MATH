@@ -30,14 +30,13 @@ const OUT = process.argv[2] || '.', U = `http://localhost:${process.env.PORT || 
   await clickSel('#st-body [data-sk="heal"]'); await S.waitForTimeout(400); v = await st();
   ok(!v.goDis && /힐 주고\s*\S*\s*재도전/.test(v.goTxt), `💚 고르면 노란 단추 = 「${v.goTxt.trim()}」`);
   await clickSel('#sk-go'); await S.waitForTimeout(2500); await clr(); v = await st(); r = await S.evaluate(async (c) => { const R = DS.Act.unpackRoom(await DS.Net.get(`rooms/${c}`)); const x = DS.Raid.record(DS.Lessons.get('set-06'), R, 'm2', DS.Net.uid()); return { energy: x.energy, inPanel: x.inPanel, panel: x.panel }; }, code);
-  ok(v.form && r.energy === 2 && r.inPanel && /재도전 판 1/.test(v.note), `힐 → ⚡ 2 · 바로 🔥 재도전 판 1 문제 화면 (${v.note.slice(0, 30)})`);
+  const dk = () => S.evaluate(() => ({ main: (document.querySelector('#st-body .dk4 .dk-l') || {}).textContent || '', slot: (document.querySelector('#st-body .dk4 .dk-slot') || {}).innerHTML || '', tag: !!document.querySelector('#st-body .num-tag.ch'), notes: [...document.querySelectorAll('#st-body .paper-note')].map((n) => n.textContent).join('|'), last: (document.querySelector('#st-body .last-ans') || {}).textContent || '' }));
+  let d = await dk();
+  ok(v.form && r.energy === 2 && r.inPanel && d.tag && !d.notes && /재도전/.test(d.main) && (d.slot.match(/data-ic|⚡/g) || []).length >= 3, `힐 → ⚡ 2 · 재도전 판 = 「🔁 숫자 바뀜」 꼬리표만 (안내 줄 없음) · 노란 단추 「${d.main}」 · 칸 「${d.slot}」`);
   await S.screenshot({ path: `${OUT}/147-panel.png` });
-  await sub('m2', false); await S.waitForTimeout(3500); await clr(); v = await st(); r = await rec('m2');
-  const bt = await S.evaluate(() => document.querySelector('#st-body').innerText); ok(r.left === 4 && !!v.retry && /칸만 고쳐서/.test(bt), `재도전 판에서 틀림 = ❤ 그대로 (${r.left}) · 「✏ 고쳐서 다시」`);
-  await clickSel('#sk-stop'); await S.waitForTimeout(600); v = await st();
-  ok(v.stop && /재도전 판 1 이어서/.test(v.back), `그만하기 → 쉬는 화면 · 「${v.back}」`);
-  await clickSel('#sk-back'); await S.waitForTimeout(800); v = await st();
-  ok(v.form, '이어서 → 같은 판 문제 화면');
+  await sub('m2', false); await S.waitForTimeout(4500); await clr(); v = await st(); r = await rec('m2'); d = await dk();
+  ok(r.left === 4 && v.form && /지난 답/.test(d.last) && !/고쳐|그대로예요|다시 생각/.test(d.notes), `재도전 판에서 틀림 = ❤ 그대로 (${r.left}) · 글자 안내 없이 같은 문제로 · 지난 답 줄 긋기 (${d.last.slice(0, 20)} · notes: ${d.notes.slice(0, 40)})`);
+  await S.screenshot({ path: `${OUT}/147-panel-wrong.png` });
   await sub('m2', true); await S.waitForTimeout(3500); await clr(); v = await st();
   ok(v.cards.length === 3 && v.go, '판 1 완성 → 다음 ⚡ 카드');
   // 소레이드
@@ -48,8 +47,8 @@ const OUT = process.argv[2] || '.', U = `http://localhost:${process.env.PORT || 
   ok(v.cards.join() === 'heal+,bind+,true-', `소레이드 대장 처치 → ⚡ 카드 (${v.cards})`);
   await S.screenshot({ path: `${OUT}/147-chain-pick.png` });
   await clickSel('#st-body [data-sk="bind"]'); await S.waitForTimeout(300); await clickSel('#sk-go'); await S.waitForTimeout(2500); await clr();
-  const cv = await S.evaluate(() => ({ h: (document.querySelector('#st-body .paper-h small') || {}).textContent || '', go: (document.querySelector('#cr-go') || {}).textContent || '' }));
-  ok(/재도전 판 1/.test(cv.h) && /재도전 공격/.test(cv.go), `⛓ 묶고 → 소레이드 재도전 판 1 (${cv.h})`);
+  const cv = await S.evaluate(() => ({ h: document.querySelector('#st-body .num-tag.ch') ? '🔁 숫자 바뀜' : '', go: (document.querySelector('#cr-go .dk-l') || {}).textContent || '', wr: !!document.querySelector('#st-body .dk-wr') }));
+  ok(/숫자 바뀜/.test(cv.h) && /재도전/.test(cv.go), `⛓ 묶고 → 소레이드 재도전 판 (꼬리표 ${cv.h} · 노란 단추 ${cv.go} · ✍ ${cv.wr})`);
   await S.screenshot({ path: `${OUT}/147-chain-panel.png` });
   console.log(log.join('\n')); console.log(bad ? `❌ ${bad}` : '✅ 통과'); console.log('errors', errs.length ? errs : 'none'); await b.close(); if (bad || errs.length) process.exit(1);
 })();

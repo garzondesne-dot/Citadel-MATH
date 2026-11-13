@@ -350,6 +350,21 @@ DS.Student = (function () {
   // ❤ 재도전 기회 (2026-11-08 사용자 「남은 기회 이모티콘 · 더 잘 보이게 · 예전처럼 체력바 느낌」): 아래 줄 = 도트 하트(빨강 남음 · 초록 힐로 받음 · 회색 쓴 칸) + 「n / 전체」 · 용사 머리 위 = 체력바 칸
   const heartsOf = (rec) => { const C = DS.ASSETS.chance; return Array.from({ length: rec.slots }, (_, i) => { const st = i < rec.left ? (i < Math.min(rec.left, rec.healed) ? 1 : 0) : 2; return `<i class="ch ch-${st}${rec.left - i > 0 && rec.left - i < 1 ? ' half' : ''}"${C ? ` style="background-image:url('${DS.ASSETS.base}${C.src}');background-position:${st * 50}% 0"` : ''}></i>`; }).join(''); };
   const dock = (rec, right) => `<div class="st-dock"><span class="dock-tries${rec.left <= 1 ? ' low' : ''}" title="${rec.hearts ? '❤ 하트' : '재도전 기회'}"><b class="dt-l">${rec.hearts ? '하트' : '재도전'}</b><span class="ch-row">${heartsOf(rec)}</span><b class="dt-n">${rec.left}<small>/${rec.slots}</small></b></span>${right}</div>`;
+  // 🟡 아래 칸 한 줄 (2026-11-13 밤 · 묶음 C · 시안 8fD8n9 ② ⑤ ⑥′): 왼쪽 💡 힌트(정사각 · 친구 힌트 수 빨간 숫자) · 가운데 노란 주요 단추(오른쪽 고정 칸 = 풀 때 ❤ · 다 맞힌 뒤 ⚡ + 🔒)
+  //   · 오른쪽 ✍ 서술형(소레이드 · 보라 · 「📄 학습지 숫자」) · 없는 단추 자리는 노란 단추가 넓어짐 · 위 보조 줄 없음 (새 방 v4 만 · 옛 방은 dock 그대로)
+  const slot4 = (rec, kind) => (kind === 'energy' ? `<span class="dk-slot en">${'⚡'.repeat(Math.max(0, rec.energy || 0)) || '·'}${rec.inPanel ? '🔒' : ''}</span>` : `<span class="dk-slot hp">${heartsOf(rec)}</span>`);
+  function dock4(rec, o) {
+    const m = o.main || {}, sl = slot4(rec, o.slot);
+    const mainH = m.wait != null ? `<div class="dk-go dk-wait"><span class="dk-l">${m.wait}</span>${sl}</div>` : `<button class="btn primary big dock-go dk-go${m.pulse ? ' go-pulse' : ''}" id="${m.id}"${m.dis ? ' disabled' : ''}><span class="dk-l">${m.label}</span>${sl}</button>`;
+    const hint = o.hint ? `<button class="dk-hint${o.hint.on ? ' on' : ''}" id="dk-hint" type="button"><span>💡</span><small>힌트</small>${o.hint.n ? `<i class="dk-n">${o.hint.n}</i>` : ''}</button>` : '';
+    return `<div class="st-dock dk4">${hint}${mainH}${o.wr || ''}</div>`;
+  }
+  // 💔 틀렸을 때 = 글자 안내 없이 노란 단추 안 하트가 커졌다가 두 조각으로 갈라져 떨어지며 사라짐 (0.15 + 0.7초 · 「쨍」 · 짧은 진동 · 소레이드 졸개 = 반쪽) · 동작 줄이기 = 흐려짐만
+  const brkSeen = {}, autoRedo = {};
+  function heartBreak(key, left, delay) {
+    if (brkSeen[key]) return; brkSeen[key] = true;
+    setTimeout(() => { const hs = document.querySelectorAll('#st-body .dk-slot.hp .ch'), h = hs[Math.max(0, Math.min(hs.length - 1, Math.floor(left)))]; if (!h) return; h.classList.remove('brk'); void h.offsetWidth; h.classList.add('brk'); if (DS.Sound && DS.Sound.shieldBreak) DS.Sound.shieldBreak(); try { if (navigator.vibrate) navigator.vibrate(35); } catch (e) { /* 무시 */ } }, Math.max(0, delay || 0));
+  }
   const hpTries = (rec) => `<div class="enc-tries hp-tries" title="남은 재도전 기회">${pipsOf(rec)}</div>`;
   // 🧷 화면 다시 그리기 = paint (2026-11-10 · 「스크롤이 맨 위로」 재발 뿌리 제거): 같은 화면(tag 같음)을 다시 그리면 양피지(.paper) · 몸통 · 창 스크롤 자리를 그대로 둠
   //   예전엔 이 처리가 fightForm 안에만 있어서, 나중에 만든 소레이드 화면(chainView)이 body.innerHTML 을 직접 써 다시 생겼음 → 전투 화면은 모두 paint 로만 그림 (tests/soraid.test.js 가 확인)
@@ -373,8 +388,9 @@ DS.Student = (function () {
     const tick = () => {
       const left = Math.ceil(((thinkUntil[key] || 0) - Date.now()) / 1000);
       if (!btn.isConnected) return;
-      if (left > 0) { btn.disabled = true; btn.innerHTML = `🤔 생각 시간 ${left}… <span class="small">해설을 읽어 봐요</span>`; setTimeout(tick, 250); }
-      else { btn.disabled = false; btn.innerHTML = label; }
+      const lab = btn.querySelector('.dk-l'); // 🟡 C: 노란 단추 안 오른쪽 칸(❤ · ⚡)은 그대로 두고 글자만
+      if (left > 0) { btn.disabled = true; if (lab) lab.textContent = `🤔 ${left}`; else btn.innerHTML = `🤔 생각 시간 ${left}… <span class="small">해설을 읽어 봐요</span>`; setTimeout(tick, 250); }
+      else { if (lab) { lab.innerHTML = label; btn.disabled = btn.dataset.ready === '0'; } else { btn.disabled = false; btn.innerHTML = label; } }
     };
     tick();
   }
@@ -566,9 +582,10 @@ DS.Student = (function () {
     drawn = sig;
     // 🧹 2026-11-07 정돈판: 마무리 일격 = 장면 위 띠 · 결과 = 한 줄 · 문항 다시 보기 = 접힌 양피지
     const banner = `${finish ? '<div class="fin-me sc-banner">⚔ 마무리 일격!</div>' : ''}${grit ? `<div class="fin-me grit sc-banner${finish ? ' second' : ''}">🔥 끈기의 일격!</div>` : ''}`;
+    const v4 = !!rec.hearts, wrong4 = v4 && !rec.perfect && !rec.locked && rec.canRetry, pfix4 = v4 && rec.inPanel && rec.fix, quiet4 = wrong4 || pfix4; // 💔 v4 틀림 = 글자 없이 채점 도장 → 하트 쪼개짐 → 같은 문제(✘ 칸만) 화면
     const resLine = prac ? head : label === 'success' ? `✔ ${t.correct} / ${t.total} 성공!` : label === 'partial' ? `◐ ${t.correct} / ${t.total} 부분 성공` : `✘ ${t.correct} / ${t.total} — 다시 도전해요`;
     paint(body, `res|${mid}|${t.attempt}`, `<div class="panel framed st-fight st-after">${scene(step, rec, hp, atk ? '' : fx, '', banner)}
-      <div class="st-res res-${prac && !(rec.v3 && rec.fix) ? 'success' : label}"><b>${esc(step.title)} · ${resLine}</b>${t.total > 1 ? `<div class="mk-chips">${t.marks.map((m, i) => `<span class="${m ? 'ok' : 'ng'}">(${i + 1}) ${m ? '✔' : '✘'}</span>`).join('')}</div>` : ''}</div>
+      ${quiet4 ? '' : `<div class="st-res res-${prac && !(rec.v3 && rec.fix) ? 'success' : label}"><b>${esc(step.title)} · ${resLine}</b>${t.total > 1 ? `<div class="mk-chips">${t.marks.map((m, i) => `<span class="${m ? 'ok' : 'ng'}">(${i + 1}) ${m ? '✔' : '✘'}</span>`).join('')}</div>` : ''}</div>`}
       ${(() => { const pk = `${mid}|${t.attempt}`, el = penShown[pk] ? Date.now() - penShown[pk] : fx ? 0 : 9e9, fresh = el < 1200; const ls = items.map((q, i) => ({ t: penLine(q, (t.given || [])[i], i), ok: t.marks[i] })).filter((l) => l.t && (l.ok || fresh)).map((l) => ({ t: l.t, cls: l.ok ? (el < 900 ? 'pen-ok pix-in' : 'pen-ok') : 'pen-gone', d: el })); return penBox(`r|${pk}`, ls, ' pen-res'); })()}
       <details class="paper-fold"><summary>▸ ${esc(step.title)} 다시 보기</summary><div class="paper"><div class="marks">${items.map((q, i) => `<div class="mark ${t.marks[i] ? 'ok' : 'ng'}"><b>(${i + 1})</b> ${t.marks[i] ? '✔' : '✘'} <span class="math">${pretty(itemText(q))}</span>${t.marks[i] ? '' : `<br><span class="sol-line math">${pretty(solOf(q))}</span>`}</div>`).join('')}</div></div></details>
       ${ult ? `<p class="okc">🌟 <b>3연속 퍼펙트!</b> 전설 스킬이 진짜 힘을 깨웠어요</p><p>마지막 기회로 <b>진필살기</b>를 쓸까요?</p>
@@ -581,10 +598,10 @@ DS.Student = (function () {
         : !rec.hearts && rec.perfect && rec.canRetry ? `<p class="muted small st-ask">남은 기회 <b>${rec.left}</b>번 · 무엇을 할까요?</p>
         <div class="heal-pick"><button class="btn primary big" id="st-retry">몬스터 묶기</button><button class="btn big heal-btn" id="st-heal">💚 친구 힐</button></div>
         <p class="muted small">몬스터 묶기 = 숫자 바뀐 문제를 맞힌 만큼 몬스터 공격을 늦춤 (1개 1초 · 최대 ${Raid().BIND_MAX}초) · 친구 힐 = 기회가 필요한 친구에게 도전 기회 한 칸</p>`
+        : quiet4 ? ''
         : rec.hearts && rec.perfect ? (skStop[mid] && (rec.canHeal || rec.inPanel) ? stopHtml(rec)
-          : rec.inPanel ? (rec.fix ? `<p>✏ <b>✘ 칸만 고쳐서</b> 다시 내요 <span class="muted small">(🔥 재도전 판 ${rec.panel} · 같은 문제 · ❤ 그대로)</span></p><button class="btn primary big" id="st-retry">✏ 고쳐서 다시</button>`
-            : `<p>🔥 재도전 판 ${rec.panel} <span class="muted small">(숫자가 바뀐 같은 문제 · 데미지 0 · 틀려도 ❤ 그대로)</span></p><button class="btn primary big" id="st-retry">🔥 재도전 판 ${rec.panel} 풀기</button>`) + '<p class="center"><button class="sk-stop" id="sk-stop">그만하기</button></p>'
-          : rec.canHeal ? skillHtml(mid, rec)
+          : rec.inPanel ? '<p class="center"><button class="sk-stop" id="sk-stop">그만하기</button></p>'
+          : rec.canHeal ? skillHtml(mid, rec, true)
           : `<p class="muted">⚡ 기력을 다 썼어요 — 멋져요! 다른 용사들을 기다려요. 데미지 <b>${rec.best}</b></p>`)
         : rec.locked ? `${done ? '<p class="okc big-msg">🎉 몬스터 격파!</p>' : ''}<div class="cr-lock"><b>🙋 선생님 확인을 기다려요</b><p>❤ 0 — 학습지에 풀이를 정리해 두면 선생님이 와서 확인하고 풀어 줘요 (❤ +1 · 그렇게 풀어내면 ❤ +1 더)</p>${relTest()}</div>`
         : done && rec.canRetry ? `<p class="okc big-msg">🎉 몬스터 격파!</p><p>틀린 소문제를 다시 풀어 볼까요? <span class="muted small">(❤ ${rec.left} · ${rec.v3 ? '같은 문제에서 ✘ 칸을 고쳐요' : '숫자가 모두 바뀌어요'} · 고친 만큼 경험치가 더 쌓여요)</span></p><button class="btn primary big" id="st-retry">🔄 다시 도전</button>`
@@ -592,17 +609,27 @@ DS.Student = (function () {
         : rec.canRetry ? `<p>다시 해 보겠습니까? <span class="muted small">(❤ ${rec.left} · 틀리면 ❤ −1 · ${rec.v3 ? '같은 문제에서 ✘ 칸을 고쳐요' : '숫자가 모두 바뀌어요'})</span></p><button class="btn primary big" id="st-retry">🔄 다시 도전</button>`
         : `<p class="muted">${rec.perfect ? '멋져요! 기회를 모두 썼어요. 다른 용사들을 기다려요.' : '재도전 기회를 모두 썼어요. 해설을 보며 학습지에 정리해요.'} 데미지 <b>${rec.best}</b></p>`}
       ${test && (test.prep.img || {})[mid] ? '<button class="btn small" id="st-sheet">📄 학습지 보기 (문제 해설)</button>' : ''}
-      ${dock(rec, rec.locked ? '<span class="dock-wait">🙋 확인 기다림</span>' : done && !rec.canRetry ? '<span class="dock-wait">다음 단계를 기다려요</span>' : '')}
+      ${v4 ? dock4(rec, rec.locked ? { main: { wait: '🙋 확인 기다림' } } : quiet4 ? { main: { id: 'st-wait4', label: pfix4 ? '🔥 재도전' : '⚔ 공격', dis: true }, slot: pfix4 ? 'energy' : 'hearts' }
+        : rec.perfect && skStop[mid] && (rec.canHeal || rec.inPanel) ? { main: { wait: '⏸ 쉬는 중' }, slot: 'energy' }
+        : rec.perfect && rec.inPanel ? { main: { id: 'st-retry', label: '🔥 재도전' }, slot: 'energy' }
+        : rec.perfect && rec.canHeal ? { main: { id: 'sk-go', label: skLabel(mid), dis: !skPick[mid] }, slot: 'energy' }
+        : rec.perfect ? { main: { wait: '다음 단계를 기다려요' }, slot: 'energy' } : { main: { wait: '다음 단계를 기다려요' } })
+        : dock(rec, rec.locked ? '<span class="dock-wait">🙋 확인 기다림</span>' : done && !rec.canRetry ? '<span class="dock-wait">다음 단계를 기다려요</span>' : '')}
       ${helpBtn()}</div>`); // #47 테스트에서도 🙋 도움 요청
     bindHelp(); bindTop(); bindRelTest(mid);
     if (rec.hearts) bindSkill(mid, rec, (r) => { retrying = `${mid}|${r.nextAttempt}`; form = null; });
+    if (quiet4) { // 💔 채점 도장이 끝나면 하트 쪼개짐 (본 판만) → 같은 문제 화면으로 (✘ 칸만 · 생각 시간은 공격 단추에)
+      const back = (atk ? 1300 : 500) + sd, k4 = `${mid}|${t.attempt}`;
+      if (wrong4) heartBreak(`n|${k4}`, rec.left, back);
+      if (!autoRedo[k4]) { autoRedo[k4] = true; setTimeout(() => { if (!body.isConnected) return; const r2 = Raid().record(L, R, mid, me); if (r2.nextAttempt !== rec.nextAttempt || !r2.canRetry) return; retrying = `${mid}|${r2.nextAttempt}`; form = null; drawn = ''; render(); }, back + (wrong4 ? 950 : 300)); }
+    }
     { const pk = `${mid}|${t.attempt}`; if (!penShown[pk] && fx) penShown[pk] = Date.now(); const t0 = penShown[pk]; if (t0) body.querySelectorAll('.pen-res li').forEach((li, i) => { if (li.classList.contains('pix-in')) pixIn(li, t0 + i * STAMP_GAP + 150, i + 7); }); body.querySelectorAll('.pen-res li').forEach((li, k) => { li.style.setProperty('--d', `${(k * STAMP_GAP - Math.max(0, Date.now() - (t0 || 0))) / 1000}s`); }); /* 다시 그려도 도장 · 지움이 이어서 */ } // 다시 그려도 이어서 // ✍ 맞힌 줄 = 픽셀 디졸브로 굳음 · 틀린 줄 = CSS 로 스르르
     const sb = $('#st-sheet'); if (sb) sb.onclick = () => sheetModal(step);
     // v0.9.3 (⑤): 공격 자세는 잠깐만 → 다시 서 있는 자세 (격파됐으면 승리 자세 그대로)
     if (atk) setTimeout(() => { if (!body.isConnected) return; { const sc = body.querySelector('.scene'); if (sc) DS.Attack.play(sc, { heroBox: sc.querySelector('.enc-hero'), monBox: sc.querySelector('.enc-mon'), hero: myP().hero || 0, fx: myP().fx || 'flame', miss: label === 'fail' && !prac, s: grit ? 1.3 : 1, rest: done ? 'win' : 'idle', noDmg: prac, ultimate: autoUlt, finish: grit, hits: prac ? 1 : gain || t.correct }).then(() => { if (prac && t.correct > 0 && DS.Thrill && sc.isConnected) DS.Thrill.bindFx(sc.querySelector('.enc-mon .art.monster') || sc.querySelector('.enc-mon')); }); } }, sd); // ⛓ 묶기 공격 = 사슬 이펙트 · 📜 도장 뒤
     else if (fx && !done) setTimeout(() => { const a = body.querySelector('.enc-hero .art'); if (a) a.outerHTML = heroNow('idle', fx === 'miss' ? 'slump' : 'huff'); }, 650);
     const rb = $('#st-retry');
-    if (rb) { thinkTimer(rb, `${mid}|${t.attempt}`, rec.v3 ? rb.textContent : rec.perfect ? '몬스터 묶기' : '🔄 다시 도전'); rb.onclick = () => { retrying = `${mid}|${rec.nextAttempt}`; form = null; DS.Sound.clank(); render(); }; }
+    if (rb) { thinkTimer(rb, `${mid}|${t.attempt}`, rb.querySelector('.dk-l') ? rb.querySelector('.dk-l').innerHTML : rec.v3 ? rb.textContent : rec.perfect ? '몬스터 묶기' : '🔄 다시 도전'); rb.onclick = () => { retrying = `${mid}|${rec.nextAttempt}`; form = null; DS.Sound.clank(); render(); }; }
     const ub = $('#st-ult');
     if (ub) ub.onclick = () => DS.Control.run(async () => {
       ub.disabled = true; await DS.Act.heal(code, raw, mid, { true: true }); drawn = '';
@@ -631,7 +658,8 @@ DS.Student = (function () {
   // ⚡ 기력 카드 (2026-11-13 밤 · 묶음 B · ❓#1~#3 = A): 다 맞힌 뒤 💚 힐 · ⛓ 묶기 · 🌟 진필살기 중 하나 고르기 → 노란 단추 = 「고른 기술 + 🔥 재도전」
   //   🌟 = 첫 공격 퍼펙트 + 재도전 판 2개를 한 번에(세 번째 ⚡) + 내 속성 Ⅳ · 그 전엔 흐림 + 이유 한 줄 · 👑 형성평가에서는 🌟 없음 · 「그만하기」 = 기다리기 화면 · 「🔥 이어서」로 같은 판
   const skPick = {}, skStop = {};
-  function skillHtml(mid, rec) {
+  const skLabel = (mid) => { const k = skPick[mid]; return k ? `${{ heal: '💚 힐 주고', bind: '⛓ 묶고', true: '🌟 진필살기 쓰고' }[k]} 🔥 재도전` : '⚡ 기술을 골라요'; };
+  function skillHtml(mid, rec, noGo) {
     const p = myP(), boss = mid === 'boss', petri = !boss && !!Raid().petrify(R, mid), canT = !!(DS.Attack && DS.Attack.canTrue(p.fx, p.hero));
     const trueOk = !boss && real() && rec.streak >= 3 && !Raid().ultUsed(R, mid, me) && !petri && canT;
     const why = boss ? '형성평가에서는 진필살기를 쓰지 않아요' : petri ? '이 몬스터는 이미 굳었어요' : !canT ? '내 속성 Ⅳ 전설 스킬을 끼우면 쓸 수 있어요' : rec.streak < 3 ? '첫 공격 퍼펙트 + 재도전 판 2개를 한 번에 → 세 번째 ⚡ 에서 켜져요' : '';
@@ -640,7 +668,7 @@ DS.Student = (function () {
     return `<div class="sk-box"><p class="sk-h"><b>⚡ 기력 1 → 하나 고르고 🔥 재도전</b><span class="sk-bolt">${'⚡'.repeat(rec.energy)}</span></p>
       <div class="sk-cards">${cards.map(([k, ic, nm]) => `<button class="sk-card${sel === k ? ' on' : ''}${k === 'true' && !trueOk ? ' off' : ''}" data-sk="${k}"${k === 'true' && !trueOk ? ' disabled' : ''}><span class="sk-ic">${ic}</span>${nm}<small>⚡1</small></button>`).join('')}</div>
       <p class="sk-desc">${desc} · <button class="sk-stop" id="sk-stop">그만하기</button></p>
-      <button class="btn primary big sk-go" id="sk-go"${sel ? '' : ' disabled'}>${sel ? `${{ heal: '💚 힐 주고', bind: '⛓ 묶고', true: '🌟 진필살기 쓰고' }[sel]} 🔥 재도전` : '기술을 골라요'}</button></div>`;
+      ${noGo ? '' : `<button class="btn primary big sk-go" id="sk-go"${sel ? '' : ' disabled'}>${sel ? `${{ heal: '💚 힐 주고', bind: '⛓ 묶고', true: '🌟 진필살기 쓰고' }[sel]} 🔥 재도전` : '기술을 골라요'}</button>`}</div>`;
   }
   const stopHtml = (rec) => `<div class="sk-box sk-stopped"><p>⏸ 재도전을 쉬고 있어요 — 다른 용사들을 기다려요 <span class="muted small">(⚡ ${rec.energy} 남음)</span></p><button class="btn primary big" id="sk-back">${rec.inPanel ? `🔥 재도전 판 ${rec.panel} 이어서` : '⚡ 기술 고르기'}</button></div>`;
   // open = 기술을 쓴 뒤 바로 🔥 재도전 판 열기 (일반 = 다음 시도 · 소레이드 = 판 번호)
@@ -724,24 +752,28 @@ DS.Student = (function () {
     const prevWrong = rec.last ? rec.last.marks.map((m) => !m) : [];
     const ready = items.every((q, i) => (q.type === 'multi' ? form.given[i].length > 0 : q.type === 'text' ? String(form.given[i] || '').trim() !== '' : form.given[i] != null));
     const down = Raid().cleared(L, R, mid); // v0.9.2: 체력 0 → 쓰러졌어도 계속 풀고 공격할 수 있다
+    const hintKeys = rec.hearts && DS.Hint && DS.Hint.svg ? items.map((q, i) => (DS.Hint.svg(q) ? hintKey(i) : null)).filter(Boolean) : []; // 💡 C: 아래 칸 힌트 단추 = 이 문제의 그림 힌트 모두 펼침 / 접기
     const sig = `form|${key}|${JSON.stringify(form.given)}|${(R.help || {})[me] ? 1 : 0}|${down}`;
     if (sig === drawn && body.querySelector('.items')) { hpText(body, hp); return; }
     drawn = sig;
     // 🧹 2026-11-07 정돈판: 문제 = 「다듬은 양피지」 한 장 (장면은 위에 고정 · 문제가 길면 양피지 안에서만 스크롤) · ⚔ 공격! 은 아래 고정 줄
     // 2026-11-08 사용자 「문제 체크할 때마다 위로 스크롤이 올라감」: 같은 문제를 다시 그릴 때는 양피지 · 화면 스크롤 자리를 그대로 둠
-    paint(body, `form|${key}`, `<div class="panel framed st-fight">${scene(step, rec, hp, '', down ? '' : GAUGE)}
+    paint(body, `form|${key}`, `<div class="panel framed st-fight${rec.hearts ? ' v4f' : ''}">${scene(step, rec, hp, '', down ? '' : GAUGE)}
       <div class="paper"><div class="paper-h"><b>${step.special ? '⭐ ' : step.review ? '📖 ' : ''}${esc(step.title)}</b><small>${items.length > 1 ? `(1)~(${items.length}) 모두 풀고 공격` : '풀고 공격'}</small></div>
       ${down ? '<p class="paper-note ok">🎉 몬스터는 쓰러졌어요! 그래도 풀어서 공격하면 이펙트도 뜨고 경험치가 쌓여요.</p>' : ''}
-      ${attempt && rec.hearts ? `<p class="paper-note">${rec.perfect ? (rec.fix ? '🔁 <b>같은 문제 그대로예요</b> — ✘ 칸만 고쳐서 다시 내요 (❤ 그대로)' : `🔥 <b>재도전 판 ${rec.panel}</b> — 숫자가 바뀐 같은 문제 · 데미지 0 · 틀려도 ❤ 그대로 · 다 맞히면 EXP +1 · 다음 ⚡`) : '🔁 <b>같은 문제 그대로예요</b> (고장 아님!) — 종이 풀이를 고쳐서 ✘ 칸만 다시 내요 · 맞힌 칸은 잠기고 ✘ 칸은 빈칸이에요 · 틀리면 ❤ −1'}</p>` : attempt && rec.v3 ? `<p class="paper-note">${rec.perfect ? (rec.fix ? '🔁 <b>같은 문제 그대로예요</b> (고장 아님!) — 종이 풀이를 고쳐서 ✘ 칸을 다시 내요 (맞히면 묶기 · 힐 한 번)' : '🆕 새 문제 (숫자가 바뀌었어요) — 맞히면 기회 그대로 + 묶기 · 힐 한 번 · 틀리면 기회 −1') : '🔁 <b>같은 문제 그대로예요</b> (고장 아님!) — 종이 풀이를 고쳐서 ✘ 칸만 다시 내요 · 맞힌 칸은 잠기고 ✘ 칸은 빈칸이에요'}</p>` : attempt && rec.perfect ? `<p class="paper-note">⛓ 몬스터 묶기 — 맞힌 소문제 1개마다 반 전체의 몬스터 공격이 1초 늦어져요 (최대 ${Raid().BIND_MAX}초)</p>` : attempt ? `<p class="paper-note">🔄 재도전 ${attempt} — 숫자가 모두 바뀌었어요 · 지난번 틀린 문항은 <b class="ngc">✘</b></p>` : ''}
+      ${rec.hearts ? (rec.inPanel ? '<p class="num-tags"><b class="num-tag ch">🔁 숫자 바뀜</b></p>' : '') : ''}${attempt && rec.hearts && false ? `<p class="paper-note">${rec.perfect ? (rec.fix ? '🔁 <b>같은 문제 그대로예요</b> — ✘ 칸만 고쳐서 다시 내요 (❤ 그대로)' : `🔥 <b>재도전 판 ${rec.panel}</b> — 숫자가 바뀐 같은 문제 · 데미지 0 · 틀려도 ❤ 그대로 · 다 맞히면 EXP +1 · 다음 ⚡`) : '🔁 <b>같은 문제 그대로예요</b> (고장 아님!) — 종이 풀이를 고쳐서 ✘ 칸만 다시 내요 · 맞힌 칸은 잠기고 ✘ 칸은 빈칸이에요 · 틀리면 ❤ −1'}</p>` : attempt && rec.v3 && !rec.hearts ? `<p class="paper-note">${rec.perfect ? (rec.fix ? '🔁 <b>같은 문제 그대로예요</b> (고장 아님!) — 종이 풀이를 고쳐서 ✘ 칸을 다시 내요 (맞히면 묶기 · 힐 한 번)' : '🆕 새 문제 (숫자가 바뀌었어요) — 맞히면 기회 그대로 + 묶기 · 힐 한 번 · 틀리면 기회 −1') : '🔁 <b>같은 문제 그대로예요</b> (고장 아님!) — 종이 풀이를 고쳐서 ✘ 칸만 다시 내요 · 맞힌 칸은 잠기고 ✘ 칸은 빈칸이에요'}</p>` : attempt && rec.perfect && !rec.hearts ? `<p class="paper-note">⛓ 몬스터 묶기 — 맞힌 소문제 1개마다 반 전체의 몬스터 공격이 1초 늦어져요 (최대 ${Raid().BIND_MAX}초)</p>` : attempt && !rec.hearts ? `<p class="paper-note">🔄 재도전 ${attempt} — 숫자가 모두 바뀌었어요 · 지난번 틀린 문항은 <b class="ngc">✘</b></p>` : ''}
       ${L.monsters[mid].note ? `<p class="paper-note">💡 ${esc(L.monsters[mid].note)}</p>` : ''}
-      ${sameQ && !ready ? `<p class="paper-note redo-note">✘ 틀린 문제 ${okLock.filter((x) => !x).length}개를 모두 고쳐요</p>` : ''}
-      <div class="items">${items.map((q, i) => { const h = withAns(itemHtml(q, i, prevWrong[i], null), q, form.given[i], i); return !sameQ ? h : okLock[i] ? h.replace(/^<div class="item">/, '<div class="item ok-lock"><b class="lock-tag">✔ 맞힘</b>') : h.replace(/^<div class="item">/, '<div class="item redo">'); }).join('')}</div></div>
-      ${dock(rec, `<button class="btn primary big dock-go${ready ? ' go-pulse' : ''}" id="st-go"${ready ? '' : ' disabled'}>⚔ 공격!</button>`)}
+      ${sameQ && !ready && !rec.hearts ? `<p class="paper-note redo-note">✘ 틀린 문제 ${okLock.filter((x) => !x).length}개를 모두 고쳐요</p>` : ''}
+      <div class="items">${items.map((q, i) => { const h = withAns(itemHtml(q, i, prevWrong[i] && !rec.hearts, null), q, form.given[i], i); const lastA = sameQ && !okLock[i] && rec.hearts ? (() => { const lt = penLine(q, (rec.last.given || [])[i], i); return lt ? `<div class="last-ans">지난 답 <s>${pretty(String(lt).replace(NO_RE, ''))}</s> <b>✘</b></div>` : ''; })() : ''; return !sameQ ? h : okLock[i] ? h.replace(/^<div class="item">/, '<div class="item ok-lock"><b class="lock-tag">✔ 맞힘</b>') : h.replace(/^<div class="item">/, '<div class="item redo">').replace(/<\/div>\s*$/, `${lastA}</div>`); }).join('')}</div></div>
+      ${rec.hearts ? dock4(rec, { main: { id: 'st-go', label: rec.inPanel ? '🔥 재도전' : '⚔ 공격', dis: !ready, pulse: ready }, slot: rec.perfect ? 'energy' : 'hearts', hint: hintKeys.length ? { on: hintKeys.every((k) => hintOpen.has(k)) } : null })
+        : dock(rec, `<button class="btn primary big dock-go${ready ? ' go-pulse' : ''}" id="st-go"${ready ? '' : ' disabled'}>⚔ 공격!</button>`)}
       ${helpBtn()}</div>`);
     chargeBtn(body); draftMark(ready && form.touched ? key : null); // ⚔ #24 (숫자 칸은 0 으로 시작하니 한 번이라도 고친 뒤에만): 다 채웠는데 공격을 안 누름 → 리모컨에 표시
     bindTop();
     bindHelp();
     body.querySelectorAll('.item.ok-lock button, .item.ok-lock input').forEach((x) => { x.disabled = true; }); // 🔁 #112 ✔ 소문제 = 잠김
+    { const dh = $('#dk-hint'); if (dh) dh.onclick = () => { const all = hintKeys.every((k) => hintOpen.has(k)); hintKeys.forEach((k) => (all ? hintOpen.delete(k) : hintOpen.add(k))); if (!all && DS.Sound && DS.Sound.hint) DS.Sound.hint(); drawn = ''; render(); }; }
+    { const g0 = $('#st-go'), tk = `${mid}|${attempt - 1}`; if (g0 && rec.hearts && attempt > 0 && (thinkUntil[tk] || 0) > Date.now()) { g0.dataset.ready = ready ? '1' : '0'; thinkTimer(g0, tk, rec.inPanel ? '🔥 재도전' : '⚔ 공격'); } } // 🤔 생각 시간 = 공격 단추 글자에
     body.querySelectorAll('[data-pick]').forEach((b) => b.addEventListener('click', () => {
       const [i, v] = b.dataset.pick.split('|'); const k = Number(i); if (okLock[k]) return;
       const t = items[k].type;
@@ -773,7 +805,7 @@ DS.Student = (function () {
     };
   }
   // ⚔ 소레이드 화면 (2026-11-09 #18): 진행 칩 ①②③👑 · 지금 단계 문제 하나 · 「📜 나의 풀이」가 한 줄씩 쌓임 · 기회 반 칸 · 1칸 남으면 🙋 선생님 확인
-  let cform = null; const bpArm = {}; const chainPrac = {}, writeMode = {}, probShut = {}, probOpen = {}, pracArm = {};
+  let cform = null; const chHint = {}; const bpArm = {}; const chainPrac = {}, writeMode = {}, probShut = {}, probOpen = {}, pracArm = {};
   // ✨ 「📜 나의 풀이」 새 줄 (#46 모래 글씨 → 2026-11-10 선생님 「픽셀 디졸브 인 · 새 문장은 빨간색 · 다음 단계에서 다시 검정」)
   //   새 줄만 · 종이색 픽셀 칸이 흩어지듯 사라지며 글씨가 드러남 (왼쪽부터 조금 먼저 · 약 0.9초 · 한 줄씩 차례로) · 그 단계에서 생긴 줄 = 빨강 → 다음 단계 줄이 생기면 검정
   //   이미 있던 줄 · 다시 들어온 첫 화면은 연출 없이 · 화면을 다시 그려도 이어서(시작 시각 기억 · 칸 순서는 줄마다 고정) · 그림 파일 없음 (캔버스 1장)
@@ -838,10 +870,12 @@ DS.Student = (function () {
     if (sig === drawn && body.querySelector('.ch-wrap')) { hpText(body, hp); return; }
     if (chainAtkUntil > Date.now() && body.querySelector('.ch-wrap')) { hpText(body, hp); return; } // ⚔ 공격 모션 중엔 다시 그리지 않음 (끝나면 다시 그림)
     drawn = sig;
-    const chips = pItems.map((_, i) => `<span class="cr-chip ${i < stage || (!prac && rec.done) ? 'ok' : i === stage ? 'now' : ''}${!prac && dns.includes(i) ? ' down' : ''}">${!prac && dns.includes(i) ? '💀' : ''}${i === pItems.length - 1 ? '👑' : '①②③④⑤⑥'[i]}${i < stage || (!prac && rec.done) ? '✔' : i === stage ? '⚔' : ''}</span>`).join('<i>›</i>');
+    const badNow = !!rec.hearts && !prac && !!rec.lastWrong && rec.lastWrong.s === stage && !rec.done; // 💔 v4: 방금 틀린 단계
+    const chips = pItems.map((_, i) => `<span class="cr-chip ${i < stage || (!prac && rec.done) ? 'ok' : i === stage ? (badNow ? 'now ng' : 'now') : ''}${!prac && dns.includes(i) ? ' down' : ''}">${!prac && dns.includes(i) ? '💀' : ''}${i === pItems.length - 1 ? '👑' : '①②③④⑤⑥'[i]}${i < stage || (!prac && rec.done) ? '✔' : i === stage ? '⚔' : ''}</span>`).join('<i>›</i>');
     const story = (arr) => (arr.length ? `<div class="cr-story"><b>📜 나의 풀이</b><ol>${arr.map((t) => `<li>${pretty(t)}</li>`).join('')}</ol></div>` : '');
     // ✍ #93 (2026-11-11 선생님 「나의 풀이 알아서 접혀져 있던데 안 접히게」): 「📜 나의 풀이」 = 늘 모두 펼침 (#56 ③ 「최근 한 줄 + n줄 ▼」 접기 없앰)
-    const storyF = (arr) => (arr.length ? `<div class="cr-story"><b>📜 나의 풀이</b><ol>${arr.map((t, k) => `<li value="${k + 1}">${pretty(t)}</li>`).join('')}</ol></div>` : '');
+    const wrongLi = () => { if (!badNow) return ''; const t = penLine(q, rec.lastWrong.given, 0); return `<li class="cr-wrong"><s>${t ? pretty(String(t).replace(NO_RE, '')) : '내 답'}</s> <b>✘</b></li>`; };
+    const storyF = (arr) => (arr.length || badNow ? `<div class="cr-story"><b>📜 나의 풀이</b><ol>${arr.map((t, k) => `<li value="${k + 1}">${pretty(t)}</li>`).join('')}${wrongLi()}</ol></div>` : '');
     const lastWrong = !prac && rec.lastWrong && rec.lastWrong.s === stage, cheer = !prac && !rec.done && !rec.fail && dns.includes(stage) ? '<p class="cr-more cr-cheer">💥 친구들은 이 졸개를 넘었어요! 힘내요</p>' : ''; // 📱 #56 ④ 장면 띠 위에 겹침
     if (!photoLoaded && DS.Photo) { photoLoaded = true; DS.Photo.load().then(() => { drawn = ''; render(); }).catch(() => {}); }
     const pendPh = (myP().pp || {})[mid] && wrOk !== 'ok' ? '<p class="ph-hand cr-pend-ph">⏳ 서술형 사진은 <b>선생님이 직접 확인</b>하고 있어요 (AI 가 확신하지 못함) · 더 또렷하게 다시 찍어도 돼요</p>' : ''; // 🐞 #57 ② 「알겠어요」 뒤 결과가 사라진 것처럼 보임 → 남김
@@ -849,11 +883,12 @@ DS.Student = (function () {
     const pUsed = Raid().pracUsed(R, mid, me, rec), pLeft = Math.max(0, Raid().PRAC_MAX - pUsed); // 🔥 #39 한 판 더 3판
     const pracBtn = rec.hearts ? (rec.inPanel && !prac ? `<button class="btn primary big dock-go cr-again" id="cr-cont">🔥 재도전 판 ${rec.panel} 이어서</button>` : rec.energy > 0 || rec.inPanel ? '' : '<span class="dock-wait cr-pend">⚡ 기력을 다 썼어요</span>') : pLeft > 0 ? `<button class="btn primary big dock-go cr-again" id="cr-prac">🔥 한 판 더 <small>${pLeft}/${Raid().PRAC_MAX}</small></button>` : `<span class="dock-wait cr-pend">🔥 연습 ${Raid().PRAC_MAX}번 끝!</span>`;
     // ⛓ 💚 #50 ①: 대장 처치 뒤 남은 기회(정수 칸)로 묶기 · 힐 (일반 몬스터 결과 화면과 같은 방식) · 한 판 더 기회와 따로
-    const tokPick = rec.hearts ? (rec.done && (!prac || pDone) && (rec.canHeal || rec.inPanel) && skStop[mid] ? stopHtml(rec) : rec.done && rec.canHeal && (!prac || pDone) ? skillHtml(mid, rec) : '') : rec.done && rec.tokLeft > 0 && (!prac || pDone || pFail) ? `<p class="okc st-ask">남은 기회로 무엇을 할까요? <span class="muted small">(${rec.tokLeft}번)</span></p>
+    const tokPick = rec.hearts ? (rec.done && (!prac || pDone) && (rec.canHeal || rec.inPanel) && skStop[mid] ? stopHtml(rec) : rec.done && rec.canHeal && (!prac || pDone) ? skillHtml(mid, rec, true) : '') : rec.done && rec.tokLeft > 0 && (!prac || pDone || pFail) ? `<p class="okc st-ask">남은 기회로 무엇을 할까요? <span class="muted small">(${rec.tokLeft}번)</span></p>
       <div class="heal-pick"><button class="btn primary big" id="st-bind">⛓ 몬스터 묶기<br><small>공격 ${Raid().BIND_TOKEN}초 늦춤</small></button><button class="btn big heal-btn" id="st-heal">💚 친구 힐<br><small>막힌 친구 기회 +1</small></button></div>` : '';
     const pendTip = rec.hearts ? (rec.done && !rec.energy && !rec.inPanel && nextHint != null ? '<p class="cr-more">⚡ 다 썼어요! 이제 💡 친구에게 힌트를 줘 볼까요?</p>' : '') : pLeft > 0 ? '' : `<p class="cr-more">🔥 연습 ${Raid().PRAC_MAX}번 끝!${nextHint != null ? ' 이제 💡 친구에게 힌트를 줘 볼까요?' : ''}</p>`;
     const hintBtn = (nextHint != null ? `<button class="btn cr-hint" id="cr-hint" data-s="${nextHint}">💡 힌트 주기${wSt.length > 1 ? ` (근거 줄 ${wSt.indexOf(nextHint) + 1})` : ''} <small>근거 한 줄이 TV 에 떠요 · 줄마다 한 번 · EXP +1</small></button>` : myHint ? '<p class="muted small center">💡 힌트를 줬어요 — 고마워요!</p>' : '') + (whyTag && !prac && rec.done ? `<p class="muted small center cr-whyn">${whyTag}</p>` : '');
-    const hintsBox = wItem && hintBy.length && !rec.done ? `<details class="cr-hints"><summary>💡 친구 힌트 ${hintBy.length}개 <small>(누르면 펼침)</small></summary>${hintLines.map((x) => `<p>${pretty(rec.items[x.s].why.text)}</p><p class="muted small">${x.by.slice(0, 5).map((p) => esc(p.nick || '')).join(' · ')}</p>`).join('')}</details>` : '';
+    const hintPanel = () => `<div class="cr-hintp">${DS.Hint && q ? DS.Hint.html(q, `cr|${mid}|${stage}`, true) : ''}${hintLines.map((x) => `<p>💡 ${pretty(rec.items[x.s].why.text)} <span class="muted small">${x.by.slice(0, 5).map((pp) => esc(pp.nick || '')).join(' · ')}</span></p>`).join('')}</div>`; // 💡 C: 그림 힌트 + 친구 힌트 한 단추
+    const hintsBox = rec.hearts ? '' : wItem && hintBy.length && !rec.done ? `<details class="cr-hints"><summary>💡 친구 힌트 ${hintBy.length}개 <small>(누르면 펼침)</small></summary>${hintLines.map((x) => `<p>${pretty(rec.items[x.s].why.text)}</p><p class="muted small">${x.by.slice(0, 5).map((p) => esc(p.nick || '')).join(' · ')}</p>`).join('')}</details>` : '';
     let mainHtml;
     if (wm) { // ✍ #50: 대장 전에도 · 바로 쓰기 (#38: 연습 중에 눌러도 · ✕ 닫으면 보던 연습 판으로): 나의 풀이 · 졸개 단계 · 채점 기준을 숨기고 원래 문제 + 📸 만 (📜 다시 보기 = ✍ 연습 쓰기)
       const img = scoutImg[mid];
@@ -886,20 +921,29 @@ DS.Student = (function () {
     const probText = prac ? (pItems[0] || {}).problem : null, pbKey = `${mid}|${pass}|${stage}`, probBox = probText ? `<details class="cr-prob"${(probOpen[pbKey] != null ? probOpen[pbKey] : stage === 0) ? ' open' : ''} data-pm="${esc(pbKey)}"><summary>📜 문제 <small>(숫자가 바뀐 원문 · 눌러서 접기)</small></summary><p>${pretty(probText)}</p></details>` : ''; // 📜 #44 ⑤ 한 판 더 = 바뀐 숫자의 원문 문제 (모든 단계 · 접기)
     if (needWhy) mainHtml = `${probBox}${storyF(says)}<div class="paper cr-why"><div class="paper-h"><b>💡 근거 한 줄</b><small>틀려도 괜찮아요 · 다시 골라요</small></div><p class="why-q">${pretty(wq.why.pre)} <b class="why-bl">____</b>${pretty(wq.why.post)}</p><div class="choices">${wq.why.choices.map((c, i) => `<button class="choice" data-why="${i}">${pretty(c)}</button>`).join('')}</div></div>`;
     else if (rec.fail) mainHtml = `<p class="paper-note">끝까지 못 맞혔어요 — 아래 풀이를 학습지에 옮겨 적고 🎯 복습 허수아비에서 다시 도전해요.</p>${story(rec.items.map((x) => x.say))}`;
-    else if (!prac && rec.done) mainHtml = `<p class="okc big-msg">${rec.perfect ? '🌟 퍼펙트 사슬!' : '🎉 대장 처치!'}</p>${story(says)}${rec.byPh ? '<p class="cr-more">✍ 서술형으로 남은 단계를 한 번에!</p>' : ''}${tokPick}${pendTip}${hintBtn}${rec.hearts ? '<p class="muted small cr-pnote">🔥 재도전 판 = 숫자만 바뀐 같은 문제 · 무료(틀려도 ❤ 그대로) · 데미지 0 · 다 맞히면 경험치 +1 · 다음 ⚡</p>' : '<p class="muted small cr-pnote">숫자만 바뀐 새 문제 · 판마다 연습 기회 4칸 (틀리면 줄어요 · 다 쓰면 그 판 끝) · 수업 기록 · 💎 그대로 · 사슬 완성마다 경험치 +1 (데미지 0)</p>'}`;
+    else if (!prac && rec.done) mainHtml = `<p class="okc big-msg">${rec.perfect ? '🌟 퍼펙트 사슬!' : '🎉 대장 처치!'}</p>${story(says)}${rec.byPh ? '<p class="cr-more">✍ 서술형으로 남은 단계를 한 번에!</p>' : ''}${tokPick}${pendTip}${hintBtn}${rec.hearts ? '' : '<p class="muted small cr-pnote">숫자만 바뀐 새 문제 · 판마다 연습 기회 4칸 (틀리면 줄어요 · 다 쓰면 그 판 끝) · 수업 기록 · 💎 그대로 · 사슬 완성마다 경험치 +1 (데미지 0)</p>'}`;
     else if (pFail) mainHtml = `<p class="paper-note">✘ 이번 연습 판은 기회를 다 썼어요 — 끝 (EXP 없음) · 아래 풀이를 보고 다시 해 봐요</p>${story(pItems.map((x) => x.say))}${tokPick}${pendTip}${hintBtn}`; // #40
     else if (pDone) mainHtml = `<p class="okc">✔ ${rec.hearts ? `🔥 재도전 판 ${pass} 완성!` : '연습 사슬 완성!'} <b class="gold">+1 EXP</b></p>${story(says)}${tokPick}${pendTip}${hintBtn}<p class="muted small cr-pnote">숫자만 바뀐 새 문제 · 판마다 연습 기회 4칸 (틀리면 줄어요 · 다 쓰면 그 판 끝) · 수업 기록 · 💎 그대로 · 맞히면 공격 이펙트가 나가요 (데미지 0)</p>`;
     else if (rec.locked && !prac) mainHtml = `${story(says)}<div class="cr-lock"><b>🙋 선생님 확인을 기다려요</b><p>${rec.hearts ? '❤ 0 — 학습지에 풀이를 정리해 두면 선생님이 와서 확인하고 풀어 줘요 (❤ +1 · 그렇게 풀어내면 ❤ +1 더)' : '기회가 1칸 남았어요 — 학습지에 풀이를 정리해 두면 선생님이 와서 확인해 줘요.'}</p>${relTest()}</div>`;
-    else mainHtml = `${probBox}${storyF(says)}<div class="paper"><div class="paper-h"><b>${esc(step.title)} · ${stage === pItems.length - 1 ? '👑 대장' : `졸개 ${'①②③④⑤⑥'[stage]}`}</b><small>${prac ? (rec.hearts ? `🔥 재도전 판 ${pass} (숫자 바뀜 · 데미지 0 · 틀려도 ❤ 그대로)` : '연습 (숫자 바뀜 · 데미지 없음)') : '틀려도 숫자는 그대로'}</small></div>
-        ${lastWrong ? '<p class="paper-note">✘ 다시 생각해 봐요 — 같은 문제예요</p>' : ''}<div class="items">${itemHtml(q, 0, lastWrong, null, cform.given)}</div></div>`;
+    else mainHtml = `${probBox}${storyF(says)}${(chHint[mid] || sage) && rec.hearts && !lastWrong ? hintPanel() : (chHint[mid] || sage) && rec.hearts ? hintPanel() : ''}<div class="paper${badNow ? ' cr-bad' : ''}"><div class="paper-h"><b>${esc(step.title)} · ${stage === pItems.length - 1 ? '👑 대장' : `졸개 ${'①②③④⑤⑥'[stage]}`}</b><small>${prac ? (rec.hearts ? '' : '연습 (숫자 바뀜 · 데미지 없음)') : rec.hearts ? '' : '틀려도 숫자는 그대로'}</small></div>
+        ${rec.hearts && prac ? '<p class="num-tags"><b class="num-tag ch">🔁 숫자 바뀜</b></p>' : ''}${lastWrong && !rec.hearts ? '<p class="paper-note">✘ 다시 생각해 봐요 — 같은 문제예요</p>' : ''}<div class="items">${itemHtml(q, 0, lastWrong && !rec.hearts, null, cform.given, !!rec.hearts)}</div></div>`;
     // ⚔ #50 ② 아래 칸 = 왼쪽 「⚔ 공격」(대장 뒤 = 「🔥 한 판 더」) · 오른쪽 「✍ 서술형 도전 📸」
     const goBtn = (t) => `<button class="btn primary big dock-go" id="cr-go"${ready ? '' : ' disabled'}>${t}</button>`;
     const dockL = needWhy ? '' : prac ? (pDone || pFail ? pracBtn : goBtn(rec.hearts ? '🔥 재도전 공격' : '⚔ 연습 공격')) : rec.done ? pracBtn : rec.fail ? '' : rec.locked ? '<span class="dock-wait">🙋 확인 기다림</span>' : goBtn('⚔ 공격!');
-    const qView = !needWhy && !rec.fail && !(!prac && rec.done) && !pFail && !pDone && !(rec.locked && !prac); // 문제 화면 = 높이 고정(양피지 안에서 스크롤) · 끝난 화면 = 높이 자유(맨 끝 단추까지 스크롤 · 🐞 2026-11-10 힌트 단추가 아래 칸에 가려 못 누름)
+    const qView = !needWhy && !rec.fail && !(!prac && rec.done) && !pFail && !pDone && !(rec.locked && !prac);
+    const dk4 = !rec.hearts ? null : (() => { // 🟡 C (v4): 💡 힌트 · 노란 단추(❤ / ⚡ 칸) · ✍ 서술형
+      const hasPic = !!(DS.Hint && DS.Hint.svg && q && DS.Hint.svg(q)), showHint = (qView && (hasPic || (!!wItem && hintBy.length > 0)));
+      const wr = !canPhoto ? '' : wrOk === 'ok' ? '<button class="dk-wr" disabled><b>🌟 통과</b><small>서술형</small></button>' : phN >= DS.Photo.raidMax() ? '<button class="dk-wr" disabled><b>📸 다 씀</b><small>서술형</small></button>' : '<button class="dk-wr" id="cr-write"><b>✍ 서술형</b><small>📄 학습지 숫자</small></button>';
+      const main = needWhy ? { wait: '💡 근거를 골라요' } : prac && !pDone ? { id: 'cr-go', label: '🔥 재도전', dis: !ready, pulse: ready } : !prac && !rec.done ? (rec.locked ? { wait: '🙋 확인 기다림' } : { id: 'cr-go', label: '⚔ 공격', dis: !ready, pulse: ready })
+        : skStop[mid] && (rec.canHeal || rec.inPanel) ? { wait: '⏸ 쉬는 중' } : rec.canHeal ? { id: 'sk-go', label: skLabel(mid), dis: !skPick[mid] } : rec.inPanel ? { id: 'cr-cont', label: '🔥 재도전' } : { wait: '다음 단계를 기다려요' };
+      return dock4(rec, { main, slot: rec.done ? 'energy' : 'hearts', hint: showHint ? { on: !!chHint[mid], n: hintBy.length } : null, wr });
+    })(); // 문제 화면 = 높이 고정(양피지 안에서 스크롤) · 끝난 화면 = 높이 자유(맨 끝 단추까지 스크롤 · 🐞 2026-11-10 힌트 단추가 아래 칸에 가려 못 누름)
     paint(body, `${key}|${needWhy ? 'w' : 'q'}`, `<div class="panel framed st-fight ch-wrap${qView || needWhy ? ' cr-q' : ' st-after'}"><div class="cr-scw">${scene(step, rec, hp, '', '')}${qView || needWhy ? cheer : ''}</div>
       <div class="cr-chips">${chips}${prac && whyTag ? `<b class="cr-whyn">${whyTag}</b>` : ''}</div>${pendPh}${qView || needWhy ? '' : cheer}${hintsBox}${mainHtml}
-      ${dock(prac && !pDone && !pFail ? pDock : rec, `<div class="cr-dbtns">${dockL}${wrBtn}</div>`).replace('class="st-dock"', 'class="st-dock cr-dock"')}${helpBtn()}${qView || needWhy ? '' : '<div class="cr-pad"></div>'}</div>`); // cr-pad = 아래 칸(두 줄)에 맨 끝 단추가 가리지 않게
+      ${dk4 || dock(prac && !pDone && !pFail ? pDock : rec, `<div class="cr-dbtns">${dockL}${wrBtn}</div>`).replace('class="st-dock"', 'class="st-dock cr-dock"')}${helpBtn()}${qView || needWhy ? '' : '<div class="cr-pad"></div>'}</div>`); // cr-pad = 아래 칸(두 줄)에 맨 끝 단추가 가리지 않게
     bindTop(); bindHelp(); bindRelTest(mid);
+    { const dh = $('#dk-hint'); if (dh) dh.onclick = () => { chHint[mid] = !chHint[mid]; if (chHint[mid] && DS.Sound && DS.Sound.hint) DS.Sound.hint(); drawn = ''; render(); }; }
+    if (badNow) heartBreak(`c|${mid}|${rec.nextK}`, rec.left, 450); // 💔 반 하트(졸개) · 하트 하나(대장)
     body.querySelectorAll('[data-pick]').forEach((b) => b.addEventListener('click', () => {
       const v = b.dataset.pick.split('|')[1];
       if (q.type === 'multi') { const nn = Number(v); if (q.empty) cform.given[0] = DS.Quiz.chipToggle(q, cform.given[0], nn); else { const st = new Set(cform.given[0]); if (st.has(nn)) st.delete(nn); else st.add(nn); cform.given[0] = [...st].sort((a, b2) => a - b2); } }
@@ -935,6 +979,7 @@ DS.Student = (function () {
       const okNow = prac ? (r2.pass === pass && r2.pStage > stage) : r2.stage > stage;
       chainAtk = { ok: okNow, big: !prac && r2.done, perfect: !prac && r2.done && r2.perfect, prac }; // ⚔ 2026-11-09 선생님 「졸개 공격도 모션」: 다시 그린 뒤 돌진 · 탄 (아래 render 뒤)
       if (okNow) { if (!DS.Attack) { DS.Sound.slash(); setTimeout(() => DS.Sound.hit(), 160); } if (stage < pItems.length - 1 && DS.Sound.die) setTimeout(() => DS.Sound.die(), 900); /* 🔊 #87 졸개가 사라질 때 (공격 연출 뒤 · 대장은 finish) */ DS.UI.toast(stage === pItems.length - 1 ? (prac ? '✔ 연습 사슬 완성! 🔥 경험치 +1' : r2.perfect ? '🌟 퍼펙트 사슬!' : '👑 대장 처치!') : `✔ 졸개 ${'①②③④⑤⑥'[stage]} 처치!`); }
+      else if (r2.hearts) { if (!DS.Attack) DS.Sound.squish(); if (r2.locked) DS.UI.toast('🙋 ❤ 0 — 선생님 확인을 기다려요'); } // 💔 v4: 글자 안내 없이 하트 쪼개짐 · 빨간 줄 (잠김만 알림)
       else { if (!DS.Attack) DS.Sound.squish(); if (!prac) DS.UI.toast(r2.locked ? (r2.hearts ? '🙋 ❤ 0 — 선생님 확인을 기다려요' : '🙋 기회 1칸 — 선생님 확인을 기다려요') : r2.fail ? '기회를 다 썼어요' : `✘ 틀렸어요 · ${r2.hearts ? '❤' : '기회'} −${stage === n - 1 ? 1 : 0.5}`); else DS.UI.toast(r2.pFail ? '✘ 이번 연습 판은 기회를 다 썼어요' : `✘ 틀렸어요 · 연습 기회 −${stage === pItems.length - 1 ? 1 : 0.5}`); }
       render(); chainAttack();
     });
@@ -1048,11 +1093,11 @@ DS.Student = (function () {
       const filled = (i) => bform.given[i] != null;
       const ready = ids.every(filled), sig = `b4|${roundKey}|${JSON.stringify(bform.given)}|${hp.left}|${rb.left}`;
       if (sig === drawn && body.querySelector('.boss4')) { hpText(body, hp); return; } drawn = sig;
-      const note = rb.inPanel ? `🔥 <b>재도전 판 ${rb.panel}</b> — 숫자가 바뀐 형성평가 · 데미지 0 · 틀려도 ❤ 그대로 · 다 맞히면 EXP +1 · 다음 ⚡` : rb.done ? '⭐ <b>보너스만 다시</b> — 숫자가 바뀐 새 문제 · 틀려도 ❤ 그대로' : rb.round === 0 ? `처음엔 학습지 형성평가와 같은 문제 · ${ids.length}문항을 모두 풀고 한 번에 공격 · 하나라도 틀리면 ❤ −1 (몇 개를 틀려도 −1)${N > hpN ? ' · ⭐ 보너스는 틀려도 ❤ 그대로' : ''}` : '🔁 <b>틀린 문항만</b> 숫자가 바뀐 새 문제로 다시 · 맞힌 문항은 잠겼어요';
+      const note = rb.inPanel ? '' : rb.done ? '⭐ <b>보너스만 다시</b> — 숫자가 바뀐 새 문제 · 틀려도 ❤ 그대로' : rb.round === 0 ? `처음엔 학습지 형성평가와 같은 문제 · ${ids.length}문항을 모두 풀고 한 번에 공격 · 하나라도 틀리면 ❤ −1 (몇 개를 틀려도 −1)${N > hpN ? ' · ⭐ 보너스는 틀려도 ❤ 그대로' : ''}` : '🔁 <b>틀린 문항만</b> 숫자가 바뀐 새 문제로 다시 · 맞힌 문항은 잠겼어요';
       paint(body, `boss4|${roundKey}`, `<div class="panel framed st-fight boss4">${top}
-        <div class="paper"><div class="paper-h"><b>👑 ${esc(L.boss.title || '형성평가')}</b><small>${ids.length}문항 모두 풀고 공격</small></div><p class="paper-note">${note}</p>
+        <div class="paper"><div class="paper-h"><b>👑 ${esc(L.boss.title || '형성평가')}</b><small>${ids.length}문항 모두 풀고 공격</small></div>${rb.inPanel ? '<p class="num-tags"><b class="num-tag ch">🔁 숫자 바뀜</b></p>' : note ? `<p class="paper-note">${note}</p>` : ''}
         <div class="boss-items">${ids.map((i) => `<button class="bitem${filled(i) ? ' tried' : ''}${i >= hpN ? ' bonus' : ''}" data-i="${i}"><b>${i + 1}번${i >= hpN ? ' ⭐' : ''}</b> ${filled(i) ? '✍ 답함 (눌러서 고치기)' : '풀기'}</button>`).join('')}</div></div>
-        ${dock(rb, `<button class="btn primary big dock-go${ready ? ' go-pulse' : ''}" id="bs-go"${ready ? '' : ' disabled'}>⚔ 공격! <small>${ids.filter(filled).length}/${ids.length}</small></button>`)}${tail}</div>`);
+        ${dock4(rb, { main: { id: 'bs-go', label: `${rb.inPanel ? '🔥 재도전' : '👑 제출'} ${ids.filter(filled).length}/${ids.length}`, dis: !ready, pulse: ready }, slot: rb.inPanel ? 'energy' : 'hearts' })}${tail}</div>`);
       bindTop(); bindLobby();
       body.querySelectorAll('.boss-items .bitem').forEach((b) => b.addEventListener('click', async () => {
         const i = Number(b.dataset.i), a = want[i], q = items[i];
@@ -1075,16 +1120,18 @@ DS.Student = (function () {
     // 결과 · ❤ 0 해설 · ⚡ 기술 · 재도전 판 고르기
     const sig = `b4r|${rb.round}|${rb.left}|${rb.out}|${rb.done}|${rb.energy}|${rb.inPanel}|${rb.panel}|${JSON.stringify(rb.pNext)}|${skPick.boss || ''}|${skStop.boss ? 1 : 0}|${hp.left}|${bossOpen}|${bRes ? bRes.round : ''}`;
     if (sig === drawn && body.querySelector('.boss4')) { hpText(body, hp); return; } drawn = sig;
-    const last = bRes ? bRes : null, lastLine = last ? `<div class="st-res res-${last.hpWrong ? 'partial' : 'success'}"><b>${last.panel ? `🔥 재도전 판 ${rb.inPanel ? rb.panel : rb.kUsed}` : '👑 형성평가'} · ${Object.values(last.res).filter((x) => x.ok).length} / ${Object.keys(last.res).length} ${last.hpWrong ? (last.panel ? '— 틀린 것만 다시 (❤ 그대로)' : '— ❤ −1') : '성공!'}</b><div class="mk-chips">${Object.entries(last.res).map(([i, x]) => `<span class="${x.ok ? 'ok' : 'ng'}">${Number(i) + 1}번 ${x.ok ? '✔' : '✘'}</span>`).join('')}</div></div>` : '';
+    const last = bRes ? bRes : null, lastLine = last ? `<div class="st-res res-${last.hpWrong ? 'partial' : 'success'}"><b>${last.panel ? '🔥' : '👑'} ${Object.values(last.res).filter((x) => x.ok).length} / ${Object.keys(last.res).length}${last.hpWrong ? '' : ' 성공!'}</b><div class="mk-chips">${Object.entries(last.res).map(([i, x]) => `<span class="${x.ok ? 'ok' : 'ng'}">${Number(i) + 1}번 ${x.ok ? '✔' : '✘'}</span>`).join('')}</div></div>` : '';
     let main;
     if (rb.out) { // ❤ 0 = 해설 보기 (선생님 호출 없음)
       const tr = Raid().bossTries(L, R, me);
       main = `<div class="cr-lock"><b>📖 ❤ 0 — 해설을 보며 학습지에 정리해요</b></div><div class="paper"><div class="marks">${Array.from({ length: N }, (_, i) => i).filter((i) => !rb.okI[i]).map((i) => { const t = tr.filter((x) => x.i === i).pop(), q = t && t.q; return `<div class="mark ng"><b>${i + 1}번</b> <span class="math">${q ? pretty(itemText(q)) : ''}</span><br><span class="sol-line math">${q ? pretty(solOf(q)) : ''}</span></div>`; }).join('')}</div></div>`;
-    } else if (!rb.done) main = `<p>${last && last.hpWrong ? `✘ 틀린 문항만 숫자가 바뀐 새 문제로 다시 <span class="muted small">(❤ ${rb.left})</span>` : '형성평가를 이어서 풀어요'}</p><button class="btn primary big" id="bs-next">🔁 틀린 문항 다시 풀기</button>`;
+    } else if (!rb.done) main = '';
     else if (skStop.boss && (rb.canHeal || rb.inPanel)) main = stopHtml(rb);
-    else if (rb.inPanel) main = `<p>🔥 재도전 판 ${rb.panel} <span class="muted small">(숫자가 바뀐 형성평가 · 데미지 0 · 틀려도 ❤ 그대로)</span></p><button class="btn primary big" id="bs-panel">🔥 재도전 판 ${rb.panel} 풀기</button><p class="center"><button class="sk-stop" id="sk-stop">그만하기</button></p>`;
-    else main = `<p class="okc big-msg">👑 형성평가 ${rb.firstPerfect ? '퍼펙트!' : '완료!'}</p>${rb.canHeal ? skillHtml('boss', rb) : '<p class="muted">⚡ 기력을 다 썼어요 — 멋져요!</p>'}${rb.bonusOpen.length ? `<button class="btn" id="bs-bonus">⭐ 보너스 ${rb.bonusOpen.map((i) => `${i + 1}번`).join(' · ')} 다시 풀기</button>` : ''}`;
-    paint(body, `boss4r|${rb.round}`, `<div class="panel framed st-fight st-after boss4">${top}${lastLine}${main}${dock(rb, '')}${tail}</div>`);
+    else if (rb.inPanel) main = '<p class="center"><button class="sk-stop" id="sk-stop">그만하기</button></p>';
+    else main = `<p class="okc big-msg">👑 형성평가 ${rb.firstPerfect ? '퍼펙트!' : '완료!'}</p>${rb.canHeal ? skillHtml('boss', rb, true) : '<p class="muted">⚡ 기력을 다 썼어요 — 멋져요!</p>'}${rb.bonusOpen.length ? `<button class="btn" id="bs-bonus">⭐ 보너스 ${rb.bonusOpen.map((i) => `${i + 1}번`).join(' · ')} 다시 풀기</button>` : ''}`;
+    const dm = rb.out ? { wait: '📖 해설 보기' } : !rb.done ? { id: 'bs-next', label: '🔁 틀린 문항 다시' } : skStop.boss && (rb.canHeal || rb.inPanel) ? { wait: '⏸ 쉬는 중' } : rb.inPanel ? { id: 'bs-panel', label: '🔥 재도전' } : rb.canHeal ? { id: 'sk-go', label: skLabel('boss'), dis: !skPick.boss } : { wait: '다음 단계를 기다려요' };
+    paint(body, `boss4r|${rb.round}`, `<div class="panel framed st-fight st-after boss4">${top}${lastLine}${main}${dock4(rb, { main: dm, slot: rb.done ? 'energy' : 'hearts' })}${tail}</div>`);
+    if (last && last.hpWrong && !last.panel) heartBreak(`b|${last.round}`, rb.left, 300); // 💔 형성평가도 하트 쪼개짐
     bindTop(); bindLobby();
     const nx = $('#bs-next'); if (nx) nx.onclick = () => { bRes = null; drawn = ''; render(); };
     const pb = $('#bs-panel'); if (pb) pb.onclick = () => { bossOpen = `p${rb.panel}`; bRes = null; delete skStop.boss; drawn = ''; render(); };

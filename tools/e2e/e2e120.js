@@ -31,7 +31,7 @@ const OUT = process.argv[2] || '.', U = `http://localhost:${process.env.PORT || 
   const st = () => S.evaluate(() => ({ items: [...document.querySelectorAll('#st-body .items .item')].map((x) => (x.classList.contains('ok-lock') ? 'lock' : x.classList.contains('redo') ? 'redo' : '-') + ':' + ((x.querySelector('.rune-slot') || {}).textContent || '').trim()), go: (document.querySelector('#st-go') || {}).disabled, note: (() => { const n = document.querySelector('.redo-note'); return n && !n.hidden ? n.textContent : ''; })(), lockBtn: [...document.querySelectorAll('#st-body .item.ok-lock [data-rune]')].every((b) => b.disabled), sw: document.documentElement.scrollWidth, iw: innerWidth }));
   let s = await st();
   ok(s.items[0].startsWith('lock:' + ans[0]) && /^redo:숫자를/.test(s.items[1]) && /^redo:숫자를/.test(s.items[2]), `✔ 잠김(지난 답) · ✘ 둘 다 빈칸 (${s.items.join(' | ')})`);
-  ok(s.go === true && /틀린 문제 2개를 모두 고쳐요/.test(s.note) && s.lockBtn, `공격 흐림 · 「${s.note}」 · ✔ 칸 단추 잠김`);
+  ok(s.go === true && !s.note && s.lockBtn, `공격 흐림 · 안내 줄 없음 (2026-11-13 밤 · 빨간 테두리 · 지난 답 줄로) 「${s.note}」 · ✔ 칸 단추 잠김`);
   ok(s.sw <= s.iw + 1, '360px 가로 넘침 없음');
   await S.evaluate(() => document.querySelectorAll('.rv96').forEach((e) => e.remove())); await S.screenshot({ path: `${OUT}/120-${tag}-redo.png` });
   await press(1, String(ans[1]).split('')); s = await st();
