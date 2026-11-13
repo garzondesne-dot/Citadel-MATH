@@ -1,4 +1,4 @@
-// 🏫 2026-11-13 학교판 로고: 첫 화면 · 메뉴 머리 = 「공통수학2」 띠 없는 로고 · 우리 학교 · 체험판 = 그대로 — PORT=8766 node tools/e2e/e2e143.js <출력 폴더>
+// 🖼 2026-11-13 밤 선생님 「로고를 전부 모두의 던전으로 교체」: 학교판 · 정식 · 체험판 모두 「모두의 던전」 로고(공통수학2 띠 없음) — PORT=8766 node tools/e2e/e2e143.js <출력 폴더>
 const fs = require('fs'), path = require('path');
 const ROOT = path.join(__dirname, '..', '..'), P = require('../school/page.js');
 const OUT = process.argv[2] || '.', BASE = `http://localhost:${process.env.PORT || 8765}`;
@@ -12,7 +12,7 @@ const { chromium } = require('playwright');
   const b = await chromium.launch(); const errs = [], log = []; let bad = 0;
   const ok = (c, s) => { log.push((c ? '✔ ' : '✘ ') + s); if (!c) bad++; };
   try {
-    for (const [nm, url, want] of [['학교판', `/s/${code}/index.html?local`, 'brand-school-logo-v1'], ['정식', '/index.html?local', 'menu-logo-v1'], ['체험판', '/trial/', null]]) {
+    for (const [nm, url, want] of [['학교판', `/s/${code}/index.html?local`, 'brand-school-logo-v1'], ['정식', '/index.html?local', 'brand-school-logo-v1'], ['체험판', '/trial/', 'brand-school-logo-v1']]) {
       const ctx = await b.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2 }); const p = await ctx.newPage(); p.on('pageerror', (e) => errs.push(nm + ': ' + e.message));
       await p.goto(BASE + url); await p.waitForTimeout(4200);
       const sp = await p.evaluate(() => ({ logo: (document.querySelector('.sp-logo') || {}).src || '', head: getComputedStyle(document.querySelector('.brand-head') || document.body).backgroundImage }));
