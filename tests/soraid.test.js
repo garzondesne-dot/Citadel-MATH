@@ -68,6 +68,11 @@ check(X.monsterHp(L, R, 'u4').dmg === 7, '반 체력 피해 = 4 + 3');
 // ❤ 풀어주기 두 번째 (2026-11-13 밤): 풀어주기 = 누른 횟수 · 한 번 = ❤ 1 · 그렇게 풀어내면 ❤ +1
 R.chainOk.u4.b = 2; r = X.record(L, R, 'u4', 'b'); check(!r.locked && r.left === 1 && r.rel === 2, '풀어주기 2번째 → ❤ 1');
 sub('b', 3, true); r = X.record(L, R, 'u4', 'b'); check(r.done && r.left === 2 && r.best === 4, `풀어준 뒤 대장 처치 = ❤ +1 → 2 (${r.left})`);
+// ❤ 2026-11-13 밤 ④: 이미 열린 수업 방(version 3) = 옛 기회 규칙 그대로 (1칸 남으면 잠김 · 풀어주기 = 마지막 칸 · 0 = 못 맞힘)
+{ const O = X.newRoom('565656', 'set-06', 'T', 1000); O.meta.version = 3; O.active = { b: true }; O.players = { b: {} }; O.chain = { u4: { b: {} } }; let k = 0;
+  for (let j = 0; j < 6; j++) O.chain.u4.b[k++] = { s: 0, p: 0, g: -999 }; let r = X.record(L, O, 'u4', 'b'); check(!X.V4(O) && r.left === 1 && r.locked && !r.hearts, `v3 옛 방: 1칸 남으면 잠김 (${r.left})`);
+  O.chainOk = { u4: { b: 2 } }; r = X.record(L, O, 'u4', 'b'); check(!r.locked && r.ok, 'v3 옛 방: 풀어주기(숫자로 저장돼도) = 마지막 칸');
+  O.chain.u4.b[k++] = { s: 0, p: 0, g: -999 }; O.chain.u4.b[k++] = { s: 0, p: 0, g: -999 }; r = X.record(L, O, 'u4', 'b'); check(r.fail && !r.locked, 'v3 옛 방: 기회 0 = 못 맞힘 그대로'); }
 // ④ 🔥 연습 사슬 EXP (2026-11-09 선생님: 사슬 완성 1번당 +1)
 const psub = (u, p, s, good) => { const q = X.chainItems(L, R, 'u4', u, p)[s]; const a = R.chain.u4[u]; a[Object.keys(a).length] = { s, p, g: good ? right(q) : wrongOf(q) }; };
 const pwhy = (u, p, g) => { const a = R.chain.u4[u]; a[Object.keys(a).length] = { s: 3, p, g, w: 1 }; }; // #44 근거 = 대장 뒤

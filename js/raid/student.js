@@ -496,9 +496,9 @@ DS.Student = (function () {
   function healNotice(mid) {
     if (!real()) return;
     let k = 0;
-    Raid().healsTo(R, mid, me, L).slice(0, Raid().NEWR(R) ? 99 : Raid().HEAL_MAX).forEach((h) => {
+    Raid().healsTo(R, mid, me, L).slice(0, Raid().V4(R) ? 99 : Raid().HEAL_MAX).forEach((h) => {
       if (healSeen(`${code}|${mid}|${h.from}|${h.k}`)) return;
-      healPop(`❤ +1 💚 ${nickOf(h.from)} 힐`, (k++) * 700); DS.Sound.correct(); drawn = '';
+      healPop(Raid().V4(R) ? `❤ +1 💚 ${nickOf(h.from)} 힐` : `+1 💚 ${nickOf(h.from)} 응원`, (k++) * 700); DS.Sound.correct(); drawn = '';
       heroFx = { pose: 'healed', until: Date.now() + 1800 }; setTimeout(() => heroFlash('healed', 1600), 60);
     });
   }
@@ -850,7 +850,7 @@ DS.Student = (function () {
     else if (!prac && rec.done) mainHtml = `<p class="okc big-msg">${rec.perfect ? '🌟 퍼펙트 사슬!' : '🎉 대장 처치!'}</p>${story(says)}${rec.byPh ? '<p class="cr-more">✍ 서술형으로 남은 단계를 한 번에!</p>' : ''}${tokPick}${pendTip}${hintBtn}<p class="muted small cr-pnote">숫자만 바뀐 새 문제 · 판마다 연습 기회 4칸 (틀리면 줄어요 · 다 쓰면 그 판 끝) · 수업 기록 · 💎 그대로 · 사슬 완성마다 경험치 +1 (데미지 0)</p>`;
     else if (pFail) mainHtml = `<p class="paper-note">✘ 이번 연습 판은 기회를 다 썼어요 — 끝 (EXP 없음) · 아래 풀이를 보고 다시 해 봐요</p>${story(pItems.map((x) => x.say))}${tokPick}${pendTip}${hintBtn}`; // #40
     else if (pDone) mainHtml = `<p class="okc">✔ 연습 사슬 완성! <b class="gold">+1 EXP</b></p>${story(says)}${tokPick}${pendTip}${hintBtn}<p class="muted small cr-pnote">숫자만 바뀐 새 문제 · 판마다 연습 기회 4칸 (틀리면 줄어요 · 다 쓰면 그 판 끝) · 수업 기록 · 💎 그대로 · 맞히면 공격 이펙트가 나가요 (데미지 0)</p>`;
-    else if (rec.locked && !prac) mainHtml = `${story(says)}<div class="cr-lock"><b>🙋 선생님 확인을 기다려요</b><p>❤ 0 — 학습지에 풀이를 정리해 두면 선생님이 와서 확인하고 풀어 줘요 (❤ +1 · 그렇게 풀어내면 ❤ +1 더)</p>${relTest()}</div>`;
+    else if (rec.locked && !prac) mainHtml = `${story(says)}<div class="cr-lock"><b>🙋 선생님 확인을 기다려요</b><p>${rec.hearts ? '❤ 0 — 학습지에 풀이를 정리해 두면 선생님이 와서 확인하고 풀어 줘요 (❤ +1 · 그렇게 풀어내면 ❤ +1 더)' : '기회가 1칸 남았어요 — 학습지에 풀이를 정리해 두면 선생님이 와서 확인해 줘요.'}</p>${relTest()}</div>`;
     else mainHtml = `${probBox}${storyF(says)}<div class="paper"><div class="paper-h"><b>${esc(step.title)} · ${stage === pItems.length - 1 ? '👑 대장' : `졸개 ${'①②③④⑤⑥'[stage]}`}</b><small>${prac ? '연습 (숫자 바뀜 · 데미지 없음)' : '틀려도 숫자는 그대로'}</small></div>
         ${lastWrong ? '<p class="paper-note">✘ 다시 생각해 봐요 — 같은 문제예요</p>' : ''}<div class="items">${itemHtml(q, 0, lastWrong, null, cform.given)}</div></div>`;
     // ⚔ #50 ② 아래 칸 = 왼쪽 「⚔ 공격」(대장 뒤 = 「🔥 한 판 더」) · 오른쪽 「✍ 서술형 도전 📸」
@@ -895,7 +895,7 @@ DS.Student = (function () {
       const okNow = prac ? (r2.pass === pass && r2.pStage > stage) : r2.stage > stage;
       chainAtk = { ok: okNow, big: !prac && r2.done, perfect: !prac && r2.done && r2.perfect, prac }; // ⚔ 2026-11-09 선생님 「졸개 공격도 모션」: 다시 그린 뒤 돌진 · 탄 (아래 render 뒤)
       if (okNow) { if (!DS.Attack) { DS.Sound.slash(); setTimeout(() => DS.Sound.hit(), 160); } if (stage < pItems.length - 1 && DS.Sound.die) setTimeout(() => DS.Sound.die(), 900); /* 🔊 #87 졸개가 사라질 때 (공격 연출 뒤 · 대장은 finish) */ DS.UI.toast(stage === pItems.length - 1 ? (prac ? '✔ 연습 사슬 완성! 🔥 경험치 +1' : r2.perfect ? '🌟 퍼펙트 사슬!' : '👑 대장 처치!') : `✔ 졸개 ${'①②③④⑤⑥'[stage]} 처치!`); }
-      else { if (!DS.Attack) DS.Sound.squish(); if (!prac) DS.UI.toast(r2.locked ? '🙋 ❤ 0 — 선생님 확인을 기다려요' : `✘ 틀렸어요 · ❤ −${stage === n - 1 ? 1 : 0.5}`); else DS.UI.toast(r2.pFail ? '✘ 이번 연습 판은 기회를 다 썼어요' : `✘ 틀렸어요 · 연습 기회 −${stage === pItems.length - 1 ? 1 : 0.5}`); }
+      else { if (!DS.Attack) DS.Sound.squish(); if (!prac) DS.UI.toast(r2.locked ? (r2.hearts ? '🙋 ❤ 0 — 선생님 확인을 기다려요' : '🙋 기회 1칸 — 선생님 확인을 기다려요') : r2.fail ? '기회를 다 썼어요' : `✘ 틀렸어요 · ${r2.hearts ? '❤' : '기회'} −${stage === n - 1 ? 1 : 0.5}`); else DS.UI.toast(r2.pFail ? '✘ 이번 연습 판은 기회를 다 썼어요' : `✘ 틀렸어요 · 연습 기회 −${stage === pItems.length - 1 ? 1 : 0.5}`); }
       render(); chainAttack();
     });
   }
