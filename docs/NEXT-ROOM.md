@@ -19,6 +19,24 @@
 > - **기다리는 것**: 테스트 #1 = 정식 fx 옮기기 → 베기 시제품(+ 성능 시험) → TV 이펙트 첫 묶음 → ⚙ 스위치 틀 → 차시 넣는 길 → 대시보드 실제 기록 → 서버 출시 규모 → 성채 / 🎆 이펙트 평가판 https://claude.ai/artifact/UGZGzKCgowwep99neaxs26 (db `votes` · 선생님 「평가 끝」 → 기준표) / 무안행복중 1 · 2차시 올림 · 동료 선생님 명단 · 종합실 비밀번호.
 > - **✅ 메타인지 6 = session_014JJv1hBEnQCcJrXvhEtnKk · 첫 할 일 ①②③④ 끝(11/13 밤 · 세 방 알림 · 지침 고침 · 대조 = 마감 뒤 📜 ee4b004 하나 · DECISIONS · 테스트 #1 전달 모두 됨 · 다른 점 없음 · 평가판 votes = 아직 0표)** · 옛 첫 할 일: ① 손발 #7 · 테스트 #1 · 미래교육상에 「🧠 새 머리 방 = 메타인지 6 · 보고는 여기로」 ② CLAUDE.md 「메타인지 5」 → 6 ③ 아래 마지막 확인 커밋 뒤 git log 대조 ④ 평가판 결과 읽기.
 >
+> **🗂 머리 방 artifact (메타인지 5 → 6 가져옴 · 2026-11-13 밤 · 모두 이 방에서 읽음 = url 로 고칠 수 있음 · 큰 판 = 고치기 전 저장 파일 전체 Read)**
+>
+> | 이름 | 주소 | 쓰임 |
+> |---|---|---|
+> | 🎆 이펙트 평가판 | https://claude.ai/artifact/UGZGzKCgowwep99neaxs26 | db `votes` · 11/13 밤 0표 · 「평가 끝」 → 기준표 |
+> | 🎨 에셋 작업대 | https://claude.ai/artifact/TRT3FTbyV27EqKRtWPTZru | 주문 카드 · db `done/<번호>` |
+> | 📦 에셋 전달함 | https://claude.ai/artifact/GLbmCzzjgcYskuhke5P1Xo | 머리 → 손발 파일 |
+> | 🧭 주소록 | https://claude.ai/artifact/WT4bknRxWuNF9Vw3Mf1XSV | v1.0 시험 사이트 · 작업 페이지 링크(「지금 b44」 낡음) |
+> | 📚 차시 팩 입력판 | https://claude.ai/artifact/FNP5m7kvcXXDa5K7W1ijWe | db `packs` · `media` |
+> | 🧍 용사 숨쉬기 비교 | https://claude.ai/artifact/J6zJHGEYL9JgP1mWF7RCp6 | PixelLab 8장 · 로안 부품 |
+> | ⚡ 기력 시안 | https://claude.ai/artifact/4u3LfuCtnxx3Z8SgC4oZ81 | 도전 칸 → 기력 · 몬스터 공격 6 |
+> | 📱 모바일 UI 시안 보기 (2판) | https://claude.ai/artifact/8fD8n9QKzP4s8RfYktPoxx · https://claude.ai/artifact/EURPgkKYR7T94EH6BHyuto | 학생 · 교사 · TV 화면 |
+> | ⚒ 모루 · 우편함 시안 | https://claude.ai/artifact/44dEkAKGELJTBPUs2gkwnD | 모루 · 도감 · 우편함 · 텐트 · 출제 공방 |
+> | ⛺ 쉼터 · 게시판 시안 | https://claude.ai/artifact/SM9tyzZhDvb44jhN1Zbuhe | 쉼터 · 게시판 던전 |
+> | 👩‍🏫 체험판 두 판 시안 | https://claude.ai/artifact/1qYXi5vRUU9d5Hcem28usZ | 학생 판 · 교사 판 |
+> | 🪟 학생 화면 창 없애기 | https://claude.ai/artifact/9b6USEMVPkq39U1z3GX93u | 전후 캡처 |
+> | 📄 운영 안내서 · 창작 경위서 (문서) | https://claude.ai/artifact/LRD59Updet9bom4CrxAghb · https://claude.ai/artifact/NNdfR3gVpsY1u3STqxzCiw | Claude Docs 문서 · 고치기 = Docs 연결 |
+>
 > **🧠 메타인지 5 인계 (2026-11-12 새벽 · 메타인지 4 → 5 · 오늘 정식 배포 뒤 옮김 · 이 방 = Opus)**
 > - **✅ 메타인지 5 = session_014JJv1gRgvKYSMwydGwzDAU · 첫 할 일 ①②③ 끝(11/12 새벽 · 세 방 알림 · 지침 고침 · 대조 다른 점 없음)** · **첫 할 일**: ① 손발 #7 `session_014JJv1hC8cMYvB3uDZ6sFn6` · 미래교육상 `session_014JJv1jjnBbvbc1JQqKY8PB` · 모션 `session_014JJv1h6rMxAggRpE7f443N` 에 「🧠 새 머리 방 = 메타인지 5 · 보고는 여기로」(옛 머리 = `session_014JJv1hPo64yZviF6yZVUH6`) ② CLAUDE.md 「메타인지 4」 → 5 · GLOSSARY ③ 🧷 5번 대조(아래 「🧠 마지막 확인 커밋」 뒤 git log) ④ 아래 「기다리는 것」.
 > - **🧪 테스트 버전 정해진 것**(DECISIONS 「🧪 테스트 버전 = 따로 저장소」 · CLAUDE.md 「🧪 정식 · 테스트 버전 두 길」): B 따로 저장소(선생님이 GitHub 에서 만들고 Pages 켬 → add_repo) · 시작 = 테스트 모드처럼 바로 · ✋ 손발 테스트 방을 새로 엶(이름 정하고 CLAUDE.md · GLOSSARY 에) · 손발 정식 = #7(release) · #99 ①②③ 정함 · 정식 v0.9.50.0 배포 끝(#92 · #93 · #94 · #97 · 룬 키패드 · 나의 풀이 펼침 · 체험판 100 · 선생님이 손발 방에서 직접).
