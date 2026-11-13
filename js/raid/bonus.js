@@ -353,7 +353,7 @@ DS.Bonus = (function () {
       // 🪞 2026-11-13 선생님 「허수아비 · 성채 체력 표시 · 재도전 기회 표시가 옛날 거」: 수업 레이드와 같은 부품 (위 HP 막대 · 아래 ❤ 재도전 줄 · js/raid/student.js parts) · ⚔ 소레이드 = 반 칸
       const done = solved.every(Boolean);
       const cbg = castle ? ((DS.ASSETS.citadel || {})[(L.rooms.find((r) => r.id === mid) || {}).boss ? 'boss' : 'room']) : '';
-      el.innerHTML = `<div class="scene enc ${cbg ? `cs-bg${cbg === (DS.ASSETS.citadel || {}).boss ? ' cs-bossroom' : ''}` : `bg-scene th-${L.theme || ''}`} ${cls}"${cbg ? ` style="background-image:url('${DS.ASSETS.base}${cbg}')"` : ''}><div class="scene-bar"><div><b>⚔ ${esc(mon.title)}</b><br><span class="muted small">${castle ? `🏰 성채던전 ${L.floor || 1}층` : `🎯 복습! ${DS.Lessons.noText(L.no)}차시`} · ${chainRoom ? `⚔ 소레이드 · 졸개 ${n - 1} + 👑 대장` : `소문제 ${n}개를 모두 맞히면 처치`}</span></div><button class="btn small" id="bf-x">✕</button></div>
+      el.innerHTML = `<div class="scene enc ${cbg ? `cs-bg${cbg === (DS.ASSETS.citadel || {}).boss ? ' cs-bossroom' : ''}` : `bg-scene th-${L.theme || ''}`} ${cls}"${cbg ? ` style="background-image:url('${DS.ASSETS.base}${cbg}')"` : ''}><div class="scene-bar"><div><b>⚔ ${esc(mon.title)}</b><br><span class="muted small">${castle ? `🏰 성채던전 ${L.floor || 1}층` : `🎯 복습! ${DS.Lessons.noText(L.no)}차시`} · ${chainRoom ? `⚔ 소레이드 · 졸개 ${n - 1} + 👑 대장` : `한 판에 소문제 ${n}개를 모두 맞혀야 처치`}</span></div><button class="btn small" id="bf-x">✕</button></div>
           ${SP().hpBox(n - solved.filter(Boolean).length, n, done || !castle ? '' : SP().GAUGE)}
           <div class="enc-hero">${DS.Art.hero(me.hero || 0, done || cls ? 'attack' : 'think', done ? 'pairhop' : cls === 'miss' ? 'slump' : 'huff')}<i class="shadow"></i></div>
           <div class="enc-mon">${DS.Art.monster(mon.sprite, done ? 'down' : 'idle', done ? '' : 'float')}</div></div>
@@ -454,8 +454,10 @@ DS.Bonus = (function () {
       }
         return null;
       }
-      const act = draw('', `${penRes}<p>맞힌 소문제 <b>${solved.filter(Boolean).length} / ${n}</b> — 틀린 것만 새 숫자로 다시!</p>${solHtml(cur)}`);
-      act.innerHTML = '<button class="btn primary" id="bf-again">🔄 다시 도전</button>';
+      // 🎯🏰 2026-11-13 선생님 「틀려도 통과돼 · 100%로」 → B: 한 판에 모두 맞혀야 처치 · 하나라도 틀리면 그 판 실패 → 다시 도전 = 모든 소문제 새 숫자로 처음부터 (기회 4번 그대로)
+      const act = draw('', `${penRes}<p>이번 판 <b>${solved.filter(Boolean).length} / ${n}</b> — <b>한 판에 모두 맞혀야 처치</b>예요. 🔄 모든 소문제를 새 숫자로 처음부터!</p>${solHtml(cur)}`);
+      solved.fill(false);
+      act.innerHTML = '<button class="btn primary" id="bf-again">🔄 다시 도전 (새 숫자 · 처음부터)</button>';
       act.querySelector('#bf-again').onclick = () => { attempt++; round(); };
       return null;
     };
@@ -590,9 +592,13 @@ DS.Bonus = (function () {
           const done = solved.every(Boolean);
           if (DS.Attack) { const sc = el.querySelector('.scene'); await DS.Attack.play(sc, { heroBox: sc && sc.querySelector('.enc-hero'), monBox: sc && sc.querySelector('.enc-mon'), hero: me.hero || 0, fx: me.fx || 'flame', miss: !ok, finish: ok && done, ultimate: ok && done && !anyWrong && DS.Attack.canUlt(me.fx || 'flame', me.hero || 0), s: 1.2 }); }
           if (!document.body.contains(el)) return null;
-          draw('', `${chips()}${story(says)}${ok ? '' : `<p class="paper-note">✘ 다시 생각해 봐요 — 같은 문제예요 (기회 −${isBoss ? 1 : '½'})</p>`}`);
+          draw('', `${chips()}${story(says)}${ok ? '' : `<p class="paper-note">✘ 한 단계 틀렸어요 — <b>한 판에 모두 맞혀야 처치</b> · 숫자 바뀐 사슬로 처음부터 (기회 −${isBoss ? 1 : '½'})</p>`}`);
           if (ok) break;
           if (left <= 0) return pracMode ? pracEnd(false, items) : chainFail(items);
+          // 🎯🏰 2026-11-13 B: 한 단계라도 틀리면 그 사슬 실패 → 숫자 바뀐 사슬로 처음부터 (기회는 이어서)
+          await new Promise((r) => setTimeout(r, 1400)); if (!document.body.contains(el)) return null;
+          pass += 1; solved.fill(false); says = [];
+          return chainRound();
         }
       }
       if (pracMode) return pracEnd(true, items);
@@ -600,7 +606,7 @@ DS.Bonus = (function () {
       return afterWin();
     };
     if (chainRoom) {
-      const act = draw('', `${chips()}<p>${first ? '교과서 단원 평가를 숫자만 바꾼 문제예요.' : '다시 들어오면 새 숫자의 사슬이 나와요.'} <b>졸개 ${n - 1}마리 → 👑 대장</b>을 차례로! 틀려도 같은 문제로 다시 · 기회 ${TRIES}칸 (졸개 −½ · 대장 −1) · 1칸 남으면 ${(L.chainVideo || {})[mid] ? '🎬 해설 영상' : '📜 풀이 첫 두 줄'}이 열려요.</p>`);
+      const act = draw('', `${chips()}<p>${first ? '교과서 단원 평가를 숫자만 바꾼 문제예요.' : '다시 들어오면 새 숫자의 사슬이 나와요.'} <b>졸개 ${n - 1}마리 → 👑 대장</b>을 차례로! <b>한 판에 모두 맞혀야 처치</b> · 한 단계라도 틀리면 숫자 바뀐 사슬로 처음부터 · 기회 ${TRIES}칸 (졸개 −½ · 대장 −1) · 1칸 남으면 ${(L.chainVideo || {})[mid] ? '🎬 해설 영상' : '📜 풀이 첫 두 줄'}이 열려요.</p>`);
       act.innerHTML = `<button class="btn primary big" id="bf-go">⚔ 전투 시작</button>${canWrite() ? '<button class="btn" id="cf-photo">✍ 서술형 도전 📸</button>' : ''}`;
       act.querySelector('#bf-go').onclick = () => chainRound();
       const ph0 = act.querySelector('#cf-photo'); if (ph0) ph0.onclick = () => { cur = L.chainItems(mid, seed, pass); goWrite(); };
