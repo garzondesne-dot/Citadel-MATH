@@ -27,6 +27,7 @@ DS.Standards = (function () {
   };
   const BY_NO = { 2: '02-01', 3: '02-02', 4: '02-03', 5: '02-03', 6: '02-03', 8: '02-04', 9: '02-05', 10: '02-06', 11: '02-07' }; // 2026-11-07 선생님: 7차시 = 6차시 이어서(새 차시 없음) · 명제 8~11차시 · // 2026-11-05 재배열: 7 명제와 조건 · 8 참·거짓 · 역·대우(+대우 증명) · 9 충분·필요 · 10 귀류법 · 절대부등식 (02-08 은 차시 파일 std 로) // 새 차시 기본값 (차시 파일 std 가 있으면 그쪽)
   function of(lessonId, concept, no) {
+    if (DS.OFF && DS.OFF('std')) return null; // 🏫 학교판 = 성취기준 없음 (우리 집합 단원 기준이라 다른 단원에 잘못 묶임 · 2026-11-13)
     if (concept === 'review') return null; // 지난 시간 복습은 그 차시 성취기준에 넣지 않는다
     const L = DS.Lessons && DS.Lessons.get(lessonId), own = (L && L.std) || MAP[lessonId] || {};
     return own[concept] || own._ || BY_NO[no || (L && L.no)] || null;
@@ -84,6 +85,7 @@ DS.Mis = (function () {
   const isPow2 = (n) => n >= 4 && Number.isInteger(Math.log2(n));
   // 틀린 답 하나 → 오개념 코드 목록 (모르면 빈 목록). tag = 형성평가 꼬리표 (없으면 자동 규칙만)
   function classify(q, given, tag) {
+    if (DS.OFF && DS.OFF('mis')) return []; // 🏫 학교판 = 오개념 기록 안 함 (집합 오개념 표라 다른 단원 답을 잘못 분류)
     if (!q || given == null) return [];
     const out = new Set();
     if (tag) {
@@ -121,6 +123,6 @@ DS.Mis = (function () {
   function add(acc, codes, fixed) { codes.forEach((c) => { acc[c] = acc[c] || [0, 0]; acc[c][0]++; if (fixed) acc[c][1]++; }); return acc; }
   function merge(a, b) { Object.entries(b || {}).forEach(([c, v]) => { a[c] = a[c] || [0, 0]; a[c][0] += Number(v[0]) || 0; a[c][1] += Number(v[1]) || 0; }); return a; }
   // 학생에게 보여 줄 한 줄 (가장 많이 틀린 것 · 아직 못 고친 것 먼저)
-  function top(acc, n = 1) { return Object.entries(acc || {}).filter(([c]) => CODES[c]).sort((x, y) => (y[1][0] - y[1][1]) - (x[1][0] - x[1][1]) || y[1][0] - x[1][0]).slice(0, n).map(([c, v]) => ({ code: c, ...CODES[c], wrong: v[0], fixed: v[1] })); }
+  function top(acc, n = 1) { if (DS.OFF && DS.OFF('mis')) return []; return Object.entries(acc || {}).filter(([c]) => CODES[c]).sort((x, y) => (y[1][0] - y[1][1]) - (x[1][0] - x[1][1]) || y[1][0] - x[1][0]).slice(0, n).map(([c, v]) => ({ code: c, ...CODES[c], wrong: v[0], fixed: v[1] })); }
   return { CODES, BOSS, classify, bossTag, add, merge, top };
 })();

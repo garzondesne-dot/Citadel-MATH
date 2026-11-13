@@ -61,7 +61,7 @@ DS.Dash = (function () {
       const conc = {}, std = {}, mis = {}; // 📚 성취기준별 첫 시도 · 🔎 오개념 (2026-11-03)
       went.forEach((l) => {
         const r = rec[l.id];
-        Object.entries(r.conc || {}).forEach(([c, v]) => { ok += v[0]; tot += v[1]; const key = `${l.id}|${c}`; conc[key] = { name: (r.names || {})[c] || c, lesson: l, ok: v[0], total: v[1] };
+        Object.entries(r.conc || {}).forEach(([c, v]) => { ok += v[0]; tot += v[1]; const key = `${l.id}|${c}`; conc[key] = { name: (r.names || {})[c] || (((DS.Lessons.get(l.id) || {}).steps || []).find((x) => x.id === c) || {}).title || (c === 'boss' ? ((DS.Lessons.get(l.id) || {}).boss || {}).title || '형성평가' : '') || c, lesson: l, ok: v[0], total: v[1] };
           const sd = DS.Standards ? DS.Standards.of(l.id, c, l.no) : null; if (sd) { std[sd] = std[sd] || [0, 0]; std[sd][0] += v[0]; std[sd][1] += v[1]; } });
         if (DS.Mis && r.mis) DS.Mis.merge(mis, r.mis);
         hg += Number(r.hg) || 0; Object.entries(r.lad || {}).forEach(([m, v]) => { lad[m] = Math.max(lad[m] || 0, Number(v) || 0); }); Object.entries(r.ladW || {}).forEach(([m, v]) => { ladW[m] = v; }); /* 🧩 #52 */ bo += Math.min(Number(r.boss) || 0, Number(r.bossN) || 0); bt += Number(r.bossN) || 0; if (r.ox) { oxo += Number(r.ox[0]) || 0; oxt += Number(r.ox[1]) || 0; } /* ⭐ 도전 문항은 따로 (옛 기록은 boss 에 섞여 있어 bossN 까지만 · v0.9.7.9) */ fixed += Number(r.fixed) || 0; perf += Number(r.perfects) || 0; hints += Number(r.hints) || 0; // 💡 그림 힌트 (v0.9.7.4 · 성적 아님)
@@ -85,7 +85,7 @@ DS.Dash = (function () {
   function render() {
     const el = $('#dash-body'); if (!el) return;
     const classes = Object.keys(roster).sort();
-    const TABS = [['table', '① 한눈에 표'], ['rank', '② 랭킹'], ['watch', '③ 주의 학생'], ['weak', '④ 개념별 약점'], ['std', '⑤ 성취기준'], ['mis', '⑥ 오개념'], ['memo', '⑦ 세특 메모'], ['sv', '📝 설문'], ['use', '📈 활용 추이'], ['photo', '📷 서술형'], ['sym', '📖 기호 톡']];
+    const TABS = [['table', '① 한눈에 표'], ['rank', '② 랭킹'], ['watch', '③ 주의 학생'], ['weak', '④ 개념별 약점'], ['std', '⑤ 성취기준'], ['mis', '⑥ 오개념'], ['memo', '⑦ 세특 메모'], ['sv', '📝 설문'], ['use', '📈 활용 추이'], ['photo', '📷 서술형'], ['sym', '📖 기호 톡']].filter(([k]) => !(DS.OFF && ((k === 'std' && DS.OFF('std')) || (k === 'mis' && DS.OFF('mis')) || (k === 'sv' && DS.OFF('survey')) || (k === 'sym' && DS.OFF('symtalk'))))); // 🏫 학교판 = ⑤ 성취기준 · ⑥ 오개념 · 📝 설문 · 📖 기호 톡 탭 없음
     el.innerHTML = `<div class="panel framed"><h2>📊 학급 대시보드 <span class="muted small">교사만 · 학생 화면과 종합상황실에는 나오지 않아요</span></h2>
         <div class="tabs st-cls">${classes.length > 1 ? `<button class="tab${isAll() ? ' on' : ''}" data-cls="${ALL}">🏫 전체</button>` : ''}${classes.map((c) => `<button class="tab${c === cls ? ' on' : ''}" data-cls="${esc(c)}">${isBeta(c) ? '🧪 ' : ''}${esc(c)}</button>`).join('') || '<span class="muted">명단이 없어요 — 학생 관리에서 먼저 올려 주세요</span>'}</div>
         <div class="tabs dash-tabs">${TABS.map(([k, t]) => `<button class="tab${k === tab ? ' on' : ''}" data-tab="${k}">${t}</button>`).join('')}</div></div>
