@@ -70,7 +70,7 @@ DS.Hall = (function () {
   // 2026-11-06 확정: ⚡ 필살기 = 첫 시도 퍼펙트 + 특화 Ⅲ↑ (현재 몬스터) · 🌟 진필살기 = '!true@시각' → 금빛 컷인 + 🗿 석화 · '!ult' = 예전 수업 · 🔥 끈기의 일격 = 두 번 넘게 틀린 뒤 다 맞힘 (띠만)
   function ulHall() {
     const H = R.heals || {}, first = !ulSeen; if (first) ulSeen = {};
-    const push = (it) => { if (!first && ulQ.length < 3) ulQ.push(it); else if (!first && it.kind === 'true') ulQ.unshift(it); };
+    const push = (it) => { if (first) return; if (it.kind === 'true') ulQ.unshift(it); else ulQ.push(it); }; // 🐞 2026-11-13 1-2반 「화면에 제 필살기가 안 보여요」: 3명 넘게 겹치면 빠지던 것 → 모두 줄 세움 (밀리면 짧게 · ulNext)
     Object.entries(H).forEach(([mid, byU]) => Object.entries(byU || {}).forEach(([u, byK]) => Object.entries(byK || {}).forEach(([k, v]) => { const key = `${mid}|${u}|${k}`; if ((v !== '!ult' && !Raid().isTrue(v) && !Raid().isTcut(v)) || ulSeen[key]) return; ulSeen[key] = true; push({ u, kind: Raid().isTrue(v) ? 'true' : Raid().isTcut(v) ? 'tcut' : 'ult', ...(Raid().isTcut(v) && (((Raid().stepOf(L, R) || {}).id !== mid) || Raid().cleared(L, R, mid)) ? { noBind: true } : {}) }); }))); // #42: 쓰러진 몬스터 · 지난 문제의 금빛 컷인은 지금 몬스터를 묶지 않음
     const step = Raid().stepOf(L, R);
     if (step && step.kind === 'monster' && DS.Attack) Raid().activeIds(R).forEach((u) => {
@@ -85,8 +85,8 @@ DS.Hall = (function () {
   }
   function ulNext() {
     const it = ulQ.shift(); if (!it || !DS.Attack) { ulBusy = false; return; } ulBusy = true;
-    const p = (R.players || {})[it.u] || {}, gold = it.kind === 'true' || it.kind === 'tcut'; // 🌟 tcut = 📸 진필살기 다음 통과자 (금빛 컷인만)
-    DS.Attack.cutin(p.hero || 0, p.fx || 'flame', { gold, ...cutHost() }).then(() => { try { const arena = $('#raid'), m0 = $('#rm'); if (arena && m0) { DS.Attack.ultBlast(arena, m0, p.fx || 'flame'); setTimeout(() => { if (!DS.Thrill) return; if (it.kind === 'true') DS.Thrill.petrify(m0.querySelector('.art.monster') || m0); else if (!it.noBind) DS.Thrill.chain(m0, DS.Combo ? DS.Combo.ULT_BIND : 15, 'ult'); }, 500); } } catch (e) { console.error(e); } }).catch(() => {}).finally(() => setTimeout(ulNext, gold ? 1800 : 1400)); // 중간에 오류가 나도 다음 필살기가 막히지 않게
+    const p = (R.players || {})[it.u] || {}, gold = it.kind === 'true' || it.kind === 'tcut', quick = ulQ.length >= 2; // 🌟 tcut = 📸 진필살기 다음 통과자 (금빛 컷인만) · quick = 뒤에 2명 넘게 기다리면 짧은 컷인(얼굴 · 이름 · 눈빛)만
+    DS.Attack.cutin(p.hero || 0, p.fx || 'flame', { gold, quick, ...cutHost() }).then(() => { try { const arena = $('#raid'), m0 = $('#rm'); if (arena && m0) { if (!quick) DS.Attack.ultBlast(arena, m0, p.fx || 'flame'); setTimeout(() => { if (!DS.Thrill) return; if (it.kind === 'true') DS.Thrill.petrify(m0.querySelector('.art.monster') || m0); else if (!it.noBind) DS.Thrill.chain(m0, DS.Combo ? DS.Combo.ULT_BIND : 15, 'ult'); }, 500); } } catch (e) { console.error(e); } }).catch(() => {}).finally(() => setTimeout(ulNext, quick ? 350 : gold ? 1800 : 1400)); // 중간에 오류가 나도 다음 필살기가 막히지 않게
   }
   // 🗿 석화 남은 초 (교실 TV 위쪽 큰 띠) · 몬스터 회색
   let petriEnd = 0, petriT = null;
