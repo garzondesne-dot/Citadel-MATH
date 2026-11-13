@@ -255,15 +255,23 @@ check(X.online(R2, 'a') && !X.online(R2, 'b'), '접속 표시');
   const V = newRoom3('333333', 'set-03', 'T', 1000), sub = (u, a, k) => { (((V.subs = V.subs || {}).m4 = V.subs.m4 || {})[u] = V.subs.m4[u] || {})[a] = answer(V, 'm4', u, a, k); };
   V.active = { a: true, b: true }; V.players = { a: { num: 1 }, b: { num: 2 } }; V.state.headcount = 2;
   const n = X.itemsFor(L, V, 'm4', 'a', 0).length, same = (u, x, y) => JSON.stringify(X.itemsFor(L, V, 'm4', u, x).map((q) => q.prompt || q.text || JSON.stringify(q))) === JSON.stringify(X.itemsFor(L, V, 'm4', u, y).map((q) => q.prompt || q.text || JSON.stringify(q)));
-  check(V.meta.version === 4, 'v4: 새 방 = version 4 (❤ 하트 · 2026-11-13 밤)');
+  check(V.meta.version === 4, 'v4: 새 방 = version 4 (❤ 하트 · 2026-11-13 밤)'); let r;
   sub('b', 0, 1); check(same('b', 0, 1), 'v3: 틀린 뒤 재도전 = 같은 문제');
   sub('b', 1, 2); check(same('b', 0, 2) && X.record(L, V, 'm4', 'b').left === 2, 'v3: 두 번 틀려도 같은 문제 · 기회 2 남음');
-  sub('a', 0, n); let r = X.record(L, V, 'm4', 'a'); check(r.perfect && r.left === 4 && r.firstPerfect && !same('a', 0, 1), 'v3: 퍼펙트 뒤 다음 문제 = 숫자 바뀜 · ❤ 4 그대로 (2026-11-13 밤)');
-  sub('a', 1, n); r = X.record(L, V, 'm4', 'a'); check(r.left === 4 && r.tokens === 1 && r.canHeal && !same('a', 1, 2), 'v3: 새 문제 맞힘 = ❤ 그대로 · 힐/묶기 1번 · 그다음 또 새 문제');
-  sub('a', 2, n - 1); r = X.record(L, V, 'm4', 'a'); check(r.left === 4 && r.fix && same('a', 2, 3), 'v3: 새 문제 틀림 = ❤ 안 깎임 (재도전 판은 무료) · 같은 문제 고치기');
-  sub('a', 3, n); r = X.record(L, V, 'm4', 'a'); check(r.left === 4 && r.tokens === 2 && !r.fix && r.best === n, 'v3: 고쳐서 맞힘 = ❤ 그대로 · 힐/묶기 2번 · 데미지 그대로');
-  ((V.heals = {}).m4 = {}).a = { 0: '!bind@5000', 1: 'b' }; r = X.record(L, V, 'm4', 'a');
-  check(r.tokLeft === 0 && !r.canHeal && r.left === 4 && X.bindOf(L, V, 'm4', 'a') === X.BIND_TOKEN && X.record(L, V, 'm4', 'b').left === 3, 'v3: 묶기 1 · 힐 1 = 쓴 만큼 줄고 ❤ 는 안 씀 · 힐 받은 b ❤ +1');
+  sub('a', 0, n); r = X.record(L, V, 'm4', 'a'); check(r.perfect && r.left === 4 && r.firstPerfect && !same('a', 0, 1), 'v4: 퍼펙트 뒤 다음 문제 = 숫자 바뀜 · ❤ 4 그대로 (2026-11-13 밤)');
+  // ⚡ 2026-11-13 밤 (묶음 B): 다 맞히면 ⚡ 3 · 기술 하나 = ⚡ −1 → 🔥 재도전 판(숫자 바뀜 · 무료 · 틀린 것만 다시) → 다 맞혀야 다음 ⚡
+  check(r.energy === 3 && r.canHeal && !r.canRetry && !r.inPanel && r.streak === 1, `퍼펙트 → ⚡ 3 · 기술 고르기 (재도전 판은 기술 뒤) (${r.energy})`);
+  ((V.heals = {}).m4 = {}).a = { 0: '!bind@5000' }; r = X.record(L, V, 'm4', 'a');
+  check(r.energy === 2 && r.inPanel && r.panel === 1 && r.canRetry && !r.canHeal && X.bindOf(L, V, 'm4', 'a') === X.BIND_TOKEN, '⛓ 묶기 = ⚡ −1 → 재도전 판 1 열림 · 다 맞히기 전엔 다음 기술 없음');
+  sub('a', 1, n - 1); r = X.record(L, V, 'm4', 'a'); check(r.left === 4 && r.fix && r.inPanel && same('a', 1, 2), '재도전 판에서 틀림 = ❤ 그대로 · 같은 문제에서 틀린 것만 다시');
+  sub('a', 2, n); r = X.record(L, V, 'm4', 'a'); check(r.left === 4 && !r.inPanel && r.canHeal && r.energy === 2 && r.panelsDone === 1 && r.best === n && r.streak === 1, `판 1 완성 = 다음 ⚡ 열림 · 데미지 그대로 · 한 번에 못 맞혀 3연속 아님 (${r.streak})`);
+  V.heals.m4.a[1] = 'b'; r = X.record(L, V, 'm4', 'a'); check(r.energy === 1 && r.inPanel && !same('a', 2, 3) && X.record(L, V, 'm4', 'b').left === 3, '💚 힐 = ⚡ −1 · 판 2 = 새 숫자 · 힐 받은 b ❤ +1');
+  sub('a', 3, n); V.heals.m4.a[2] = '!bind@6000'; sub('a', 4, n); r = X.record(L, V, 'm4', 'a'); check(r.energy === 0 && !r.canHeal && !r.canRetry && r.panelsDone === 3, '⚡ 0 = 그 몬스터 재도전 끝');
+  { const Z = newRoom3('353535', 'set-03', 'T', 1000), zs = (a, k) => { (((Z.subs = Z.subs || {}).m4 = Z.subs.m4 || {}).z = Z.subs.m4.z || {})[a] = answer(Z, 'm4', 'z', a, k); }; Z.active = { z: true }; Z.players = { z: { num: 1 } };
+    zs(0, n); Z.heals = { m4: { z: { 0: '!bind@1' } } }; zs(1, n); Z.heals.m4.z[1] = '!bind@2'; zs(2, n); let q = X.record(L, Z, 'm4', 'z');
+    check(q.streak === 3 && q.energy === 1 && q.canHeal && X.perfStreak(q) === 3, `🌟 3연속 = 첫 공격 퍼펙트 + 판 1 · 2 를 한 번에 → 세 번째 ⚡ (${q.streak})`);
+    const Y = newRoom3('363636', 'set-03', 'T', 1000); Y.subs = { m4: { y: { 0: answer(Y, 'm4', 'y', 0, n - 1), 1: answer(Y, 'm4', 'y', 1, n) } } }; Y.active = { y: true }; Y.players = { y: {} };
+    q = X.record(L, Y, 'm4', 'y'); check(q.perfect && !q.firstPerfect && q.energy === 3 && q.streak === 0, '퍼펙트가 아니어도 한 번 다 맞히면 ⚡ 3 · 3연속은 아님'); }
   // ❤ 2026-11-13 밤: 한 번 공격에 몇 개를 틀려도 −1 · ❤ 0 = 잠김 → 풀어주기 ❤ +1 → 다 맞히면 ❤ +1 · 힐 = +1 (상한 4)
   sub('b', 2, 0); r = X.record(L, V, 'm4', 'b'); check(r.left === 2 && !r.locked, `b: 힐 받은 뒤 또 틀림 = ❤ 2 (${r.left})`);
   sub('b', 3, 1); sub('b', 4, n - 1); r = X.record(L, V, 'm4', 'b'); check(r.left === 0 && r.locked && !r.canRetry, '❤ 0 = 🙋 잠김 · 다시 못 냄');

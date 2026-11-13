@@ -32,7 +32,7 @@ DS.Result = (function () {
       const everOk = rec.chain ? rec.stOk.slice() : Array.from({ length: n }, (_, i) => rec.tries.some((t) => t.marks[i]));
       const sp = (L.split || {})[s.id]; // v0.9.6.18: 한 몬스터에 두 개념이면 소문제마다 (5차시 문제 3 · 4)
       if (rec.submitted) firstOk.forEach((ok, i) => bump((sp && sp[i]) || map[s.id], ok)); // 안 한 몬스터는 개념 이해도에 넣지 않는다 (늦게 들어온 학생)
-      submits += rec.tries.length; best += rec.best; if (rec.chain) chainPrac += rec.pDoneN || 0; // 🔥 소레이드 연습 사슬 완성
+      submits += rec.tries.length; best += rec.best; if (rec.chain) chainPrac += rec.pDoneN || 0; else if (rec.hearts) chainPrac += rec.panelsDone || 0; // 🔥 소레이드 연습 사슬 완성 · ⚡ 2026-11-13 밤: 일반 몬스터 🔥 재도전 판 완성도 EXP +1
       const fx = everOk.filter((ok, i) => ok && !firstOk[i]).length; fixed += fx;
       if (M) rec.tries.forEach((t) => { const items = X.itemsFor(L, R, s.id, uid, t.attempt); items.forEach((q, i) => { if (t.marks[i]) return; const later = rec.tries.some((u) => u.attempt > t.attempt && u.marks[i]); M.add(mis, M.classify(q, (t.given || [])[i]), later); }); });
       if (rec.submitted && n && firstOk.every(Boolean)) perfects++; // ⚡ PERFECT = 첫 시도에 모두 맞힘

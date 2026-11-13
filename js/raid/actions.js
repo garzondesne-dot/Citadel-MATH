@@ -206,6 +206,7 @@ DS.Act = (function () {
   async function chainSubmit(code, packed, mid, s, p, g, w) { // w = 1 → 💡 근거 빈칸 답 (2026-11-09 #26)
     const R = unpackRoom(packed), L = DS.Lessons.get(R.meta.lesson), me = N().uid(), rec = Raid.record(L, R, mid, me);
     if (p > Raid.PRAC_MAX) fail(`🔥 연습은 ${Raid.PRAC_MAX}번까지예요`); // #39
+    if (p && Raid.V4(R) && !(rec.inPanel && rec.panel === p)) fail('⚡ 기술을 먼저 고르면 🔥 재도전 판이 열려요.'); // ⚡ 2026-11-13 밤: 재도전 판 = 기술 하나마다 하나
     if (p && !w && rec.pass === p && rec.pFail) fail('이번 연습 판은 기회를 다 썼어요'); // #40
     if (!p && (rec.locked || rec.fail || rec.done)) fail(rec.locked ? '🙋 선생님 확인을 기다려요' : '이 문제는 끝났어요');
     await N().set(P(code, `chain/${mid}/${me}/${rec.nextK}`), { s, p: p || 0, g: g == null ? '' : g, ...(w ? { w: 1 } : {}), at: N().TS });
@@ -423,9 +424,11 @@ DS.Act = (function () {
     const R = unpackRoom(packed), L = DS.Lessons.get(R.meta.lesson), step = L.steps[R.state.step], me = N().uid();
     if (!step || step.id !== mid) fail('지금은 이 몬스터와 싸우는 시간이 아니에요.');
     const rec = Raid.record(L, R, mid, me);
+    if (Raid.V4(R) && !rec.canHeal) fail(rec.inPanel ? '🔥 재도전 판을 다 맞혀야 다음 ⚡ 기술을 쓸 수 있어요.' : rec.perfect || rec.done ? '⚡ 기력을 다 썼어요.' : '⚡ 기력은 몬스터를 한 번 다 맞힌 뒤에 생겨요.'); // ⚡ 2026-11-13 밤
+    if (Raid.V4(R) && (opt.party || opt.ult)) fail('💚 파티 힐 · 필살기 단추는 ⚡ 기력 카드로 바뀌었어요.');
     if (!rec.canHeal) fail('힐은 몬스터를 다 맞힌 뒤 남은 기회로 할 수 있어요.');
     if (opt.true) { // 🌟 진필살기 (2026-11-06 사용자 확정): 3연속 퍼펙트 + 특화 Ⅳ · 파티 힐 + 🗿 석화 20초 · 한 몬스터에 반 전체 한 번
-      if (Raid.perfStreak(rec) < 3 || Raid.ultUsed(R, mid, me)) fail('3연속 퍼펙트일 때만 쓸 수 있어요.');
+      if (Raid.perfStreak(rec) < 3 || Raid.ultUsed(R, mid, me)) fail(Raid.V4(R) ? '🌟 진필살기 = 첫 공격 퍼펙트 + 재도전 판 2개를 한 번에 → 세 번째 ⚡ 에서만' : '3연속 퍼펙트일 때만 쓸 수 있어요.');
       const p = (R.players || {})[me] || {}; if (DS.Attack && !DS.Attack.canTrue(p.fx, p.hero)) fail('진필살기는 특화 계열 Ⅳ 전설 스킬을 끼웠을 때만 쓸 수 있어요.');
       if (Raid.petrify(R, mid)) fail('이 몬스터는 이미 진필살기로 굳었어요 — 지금 맞히면 💎 가 나와요!');
       const v = `!true@${N().now()}`; await N().set(P(code, `heals/${mid}/${me}/${Raid.healsGiven(R, mid, me)}`), v); return v;

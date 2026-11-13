@@ -78,7 +78,7 @@ const psub = (u, p, s, good) => { const q = X.chainItems(L, R, 'u4', u, p)[s]; c
 const pwhy = (u, p, g) => { const a = R.chain.u4[u]; a[Object.keys(a).length] = { s: 3, p, g, w: 1 }; }; // #44 근거 = 대장 뒤
 psub('a', 1, 0, false); [0, 1, 2, 3].forEach((s) => psub('a', 1, s, true)); r = X.record(L, R, 'u4', 'a');
 check(r.pWhy === 3 && !r.whyOk && r.pDoneN === 0, '💡 연습 판: 대장 맞힌 뒤 근거 빈칸을 기다림 (아직 완성 아님)');
-pwhy('a', 1, 1); r = X.record(L, R, 'u4', 'a'); check(r.pWhy === 3 && !r.whyOk && r.pLeft === 3.5, '💡 근거 오답 = 그대로 (기회도 안 깎음)');
+pwhy('a', 1, 1); r = X.record(L, R, 'u4', 'a'); check(r.pWhy === 3 && !r.whyOk && r.pLeft === 4 && !r.pFail, '💡 근거 오답 = 그대로 (재도전 판은 무료 · 2026-11-13 밤)');
 pwhy('a', 1, 0); r = X.record(L, R, 'u4', 'a'); check(r.pWhy === -1 && r.whyOk && /부분집합/.test(r.pSays[r.pSays.length - 1]), '💡 근거 정답 = 「∵ …」 한 줄 · 힌트 주기 열림');
 check(r.pDoneN === 1 && r.left === 4 && r.best === 4 && r.perfect, '연습 1판 완성(중간 오답 있어도) = 1 · 기회 · 기록 그대로');
 [0, 1].forEach((s) => psub('a', 2, s, true)); r = X.record(L, R, 'u4', 'a'); check(r.pDoneN === 1, '연습 2판 반만 = 그대로 1');
@@ -125,7 +125,7 @@ for (let i = 0; i < 8; i++) add('c', 1, false); d = X.chainDown(L, Q, 'u4'); che
   const fs = require('fs'), path = require('path'), bon = fs.readFileSync(path.join(__dirname, '..', 'js/raid/bonus.js'), 'utf8');
   check(!/PRAC_MAX|pracUsed|pracStart/.test(bon), '성채 · 복습 허수아비(bonus.js)의 한 판 더는 제한 없음 그대로'); }
 // ⑨ 🔥 한 판 더도 오답이면 기회 깎임 (#40 · 2026-11-09 · #22 바꿈): 판마다 새 4칸 · 졸개 0.5 · 대장 1 · 0 = 그 판 끝(EXP 없음) · 잠김 없음 · 근거 빈칸 오답은 안 깎음
-{ const Q = X.newRoom('343434', 'set-06', 'T', 1000); Q.active = { a: true }; Q.players = { a: {} }; Q.chain = { u4: {} };
+{ const Q = X.newRoom('343434', 'set-06', 'T', 1000); Q.meta.version = 3; Q.active = { a: true }; Q.players = { a: {} }; Q.chain = { u4: {} }; // v3 옛 방 규칙 그대로 (❤ 이전)
   const it0 = X.chainItems(L, Q, 'u4', 'a', 0), m = (Q.chain.u4.a = {}); let k = 0;
   it0.forEach((q, i) => { m[k++] = { s: i, p: 0, g: right(q) }; });
   const P1 = X.chainItems(L, Q, 'u4', 'a', 1), sub = (p, s2, good, w) => { const q = X.chainItems(L, Q, 'u4', 'a', p)[s2]; m[k++] = { s: s2, p, g: w ? (good ? q.why.answer : 99) : good ? right(q) : wrongOf(q), ...(w ? { w: 1 } : {}) }; };
@@ -154,14 +154,16 @@ for (let i = 0; i < 8; i++) add('c', 1, false); d = X.chainDown(L, Q, 'u4'); che
   Q.chain.u4.b[kb++] = { s: 0, p: 0, g: -999 }; // b: ❤ 0 (8번째 졸개 오답) · 잠김
   let rb = X.record(L, Q, 'u4', 'b'); check(rb.left === 0 && rb.locked && X.healTarget(L, Q, 'u4', 'a', 0) === 'b', `막힌 친구 b (❤ 0 · 잠김) = 힐 받을 사람`);
   Q.heals = { u4: { a: { 0: 'b' } } }; rb = X.record(L, Q, 'u4', 'b'); r = X.record(L, Q, 'u4', 'a');
-  check(rb.slots === 4 && rb.left === 1 && !rb.locked && rb.healed === 1 && r.tokLeft === 2, `💚 힐 → b ❤ +1 (${rb.left}/${rb.slots}) · 잠김 풀림 · a 남은 2번`);
-  Q.heals.u4.a[1] = '!bind@1'; r = X.record(L, Q, 'u4', 'a'); check(r.tokLeft === 1 && X.tokBinds(Q, 'u4', 'a').length === 1, '⛓ 묶기 1번 → 남은 1번');
+  check(rb.slots === 4 && rb.left === 1 && !rb.locked && rb.healed === 1 && r.energy === 2 && r.inPanel && r.panel === 1 && r.tokLeft === 0, `💚 힐 → b ❤ +1 (${rb.left}/${rb.slots}) · 잠김 풀림 · a ⚡ 2 · 재도전 판 1 (다 맞히기 전엔 다음 기술 없음)`);
+  { const P1 = X.chainItems(L, Q, 'u4', 'a', 1); P1.forEach((q, s) => { Q.chain.u4.a[k++] = { s, p: 1, g: ans(q) }; if (q.why) Q.chain.u4.a[k++] = { s, p: 1, g: q.why.answer, w: 1 }; }); }
+  r = X.record(L, Q, 'u4', 'a'); check(!r.inPanel && r.canHeal && r.tokLeft === 2 && r.pDoneN === 1, '재도전 판 1 완성 → 다음 ⚡ 열림');
+  Q.heals.u4.a[1] = '!bind@1'; r = X.record(L, Q, 'u4', 'a'); check(r.energy === 1 && r.inPanel && r.panel === 2 && X.tokBinds(Q, 'u4', 'a').length === 1, '⛓ 묶기 = ⚡ −1 → 재도전 판 2');
   check(X.healTarget(L, Q, 'u4', 'b', 0) !== 'a', '대장을 잡은 a 는 힐 받는 사람이 아님');
   Q.chain.u4.b[kb++] = { s: 0, p: 0, g: ans(ib[0]) }; for (let s = 1; s < ib.length; s++) Q.chain.u4.b[kb++] = { s, p: 0, g: ans(ib[s]), ph: 1 };
-  rb = X.record(L, Q, 'u4', 'b'); check(rb.done && rb.byPh && !rb.perfect && rb.stage === ib.length && rb.says.length >= ib.length && rb.tokens === 1, `서술형 통과 = 남은 ${ib.length - 1}단계 처치 · 퍼펙트 아님 · 나의 풀이 채움 · 남은 1.5 → 1번`);
+  rb = X.record(L, Q, 'u4', 'b'); check(rb.done && rb.byPh && !rb.perfect && rb.stage === ib.length && rb.says.length >= ib.length && rb.tokens === 3, `서술형 통과 = 남은 ${ib.length - 1}단계 처치 · 퍼펙트 아님 · 나의 풀이 채움 · ⚡ 3 (2026-11-13 밤 · 한 번 다 풀면)`);
   const F = X.newRoom('515151', 'set-06', 'T', 1000); F.active = { c: true }; F.players = { c: {} }; F.chain = { u4: { c: {} } }; const ic = X.chainItems(L, F, 'u4', 'c', 0); let kc = 0;
   for (let j = 0; j < 8; j++) F.chain.u4.c[kc++] = { s: 0, p: 0, g: -999 }; check(X.record(L, F, 'u4', 'c').locked, '❤ 0 = 잠김');
-  ic.forEach((q, s) => { F.chain.u4.c[kc++] = { s, p: 0, g: ans(q), ph: 1 }; }); const rc = X.record(L, F, 'u4', 'c'); check(rc.done && !rc.fail && rc.tokens === 0, '못 맞힌 뒤에도 서술형 통과 = 처치 (묶기 · 힐 0번)');
+  ic.forEach((q, s) => { F.chain.u4.c[kc++] = { s, p: 0, g: ans(q), ph: 1 }; }); const rc = X.record(L, F, 'u4', 'c'); check(rc.done && !rc.fail && rc.tokens === 3, '❤ 0 잠김이어도 서술형 통과 = 처치 · ⚡ 3 (2026-11-13 밤 · 한 번 다 풀면)');
   const st = require('fs').readFileSync(require('path').join(__dirname, '..', 'js/raid/student.js'), 'utf8');
   check(/pracArm\[ak\]/.test(st) && /1500 - \(Date\.now\(\) - pracArm/.test(st), '🔥 한 판 더 단추 = 나타난 뒤 1.5초 잠금 (저절로 넘어가지 않게)'); }
 // ⑫ 🧷 스크롤 재발 막기 (2026-11-10): 전투 화면(문제 · 소레이드 · 서술형 쓰기 · 결과)은 모두 paint() 로 그림 — body.innerHTML 을 직접 쓰면 답을 고를 때 스크롤이 맨 위로 (11-08 고침 → 11-09 소레이드에서 재발)

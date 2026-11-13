@@ -3513,3 +3513,15 @@ body.trial-teach .trial-tch .tch-pc { color: #c9b896; font-size: 11px; }
 .ph-top { margin: 0 0 10px; padding: 10px 12px; border: 3px solid #b8873a; border-radius: 10px; background: #fff3d6; color: #2b1d0e; text-align: center; }
 .ph-top > b { display: block; font-size: 19px; line-height: 1.35; } .ph-top > b span { font-size: 15px; color: #8a4b0f; }
 .ph-top img { display: block; max-width: 100%; max-height: 38vh; margin: 8px auto 0; border-radius: 6px; } .ph-top p { margin: 6px 0 0; font-size: 14px; text-align: left; }
+/* ⚡ 기력 카드 (2026-11-13 밤 · 묶음 B · 시안 8fD8n9 ⑥): 💚 힐 · ⛓ 묶기 · 🌟 진필살기 3장 → 고른 카드 설명 + 그만하기 → 노란 단추 「고른 기술 + 🔥 재도전」 */
+.sk-box { margin: 8px 0; padding: 10px; border-radius: 12px; background: #1b1610e6; border: 1px solid #b08d5788; display: flex; flex-direction: column; gap: 8px; }
+.sk-h { display: flex; justify-content: space-between; align-items: center; margin: 0; color: #f5e6c8; font-size: 15px; } .sk-bolt { color: #ffe066; letter-spacing: 1px; }
+.sk-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.sk-card { position: relative; min-height: 76px; border-radius: 14px; border: 2px solid #5c4a30; background: #2a2218; color: #f5e6c8; font-weight: 700; font-size: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; box-shadow: 0 3px 0 #0a0b0e; cursor: pointer; }
+.sk-card .sk-ic { font-size: 28px; line-height: 1; } .sk-card small { position: absolute; top: 4px; right: 6px; font-size: 11px; color: #ffe066; }
+.sk-card.on { border-color: #f5b84a; background: #3a2c14; box-shadow: 0 3px 0 #9a6a1c, 0 0 0 3px #f5b84a44; }
+.sk-card.off { opacity: .45; filter: grayscale(.8); cursor: default; }
+.sk-desc { margin: 0; text-align: center; font-size: 13px; color: #d8c8a8; min-height: 20px; }
+.sk-stop { background: none; border: 0; padding: 4px 6px; color: #bfae90; text-decoration: underline; font: inherit; font-size: 13px; cursor: pointer; }
+.sk-go { width: 100%; }
+.sk-stopped p { margin: 0; color: #f5e6c8; text-align: center; }
