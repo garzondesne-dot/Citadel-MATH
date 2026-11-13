@@ -113,7 +113,7 @@ DS.Prep = (function () {
       el.querySelectorAll('[data-va]').forEach((b) => (b.onclick = () => { a = Number(b.dataset.va); draw(); })); };
     draw();
   }
-  const up = (slot, url, msg = '올렸어요!') => DS.Control.run(async () => { await DS.Act.setImage(L.id, slot, url); delete draft[slot]; DS.UI.toast(msg); render(); });
+  const up = (slot, url, msg = '올렸어요!') => DS.Control.run(async () => { await DS.Act.setImage(L.id, slot, url); delete draft[slot]; if (editing === slot) editing = null; DS.UI.toast(msg); render(); }); // 🐞 2026-11-13 학교판 「PDF 자르기가 안먹혀」: 자르기 창을 연 채로 올리면 지운 칸을 그리다 깨졌음
   function bindSlots() {
     document.querySelectorAll('[data-box]').forEach((box) => {
       box.onclick = (e) => { if (editing || e.target.closest('button,label,input')) return; if (sel !== box.dataset.box) { sel = box.dataset.box; opened.add(sel); render(); } };
@@ -144,14 +144,14 @@ DS.Prep = (function () {
     document.querySelectorAll('[data-slot]').forEach((inp) => (inp.onchange = () => { const f = inp.files[0]; if (f) putFile(inp.dataset.slot, f); }));
     document.querySelectorAll('[data-del]').forEach((b) => (b.onclick = () => DS.Control.run(async () => { if (confirm('이 이미지를 지울까요?')) await DS.Act.setImage(L.id, b.dataset.del, null); })));
     document.querySelectorAll('[data-up]').forEach((b) => (b.onclick = () => up(b.dataset.up, draft[b.dataset.up].url)));
-    document.querySelectorAll('[data-undo]').forEach((b) => (b.onclick = () => { delete draft[b.dataset.undo]; render(); }));
+    document.querySelectorAll('[data-undo]').forEach((b) => (b.onclick = () => { delete draft[b.dataset.undo]; if (editing === b.dataset.undo) editing = null; render(); }));
     document.querySelectorAll('[data-edit]').forEach((b) => (b.onclick = () => {
       const id = b.dataset.edit; if (!draft[id]) draft[id] = { rects: guessRects(id), guess: !(L.crops || {})[id] };
       editing = id; sel = id; piece = 0; render();
       const on = document.querySelector('.crop-box.on'); if (on) on.scrollIntoView({ block: 'center', behavior: 'smooth' });
     }));
     const pdf = $('#p-pdf'); if (pdf) pdf.onchange = () => { const f = pdf.files[0]; if (f) DS.Control.run(() => fromPdf(f)); };
-    const all = $('#p-all'); if (all) all.onclick = () => DS.Control.run(async () => { const ids = Object.keys(draft); for (const id of ids) await DS.Act.setImage(L.id, id, draft[id].url); draft = {}; DS.UI.toast(`${ids.length}칸을 올렸어요!`); render(); });
+    const all = $('#p-all'); if (all) all.onclick = () => DS.Control.run(async () => { const ids = Object.keys(draft).filter((id) => draft[id] && draft[id].url); for (const id of ids) await DS.Act.setImage(L.id, id, draft[id].url); draft = {}; editing = null; DS.UI.toast(`${ids.length}칸을 올렸어요!`); render(); }); // 🐞 자르기 창을 연 채로 「전부 올리기」 = 깨지던 것 · 아직 안 자른 칸은 건너뜀
     const drop = $('#p-drop'); if (drop) drop.onclick = () => { draft = {}; editing = null; render(); };
     if (editing) bindEditor();
   }
@@ -264,7 +264,8 @@ DS.Prep = (function () {
 
   // ── 자르기 조정: 쪽 그림 위의 틀을 끌어 옮기고, 모서리로 크기를 바꾼다 ─────────
   function editorHtml(id) {
-    const d = draft[id], r = d.rects[piece];
+    const d = draft[id]; if (!d || !d.rects || !d.rects.length) { editing = null; return ''; } // 지운 칸 = 자르기 창 닫음 (깨지지 않게)
+    const r = d.rects[Math.min(piece, d.rects.length - 1)];
     return `<div class="crop-ed">
       <div class="row small">${d.rects.length > 1 ? d.rects.map((_, k) => `<button class="btn small${k === piece ? ' primary' : ''}" data-piece="${k}">조각 ${k + 1}</button>`).join('') : ''}
         <button class="btn small" id="ce-prev"${r.p <= 1 ? ' disabled' : ''}>◀ 쪽</button><b>${r.p} / ${pages.length}쪽</b><button class="btn small" id="ce-next"${r.p >= pages.length ? ' disabled' : ''}>쪽 ▶</button>
