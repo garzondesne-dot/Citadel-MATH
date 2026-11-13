@@ -23,7 +23,10 @@ DS.Attack = (function () {
     const b = { x0: r.x + r.w * f[0], y0: r.y + r.h * f[1], x1: r.x + r.w * f[2], y1: r.y + r.h * f[3] };
     return Object.assign(b, { w: b.x1 - b.x0, h: b.y1 - b.y0, cx: (b.x0 + b.x1) / 2, cy: (b.y0 + b.y1) / 2 });
   }
-  const reduce = () => typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // 👁 2026-11-13 선생님 「종합실에서도 눈빛 연출 보여줘」: 교실 PC 가 「동작 줄이기」(윈도우 애니메이션 끔 → prefers-reduced-motion)면 컷인 · 눈빛 · 흔들림이 통째로 빠지던 것 → 종합실(교실 TV)은 늘 연출 (setForce · hall.js)
+  let force = false;
+  const setForce = (on) => { force = !!on; };
+  const reduce = () => !force && typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
   function setPose(heroBox, hero, pose, cls = '') { const a = heroBox && heroBox.querySelector('.art'); if (a && DS.Art) a.outerHTML = DS.Art.hero(hero, pose, cls); }
   function shake(box, amp = 3, ms = 180) {
     if (reduce() || !box) return;
@@ -246,5 +249,5 @@ DS.Attack = (function () {
   // ⚡ 필살기 = 내 속성 Ⅲ · Ⅳ (+ 첫 시도 퍼펙트) · 🌟 진필살기 = 내 속성 Ⅳ (+ 3연속 퍼펙트) — #96 공통 특화 없앰
   const canUlt = (fx, hero) => !!(DS.FX && tierN(fx) >= 2 && (DS.FX.ownReso || DS.FX.resonates)(hero, fx)); // 🪜 #96 공통 특화 없앰 = 내 속성 Ⅲ · Ⅳ 만
   const canTrue = (fx, hero) => !!(DS.FX && tierN(fx) === 3 && (DS.FX.ownReso || DS.FX.resonates)(hero, fx));
-  return { projOf, isRanged, body, play, impact, fly, preload, preloadFaces, shake, knock, cutin, canUlt, canTrue, ultBlast, trail, TRAIL_C };
+  return { setForce, projOf, isRanged, body, play, impact, fly, preload, preloadFaces, shake, knock, cutin, canUlt, canTrue, ultBlast, trail, TRAIL_C };
 })();

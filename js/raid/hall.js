@@ -25,6 +25,7 @@ DS.Hall = (function () {
     code = c; hallKey = String(key); camped = false; L = null; R = null; built = '';
     if (!atkT) atkT = setInterval(hallAtk, 200);
     if (DS.Attack && DS.Attack.preloadFaces) DS.Attack.preloadFaces(); // ⚡ 필살기 컷인 얼굴 (선생님 · 학생) 미리
+    if (DS.Attack && DS.Attack.setForce && !embed) DS.Attack.setForce(true); // 👁 2026-11-13 종합실 = 교실 PC 「동작 줄이기」여도 컷인 · 눈빛 연출 (체험판 TV 창은 폰 설정 그대로)
     if (!embed) {
       try { localStorage.setItem('citadel-hall', JSON.stringify({ code: c })); } catch (e) { /* 무시 */ } // 2026-11-06 사용자: 비밀번호는 기억하지 않음 (메뉴로 가거나 다시 접속하면 다시 입력)
       DS.UI.show('screen-hall');
