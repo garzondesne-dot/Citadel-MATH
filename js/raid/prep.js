@@ -71,14 +71,14 @@ DS.Prep = (function () {
     const isOpen = opened.has(s.id) || editing === s.id || sel === s.id;
     if (!isOpen) {
       return `<div class="panel framed p-slot p-fold" data-box="${s.id}" tabindex="0"><div class="p-slot-head"><b>${esc(s.title)}</b>
-        <span class="p-state ${img ? 'okc' : d ? 'gold' : 'muted'}">${img ? '✅ 이미지' : d ? '📝 미리보기' : '⚠ 없음'}</span>${vid ? '<span class="p-state okc">🎬 영상</span>' : ''}
+        <span class="p-state ${img ? 'okc' : d ? 'gold' : 'muted'}">${img ? '✅ 이미지' : d ? (d.miss ? '⚠ 못 찾음 · 직접' : '📝 미리보기') : '⚠ 없음'}</span>${vid ? '<span class="p-state okc">🎬 영상</span>' : ''}
         ${img || d ? `<img class="p-thumb" src="${(d || {}).url || img}" alt="">` : ''}<button class="btn small" data-open="${s.id}">자세히 보기 ▾</button></div></div>`;
     }
     const kind = s.kind === 'intro' || s.kind === 'concept' ? '<span class="p-kind">설명 때 크게</span>' : s.kind === 'bonus' ? '<span class="p-kind q">⚔ 학생 혼자 「📄 학습지 보기」</span>' : '<span class="p-kind q">📄 문제 화면 (교사 해설용)</span>';
     const head = `<div class="p-slot-head"><b>${esc(s.title)}</b>${kind}<label class="btn small">🖼 고르기<input type="file" accept="image/*" data-slot="${s.id}" hidden></label>
       ${pages.length ? `<button class="btn small" data-edit="${s.id}">✏ 자르기 ${d ? '조정' : 'PDF 에서'}</button>` : ''}${img && !d ? `<button class="btn small" data-del="${s.id}">지우기</button>` : ''}</div>`;
     const body = editing === s.id ? editorHtml(s.id)
-      : d ? `<img class="p-prev draft" src="${d.url}" alt="${esc(s.title)} 미리보기"><p class="gold small">미리보기 — 아직 안 올렸어요${d.guess ? ' (자를 위치 정보가 없어 대충 잘랐어요. 조정해 주세요)' : ''}</p>
+      : d ? `<img class="p-prev draft" src="${d.url}" alt="${esc(s.title)} 미리보기"><p class="gold small">미리보기 — 아직 안 올렸어요${d.miss ? ' ⚠ 못 찾음 · 직접 맞춰 주세요' : ''}${d.guess && !d.miss ? ' (자를 위치 정보가 없어 대충 잘랐어요. 조정해 주세요)' : ''}</p>
         <div class="row"><button class="btn primary small" data-up="${s.id}">✅ 이 칸 올리기</button><button class="btn small" data-undo="${s.id}">버리기</button></div>`
       : img ? `<img class="p-prev" src="${img}" alt="${esc(s.title)}">`
       : '<p class="muted small">아직 없음 — 이 칸을 누르고 <b>Ctrl+V</b> (스크린샷 붙여넣기) · 이미지 끌어다 놓기 · 🖼 고르기</p>';
@@ -193,10 +193,74 @@ DS.Prep = (function () {
       t.getContext('2d').drawImage(cv, 0, 0, t.width, t.height); thumbs.push(t.toDataURL('image/jpeg', 0.75));
     }
     draft = {}; editing = null;
-    slotSteps().forEach((s) => { const rects = guessRects(s.id); draft[s.id] = { rects, url: cut(rects), guess: !(L.crops || {})[s.id] }; });
+    let auto = null, autoMsg = '';
+    if (!L.crops) { // ✂ 칸 위치가 없는 차시 = 글자로 찾기
+      const lines = await textLines(doc, pages.length).catch(() => []);
+      if (!lines.length) autoMsg = '글자를 찾지 못했어요 (스캔 · 사진 PDF) — 칸마다 ✏ 자르기로 직접 맞춰 주세요.';
+      else { auto = autoRects(lines, slotSteps()); const miss = Object.values(auto).filter((x) => !x).length; autoMsg = miss ? `✂ 글자로 ${Object.keys(auto).length - miss}칸을 찾아 잘랐어요 · ⚠ ${miss}칸은 못 찾음 — 직접 맞춰 주세요` : `✂ 글자로 ${Object.keys(auto).length}칸을 모두 찾아 잘랐어요 — 눈으로 보고 올려 주세요`; }
+    }
+    slotSteps().forEach((s) => { const a = auto && auto[s.id], rects = a || guessRects(s.id); draft[s.id] = { rects, url: cut(rects), guess: !a && !(L.crops || {})[s.id], miss: !!auto && !a }; });
     const need = Math.max(0, ...Object.values(L.crops || {}).flat().map((r) => r.p));
+    if (autoMsg) { DS.UI.toast(autoMsg, 5200); render(); return; }
     DS.UI.toast(need > pages.length ? `PDF 가 ${pages.length}쪽뿐이에요 (${need}쪽 필요). 레이드용 학습지가 맞는지 확인해 주세요.` : `${Object.keys(draft).length}칸을 잘라 미리 넣었어요. 확인하고 올려 주세요.`, 4200);
     render();
+  }
+
+  // ✂ 2026-11-13 선생님 「PDF 넣으면 알아서 잘라서 이미지 추가하기」 → C: 칸 위치(crops)가 없는 차시(📊 엑셀 · 학교판) = PDF 글자 층에서 칸 이름을 찾아 자름
+  //   칸마다 ① 「몬스터 n」(GAME 태그 · n번째 문제 단계) ② 단계 제목 앞말(「문제 1」 · 「형성평가」 · 도입 = 「생각 열기」 · 개념 = 「STEP k」 순서) ③ 못 찾으면 기본 틀 + ⚠
+  //   자를 곳 = 찾은 줄 바로 위 ~ 같은 단 다음 칸 이름 줄 바로 위(없으면 쪽 아래 여백) · 2단이면 그 단 폭 · 결과는 「미리 넣기」(교사가 눈으로 보고 올림)
+  //   lines = [{ p, x0, x1, y, h, s }] (0~1 · y = 줄 위끝) · steps = slotSteps()
+  const ANCHOR = /^[^\p{L}\p{N}]*(몬스터\s*\d+|문제\s*\d+|STEP\s*\d+)|형성\s*평가|생각\s*열기/u; // 「문제 n」 등은 줄 맨 앞일 때만 (본문 「교과서 89쪽 문제 3」 은 칸 끝이 아님)
+  const AT = (src) => new RegExp(`^[^\\p{L}\\p{N}]*${src}`, 'u');
+  function anchorsOf(steps) {
+    let mon = 0, con = 0;
+    return steps.map((st) => {
+      const t = String(st.title || ''), head = t.split(' · ')[0].trim(), out = [];
+      if (st.kind === 'monster') { mon += 1; out.push(AT(`몬스터\\s*${mon}(?!\\d)`)); }
+      if (st.kind === 'concept') { con += 1; }
+      const m = /^(문제|STEP)\s*(\d+)/.exec(head);
+      if (m) out.push(AT(`${m[1]}\\s*${m[2]}(?!\\d)`));
+      if (st.kind === 'boss') out.push(/형성\s*평가/);
+      if (st.kind === 'intro') out.push(/생각\s*열기/);
+      if (st.kind === 'concept') out.push(AT(`STEP\\s*${con}(?!\\d)`));
+      { const tail = (t.split(' · ')[1] || '').replace(/[^\p{L}\p{N}\s]/gu, '').trim(); if (st.kind === 'intro' && tail.length >= 2) out.push(new RegExp(tail.replace(/\s+/g, '\\s*'))); } // 도입 「🔁 전시 확인」
+      if (head && !/^(문제|STEP)\s*\d/.test(head) && head.length >= 2) out.push(new RegExp(`^\\s*${head.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s*')}`)); // 제목 앞말(예: 「보강」) = 줄 맨 앞에서
+      return out;
+    });
+  }
+  function autoRects(lines, steps) {
+    const sorted = lines.slice().sort((a, b) => a.p - b.p || a.y - b.y || a.x0 - b.x0);
+    const colOf = (pg) => { const right = sorted.filter((l) => l.p === pg && l.x0 > 0.5).length; return right >= 3; };
+    const used = new Set(), res = {}, hits = [];
+    const all = anchorsOf(steps);
+    all.forEach((res0, i) => { let hit = null; for (const re of res0) { hit = sorted.find((l) => !used.has(l) && re.test(l.s)); if (hit) break; } if (hit) used.add(hit); hits[i] = hit; });
+    const isEdge = (l) => used.has(l) || ANCHOR.test(l.s);
+    hits.forEach((hit, i) => {
+      const st = steps[i];
+      if (!hit) { res[st.id] = null; return; }
+      const left = hit.x0 < 0.5, two = colOf(hit.p) && (left ? hit.x1 < 0.56 : true);
+      const x0 = two ? (left ? 0.02 : 0.5) : 0.02, x1 = two ? (left ? 0.5 : 0.98) : 0.98;
+      const inCol = (l) => l.p === hit.p && (two ? (left ? l.x0 < 0.5 : l.x0 >= 0.48) : true);
+      const own = all[i], nx = sorted.find((l) => inCol(l) && l !== hit && l.y > hit.y + 0.008 && isEdge(l) && !(!used.has(l) && own.some((re) => re.test(l.s))) && !(st.kind === 'boss' && !used.has(l) && /문제\s*\d/.test(l.s)));
+      const top = Math.max(0, hit.y - 0.008), lim = nx ? nx.y - 0.006 : 0.965, last = sorted.filter((l) => inCol(l) && l.y >= hit.y && l.y + l.h <= lim + 0.002).reduce((m, l) => Math.max(m, l.y + l.h), hit.y + hit.h);
+      const bot = Math.max(top + 0.04, Math.min(lim, last + 0.012)); // 글자가 끝나는 곳 + 여백 (빈 아래쪽은 자름)
+      const lone = two && left && !sorted.some((l) => l.p === hit.p && l.x0 >= 0.5 && l.y + l.h > top && l.y < bot); // 옆 단이 비면 = 가로 전체 칸 (전시 확인 상자 등)
+      if (lone) { res[st.id] = [{ p: hit.p, x: 0.02, y: +top.toFixed(4), w: 0.96, h: +(Math.min(1, bot) - top).toFixed(4) }]; return; }
+      res[st.id] = [{ p: hit.p, x: +x0.toFixed(4), y: +top.toFixed(4), w: +(x1 - x0).toFixed(4), h: +(Math.min(1, bot) - top).toFixed(4) }];
+    });
+    return res;
+  }
+  async function textLines(doc, n) { // pdf.js 글자 층 → 줄
+    const out = [];
+    for (let i = 1; i <= n; i++) {
+      const pg = await doc.getPage(i), vp = pg.getViewport({ scale: 1 }), tc = await pg.getTextContent();
+      const items = tc.items.filter((it) => it.str && it.str.trim()).map((it) => { const x = it.transform[4], y = it.transform[5], h = Math.abs(it.transform[3]) || it.height || 10; return { x0: x / vp.width, x1: (x + (it.width || 0)) / vp.width, yb: 1 - y / vp.height, h: h / vp.height, s: it.str }; });
+      items.sort((a, b) => a.yb - b.yb || a.x0 - b.x0);
+      const rows = [];
+      items.forEach((it) => { const r = rows.find((q) => Math.abs(q.yb - it.yb) < Math.max(q.h, it.h) * 0.5 && (it.x0 - q.x1) < 0.015 && it.x0 >= q.x0); if (r) { r.s += (it.x0 - r.x1 > 0.004 ? ' ' : '') + it.s; r.x1 = Math.max(r.x1, it.x1); r.h = Math.max(r.h, it.h); } else rows.push({ ...it }); });
+      rows.forEach((r) => out.push({ p: i, x0: r.x0, x1: r.x1, y: r.yb - r.h, h: r.h, s: r.s }));
+    }
+    return out;
   }
   const guessRects = (id) => ((L.crops || {})[id] || [{ p: 1, x: 0.05, y: 0.1, w: 0.44, h: 0.3 }]).map((r) => ({ ...r }));
   // v0.9.3 (사용자 결정 ②A): 조각을 위아래로만 붙이면 세로로 길어 큰 화면에서 글자가 작아진다
@@ -414,5 +478,5 @@ DS.Prep = (function () {
       rd.readAsDataURL(file);
     });
   }
-  return { enter, plan };
+  return { enter, plan, _auto: { autoRects, anchorsOf, textLines } }; // _auto = 시험용
 })();
