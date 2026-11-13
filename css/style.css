@@ -86,6 +86,7 @@ input:focus, select:focus { outline: none; border-color: var(--gold); }
 .art.hv2 { position: relative; }
 .art.hv2 > b { position: absolute; left: -12%; width: 124%; bottom: 0; aspect-ratio: 5 / 4; background-repeat: no-repeat; image-rendering: pixelated; }
 @keyframes hv2n4 { from { background-position-x: 0%; } to { background-position-x: 133.333%; } }
+@keyframes hv2i8 { from { background-position-x: 0%; } to { background-position-x: 114.286%; } } /* 🧍 숨쉬기 8칸 (8 / 7 × 100%) */
 @keyframes hv2n2 { from { background-position-x: 0%; } to { background-position-x: 66.667%; } }
 @keyframes hv2n3 { from { background-position-x: 0%; } to { background-position-x: 100%; } }
 /* 한 번만 (쓰러짐 · 차원문): 마지막 프레임에서 멈춤 */

@@ -20,6 +20,8 @@ DS.Art = (function () {
     const delay = mode === 'once' ? 0 : -((n * 0.37 + Math.random()) % 1) * dur; // 여럿이 있어도 같은 박자로 안 움직이게
     const run = nf > 1 ? (mode === 'once' ? `animation:hv2o${nf} ${dur}s steps(${nf}, jump-none) 1 forwards;` : `animation:hv2n${nf} ${dur}s steps(${nf}) ${delay.toFixed(2)}s infinite;`) : '';
     const W = 124, left = 50 - (h.cx || 0.4) * W; // 그림 칸(80×64)을 상자보다 넓게 두고, 머리 가운데가 상자 가운데에 오게
+    const I8 = A().heroIdle8; // 🧍 2026-11-13 대기 = 숨쉬기 8프레임 (그 용사 줄이 있으면)
+    if (a === 'idle' && I8 && n < I8.rows) return `<i class="art hero hv2 ${String(cls).replace(/\bhuff\b/g, '')}" data-anim="idle"><b style="left:${left.toFixed(1)}%;width:${W}%;background-image:url('${A().base}${I8.src}');background-size:${I8.cols * 100}% ${I8.rows * 100}%;background-position:0% ${(100 * n) / (I8.rows - 1)}%;animation:hv2i8 ${I8.dur}s steps(8) ${(-((n * 0.37 + Math.random()) % 1) * I8.dur).toFixed(2)}s infinite;"></b></i>`;
     return `<i class="art hero hv2 ${String(cls).replace(/\bhuff\b/g, '')}" data-anim="${a}"><b style="left:${left.toFixed(1)}%;width:${W}%;background-image:url('${A().base}${h.src}');background-size:${v.cols * 100}% ${rows * 100}%;background-position:0% ${rows > 1 ? (100 * row) / (rows - 1) : 0}%;${run}"></b></i>`;
   }
   // 🌟 #73 각성한 로안 (2026-11-11): 로안(0) + 🔨 10강 + ⚔ 쌍월 참(베기 Ⅳ) 장착 + 호칭 「만 번째 베기」 장착 → 금발 모습(16) · 하나라도 빼면 로안

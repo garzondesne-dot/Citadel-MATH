@@ -6,6 +6,8 @@ DS.ASSETS = {
   heroes: { src: 'heroes-v2.webp', cols: 4, rows: 8, poses: { idle: 0, walk: 1, attack: 2, fall: 3 }, count: 8, teacher: 7, teacherSkins: [7, 17] }, // teacherSkins: 선생님 모습 고르기 (7 현자 · 17 수학자, 교사 메뉴)
   // v2 도트 용사 (2026-11-02 · docs/ASSET-SPEC.md): 칸 80×64 · 줄 = 동작 [줄, 프레임 수, 초] · 대기 줄 = 숨쉬기 구움(tools/sprite/breathe.py)
   // 용사 시트에 없는 줄(7줄 시트 등)은 art.js 의 대신 쓰기 표로 보여 준다. 2026-11-03: 0~15 직업 v2 (모두 12줄) · 17 수학자(선생님) · tools/sprite/hero_pair.py
+  // 🧍 2026-11-13 선생님 「저번에 만든 용사들 숨쉬기 신버전 업데이트」: 대기(idle) = PixelLab 숨쉬기 8프레임 한 장 (줄 = 용사 번호 0~33 · 칸 80×64 · 8칸 · 약 1.3초) · 되돌리기 = 이 줄 지우기(옛 breathe.py 대기 줄로)
+  heroIdle8: { src: 'hero-idle8-pl-v3.webp', cols: 8, rows: 34, dur: 1.3 },
   heroesV2: {
     cols: 4, rows: 12, w: 80, h: 64,
     anims: { idle: [0, 4, 1.28], walk: [1, 4, 0.64], attack: [2, 4, 0.48], hit: [3, 1], win: [4, 2, 0.7], fall: [5, 2, 0.6, 'once'], heal: [6, 2, 0.7],
