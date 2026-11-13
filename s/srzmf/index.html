@@ -57,7 +57,7 @@
           <div class="mk-grid">
             <button id="p-go" class="btn"><i>📋</i>수업 준비</button>
             <button id="x-go" class="btn" title="학생 계정 없이 학생 폰 화면으로 이 차시를 끝까지 · 가상 친구 4명 · 기록 저장 안 함"><i>🧪</i>테스트</button>
-            <button id="t-sched" class="btn"><i>📅</i>시간표</button>
+            <button id="t-sched" class="btn sched-only" hidden><i>📅</i>시간표</button>
             <button id="s-go" class="btn"><i>👥</i>명단</button>
             <button id="d-go" class="btn"><i>📊</i>대시보드</button>
             <button id="fb-go" class="btn"><i>💬</i>학생 의견<b class="mk-bd" id="fb-bd" hidden></b></button>
@@ -72,6 +72,8 @@
           <summary>⚙ 설정 · 비밀번호 · 선생님 모습 · 로그아웃</summary>
           <div class="row2 t-hallpw"><label>🖥 종합상황실 비밀번호 <input id="t-hallpw" class="masked" type="text" inputmode="numeric" maxlength="4" placeholder="비우면 수업마다 새로" autocomplete="off" data-1p-ignore data-lpignore="true"></label><button id="t-hallpw-save" class="btn">💾 저장</button></div>
           <p class="muted small">숫자 4자리를 저장하면 모든 수업이 그 비밀번호예요 (교실 PC 가 기억해서 다음부터 바로 입장). 비우고 저장하면 수업마다 무작위.</p>
+          <label class="t-sched-use"><input type="checkbox" id="t-sched-use"> 📅 <b>시간표 쓰기</b> <span class="muted small">끄면(기본) 반 → 차시를 골라 「▶ 수업 열기」 · 켜면 교시 시각 · 시간표를 넣고 지금 교시 수업을 추천 (수업은 늘 선생님이 눌러서 열어요)</span></label>
+          <div class="row sched-only" hidden><button class="btn small" id="t-bells">🕘 교시 시각</button><button class="btn small" id="t-week">🗓 시간표</button></div>
           <p class="muted small">🧙 선생님 모습 · 이펙트 · 호칭은 <b>🏕 내 캠프 → 🧙 선생님 모습</b>에서 바꿔요.</p>
           <div class="t-auth-out"></div>
         </details>

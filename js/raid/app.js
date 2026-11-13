@@ -235,11 +235,25 @@ DS.App = (function () {
       DS.UI.toast(`선생님 모습: ${name(n)}`);
     }));
   }
+  // 📅 ⚙ 시간표 쓰기 (2026-11-13 밤 · 기본 끔): 스위치 · 시간표 단추 · 오늘 수업 줄 보이기
+  function schedUi() {
+    const on = !!(DS.Sched && DS.Sched.isOn && DS.Sched.isOn()), cb = $('#t-sched-use');
+    document.querySelectorAll('.sched-only').forEach((e) => { e.hidden = !on; });
+    if (!cb) return; cb.checked = on;
+    cb.onchange = go(async () => {
+      await DS.Sched.setUse(cb.checked); schedUi(); suggestLesson().catch(() => {});
+      const td = $('#t-today'); if (cb.checked && DS.Att) DS.Att.today(td).catch(() => {}); else if (td) td.innerHTML = '';
+      DS.UI.toast(cb.checked ? '📅 시간표를 켰어요 — 🕘 교시 시각 · 🗓 시간표를 넣어 주세요' : '📅 시간표를 껐어요 — 반 · 차시를 골라 수업을 열어요', 3200);
+    });
+    const bl = $('#t-bells'); if (bl) bl.onclick = go(async () => { if (DS.Att && DS.Att.bells) DS.Att.bells(() => DS.Att.today($('#t-today')).catch(() => {})); });
+    const wk = $('#t-week'); if (wk) wk.onclick = go(async () => { if (DS.Att) DS.Att.editor(() => DS.Att.today($('#t-today')).catch(() => {})); });
+  }
   async function teacherAuth() {
     const ok = await A().isAdmin();
     document.querySelectorAll('.t-only').forEach((e) => (e.hidden = !ok));
     if (ok) teacherSkin();
-    if (ok && DS.Att && !(DS.OFF && DS.OFF('sched'))) DS.Att.today($('#t-today')).catch((e) => console.warn('오늘 수업', e)); // 📅 v0.9.7.0: 예약 수업 7일 치 채우기 + 오늘 목록
+    if (ok && DS.Sched && DS.Sched.load) { await DS.Sched.load().catch(() => false); schedUi(); } // 📅 ⚙ 시간표 쓰기 (기본 끔)
+    if (ok && DS.Att && DS.Sched && DS.Sched.isOn()) DS.Att.today($('#t-today')).catch((e) => console.warn('오늘 수업', e)); // 📅 v0.9.7.0: 예약 수업 7일 치 채우기 + 오늘 목록
     if (ok) DS.Net.get('tcfg/hallPw').then((v) => { const el = $('#t-hallpw'); if (el && v) el.value = v; }).catch(() => {}); // 🖥 고정 비밀번호 (있으면)
     if (ok) {
       document.querySelectorAll('.t-auth').forEach((e) => { e.innerHTML = ''; }); // 2026-11-07 메뉴 정돈: 로그아웃은 ⚙ 설정 안으로
@@ -277,11 +291,12 @@ DS.App = (function () {
     const cls = ($('#t-cls') || {}).value, sel = $('#lesson'); if (!cls || !sel) return;
     const held = await heldOf(cls), codeL = DS.Lessons.list.filter((x) => /^set-/.test(x.id)).sort((a, b) => (a.no || 0) - (b.no || 0));
     let next = codeL.find((x) => !held[x.id] && [...sel.options].some((o) => o.value === x.id));
-    if (DS.Sched && DS.Sched.pointer) { const pt = await DS.Sched.pointer(cls).catch(() => null); if (pt && [...sel.options].some((o) => o.value === pt.id)) next = pt; } // 📅 진도 예정표와 같은 「다음 차시」 (수업 끝을 눌러야 넘어감)
+    if (DS.Sched && DS.Sched.isOn && !DS.Sched.isOn()) next = null; // 📅 시간표 끔 = 차시를 저절로 고르지 않음 (선생님이 고름)
+    if (next && DS.Sched && DS.Sched.pointer) { const pt = await DS.Sched.pointer(cls).catch(() => null); if (pt && [...sel.options].some((o) => o.value === pt.id)) next = pt; } // 📅 진도 예정표와 같은 「다음 차시」 (수업 끝을 눌러야 넘어감)
     let hint = document.getElementById('t-lhint'); if (!hint) { hint = document.createElement('p'); hint.id = 't-lhint'; hint.className = 'muted small t-lhint'; sel.closest('label').after(hint); }
     const done = codeL.filter((x) => held[x.id]).map((x) => x.no);
     if (next) sel.value = next.id;
-    hint.textContent = `📚 ${cls}반 · ${done.length ? `${done.join(' · ')}차시 함 → ` : ''}${next ? `${DS.Lessons.noText(next.no)}차시 차례라 골라 두었어요` : '차시를 골라 주세요'}`;
+    hint.textContent = `📚 ${cls}반 · ${done.length ? `${done.join(' · ')}차시 함 (지난)${next ? ' → ' : ' · '}` : ''}${next ? `${DS.Lessons.noText(next.no)}차시 차례라 골라 두었어요` : '차시를 골라 주세요'}`;
     resumeHint().catch((e) => console.warn('이어서', e));
   }
   // ▶ 이어서 시작할 단계 고르기 (2026-11-07): 개념 · 문제 · 형성평가 단계 목록 → 고른 단계 번호 (취소 = null)

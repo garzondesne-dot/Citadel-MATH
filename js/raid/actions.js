@@ -102,7 +102,7 @@ DS.Act = (function () {
       if (!studs.length) fail('입장한 학생이 없어요.');
       const s0 = Math.max(0, Math.min(L.steps.length - 1, Number(R.meta.resumeFrom) || 0)), f0 = Raid.autoFocus(L.steps[s0]), plan = DS.Combo ? DS.Combo.batPlan(L, Math.random(), Math.random()) : null;
       // ⏳ 2026-11-06 사용자 「50분 제한이 안 보임」: 방을 교시 밖에서 열어 문 닫힘 시각이 없으면 → 수업 시작 때 그 교시 끝(없으면 지금 + 50분)
-      const dl0 = (!R.meta.deadline || R.meta.deadline < N().now() + 5 * 60e3) && !R.meta.noLimit && !(DS.OFF && DS.OFF('sched')) ? ((DS.Sched && DS.Sched.periodEnd(N().now())) || N().now() + 50 * 60e3) : null;
+      const dl0 = (!R.meta.deadline || R.meta.deadline < N().now() + 5 * 60e3) && !R.meta.noLimit && !(DS.SCHOOL && !(DS.Sched && DS.Sched.isOn && DS.Sched.isOn())) ? ((DS.Sched && DS.Sched.periodEnd(N().now())) || N().now() + 50 * 60e3) : null;
       if (dl0) await N().set(P(code, 'state/deadline'), dl0).catch(() => {}); // 2026-11-06 검증: 지난 교시 끝에 방을 만들어 둔 경우(마감이 이미 지났거나 5분 안)도 수업 시작 시각 기준으로 다시 잡음 (바로 「문을 닫았다」 방지)
       await N().update(P(code), { active: Object.fromEntries(studs.map((u) => [u, true])), 'state/headcount': Math.max(1, studs.filter((u) => !(R.players[u] || {}).tester).length), /* 🧪 #67 시험 계정은 체력 머릿수에서 빠짐 (공격 데미지는 그대로) */ 'state/step': s0, 'state/stepAt': N().TS, 'state/focus': f0, 'state/focusAt': f0 ? N().now() : null, 'state/pauseMs': null, 'state/batPlan': plan, 'state/cpAt': f0 ? N().now() : null, 'state/cpMs': 0 });
       const clss = [...new Set(studs.map((u) => (R.players[u] || {}).cls).filter(Boolean))];
@@ -329,7 +329,7 @@ DS.Act = (function () {
     const now = N().now(), cands = [];
     const [live, slots] = await Promise.all([N().get('live').catch(() => null), N().get('slots').catch(() => null)]);
     Object.entries(live || {}).forEach(([c, v]) => { if (v && v.code && Raid.liveOpen(v, Date.now())) cands.push({ code: v.code, cls: c, no: v.no, lesson: v.lesson, at: v.at || 0 }); });
-    if (!(DS.OFF && DS.OFF('sched'))) Object.entries(slots || {}).forEach(([c, byCode]) => Object.entries(byCode || {}).forEach(([code, v]) => { if (v && v.from - 10 * 60e3 <= now && now < v.to) cands.push({ code, cls: c, no: v.no, lesson: v.lesson, at: v.from, sched: true }); }));
+    if (DS.Sched && DS.Sched.isOn && DS.Sched.isOn()) Object.entries(slots || {}).forEach(([c, byCode]) => Object.entries(byCode || {}).forEach(([code, v]) => { if (v && v.from - 10 * 60e3 <= now && now < v.to) cands.push({ code, cls: c, no: v.no, lesson: v.lesson, at: v.from, sched: true }); }));
     const out = [];
     for (const x of cands.sort((a, b) => b.at - a.at)) { if (out.some((r) => r.code === x.code)) continue; const st = await N().get(P(x.code, 'state')).catch(() => null); if (st && !st.closed) out.push(x); }
     return out;

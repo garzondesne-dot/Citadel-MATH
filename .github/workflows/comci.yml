@@ -2,9 +2,10 @@
 #   비밀 값(Settings → Secrets and variables → Actions): FIREBASE_SA_JSON · COMCI_SCHOOL · COMCI_TEACHER
 #   결과는 Firebase sched/comci 에만 (저장소 · 로그에 열쇠 없음). 게임 반영은 sched/comciOn 이 켜져 있을 때만
 name: comci-timetable
+# ⏸ 2026-11-13 밤 꺼 둠 (선생님 「시간표 컴시간 연동 구현하지말아줘. 잘 안쓰게됨」): 매일 새벽 가져오기 없음 · 게임도 sched/comci 를 합치지 않음 · 파일은 다시 켤 때를 위해 남김
 on:
-  schedule:
-    - cron: '0 21 * * *'   # 21:00 UTC = 06:00 KST
+  # schedule:
+  #   - cron: '0 21 * * *'   # 21:00 UTC = 06:00 KST
   workflow_dispatch:
     inputs:
       raw:

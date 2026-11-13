@@ -3,6 +3,9 @@ global.window = global; global.DS = { UI: { esc: (s) => s } };
 require('../js/raid/sched.js');
 const S = DS.Sched; let ok = 0, bad = 0;
 const t = (name, got, want) => { if (JSON.stringify(got) === JSON.stringify(want)) ok++; else { bad++; console.log('❌', name, '\n  got ', JSON.stringify(got), '\n  want', JSON.stringify(want)); } };
+// 📅 2026-11-13 밤: ⚙ 「시간표 쓰기」 기본 끔 → 끄면 교시 끝 · 예약 없음 · 켜면 아래 계산 그대로
+t('끔(기본) = 교시 끝 없음', S.periodEnd(Date.parse('2026-11-05T11:05:00+09:00')), null); t('끔 = isOn false', S.isOn(), false);
+S._on(true);
 const K = (s) => Date.parse(s + '+09:00');
 // ⏳ 보스 타임바 (2026-11-05): 교시 끝 = 문 닫힘 · 10분 전부터 그 교시 · 교시 밖 = 없음 · 예약 수업은 그 교시
 t('3교시 중 11:05 → 11:50', S.periodEnd(K('2026-11-05T11:05:00')), K('2026-11-05T11:50:00'));
@@ -38,7 +41,7 @@ t('출석', S.judge(g, 1), 'o'); t('지각', S.judge(g, 2), 'l'); t('미입장',
 (async () => {
   const db = { 'sched/week': { '2-3': '1-5', '3-1': '-' }, 'sched/comci': { ok: true, week: { '1-5': '1-3', '2-3': '1-3', '3-1': '1-2', '4-2': '1-1' } }, 'sched/comciOn': true };
   DS.Net = { get: async (k) => db[k] ?? null, now: () => 0 };
-  let e = await S.effective(); t('켜짐: 합친 시간표', e.week, { '2-3': '1-5', '4-2': '1-1' });
+  let e = await S.effective(); t('컴시간 = 끔 (2026-11-13 밤 · comciOn 이 켜져 있어도 합치지 않음 · 수동만)', e.week, { '2-3': '1-5' });
   db['sched/comciOn'] = null; e = await S.effective(); t('꺼짐: 수동만', e.week, { '2-3': '1-5' });
   console.log(bad ? `❌ ${bad}개 틀림 · ${ok}개 맞음` : `✅ 시간표 계산 ${ok}개 모두 맞음`); process.exit(bad ? 1 : 0);
 })();

@@ -14,7 +14,8 @@ DS.Att = (function () {
   const md = (date) => { const [, m, d] = date.split('-'); return `${+m}/${+d}`; };
   const tag = (x) => `${x.extra ? '<span class="sc-tag ex">➕ 보충</span>' : ''}${x.resume ? '<span class="sc-tag rz">⏸ 이어서</span>' : ''}`;
   async function today(el) {
-    if (!el || (DS.OFF && DS.OFF('sched'))) return;
+    if (!el) return;
+    if (!(S() && S().isOn())) { el.innerHTML = ''; return; } // 📅 ⚙ 시간표 끔 = 오늘 수업 줄 없음
     el.innerHTML = '<p class="muted small">📅 오늘 수업 불러오는 중…</p>';
     try { await S().ensure(); } catch (e) { /* 오프라인 · 권한 → 목록만 */ }
     const [eff, all] = await Promise.all([S().effective(), S().plan({ past: true, days: 1 }).catch(() => [])]), now = DS.Net.now();
@@ -49,7 +50,7 @@ DS.Att = (function () {
 
   // ── 📅 시간표 (요일 × 교시 → 반 · 매주) + 칸마다 다음 차시 · 진도 맞추기 · 앞으로 2주 ───────────────────────
   async function editor(done) {
-    if (DS.OFF && DS.OFF('sched')) return; // 🏫 학교판 = 시간표 없음
+    if (!(S() && S().isOn())) return; // 📅 ⚙ 시간표 끔
     const [eff, cs] = await Promise.all([S().effective(), classes()]);
     const auto = eff.auto, man = { ...eff.manual }, L = DS.Lessons.list.filter((l) => !l.eval && !l.sheetLesson && l.no).sort((a, b) => a.no - b.no);
     const m = document.createElement('div'); m.className = 'modal sc-edit';
@@ -63,7 +64,7 @@ DS.Att = (function () {
     const days = [1, 2, 3, 4, 5], ps = [1, 2, 3, 4, 5, 6, 7];
     const progCls = () => [...new Set([...Object.values(wk()), ...cs])].filter((c) => c && c !== '-').sort();
     m.innerHTML = `<div class="quiz-box framed sc-box"><div class="quiz-head"><b>📅 시간표 · 진도 예정표</b><button class="btn small" data-x>✕ 닫기</button><button class="btn" id="sc-ex">➕ 보충</button><button class="btn primary" id="sc-save">💾 저장</button></div>
-      ${eff.comci && (eff.comci.ok || eff.comci.week) ? `<label class="sc-comci"><input type="checkbox" id="sc-comci"${eff.on ? ' checked' : ''}> 🔄 <b>컴시간 시간표 쓰기</b> <span class="muted small">수학 ${eff.comci.n || 0}칸 · 고친 칸이 우선${Number(eff.comci.failAt) > (Number(eff.comci.at) || 0) ? ` · ⚠ ${new Date(Number(eff.comci.failAt)).toLocaleDateString('ko-KR')} 새로 받기 실패 → ${eff.comci.at ? new Date(Number(eff.comci.at)).toLocaleDateString('ko-KR') : '마지막'} 시간표 그대로` : ''}</span></label>` : eff.comci && eff.comci.err ? `<p class="ngc small">⚠ 컴시간 시간표를 받지 못했어요 (${esc(String(eff.comci.err).slice(0, 60))}) — 아래 칸에 직접 넣어 주세요</p>` : ''}
+      ${false && eff.comci && (eff.comci.ok || eff.comci.week) ? `<label class="sc-comci"><input type="checkbox" id="sc-comci"${eff.on ? ' checked' : ''}> 🔄 <b>컴시간 시간표 쓰기</b> <span class="muted small">수학 ${eff.comci.n || 0}칸 · 고친 칸이 우선${Number(eff.comci.failAt) > (Number(eff.comci.at) || 0) ? ` · ⚠ ${new Date(Number(eff.comci.failAt)).toLocaleDateString('ko-KR')} 새로 받기 실패 → ${eff.comci.at ? new Date(Number(eff.comci.at)).toLocaleDateString('ko-KR') : '마지막'} 시간표 그대로` : ''}</span></label>` : eff.comci && eff.comci.err ? `<p class="ngc small">⚠ 컴시간 시간표를 받지 못했어요 (${esc(String(eff.comci.err).slice(0, 60))}) — 아래 칸에 직접 넣어 주세요</p>` : ''}
       <p class="muted small">정규 시간표는 한 번 넣으면 매주 반복 · 칸 아래 = 그 칸의 다음 수업이 몇 차시인지 (반마다 시간순으로 6 → 7 → 8 …) · <b>마무리까지 가서 「수업 끝」을 눌러야 다음 차시로</b> 넘어가요 (⏸ 저장 · 안 한 수업 = 같은 차시) · 방은 미리 만들지 않고 「오늘 수업」에서 눌러 열어요</p>
       ${cs.length ? '' : '<p class="ngc">먼저 학생 관리 → 명단 관리에서 반 명단을 올려 주세요.</p>'}
       <div class="sc-wrap"><table class="sc-tbl"><tr><th></th>${days.map((d) => `<th>${S().DOW[d]}</th>`).join('')}</tr>${ps.map((p) => `<tr><th>${p}교시<small>${S().BELLS[p][0]}</small></th>${days.map((d) => cell(d, p)).join('')}</tr>`).join('')}</table></div>

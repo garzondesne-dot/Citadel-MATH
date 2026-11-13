@@ -38,7 +38,8 @@ DS.Sched = (function () {
   const getWeek = async () => (await N().get('sched/week').catch(() => null)) || {};
   // 🔄 컴시간 자동 (v0.9.7.1 · GitHub 가 매일 새벽 sched/comci 에 수학 칸만) — sched/comciOn 이 켜져 있을 때만 합침 · 수동 칸이 우선 ('-' = 수동으로 비움)
   const getComci = async () => (await N().get('sched/comci').catch(() => null)) || null;
-  async function comci() { const [c, on] = await Promise.all([getComci(), N().get('sched/comciOn').catch(() => null)]); return { on: on === true, c }; }
+  // 🔄 컴시간 = 끔 (2026-11-13 밤 선생님 「시간표 컴시간 연동 구현하지말아줘. 잘 안쓰게됨」) · 저장된 sched/comci 는 두되 합치지 않음 · 화면 · 스위치 숨김 · 새벽 GitHub 작업도 꺼 둠(.github/workflows/comci.yml)
+  async function comci() { return { on: false, c: null }; }
   async function effective(manual) {
     const [m, { on, c }] = await Promise.all([manual ? Promise.resolve(manual) : getWeek(), comci()]);
     const out = {}, auto = {};
@@ -275,8 +276,15 @@ DS.Sched = (function () {
   const setHide = (cls, code, on) => N().set(`classlog/${ck(cls)}/${code}/hide`, on ? true : null);
   const when = (g) => { const k = kst(g.from || g.at || 0); return { date: k.date, dow: DOW[k.dow], hm: k.hm }; };
 
-  const api = { plan, openSlot, pointer, advance, setNext, addExtra, removeExtra, slotsAhead, getProg, syncKeys, periodEnd, BELLS, PERIODS, SKIP, DOW, AFTER, LATE, ST, CYCLE, kst, times, usable, skipped, upcoming, nextLesson, ensure, active, today, skipSlot, relesson, logs, sheet, judge, setAtt, setMemo, setHide, when, label, getWeek, effective, comci, ck };
-  // 🏫 2026-11-13 선생님 「시간표 숨김」(학교판 · 선생님마다 시간표가 다름): 우리 학교 일과표에 묶인 길을 끔 — 보스 타임바(교시 끝) 없음 · 예약 수업 없음 · 진도 포인터 없음
-  if (DS.OFF && DS.OFF('sched')) Object.assign(api, { periodEnd: () => null, active: () => null, pointer: async () => null, syncKeys: async () => 0, advance: async () => null, ensure: async () => null, plan: async () => [], openSlot: async () => null });
+  // 📅 ⚙ 「시간표 쓰기」 (2026-11-13 밤 선생님 「당분간 시간표기능은 끄고 … 수동 기능을 기본으로」): sched/use = true 일 때만 시간표 · 오늘 수업 · 「다음 차시」 추천 · 교시 끝 타임바
+  //   끔(기본) = 반 → 차시 → 「▶ 수업 열기」 수동 · 타임바 = 수업 시작부터 50분(학교판은 제한 없음 그대로) · 켜도 수업 방은 저절로 열리지 않음(추천만)
+  let useOn = false;
+  async function load() { if (!(DS.Account && (await DS.Account.isAdmin().catch(() => false)))) { useOn = false; return false; } useOn = (await N().get('sched/use').catch(() => null)) === true; return useOn; }
+  const isOn = () => useOn === true;
+  async function setUse(on) { await N().set('sched/use', on ? true : null); useOn = !!on; return useOn; }
+  const api = { _on: (v) => { useOn = !!v; }, load, isOn, setUse, plan, openSlot, pointer, advance, setNext, addExtra, removeExtra, slotsAhead, getProg, syncKeys, periodEnd, BELLS, PERIODS, SKIP, DOW, AFTER, LATE, ST, CYCLE, kst, times, usable, skipped, upcoming, nextLesson, ensure, active, today, skipSlot, relesson, logs, sheet, judge, setAtt, setMemo, setHide, when, label, getWeek, effective, comci, ck };
+  // 📅 끔 = 일과표에 묶인 길을 막음 (예전 학교판 「시간표 숨김」과 같은 길 · 이제 우리 · 학교판 모두 ⚙ 스위치) — 보스 타임바(교시 끝) 없음 · 예약 없음 · 진도 포인터 없음
+  const OFFV = { periodEnd: () => null, active: () => null, pointer: async () => null, syncKeys: async () => 0, advance: async () => null, ensure: async () => null, plan: async () => [], openSlot: async () => null };
+  Object.keys(OFFV).forEach((k) => { const on = api[k], off = OFFV[k]; api[k] = (...a) => (isOn() ? on(...a) : off(...a)); });
   return api;
 })();
