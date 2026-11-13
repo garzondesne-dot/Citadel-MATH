@@ -26,4 +26,10 @@ let s = { ...base(['a', 'b', 'c', 'd', 'e', 'f']), phase: 'show', to: 100, said:
 let nx = NU.step(s, {}, 200); check(nx.phase === 'ready' && nx.round === 2 && Object.keys(nx.alive).join() === 'a,b,c,d', '생존 4명 → 2판');
 s = { ...s, said: { a: 1, b: 2 }, out: { c: 'x', d: 'x', e: 'x', f: 'x' } }; nx = NU.step(s, {}, 200); check(nx.phase === 'end' && nx.win.join() === 'a,b', '3명 이하 → 우승');
 s = { ...s, round: 3, said: { a: 1, b: 2, c: 3, d: 4, e: 5 }, out: { f: 'x' } }; nx = NU.step(s, {}, 200); check(nx.phase === 'end' && nx.win.length === 5, '3판 끝 → 남은 사람 모두 우승');
+// ⑦ 🐞 11/13 「자고 있으면 빠르게 제외」: 연결이 끊긴(폰이 잠든) 학생 = 20초 기다리지 않고 바로 💤
+{ let h = base(['a', 'b', 'c', 'd', 'e']); const on = { a: true, b: true, c: true }; // d · e = 끊김
+  h = NU.step(h, { a: 1100 }, 1700, null, on); check(h.out.d === 'zz' && h.out.e === 'zz' && h.zz.d && !h.out.b, '끊긴 학생 = 그 자리에서 💤 (깨어 있는 b · c 는 그대로)');
+  h = NU.step(h, { a: 1100, b: 2100 }, 2700, null, on); check(h.out.c === 'last' && h.phase === 'show' && h.said.b === 2, '남은 깨어 있는 1명 = ⌛ 마지막 · 20초 안 기다리고 판 끝');
+  const g = NU.step(base(['a', 'b', 'c']), { a: 1100 }, 1700, null, { a: true, b: true, c: true }); check(!g.out.b && !g.out.c, '모두 연결 = 예전과 같음');
+  check(NU.step(base(['a', 'b', 'c']), {}, 1700, null, null) === null, 'online 정보가 없으면 예전과 같음'); }
 console.log(fail ? `❌ 눈치 게임 실패 ${fail}` : `✅ 눈치 게임: 확인 ${ok}개 · 실패 0`); if (fail) process.exit(1);

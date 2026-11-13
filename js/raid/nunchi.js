@@ -18,16 +18,17 @@ DS.Nunchi = (() => {
   const setCode = (c) => { code = c; };
 
   async function start(c, R) {
-    const alive = studentsIn(R);
+    const all = studentsIn(R), off = (u) => R.online && !R.online[u], alive = all.filter((u) => !off(u)); // 💤 2026-11-13: 시작할 때 끊긴(폰이 잠든) 학생 = 바로 💤 관전
     if (alive.length < MIN) throw Object.assign(new Error(`🙊 눈치 게임은 ${MIN}명 이상일 때 할 수 있어요 (지금 ${alive.length}명)`), { user: true });
     const now = N().now(), g = now;
-    await N().set(P(c, 'fun'), { kind: 'nun', g, round: 1, phase: 'ready', to: now + READY(), alive: Object.fromEntries(alive.map((u) => [u, 1])), n: 1, said: {}, out: {}, done: {}, ev: [], lastAt: now + READY(), at: now });
+    await N().set(P(c, 'fun'), { kind: 'nun', g, round: 1, phase: 'ready', to: now + READY(), alive: Object.fromEntries(alive.map((u) => [u, 1])), zz: Object.fromEntries(all.filter(off).map((u) => [u, now])), n: 1, said: {}, out: {}, done: {}, ev: [], lastAt: now + READY(), at: now });
     code = c;
   }
 
   // ── 판정 (교실 TV 한 대만: drv) ─────────────────────────
   // 💤 #57 ⑫ (2026-11-10): 20초 무반응(지금 규칙의 시간)까지 한 번도 안 누른 학생 = 탈락이 아니라 💤 관전 (혼자 남은 「⌛ 마지막」 은 게임 규칙이라 그대로 탈락) (남은 수 · 결과 · 상에서 빠짐) · 폰 「🙋 다음 판 참여」(응원 칸 🙋) = 다음 판부터 다시
-  function step(f, presses, now, cheers) {
+  //   🐞 2026-11-13 1-2반 「자고 있으면 빠르게 제외 · 안 되네」: 판 중에 연결이 끊긴(폰이 잠든) 학생 = 20초를 기다리지 않고 그 자리에서 💤 (online 을 받을 때만)
+  function step(f, presses, now, cheers, online) {
     const x = JSON.parse(JSON.stringify(f)); x.said = x.said || {}; x.out = x.out || {}; x.done = x.done || {}; x.zz = x.zz || {}; x.ev = arr(x.ev); x.hist = arr(x.hist); x.ev.forEach((e) => { e.u = arr(e.u); });
     const ev = (e) => { x.ev.push({ ...e, at: now }); x.ev = x.ev.slice(-6); };
     if (x.phase === 'ready') { if (now < x.to) return null; x.phase = 'play'; x.lastAt = now; return x; }
@@ -51,6 +52,7 @@ DS.Nunchi = (() => {
       else { grp.forEach(([u]) => { x.out[u] = 'clash'; }); ev({ k: 'clash', n: x.n, u: grp.map(([u]) => u) }); }
       x.lastAt = Math.max(x.lastAt, grp[grp.length - 1][1]); changed = true;
     }
+    if (online) left().forEach((u) => { if (!x.done[u] && !online[u]) { x.out[u] = 'zz'; x.zz[u] = now; changed = true; } });
     const L = left();
     if (L.length === 1 && !todo.length) { x.out[L[0]] = 'last'; ev({ k: 'last', n: x.n, u: L }); changed = true; }
     else if (L.length > 1 && !todo.length && now - x.lastAt > TIMEOUT()) { L.forEach((u) => { x.out[u] = 'time'; }); ev({ k: 'time', n: x.n, u: L }); changed = true; }
@@ -70,7 +72,8 @@ DS.Nunchi = (() => {
         if (DS.Fun && DS.Fun.hold && await DS.Fun.hold(code, f, now)) return; // ⏸ #117 집중 = 눈치 시계 멈춤
         const presses = f.phase === 'play' ? (await N().get(P(code, `nun/${f.g}/${f.round}`)).catch(() => null)) || {} : {};
         const cheers = f.phase === 'show' && f.zz ? (await N().get(P(code, `nunE/${f.g}`)).catch(() => null)) || {} : {};
-        const nx = step(f, presses, now, cheers);
+        const online = f.phase === 'play' ? (await N().get(P(code, 'online')).catch(() => null)) : null;
+        const nx = step(f, presses, now, cheers, online && typeof online === 'object' ? online : null);
         if (nx) { nx.drv = { u: me, at: now }; await N().set(P(code, 'fun'), nx); }
         else if (!f.drv || f.drv.u !== me || now - f.drv.at > 1200) await N().set(P(code, 'fun/drv'), { u: me, at: now });
       } finally { busy = false; }
