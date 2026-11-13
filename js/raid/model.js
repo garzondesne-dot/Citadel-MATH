@@ -101,8 +101,8 @@ DS.Raid = (function () {
   // 받을 친구 고르기: 아직 다 못 맞힌 친구 전원이 후보 · 남은 기회가 적을수록 무게가 크다 (0칸 8 · 1칸 4 · 2칸 2 · 그 밖 1)
   // → 대부분 막힌 친구에게 가지만 가끔 다른 친구에게도 가서 티가 나지 않는다. rnd = 0~1 난수 (없으면 Math.random)
   function healTarget(L, R, mid, healer, rnd) {
-    const cand = activeIds(R).filter((u) => u !== healer && u !== teacherUid(R)).map((u) => ({ u, rec: record(L, R, mid, u) }))
-      .filter(({ u, rec }) => rec.submitted && (rec.chain ? !rec.done : !rec.perfect) && (rec.hearts ? rec.left < HEARTS : healsTo(R, mid, u, L).length < HEAL_MAX)) // ⚔ #50 소레이드 = 대장을 아직 못 잡은 친구
+    const cand = activeIds(R).filter((u) => u !== healer && u !== teacherUid(R)).map((u) => ({ u, rec: mid === 'boss' && V4(R) ? bossRec(L, R, u) : record(L, R, mid, u) }))
+      .filter(({ u, rec }) => rec.submitted && (rec.chain || rec.boss ? !rec.done : !rec.perfect) && (rec.hearts ? rec.left < HEARTS : healsTo(R, mid, u, L).length < HEAL_MAX)) // ⚔ #50 소레이드 = 대장을 아직 못 잡은 친구
       .map(({ u, rec }) => ({ u, w: rec.left <= 0 ? 8 : rec.left <= 1 ? 4 : rec.left <= 2 ? 2 : 1 }));
     const sum = cand.reduce((a, c) => a + c.w, 0);
     if (!sum) return null;
@@ -221,6 +221,7 @@ DS.Raid = (function () {
     return Array.from({ length: Math.max(0, n - 1) }, (_, k) => { const past = live.filter((r) => r.done || r.stage > k).length; const down = !!man[k] || (live.length > 0 && past >= need); return { k, past, all: live.length, need, down, max: need, left: down ? 0 : Math.max(0, need - past) }; }); // 🩸 #37 졸개 체력 = 최대 올림(머릿수 × 기준%) · 넘은 학생 1명마다 −1 · 0 = 쓰러짐 (리모컨 쓰러뜨리기 = 0)
   }
   function record(L, R, mid, uid) {
+    if (mid === 'boss' && V4(R) && L && L.boss) return bossRec(L, R, uid);
     if (isChain(L, R, mid)) return chainRecord(L, R, mid, uid);
     const tries = attemptsOf(R, mid, uid).map((t) => ({ ...t, ...gradeAttempt(L, R, mid, uid, t.attempt, t.given) }));
     const best = tries.reduce((m, t) => Math.max(m, t.correct), 0);
@@ -296,9 +297,9 @@ DS.Raid = (function () {
     return (L.boss.sets[2] || L.boss.sets[1])[i]; // 생성기가 없는 차시(엑셀 차시 등): 세트2 고정
   }
   // 그 학생의 시도 목록 [{ i, a, given, q, ok }] (문항 · 시도 순)
-  function bossTries(L, R, uid) {
-    const out = [], t = ((R.bossTry || {})[uid]) || {}, old = ((R.bossAns || {})[uid]) || {};
-    Object.entries(t).forEach(([i, byA]) => Object.entries(byA || {}).forEach(([a, given]) => { if (given == null || given === '') return; const q = bossItem(L, R, uid, Number(i), Number(a)); out.push({ i: Number(i), a: Number(a), given, q, ok: !!q && DS.Quiz.grade(q, given) }); }));
+  function bossTries(L, R, uid, all) {
+    const out = [], t = ((R.bossTry || {})[uid]) || {}, old = ((R.bossAns || {})[uid]) || {}, cut = V4(R) && !all ? BOSS_MAIN : Infinity; // 👑 v4: 시도 10 이상 = 🔥 재도전 판 (본 기록 아님)
+    Object.entries(t).forEach(([i, byA]) => Object.entries(byA || {}).forEach(([a, given]) => { if (given == null || given === '' || Number(a) >= cut) return; const q = bossItem(L, R, uid, Number(i), Number(a)); out.push({ i: Number(i), a: Number(a), given, q, ok: !!q && DS.Quiz.grade(q, given) }); }));
     [1, 2].forEach((set) => (old[set] || []).forEach((given, i) => { if (given == null || given === '' || !L.boss.sets[set] || !L.boss.sets[set][i]) return; const q = L.boss.sets[set][i]; out.push({ i, a: set - 1, given, q, ok: DS.Quiz.grade(q, given), legacy: true }); }));
     return out.sort((x, y) => x.i - y.i || x.a - y.a);
   }
@@ -309,6 +310,33 @@ DS.Raid = (function () {
       const mine = tr.filter((t) => t.i === i), ok = mine.some((t) => t.ok), first = mine.find((t) => t.a === 0);
       return { n: mine.length, ok, first: !!(first && first.ok), firstTried: !!first, left: ok ? 0 : Math.max(0, BOSS_TRIES - mine.length), next: mine.length ? Math.max(...mine.map((t) => t.a)) + 1 : 0 };
     });
+  }
+  // 👑 형성평가 v4 (2026-11-13 밤 선생님 「소문제 틀리면 -1인데 두개틀려도 -1 한개틀려도 -1」 · ❓#3 · #4): 일반 몬스터와 같은 꼴
+  //   4~7문항을 한 번에 모아 제출(한 판 = 시도 번호 r) · 체력 문항 하나라도 틀리면 ❤ −1 · ❤ 4 를 형성평가 전체가 같이 씀 · 틀린 문항만 숫자 바뀐 새 문제 · 맞힌 문항 잠김
+  //   ⭐ 보너스 = 같은 제출 · 틀려도 ❤ 안 깎임 · 체력 문항을 다 맞힌 뒤에도 못 맞힌 보너스만 다시(문항마다 BOSS_TRIES 번 · ❓#4 B) · ❤ 0 = 해설 보기(선생님 호출 없음)
+  //   다 맞히면 ⚡ 3 → 💚 힐 · ⛓ 묶기 (🌟 없음) → 🔥 재도전 판 p = 시도 10p + t (체력 문항 · 숫자 바뀜 · 데미지 0 · 틀린 것만 다시) · 저장 bossTry/{나}/{문항}/{시도}
+  const BOSS_MAIN = 10;
+  function bossRec(L, R, uid) {
+    const raw = bossTries(L, R, uid, true), main = raw.filter((t) => t.a < BOSS_MAIN), hpN = L.boss.hpItems, N = L.boss.items;
+    let h = HEARTS, res = healsTo(R, 'boss', uid, L).length, healed = 0; const refill = () => { while (h <= HEARTS - 1 && res > 0) { h += 1; res -= 1; healed += 1; } };
+    const okI = Array(N).fill(false), firstOk = Array(N).fill(false), tried = Array(N).fill(0); let lastR = -1;
+    const maxA = main.reduce((m, t) => Math.max(m, t.a), -1);
+    for (let r = 0; r <= maxA; r++) {
+      const es = main.filter((t) => t.a === r); if (!es.length) continue; lastR = r;
+      const hpDone = okI.slice(0, hpN).every(Boolean);
+      es.forEach((t) => { tried[t.i] += 1; if (t.ok) okI[t.i] = true; if (t.a === 0 && t.ok) firstOk[t.i] = true; });
+      if (!hpDone && h > 0 && es.some((t) => t.i < hpN && !t.ok)) { h -= 1; refill(); } // 한 판에 체력 문항 하나라도 틀리면 −1 (몇 개를 틀려도)
+    }
+    const done = okI.slice(0, hpN).every(Boolean), out = !done && h <= 0, round = lastR + 1, submitted = main.length > 0;
+    const bonusOpen = done ? Array.from({ length: N - hpN }, (_, k) => hpN + k).filter((i) => !okI[i] && tried[i] < BOSS_TRIES) : []; // ❓#4 B
+    const firstPerfect = submitted && Array.from({ length: hpN }, (_, i) => firstOk[i]).every(Boolean);
+    const kUsed = skillsUsed(R, 'boss', uid), pDone = (p) => Array.from({ length: hpN }, (_, i) => raw.some((t) => t.i === i && t.ok && t.a >= BOSS_MAIN * p && t.a < BOSS_MAIN * (p + 1))).every(Boolean);
+    const passesDone = Array.from({ length: kUsed }, (_, k) => pDone(k + 1)).filter(Boolean).length, energy = done ? Math.max(0, ENERGY - kUsed) : 0, inPanel = done && kUsed > passesDone, canSkill = done && energy > 0 && !inPanel;
+    const panel = inPanel ? kUsed : 0, pNext = {}; // 지금 재도전 판에서 문항마다 낼 시도 번호 (맞힌 문항 = 없음)
+    if (panel) for (let i = 0; i < hpN; i++) { const mine = raw.filter((t) => t.i === i && t.a >= BOSS_MAIN * panel && t.a < BOSS_MAIN * (panel + 1)); if (!mine.some((t) => t.ok)) pNext[i] = BOSS_MAIN * panel + mine.length; }
+    const next = {}; if (!out && !done) for (let i = 0; i < N; i++) { if (!okI[i]) next[i] = round; } // 본 판: 못 맞힌 문항(보너스 포함) = 다음 판 번호
+    bonusOpen.forEach((i) => { next[i] = round; });
+    return { boss: true, hearts: true, left: Math.max(0, h), slots: HEARTS, healed, okI, firstOk, tried, done, out, round, submitted, next, bonusOpen, firstPerfect, perfect: done, energy, kUsed, inPanel, panel, pNext, panelsDone: passesDone, canHeal: canSkill, tokLeft: canSkill ? energy : 0, streak: 0, best: okI.filter(Boolean).length, total: N };
   }
   const mastery = (L, R, uid) => bossState(L, R, uid).map((s) => s.ok);
   const bossFirst = (L, R, uid) => bossState(L, R, uid).map((s) => s.first);
@@ -418,7 +446,7 @@ DS.Raid = (function () {
   function holyCan(L, R, uid) {
     const step = stepOf(L, R), p = (R.players || {})[uid] || {};
     if (!step || !awake(p)) return false; // 🐞 2026-11-10 1-1반: enh 가 없으면(0강) Number(undefined) = NaN → NaN < 10 이 거짓이라 0강이 통과했음
-    if (step.kind === 'boss') return !!L.boss && !holyUsed(R, 'boss', uid) && !bossHp(L, R).won && (() => { const b = bossState(L, R, uid); return b.length > 0 && b.every((s) => s.ok); })(); // 👑 보스 = 형성평가 모든 문항 도달 (재도전에서 맞혀도 됨) (2026-11-09 「일반 · 보스도 사용 가능」)
+    if (step.kind === 'boss') return !!L.boss && !holyUsed(R, 'boss', uid) && !bossHp(L, R).won && (V4(R) ? bossRec(L, R, uid).firstPerfect : (() => { const b = bossState(L, R, uid); return b.length > 0 && b.every((s) => s.ok); })()); // ⚡ v4: 퍼펙트 = 첫 제출에 체력 문항 모두 // 👑 보스 = 형성평가 모든 문항 도달 (재도전에서 맞혀도 됨) (2026-11-09 「일반 · 보스도 사용 가능」)
     if (step.kind !== 'monster' || !L.monsters[step.id] || holyUsed(R, step.id, uid) || cleared(L, R, step.id)) return false;
     // ✨ 퍼펙트일 때만 (2026-11-09 선생님 「퍼펙트하면 발동 · 너무 남발되겠다」 → 「재도전도 퍼펙트면 가능」): 일반 = 한 번의 시도에서 소문제를 모두 맞힘(첫 시도 · 재도전 상관없음) · 소레이드 = 틀림 없이 사슬 완성
     if (isChain(L, R, step.id)) { const cr = chainRecord(L, R, step.id, uid); return !!(cr.done && cr.perfect); }
@@ -453,5 +481,5 @@ DS.Raid = (function () {
   const frozeAt = (R) => { const z = ((R && R.state) || {}).fzAt; return z != null ? Number(z) : null; };
   // 던전 진행: 지나온 단계 / 전체 (마무리 = 끝)
   const progress = (L, R) => { const i = (R.state || {}).step ?? -1, n = L.steps.length; return Math.max(0, Math.min(1, (i + (isEnd(L, R) || bossHp(L, R).won ? 1 : 0)) / n)); };
-  return { ENERGY, skillsUsed, V4, HEARTS, relOf, deadline0, frozeAt, isTester, whyStages, hintKeyOf, chainAns, PRAC_MAX, pracUsed, isTcut, tcutN, chainDown, isChain, chainItems, chainSubs, CHAIN_SLOTS, readyOf, NEWR, variantOf, BIND_TOKEN, tokBinds, solveLock, BOSS_TRIES, bossItem, bossTries, bossState, bossFirst, bossAnswered, skipped, deadline, timeLeft, progress, ATK, soloAtk, BIND_PER, BIND_MAX, bindOf, bindTotal, atkClock, atkTrack, HOLY_SEC, holyUsed, holyCan, holyOn, holyArmed, holyTimes, stone, RETRIES, HEAL_MAX, healsOf, healsGiven, healsTo, healsReceived, healTarget, ultUsed, perfStreak, TRUE_SEC, isTrue, petrify, LIVE_MS, lateIds, liveOpen, roomDone, inClass, activeIds, teacherUid, num, newRoom, stepOf, isLobby, isEnd, isFinale, isClosed, focusOn, restOn, sheetOn, videoOn, autoFocus, fullMarks, canLobby, online, seedOf, itemsFor, attemptsOf, gradeAttempt, record, resultLabel, headcount, pctOf, monsterHp, waiting, allSubmitted, cleared, mastery, bossHp, helpList };
+  return { bossRec, BOSS_MAIN, ENERGY, skillsUsed, V4, HEARTS, relOf, deadline0, frozeAt, isTester, whyStages, hintKeyOf, chainAns, PRAC_MAX, pracUsed, isTcut, tcutN, chainDown, isChain, chainItems, chainSubs, CHAIN_SLOTS, readyOf, NEWR, variantOf, BIND_TOKEN, tokBinds, solveLock, BOSS_TRIES, bossItem, bossTries, bossState, bossFirst, bossAnswered, skipped, deadline, timeLeft, progress, ATK, soloAtk, BIND_PER, BIND_MAX, bindOf, bindTotal, atkClock, atkTrack, HOLY_SEC, holyUsed, holyCan, holyOn, holyArmed, holyTimes, stone, RETRIES, HEAL_MAX, healsOf, healsGiven, healsTo, healsReceived, healTarget, ultUsed, perfStreak, TRUE_SEC, isTrue, petrify, LIVE_MS, lateIds, liveOpen, roomDone, inClass, activeIds, teacherUid, num, newRoom, stepOf, isLobby, isEnd, isFinale, isClosed, focusOn, restOn, sheetOn, videoOn, autoFocus, fullMarks, canLobby, online, seedOf, itemsFor, attemptsOf, gradeAttempt, record, resultLabel, headcount, pctOf, monsterHp, waiting, allSubmitted, cleared, mastery, bossHp, helpList };
 })();

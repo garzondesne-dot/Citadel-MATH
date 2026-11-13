@@ -989,6 +989,7 @@ DS.Student = (function () {
   let bossSnd = null;
   function bossView(body) {
     { const lk = Raid().solveLock(L, R, DS.Net.now()); if (lk && lk.on && !Raid().bossAnswered(R, me)) { scoutWas = lk.id; return frozenView(body, Raid().stepOf(L, R), lk); } scoutAppear('boss'); } // ❄ 형성평가도 선생님이 켜면
+    if (Raid().V4(R)) return bossView4(body); // 👑 2026-11-13 밤: 새 방 = 일반 몬스터 꼴 (한 번에 제출 · ❤ 4)
     const S = Raid().bossState(L, R, me), hp = Raid().bossHp(L, R), N0 = Raid().BOSS_TRIES;
     const lab = (s) => (s.ok ? '✔ 도달' : !s.n ? '풀기' : s.left ? `✘ 다시 · 기회 ${s.left}` : '해설 보기');
     const bpk = `${code}|${me}`, bpOn = !!(DS.Bonus && DS.Bonus.bossPracBtn && L.boss.make && (hp.won || S.slice(0, L.boss.hpItems).every((x) => x.ok || !x.left))); // 🔥 #65-4 형성평가를 마쳤거나 보스 처치 뒤 = 한 판 더 3판
@@ -1026,6 +1027,71 @@ DS.Student = (function () {
       if (ok && a === 0 && DS.Attack && DS.Attack.canUlt(myP().fx, myP().hero)) { const fr = Raid().bossState(L, R, me).map((x, k) => (k === i ? true : x.first)); if (fr.length && fr.every(Boolean)) setTimeout(() => DS.Attack.cutin(myP().hero || 0, myP().fx), 300); }
     }));
   }
+  // 👑 형성평가 v4 (2026-11-13 밤 선생님 「두개틀려도 -1 한개틀려도 -1」 · ❓#3 · #4 = B): 일반 몬스터와 같은 꼴
+  //   못 맞힌 문항(⭐ 포함)을 한 장에 모아 「⚔ 공격!」 한 번 · 체력 문항 하나라도 틀리면 ❤ −1 · 맞힌 문항 잠김 · 틀린 문항만 숫자 바뀐 새 문제 · ❤ 0 = 해설 보기
+  //   다 맞히면 ⚡ 3 → 💚 힐 · ⛓ 묶기 (🌟 없음) → 🔥 재도전 판(체력 문항 · 숫자 바뀜 · 데미지 0 · 틀린 것만 다시) · 💡 힌트 숨김
+  let bform = null, bRes = null;
+  function bossView4(body) {
+    const rb = Raid().bossRec(L, R, me), hp = Raid().bossHp(L, R), N = L.boss.items, hpN = L.boss.hpItems;
+    const want = rb.inPanel ? rb.pNext : rb.next, ids = Object.keys(want).map(Number).sort((a, b) => a - b), panelOn = rb.inPanel && bossOpen === `p${rb.panel}`;
+    const formOn = !rb.out && ids.length > 0 && !bRes && (!rb.done || panelOn || (rb.bonusOpen.length > 0 && bossOpen === 'bonus')); // 낸 뒤 = 결과 화면 (「다시 풀기」 누르면 다음 판)
+    const roundKey = rb.inPanel ? `p${rb.panel}|${JSON.stringify(rb.pNext)}` : `r${rb.round}`;
+    const chips = Array.from({ length: N }, (_, i) => `<span class="bchip${rb.okI[i] ? ' ok' : rb.tried[i] ? ' ng' : ''}${i >= hpN ? ' bonus' : ''}">${i + 1}${i >= hpN ? '⭐' : ''} ${rb.okI[i] ? '✔' : rb.tried[i] ? '✘' : ''}</span>`).join('');
+    const top = `<div class="scene enc bg-scene th-${L.theme || ''} boss${hp.won ? '' : ' quake-once'}">${scTop()}${hpBox(hp.left, hp.max, hp.won ? '' : GAUGE, '👑 HP')}
+        <div class="enc-hero">${heroNow(hp.won ? pose2(true, '') : 'think', hp.won ? 'pairhop' : 'huff')}<i class="shadow"></i>${plate()}</div>
+        <div class="enc-mon">${DS.Art.monster(L.boss.sprite, hp.won ? 'down' : 'idle', hp.won ? '' : 'float')}</div></div>
+      ${hp.won ? '<h2 class="okc center">🎉 보스 격파! 모두 함께 이겼어요!</h2>' : ''}<div class="boss-chips">${chips}</div>`;
+    const tail = `${Raid().canLobby(L, R, me) ? `<div class="stamp-bar">📮 반드시 학습지 확인도장 받아가세요.</div>${lobbyBtn()}` : ''}`;
+    if (formOn) {
+      const items = {}; ids.forEach((i) => { items[i] = Raid().bossItem(L, R, me, i, want[i]); });
+      if (!bform || bform.key !== roundKey) bform = { key: roundKey, given: {} };
+      const filled = (i) => bform.given[i] != null;
+      const ready = ids.every(filled), sig = `b4|${roundKey}|${JSON.stringify(bform.given)}|${hp.left}|${rb.left}`;
+      if (sig === drawn && body.querySelector('.boss4')) { hpText(body, hp); return; } drawn = sig;
+      const note = rb.inPanel ? `🔥 <b>재도전 판 ${rb.panel}</b> — 숫자가 바뀐 형성평가 · 데미지 0 · 틀려도 ❤ 그대로 · 다 맞히면 EXP +1 · 다음 ⚡` : rb.done ? '⭐ <b>보너스만 다시</b> — 숫자가 바뀐 새 문제 · 틀려도 ❤ 그대로' : rb.round === 0 ? `처음엔 학습지 형성평가와 같은 문제 · ${ids.length}문항을 모두 풀고 한 번에 공격 · 하나라도 틀리면 ❤ −1 (몇 개를 틀려도 −1)${N > hpN ? ' · ⭐ 보너스는 틀려도 ❤ 그대로' : ''}` : '🔁 <b>틀린 문항만</b> 숫자가 바뀐 새 문제로 다시 · 맞힌 문항은 잠겼어요';
+      paint(body, `boss4|${roundKey}`, `<div class="panel framed st-fight boss4">${top}
+        <div class="paper"><div class="paper-h"><b>👑 ${esc(L.boss.title || '형성평가')}</b><small>${ids.length}문항 모두 풀고 공격</small></div><p class="paper-note">${note}</p>
+        <div class="boss-items">${ids.map((i) => `<button class="bitem${filled(i) ? ' tried' : ''}${i >= hpN ? ' bonus' : ''}" data-i="${i}"><b>${i + 1}번${i >= hpN ? ' ⭐' : ''}</b> ${filled(i) ? '✍ 답함 (눌러서 고치기)' : '풀기'}</button>`).join('')}</div></div>
+        ${dock(rb, `<button class="btn primary big dock-go${ready ? ' go-pulse' : ''}" id="bs-go"${ready ? '' : ' disabled'}>⚔ 공격! <small>${ids.filter(filled).length}/${ids.length}</small></button>`)}${tail}</div>`);
+      bindTop(); bindLobby();
+      body.querySelectorAll('.boss-items .bitem').forEach((b) => b.addEventListener('click', async () => {
+        const i = Number(b.dataset.i), a = want[i], q = items[i];
+        const r = await DS.Quiz.ask({ name: `형성평가 ${i + 1}번${i >= hpN ? ' ⭐' : ''}`, formula: rb.inPanel ? `🔥 재도전 판 ${rb.panel} · 숫자가 바뀌었어요` : a === 0 ? '첫 시도' : '🔄 숫자가 바뀌었어요' }, q, { collect: true, tag: '👑 보스', ref: a === 0 ? `학습지 형성평가 ${i + 1}번` : '' });
+        if (!r || r.given == null) return; bform.given[i] = r.given; DS.Sound.clank(); drawn = ''; render();
+      }));
+      $('#bs-go').onclick = () => DS.Control.run(async () => {
+        const go = $('#bs-go'); go.disabled = true; DS.UI.runeCast(body);
+        const given = {}; ids.forEach((i) => { given[i] = bform.given[i]; });
+        const res = await DS.Act.bossSubmit(code, raw, given); saveSoon(10000);
+        const okN = Object.values(res).filter((x) => x.ok).length, hpWrong = Object.entries(res).some(([i, x]) => Number(i) < hpN && !x.ok);
+        if (!rb.inPanel) Object.entries(res).forEach(([i, x]) => DS.Act.hit(code, raw, `b1_${i}_${x.a}`, { ok: x.ok })); // ✨ 보스 문항 퍼펙트(첫 시도) · 🔥 콤보
+        if (!rb.inPanel && okN) petriGem('boss', okN); // 🗿 석화 중 도달 = 💎
+        if (okN) { DS.Sound.slash(); setTimeout(() => DS.Sound.hit(), 160); const sc = document.querySelector('#st-body .scene'); if (sc) DS.FX.play(sc, myP().fx || 'flame', { scale: hpWrong ? 0.32 : 0.45, perfect: !hpWrong }); } else DS.Sound.squish();
+        if (!rb.inPanel && rb.round === 0 && !hpWrong && DS.Attack && DS.Attack.canUlt(myP().fx, myP().hero)) setTimeout(() => DS.Attack.cutin(myP().hero || 0, myP().fx), 300); // ⚡ 형성평가 첫 제출 퍼펙트 + 특화 Ⅲ↑
+        bRes = { round: `${rb.inPanel ? 'p' : 'r'}${rb.inPanel ? rb.panel : rb.round}`, res, panel: rb.inPanel, hpWrong }; bform = null; if (rb.inPanel || rb.done) bossOpen = ''; drawn = ''; render();
+      });
+      return;
+    }
+    // 결과 · ❤ 0 해설 · ⚡ 기술 · 재도전 판 고르기
+    const sig = `b4r|${rb.round}|${rb.left}|${rb.out}|${rb.done}|${rb.energy}|${rb.inPanel}|${rb.panel}|${JSON.stringify(rb.pNext)}|${skPick.boss || ''}|${skStop.boss ? 1 : 0}|${hp.left}|${bossOpen}|${bRes ? bRes.round : ''}`;
+    if (sig === drawn && body.querySelector('.boss4')) { hpText(body, hp); return; } drawn = sig;
+    const last = bRes ? bRes : null, lastLine = last ? `<div class="st-res res-${last.hpWrong ? 'partial' : 'success'}"><b>${last.panel ? `🔥 재도전 판 ${rb.inPanel ? rb.panel : rb.kUsed}` : '👑 형성평가'} · ${Object.values(last.res).filter((x) => x.ok).length} / ${Object.keys(last.res).length} ${last.hpWrong ? (last.panel ? '— 틀린 것만 다시 (❤ 그대로)' : '— ❤ −1') : '성공!'}</b><div class="mk-chips">${Object.entries(last.res).map(([i, x]) => `<span class="${x.ok ? 'ok' : 'ng'}">${Number(i) + 1}번 ${x.ok ? '✔' : '✘'}</span>`).join('')}</div></div>` : '';
+    let main;
+    if (rb.out) { // ❤ 0 = 해설 보기 (선생님 호출 없음)
+      const tr = Raid().bossTries(L, R, me);
+      main = `<div class="cr-lock"><b>📖 ❤ 0 — 해설을 보며 학습지에 정리해요</b></div><div class="paper"><div class="marks">${Array.from({ length: N }, (_, i) => i).filter((i) => !rb.okI[i]).map((i) => { const t = tr.filter((x) => x.i === i).pop(), q = t && t.q; return `<div class="mark ng"><b>${i + 1}번</b> <span class="math">${q ? pretty(itemText(q)) : ''}</span><br><span class="sol-line math">${q ? pretty(solOf(q)) : ''}</span></div>`; }).join('')}</div></div>`;
+    } else if (!rb.done) main = `<p>${last && last.hpWrong ? `✘ 틀린 문항만 숫자가 바뀐 새 문제로 다시 <span class="muted small">(❤ ${rb.left})</span>` : '형성평가를 이어서 풀어요'}</p><button class="btn primary big" id="bs-next">🔁 틀린 문항 다시 풀기</button>`;
+    else if (skStop.boss && (rb.canHeal || rb.inPanel)) main = stopHtml(rb);
+    else if (rb.inPanel) main = `<p>🔥 재도전 판 ${rb.panel} <span class="muted small">(숫자가 바뀐 형성평가 · 데미지 0 · 틀려도 ❤ 그대로)</span></p><button class="btn primary big" id="bs-panel">🔥 재도전 판 ${rb.panel} 풀기</button><p class="center"><button class="sk-stop" id="sk-stop">그만하기</button></p>`;
+    else main = `<p class="okc big-msg">👑 형성평가 ${rb.firstPerfect ? '퍼펙트!' : '완료!'}</p>${rb.canHeal ? skillHtml('boss', rb) : '<p class="muted">⚡ 기력을 다 썼어요 — 멋져요!</p>'}${rb.bonusOpen.length ? `<button class="btn" id="bs-bonus">⭐ 보너스 ${rb.bonusOpen.map((i) => `${i + 1}번`).join(' · ')} 다시 풀기</button>` : ''}`;
+    paint(body, `boss4r|${rb.round}`, `<div class="panel framed st-fight st-after boss4">${top}${lastLine}${main}${dock(rb, '')}${tail}</div>`);
+    bindTop(); bindLobby();
+    const nx = $('#bs-next'); if (nx) nx.onclick = () => { bRes = null; drawn = ''; render(); };
+    const pb = $('#bs-panel'); if (pb) pb.onclick = () => { bossOpen = `p${rb.panel}`; bRes = null; delete skStop.boss; drawn = ''; render(); };
+    const bb = $('#bs-bonus'); if (bb) bb.onclick = () => { bossOpen = 'bonus'; bRes = null; drawn = ''; render(); };
+    bindSkill('boss', rb, (r) => { bossOpen = `p${r.panel}`; bRes = null; });
+  }
+  let bossOpen = '';
   function endView(body) {
     const m = Raid().mastery(L, R, me).slice(0, L.boss.hpItems).filter(Boolean).length;
     body.innerHTML = `<div class="panel framed center win"><h2><i class="trophy-img sm" style="background-image:url('${DS.ASSETS.base}${DS.ASSETS.trophy}')"></i> 오늘의 던전 클리어!</h2><p class="muted small">형성평가 ${m} / ${L.boss.hpItems}${Raid().fullMarks(L, R, me) ? ' 만점!' : ''}</p>${DS.Art.hero(myP().hero, 'attack', 'big pairhop')}

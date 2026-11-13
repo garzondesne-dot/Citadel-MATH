@@ -3525,3 +3525,7 @@ body.trial-teach .trial-tch .tch-pc { color: #c9b896; font-size: 11px; }
 .sk-stop { background: none; border: 0; padding: 4px 6px; color: #bfae90; text-decoration: underline; font: inherit; font-size: 13px; cursor: pointer; }
 .sk-go { width: 100%; }
 .sk-stopped p { margin: 0; color: #f5e6c8; text-align: center; }
+/* 👑 형성평가 v4 (2026-11-13 밤 · 묶음 D): 문항 칩 줄 (✔ 맞힘 · ✘ 틀림 · ⭐ 보너스) */
+.boss-chips { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; margin: 6px 0; }
+.bchip { min-width: 40px; height: 26px; padding: 0 8px; border-radius: 13px; background: #2a2218; border: 1px solid #5c4a30; color: #d8c8a8; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 3px; }
+.bchip.ok { background: #15382a; border-color: #2d8c5a; color: #c9f5dd; } .bchip.ng { background: #3a1717; border-color: #b8322a; color: #ffd9d6; } .bchip.bonus { border-style: dashed; }

@@ -120,7 +120,7 @@
           "$uid": {
             "$i": {
               "$a": {
-                ".write": "auth != null && auth.uid === $uid && !data.exists() && root.child('rooms/'+$code+'/active/'+$uid).val() === true && $i.matches(/^[0-9]$/) && ($a === '0' || $a === '1' || $a === '2' || $a === '3')",
+                ".write": "auth != null && auth.uid === $uid && !data.exists() && root.child('rooms/'+$code+'/active/'+$uid).val() === true && $i.matches(/^[0-9]$/) && $a.matches(/^([0-9]|[1-3][0-9])$/)",
                 ".validate": "newData.isString() && newData.val().length < 20000"
               }
             }

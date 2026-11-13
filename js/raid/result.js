@@ -45,6 +45,7 @@ DS.Result = (function () {
       const st = rec.submitted ? (everOk.every(Boolean) ? (firstOk.every(Boolean) ? 'o' : 'f') : 'x') : X.activeIds(R).some((u) => u !== uid && X.record(L, R, s.id, u).submitted) ? '-' : 'n';
       return { id: s.id, title: s.title, concept: map[s.id], n, tried: rec.submitted, first: firstOk.filter(Boolean).length, fixed: fx, miss: everOk.filter((ok) => !ok).length, st };
     });
+    if (X.V4 && X.V4(R) && L.boss) chainPrac += X.bossRec(L, R, uid).panelsDone || 0; // ⚡ 👑 형성평가 🔥 재도전 판 완성도 EXP +1 (2026-11-13 밤)
     const tags = L.boss.tags || [], BS = X.bossState(L, R, uid), tries = X.bossTries(L, R, uid); // 2026-11-05: 문항 · 시도별 (예전 세트 1 · 2 도 시도 0 · 1 로)
     const set1 = BS.map((s) => s.first); // 첫 시도 맞힘
     const mast = X.mastery(L, R, uid), bossTried = BS.some((s) => s.firstTried);

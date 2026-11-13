@@ -281,6 +281,29 @@ check(X.online(R2, 'a') && !X.online(R2, 'b'), '접속 표시');
   const W = newRoom3('343434', 'set-03', 'T', 1000); W.active = { c: true }; W.players = { c: { num: 1 } }; W.subs = { m4: { c: { 0: answer(W, 'm4', 'c', 0, 0) } } }; W.heals = { m4: { a: { 0: 'c', 1: 'c' } } };
   r = X.record(L, W, 'm4', 'c'); check(r.left === 4 && r.healed === 1, `❤ 상한 4: 힐 2번 받아도 3 → 4 (${r.left} · 쓴 힐 ${r.healed})`);
 }
+// 👑 형성평가 v4 (2026-11-13 밤 · 묶음 D · ❓#3 · #4 = B): 한 번에 제출 · 체력 문항 하나라도 틀리면 ❤ −1 · 틀린 문항만 새 숫자 · ⭐ 틀려도 ❤ 그대로 · ❤ 0 = 해설 · 다 맞히면 ⚡ 3 → 재도전 판(시도 10~)
+{
+  const B = newRoom3('373737', 'set-03', 'T', 1000); B.active = { a: true, b: true, c: true }; B.players = { a: { num: 1 }, b: { num: 2 }, c: { num: 3 } }; B.state.headcount = 3; B.state.step = L.steps.findIndex((x) => x.kind === 'boss');
+  const N = L.boss.items, hpN = L.boss.hpItems, put = (u, a, okFn) => { const t = ((B.bossTry = B.bossTry || {})[u] = B.bossTry[u] || {}); for (let i = 0; i < N; i++) { const q = X.bossItem(L, B, u, i, a); if (!q) continue; if (okFn(i) === null) continue; (t[i] = t[i] || {})[a] = okFn(i) ? right(q) : (q.type === 'subsets' ? [[1]] : wrong(q) == null ? 'zz' : wrong(q)); } };
+  check(X.V4(B), '👑 v4 방');
+  put('a', 0, () => true); let r = X.bossRec(L, B, 'a');
+  check(r.done && r.firstPerfect && r.left === 4 && r.energy === 3 && r.canHeal && X.mastery(L, B, 'a').every(Boolean) && X.bossFirst(L, B, 'a').every(Boolean), '첫 제출에 모두 맞힘 = 퍼펙트 · ❤ 4 · ⚡ 3 · 첫 시도 기록 그대로');
+  put('b', 0, (i) => i !== 1 && i !== 2 && i < hpN); r = X.bossRec(L, B, 'b');
+  check(r.left === 3 && !r.done && Object.keys(r.next).map(Number).join() === `1,2,${hpN}` && r.round === 1, `두 문항 틀려도 ❤ −1 (${r.left}) · 다음 판 = 틀린 문항 + ⭐ (${Object.keys(r.next)})`);
+  check(JSON.stringify(X.bossItem(L, B, 'b', 1, 1)) !== JSON.stringify(X.bossItem(L, B, 'b', 1, 0)), '틀린 문항 = 숫자 바뀐 새 문제');
+  put('b', 1, (i) => (i === 1 || i === 2 ? true : i === hpN ? false : null)); r = X.bossRec(L, B, 'b');
+  check(r.done && r.left === 3 && !r.firstPerfect && r.energy === 3 && r.bonusOpen.join() === String(hpN), `체력 문항 다 맞힘 · ⭐ 틀려도 ❤ 그대로 (${r.left}) · ⭐ 만 다시 열림 (❓#4 B)`);
+  check(X.bossHp(L, B).dmg === N + hpN, `데미지 = 맞힌 문항마다 1 (${X.bossHp(L, B).dmg})`);
+  for (let a = 0; a < 4; a++) put('c', a, (i) => i >= hpN ? null : i !== 0); r = X.bossRec(L, B, 'c');
+  check(r.out && r.left === 0 && !r.done && r.energy === 0 && !r.canHeal, '네 번 틀림 = ❤ 0 · 해설 보기 (⚡ 없음)');
+  (B.heals = { boss: { a: { 0: 'c' } } }); r = X.bossRec(L, B, 'c'); check(!r.out && r.left === 1, '💚 힐 받으면 ❤ +1 → 다시 풀 수 있음');
+  check(X.healTarget(L, B, 'boss', 'b', 0) === 'c', '형성평가 힐 받을 친구 = 아직 못 끝낸 친구');
+  B.heals.boss.a[1] = '!bind@1'; r = X.bossRec(L, B, 'a'); check(r.energy === 1 && r.inPanel === true && r.panel === 2 && r.kUsed === 2 && r.pNext[0] === 20, '힐 · 묶기 = ⚡ −1 씩 · 판 1 안 끝났으면 판 번호는 쓴 기술 수 (재도전 판 시도 = 10 × 판)');
+  delete B.heals.boss.a[1]; r = X.bossRec(L, B, 'a'); check(r.inPanel && r.panel === 1 && Object.keys(r.pNext).length === hpN && r.pNext[0] === 10, '기술 1번 → 🔥 재도전 판 1 = 체력 문항 · 시도 10');
+  const d0 = X.bossHp(L, B).dmg; put('a', 10, (i) => (i < hpN ? i !== 0 : null)); r = X.bossRec(L, B, 'a'); check(r.inPanel && Object.keys(r.pNext).join() === '0' && r.pNext[0] === 11 && r.left === 4 && X.bossHp(L, B).dmg === d0, '재도전 판 틀림 = 그 문항만 다시 · ❤ 그대로 · 데미지 그대로');
+  put('a', 11, (i) => (i === 0 ? true : null)); r = X.bossRec(L, B, 'a'); check(!r.inPanel && r.panelsDone === 1 && r.canHeal && r.energy === 2, '판 1 완성 → 다음 ⚡');
+  check(X.bossTries(L, B, 'a').every((t) => t.a < 10) && X.bossTries(L, B, 'a', true).some((t) => t.a >= 10), '재도전 판 시도는 본 기록(도달 · 오개념)에서 뺌');
+}
 // ❤ 2026-11-13 밤 ④: 이미 열린 수업 방(version 3)은 옛 규칙 그대로 — 옛 시험 그대로
 {
   const V = newRoom3('333333', 'set-03', 'T', 1000), sub = (u, a, k) => { (((V.subs = V.subs || {}).m4 = V.subs.m4 || {})[u] = V.subs.m4[u] || {})[a] = answer(V, 'm4', u, a, k); }; V.meta.version = 3;

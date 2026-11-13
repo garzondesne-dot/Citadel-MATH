@@ -446,6 +446,19 @@ DS.Act = (function () {
   }
   const bossAnswer = (code, set, answers) => N().set(P(code, `bossAns/${N().uid()}/${set}`), N().pack(answers)); // (예전 방식 · 지난 수업 호환)
   // 👑 형성평가 시도 (2026-11-05): bossTry/{나}/{문항}/{시도 0~3} · 한 번 쓴 칸은 못 고침
+  // 👑 v4 (2026-11-13 밤): 한 번에 모아 제출 · given = { 문항: 답 } · 본 판 = rec.next 의 문항만 · 🔥 재도전 판 = rec.pNext · 반환 = 문항마다 맞힘
+  async function bossSubmit(code, packed, given) {
+    const R = unpackRoom(packed), L = DS.Lessons.get(R.meta.lesson), me = N().uid(), rec = Raid.bossRec(L, R, me), step = L.steps[R.state.step];
+    if (!step || step.kind !== 'boss') fail('지금은 형성평가 시간이 아니에요.');
+    if (rec.out) fail('❤ 0 — 해설을 보며 학습지에 정리해요.');
+    const want = rec.inPanel ? rec.pNext : rec.next, ids = Object.keys(want).map(Number);
+    if (!ids.length) fail(rec.done ? '⚡ 기술을 고르면 🔥 재도전 판이 열려요.' : '낼 문항이 없어요.');
+    if (ids.some((i) => given[i] == null)) fail('모든 문항에 답을 넣어 주세요.');
+    const patch = {}, out = {};
+    ids.forEach((i) => { const a = want[i], q = Raid.bossItem(L, R, me, i, a); patch[`${i}/${a}`] = N().pack(given[i]); out[i] = { a, ok: !!q && DS.Quiz.grade(q, given[i]) }; });
+    await N().update(P(code, `bossTry/${me}`), patch);
+    return out;
+  }
   async function bossTry(code, i, a, given) {
     if (a < 0 || a >= Raid.BOSS_TRIES) fail('이 문항의 기회를 모두 썼어요.');
     await N().set(P(code, `bossTry/${N().uid()}/${i}/${a}`), N().pack(given));
@@ -462,5 +475,5 @@ DS.Act = (function () {
     return out;
   }
 
-  return { chainPhotoFill, pracStart, restMinDef, holyArm, holyUse, snapStart, snapEnd, useCharge, giveHint, chainSubmit, chainKnock, chainRelease, scoutReady, setSolve, saveEnd, resumeInfo, switchLesson, setSound, bossTry, openRooms, savePunch, finishOvertime, setPunchOff, punchOff, batTick, batAnswer, hit, endClassAsk, timeUp, extendTime, doorStart, doorExtend, openRift, cutShort, setRest, setRestMin, markBossWin, prepLite, prepImg, hasImg, setVideoFile, setVideoOn, endClass, admitLate, getPrep, setImage, setVideo, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, heal, bossAnswer, unpackRoom, P };
+  return { bossSubmit, chainPhotoFill, pracStart, restMinDef, holyArm, holyUse, snapStart, snapEnd, useCharge, giveHint, chainSubmit, chainKnock, chainRelease, scoutReady, setSolve, saveEnd, resumeInfo, switchLesson, setSound, bossTry, openRooms, savePunch, finishOvertime, setPunchOff, punchOff, batTick, batAnswer, hit, endClassAsk, timeUp, extendTime, doorStart, doorExtend, openRift, cutShort, setRest, setRestMin, markBossWin, prepLite, prepImg, hasImg, setVideoFile, setVideoOn, endClass, admitLate, getPrep, setImage, setVideo, setDefaultPct, setThink, createRoom, joinHall, isHost, go, setSheet, setFocus, unlockFor, presence, toLobby, say, hideWord, lockWords, setPct, skip, setActive, clearHelp, join, help, submit, heal, bossAnswer, unpackRoom, P };
 })();
