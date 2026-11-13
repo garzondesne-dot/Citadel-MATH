@@ -5,11 +5,11 @@ window.DS = window.DS || {};
 DS.SoundUI = (function () {
   let tab = null, pop = null;
   const S = () => DS.Sound;
-  const icon = () => (!S() ? '🔊' : !S().sfxOn ? '🔇' : '🔊'); // 🎵 배경음 없음 → 효과음만
+  const icon = () => (!S() ? '🔊' : !S().sfxOn && !S().bgmOn ? '🔇' : '🔊'); // 🎵 2026-11-13 선생님 「배경 음악 끄는 기능」: 둘 다 꺼짐 = 🔇 · 하나라도 켜짐 = 🔊
   function draw() {
     if (!tab) return;
-    tab.textContent = icon(); tab.classList.toggle('off', !!S() && !S().sfxOn);
-    if (pop) pop.innerHTML = `<b>소리</b><button data-k="sfx" class="${S().sfxOn ? 'on' : ''}">🔊 효과음 <i>${S().sfxOn ? '켜짐' : '꺼짐'}</i></button><div class="snd-lv">${[['low', '작게'], ['mid', '보통']].map(([k, t]) => `<button data-v="${k}" class="${S().vol === k ? 'on' : ''}">${t}</button>`).join('')}</div>`;
+    tab.textContent = icon(); tab.classList.toggle('off', !!S() && !S().sfxOn && !S().bgmOn);
+    if (pop) pop.innerHTML = `<b>소리</b><button data-k="sfx" class="${S().sfxOn ? 'on' : ''}">🔊 효과음 <i>${S().sfxOn ? '켜짐' : '꺼짐'}</i></button><button data-k="bgm" class="${S().bgmOn ? 'on' : ''}">🎵 배경음 <i>${S().bgmOn ? '켜짐' : '꺼짐'}</i></button><div class="snd-lv">${[['low', '작게'], ['mid', '보통']].map(([k, t]) => `<button data-v="${k}" class="${S().vol === k ? 'on' : ''}">${t}</button>`).join('')}</div>`;
     if (pop) pop.querySelectorAll('[data-v]').forEach((b) => (b.onclick = (e) => { e.stopPropagation(); S().setVol(b.dataset.v); S().clank(); }));
     if (pop) pop.querySelectorAll('[data-k]').forEach((b) => (b.onclick = (e) => { e.stopPropagation(); if (b.dataset.k === 'sfx') { S().setSfx(!S().sfxOn); if (S().sfxOn) S().clank(); } else S().setBgm(!S().bgmOn); }));
   }
