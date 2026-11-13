@@ -83,7 +83,7 @@ DS.ShareCard = (function () {
     let y = 1210;
     if (o.first) { await hero(g, 9, 'attack', 70, y - 62, 110); g.fillStyle = '#ffcf5a'; g.font = `700 34px ${PIX}`; g.fillText('🎁 첫 출정 특전 — 새 용사 합류!', 190, y); y += 56; }
     if (r.words) { rr(g, 70, y - 10, 940, 80, 20); g.fillStyle = '#ffffff18'; g.fill(); g.fillStyle = '#ffffff'; g.font = `30px ${PIX}`; wrap(g, `💬 "${r.words}"`, 96, y + 40, 880, 36, 1); }
-    g.fillStyle = '#ffffff66'; g.font = `24px ${PIX}`; g.textAlign = 'center'; g.fillText('모두의 던전 : 공통수학2', W / 2, H - 28);
+    g.fillStyle = '#ffffff66'; g.font = `24px ${PIX}`; g.textAlign = 'center'; g.fillText(`모두의 던전 : ${DS.SUBJECT || '공통수학2'}`, W / 2, H - 28);
     return c;
   }
 
@@ -95,7 +95,7 @@ DS.ShareCard = (function () {
     g.fillStyle = '#fbf8f0'; g.fillRect(0, 0, W, H);
     g.fillStyle = '#2d4a8a'; g.fillRect(0, 0, W, 170);
     g.fillStyle = '#fff'; g.textAlign = 'left'; g.font = `700 60px ${SANS}`; g.fillText('오늘의 수학 노트', 64, 92);
-    g.font = `30px ${SANS}`; g.fillStyle = '#dbe6ff'; g.fillText(`공통수학2 · ${L.no ? `${DS.Lessons.noText(L.no)}차시 ` : ''}${L.title} · ${today()}`, 64, 140);
+    g.font = `30px ${SANS}`; g.fillStyle = '#dbe6ff'; g.fillText(`${DS.SUBJECT || '공통수학2'} · ${L.no ? `${DS.Lessons.noText(L.no)}차시 ` : ''}${L.title} · ${today()}`, 64, 140);
     let y = 230;
     const head = (t) => { g.fillStyle = '#2d4a8a'; g.font = `700 36px ${SANS}`; g.fillText(t, 64, y); g.fillStyle = '#2d4a8a33'; g.fillRect(64, y + 14, W - 128, 3); y += 60; };
     // 오늘 배운 것 + 나의 이해
@@ -152,7 +152,7 @@ DS.ShareCard = (function () {
     g.fillStyle = '#f6f9ff'; g.fillRect(0, 0, W, H);
     g.fillStyle = '#1f6f5c'; g.fillRect(0, 0, W, 180);
     g.fillStyle = '#fff'; g.textAlign = 'left'; g.font = `700 60px ${SANS}`; g.fillText('우리 반 수업 소식', 64, 96);
-    g.font = `30px ${SANS}`; g.fillStyle = '#d9fff3'; g.fillText(`${o.cls ? `${o.cls}반 · ` : ''}공통수학2 ${L.no ? `${DS.Lessons.noText(L.no)}차시 ` : ''}${L.title} · ${today()}`, 64, 146);
+    g.font = `30px ${SANS}`; g.fillStyle = '#d9fff3'; g.fillText(`${o.cls ? `${o.cls}반 · ` : ''}${DS.SUBJECT || '공통수학2'} ${L.no ? `${DS.Lessons.noText(L.no)}차시 ` : ''}${L.title} · ${today()}`, 64, 146);
     let y = 250;
     const head = (t) => { g.fillStyle = '#1f6f5c'; g.font = `700 36px ${SANS}`; g.fillText(t, 64, y); g.fillStyle = '#1f6f5c33'; g.fillRect(64, y + 14, W - 128, 3); y += 58; };
     head('함께한 결과');

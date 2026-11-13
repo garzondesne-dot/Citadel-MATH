@@ -13,7 +13,7 @@ DS.FIREBASE = {
 // 🏫 다른 학교판 (2026-11-13 · 선생님 「추천대로」 = A 학교 주소): s/<학교코드>/ 페이지(tools/school/page.js 가 만듦)가 window.DS_SCHOOL = { code, name, fb } 를 먼저 둠
 //   → 같은 코드 · 그 학교 Firebase(공개 웹 설정값)로만 읽고 씀 · 이 기기 저장소는 학교코드 앞말로 나눔(같은 폰에서 우리 게임 · 다른 학교판이 섞이지 않게) · 학습지 그림(prep)만 우리 서버에서 읽기 전용(js/raid/net.js)
 if (typeof window !== 'undefined' && window.DS_SCHOOL && window.DS_SCHOOL.fb && window.DS_SCHOOL.fb.apiKey) {
-  DS.HOME_FB = DS.FIREBASE; DS.FIREBASE = window.DS_SCHOOL.fb; DS.SCHOOL = { code: String(window.DS_SCHOOL.code), name: String(window.DS_SCHOOL.name || '') };
+  DS.HOME_FB = DS.FIREBASE; DS.FIREBASE = window.DS_SCHOOL.fb; DS.SCHOOL = { code: String(window.DS_SCHOOL.code), name: String(window.DS_SCHOOL.name || ''), subject: String(window.DS_SCHOOL.subject || '수학') };
   const pre = (st, p) => { const ks = () => { const a = []; for (let i = 0; i < st.length; i++) { const k = st.key(i); if (k && k.indexOf(p) === 0) a.push(k.slice(p.length)); } return a; };
     return { getItem: (k) => st.getItem(p + k), setItem: (k, v) => st.setItem(p + k, v), removeItem: (k) => st.removeItem(p + k), clear: () => ks().forEach((k) => st.removeItem(p + k)), key: (i) => (ks()[i] == null ? null : ks()[i]), get length() { return ks().length; } }; };
   try { const L0 = window.localStorage, S0 = window.sessionStorage, p = `s.${DS.SCHOOL.code}.`; Object.defineProperty(window, 'localStorage', { value: pre(L0, p), configurable: true }); Object.defineProperty(window, 'sessionStorage', { value: pre(S0, p), configurable: true }); } catch (e) { /* 못 바꾸면 그대로 */ }
@@ -29,6 +29,9 @@ if (typeof location !== 'undefined' && (/\/trial\/(index\.html)?$/.test(location
   document.documentElement.classList.add('trial'); // CSS: 체험판 화면 다듬기
   DS.TRIAL = { lesson: 'set-03', lessons: ['set-03', 'trial-07'], castle: 'eval-1', cls: '체험' }; // v2 (2026-11-07): 테스트 모드 기준 · 3차시
 }
+// 🏫 학교판 다른 점 (2026-11-13 선생님 「최대한 기본 기능 위주로 · 버그 없게」 · CLAUDE.md 「🏫 학교판 규칙」): 과목 글자 · 숨기는 기능 (DS.OFF('forge') …)
+DS.SUBJECT = DS.SCHOOL ? DS.SCHOOL.subject : '공통수학2';
+DS.OFF = (k) => !!(DS.SCHOOL && ['forge', 'symtalk', 'castle', 'survey', 'quest', 'ox'].includes(k)); // ⚒ 모루 · 도감 · 📖 기호 톡 · 🏰 성채 · 📝 설문 · ✏ 출제 · ⭕ OX
 DS.VERSION = 'citadel-0.9.59.0';
 // 🕶 익명 보기 (2026-11-09 #36 · 미래교육상 제출용): 주소 뒤 ?anon → 개발자 이름을 모든 화면에서 숨김 · 한 번 열면 그 탭 안에서 유지(sessionStorage · 체험판은 주소에 남음)
 DS.ANON = (() => { if (typeof location === 'undefined') return false; const q = /[?&]anon(=|&|$)/.test(location.search); try { if (q) sessionStorage.setItem('ds-anon', '1'); return q || sessionStorage.getItem('ds-anon') === '1'; } catch (e) { return q; } })();

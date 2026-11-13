@@ -103,9 +103,10 @@ DS.Survey = (function () {
     return () => subs.delete(cb);
   }
   const pending = () => pend;
-  const btnHtml = (id = 'sv-open') => (pend ? `<button class="btn primary sv-btn" id="${id}">📝 수업 설문 (3분 · 이름 없이) <small>+5 EXP · 💎+10</small></button>` : '');
+  const btnHtml = (id = 'sv-open') => (pend && !(DS.OFF && DS.OFF('survey')) ? `<button class="btn primary sv-btn" id="${id}">📝 수업 설문 (3분 · 이름 없이) <small>+5 EXP · 💎+10</small></button>` : '');
 
   function open(m, done) {
+    if (DS.OFF && DS.OFF('survey')) return; // 🏫 학교판 = 없음
     const no = pend; if (!no) return;
     const a = { r: PAIR.map(() => [0, 0]), pick: [], cmp: -1, say: '', want: '' };
     const el = document.createElement('div'); el.className = 'modal sv-modal';
@@ -171,6 +172,7 @@ DS.Survey = (function () {
   }
   // 교사 메뉴 「📝 설문」 창: 반마다 · 전체 열기/닫기 · 응답 수
   async function panel() {
+    if (DS.OFF && DS.OFF('survey')) return; // 🏫 학교판 = 없음
     const esc = DS.UI.esc;
     const el = document.createElement('div'); el.className = 'modal fb-modal sv-modal'; document.body.appendChild(el);
     const draw = async () => {

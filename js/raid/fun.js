@@ -16,6 +16,7 @@ DS.Fun = (function () {
     ox: { name: '⭕ 수학 OX', short: '⭕ 수학 OX', rule: '틀리면 탈락!', out: '틀려서', list: OXL, pre: 'x' },
     quiz: { name: '⭕ OX 타임', short: '⭕ OX 타임', rule: '탈락 없는 복습!', out: '', list: OXL, pre: 'q' }, // v0.9.8.1 수업 중 · 5문장 · 반 정답률
   };
+  if (DS.OFF && DS.OFF('ox')) { delete KIND.ox; delete KIND.quiz; } // 🏫 학교판 = ⭕ OX 없음 (집합 · 명제 문장이라)
   const K = (f) => KIND[(f && f.kind) || 'bal'] || KIND.bal;
   const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const T = () => (typeof window !== 'undefined' && window.DS_FUN) || {}; // 시험용 시간 줄이기 (e2e48)

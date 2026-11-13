@@ -293,7 +293,7 @@ DS.Student = (function () {
     if (locked) return '<p class="muted small center">💬 한마디는 선생님이 잠가 두었어요.</p>';
     if (w && (w.n || 0) >= 2) return `<p class="center">💬 남긴 한마디: <b>${esc(w.t)}</b></p>`;
     return `<div class="words"><p class="gold">💬 마지막 한마디 <span class="muted small">(${DS.Words.MAX}자 · ${w ? '한 번 고칠 수 있어요' : '오늘 배운 것을 한마디로'})</span></p>
-      <input id="st-word" maxlength="${DS.Words.MAX}" value="${esc(w ? w.t : '')}" placeholder="벤 다이어그램 이제 알겠다!">
+      <input id="st-word" maxlength="${DS.Words.MAX}" value="${esc(w ? w.t : '')}" placeholder="${DS.SCHOOL ? '오늘 수업 한 줄!' : '벤 다이어그램 이제 알겠다!'}">
       <div class="chips">${DS.Words.CHIPS.map((t) => `<button class="chip" data-chip="${esc(t)}">${esc(t)}</button>`).join('')}</div>
       <button class="btn primary" id="st-say">💬 ${w ? '고치기' : '남기기'}</button></div>`;
   }

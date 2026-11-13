@@ -49,6 +49,7 @@ DS.Titles = (function () {
   }
   // 레벨 칭호 (일반): 지금 레벨까지의 칭호
   const levelTitles = () => (DS.Grow ? DS.Grow.TITLES.map((t, i) => ({ id: `lv${i + 1}`, name: t, tier: 'w', medal: null, cond: `Lv.${i + 1}`, test: (d) => DS.Grow.level(d.xp).lv >= i + 1 })) : []);
+  { const off = { king: 'castle', detective: 'castle', sovereign: 'castle', oxsurv: 'ox', quester: 'quest' }; if (DS.OFF) for (let i = BASE.length - 1; i >= 0; i--) if (off[BASE[i].id] && DS.OFF(off[BASE[i].id])) BASE.splice(i, 1); } // 🏫 학교판: 없는 기능의 칭호는 목록에서 뺌
   const all = () => [...BASE, ...dungeonTitles(), ...levelTitles()];
   const get = (id) => all().find((t) => t.id === id) || null;
   // 한 학생의 기록 모으기 (모닥불 · 설정에서)

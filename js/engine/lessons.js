@@ -16,6 +16,7 @@ DS.Lessons = (function () {
   const list = [];
   function register(pack) {
     if (list.some((p) => p.id === pack.id)) return;
+    if (DS.SCHOOL && !pack.sheetLesson) return; // 🏫 학교판 = 그 학교 📊 엑셀 차시만 (우리 2~10차시 · 성채 평가 안 보임)
     list.push(pack);
   }
   const get = (id) => list.find((p) => p.id === id) || null;

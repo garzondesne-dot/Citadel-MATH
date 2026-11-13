@@ -30,6 +30,7 @@ DS.Forge = (function () {
   const wished = (c) => !!wish[c.id] && !owned[c.id], wfirst = (cs) => cs.filter(wished).concat(cs.filter((c) => !wished(c))), star = (c) => (wished(c) ? '<i class="fg-wish" title="기호 톡에서 찜한 카드">★</i>' : '');
   let preview = false; // 교사 대기공간: 모든 차시 미리 보기 (저장하지 않음)
   async function open(m, opt = {}) {
+    if (DS.OFF && DS.OFF('forge')) return; // 🏫 학교판 = 모루 없음
     me = m; tab = 'forge'; slots = { l: null, op: null, r: null }; pick = 'l'; preview = !!opt.preview;
     no = 99; // 2026-11-05 사용자: 연성 도감은 진도(unlock)와 상관없이 모두 해금 가능 (처음 만든 카드는 예제를 맞혀야 완성 · 그대로)
     owned = preview ? {} : (await N().get(`cards/${key(m.c)}/${m.n}`).catch(() => null)) || {};

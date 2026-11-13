@@ -129,7 +129,7 @@ DS.SymTalk = (function () {
   }
   let busy = false;
   function scan() { if (busy || !on()) return; busy = true; try { document.querySelectorAll(ROOTS).forEach(markEl); } finally { busy = false; } }
-  const on = () => !document.body.classList.contains('st-off');
+  const on = () => !document.body.classList.contains('st-off') && !(DS.OFF && DS.OFF('symtalk')); // 🏫 학교판 = 기호 톡 없음
 
   // ── 말풍선 ──
   let bub = null, timer = 0;

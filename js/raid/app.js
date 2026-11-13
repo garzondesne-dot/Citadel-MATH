@@ -16,7 +16,9 @@ DS.App = (function () {
     if (DS.DEMO) return demoBoot();
     DS.Art.install();
     DS.PWA.init();
-    try { await DS.Net.init(); } catch (e) { if (!DS.TRIAL) { DS.UI.show('screen-home'); $('#home-msg').textContent = e.message; return; } }
+    const notReady = (e) => { DS.UI.show('screen-home'); $('#home-msg').innerHTML = `🏫 이 학교 던전은 선생님이 아직 준비 중이에요.<br><span class="muted small">(Firebase 규칙 게시 · 로그인 방법 · 교사 등록 전이면 이렇게 보여요 · ${DS.UI.esc(String((e && (e.code || e.message)) || ''))})</span>`; }; // 🏫 2026-11-13 학교판: 그 학교 서버 준비 전 = 깨지지 않고 안내
+    try { await DS.Net.init(); } catch (e) { if (DS.SCHOOL) return notReady(e); if (!DS.TRIAL) { DS.UI.show('screen-home'); $('#home-msg').textContent = e.message; return; } }
+    if (DS.SCHOOL && DS.Net.mode === 'firebase') { try { await DS.Net.get('gcfg/v'); } catch (e) { return notReady(e); } } // 규칙을 아직 안 올렸으면(잠금 모드) 읽기부터 막힘
     if (DS.TRIAL) { splash(true); DS.Nav.init(); return DS.Test.trialBoot(); } // 👩‍🏫 교사용 체험판 v2: 첫 화면(터치) → 테스트 모닥불
     try { if (await A().endStaleTeacher()) DS.UI.toast('앱을 다시 켜서 교사 계정은 로그아웃했어요.', 3200); } catch (e) { console.error(e); }
     DS.Nav.init();

@@ -88,6 +88,7 @@ DS.Camp = (function () {
     ['#camp-mail', '📮 우편함', '<b>선생님 소식</b>(선물 · 공지 · 답장)이 오고, 편지 · 설문 · 친구 선물을 <b>보내는</b> 곳이에요.'],
     ['#camp-anvil', '⚒ 모루', '수업에서 배운 개념으로 <b>카드를 만드는 대장간</b>이에요. 언제든 열려요.'],
   ];
+  if (DS.SCHOOL) for (let i = TUT_B.length - 1; i >= 0; i--) if (['#camp-castle', '#camp-tent', '#camp-anvil'].includes(TUT_B[i][0])) TUT_B.splice(i, 1); // 🏫 학교판: 없는 곳은 첫 안내에서도 뺌
   function tutClear() {
     tutMode = ''; const stg = document.querySelector('#camp .camp-stage'); const co = document.getElementById('tut-coach'); if (co) co.remove();
     document.getElementById('camp').classList.remove('tut-a', 'tut-on');
@@ -438,7 +439,7 @@ DS.Camp = (function () {
   // 📣 #96 개편 안내 창 (2026-11-11 선생님 「안내 창 더하고」): 개편 뒤 첫 접속 한 번 (accounts/…/seen96) · 바뀐 것 3줄 + 돌려받은 💎 · 📜 내역
   //   옛 구매(개편 뒤 표시 v: 96 없음)가 아직 남아 있으면 = 일괄 환불 전 → 띄우지 않고 기다림 · 🧪 테스트 · 👩‍🏫 체험판 · 선생님 = 없음
   async function revamp96(m) {
-    if (!m || m.test || m.teacher || m.trial || m.c == null || !m.n || !DS.Gem) return false;
+    if (!m || m.test || m.teacher || m.trial || DS.SCHOOL || m.c == null || !m.n || !DS.Gem) return false;
     const a = await DS.Net.get(`accounts/${ck(m.c)}/${m.n}`).catch(() => null); if (!a || a.seen96) return false;
     const d = await DS.Gem.mine(m).catch(() => null); if (!d) return false; const log = d.log || {};
     if (Object.keys(d.buy || {}).some((k) => /^(hero|fx)_/.test(k) && !log[`refund_${k}`] && Number((log[`buy_${k}`] || {}).v) !== 96)) return false; // 환불 전

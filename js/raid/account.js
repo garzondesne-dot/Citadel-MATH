@@ -174,6 +174,7 @@ DS.Account = (function () {
     [18, 19, 20, 21, 22, 23].forEach((id) => heroes.push({ id, open: false, cond: '💎 조각으로 해금' })); // 2026-11-07 새 용사 6 (흑기사 · 메카닉 · 해커 · 용기사 = 💎 상점 · gem.js SHOP)
     [24, 25, 26, 27, 28, 29, 30, 31, 32, 33].forEach((id) => heroes.push({ id, open: false, cond: '💎 조각으로 해금' })); // 2026-11-11 #73 새 용사 10: 💎 30 · 60 (gem.js SHOP) · 27 · 28 · 33 = 도전 (아래 CHAL)
     { const cp = chalProgress(rec, bonus); Object.entries(CHAL).forEach(([id, c]) => { const h = heroes.find((x) => x.id === Number(id)); if (!h) return; const n = cp[id] || 0; h.chal = { n: Math.min(n, c.need), need: c.need }; h.open = n >= c.need; h.cond = `${c.cond} · ${Math.min(n, c.need)} / ${c.need}`; }); }
+    if (DS.OFF && DS.OFF('forge')) { heroes.forEach((h) => { if ([8, 10, 11].includes(h.id) && !h.open) h.cond = '💎 조각으로 해금'; }); const i28 = heroes.findIndex((h) => h.id === 28); if (i28 >= 0 && !heroes[i28].open) heroes.splice(i28, 1); } // 🏫 학교판: 도감 · 성채 조건 용사 = 💎 로만 (성채 방 도전 용사는 숨김)
     // ⚔ 이펙트 v2 (2026-11-06): 계열 6 × 단계 4 — Ⅰ 열림 · Ⅱ 💎 · Ⅲ 인장(또는 💎) · Ⅳ 💎 + 같은 계열 Ⅲ 필요 · 특별(업적)
     const fx = [];
     DS.FX.FAMS.forEach((fam) => fam.ids.forEach((k, t) => {

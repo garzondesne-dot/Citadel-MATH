@@ -3497,3 +3497,6 @@ body.trial-teach .trial-tch .tch-pc { color: #c9b896; font-size: 11px; }
 .trial-pick .tp-mode { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 14px 8px !important; }
 .trial-pick .tp-mode b { font-size: 17px; } .trial-pick .tp-mode small { font-size: 12px; opacity: .85; line-height: 1.35; }
 .trial-pick .tp-back { margin-bottom: 6px; }
+/* 🏫 학교판 (2026-11-13 · html.school · js/config.js DS.OFF): 없는 기능의 단추 · 자리 숨김 — ⚒ 모루 · 🏰 성채 · ⛺ 출제 공방 · 📝 설문 · ✏ 출제 확인 · ⭕ OX 타임 */
+.school #camp-anvil, .school #camp-castle, .school #camp-tent, .school #tc-anvil, .school #tc-castle, .school #tc-tent,
+.school #sv-go, .school #t-quest, .school #ml-sv, .school [data-oxq], .school [data-forge], .school #camp-sv, .school .sv-btn { display: none !important; }

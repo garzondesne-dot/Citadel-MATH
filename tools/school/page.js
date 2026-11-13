@@ -1,12 +1,12 @@
 // 🏫 다른 학교판 주소 s/<학교코드>/ 만들기 (2026-11-13 · 선생님 「추천대로」 = A 학교 주소) — node tools/school/page.js
-//   schools/schools.json = { "<학교코드>": { name, fb: { 그 학교 Firebase 웹 설정값(공개값) }, example? } }
+//   schools/schools.json = { "<학교코드>": { name, subject(과목 · 화면 글자), fb: { 그 학교 Firebase 웹 설정값(공개값) }, example? } }
 //   학교마다 index.html 을 그대로 복사하되 <base href="../../"> (그림 · 스크립트는 저장소 맨 위 것 = 우리 배포 때 같이 바뀜)
 //   + config.js 앞에 window.DS_SCHOOL (그 학교 Firebase · 이름) + 앱 정보 s/<코드>/manifest.webmanifest (시작 주소 · 범위 = 그 학교 주소 · 앱 따로 설치)
 //   example: true 인 학교는 파일을 만들지 않음 (시험용 · 배포 안 함) · index.html 을 고치면 다시 실행 (tests/school.test.js 가 같은지 확인)
 const fs = require('fs'), path = require('path');
 const ROOT = path.join(__dirname, '..', '..');
 const CODE = /^[a-z0-9]{4,6}$/; // 짧은 무작위 영소문자 · 숫자 (학교 이름이 드러나지 않게)
-const FB_KEYS = ['apiKey', 'authDomain', 'databaseURL', 'projectId', 'storageBucket', 'messagingSenderId', 'appId'];
+const FB_KEYS = ['apiKey', 'authDomain', 'databaseURL', 'projectId', 'storageBucket', 'messagingSenderId', 'appId', 'measurementId'];
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 function check(code, sch) {
   if (!CODE.test(code)) throw new Error(`학교코드는 영소문자 · 숫자 4~6자: ${code}`);
@@ -17,18 +17,19 @@ function build(src, code, sch) {
   check(code, sch);
   let s = src;
   const rep = (a, b) => { if (!s.includes(a)) throw new Error(`index.html 에 없음: ${a}`); s = s.replace(a, b); };
-  const name = String(sch.name || '').slice(0, 20);
-  const data = JSON.stringify({ code, name, fb: Object.fromEntries(FB_KEYS.filter((k) => sch.fb[k]).map((k) => [k, sch.fb[k]])) }).replace(/</g, '\\u003c');
+  const name = String(sch.name || '').slice(0, 20), subj = String(sch.subject || '수학').slice(0, 20);
+  const data = JSON.stringify({ code, name, subject: subj, fb: Object.fromEntries(FB_KEYS.filter((k) => sch.fb[k]).map((k) => [k, sch.fb[k]])) }).replace(/</g, '\\u003c');
   rep('<meta charset="utf-8">', `<meta charset="utf-8">\n<base href="../../"><!-- 🏫 다른 학교판 · tools/school/page.js 가 index.html 에서 만듦 (직접 고치지 말 것) -->`);
-  rep('<title>모두의 던전 : 공통수학2</title>', `<title>모두의 던전 : 공통수학2${name ? ` · ${esc(name)}` : ''}</title>`);
+  rep('<title>모두의 던전 : 공통수학2</title>', `<title>모두의 던전 : ${esc(subj)}${name ? ` · ${esc(name)}` : ''}</title>`);
+  rep('<h1 class="sr">모두의 던전 : 공통수학2</h1>', `<h1 class="sr">모두의 던전 : ${esc(subj)}</h1>`);
   rep('<link rel="manifest" href="manifest.webmanifest">', `<link rel="manifest" href="s/${code}/manifest.webmanifest">`);
   rep('<script src="js/config.js"></script>', `<script>window.DS_SCHOOL = ${data};</script>\n<script src="js/config.js"></script>`);
   return s;
 }
 function manifest(base, code, sch) {
   check(code, sch);
-  const m = JSON.parse(base), name = String(sch.name || '').slice(0, 20);
-  m.name = `모두의 던전${name ? ` · ${name}` : ''}`; m.short_name = '모두의 던전'; m.id = './'; m.start_url = './'; m.scope = './';
+  const m = JSON.parse(base), name = String(sch.name || '').slice(0, 20), subj = String(sch.subject || '수학').slice(0, 20);
+  m.name = `모두의 던전 : ${subj}${name ? ` · ${name}` : ''}`; m.description = `함께 풀고, 모두 함께 돌파하라 — ${subj} 협동 던전 학습 게임`; m.short_name = '모두의 던전'; m.id = './'; m.start_url = './'; m.scope = './';
   m.icons = (m.icons || []).map((i) => ({ ...i, src: `../../${String(i.src).replace(/^\.\//, '')}` }));
   return JSON.stringify(m, null, 2) + '\n';
 }

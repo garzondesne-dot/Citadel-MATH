@@ -51,6 +51,7 @@ DS.Fresh = (function () {
 
   // ② 입장 문지기: 새 판이면 true · 옛 판이면 바꾸는 중(또는 ④ 안내) · false
   async function gate() {
+    if (DS.SCHOOL) { check(true).catch(() => {}); return true; } // 🏫 학교판: 수업 · 방 입장은 막지 않음 (수업이 끝나면 캠프 · 첫 화면에서 새 판)
     if (!(await check(true))) return true;
     if (failed) { showFail(); return false; }
     update(); return false;
@@ -61,7 +62,8 @@ DS.Fresh = (function () {
     if (!stale()) { staleStep = null; band(null); return; }
     if (failed) { band('⚠ 옛 판이에요 — 앱을 완전히 껐다 다시 켜 주세요'); return; }
     if (staleStep == null) staleStep = stepKey;
-    if (opt.test) { band('🔄 새 판이 나왔어요 — 테스트를 처음부터 다시 하면 새 판'); return; } // 🧪 테스트는 처음부터 (기록 없는 연습)
+    if (opt.test) { band('🔄 새 판이 나왔어요 — 테스트를 처음부터 다시 하면 새 판'); return; }
+    if (DS.SCHOOL) { band('🔄 새 판이 나왔어요 — 수업이 끝나면 저절로 바뀌어요'); return; } // 🏫 학교판: 수업 중 강제 새로 고침 미룸 // 🧪 테스트는 처음부터 (기록 없는 연습)
     if (stepKey !== staleStep) { update(); return; }
     band('🔄 새 판이 나왔어요 — 다음 몬스터로 넘어갈 때 저절로 바뀌어요 (기록은 그대로)');
   }

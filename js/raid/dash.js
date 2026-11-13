@@ -257,7 +257,7 @@ DS.Dash = (function () {
     if (!s || !s.went) return { main: '저장된 수업 기록이 없음.', more: [] };
     const S = []; // [단계, 문장]
     // ① 참여
-    S.push([1, `모둠 협동학습 형태의 수학 수업(집합과 명제 단원) ${s.heldN}차시 중 ${s.went}차시에 참여함${s.went === s.heldN ? '(전 차시 참여)' : ''}`]);
+    S.push([1, `모둠 협동학습 형태의 수학 수업(${DS.SCHOOL ? DS.SUBJECT : '집합과 명제 단원'}) ${s.heldN}차시 중 ${s.went}차시에 참여함${s.went === s.heldN ? '(전 차시 참여)' : ''}`]);
     // ② 이해
     const cs = Object.values(s.conc || {}).filter((c) => c.total >= 2).map((c) => ({ ...c, p: pct(c.ok, c.total) }));
     const best = cs.filter((c) => c.p >= 80).sort((a, b) => b.p - a.p || b.total - a.total)[0];

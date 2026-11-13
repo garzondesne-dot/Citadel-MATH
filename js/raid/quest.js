@@ -39,6 +39,7 @@ DS.Quest = (() => {
 
   // ── 학생: ⛺ 출제 공방 ─────────────────────────
   async function open(m) {
+    if (DS.OFF && DS.OFF('quest')) return; // 🏫 학교판 = 없음
     const el = document.createElement('div'); el.className = 'modal camp-modal'; document.body.appendChild(el);
     const no = m.test ? 99 : Number(await N().get(`unlock/${ck(m.c)}`).catch(() => 0)) || 0;
     const lessons = DS.Lessons.list.filter((l) => l.no && !l.eval && !l.rooms && l.no <= no && fieldIds(l).length).sort((a, b) => b.no - a.no);
