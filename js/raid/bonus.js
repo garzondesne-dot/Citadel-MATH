@@ -353,7 +353,7 @@ DS.Bonus = (function () {
       // 🪞 2026-11-13 선생님 「허수아비 · 성채 체력 표시 · 재도전 기회 표시가 옛날 거」: 수업 레이드와 같은 부품 (위 HP 막대 · 아래 ❤ 재도전 줄 · js/raid/student.js parts) · ⚔ 소레이드 = 반 칸
       const done = solved.every(Boolean);
       const cbg = castle ? ((DS.ASSETS.citadel || {})[(L.rooms.find((r) => r.id === mid) || {}).boss ? 'boss' : 'room']) : '';
-      el.innerHTML = `<div class="scene enc ${cbg ? `cs-bg${cbg === (DS.ASSETS.citadel || {}).boss ? ' cs-bossroom' : ''}` : `bg-scene th-${L.theme || ''}`} ${cls}"${cbg ? ` style="background-image:url('${DS.ASSETS.base}${cbg}')"` : ''}><div class="scene-bar"><div><b>⚔ ${esc(mon.title)}</b><br><span class="muted small">${castle ? `🏰 성채던전 ${L.floor || 1}층` : `🎯 복습! ${DS.Lessons.noText(L.no)}차시`} · ${chainRoom ? `⚔ 소레이드 · 졸개 ${n - 1} + 👑 대장` : `한 판에 소문제 ${n}개를 모두 맞혀야 처치`}</span></div><button class="btn small" id="bf-x">✕</button></div>
+      el.innerHTML = `<div class="scene enc ${cbg ? `cs-bg${cbg === (DS.ASSETS.citadel || {}).boss ? ' cs-bossroom' : ''}` : `bg-scene th-${L.theme || ''}`} ${cls}"${cbg ? ` style="background-image:url('${DS.ASSETS.base}${cbg}')"` : ''}><div class="scene-bar"><div><b>⚔ ${esc(mon.title)}</b><br><span class="muted small">${castle ? `🏰 성채던전 ${L.floor || 1}층` : `🎯 복습! ${DS.Lessons.noText(L.no)}차시`} · ${chainRoom ? `⚔ 소레이드 · 졸개 ${n - 1} + 👑 대장` : (castle ? `한 판에 소문제 ${n}개를 모두 맞혀야 처치` : `소문제 ${n}개를 모두 맞히면 처치`)}</span></div><button class="btn small" id="bf-x">✕</button></div>
           ${SP().hpBox(n - solved.filter(Boolean).length, n, done || !castle ? '' : SP().GAUGE)}
           <div class="enc-hero">${DS.Art.hero(me.hero || 0, done || cls ? 'attack' : 'think', done ? 'pairhop' : cls === 'miss' ? 'slump' : 'huff')}<i class="shadow"></i></div>
           <div class="enc-mon">${DS.Art.monster(mon.sprite, done ? 'down' : 'idle', done ? '' : 'float')}</div></div>
@@ -455,9 +455,10 @@ DS.Bonus = (function () {
         return null;
       }
       // 🎯🏰 2026-11-13 선생님 「틀려도 통과돼 · 100%로」 → B: 한 판에 모두 맞혀야 처치 · 하나라도 틀리면 그 판 실패 → 다시 도전 = 모든 소문제 새 숫자로 처음부터 (기회 4번 그대로)
-      const act = draw('', `${penRes}<p>이번 판 <b>${solved.filter(Boolean).length} / ${n}</b> — <b>한 판에 모두 맞혀야 처치</b>예요. 🔄 모든 소문제를 새 숫자로 처음부터!</p>${solHtml(cur)}`);
-      solved.fill(false);
-      act.innerHTML = '<button class="btn primary" id="bf-again">🔄 다시 도전 (새 숫자 · 처음부터)</button>';
+      //   🎯 같은 날 선생님 「허수아비 네문제 모두 맞춰야 정답처리는 롤백해줘 학생이 착각한거래」 → 허수아비 = 예전대로 틀린 것만 새 숫자로 다시 (🏰 성채만 한 판에 모두)
+      const act = draw('', castle ? `${penRes}<p>이번 판 <b>${solved.filter(Boolean).length} / ${n}</b> — <b>한 판에 모두 맞혀야 처치</b>예요. 🔄 모든 소문제를 새 숫자로 처음부터!</p>${solHtml(cur)}` : `${penRes}<p>맞힌 소문제 <b>${solved.filter(Boolean).length} / ${n}</b> — 틀린 것만 새 숫자로 다시!</p>${solHtml(cur)}`);
+      if (castle) solved.fill(false);
+      act.innerHTML = castle ? '<button class="btn primary" id="bf-again">🔄 다시 도전 (새 숫자 · 처음부터)</button>' : '<button class="btn primary" id="bf-again">🔄 다시 도전</button>';
       act.querySelector('#bf-again').onclick = () => { attempt++; round(); };
       return null;
     };

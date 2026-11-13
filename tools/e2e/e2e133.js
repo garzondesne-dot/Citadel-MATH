@@ -1,4 +1,4 @@
-// 🎯🏰 2026-11-13 B 「한 판에 모두 맞혀야 처치」: 허수아비 = 하나 틀리면 그 판 실패 → 다시 도전 = 소문제 모두 새 숫자로 처음부터 · 성채 소레이드 = 한 단계 틀리면 숫자 바뀐 사슬로 처음부터 — PORT=8766 node tools/e2e/shots131.js <출력 폴더> <앞 이름>
+// 🎯🏰 2026-11-13: 🏰 성채 = 한 판에 모두 맞혀야 처치(B · 소레이드 = 한 단계 틀리면 숫자 바뀐 사슬로 처음부터) · 🎯 허수아비 = 같은 날 되돌림(틀린 것만 새 숫자로 다시) — PORT=8766 node tools/e2e/shots131.js <출력 폴더> <앞 이름>
 //   ① 🎯 허수아비 9차시 문제 1 (한 번 틀린 뒤) ② 🏰 성채 1층 일반 방 ③ 🏰 성채 소레이드 방 q07
 const { chromium } = require('playwright');
 const OUT = process.argv[2] || '.', U = `http://localhost:${process.env.PORT || 8765}/index.html?local`;
@@ -23,10 +23,10 @@ const OUT = process.argv[2] || '.', U = `http://localhost:${process.env.PORT || 
   const n1 = await fill(); await S.evaluate(() => document.querySelector('#bf-go2').click()); await S.waitForTimeout(6500);
   const t1 = await S.evaluate(() => document.querySelector('.bn-fight').innerText);
   const r1 = await S.evaluate(() => DS.Net.get('bonus/1-3/1/set-09/m1'));
-  ok(/한 판에 모두 맞혀야 처치/.test(t1) && !(r1 || {}).clear, `1개 틀림 → 처치 안 됨 · 「한 판에 모두 맞혀야 처치」 (소문제 ${n1})`);
+  ok(/틀린 것만 새 숫자로 다시/.test(t1) && !/한 판에 모두/.test(t1) && !(r1 || {}).clear, `🎯 허수아비 1개 틀림 → 처치 안 됨 · 「틀린 것만 새 숫자로 다시」 (소문제 ${n1} · 같은 날 되돌림)`);
   await S.click('#bf-again'); await S.waitForTimeout(1500);
   const n2 = (await S.$$('.bn-fight .ans-line')).length;
-  ok(n2 === n1, `다시 도전 = 소문제 ${n2} / ${n1}개 모두 처음부터 (맞힌 것도 다시)`);
+  ok(n2 === 1, `다시 도전 = 틀린 소문제 ${n2}개만 (맞힌 ${n1 - 1}개는 그대로)`);
   await S.evaluate(() => { DS.Quiz.grade = () => true; });
   await fill(); await S.evaluate(() => document.querySelector('#bf-go2').click()); await S.waitForTimeout(6500);
   const r2 = await S.evaluate(() => DS.Net.get('bonus/1-3/1/set-09/m1'));
