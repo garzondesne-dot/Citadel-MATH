@@ -741,10 +741,10 @@ DS.Hall = (function () {
       <div class="marks">${d.items.map((q, i) => `<div class="mark ${d.marks[i] ? 'ok' : 'ng'}"><b>${i + 1}</b> ${d.shown ? '💡' : d.marks[i] ? '✔' : '✘'}${bonusTag(i)} <span class="math">${DS.UI.pretty(S.itemText(q))}</span>${d.shown || !d.marks[i] ? `<br><span class="sol-line math">정답: ${ansText(q)}${S.solOf(q) ? ` · ${DS.UI.pretty(S.solOf(q))}` : ''}</span>` : ''}</div>`).join('')}</div>` : '';
     const itemOf = (q, i) => (q.type === 'subsets'
       ? `<div class="item"><span class="item-no">${i + 1}</span>${bonusTag(i)}<div class="item-q">${DS.UI.rich(q.question || S.itemText(q))}</div><button class="btn" data-ask="${i}">${d.given[i].length ? `✏ ${d.given[i].length}개 썼어요 · 고치기` : '✏ 입력 창 열기'}</button></div>`
-      : (bonusTag(i) ? `<div class="demo-bwrap">${bonusTag(i)}${S.itemHtml(q, i, d.given)}</div>` : S.itemHtml(q, i, d.given)));
+      : (bonusTag(i) ? `<div class="demo-bwrap">${bonusTag(i)}${S.withAns(S.itemHtml(q, i, d.given), q, d.given[i], i)}</div>` : S.withAns(S.itemHtml(q, i, d.given), q, d.given[i], i))); // 🪞 2026-11-13 학생과 같은 「✍ 나의 답」 줄
     ov.innerHTML = `<div class="demo-box paper${d.boss ? ' boss' : ''}"><div class="demo-head"><b>🎮 시연 · ${esc(title)}</b><span class="demo-tag">데미지 · 기록 없음</span>
         <button class="btn small${d.attempt ? '' : ' on'}" data-da="0">📄 ${d.boss ? '세트 1 (학습지)' : '학습지 문제'}</button><button class="btn small${d.attempt ? ' on' : ''}" data-da="${d.attempt + 1}">🔄 ${d.boss ? '숫자 바꿈 (한 판 더)' : '숫자 바꾼 문제'}</button><button class="btn small" id="demo-x">✕ 닫기</button></div>
-      ${d.marks ? res : `${!d.boss && (L.monsters[d.step.id] || {}).note ? `<p class="muted small">💡 ${esc(L.monsters[d.step.id].note)}</p>` : ''}${d.boss && d.hp < d.items.length ? `<p class="muted small">1~${d.hp}번을 모두 맞히면 선생님의 일격! (${d.hp + 1}번~ 보너스는 골라서)</p>` : ''}<div class="items demo-items${d.boss ? ' two' : ''}">${d.items.map(itemOf).join('')}</div>
+      ${d.marks ? `${d.penRes || ''}${d.stamping ? '' : res}` : `${!d.boss && (L.monsters[d.step.id] || {}).note ? `<p class="muted small">💡 ${esc(L.monsters[d.step.id].note)}</p>` : ''}${d.boss && d.hp < d.items.length ? `<p class="muted small">1~${d.hp}번을 모두 맞히면 선생님의 일격! (${d.hp + 1}번~ 보너스는 골라서)</p>` : ''}<div class="items demo-items${d.boss ? ' two' : ''}">${d.items.map(itemOf).join('')}</div>
         <div class="row demo-go-row"><button class="btn big" id="demo-reveal">💡 정답 펼치기</button><button class="btn primary big" id="demo-go"${ready ? '' : ' disabled'}>⚔ 공격! (시연)</button></div>`}
       ${d.marks ? '<div class="row demo-row"><button class="btn" data-da="1">🔄 숫자 바꿔 다시</button><button class="btn primary" id="demo-x2">✕ 닫고 레이드로</button></div>' : ''}</div>`;
     ov.querySelector('#demo-x').onclick = demoClose; const x2 = ov.querySelector('#demo-x2'); if (x2) x2.onclick = demoClose; bindStrike(ov, d.step);
@@ -760,16 +760,22 @@ DS.Hall = (function () {
       const i = Number(b.dataset.ask), r = await DS.Quiz.ask({ name: `${title} ${i + 1}번 (시연)`, formula: d.attempt ? '🔄 숫자가 바뀌었어요' : '학습지' }, d.items[i], { collect: true, tag: '🎮 시연' });
       if (!r || demo !== d) return; d.given[i] = r.given || []; demoDraw();
     }));
-    DS.UI.runes(ov, (i) => d.given[i], (i, v) => { d.given[i] = v; reGo(); }); // ⌨ #92 학생과 같은 룬 키패드
+    DS.UI.runes(ov, (i) => d.given[i], (i, v) => { d.given[i] = v; reGo(); const al = ov.querySelector(`.ans-line[data-al="${i}"]`); if (al) al.outerHTML = S.ansLine(d.items[i], v, i); }); // ⌨ #92 학생과 같은 룬 키패드 · ✍ 나의 답 줄도 바로 (학생과 같음)
     ov.querySelectorAll('[data-text]').forEach((inp) => inp.addEventListener('input', () => { d.given[Number(inp.dataset.text)] = inp.value; reGo(); }));
     const rv = ov.querySelector('#demo-reveal');
     if (rv) rv.onclick = () => { d.shown = true; d.marks = d.items.map(() => true); Snd().slash(); demoDraw(); };
     const go = ov.querySelector('#demo-go');
-    if (go) go.onclick = () => {
-      DS.UI.runeCast(ov);
+    if (go) go.onclick = async () => {
+      // 🪞 2026-11-13 선생님 「시연할 때 나의 풀이 정돈되면서 해결되는 기믹이 안 나와 · 똑같이」: 학생 폰과 같은 부품 — ✍ 답 줄이 📜 나의 답안으로 모임(mergeAnim) → 줄마다 채점 도장(pen-res · pixIn) → 결과
+      go.disabled = true; DS.UI.runeCast(ov);
       const given = d.items.map((q, i) => (q.type === 'number' ? Number(d.given[i]) : d.given[i]));
+      await S.mergeAnim(ov); if (demo !== d) return;
       d.marks = d.items.map((q, i) => filled(q, given[i]) && DS.Quiz.grade(q, given[i]));
-      demoDraw();
+      d.penRes = S.penBox(`demo|${code}|${d.step.id}|${d.attempt}`, d.items.map((q, i) => ({ t: S.penLine(q, given[i], i), cls: d.marks[i] ? 'pen-ok' : 'pen-gone' })).filter((l) => l.t), ' pen-res');
+      d.stamping = true; demoDraw();
+      { const t0 = Date.now(); ov.querySelectorAll('.pen-res li.pen-ok').forEach((li) => { const k = [...li.parentNode.children].indexOf(li); li.classList.add('pix-in'); S.pixIn(li, t0 + k * S.STAMP_GAP + 150, k + 7); }); } // 📜 채점 도장 (줄마다 0.4초)
+      await new Promise((r) => setTimeout(r, S.stampMs(ov.querySelectorAll('.pen-res li').length))); if (demo !== d) return;
+      d.stamping = false; d.penRes = d.penRes.replace(' pen-res', ' pen-res pen-still'); demoDraw();
       if (d.marks.slice(0, d.hp).every(Boolean)) Snd().slash(); else Snd().squish(); // 다 맞히면 ⚔ 일반 · ⚡ 필살기 버튼 (2026-11-06)
     };
   }
@@ -789,6 +795,7 @@ DS.Hall = (function () {
     ov.innerHTML = `<div class="demo-box paper"><div class="demo-head"><b>🎮 시연 · ${esc(title)}</b><span class="demo-tag">데미지 · 기록 없음</span>
         <button class="btn small${d.attempt ? '' : ' on'}" data-da="0">📄 학습지 숫자</button><button class="btn small${d.attempt ? ' on' : ''}" data-da="${d.attempt + 1}">🔄 숫자 바꿈</button><button class="btn small" id="demo-x">✕ 닫기</button></div>
       <div class="cr-chips">${chips}</div>${story}${body}</div>`;
+    if (S.sandApply) S.sandApply(ov, `demo|${code}|${d.step.id}|${d.attempt}|${d.t0 || (d.t0 = Date.now())}`); // 🪞 2026-11-13 학생과 같은 「📜 나의 풀이」 모래 새김 (새 줄마다)
     ov.querySelector('#demo-x').onclick = demoClose;
     ov.querySelectorAll('[data-da]').forEach((b) => (b.onclick = () => demoOpen(d.step, Number(b.dataset.da))));
     if (done) return bindStrike(ov, d.step);

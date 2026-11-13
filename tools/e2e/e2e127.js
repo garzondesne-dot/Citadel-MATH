@@ -11,7 +11,7 @@ const OUT = process.argv[2] || '.', U = `http://localhost:${process.env.PORT || 
   await T.evaluate(() => DS.Account.uploadRoster([{ c: '1-3', n: 1, name: '김민준' }, { c: '1-3', n: 2, name: '이서연' }])); await T.waitForTimeout(600);
   await T.reload(); await T.waitForTimeout(1500); if (await T.isVisible('#splash')) { await T.click('#splash'); await T.waitForTimeout(400); }
   if (!(await T.isVisible('#lesson'))) { await T.click('.role[data-role=teacher]').catch(() => {}); await T.waitForTimeout(600); }
-  await T.selectOption('#lesson', 'set-10'); await T.selectOption('#t-cls', '1-3'); await T.click('#t-new'); await T.waitForTimeout(2500);
+  await T.selectOption('#t-cls', '1-3'); await T.waitForTimeout(400); await T.selectOption('#lesson', 'set-10'); await T.click('#t-new'); await T.waitForTimeout(2500);
   const code = await T.evaluate(() => DS.Teacher.code()), key = (await T.textContent('#t-key')).trim();
   const H = await mk('H'); await H.setViewportSize({ width: 1600, height: 900 }); await H.goto(`${U}&role=hall&code=${code}&key=${key}`); await H.waitForTimeout(2500);
   await T.evaluate(async (c) => { await DS.Net.set(`rooms/${c}/players/bot1`, { num: 1, nick: '학생1', hero: 1, fx: 'flame', cls: '1-3', at: Date.now() }); await DS.Net.set(`rooms/${c}/online/bot1`, true); await DS.Net.update(`rooms/${c}/state`, { solve: 0 }); }, code);
