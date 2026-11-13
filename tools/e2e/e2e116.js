@@ -7,7 +7,7 @@ const OUT = process.argv[2] || '.', U = `http://localhost:${process.env.PORT || 
   const check = (c, m) => { if (c) ok++; else { fail++; console.log('FAIL:', m); } };
   p.on('pageerror', (e) => errs.push(e.message)); p.on('dialog', (d) => d.accept());
   await p.goto(U); await p.waitForTimeout(3500);
-  await p.fill('#tp-name', '이선생'); await p.click('.tp-h1[data-h="1"]'); await p.click('[data-go="set-03"]'); await p.waitForTimeout(3500);
+  await p.click('[data-mode="s"]'); await p.waitForTimeout(300); await p.fill('#tp-name', '이선생'); await p.click('.tp-h1[data-h="1"]'); await p.click('[data-go="set-03"]'); await p.waitForTimeout(3500);
   await p.evaluate(async () => { const m = await DS.Account.me(); await DS.Gem.add(m, 620, 'trial_gift3', '선물', { free: true }); await DS.Gem.addScroll(m, 8, 'trial_scroll3', '선물'); });
   const srv = () => p.evaluate(async () => { const m = await DS.Account.me(); const d = await DS.Gem.mine(m); return { total: d.total, scroll: d.scroll, enh: d.enh || 0, buy: Object.keys(d.buy || {}) }; });
   const s0 = await srv();

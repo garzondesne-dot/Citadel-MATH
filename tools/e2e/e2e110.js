@@ -9,7 +9,7 @@ const OUT = process.argv[2] || '.', U = `http://localhost:${process.env.PORT || 
   // 첫 화면 캡처 (PC · 폰)
   for (const [nm, vp] of [['pc', { width: 1280, height: 720 }], ['phone', { width: 360, height: 780 }]]) {
     const c = await b.newContext({ viewport: vp, deviceScaleFactor: 2 }); const q = await c.newPage(); q.on('pageerror', (e) => errs.push(e.message));
-    await q.goto(U); await q.waitForTimeout(3500); await q.screenshot({ path: `${OUT}/110-first-${nm}.png` });
+    await q.goto(U); await q.waitForTimeout(3500); await q.screenshot({ path: `${OUT}/110-first-${nm}.png` }); await q.click('[data-mode="s"]'); await q.waitForTimeout(300);
     const f = await q.evaluate(() => { const k = document.querySelector('.sp-key img'), p = document.querySelector('.trial-pick'), r = p.getBoundingClientRect(); return { key: !!k && k.complete && k.naturalWidth === 1672, cards: [...p.querySelectorAll('[data-go]')].map((x) => x.dataset.go), cam: getComputedStyle(document.querySelector('.sp-cam') || document.body).display, top: r.top, h: innerHeight, sw: document.documentElement.scrollWidth, w: innerWidth }; });
     ok(f.key && f.cards.join() === 'set-03,trial-07' && (f.cam === 'none') && f.sw <= f.w + 1, `${nm} 첫 화면: 대표 그림 · 카드 ${f.cards} · 옛 배경 숨김 · 가로 넘침 없음 · 판 위끝 ${Math.round(f.top)} / ${f.h}`);
     await c.close();
@@ -26,7 +26,7 @@ const OUT = process.argv[2] || '.', U = `http://localhost:${process.env.PORT || 
   const chainAll = () => p.evaluate(async () => { const code = Object.keys((await DS.Net.get('rooms')) || {}).pop(); const R = DS.Act.unpackRoom(await DS.Net.get(`rooms/${code}`)); const L = DS.Lessons.get(R.meta.lesson), st = DS.Raid.stepOf(L, R), me = DS.Net.uid();
     let rec = DS.Raid.record(L, R, st.id, me); for (let g = 0; g < 8 && !rec.done; g++) { const q = rec.items[rec.stage], v = DS.Bots.given(q, true); rec = await DS.Act.chainSubmit(code, await DS.Net.get(`rooms/${code}`), st.id, rec.stage, 0, q.type === 'number' ? Number(Array.isArray(v) ? v[0] : v) : v); } return st.id + ':' + !!rec.done; });
   await p.goto(U); await p.waitForTimeout(3500);
-  await p.fill('#tp-name', '이선생'); await p.click('.tp-h1[data-h="1"]'); await p.click('[data-go="trial-07"]'); await p.waitForTimeout(3500); await shot('1-camp');
+  await p.click('[data-mode="s"]'); await p.waitForTimeout(300); await p.fill('#tp-name', '이선생'); await p.click('.tp-h1[data-h="1"]'); await p.click('[data-go="trial-07"]'); await p.waitForTimeout(3500); await shot('1-camp');
   const g0 = await p.evaluate(async () => { const d = (await DS.Gem.mine({ c: '체험', n: 1 })) || {}; return { gem: d.total || 0, bar: (document.querySelector('#test-bar') || {}).innerText || '', gate: (document.querySelector('#camp-gate .camp-label') || {}).textContent || '' }; });
   ok(g0.gem === 200 && /3차시로/.test(g0.bar) && /7차시/.test(g0.gate), `내 캠프 💎 ${g0.gem} · 막대 「${g0.bar.replace(/\n/g, ' ')}」 · 관문 「${g0.gate}」`);
   await shut(); await p.click('#camp-gate'); await p.waitForTimeout(4000);

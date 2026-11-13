@@ -11,7 +11,7 @@ const OUT = process.argv[2] || '.', U = `http://localhost:${process.env.PORT || 
     const tv = () => p.evaluate(() => { const t = document.getElementById('test-tv'), bt = document.getElementById('tb-tvv'), tb = document.getElementById('test-bar'); if (!t) return { none: true, btn: bt ? bt.textContent : '' }; const r = t.getBoundingClientRect(), cs = getComputedStyle(t);
       return { vis: cs.visibility, show: t.classList.contains('tv-show'), btn: bt ? (bt.dataset.tv === '1' ? '학생 화면' : 'TV 화면') : '', btnR: bt ? bt.getBoundingClientRect().toJSON() : null, bottom: Math.round(r.bottom), barTop: Math.round(tb.getBoundingClientRect().top), stu: document.getElementById('screen-student').classList.contains('active'), over: tb.scrollWidth > tb.clientWidth + 1 || [...tb.children].some((x) => x.getBoundingClientRect().right > innerWidth + 1), pad: getComputedStyle(document.body).getPropertyValue('--tvh').trim() }; });
     await p.goto(U); await p.waitForTimeout(3500);
-    await p.fill('#tp-name', '이선생'); await p.click('.tp-h1[data-h="1"]'); await p.click(`[data-go="${card}"]`); await p.waitForTimeout(3500);
+    await p.click('[data-mode="s"]'); await p.waitForTimeout(300); await p.fill('#tp-name', '이선생'); await p.click('.tp-h1[data-h="1"]'); await p.click(`[data-go="${card}"]`); await p.waitForTimeout(3500);
     await p.evaluate(() => document.querySelectorAll('.th-chest-ov, .bat-ov, .th-bat').forEach((e) => e.remove()));
     await p.click('#camp-gate'); await p.waitForTimeout(4000);
     for (let k = 0; k < 15; k++) { if (/수업 시작 ▶ \(5/.test(await bar())) break; await p.waitForTimeout(1000); }

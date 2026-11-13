@@ -39,6 +39,7 @@ DS.Test = (function () {
     if (ntCopy) await local.set(`notice/${CLS0}`, ntCopy).catch(() => {});
     if (photoCfg) await local.set('gcfg/photo', photoCfg).catch(() => {}); if (photoRub) await local.set('photo_rubric', photoRub).catch(() => {}); if (DS.Photo && DS.Photo.load) DS.Photo.load(true).catch(() => {}); // 👩‍🏫 체험판: 위 TV(종합상황실)도 학습지 그림 · 영상을 읽게 (메모리 저장소라 용량 걱정 없음 · 교사 테스트는 localStorage 라 넣지 않음)
     look = demo ? { hero: demo.hero ?? 16, fx: demo.fx || 'flame' } : { hero: 0, fx: 'flame' };
+    if (trial && trial.teach) return teachStart();
     if (trial) { // 👩‍🏫 메모리 저장소 안에 진짜 학생 계정 하나 (기록 · 💎 · EXP · 오답노트 · 성채가 실제처럼 · 탭을 닫으면 사라짐)
       look = { hero: trial.hero, fx: DS.FX.affOf(trial.hero).ids[0] };
       await local.signUp('trial@ds.local', '0000');
@@ -62,7 +63,7 @@ DS.Test = (function () {
   }
   // 선생님이 「새 수업 만들기」를 누른 것과 같음 → live/테스트 에 차원문이 실시간으로 나타난다
   async function openGate() {
-    const r = await DS.Act.createRoom(L.id, cls(), { noLimit: true, ...(demo ? {} : { solve: 5 }), ...(trial ? { pct: 100 } : {}) }); // 🧪 테스트 모드 · 👩‍🏫 체험판 = 시간 제한 없음 · #43 정찰 5초 · #92 체험판 성취 기준 100 (가상 친구가 먼저 쓰러뜨리지 않게 · 실제 수업 90 그대로) (CLAUDE.md 체험판 규칙 · 실제 수업은 그대로)
+    const r = await DS.Act.createRoom(L.id, cls(), { noLimit: true, ...(demo ? {} : { solve: 5 }), ...(trial ? { pct: trial.teach ? 90 : 100 } : {}) }); // 🧪 테스트 모드 · 👩‍🏫 체험판 = 시간 제한 없음 · #43 정찰 5초 · #92 체험판 성취 기준 100 (가상 친구가 먼저 쓰러뜨리지 않게 · 실제 수업 90 그대로) (CLAUDE.md 체험판 규칙 · 실제 수업은 그대로)
     code = r.code; hallKey = r.hallKey; R = null; armed = '';
     if (demo) return;
     draw(true);
@@ -202,6 +203,26 @@ DS.Test = (function () {
     L0.steps = L0.steps.filter((x) => ['intro', 'c1', 'm1', 'c2', 'm2', 'boss'].includes(x.id));
     L0.boss = Object.assign({}, L0.boss, { items: 3, hpItems: 3, tags: (L0.boss.tags || []).slice(0, 3) });
   }
+  // 👩‍🏫 교사 판 (2026-11-13 선생님 「교사 버전(TV 화면 기준 + 옆에 리모컨 화면)」 · 「한 주소 들어가서 고르게」): 같은 메모리 저장소 · 실제 리모컨(DS.Teacher) 그대로
+  //   PC = 왼쪽 큰 TV(종합실 · DS.Hall embed) + 오른쪽 리모컨 · 폰 = 리모컨만 + 📺 단추 · 가상 학생 20명(맞힘 · 틀림 섞어 · 시간차) · 성취 기준 90 (리모컨에서 바꿔 볼 수 있음) · 아래 진행 막대 없음
+  const TEACH_N = 20, wide = () => window.innerWidth >= 900;
+  async function teachStart() {
+    where = 'raid'; bar(false);
+    await openGate();
+    DS.Bots.start(code, TEACH_N, { speed: 0.3, joinFast: true, acc: { item: 0.6, boss: 0.7 } }); // 천천히 · 맞힘 · 틀림 섞어 (몬스터를 너무 빨리 잡지 않게)
+    document.body.classList.add('trial-teach');
+    await DS.Teacher.open(code, hallKey);
+    tvHall(true); if (tvShow) tvShow(wide());
+    teachChrome();
+    DS.UI.toast(wide() ? '👩‍🏫 왼쪽 = 교실 TV · 오른쪽 = 내 리모컨 — 가상 학생 20명이 들어오면 「수업 시작」' : '👩‍🏫 리모컨 화면이에요 · 📺 = 교실 TV 화면 — PC 에서 보면 더 좋아요', 4200);
+  }
+  function teachChrome() {
+    let el = $('#trial-tch');
+    if (!el) { el = document.createElement('div'); el.id = 'trial-tch'; el.className = 'trial-tch'; document.body.appendChild(el); }
+    el.innerHTML = `<b>👩‍🏫 체험판 · 선생님</b>${tvBtn().replace('📱<span class="tvl"> 학생 화면</span>', '📱<span class="tvl"> 리모컨</span>')}<button class="btn small" id="tch-x" title="처음부터 다시">↻</button><span class="tch-pc">PC 에서 보면 더 좋아요</span>`;
+    tvBind(); const x = $('#tch-x'); if (x) x.onclick = () => again();
+    let was = wide(); window.addEventListener('resize', () => { const w = wide(); if (w !== was && tvShow) { was = w; tvShow(w); teachChrome(); } });
+  }
   // 👩‍🏫 #80 (2026-11-11): 체험판 차시 = 3차시(위) + 7차시(아래) · 7차시 = 6·7차시 파일의 체험판 판(trial7 · 문제 4 · 6 · 👑 7 · 체험판 학습지 숫자)
   const trialLessons = () => (DS.TRIAL.lessons || [DS.TRIAL.lesson]).map((id) => DS.Lessons.get(id)).filter(Boolean);
   const preps = {}; // 차시마다 학습지 칸 그림 (실제 서버에서 읽기만 · 연결 끊기 전에 모두)
@@ -233,17 +254,31 @@ DS.Test = (function () {
     let box = sp.querySelector('.trial-pick');
     if (!box) { box = document.createElement('div'); box.className = 'trial-pick'; sp.appendChild(box); }
     const SUB = { 'set-03': '개념 2 · 문제 2 · 👑 형성평가 3문항', 'trial-07': '⚔ 소레이드 문제 4 · 6 · 👑 문제 7 · ✍ 서술형' };
-    box.innerHTML = `<h1 class="tp-title">모두의 던전 <small>체험판</small></h1><p class="tp-h">👩‍🏫 선생님이 학생이 되어 한 차시를 직접!</p><input id="tp-name" maxlength="8" placeholder="이름 (예: 김선생)" autocomplete="off">
+    const verP = `<p class="tp-ver">v${String(DS.VERSION || '').replace(/^citadel-/, '')} · ${DS.CREDIT || ''}</p>`; // 2026-11-08 사용자 「체험판 버전 확인이 어려워」
+    const lessonCards = () => `<div class="tp-lessons">${LS.map((x) => `<button class="btn primary tp-go" data-go="${x.id}"><b>⚔ ${DS.Lessons.noText(x.no)}차시 「${esc(x.title.replace(/ \(체험판\)$/, ''))}」</b><small>${esc(SUB[x.id] || '')}</small></button>`).join('')}</div>`;
+    // 👩‍🏫 2026-11-13 선생님 「한 주소 들어가서 고르게」: ① 학생으로 · 선생님으로 → ② (학생 = 이름 · 용사 · 차시 / 선생님 = 이름 · 차시)
+    let mode = '';
+    const paint = () => {
+      if (!mode) box.innerHTML = `<h1 class="tp-title">모두의 던전 <small>체험판</small></h1><p class="tp-h">어떻게 체험할까요?</p>
+        <div class="tp-modes"><button class="btn primary tp-mode" data-mode="s"><b>⚔ 학생으로 체험</b><small>학생 폰 화면 · 가상 친구 4명과 한 차시</small></button><button class="btn primary tp-mode" data-mode="t"><b>👩‍🏫 선생님으로 체험</b><small>교실 TV + 리모컨 · 가상 학생 20명 수업 진행</small></button></div>
+        <p class="tp-n">기록은 남지 않아요</p>${verP}`;
+      else if (mode === 's') box.innerHTML = `<button class="btn small tp-back" data-back>◀ 고르기</button><h1 class="tp-title">모두의 던전 <small>체험판</small></h1><p class="tp-h">⚔ 선생님이 학생이 되어 한 차시를 직접!</p><input id="tp-name" maxlength="8" placeholder="이름 (예: 김선생)" autocomplete="off">
       <div class="tp-heroes">${HEROES.map((n) => `<button class="tp-h1${n === pick ? ' on' : ''}" data-h="${n}">${DS.Art.hero(n, 'idle')}<span>${esc(DS.Lore ? DS.Lore.label(n) : (DS.ASSETS.heroesV2.list[n] || {}).name || '')}</span></button>`).join('')}</div>
-      <div class="tp-lessons">${LS.map((x) => `<button class="btn primary tp-go" data-go="${x.id}"><b>⚔ ${DS.Lessons.noText(x.no)}차시 「${esc(x.title.replace(/ \(체험판\)$/, ''))}」</b><small>${esc(SUB[x.id] || '')}</small></button>`).join('')}</div>
-      <p class="tp-n">기록은 남지 않아요 · 한 차시를 끝내면 캠프에서 다른 차시도</p><p class="tp-ver">v${String(DS.VERSION || '').replace(/^citadel-/, '')} · ${DS.CREDIT || ''}</p>`; // 2026-11-08 사용자 「체험판 버전 확인이 어려워」: 첫 화면 꼬리표는 고르기 칸에 가려서 칸 안에
+      ${lessonCards()}<p class="tp-n">기록은 남지 않아요 · 한 차시를 끝내면 캠프에서 다른 차시도</p>${verP}`;
+      else box.innerHTML = `<button class="btn small tp-back" data-back>◀ 고르기</button><h1 class="tp-title">모두의 던전 <small>체험판</small></h1><p class="tp-h">👩‍🏫 교실 TV + 리모컨으로 수업을 직접 진행해요</p><input id="tp-name" maxlength="8" placeholder="선생님 이름 (예: 김선생)" autocomplete="off">
+      ${lessonCards()}<p class="tp-n">가상 학생 20명이 풀고 공격해요 · 기록은 남지 않아요${wideNow() ? '' : ' · <b>PC 에서 보면 더 좋아요</b>'}</p>${verP}`;
+      box.querySelectorAll('[data-mode]').forEach((b) => (b.onclick = () => { mode = b.dataset.mode; DS.Sound.clank(); paint(); }));
+      const bk = box.querySelector('[data-back]'); if (bk) bk.onclick = () => { mode = ''; paint(); };
+      box.querySelectorAll('[data-h]').forEach((b) => (b.onclick = () => { pick = Number(b.dataset.h); box.querySelectorAll('[data-h]').forEach((x) => x.classList.toggle('on', x === b)); DS.Sound.clank(); }));
+      box.querySelectorAll('[data-go]').forEach((b) => (b.onclick = () => DS.Control.run(async () => {
+        const name = (box.querySelector('#tp-name').value || '').trim() || '선생님', id = b.dataset.go;
+        sp.onclick = null; DS.Sound.clank();
+        await start(id, { trial: mode === 't' ? { name, teach: true } : { name, hero: pick }, prep: preps[id] || {} });
+      })));
+    };
+    const wideNow = () => window.innerWidth >= 900;
     box.onclick = (e) => e.stopPropagation();
-    box.querySelectorAll('[data-h]').forEach((b) => (b.onclick = () => { pick = Number(b.dataset.h); box.querySelectorAll('[data-h]').forEach((x) => x.classList.toggle('on', x === b)); DS.Sound.clank(); }));
-    box.querySelectorAll('[data-go]').forEach((b) => (b.onclick = () => DS.Control.run(async () => {
-      const name = (box.querySelector('#tp-name').value || '').trim() || '선생님', id = b.dataset.go;
-      sp.onclick = null; DS.Sound.clank();
-      await start(id, { trial: { name, hero: pick }, prep: preps[id] || {} });
-    })));
+    paint();
   }
   let gift3 = false; // 3차시를 끝내면 한 번
   async function trialEnd() {
@@ -276,6 +311,11 @@ DS.Test = (function () {
       let big = false, fsUsed = false;
       const fit = () => {
         const inn = box.querySelector('.tt-in');
+        if (!big && tvShown && trial && trial.teach && wide()) { // 👩‍🏫 교사 판 PC = 왼쪽 큰 TV (오른쪽 리모컨 칸 = --rmw)
+          const vw = window.innerWidth - (parseFloat(getComputedStyle(document.body).getPropertyValue('--rmw')) || 420), vh = window.innerHeight, k = Math.min(vw / 1280, vh / 720);
+          box.classList.remove('rot'); box.style.width = `${vw}px`; box.style.height = `${vh}px`; box.style.setProperty('--tbh', '0px');
+          inn.style.transform = `translate(${((vw - 1280 * k) / 2).toFixed(1)}px, ${((vh - 720 * k) / 2).toFixed(1)}px) scale(${k})`; document.body.style.setProperty('--tvh', '0px'); return;
+        }
         if (!big && tvShown) { // 📺 TV 화면 = 아래 진행 막대 위를 가득 (막대 · 단추는 그대로 보임)
           const bar = document.getElementById('test-bar'), bh = bar ? bar.offsetHeight : 0, vw = window.innerWidth, vh = Math.max(100, window.innerHeight - bh), rot = vh > vw * 1.15;
           const W = rot ? vh : vw, H = rot ? vw : vh, k = Math.min(W / 1280, H / 720);
@@ -309,7 +349,7 @@ DS.Test = (function () {
         fit(); setTimeout(fit, 250); // 전체 화면 · 회전이 끝난 뒤 한 번 더
       };
       box.querySelector('.tt-tap').addEventListener('click', () => setBig(!big));
-      tvShow = (on) => { tvShown = on; box.classList.toggle('tv-off', !on); box.classList.toggle('tv-show', on); document.body.classList.toggle('trial-tv', on); fit(); setTimeout(fit, 120); const b = document.getElementById('tb-tvv'); if (b) { b.innerHTML = on ? '📱<span class="tvl"> 학생 화면</span>' : '📺<span class="tvl"> TV 화면</span>'; b.dataset.tv = on ? 1 : 0; b.classList.toggle('on', on); } };
+      tvShow = (on) => { tvShown = on; if (trial && trial.teach) setTimeout(() => { const c = $('#trial-tch'); if (c) { const b = c.querySelector('#tb-tvv'); if (b) { b.innerHTML = on ? '📱<span class="tvl"> 리모컨</span>' : '📺<span class="tvl"> TV 화면</span>'; b.classList.toggle('on', on); } } }, 0); box.classList.toggle('tv-off', !on); box.classList.toggle('tv-show', on); document.body.classList.toggle('trial-tv', on); fit(); setTimeout(fit, 120); const b = document.getElementById('tb-tvv'); if (b) { b.innerHTML = on ? '📱<span class="tvl"> 학생 화면</span>' : '📺<span class="tvl"> TV 화면</span>'; b.dataset.tv = on ? 1 : 0; b.classList.toggle('on', on); } };
       document.addEventListener('fullscreenchange', () => { if (big && fsUsed && !document.fullscreenElement) { fsUsed = false; setBig(false); } }); // 뒤로 가기 · 제스처로 나가도 맞춤
       fit(); window.addEventListener('resize', () => { if (box.isConnected) fit(); });
     }
@@ -317,6 +357,7 @@ DS.Test = (function () {
   }
   // ≪ 메뉴화면 · 휴대폰 뒤로 (nav.js): 수업 → 모닥불(수업은 멈춰 기다림 · 차원문으로 이어서) · 성채/허수아비 → 모닥불 · 모닥불 → 첫 화면(처음부터)
   function trialNav(id) {
+    if (trial && trial.teach) { if (confirm('체험판 첫 화면으로 갈까요?\n처음부터 다시 시작해요.')) location.reload(); return true; } // 👩‍🏫 교사 판 = 캠프 없음
     if (!trial) { if (id === 'screen-splash' || id === 'screen-home') return true; if (confirm('첫 화면으로 갈까요?')) location.reload(); return true; }
     if (id === 'screen-bonus') { const b = $('#bn-back'); if (b) b.click(); else DS.Camp.enter(tme); return true; }
     if (id === 'screen-student' && where === 'raid') {

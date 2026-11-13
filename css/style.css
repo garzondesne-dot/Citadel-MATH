@@ -3480,3 +3480,20 @@ body:has(#test-bar) .bn-fight .st-dock.bf-dock { bottom: 0; }
 .bn-wr > summary { list-style: none; cursor: pointer; } .bn-wr > summary::-webkit-details-marker { display: none; }
 .bn-wr-l { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 2px; width: 100%; }
 details.bn-wr { display: block; }
+/* 👩‍🏫 체험판 교사 판 (2026-11-13): PC = 왼쪽 큰 TV + 오른쪽 리모컨(--rmw) · 폰 = 리모컨만 + 📺 단추 */
+body.trial-teach { --rmw: 420px; }
+body.trial-teach .test-tv.tv-hall.tv-show { bottom: 0; border: 0; }
+body.trial-teach .trial-tch { position: fixed; z-index: 48; right: 8px; bottom: 8px; display: flex; align-items: center; gap: 6px; padding: 6px 8px; border-radius: 12px; background: rgba(20, 16, 12, .92); box-shadow: 0 0 0 1.5px #c08aff, 0 4px 14px #0008; color: #f3ecdc; font-size: 12px; }
+body.trial-teach .trial-tch .tch-pc { color: #c9b896; font-size: 11px; }
+@media (min-width: 900px) {
+  body.trial-teach #screen-teacher.active { position: fixed; right: 0; top: 0; bottom: 0; width: var(--rmw); overflow-y: auto; z-index: 47; box-shadow: -4px 0 16px #0009; border-left: 2px solid #c08aff; }
+  body.trial-teach .test-tv.tv-hall.tv-show { right: var(--rmw); }
+  body.trial-teach .trial-tch #tb-tvv, body.trial-teach .trial-tch .tch-pc { display: none; }
+  body.trial-teach .trial-tch { right: calc(var(--rmw) + 8px); }
+}
+@media (max-width: 899px) { body.trial-teach .trial-tch { left: 8px; right: 8px; bottom: 8px; justify-content: space-between; } body.trial-teach #screen-teacher { padding-bottom: 64px; } }
+/* 첫 화면: 학생으로 · 선생님으로 고르기 */
+.trial-pick .tp-modes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0; }
+.trial-pick .tp-mode { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 14px 8px !important; }
+.trial-pick .tp-mode b { font-size: 17px; } .trial-pick .tp-mode small { font-size: 12px; opacity: .85; line-height: 1.35; }
+.trial-pick .tp-back { margin-bottom: 6px; }

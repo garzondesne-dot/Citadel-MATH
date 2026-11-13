@@ -13,7 +13,7 @@ const OUT = process.argv[2] || '.', U = 'http://localhost:8765/trial/';
   await p.goto(U); await p.waitForTimeout(3500);
   let n = await now(); check(n.phone === 'camp' && !n.tv, `첫 화면 = camp (${JSON.stringify(n)})`);
   await p.evaluate(() => { window.__clk = 0; const f = DS.Sound.click; DS.Sound.click = () => { window.__clk++; f.call(DS.Sound); }; }); // 🔘 #87a
-  await p.fill('#tp-name', '박선생'); await p.click('[data-go="set-03"]'); await p.waitForTimeout(3500);
+  await p.click('[data-mode="s"]'); await p.waitForTimeout(300); await p.fill('#tp-name', '박선생'); await p.click('[data-go="set-03"]'); await p.waitForTimeout(3500);
   n = await now(); check(n.phone === 'camp' && n.playing === 'camp', `캠프 = camp (${JSON.stringify(n)})`);
   { const c0 = await p.evaluate(() => window.__clk); check(c0 >= 1, `🔘 [data-go] 시작 단추 = 딸깍 (${c0})`); }
   await shut(); await p.click('#camp-gate'); await p.waitForTimeout(4000);

@@ -24,6 +24,7 @@ const OUT = process.argv[2] || '.', U = 'http://localhost:8765/trial/';
   }, [att, firstWrong]);
   // ① 첫 화면(이름 · 용사) → 내 캠프
   await p.goto(U); await p.waitForTimeout(4000); await shot('1-splash');
+  await p.click('[data-mode="s"]'); await p.waitForTimeout(300);
   const cap = await p.evaluate(() => [...document.querySelectorAll('.trial-pick [data-go]')].map((b) => b.dataset.go + ':' + b.textContent).join(' / ')); // #80 차시 카드 두 장 (3차시 위 · 7차시 아래)
   const pick6 = (await p.$$('.trial-pick .tp-h1')).length;
   await p.fill('#tp-name', '김선생'); await p.click('.tp-h1[data-h="2"]'); await p.click('[data-go="set-03"]');

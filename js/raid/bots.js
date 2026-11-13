@@ -5,7 +5,7 @@ window.DS = window.DS || {};
 DS.Bots = (function () {
   const NICK = ['민준', '서연', '도윤', '하은', '시우', '지유', '주원', '서아', '하준', '지안', '은우', '수아', '건우', '윤서', '선우', '채원', '유준', '다은', '이안', '소율', '태윤', '예린', '로운', '하린', '지호', '아린', '준서', '서윤', '현우'];
   const WORDS = ['벤 다이어그램 이제 알겠다!', '오늘 재밌었어요', '공집합 헷갈렸는데 해결', 'n(∅)=0 외웠다', '재도전 2번 만에 성공!', '다음 던전 언제해요?', '조건제시법 어려워요 ㅠ', '보스 막타 내가 침'];
-  let code = null, n = 0, stop = null, R = null, L = null, speed = 1, acc = { item: 0.8, boss: 0.8 }, PER = null;
+  let joinK = 1, code = null, n = 0, stop = null, R = null, L = null, speed = 1, acc = { item: 0.8, boss: 0.8 }, PER = null;
   // 👩‍🏫 교사 체험판 (2026-11-07): 친구마다 성격 { nick, hero, acc, slow, retry, heal, late, ok0 } — 없으면 예전처럼 모두 같게
   const per = (i) => (PER && PER[i]) || {};
   const done = new Set();
@@ -34,7 +34,7 @@ DS.Bots = (function () {
 
   function start(c, count, opt = {}) {
     stopAll();
-    code = c; n = count; speed = opt.speed || 1; Object.assign(acc, opt.acc || {}); PER = opt.personas || null; if (PER) n = PER.length;
+    code = c; n = count; speed = opt.speed || 1; joinK = opt.joinFast ? speed : 1; Object.assign(acc, opt.acc || {}); PER = opt.personas || null; if (PER) n = PER.length; // 👩‍🏫 교사 판 joinFast: 풀이는 천천히 · 입장은 보통 빠르기
     stop = N().watch(`rooms/${code}`, (v) => { if (!v) return; R = DS.Act.unpackRoom(v); L = DS.Lessons.get(R.meta.lesson); step(); });
   }
   function stopAll() { if (stop) stop(); stop = null; code = null; done.clear(); held = []; }
@@ -77,7 +77,7 @@ DS.Bots = (function () {
     const st = DS.Raid.stepOf(L, R);
     ids().forEach((u, i) => {
       const pp = per(i), slow = pp.slow || 1;
-      if (DS.Raid.isLobby(R) || (pp.late && !(R.players || {})[u])) later(`join|${u}`, pp.late ? pp.late * speed : 300 + i * rand(150, 450), () => N().set(P(`players/${u}`), { ver: DS.VERSION, num: i + 2, nick: pp.nick || NICK[i % NICK.length], hero: pp.hero != null ? pp.hero : Math.floor(Math.random() * 7), fx: pp.fx || (DS.FX ? DS.FX.BASE[i % 6] : 'flame'), cls: (R.meta || {}).cls || '1-1', at: N().TS }).then(() => N().set(P(`online/${u}`), true)).then(() => { if (!DS.Raid.isLobby(R)) N().set(P(`active/${u}`), true).catch(() => {}); })); // 💤 늦게 온 친구: 들어오면 바로 함께
+      if (DS.Raid.isLobby(R) || (pp.late && !(R.players || {})[u])) later(`join|${u}`, pp.late ? pp.late * speed : (300 + i * rand(150, 450)) * joinK, () => N().set(P(`players/${u}`), { ver: DS.VERSION, v: String(DS.VERSION || ""), num: i + 2, nick: pp.nick || NICK[i % NICK.length], hero: pp.hero != null ? pp.hero : Math.floor(Math.random() * 7), fx: pp.fx || (DS.FX ? DS.FX.BASE[i % 6] : 'flame'), cls: (R.meta || {}).cls || '1-1', at: N().TS }).then(() => N().set(P(`online/${u}`), true)).then(() => { if (!DS.Raid.isLobby(R)) N().set(P(`active/${u}`), true).catch(() => {}); })); // 💤 늦게 온 친구: 들어오면 바로 함께
       if (!(R.active || {})[u]) return;
       // 마무리: 대기실로 이동 → 한마디
       if (DS.Raid.isFinale(L, R) || (st && st.kind === 'boss' && DS.Raid.canLobby(L, R, u))) {
