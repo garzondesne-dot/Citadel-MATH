@@ -12,5 +12,19 @@
       "appId": "1:000000000000:web:0000000000000000000000"
     },
     "subject": "예시과목"
+  },
+  "srzmf": {
+    "name": "○○중학교",
+    "subject": "중학수학1",
+    "fb": {
+      "apiKey": "AIzaSyCRA48IQMfgcwVbnggJr8CyEqnt5fvpUvo",
+      "authDomain": "dungeon-hpms.firebaseapp.com",
+      "databaseURL": "https://dungeon-hpms-default-rtdb.firebaseio.com",
+      "projectId": "dungeon-hpms",
+      "storageBucket": "dungeon-hpms.firebasestorage.app",
+      "messagingSenderId": "271517619583",
+      "appId": "1:271517619583:web:e191274034baedb401764a",
+      "measurementId": "G-Z5NNL2BMKV"
+    }
   }
 }
