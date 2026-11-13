@@ -275,5 +275,8 @@ DS.Sched = (function () {
   const setHide = (cls, code, on) => N().set(`classlog/${ck(cls)}/${code}/hide`, on ? true : null);
   const when = (g) => { const k = kst(g.from || g.at || 0); return { date: k.date, dow: DOW[k.dow], hm: k.hm }; };
 
-  return { plan, openSlot, pointer, advance, setNext, addExtra, removeExtra, slotsAhead, getProg, syncKeys, periodEnd, BELLS, PERIODS, SKIP, DOW, AFTER, LATE, ST, CYCLE, kst, times, usable, skipped, upcoming, nextLesson, ensure, active, today, skipSlot, relesson, logs, sheet, judge, setAtt, setMemo, setHide, when, label, getWeek, effective, comci, ck };
+  const api = { plan, openSlot, pointer, advance, setNext, addExtra, removeExtra, slotsAhead, getProg, syncKeys, periodEnd, BELLS, PERIODS, SKIP, DOW, AFTER, LATE, ST, CYCLE, kst, times, usable, skipped, upcoming, nextLesson, ensure, active, today, skipSlot, relesson, logs, sheet, judge, setAtt, setMemo, setHide, when, label, getWeek, effective, comci, ck };
+  // 🏫 2026-11-13 선생님 「시간표 숨김」(학교판 · 선생님마다 시간표가 다름): 우리 학교 일과표에 묶인 길을 끔 — 보스 타임바(교시 끝) 없음 · 예약 수업 없음 · 진도 포인터 없음
+  if (DS.OFF && DS.OFF('sched')) Object.assign(api, { periodEnd: () => null, active: () => null, pointer: async () => null, syncKeys: async () => 0, advance: async () => null, ensure: async () => null, plan: async () => [], openSlot: async () => null });
+  return api;
 })();

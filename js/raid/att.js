@@ -14,7 +14,7 @@ DS.Att = (function () {
   const md = (date) => { const [, m, d] = date.split('-'); return `${+m}/${+d}`; };
   const tag = (x) => `${x.extra ? '<span class="sc-tag ex">➕ 보충</span>' : ''}${x.resume ? '<span class="sc-tag rz">⏸ 이어서</span>' : ''}`;
   async function today(el) {
-    if (!el) return;
+    if (!el || (DS.OFF && DS.OFF('sched'))) return;
     el.innerHTML = '<p class="muted small">📅 오늘 수업 불러오는 중…</p>';
     try { await S().ensure(); } catch (e) { /* 오프라인 · 권한 → 목록만 */ }
     const [eff, all] = await Promise.all([S().effective(), S().plan({ past: true, days: 1 }).catch(() => [])]), now = DS.Net.now();
@@ -49,6 +49,7 @@ DS.Att = (function () {
 
   // ── 📅 시간표 (요일 × 교시 → 반 · 매주) + 칸마다 다음 차시 · 진도 맞추기 · 앞으로 2주 ───────────────────────
   async function editor(done) {
+    if (DS.OFF && DS.OFF('sched')) return; // 🏫 학교판 = 시간표 없음
     const [eff, cs] = await Promise.all([S().effective(), classes()]);
     const auto = eff.auto, man = { ...eff.manual }, L = DS.Lessons.list.filter((l) => !l.eval && !l.sheetLesson && l.no).sort((a, b) => a.no - b.no);
     const m = document.createElement('div'); m.className = 'modal sc-edit';

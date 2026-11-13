@@ -3507,3 +3507,4 @@ body.trial-teach .trial-tch .tch-pc { color: #c9b896; font-size: 11px; }
 .nn-name { font-size: clamp(14px, 1.25vw, 19px); font-weight: 700; line-height: 1.15; padding: 1px 6px; text-align: center; white-space: normal; word-break: keep-all; max-width: 100%; }
 .fa-wrap.big .k-rev .fa-ann, .fa-wrap.big .fa-ann { z-index: 20; } /* 🔄 안내 방송 = 이름 줄 위 */
 .nn-row { grid-template-columns: repeat(var(--cols, 8), minmax(0, clamp(64px, 7vw, 110px))); } .nn-row .nn-h { width: 100%; min-width: 0; } /* 🙊 30명이어도 화면 안 (칸이 줄어듦) */
+.school #t-sched, .school #t-today, .school #sc-ex { display: none !important; } /* 🏫 2026-11-13 학교판 = 📅 시간표 · 오늘 수업(예약) · 보충 숨김 */

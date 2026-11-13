@@ -239,7 +239,7 @@ DS.App = (function () {
     const ok = await A().isAdmin();
     document.querySelectorAll('.t-only').forEach((e) => (e.hidden = !ok));
     if (ok) teacherSkin();
-    if (ok && DS.Att) DS.Att.today($('#t-today')).catch((e) => console.warn('오늘 수업', e)); // 📅 v0.9.7.0: 예약 수업 7일 치 채우기 + 오늘 목록
+    if (ok && DS.Att && !(DS.OFF && DS.OFF('sched'))) DS.Att.today($('#t-today')).catch((e) => console.warn('오늘 수업', e)); // 📅 v0.9.7.0: 예약 수업 7일 치 채우기 + 오늘 목록
     if (ok) DS.Net.get('tcfg/hallPw').then((v) => { const el = $('#t-hallpw'); if (el && v) el.value = v; }).catch(() => {}); // 🖥 고정 비밀번호 (있으면)
     if (ok) {
       document.querySelectorAll('.t-auth').forEach((e) => { e.innerHTML = ''; }); // 2026-11-07 메뉴 정돈: 로그아웃은 ⚙ 설정 안으로
