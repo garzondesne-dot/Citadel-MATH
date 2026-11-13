@@ -3475,3 +3475,8 @@ body:has(#screen-student.st-battle.active) #snd-tab { left: auto; right: 8px; to
 .bn-fight .scene .sc-hp { top: 50px; }
 .bn-fight .st-dock.bf-dock { position: sticky; margin-top: auto; bottom: 0; }
 body:has(#test-bar) .bn-fight .st-dock.bf-dock { bottom: 0; }
+/* ✍ 허수아비 「서술형만」 바로 가기 (2026-11-13) */
+.bn-wr { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 4px 0 8px; }
+.bn-wr > summary { list-style: none; cursor: pointer; } .bn-wr > summary::-webkit-details-marker { display: none; }
+.bn-wr-l { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 2px; width: 100%; }
+details.bn-wr { display: block; }
