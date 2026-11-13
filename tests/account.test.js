@@ -14,5 +14,6 @@ check(e0 !== e1 && /^[a-z0-9_.-]+@citadel\.class$/.test(e0) && /^[a-z0-9_.-]+@ci
 check(A.email('1-3', 7, 0) !== A.email('1-3', 17, 0) && A.email('1-3', 7, 0) !== A.email('1-37', 0, 0), '번호가 다르면 다른 계정');
 check(A.pw('0427').length >= 6 && A.validPin('0427') && !A.validPin('427') && !A.validPin('04a7') && !A.validPin('12345'), '비밀번호 4자리 → 6자 이상');
 check(/^t_[a-z0-9._-]+@citadel\.class$/.test(A.teacherEmail('Kim T')), `교사 이메일 ${A.teacherEmail('Kim T')}`);
+check(JSON.stringify(A.loginEmails(' Teacher@School.KR ')) === JSON.stringify(['teacher@school.kr', 't_teacherschool.kr@citadel.class']) && JSON.stringify(A.loginEmails('kimt')) === JSON.stringify(['t_kimt@citadel.class']) && A.teacherEmail('a@b.kr') === 't_ab.kr@citadel.class', `✉ 로그인 = 이메일 그대로 → 예전 꼴 (${A.loginEmails(' Teacher@School.KR ')}) · 만들기는 예전 꼴 그대로`); // 2026-11-13 학교판
 if (fail) { console.error(`\n${fail}건 실패`); process.exit(1); }
 console.log('OK: 계정 — 가린 이름 · 반 이름 · 명단 붙여 넣기 · 학생/교사 이메일 · 4자리 비밀번호 통과');

@@ -257,7 +257,7 @@ DS.App = (function () {
     const first = !(await A().adminExists());
     document.querySelectorAll('.t-auth').forEach((e) => {
       e.innerHTML = `<p class="muted small">${first ? '처음 한 번: 교사 계정을 만들어요. (학생보다 먼저!)' : '교사 계정으로 로그인해요.'}</p>
-        <form class="t-form" autocomplete="on" onsubmit="return false"><div class="row2"><label>교사 아이디 <input class="t-id" name="username" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="영문·숫자"></label><label>비밀번호 <input class="t-pw" name="${first ? 'new-password' : 'password'}" type="password" autocomplete="${first ? 'new-password' : 'current-password'}" placeholder="6자 이상"></label></div>
+        <form class="t-form" autocomplete="on" onsubmit="return false"><div class="row2"><label>교사 아이디 <input class="t-id" name="username" autocomplete="username" autocapitalize="off" spellcheck="false" placeholder="영문·숫자 (또는 이메일)"></label><label>비밀번호 <input class="t-pw" name="${first ? 'new-password' : 'password'}" type="password" autocomplete="${first ? 'new-password' : 'current-password'}" placeholder="6자 이상"></label></div>
         <button type="submit" class="btn primary t-login">${first ? '✨ 교사 계정 만들기' : '🔑 교사 로그인'}</button></form>`;
     });
     document.querySelectorAll('.t-login').forEach((b) => (b.onclick = go(async () => {

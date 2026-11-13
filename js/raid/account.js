@@ -25,7 +25,10 @@ DS.Account = (function () {
   // ── 순수 도구 (tests/account.test.js) ──────────────────────
   const classKey = (s) => String(s).trim().replace(/\s+/g, '').replace(/[^0-9A-Za-z가-힣-]/g, '-');
   const email = (c, n, gen) => `s_${encodeURIComponent(c).replace(/%/g, '').toLowerCase()}_${Number(n)}_${gen || 0}@${DOMAIN}`;
+  // ✉ 2026-11-13 (무안행복중학교 「여기서 막혔대」 · Firebase 콘솔에서 이메일로 만든 교사 계정): 아이디 칸에 「@」가 있으면 그 이메일 그대로 (소문자 · 앞뒤 공백 정리) · 없으면 예전처럼 t_<아이디>@citadel.class
+  //   계정 만들기는 예전 꼴 그대로(이미 「✨ 교사 계정 만들기」에 이메일을 넣어 만든 계정 = t_<@ 지운 꼴>@citadel.class) · 로그인 = ① 그 이메일 그대로 → 안 되면 ② 예전 꼴로 한 번 더
   const teacherEmail = (id) => `t_${String(id).trim().toLowerCase().replace(/[^0-9a-z._-]/g, '')}@${DOMAIN}`;
+  const loginEmails = (id) => { const t = String(id).trim().toLowerCase().replace(/\s+/g, ''); return t.includes('@') ? [t, teacherEmail(id)] : [teacherEmail(id)]; };
   const pw = (pin) => `${pin}#cm`; // Firebase 는 6자 이상이라 4자리 뒤에 앱이 정한 글자를 붙인다
   const validPin = (pin) => /^\d{4}$/.test(String(pin));
   function mask(name) {
@@ -247,7 +250,9 @@ DS.Account = (function () {
     tsess(true);
   }
   async function teacherLogin(id, password) {
-    try { await N().signIn(teacherEmail(id), password); } catch (e) { if (why(e)) rethrow(e); fail('교사 아이디나 비밀번호가 달라요.'); }
+    const tries = loginEmails(id); let done = false;
+    for (let i = 0; i < tries.length && !done; i++) { try { await N().signIn(tries[i], password); done = true; } catch (e) { if (why(e)) rethrow(e); } }
+    if (!done) fail('교사 아이디나 비밀번호가 달라요.');
     if (!(await isAdmin())) { await N().signOut(); fail('교사 계정이 아니에요.'); }
     tsess(true);
   }
@@ -258,5 +263,5 @@ DS.Account = (function () {
   const betaKeys = (T) => Object.keys(T || {}).filter((k) => (T[k] || {})[BETA] === true);
   const isBetaOf = (T, c) => ((T || {})[classKey(c)] || {})[BETA] === true;
   async function testerOf(c, n) { const T = (await DS.Net.get(`tester/${classKey(c)}`).catch(() => null)) || {}; return T[n] === true || T[BETA] === true; } // 개인 시험 계정 또는 베타 반
-  return { BETA, betaKeys, isBetaOf, testerOf, classKey, email, teacherEmail, pw, validPin, mask, parseRoster, uploadRoster, removeStudent, resetAccount, masks, accountOf, signUp, login, me, setHero, setFx, setLook, setSocket, setTitle, looks, CHAL, chalProgress, logout, adminExists, isAdmin, teacherCreate, teacherLogin, endStaleTeacher };
+  return { BETA, betaKeys, isBetaOf, testerOf, classKey, email, teacherEmail, loginEmails, pw, validPin, mask, parseRoster, uploadRoster, removeStudent, resetAccount, masks, accountOf, signUp, login, me, setHero, setFx, setLook, setSocket, setTitle, looks, CHAL, chalProgress, logout, adminExists, isAdmin, teacherCreate, teacherLogin, endStaleTeacher };
 })();
