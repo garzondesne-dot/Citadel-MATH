@@ -214,7 +214,7 @@ DS.Fun = (function () {
   const left = (f) => Math.max(0, Math.round((f.to - N().now()) / 1000));
   if (typeof document !== 'undefined') setInterval(() => document.querySelectorAll('[data-fun-end]').forEach((e) => { e.textContent = Math.max(0, Math.round((Number(e.dataset.funEnd) - N().now()) / 1000)); }), 250);
   // 자리: 무리 안에서 i 번째 (가로 cols 칸)
-  const spot = (i, n, x0, x1, y0, cols) => { const c = Math.max(1, Math.min(cols, n)), r = Math.floor(i / c), k = i % c, w = (x1 - x0) / c; return { x: x0 + w * (k + 0.5) + (r % 2 ? w * 0.25 : 0), y: y0 + r * 9 }; };
+  const spot = (i, n, x0, x1, y0, cols, dy = 9) => { const c = Math.max(1, Math.min(cols, n)), r = Math.floor(i / c), k = i % c, w = (x1 - x0) / c; return { x: x0 + w * (k + 0.5) + (r % 2 ? w * 0.25 : 0), y: y0 + r * dy }; };
   // 종합상황실 · 학생 폰 같은 무대 (big: 종합상황실)
   function stage(R, f, big, me) {
     const alive = Object.keys(f.alive || {}), res = f.res || {}, show = f.phase === 'show';
@@ -222,9 +222,10 @@ DS.Fun = (function () {
     const spect = Object.keys(R.players || {}).filter((u) => !R.players[u].teacher && !inPlay.includes(u) && (R.active || {})[u]);
     const cols = big ? 6 : 4;
     const bib = (u) => String((R.players[u] || {}).num || 0).padStart(2, '0'); // 🔄 반대로: 이름 대신 번호표
-    const fig = (u, x, y, cls = '') => `<div class="fa-h${cls}${u === me ? ' me' : ''}" data-u="${u}" style="left:${x}%;top:${y}%" ${show ? `data-go="${res.a.includes(u) ? 'a' : res.b.includes(u) ? 'b' : (res.c || []).includes(u) ? 'c' : 'n'}"` : ''}>${show && f.rps ? `<i class="fa-hand${res.out.includes(u) ? ' lose' : ''}">${res.a.includes(u) ? HAND_KO.a : res.b.includes(u) ? HAND_KO.b : (res.c || []).includes(u) ? HAND_KO.c : '안 냄'}</i>` : ''}${heroOf(R, u)}${(f.kind || 'bal') === 'rev' ? `<b class="bib">${bib(u)}</b>` : big || u === me ? `<b>${esc(u === me ? '나' : nameOf(R, u))}</b>` : ''}</div>`;
+    const fig = (u, x, y, cls = '') => `<div class="fa-h${cls}${u === me ? ' me' : ''}" data-u="${u}" style="left:${x}%;top:${y}%" ${show ? `data-go="${res.a.includes(u) ? 'a' : res.b.includes(u) ? 'b' : (res.c || []).includes(u) ? 'c' : 'n'}"` : ''}>${show && f.rps ? `<i class="fa-hand${res.out.includes(u) ? ' lose' : ''}">${res.a.includes(u) ? HAND_KO.a : res.b.includes(u) ? HAND_KO.b : (res.c || []).includes(u) ? HAND_KO.c : '안 냄'}</i>` : ''}${heroOf(R, u)}${(f.kind || 'bal') === 'rev' ? `<b class="bib">${bib(u)}</b>${big ? `<b class="fa-nm">${esc(nameOf(R, u))}</b>` : ''}` : big || u === me ? `<b>${esc(u === me ? '나' : nameOf(R, u))}</b>` : ''}</div>`;
     const py = (f.kind || 'bal') === 'rev' ? 68 : 50; // 🔄 숙소 그림: 바닥이 아래쪽
-    const plaza = inPlay.map((u, i) => { const s = spot(i, inPlay.length, 34, 66, py, big ? 5 : 4); return fig(u, s.x, s.y); }).join('');
+    const wide = big && (f.kind || 'bal') === 'rev'; // 🔄 2026-11-13 TV 이름 크게: 반대로 = 숙소 바닥을 넓게 써서 이름이 겹치지 않게 (8칸 · 줄 간격 넓게 · 위로 당김)
+    const plaza = inPlay.map((u, i) => { const s = wide ? spot(i, inPlay.length, 16, 84, inPlay.length > 16 ? 50 : 58, 8, 12) : spot(i, inPlay.length, 34, 66, py, big ? 5 : 4); return wide ? fig(u, s.x, s.y).replace('style="', `style="z-index:${3 + Math.max(0, 9 - Math.floor(s.y / 10))};`) : fig(u, s.x, s.y); }).join(''); // 윗줄 이름이 아랫줄 용사에 가리지 않게
     const gal = spect.slice(0, big ? 24 : 10).map((u, i) => `<div class="fa-g${u === me ? ' me' : ''}" style="left:${4 + (i * (92 / Math.max(1, Math.min(spect.length, big ? 24 : 10))))}%">${heroOf(R, u)}</div>`).join('');
     const lose = show ? res.lose : '';
     const kind = f.kind || 'bal', bg = bgOf(kind), spring = kind === 'rev' ? '<i class="fa-spring"></i>' : '';

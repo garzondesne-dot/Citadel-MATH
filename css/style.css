@@ -3500,3 +3500,10 @@ body.trial-teach .trial-tch .tch-pc { color: #c9b896; font-size: 11px; }
 /* 🏫 학교판 (2026-11-13 · html.school · js/config.js DS.OFF): 없는 기능의 단추 · 자리 숨김 — ⚒ 모루 · 🏰 성채 · ⛺ 출제 공방 · 📝 설문 · ✏ 출제 확인 · ⭕ OX 타임 */
 .school #camp-anvil, .school #camp-castle, .school #camp-tent, .school #tc-anvil, .school #tc-castle, .school #tc-tent,
 .school #sv-go, .school #t-quest, .school #ml-sv, .school [data-oxq], .school [data-forge], .school #camp-sv, .school .sv-btn { display: none !important; }
+/* 🔄 🙊 2026-11-13 선생님 「역밸런스할때 이름도 크게 · 눈치게임할때 이름 크게」: 종합실(TV) 이름 = 교실 뒤에서도 읽히게 · 긴 이름 · 30명이어도 겹치지 않게 두 줄까지 */
+.fa-wrap.big .fa-h b { font-size: 20px; line-height: 1.1; }
+.fa-wrap.big .fa-h b.bib { font-size: 22px; padding: 0 8px; }
+.fa-wrap.big .fa-h b.fa-nm { display: block; margin-top: 1px; font-size: 17px; color: #fff; text-shadow: 2px 2px 0 #000, 0 0 4px #000; white-space: nowrap; }
+.nn-name { font-size: clamp(14px, 1.25vw, 19px); font-weight: 700; line-height: 1.15; padding: 1px 6px; text-align: center; white-space: normal; word-break: keep-all; max-width: 100%; }
+.fa-wrap.big .k-rev .fa-ann, .fa-wrap.big .fa-ann { z-index: 20; } /* 🔄 안내 방송 = 이름 줄 위 */
+.nn-row { grid-template-columns: repeat(var(--cols, 8), minmax(0, clamp(64px, 7vw, 110px))); } .nn-row .nn-h { width: 100%; min-width: 0; } /* 🙊 30명이어도 화면 안 (칸이 줄어듦) */
