@@ -86,9 +86,11 @@ DS.Act = (function () {
   async function joinHall(code, key) {
     const meta = await N().get(P(code, 'meta'));
     if (!meta) fail('수업 코드가 없어요.');
-    try { await N().set(P(code, `hosts/${N().uid()}`), String(key)); } catch (e) { fail('종합상황실 키가 달라요.'); }
+    // 🔐 2026-11-14 (선생님 「추천대로」): 키 글자는 방 칸(학생도 읽음)에 쓰지 않음 — 아무도 못 읽는 hallTry 에 내고(규칙이 secrets 와 같을 때만 받음) · 방 칸 hosts = true
+    if (N().mode === 'local') { const sec = await N().get(`secrets/${code}`); if (!sec || sec.hallKey !== String(key)) fail('종합상황실 키가 달라요.'); }
+    try { await N().set(`hallTry/${code}/${N().uid()}`, String(key)); } catch (e) { fail('종합상황실 키가 달라요.'); }
+    try { await N().set(P(code, `hosts/${N().uid()}`), true); } catch (e) { fail('종합상황실 키가 달라요.'); }
     const ok = await N().get(P(code, `hosts/${N().uid()}`));
-    if (N().mode === 'local') { const sec = await N().get(`secrets/${code}`); if (!sec || sec.hallKey !== String(key)) { await N().remove(P(code, `hosts/${N().uid()}`)); fail('종합상황실 키가 달라요.'); } }
     if (!ok) fail('종합상황실 키가 달라요.');
     return meta;
   }

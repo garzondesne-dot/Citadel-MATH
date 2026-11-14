@@ -9,6 +9,14 @@
         }
       }
     },
+    "hallTry": {
+      "$code": {
+        "$uid": {
+          ".write": "auth != null && auth.uid === $uid",
+          ".validate": "newData.isString() && newData.val() === root.child('secrets/'+$code+'/hallKey').val()"
+        }
+      }
+    },
     "rooms": {
       ".read": "auth != null && root.child('admins/'+auth.uid).val() === true",
       "$code": {
@@ -16,7 +24,7 @@
         ".write": "auth != null && root.child('admins/'+auth.uid).val() === true && ((!data.exists() && newData.child('meta/teacher').val() === auth.uid) || !newData.exists())",
         "hosts": {
           "$uid": {
-            ".write": "auth != null && auth.uid === $uid && newData.val() === root.child('secrets/'+$code+'/hallKey').val()"
+            ".write": "auth != null && auth.uid === $uid && newData.val() === true && root.child('hallTry/'+$code+'/'+auth.uid).val() === root.child('secrets/'+$code+'/hallKey').val()"
           }
         },
         "state": {

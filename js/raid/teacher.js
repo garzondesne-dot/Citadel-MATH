@@ -9,8 +9,8 @@ DS.Teacher = (function () {
   let wasClosed = null, curKey = '';
   let code = null, L = null, R = null, raw = null, stop = null, tick = 0, showKey = 0, videos = {}, vStop = null, vLesson = '';
   let svSt = null, svStop = null, svCls = ''; // 📝 이 반 설문 열림 상태 (v0.9.8.2)
-  // 교사 폰에서는 종합상황실 키를 바로 보여 준다 (종합상황실 입력칸만 **** 로 가림 — 사용자 결정 v0.5.0)
-  const keyHtml = () => `<b>${esc($('#t-key').textContent) || '—'}</b>`;
+  // 🔐 2026-11-14 선생님 「추천대로」(옛 v0.5.0 「교사 폰엔 바로 보임」 바뀜): 교사 폰 화면을 TV 에 띄울 수 있어 ●●●● · 「보기」 누를 때만 5초
+  const keyHtml = () => { const k = $('#t-key').textContent; return !k ? '<b>—</b>' : Date.now() < showKey ? `<b>${esc(k)}</b>` : '<b>●●●●</b> <button class="btn small t-keyshow" type="button">보기</button>'; };
 
   async function create(lessonId, cls, opt = {}) {
     // 2026-11-08: 한 반에 던전 하나만 — 이미 열린 던전이 있으면 닫을지 묻는다 (아니오 = 새 던전 안 만듦)
@@ -58,6 +58,7 @@ DS.Teacher = (function () {
     const total = L.steps.length, i = R.state.step ?? -1;
     $('#t-head').innerHTML = `<div><b>수업 ${code}</b> <span class="muted small">${esc(L.title)}</span><br><span class="muted small">종합상황실 키 ${keyHtml()} · 입장 ${studs.length}${Raid().isLobby(R) ? '' : ` · 대기실 인원 ${Raid().headcount(R)}`}</span></div>
       <div class="phase-pill">${i < 0 ? '대기' : Raid().isClosed(R) ? '끝' : i >= total ? '마무리' : `${i + 1}/${total}`}</div>`;
+    { const ks = document.querySelector('#t-head .t-keyshow'); if (ks) ks.onclick = () => { showKey = Date.now() + 5000; render(); setTimeout(() => { if (code) render(); }, 5100); }; } // 🔐 키 보기 5초
     $('#t-tabs').innerHTML = '';
     const tb = $('#t-tbar'); if (tb) { const sig = `${Raid().deadline(R)}|${Raid().isClosed(R)}|${Raid().bossHp(L, R).won}|${Raid().isLobby(R)}|${(R.state || {}).extend || 0}`; if (tb.dataset.sig !== sig) { tb.dataset.sig = sig; tb.innerHTML = C().tbarHtml(L, R, { mini: true, ext: true }); } C().bindExtend(tb, code, R); } // 2026-11-06 사용자 「교사 폰 타이머가 0으로 줄었다 늘었다」: 방이 바뀔 때마다 막대를 새로 그려 폭 0 → 제자리로 다시 늘어나던 것 → 마감 · 연장 · 승리가 바뀔 때만 다시 그림
     const body = $('#t-body');

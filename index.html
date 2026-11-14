@@ -70,7 +70,7 @@
         </div>
         <details class="mk-card mk-set" id="t-set">
           <summary>⚙ 설정 · 비밀번호 · 선생님 모습 · 로그아웃</summary>
-          <div class="row2 t-hallpw"><label>🖥 종합상황실 비밀번호 <input id="t-hallpw" class="masked" type="text" inputmode="numeric" maxlength="4" placeholder="비우면 수업마다 새로" autocomplete="off" data-1p-ignore data-lpignore="true"></label><button id="t-hallpw-save" class="btn">💾 저장</button></div>
+          <div class="row2 t-hallpw"><label>🖥 종합상황실 비밀번호 <input id="t-hallpw" class="masked" type="password" inputmode="numeric" maxlength="4" placeholder="비우면 수업마다 새로" autocomplete="off" data-1p-ignore data-lpignore="true"></label><button id="t-hallpw-save" class="btn">💾 저장</button></div>
           <p class="muted small">숫자 4자리를 저장하면 모든 수업이 그 비밀번호예요 (교실 PC 가 기억해서 다음부터 바로 입장). 비우고 저장하면 수업마다 무작위.</p>
           <label class="t-sched-use"><input type="checkbox" id="t-sched-use"> 📅 <b>시간표 쓰기</b> <span class="muted small">끄면(기본) 반 → 차시를 골라 「▶ 수업 열기」 · 켜면 교시 시각 · 시간표를 넣고 지금 교시 수업을 추천 (수업은 늘 선생님이 눌러서 열어요)</span></label>
           <div class="row sched-only" hidden><button class="btn small" id="t-bells">🕘 교시 시각</button><button class="btn small" id="t-week">🗓 시간표</button></div>
@@ -84,7 +84,7 @@
     <div id="f-hall" class="role-form panel framed" hidden>
       <div id="h-find" class="h-find"></div>
       <details class="mk-more" id="h-manual"><summary>직접 입력 (코드 · 키)</summary>
-        <div class="row2"><label>수업 코드 <input id="h-code" name="class-code" inputmode="numeric" maxlength="6" autocomplete="off" data-1p-ignore data-lpignore="true"></label><label>종합상황실 키 <input id="h-key" class="masked" type="text" name="hall-key" inputmode="numeric" maxlength="4" autocomplete="off" data-1p-ignore data-lpignore="true" placeholder="••••"></label></div>
+        <div class="row2"><label>수업 코드 <input id="h-code" name="class-code" inputmode="numeric" maxlength="6" autocomplete="off" data-1p-ignore data-lpignore="true"></label><label>종합상황실 키 <input id="h-key" class="masked" type="password" name="hall-key" inputmode="numeric" maxlength="4" autocomplete="off" data-1p-ignore data-lpignore="true" placeholder="••••"></label></div>
       </details>
       <button id="h-go" class="btn primary big">🖥 종합상황실 열기</button>
       <p class="muted small mk-c">교실 PC · TV 화면용</p>

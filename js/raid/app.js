@@ -35,7 +35,7 @@ DS.App = (function () {
     if (role === 'hall' && q.get('code')) $('#h-code').value = q.get('code');
     const h = read('citadel-hall');
     if (h) { $('#h-code').value = $('#h-code').value || h.code; if (h.key) { try { localStorage.setItem('citadel-hall', JSON.stringify({ code: h.code })); } catch (e) { /* 무시 */ } } } // 2026-11-06: 옛 판이 저장한 비밀번호는 지움 · 칸에 채우지 않음
-    if (q.get('key')) $('#h-key').value = q.get('key');
+    if (q.get('key')) { $('#h-key').value = q.get('key'); try { const u = new URLSearchParams(location.search); u.delete('key'); history.replaceState(history.state, '', `${location.pathname}${u.toString() ? `?${u.toString().replace(/(^|&)local=(&|$)/, '$1local$2')}` : ''}${location.hash}`); } catch (e) { /* 무시 */ } } // 🔐 2026-11-14: 주소 줄 · 방문 기록 · 북마크에 키가 남지 않게 읽은 즉시 지움
     const t = read('citadel-teacher');
     // 바로 열기 (체험판·북마크): ?role=teacher&resume · ?role=hall&code=…&key=…
     if (role === 'teacher' && q.has('resume') && t && t.uid === DS.Net.uid()) $('#t-resume').click();
@@ -112,7 +112,7 @@ DS.App = (function () {
     const L = (id) => DS.Lessons.get(id);
     // 2026-11-07 메뉴 정돈: 「지금 열린 수업」 카드 하나를 크게 · 다른 수업은 아래 작은 단추
     const big = (r) => `<div class="mk-live" data-hc="${r.code}"><span class="muted small">지금 열린 수업</span><b>${esc(r.cls)}반${r.no ? ` · ${DS.Lessons.noText(r.no)}차시` : ''}</b><span>${esc(L(r.lesson) ? L(r.lesson).title : '')}${r.sched ? ' · 예약' : ''}</span><small>수업 코드 <b class="code">${r.code}</b></small></div>`;
-    box.innerHTML = rooms.length ? `${big(rooms[0])}${rooms.length > 1 ? `<div class="h-find-list">${rooms.slice(1).map((r) => `<button class="btn small" data-hc="${r.code}"><b>${esc(r.cls)}반</b> ${r.no ? `${DS.Lessons.noText(r.no)}차시` : ''}</button>`).join('')}</div>` : ''}<label class="mk-key">종합상황실 키 <input id="h-key2" class="masked" type="text" inputmode="numeric" maxlength="4" autocomplete="off" data-1p-ignore data-lpignore="true" placeholder="••••"></label>`
+    box.innerHTML = rooms.length ? `${big(rooms[0])}${rooms.length > 1 ? `<div class="h-find-list">${rooms.slice(1).map((r) => `<button class="btn small" data-hc="${r.code}"><b>${esc(r.cls)}반</b> ${r.no ? `${DS.Lessons.noText(r.no)}차시` : ''}</button>`).join('')}</div>` : ''}<label class="mk-key">종합상황실 키 <input id="h-key2" class="masked" type="password" inputmode="numeric" maxlength="4" autocomplete="off" data-1p-ignore data-lpignore="true" placeholder="••••"></label>`
       : '<p class="muted small">🔎 열린 수업을 찾는 중… 교사 폰에서 수업을 만들면 여기에 저절로 나타나요 (아래에 코드를 직접 넣어도 돼요)</p>';
     const pickCode = (c) => { $('#h-code').value = c; box.querySelectorAll('[data-hc]').forEach((b) => b.classList.toggle('on', b.dataset.hc === c)); };
     box.querySelectorAll('[data-hc]').forEach((b) => (b.onclick = () => { pickCode(b.dataset.hc); const k = $('#h-key2') || $('#h-key'); k.focus(); }));
@@ -254,7 +254,7 @@ DS.App = (function () {
     if (ok) teacherSkin();
     if (ok && DS.Sched && DS.Sched.load) { await DS.Sched.load().catch(() => false); schedUi(); } // 📅 ⚙ 시간표 쓰기 (기본 끔)
     if (ok && DS.Att && DS.Sched && DS.Sched.isOn()) DS.Att.today($('#t-today')).catch((e) => console.warn('오늘 수업', e)); // 📅 v0.9.7.0: 예약 수업 7일 치 채우기 + 오늘 목록
-    if (ok) DS.Net.get('tcfg/hallPw').then((v) => { const el = $('#t-hallpw'); if (el && v) el.value = v; }).catch(() => {}); // 🖥 고정 비밀번호 (있으면)
+    if (ok) DS.Net.get('tcfg/hallPw').then((v) => { const el = $('#t-hallpw'); if (el) { el.value = ''; el.dataset.has = v ? '1' : ''; el.placeholder = v ? '●●●● 고정됨 · 바꿀 때만 새로 입력' : '비우면 수업마다 새로'; } }).catch(() => {}); // 🖥 고정 비밀번호 (있으면) · 🔐 2026-11-14: 칸에 미리 채우지 않음
     if (ok) {
       document.querySelectorAll('.t-auth').forEach((e) => { e.innerHTML = ''; }); // 2026-11-07 메뉴 정돈: 로그아웃은 ⚙ 설정 안으로
       document.querySelectorAll('.t-auth-out').forEach((e) => { e.innerHTML = '<div class="acc-card"><b>👩‍🏫 교사 계정</b><span class="muted small">로그인됨</span><button class="btn small t-out">로그아웃</button></div>'; });
@@ -380,10 +380,12 @@ DS.App = (function () {
     // 🖥 종합상황실 비밀번호 고정 (2026-11-05 사용자): tcfg/hallPw (교사만 읽고 씀) · 비우면 수업마다 무작위
     $('#t-hallpw-save').onclick = go(async () => {
       const v = $('#t-hallpw').value.trim();
+      if (!v && $('#t-hallpw').dataset.has && !confirm('고정 비밀번호를 지우고 수업마다 새 비밀번호로 바꿀까요?')) return; // 🔐 칸이 비어 보여도 실수로 지우지 않게
       if (v && !/^\d{4}$/.test(v)) throw Object.assign(new Error('비밀번호는 숫자 4자리예요 (비우면 수업마다 새로).'), { user: true });
       await DS.Net.set('tcfg/hallPw', v || null);
       const fixedN = v && DS.Sched && DS.Sched.syncKeys ? await DS.Sched.syncKeys().catch(() => 0) : 0; // 미리 만든 예약 방도 (2026-11-06)
-      DS.UI.toast(v ? `🖥 종합상황실 비밀번호를 ${v} 로 고정했어요 (다음 수업부터${fixedN ? ` · 예약 수업 ${fixedN}개도 바꿈` : ''})` : '🖥 이제 수업마다 새 비밀번호가 생겨요', 3400);
+      $('#t-hallpw').value = ''; $('#t-hallpw').dataset.has = v ? '1' : ''; $('#t-hallpw').placeholder = v ? '●●●● 고정됨 · 바꿀 때만 새로 입력' : '비우면 수업마다 새로';
+      DS.UI.toast(v ? `🖥 종합상황실 비밀번호를 고정했어요 (다음 수업부터${fixedN ? ` · 예약 수업 ${fixedN}개도 바꿈` : ''})` : '🖥 이제 수업마다 새 비밀번호가 생겨요', 3400);
     });
     const noLesson = () => Object.assign(new Error('아직 차시가 없어요 — 📋 수업 준비 → 「📊 엑셀로 차시 만들기」에서 첫 차시를 올려 주세요.'), { user: true }); // 🏫 2026-11-13 차시 0개 학교
     $('#x-go').onclick = go(async () => { if (!(await A().isAdmin())) throw Object.assign(new Error('교사 계정으로 로그인해야 해요.'), { user: true }); if (!DS.Lessons.get($('#p-lesson').value)) throw noLesson(); await DS.Test.start($('#p-lesson').value); });
