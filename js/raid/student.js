@@ -160,7 +160,7 @@ DS.Student = (function () {
     el.hidden = false;
     el.innerHTML = `<div class="focus-top"><b>⚠ WARNING</b><span>선생님에게 주목하세요</span></div>
       <div class="focus-body"><p class="focus-step">${step ? esc(step.title) : ''}</p>${step && step.say ? `<p class="focus-say">${pretty(step.say)}</p>` : ''}<p class="muted small">화면이 잠깐 멈췄어요. 선생님이 풀어 주면 이어서 해요.</p></div>`;
-    if (!focusWas) { focusWas = true; DS.Sound.warn(); if (navigator.vibrate) navigator.vibrate([80, 60, 80]); }
+    if (!focusWas) { focusWas = true; if (DS.Sound.fx) DS.Sound.fx('focus', 0.8, () => DS.Sound.warn()); else DS.Sound.warn(); if (navigator.vibrate) navigator.vibrate([80, 60, 80]); }
   }
   const myP = () => (R.players || {})[me] || {};
 
@@ -363,7 +363,7 @@ DS.Student = (function () {
   const brkSeen = {}, autoRedo = {};
   function heartBreak(key, left, delay) {
     if (brkSeen[key]) return; brkSeen[key] = true;
-    setTimeout(() => { const hs = document.querySelectorAll('#st-body .dk-slot.hp .ch'), h = hs[Math.max(0, Math.min(hs.length - 1, Math.floor(left)))]; if (!h) return; h.classList.remove('brk'); void h.offsetWidth; h.classList.add('brk'); if (DS.Sound && DS.Sound.shieldBreak) DS.Sound.shieldBreak(); try { if (navigator.vibrate) navigator.vibrate(35); } catch (e) { /* 무시 */ } }, Math.max(0, delay || 0));
+    setTimeout(() => { const hs = document.querySelectorAll('#st-body .dk-slot.hp .ch'), h = hs[Math.max(0, Math.min(hs.length - 1, Math.floor(left)))]; if (!h) return; h.classList.remove('brk'); void h.offsetWidth; h.classList.add('brk'); if (DS.Sound && DS.Sound.fx) DS.Sound.fx('heart-break', 0.85, () => DS.Sound.shieldBreak()); /* 🔊 2차 ❤ 깨짐 */ try { if (navigator.vibrate) navigator.vibrate(35); } catch (e) { /* 무시 */ } }, Math.max(0, delay || 0));
   }
   const hpTries = (rec) => `<div class="enc-tries hp-tries" title="남은 재도전 기회">${pipsOf(rec)}</div>`;
   // 🧷 화면 다시 그리기 = paint (2026-11-10 · 「스크롤이 맨 위로」 재발 뿌리 제거): 같은 화면(tag 같음)을 다시 그리면 양피지(.paper) · 몸통 · 창 스크롤 자리를 그대로 둠
@@ -424,7 +424,7 @@ DS.Student = (function () {
     if (!can) { if (old) old.remove(); return; }
     const b = old || document.createElement('button'); b.className = `holy-btn${on ? ' on' : ''}`; b.type = 'button';
     b.innerHTML = on ? '🛡 <b>준비됨</b><small>다음 공격을 막습니다 · 누르면 끄기</small>' : '🛡 <b>홀리 방패</b><small>누르면 다음 공격을 막아요</small>';
-    b.onclick = async () => { b.disabled = true; try { await DS.Act.holyArm(code, mid, !on); if (!on && DS.Sound.holy) DS.Sound.holy(); else DS.Sound.clank(); /* 🔊 #87 켤 때 = holy */ if (navigator.vibrate) navigator.vibrate(30); } catch (e) { DS.UI.toast('잠깐 뒤 다시 눌러 주세요'); } b.disabled = false; };
+    b.onclick = async () => { b.disabled = true; try { await DS.Act.holyArm(code, mid, !on); if (!on && DS.Sound.fx) DS.Sound.fx('holy-on', 0.85, () => DS.Sound.holy()); else DS.Sound.clank(); /* 🔊 #87 켤 때 = holy */ if (navigator.vibrate) navigator.vibrate(30); } catch (e) { DS.UI.toast('잠깐 뒤 다시 눌러 주세요'); } b.disabled = false; };
     if (!old) sc.appendChild(b);
   }
   // 🛡 홀리 방패 막기: 켠 용사가 있으면 반 전체 안 멈춤 · 내가 켰으면 내 용사 날개 · 방패 + 막은 기록(→ 🗿 석화 10초) · 다른 폰 = 알림만
@@ -514,7 +514,7 @@ DS.Student = (function () {
     let k = 0;
     Raid().healsTo(R, mid, me, L).slice(0, Raid().V4(R) ? 99 : Raid().HEAL_MAX).forEach((h) => {
       if (healSeen(`${code}|${mid}|${h.from}|${h.k}`)) return;
-      healPop(Raid().V4(R) ? `❤ +1 💚 ${nickOf(h.from)} 힐` : `+1 💚 ${nickOf(h.from)} 응원`, (k++) * 700); DS.Sound.correct(); drawn = '';
+      healPop(Raid().V4(R) ? `❤ +1 💚 ${nickOf(h.from)} 힐` : `+1 💚 ${nickOf(h.from)} 응원`, (k++) * 700); if (Raid().V4(R) && DS.Sound.fx) DS.Sound.fx('heart-up', 0.85, () => DS.Sound.correct()); else DS.Sound.correct(); drawn = '';
       heroFx = { pose: 'healed', until: Date.now() + 1800 }; setTimeout(() => heroFlash('healed', 1600), 60);
     });
   }
@@ -544,7 +544,7 @@ DS.Student = (function () {
   // 정찰이 끝난 첫 화면: 실루엣에 색이 돌아오며 포효 (선생님 「⚔ 등장!」 · 시간 끝 둘 다)
   function scoutAppear(id) {
     if (scoutWas !== id) return; scoutWas = null; clearTimeout(solveT);
-    if (Date.now() - appearAt > 1500) { appearAt = Date.now(); if (DS.Sound && DS.Sound.hit) DS.Sound.hit(); DS.UI.toast('⚔ 몬스터 등장! 이제 답을 넣어요'); }
+    if (Date.now() - appearAt > 1500) { appearAt = Date.now(); if (DS.Sound && DS.Sound.fx) DS.Sound.fx(id === 'boss' ? 'mon-appear-boss' : 'mon-appear', 0.85, () => DS.Sound.hit()); else if (DS.Sound && DS.Sound.hit) DS.Sound.hit(); DS.UI.toast('⚔ 몬스터 등장! 이제 답을 넣어요'); }
     setTimeout(() => { const m = document.querySelector('#st-body .enc-mon'); if (m) { m.classList.remove('appear'); void m.offsetWidth; m.classList.add('appear'); } }, 60);
   }
   function monsterView(body, step) {
@@ -673,6 +673,7 @@ DS.Student = (function () {
   const stopHtml = (rec) => `<div class="sk-box sk-stopped"><p>⏸ 재도전을 쉬고 있어요 — 다른 용사들을 기다려요 <span class="muted small">(⚡ ${rec.energy} 남음)</span></p><button class="btn primary big" id="sk-back">${rec.inPanel ? `🔥 재도전 판 ${rec.panel} 이어서` : '⚡ 기술 고르기'}</button></div>`;
   // open = 기술을 쓴 뒤 바로 🔥 재도전 판 열기 (일반 = 다음 시도 · 소레이드 = 판 번호)
   function bindSkill(mid, rec, open) {
+    { const ck = `${mid}|${rec.energy}`; if (document.querySelector('#st-body [data-sk]') && !skCardSnd[ck]) { skCardSnd[ck] = 1; if (DS.Sound.fx) DS.Sound.fx('energy-card', 0.7); } } // 🔊 2차 ⚡ 카드 펼침 (⚡ 칸마다 한 번)
     document.querySelectorAll('#st-body [data-sk]').forEach((b) => (b.onclick = () => { skPick[mid] = b.dataset.sk; drawn = ''; render(); }));
     const st = $('#sk-stop'); if (st) st.onclick = () => { skStop[mid] = true; drawn = ''; render(); };
     const bk = $('#sk-back'); if (bk) bk.onclick = () => { delete skStop[mid]; if (rec.inPanel) open(rec); drawn = ''; render(); };
@@ -680,13 +681,13 @@ DS.Student = (function () {
     go.onclick = () => DS.Control.run(async () => {
       const k = skPick[mid]; if (!k) return; go.disabled = true; const n0 = Raid().healsGiven(R, mid, me);
       if (k === 'true') {
-        await DS.Act.heal(code, raw, mid, { true: true }); drawn = '';
+        await DS.Act.heal(code, raw, mid, { true: true }); drawn = ''; if (DS.Sound.fx) DS.Sound.fx('true-ult', 0.9); // 🔊 2차 眞
         if (DS.Attack) { await DS.Attack.cutin(myP().hero || 0, myP().fx, { gold: true }); const sc = document.querySelector('#st-body .scene'); if (sc) { const mon = sc.querySelector('.enc-mon .art.monster') || sc.querySelector('.enc-mon'); DS.Attack.ultBlast(sc, mon, myP().fx); if (DS.Thrill && DS.Thrill.petrify) setTimeout(() => DS.Thrill.petrify(mon), 500); } }
         healPop('🌟 진필살기! 🗿 석화 · 못 맞힌 친구 ❤ +1', 1600);
       } else if (k === 'bind') { await DS.Act.heal(code, raw, mid, { bind: true }); DS.Sound.correct(); healPop(`⛓ ${mid === 'boss' ? '보스' : '몬스터'} 묶기 +${Raid().BIND_TOKEN}초!`); }
       else { const to = await DS.Act.heal(code, raw, mid); DS.Sound.correct(); heroFx = { pose: 'heal', until: Date.now() + 1600 }; setTimeout(() => heroFlash('heal', 1400), 60); healPop(to ? `💚 ${nickOf(to)} ❤ +1` : '💚 응원 보냄!'); }
       if (DS.Grow && real() && k !== 'bind') DS.Grow.add(acc(), { heal: 1 }, `${k === 'true' ? 'ult' : 'heal'}_${code}_${mid}_${n0}`).catch(() => {});
-      delete skPick[mid]; delete skStop[mid]; open(Object.assign({}, rec, { kUsed: rec.kUsed + 1, panel: rec.kUsed + 1 })); drawn = ''; render();
+      delete skPick[mid]; delete skStop[mid]; open(Object.assign({}, rec, { kUsed: rec.kUsed + 1, panel: rec.kUsed + 1 })); if (DS.Sound.fx) setTimeout(() => DS.Sound.fx('retry-start', 0.75), 700); drawn = ''; render(); // 🔊 2차 🔥 재도전 판
     });
   }
   // 보기 글자: 'venn:B|1 2 3 6' 은 벤 다이어그램 그림으로
@@ -700,7 +701,7 @@ DS.Student = (function () {
     const c = Number(myP().charge) || 0, st = Raid().stepOf(L, R); if (!c || !st || st.kind !== 'monster' || Raid().cleared(L, R, st.id)) return;
     const dock = body.querySelector('.st-dock') || body.querySelector('.panel'); if (!dock || dock.querySelector('#st-charge')) return;
     dock.insertAdjacentHTML('beforeend', `<button class="btn st-charge" id="st-charge">⚡ 충전된 진필살기 쓰기 (${c})</button>`);
-    dock.querySelector('#st-charge').onclick = () => DS.Control.run(async () => { await DS.Act.useCharge(code, raw); DS.UI.toast('🌟 진필살기!'); drawn = ''; render(); });
+    dock.querySelector('#st-charge').onclick = () => DS.Control.run(async () => { await DS.Act.useCharge(code, raw); DS.UI.toast('🌟 진필살기!'); if (DS.Sound.fx) DS.Sound.fx('true-ult', 0.9); drawn = ''; render(); });
   }
   // ⚔ #24 (2026-11-09 1-4반 「다 적고 공격을 안 누름」): 칸을 다 채우면 players/{나}/draft = 그 시도 · 리모컨이 「입력 다 함 · 공격 안 누름」으로 봄 (바뀔 때만 씀)
   let draftKey = '';
@@ -805,7 +806,7 @@ DS.Student = (function () {
     };
   }
   // ⚔ 소레이드 화면 (2026-11-09 #18): 진행 칩 ①②③👑 · 지금 단계 문제 하나 · 「📜 나의 풀이」가 한 줄씩 쌓임 · 기회 반 칸 · 1칸 남으면 🙋 선생님 확인
-  let cform = null; const chHint = {}; const bpArm = {}; const chainPrac = {}, writeMode = {}, probShut = {}, probOpen = {}, pracArm = {};
+  let cform = null; const skCardSnd = {}; const chHint = {}; const bpArm = {}; const chainPrac = {}, writeMode = {}, probShut = {}, probOpen = {}, pracArm = {};
   // ✨ 「📜 나의 풀이」 새 줄 (#46 모래 글씨 → 2026-11-10 선생님 「픽셀 디졸브 인 · 새 문장은 빨간색 · 다음 단계에서 다시 검정」)
   //   새 줄만 · 종이색 픽셀 칸이 흩어지듯 사라지며 글씨가 드러남 (왼쪽부터 조금 먼저 · 약 0.9초 · 한 줄씩 차례로) · 그 단계에서 생긴 줄 = 빨강 → 다음 단계 줄이 생기면 검정
   //   이미 있던 줄 · 다시 들어온 첫 화면은 연출 없이 · 화면을 다시 그려도 이어서(시작 시각 기억 · 칸 순서는 줄마다 고정) · 그림 파일 없음 (캔버스 1장)
@@ -911,7 +912,7 @@ DS.Student = (function () {
         const missOf = (r) => Object.values((r && r.steps) || {}).map((x, i) => (x && !x.earned ? (i === rec.items.length - 1 ? '👑' : '①②③④⑤⑥'[i]) : null)).filter(Boolean);
         if (res && res.status === 'pass' && missOf(res).length) setTimeout(() => DS.UI.toast(`✏ 통과! 다만 ${missOf(res).join(' · ')} 단계는 학습지에 다시 정리해 둬요`, 4500), 4400); // 1점 빠져도 통과 (2026-11-09 선생님)
         if (res && res.status === 'pass' && !wm.peek && !rec.done) { const nFill = await DS.Act.chainPhotoFill(code, raw, mid).catch(() => 0); if (nFill) setTimeout(() => DS.UI.toast(`✍ 서술형 통과 — 남은 ${nFill}단계 모두 처치!`, 3500), 4300); } // #50 ③
-        if (res && res.status === 'pass') { delete writeMode[mid]; DS.UI.toast(wm.peek ? '✍ 연습 쓰기 통과! (진필살기 없음)' : out === 'true' ? '🌟 진필살기 발동! 몬스터가 돌로 굳어요' : out === 'cut' ? '🌟 금빛 컷인! (석화는 이미 친구가)' : out === 'charge' ? '⚡ 진필살기 충전 1개 — 다음 몬스터에서 써요' : /* #42: 이제 안 나옴 (옛 판 호환) */ '🌟 서술형 통과!', 4200); }
+        if (res && res.status === 'pass') { delete writeMode[mid]; if (DS.Sound.fx) { if (!wm.peek) DS.Sound.fx('scroll', 0.8); if (out === 'true') setTimeout(() => DS.Sound.fx('true-ult', 0.9), 600); } /* 🔊 2차 📜 · 眞 */ DS.UI.toast(wm.peek ? '✍ 연습 쓰기 통과! (진필살기 없음)' : out === 'true' ? '🌟 진필살기 발동! 몬스터가 돌로 굳어요' : out === 'cut' ? '🌟 금빛 컷인! (석화는 이미 친구가)' : out === 'charge' ? '⚡ 진필살기 충전 1개 — 다음 몬스터에서 써요' : /* #42: 이제 안 나옴 (옛 판 호환) */ '🌟 서술형 통과!', 4200); }
         else if (res && res.steps) { const miss = Object.values(res.steps).map((x, i) => (x && !x.earned ? (i === rec.items.length - 1 ? '👑' : '①②③④⑤⑥'[i]) : null)).filter(Boolean); if (miss.length) DS.UI.toast(`✏ 빠진 단계: ${miss.join(' · ')} — 그 졸개만 다시 고쳐 써요 (충전 유지)`, 4500); }
         drawn = ''; render();
       });
@@ -979,7 +980,7 @@ DS.Student = (function () {
       const okNow = prac ? (r2.pass === pass && r2.pStage > stage) : r2.stage > stage;
       chainAtk = { ok: okNow, big: !prac && r2.done, perfect: !prac && r2.done && r2.perfect, prac }; // ⚔ 2026-11-09 선생님 「졸개 공격도 모션」: 다시 그린 뒤 돌진 · 탄 (아래 render 뒤)
       if (okNow) { if (!DS.Attack) { DS.Sound.slash(); setTimeout(() => DS.Sound.hit(), 160); } if (stage < pItems.length - 1 && DS.Sound.die) setTimeout(() => DS.Sound.die(), 900); /* 🔊 #87 졸개가 사라질 때 (공격 연출 뒤 · 대장은 finish) */ DS.UI.toast(stage === pItems.length - 1 ? (prac ? '✔ 연습 사슬 완성! 🔥 경험치 +1' : r2.perfect ? '🌟 퍼펙트 사슬!' : '👑 대장 처치!') : `✔ 졸개 ${'①②③④⑤⑥'[stage]} 처치!`); }
-      else if (r2.hearts) { if (!DS.Attack) DS.Sound.squish(); if (r2.locked) DS.UI.toast('🙋 ❤ 0 — 선생님 확인을 기다려요'); } // 💔 v4: 글자 안내 없이 하트 쪼개짐 · 빨간 줄 (잠김만 알림)
+      else if (r2.hearts) { if (!DS.Attack) DS.Sound.squish(); if (r2.locked) { DS.UI.toast('🙋 ❤ 0 — 선생님 확인을 기다려요'); if (DS.Sound.fx) setTimeout(() => DS.Sound.fx('lock', 0.8), 500); } } // 💔 v4: 글자 안내 없이 하트 쪼개짐 · 빨간 줄 (잠김만 알림)
       else { if (!DS.Attack) DS.Sound.squish(); if (!prac) DS.UI.toast(r2.locked ? (r2.hearts ? '🙋 ❤ 0 — 선생님 확인을 기다려요' : '🙋 기회 1칸 — 선생님 확인을 기다려요') : r2.fail ? '기회를 다 썼어요' : `✘ 틀렸어요 · ${r2.hearts ? '❤' : '기회'} −${stage === n - 1 ? 1 : 0.5}`); else DS.UI.toast(r2.pFail ? '✘ 이번 연습 판은 기회를 다 썼어요' : `✘ 틀렸어요 · 연습 기회 −${stage === pItems.length - 1 ? 1 : 0.5}`); }
       render(); chainAttack();
     });
@@ -1111,6 +1112,7 @@ DS.Student = (function () {
         const okN = Object.values(res).filter((x) => x.ok).length, hpWrong = Object.entries(res).some(([i, x]) => Number(i) < hpN && !x.ok);
         if (!rb.inPanel) Object.entries(res).forEach(([i, x]) => DS.Act.hit(code, raw, `b1_${i}_${x.a}`, { ok: x.ok })); // ✨ 보스 문항 퍼펙트(첫 시도) · 🔥 콤보
         if (!rb.inPanel && okN) petriGem('boss', okN); // 🗿 석화 중 도달 = 💎
+        if (Object.entries(res).some(([i, x]) => Number(i) >= hpN && x.ok) && DS.Sound.fx) setTimeout(() => DS.Sound.fx('star-bonus', 0.8), 450); // 🔊 2차 ⭐ 보너스
         if (okN) { DS.Sound.slash(); setTimeout(() => DS.Sound.hit(), 160); const sc = document.querySelector('#st-body .scene'); if (sc) DS.FX.play(sc, myP().fx || 'flame', { scale: hpWrong ? 0.32 : 0.45, perfect: !hpWrong }); } else DS.Sound.squish();
         if (!rb.inPanel && rb.round === 0 && !hpWrong && DS.Attack && DS.Attack.canUlt(myP().fx, myP().hero)) setTimeout(() => DS.Attack.cutin(myP().hero || 0, myP().fx), 300); // ⚡ 형성평가 첫 제출 퍼펙트 + 특화 Ⅲ↑
         bRes = { round: `${rb.inPanel ? 'p' : 'r'}${rb.inPanel ? rb.panel : rb.round}`, res, panel: rb.inPanel, hpWrong }; bform = null; if (rb.inPanel || rb.done) bossOpen = ''; drawn = ''; render();

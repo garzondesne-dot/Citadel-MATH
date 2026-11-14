@@ -165,6 +165,8 @@ DS.Sound = (function () {
     holy() { sample('holy', 0.8, () => this.clank()); },
     awaken() { sample('awaken', 0.9, () => this.levelup()); },
     click() { sample('click', 0.5); },
+    // 🔊 효과음 2차 (2026-11-14 선생님 「효과음 평가 끝」 · hero-v2 docs/handoff/sfx/round2 1위 · manifest sfx.files 의 id) · 파일이 아직 안 받아졌으면 fb (옛 소리)
+    fx(id, v = 0.8, fb) { return sample(id, v, fb); },
     sand() { noise({ dur: 0.55, vol: 0.07, freq: 7000, sweepTo: 2200, q: 0.9 }); }, // ✨ 모래 글씨 「사르륵」 (#46)
     tick() { tone({ type: 'square', f0: 1300, f1: 1250, dur: 0.025, vol: 0.05 }); }, // 🥊 펀치 기계 숫자 돌기 (v0.9.11)
     // ⚖ 쉼터 놀이 (v0.9.8.0): 탈락 버저 · 스프링 띠용

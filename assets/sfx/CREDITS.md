@@ -12,3 +12,8 @@
 
 ## 2026-11-14 · 🛡 방패 막는 소리 (나무)
 - **ElevenLabs (무료 요금제 · 2026-11-14 생성)** — 선생님이 후보 A~E 중 고름 「지금 거랑 B C 사용해 줘」: block-v3b(가죽 덧댄 나무 「쿵」) · block-v3c(작은 나무 「똑」). 다듬음: 음량 맞춤 · mono 96k mp3. 막는 소리 = block-v2 · v3b · v3c 셋을 번갈아(block-v2b 는 뺌 · 파일만 남김).
+
+## 2026-11-14 · 🔊 효과음 2차 (선생님 「효과음 평가 끝」 · 1위만)
+- **PlinkFX 0.2.0 — CC0** (코드 합성 효과음 · 출처 표기 필요 없음): r2-combo · energy-card · enh-great · focus · game-ok · game-no · heart-break · heart-up · lock · mail · mon-appear · portal · raise-hand · retry-start · skill-unlock · star-bonus.
+- **ElevenLabs** (위 #86 줄과 같음 · 선생님이 후보 A~C 중 고름): r2-castle-open · class-start · door-close · dummy-hit · enh-ok · holy-on · mon-appear-boss · plus5 · scout-start · scroll · true-ult.
+- 음량 = loudnorm −16 LUFS · mono 96k. 정식에 없는 기능(얼음 · 사슬 · 안개 · 파지직 · 독 · 먹물 · 하품 · 혼란 · 깨우기 · 불 끄기)과 게시판 · 3 · 2 · 1 · 첫 용사 고르기 · 강화 실패 소리는 넣지 않음.

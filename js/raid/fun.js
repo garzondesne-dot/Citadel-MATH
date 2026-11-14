@@ -318,6 +318,7 @@ DS.Fun = (function () {
   // 학생 폰
   const funPaid = {}; // 💎 이 기기에서 이미 받은 판
   let phoneSig = '';
+  let funSnd = '';
   function phone(body, R, me, code) {
     if (R.fun && R.fun.kind === 'td' && DS.TD) return DS.TD.phone(body, R, me, code);
     if (R.fun && R.fun.kind === 'nun' && DS.Nunchi) return DS.Nunchi.phone(body, R, me, code);
@@ -349,6 +350,7 @@ DS.Fun = (function () {
     body.innerHTML = `<div class="panel framed fa-wrap"><div class="fa-head">${head(f)}</div>${stage(R, f, false, me)}${me2}
       ${f.phase === 'pick' && f.rps ? `<div class="fa-pick rps">${['a', 'b', 'c'].map((k, i) => `<button class="btn big fa-${k}${mine === k ? ' on' : ''}" data-pick="${k}">${HANDS[i]}</button>`).join('')}</div>` : f.phase === 'pick' ? `<div class="fa-pick"><button class="btn big fa-a${mine === 'a' ? ' on' : ''}" data-pick="a">${esc(f.q[0])}</button><button class="btn big fa-b${mine === 'b' ? ' on' : ''}" data-pick="b">${esc(f.q[1])}</button></div>` : ''}
       ${f.phase === 'show' ? `<p class="fa-res">${verdict(f)}</p>` : ''}</div>`;
+    if (f.phase === 'show' && wasIn && f.kind !== 'quiz' && funSnd !== `${f.g}|${f.rk}` && DS.Sound && DS.Sound.fx) { funSnd = `${f.g}|${f.rk}`; const outL = arr(r.out); setTimeout(() => DS.Sound.fx(outL.includes(me) ? 'game-no' : 'game-ok', 0.8), 1900); } // 🔊 2차 ⭕ · ❌ (공개 연출 뒤)
     body.querySelectorAll('[data-pick]').forEach((b) => (b.onclick = () => {
       if (N().now() > f.to) return;
       pend[`${f.g}|${f.rk}`] = b.dataset.pick; phoneSig = '';

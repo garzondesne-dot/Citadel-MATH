@@ -86,6 +86,7 @@ DS.Hall = (function () {
   function ulNext() {
     const it = ulQ.shift(); if (!it || !DS.Attack) { ulBusy = false; return; } ulBusy = true;
     const p = (R.players || {})[it.u] || {}, gold = it.kind === 'true' || it.kind === 'tcut', quick = ulQ.length >= 2; // 🌟 tcut = 📸 진필살기 다음 통과자 (금빛 컷인만) · quick = 뒤에 2명 넘게 기다리면 짧은 컷인(얼굴 · 이름 · 눈빛)만
+    if (it.kind === 'true' && Snd() && Snd().fx) Snd().fx('true-ult', 0.9); // 🔊 2차 眞 진필살기 (TV)
     DS.Attack.cutin(p.hero || 0, p.fx || 'flame', { gold, quick, ...cutHost() }).then(() => { try { const arena = $('#raid'), m0 = $('#rm'); if (arena && m0) { if (!quick) DS.Attack.ultBlast(arena, m0, p.fx || 'flame'); setTimeout(() => { if (!DS.Thrill) return; if (it.kind === 'true') DS.Thrill.petrify(m0.querySelector('.art.monster') || m0); else if (!it.noBind) DS.Thrill.chain(m0, DS.Combo ? DS.Combo.ULT_BIND : 15, 'ult'); }, 500); } } catch (e) { console.error(e); } }).catch(() => {}).finally(() => setTimeout(ulNext, quick ? 350 : gold ? 1800 : 1400)); // 중간에 오류가 나도 다음 필살기가 막히지 않게
   }
   // 🗿 석화 남은 초 (교실 TV 위쪽 큰 띠) · 몬스터 회색
@@ -181,7 +182,8 @@ DS.Hall = (function () {
     const cb = $('#h-combo'); if (cb) { const h = DS.Thrill.badge(DS.Combo.comboNow(han, R, now), { big: true }) + (han && han.best >= 5 ? `<small class="th-best">오늘 최고 ${han.best}${(R.meta || {}).comboBest ? ` · 반 기록 ${R.meta.comboBest}` : ''}</small>` : ''); if (cb.innerHTML !== h) cb.innerHTML = h; }
     DS.Thrill.batHall($('#raid'), Raid().isClosed(R) ? null : b);
   }
-  C().onTimeUp('hall', (now) => { if (!R || !L || !document.getElementById('screen-hall').classList.contains('active')) return; C().doorMount('hall', code, R, L); if (DS.Act.isHost(R)) C().doorHost(code, R, L, now); }); // ⏰ #68 A 보스 문 닫기 장면 (마감 → 15초 묻기 → 끝)
+  let doorSnd = ''; // 🔊 2차 👑 보스 문 닫힘 (수업마다 한 번)
+  C().onTimeUp('hall', (now) => { if (!R || !L || !document.getElementById('screen-hall').classList.contains('active')) return; if (doorSnd !== code && Snd() && Snd().fx) { doorSnd = code; Snd().fx('door-close', 0.9); } C().doorMount('hall', code, R, L); if (DS.Act.isHost(R)) C().doorHost(code, R, L, now); }); // ⏰ #68 A 보스 문 닫기 장면 (마감 → 15초 묻기 → 끝)
   // 🧭 위 줄 「도입 · 개념 · 문제 · 형성」 (2026-11-07 최종 정돈판 ⑤): 지금 단계만 금색 + 그 종류 안에서 「1 / 5」 · 아래 얇은 진행 점(단계 하나 = 점 하나 · 형성평가는 긴 점)
   const KIND4 = (st) => (st.kind === 'concept' ? '개념' : st.kind === 'monster' ? '문제' : st.kind === 'boss' ? '형성' : '도입');
   function stepChips(i) {
@@ -451,12 +453,12 @@ DS.Hall = (function () {
     if (on) {
       const st = Raid().stepOf(L, R) || {}, img = (prep.img || {})[st.kind === 'boss' ? 'boss' : st.id] || (prep.img || {})[st.id];
       if (mon) mon.classList.add('scout-sil');
-      if (!ban) { ban = document.createElement('div'); ban.className = 'h-solve h-scout'; arena.appendChild(ban); }
+      if (!ban) { ban = document.createElement('div'); ban.className = 'h-solve h-scout'; arena.appendChild(ban); if (Snd() && Snd().fx) Snd().fx('scout-start', 0.8); } // 🔊 2차 🌫 정찰 시작
       ban.innerHTML = `<b>🌫 정찰 — 학습지를 먼저 풀어요</b>${img ? `<img class="scout-img" src="${img}" alt="">` : ''}<p>✋ 준비 완료 <b>${rd}</b> / ${all} · 등장까지 <b class="sl-left" data-sl-end="${lk.end - lk.cur}"${lk.frz ? ` data-fz="${(R.state || {}).fzAt}"` : ''}>${Math.ceil(lk.left / 1000)}초</b></p>`;
     } else {
       if (ban) ban.remove();
       if (mon) DS.Art.scoutDeco(mon, false);
-      if (mon && mon.classList.contains('scout-sil')) { mon.classList.remove('scout-sil'); mon.classList.remove('appear'); void mon.offsetWidth; mon.classList.add('appear'); if (Snd() && Snd().hit) Snd().hit(); }
+      if (mon && mon.classList.contains('scout-sil')) { mon.classList.remove('scout-sil'); mon.classList.remove('appear'); void mon.offsetWidth; mon.classList.add('appear'); const st2 = Raid().stepOf(L, R) || {}; if (Snd() && Snd().fx) Snd().fx(st2.kind === 'boss' ? 'mon-appear-boss' : 'mon-appear', 0.9, () => Snd().hit()); else if (Snd() && Snd().hit) Snd().hit(); } // 🔊 2차 👹 등장 (보스 = 따로)
     }
   }
   // ⚔ 소레이드 진행판 (2026-11-09 #18): ①②③👑 칸마다 그 단계 학생 번호 · 🙋 = 선생님 확인 필요 · 맨 위 체력바는 반 전체 그대로

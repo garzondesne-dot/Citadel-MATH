@@ -41,7 +41,7 @@ DS.Thrill = (function () {
   }
   // ⚡ 10 COMBO! · 👑 보스 2단계! 같은 큰 알림
   function note(html, cls = '', ms = 2600, parent) { const n = el(`th-note ${cls}`, html, parent); setTimeout(() => n.remove(), ms); }
-  const tierNote = (t, parent) => note(`<p>${t === 30 ? '👑' : t === 20 ? '🌈' : '⚡'} ${t} COMBO!</p><b>몬스터 묶기 +${DS.Combo.TIER_BIND[t]}초</b>`, `tier tier-${t}`, 2600, parent);
+  const tierNote = (t, parent) => (DS.Sound && DS.Sound.fx && DS.Sound.fx('combo', 0.85), note(`<p>${t === 30 ? '👑' : t === 20 ? '🌈' : '⚡'} ${t} COMBO!</p><b>몬스터 묶기 +${DS.Combo.TIER_BIND[t]}초</b>`, `tier tier-${t}`, 2600, parent)); // 🔊 2차 🔥 콤보 (10 · 20 · 30)
   const phaseNote = (ph, parent) => note(`<p>👑 보스 ${ph.phase}단계!</p><b>${ph.phase === 2 ? '보스가 화났다 — 공격 멈춤 3초' : '보스가 비틀거린다 — 공격 멈춤 2초'}</b>`, `phase ph-${ph.phase}`, 3000, parent);
 
   // 🎁 보물 상자 열기 (폰): 닫힘 → 흔들림 → 열림 → 보상 · 확률 공개

@@ -10,7 +10,7 @@ DS.Camp = (function () {
   const $ = (s) => document.querySelector(s);
   const { esc } = DS.UI;
   const C = () => DS.ASSETS.camp, base = () => DS.ASSETS.base;
-  let slotTick = 0;
+  let slotTick = 0, mailN = null; // mailN = 🔊 📬 새 소식 소리 기준 (처음 본 수 · 그 뒤 늘 때만)
   let me = null, fireT = 0, code0 = '', live = null, liveStop = null, liveSeen = '', roomSt = null, roomStop = null, roomCode = '';
   const ck = (c) => String(c).replace(/[.#$/[\]]/g, '_');
   const today = () => new Date().toISOString().slice(0, 10);
@@ -185,7 +185,7 @@ DS.Camp = (function () {
     { const fb = $('#camp-fb'); if (fb) fb.onclick = () => DS.Feedback.open({ c: me.c, n: me.n, name: me.name }, { where: 'camp' }); } // 💬 2026-11-06 · 2026-11-07 캠프 위로
     $('#camp-mail').onclick = () => pick('#camp-mail', () => { if (me.teacher) return DS.Control.run(() => DS.Dash.enter()); if (cues.mark) cues.mark('mail'); DS.Control.run(() => (DS.Mail && !me.test ? DS.Mail.open(me, { onClose: () => status() }) : note())); }); // 교사 = 📊 학급 대시보드 · 2026-11-07 6판: 우편함 = 소식 + 보내기 (오답노트는 🎯 허수아비로)
     $('#camp-tent').onclick = () => (DS.CampScene.objOn(document.querySelector('#camp .camp-stage'), 'tent', true), pick('#camp-tent', () => { if (cues.mark) cues.mark('tent'); DS.Control.run(() => (DS.Quest && !me.teacher ? DS.Quest.open(me) : shelf())); setTimeout(() => DS.CampScene.objOn(document.querySelector('#camp .camp-stage'), 'tent', false), 1500); })); // ⛺ 텐트 = ✏ 출제 공방 (2026-11-07 6판 · 책장은 🎯 허수아비 차시 카드로)
-    $('#camp-dummy').onclick = () => pick('#camp-dummy', () => DS.Control.run(() => DS.Bonus.enter(me, { train: true })));
+    $('#camp-dummy').onclick = () => (DS.Sound && DS.Sound.fx && DS.Sound.fx('dummy-hit', 0.8), pick('#camp-dummy', () => DS.Control.run(() => DS.Bonus.enter(me, { train: true }))));
     $('#camp-set').onclick = () => (me.teacher ? settings({ teacher: true, onSave: async (v) => { me.hero = v.hero; me.fx = v.fx; me.title = v.title; const t = me.teacher; if (t.code) { try { await DS.Net.set(`rooms/${t.code}/state/tlook`, { hero: v.hero, fx: v.fx, at: DS.Net.TS }).catch(() => {}); /* 2026-11-06: 종합상황실도 쓸 수 있는 칸 → 수업 화면이 이 모습을 먼저 씀 */ const R0 = await DS.Net.get(`rooms/${t.code}/meta`); if (R0 && R0.teacher === DS.Net.uid()) await DS.Net.update(`rooms/${t.code}/players/${R0.teacher}`, { hero: v.hero, fx: v.fx }); } catch (e) { /* 다음 수업부터 */ } } render(); drawGate(); } }) : settings({ buy: true }));
     drawGate();
     animateFire();
@@ -198,7 +198,7 @@ DS.Camp = (function () {
   // pose: 그쪽으로 가는 동안의 용사 동작 (기본 걷기 · 차원문 = 뒷모습으로 들어가기 → 작아지며 사라짐)
   const heroArt = (pose, cls = '') => { const a = document.querySelector('.camp-hero .art'); if (a) a.outerHTML = DS.Art.hero(DS.Art.look(me), pose, cls); }; // 🌟 #73 각성한 로안
   function pick(sel, then, pose = 'walk') {
-    if ((pose === 'portal' || pose === 'castle') && DS.Sound && DS.Sound.door) DS.Sound.door(); // 🔊 #87 던전 입장 · 차원문 · 성채 문
+    if (pose === 'portal' && DS.Sound && DS.Sound.fx) DS.Sound.fx('portal', 0.85, () => DS.Sound.door()); else if ((pose === 'portal' || pose === 'castle') && DS.Sound && DS.Sound.door) DS.Sound.door(); // 🔊 2차 🌀 포털 // 🔊 #87 던전 입장 · 차원문 · 성채 문
     const el = document.querySelector(sel); if (!el || picking) return;
     picking = true;
     el.classList.remove('picked'); void el.offsetWidth; el.classList.add('picked');
@@ -288,7 +288,7 @@ DS.Camp = (function () {
       if (me.title === 'steady' && DS.Gem && DS.Gem.streak) { me.stk = DS.Gem.streak(rec || {}, held); const ic = document.querySelector('.camp-plate .tfx-ic[data-tfx="steady"]'); if (ic) ic.textContent = `🔁${me.stk || ''}`; } // 🏅 #63 🔁n 연속 참여 수
       // 2026-11-07 6판: 남은 복습 수 = 🎯 허수아비 위 · 📮 우편함 = 안 읽은 소식 수
       const d = document.getElementById('camp-dummy'); if (d) { const old = d.querySelector('.nt-badge'); if (old) old.remove(); if (nt.list.length) d.insertAdjacentHTML('beforeend', DS.Note.badge(nt.left)); }
-      const z = document.getElementById('camp-mail'); if (z && DS.Mail) { const un = await DS.Mail.unread(me).catch(() => 0), old = z.querySelector('.ml-badge'); if (old) old.remove(); if (un) z.insertAdjacentHTML('beforeend', `<span class="ml-badge">${un}</span>`); }
+      const z = document.getElementById('camp-mail'); if (z && DS.Mail) { const un = await DS.Mail.unread(me).catch(() => 0), old = z.querySelector('.ml-badge'); if (old) old.remove(); if (un) z.insertAdjacentHTML('beforeend', `<span class="ml-badge">${un}</span>`); if (mailN != null && un > mailN && DS.Sound && DS.Sound.fx) DS.Sound.fx('mail', 0.7); mailN = un; } // 🔊 2차 📬 새 소식
     }
     // 🏰 성채던전 NEW (2026-11-05): 진도를 나가 새로 열린 방 수 → 파란 배지 · 늘었으면 한 번 안내
     if (DS.Bonus && (!me.test || (DS.Test && DS.Test.active && DS.Test.active()))) { // #47
@@ -296,7 +296,7 @@ DS.Camp = (function () {
       const fresh = DS.Bonus.newRooms(me, bonus || {}, Number(no) || 0).length, z = document.getElementById('camp-castle');
       if (z) { const old = z.querySelector('.cs-newb'); if (old) old.remove(); if (fresh) z.insertAdjacentHTML('beforeend', `<span class="cs-newb">새 방 ${fresh}</span>`); }
       const nk = `citadel-castle-new-${k}-${me.n}`; let was = 0; try { was = Number(localStorage.getItem(nk)) || 0; localStorage.setItem(nk, String(fresh)); } catch (e) { /* 무시 */ }
-      if (fresh > was && !tutMode) DS.UI.toast(`🏰 성채던전에 새 방 ${fresh - was}개가 열렸어요!`, 3200);
+      if (fresh > was && !tutMode) { DS.UI.toast(`🏰 성채던전에 새 방 ${fresh - was}개가 열렸어요!`, 3200); if (DS.Sound && DS.Sound.fx) DS.Sound.fx('castle-open', 0.8); }
     }
   }
   // 상태가 있을 때만 살아 움직임: 📮 새 결과 · ⚒ 만들 수 있는 카드 · ⛺ 새로 열린 차시 영상
@@ -631,7 +631,8 @@ DS.Camp = (function () {
         U.total = tot - c.g + back; if (c.s) U.scroll = sc - c.s;
         try { await DS.Net.update(gp, U); } catch (e) { throw Object.assign(new Error(`💾 저장 실패(💎) — ${e.message || e}`), { user: true }); } // 💎 · 구매 · 강화 = 한 칸 한 번 (반쯤 저장 없음)
         if (great) setTimeout(() => DS.UI.toast(`🌟 강화 대성공 ${great}번! 💎 ${back}개 돌려받았어요`, 3600), 400);
-        if (P.enh && DS.Sound) { if (lv + P.enh === 10 && DS.Sound.awaken) DS.Sound.awaken(); else DS.Sound.correct(); }
+        if (P.enh && DS.Sound) { if (lv + P.enh === 10 && DS.Sound.awaken) DS.Sound.awaken(); else if (DS.Sound.fx) DS.Sound.fx(great ? 'enh-great' : 'enh-ok', 0.85, () => DS.Sound.correct()); else DS.Sound.correct(); } // 🔊 2차 🔨 · 🌟 (정식 강화는 실패 없음)
+        else if (P.sk.length && DS.Sound && DS.Sound.fx) DS.Sound.fx('skill-unlock', 0.85); // 🔊 2차 🔓 스킬 해금
       }
       { const was = DS.Art.awake({ hero: me.hero, enh: lv0(), fx: me.fx, title: me.title }), now = DS.Art.awake({ hero, enh: lvNow(), fx, title }); let seen = false; try { seen = localStorage.getItem('citadel-awake-seen') === '1'; } catch (e) { /* 무시 */ } if (now && !was && !seen && DS.Attack && DS.Attack.cutin) { try { localStorage.setItem('citadel-awake-seen', '1'); } catch (e) { /* 무시 */ } setTimeout(() => DS.Attack.cutin(DS.Art.AWAKE.to, fx, { peek: true, name: '🌟 각성한 로안' }), 300); } } // 🌟 #73 처음 한 번 변신 컷인
       if (me.test) DS.Test.setLook(hero, fx);

@@ -47,6 +47,7 @@ DS.Control = (function () {
       if (armed !== key + 'hp') { armed = key + 'hp'; DS.UI.toast(`몬스터 체력이 ${hp.left} 남았어요. 기준%를 낮추거나, ▶ 를 한 번 더 누르면 그대로 넘어가요`, 4200); return; }
     }
     armed = '';
+    if ((R.state.step ?? -1) < 0 && DS.Sound && DS.Sound.fx) DS.Sound.fx('class-start', 0.85); // 🔊 2차 📯 수업 시작
     await Act().go(code, R, L, 1);
   }
   const back = (code, R, L, out) => { armed = ''; if (Raid().isClosed(R)) return out ? out() : null; return Act().go(code, R, L, -1); }; // 🏁 #68 C①: 끝난 수업에서 ◀ = 다시 열지 않고 교사 캠프 · 메뉴로 (예전: closed 를 지워 끝난 수업이 다시 열림)
@@ -97,7 +98,7 @@ DS.Control = (function () {
   const videoBtn = (L, R, videos) => { const st = Raid().stepOf(L, R); if (!st || !DS.Video.ok(DS.Video.pick(L, videos, st.id))) return ''; const on = Raid().videoOn(R, st.id);
     return `<button class="btn video-btn${on ? ' on' : ''}" data-video="${st.id}">${on ? '🎬 영상 닫기' : '🎬 설명 영상 틀기 (큰 화면)'}</button>`; };
   const bindVideo = (el, code, R) => el.querySelectorAll('[data-video]').forEach((b) => (b.onclick = () => run(() => Act().setVideoOn(code, Raid().videoOn(R, b.dataset.video) ? null : b.dataset.video))));
-  const bindFocus = (el, code, R) => el.querySelectorAll('[data-focus]').forEach((b) => (b.onclick = () => run(() => Act().setFocus(code, !Raid().focusOn(R)))));
+  const bindFocus = (el, code, R) => el.querySelectorAll('[data-focus]').forEach((b) => (b.onclick = () => run(() => { const on = !Raid().focusOn(R); if (on && DS.Sound && DS.Sound.fx) DS.Sound.fx('focus', 0.8); return Act().setFocus(code, on); })));
 
   // 기준% 조절 (몬스터·보스 단계에서)
   function pctHtml(L, R) {
@@ -170,16 +171,18 @@ DS.Control = (function () {
     else await Act().setSolve(code, R, L, { sec: Math.max(0, base + (k === 'up' ? 30 : -30)) });
   })));
   // ⚔ 소레이드 리모컨 (2026-11-09 #18): 🙋 확인 필요(남은 기회 1칸 · 잠김) → 「✔ 풀어주기」 · 학생별 지금 단계
+  const handSeen = {}; // 🔊 2차 🙋 도움 요청 (❤ 0 잠김이 새로 생길 때 리모컨에서 한 번)
+  function handSnd(mid, us) { let nw = false; (us || []).forEach((u) => { const k = `${mid}|${u}`; if (!handSeen[k]) { handSeen[k] = 1; nw = true; } }); if (nw && DS.Sound && DS.Sound.fx && document.getElementById('screen-teacher') && document.getElementById('screen-teacher').classList.contains('active')) DS.Sound.fx('raise-hand', 0.8); }
   function chainHtml(L, R) {
     const st = Raid().stepOf(L, R); if (!st || st.kind !== 'monster') return '';
     if (!Raid().isChain(L, R, st.id)) { // ❤ 2026-11-13 밤: 일반 몬스터도 ❤ 0 = 🙋 잠김 → 「✔ 풀어주기」 (❤ +1)
       const nm0 = (u) => { const p = (R.players || {})[u] || {}; return `${p.num != null ? `${p.num} ` : ''}${p.nick || ''}`; };
-      const lk = Raid().activeIds(R).filter((u) => u !== (R.meta || {}).teacher).filter((u) => Raid().record(L, R, st.id, u).locked);
+      const lk = Raid().activeIds(R).filter((u) => u !== (R.meta || {}).teacher).filter((u) => Raid().record(L, R, st.id, u).locked); handSnd(st.id, lk);
       return lk.length ? `<div class="cr-ctl"><p class="cr-need"><b>🙋 ❤ 0 · 확인 필요 ${lk.length}</b></p>${lk.map((u) => `<div class="cr-lockrow"><span>${esc(nm0(u))} · ${esc(st.title)}</span><button class="btn small primary" data-crok="${u}">✔ 풀어주기</button></div>`).join('')}</div>` : '';
     }
     const ids = Raid().activeIds(R).filter((u) => u !== (R.meta || {}).teacher), recs = ids.map((u) => [u, Raid().record(L, R, st.id, u)]);
     const nm = (u) => { const p = (R.players || {})[u] || {}; return `${p.num != null ? `${p.num} ` : ''}${p.nick || ''}`; }, mark = (r) => (r.done ? (r.perfect ? '🌟' : '👑✔') : r.fail ? '✘' : r.stage === r.n - 1 ? '👑' : '①②③④⑤⑥'[r.stage]);
-    const lock = recs.filter(([, r]) => r.locked);
+    const lock = recs.filter(([, r]) => r.locked); handSnd(st.id, lock.map(([u]) => u));
     const n = recs[0] ? recs[0][1].n : 0, by = Array.from({ length: n + 1 }, (_, i) => recs.filter(([, r]) => (i === n ? r.done : !r.done && r.stage === i)).length);
     const dn = Raid().chainDown(L, R, st.id);
     return `<div class="cr-ctl"><p><b>⚔ 소레이드</b> ${by.map((c, i) => `<span>${i === n ? '완료' : i === n - 1 ? '👑' : '①②③④⑤⑥'[i]} ${c}</span>`).join(' · ')}</p>
@@ -276,7 +279,7 @@ DS.Control = (function () {
     e.classList.remove('ping'); void e.offsetWidth; e.classList.add('ping');
   }
   if (typeof document !== 'undefined') setInterval(tbTick, 1000);
-  const bindExtend = (el, code, R) => el.querySelectorAll('[data-extend]').forEach((b) => (b.onclick = () => run(async () => { if (!confirm('⏰ 문 닫히는 시각을 5분 늦출까요? (한 번만)')) return; await Act().extendTime(code, R); DS.UI.toast('⏰ 5분 늘렸어요'); })));
+  const bindExtend = (el, code, R) => el.querySelectorAll('[data-extend]').forEach((b) => (b.onclick = () => run(async () => { if (!confirm('⏰ 문 닫히는 시각을 5분 늦출까요? (한 번만)')) return; await Act().extendTime(code, R); DS.UI.toast('⏰ 5분 늘렸어요'); if (DS.Sound && DS.Sound.fx) DS.Sound.fx('plus5', 0.8); })));
   // 🆙 머리 위 「+12 EXP」 (2026-11-05): 몬스터 · 보스를 쓰러뜨리는 순간 (정답 · 오답 글자 대신 숫자만)
   function xpFloat(host, text, cls = '') {
     if (!host) return; const e = document.createElement('span'); e.className = `xp-pop ${cls}`; e.textContent = text;
