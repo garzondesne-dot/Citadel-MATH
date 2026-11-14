@@ -63,7 +63,7 @@ check(!U.forge('in', 'a', null, 2).ok, '두 칸 연산에 재료 하나면 실�
 Object.keys(U.MISTAKES).forEach((k) => { const [op, rest] = k.split('|'); const p = rest.split(','); const g = U.forge(op, p[0], p[1] || null, 11); check(!g.ok && g.msg === U.MISTAKES[k], `실수 메시지(10차시) ${k}`); });
 Object.keys(U.MISTAKES).forEach((k) => { const [op, rest] = k.split('|'); const p = rest.split(','); const g = U.forge(op, p[0], p[1] || null, 3); check(!g.ok && g.msg === U.MISTAKES[k] || (U.opOf(op).no > 3), `실수 메시지 ${k}`); });
 // 열리는 범위
-const want = { 2: 7, 3: 16, 4: 22, 5: 30, 6: 34, 7: 34, 8: 42, 9: 48, 10: 52, 11: 54 }; // 2026-11-07: 7차시 = 6차시 이어서(새 카드 없음) · 명제 8~11차시
+const want = { 2: 7, 3: 16, 4: 22, 5: 30, 6: 34, 7: 34, 8: 42, 9: 48, 10: 51, 11: 54 }; // 2026-11-14: 「대우를 이용한 증명」 10 → 11 · 2026-11-07: 7차시 = 6차시 이어서(새 카드 없음) · 명제 8~11차시
 Object.entries(want).forEach(([no, n]) => check(U.opens(Number(no)).length === n, `${no}차시까지 ${n}장 (${U.opens(Number(no)).length})`));
 check(U.opens(1).length === 0, '1차시 0장');
 if (fail) { console.error(`\n${fail}건 실패`); process.exit(1); }

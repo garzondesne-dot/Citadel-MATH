@@ -135,7 +135,8 @@ DS.Unit = (function () {
       ex: q({ type: 'choice', question: 'x > 0 은 −x < 0 이기 위한 어떤 조건인가?', choices: ['필요충분조건', '충분조건', '필요조건'], answerIndex: 0, solution: 'x > 0 ⇔ −x < 0' }) },
     { id: 'iffset', no: 10, sec: '05 명제 사이의 관계', name: '필요충분조건과 진리집합', short: 'P = Q', fm: 'p ⇔ q ⇔ P = Q', desc: '두 조건의 진리집합이 서로 같다', grade: 3, art: 3, page: '9차시 학습지', op: 'eq', in: ['card:iff', 'card:equal'], hint: '진리집합이 어떤 관계일 때?',
       ex: q({ type: 'ox', question: 'P = Q 이면 p 는 q 이기 위한 필요충분조건이다.', answer: true, solution: 'P ⊂ Q 이고 Q ⊂ P' }) },
-    { id: 'contraproof', no: 10, sec: '06 명제의 증명', name: '대우를 이용한 증명', short: '대우로 증명', fm: '대우가 참임을 보이면 처음 명제도 참', desc: '직접 보이기 어려울 때 대우를 증명한다', grade: 3, art: 0, page: '9차시 학습지', op: 'imp', in: ['card:contra', 'card:imp'], ordered: true, hint: '대우가 참이면 명제는?',
+    { id: 'contraproof', no: 11, sec: '06 명제의 증명', name: '대우를 이용한 증명', short: '대우로 증명', fm: '대우가 참임을 보이면 처음 명제도 참', desc: '직접 보이기 어려울 때 대우를 증명한다', grade: 3, art: 0, page: '11차시 학습지', // 📚 2026-11-14 11차시 수업 = 10 → 11 (선생님 「추천대로」)
+      op: 'imp', in: ['card:contra', 'card:imp'], ordered: true, hint: '대우가 참이면 명제는?',
       ex: q({ type: 'ox', question: '명제 ‘n²이 짝수이면 n은 짝수이다.’는 대우 ‘n이 홀수이면 n²은 홀수이다.’를 보여 증명할 수 있다.', answer: true, solution: '대우가 참 → 명제도 참' }) },
     // ── 06 명제의 증명 · 절대부등식 (2026-11-05 재배열: 수업에서 대우 증명 맛보기는 8차시지만 카드는 ⇒ 연산이 9차시라 9차시 묶음 · 귀류법 · 절대부등식 = 10차시) ──
     { id: 'contradiction', no: 11, sec: '06 명제의 증명', name: '귀류법', fm: '결론을 부정 → 모순 → 처음 명제가 참', desc: '결론을 부정하여 모순을 이끌어 내는 증명', grade: 3, art: 0, flip: true, page: '10차시 학습지', op: 'then', in: ['card:neg', 'X'], ordered: true, hint: '아니라고 가정했더니 말이 안 된다면?',
