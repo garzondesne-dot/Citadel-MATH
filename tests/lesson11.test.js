@@ -126,6 +126,11 @@ check(isContra('n²이 짝수이면 n도 짝수이다.', 'n이 홀수이면 n²�
 check(isContra('a + b가 홀수이면 a, b 중 적어도 하나는 홀수이다.', 'a, b가 모두 짝수이면 a + b는 짝수이다.') && !isContra('a + b가 홀수이면 a, b 중 적어도 하나는 홀수이다.', 'a, b가 모두 홀수이면 a + b는 짝수이다.'), '판정기 = 적어도 하나 ↔ 모두');
 { const C = chainSets(['p → q', '~r → ~q']); check(C.order.join() === 'p,q,r' && ['q → r', '~r → ~p'].every((s) => propOk(C, s)) && !['~p → ~q', 'p → ~r'].some((s) => propOk(C, s)), '판정기 = 중단원 09 답 ㄱ, ㄷ'); }
 
+// 🎬 영상 (#49 · #50) = 개념 · 문제 칸에 연결 · 파일 있음 · 1MB 이내
+{ const fs = require('fs'), path = require('path'); const V = L.videos || {};
+  check(V.c1 === 'assets/video/v11-49.mp4' && V.m1 === V.c1 && V.c2 === 'assets/video/v11-50.mp4' && V.m2 === V.c2 && V.m3 === V.c2, '🎬 영상 칸');
+  Object.values(V).forEach((f) => check(fs.existsSync(path.join(__dirname, '..', f)) && fs.statSync(path.join(__dirname, '..', f)).size < 1.05e6, `🎬 ${f} 있음 · 1MB 이내`)); }
+
 // (4) 📸 서술형 채점 기준 (m3) · 모루 카드 「대우를 이용한 증명」 = 11차시
 const RB = ((DS.Rubrics || {})['set-11'] || {}).m3;
 check(RB && RB.on && RB.raid && RB.total === 4 && RB.steps.length === 4 && RB.steps.reduce((s, x) => s + x.pts, 0) === 4 && RB.pass === 3, '📸 채점 기준 4단계 · 통과 3');
