@@ -32,7 +32,7 @@ if (typeof location !== 'undefined' && (/\/trial\/(index\.html)?$/.test(location
 // 🏫 학교판 다른 점 (2026-11-13 선생님 「최대한 기본 기능 위주로 · 버그 없게」 · CLAUDE.md 「🏫 학교판 규칙」): 과목 글자 · 숨기는 기능 (DS.OFF('forge') …)
 DS.SUBJECT = DS.SCHOOL ? DS.SCHOOL.subject : '공통수학2';
 DS.OFF = (k) => !!(DS.SCHOOL && ['forge', 'symtalk', 'castle', 'survey', 'quest', 'ox', 'mis', 'std'].includes(k)); // + 오개념 · 성취기준(우리 집합 단원 기준 · 2026-11-13) // ⚒ 모루 · 도감 · 📖 기호 톡 · 🏰 성채 · 📝 설문 · ✏ 출제 · ⭕ OX · 📅 시간표(우리 학교 일과표 · 2026-11-13)
-DS.VERSION = 'citadel-0.9.68.0';
+DS.VERSION = 'citadel-0.9.69.0';
 // 🕶 익명 보기 (2026-11-09 #36 · 미래교육상 제출용): 주소 뒤 ?anon → 개발자 이름을 모든 화면에서 숨김 · 한 번 열면 그 탭 안에서 유지(sessionStorage · 체험판은 주소에 남음)
 DS.ANON = (() => { if (typeof location === 'undefined') return false; const q = /[?&]anon(=|&|$)/.test(location.search); try { if (q) sessionStorage.setItem('ds-anon', '1'); return q || sessionStorage.getItem('ds-anon') === '1'; } catch (e) { return q; } })();
 DS.AUTHOR = DS.ANON ? '' : '김찬우'; // 개발자 (2026-11-03 사용자 요청: 모든 화면 · 첫 화면에 새김)
