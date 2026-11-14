@@ -550,7 +550,7 @@ DS.Camp = (function () {
     let demoN = 0; // ⚔ 미리보기: 고른 용사가 고른 스킬로 공격 (근접 = 돌진 · 원거리 = 탄)
     const demo = (fx0) => { const ap = el.querySelector('#ap'); if (!ap || !DS.Attack) return; const n = ++demoN, fx = fx0 || fxNow(); DS.Attack.preload(hero, fx); setTimeout(() => { if (n === demoN && ap.isConnected) DS.Attack.play(ap, { heroBox: ap.querySelector('.ap-hero'), monBox: ap.querySelector('.ap-mon'), hero, fx, s: 0.85, ps: 1, rest: 'idle' }); }, 120); };
     const el = document.createElement('div'); el.className = 'modal camp-modal';
-    const preview = () => `<div class="atk-prev" id="ap"><div class="ap-hero">${DS.Art.hero(hero, 'idle')}</div><div class="ap-mon">${DS.Art.monster('castle2:0', 'idle', 'float')}</div></div>`;
+    const preview = () => `<div class="atk-prev" id="ap"><div class="ap-hero">${DS.Art.hero(hero, 'idle')}</div><div class="ap-mon">${DS.Art.monster('castle2:0', 'idle', 'float')}</div><button type="button" class="ap-re" id="ap-re">▶ 다시 보기</button></div>`; // ⚔ 2026-11-14 스킬 미리 보기: 줄을 누를 때마다 전투와 같은 이펙트 · ▶ 다시 보기
     const pend = (on) => (on ? '<i class="mh-pend">고름</i>' : '');
     // ── 맨 위 = 지금 출전 용사 ──
     const meTop = () => { const lo = DS.Lore ? DS.Lore.of(hero) : null, st = stageOf(hero), lv = T ? 0 : lvNow();
@@ -655,7 +655,7 @@ DS.Camp = (function () {
         ${T ? '<button class="btn camp-bye t-reset" id="t-reset">↺ 처음으로 되돌리기 <small>스킬 · 용사 · 강화 · 💎 📜 다시 채움</small></button>' : DS.TRIAL ? '' : '<button class="btn camp-bye" id="camp-bye">🚪 처음 화면으로 (로그아웃)</button>'}${barHtml()}${sheetOn ? sheetHtml() : ''}</div>`;
       { const sb2 = el.querySelector('.set-box'); if (sb2) sb2.scrollTop = keep; }
       paintStills(el);
-      { const ap = el.querySelector('#ap'); if (ap) ap.onclick = () => demo(); }
+      { const ap = el.querySelector('#ap'); if (ap) ap.onclick = () => demo(skPick || undefined); const re = el.querySelector('#ap-re'); if (re) re.onclick = (e) => { e.stopPropagation(); demo(skPick || undefined); }; }
       el.querySelector('#set-x').onclick = close;
       { const rs = el.querySelector('#t-reset'); if (rs) rs.onclick = () => DS.Control.run(async () => { if (!window.confirm('스킬(해금 · 끼운 것) · 용사(강화 · 고른 용사)를 처음으로 되돌리고 💎 9,999 · 📜 30 을 다시 채울까요?')) return; await DS.Art.saveTeacherCfg('tw', null); await DS.Art.setTeacherLook({ hero: DS.ASSETS.heroes.teacher, fx: 'twinkle', title: 'none', socket: {}, enh: 0 }); el.remove(); DS.UI.toast('↺ 처음으로 되돌렸어요 · 💎 9,999 · 📜 30', 2600); settings(opt); }); } // 👩‍🏫 교사만
       { const bye = el.querySelector('#camp-bye'); if (bye) bye.onclick = () => DS.Control.run(async () => { if (!window.confirm('로그아웃하고 처음 화면으로 갈까요?\n(다시 들어올 때 반 · 번호 · 비밀번호)')) return; await DS.Account.logout(); location.reload(); }); } // 🚪 2026-11-13 밤: 학생 「내 용사」 맨 아래 = 처음 화면
@@ -663,11 +663,11 @@ DS.Camp = (function () {
       el.querySelectorAll('[data-tab]').forEach((b) => (b.onclick = () => { tab = b.dataset.tab; try { localStorage.setItem('citadel-settab', tab); } catch (e) { /* 이 기기에만 */ } DS.Sound.clank(); const sb3 = el.querySelector('.set-box'); if (sb3) sb3.scrollTop = 0; draw(); if (tab === 'gem') demo(); }));
       { const eg = el.querySelector('#enh-go'); if (eg) eg.onclick = () => { const nx = ENH[lvNow() + 1]; if (!nx || gemLeft() < nx.g || scrLeft() < (nx.s || 0)) { DS.UI.toast('💎 가 모자라요', 2000); return; } P.enh++; DS.Sound.clank(); draw(); const pa = el.querySelector('#mh-party'); if (pa) { pa.classList.remove('glow'); void pa.offsetWidth; pa.classList.add('glow'); } }; }
       el.querySelectorAll('.lad [data-fx], .sk-sp [data-fx]').forEach((b) => (b.onclick = () => { const id = b.dataset.fx, i = Number(b.dataset.i); skPick = id;
-        if (b.dataset.sp || ownsF(id)) { if (P.sk.includes(id)) { P.sk = P.sk.filter((x) => DS.FX.ladder(hero).indexOf(x) < i); } else { sock[hero] = id; demo(id); } DS.Sound.clank(); draw(); return; }
+        if (b.dataset.sp || ownsF(id)) { if (P.sk.includes(id)) { P.sk = P.sk.filter((x) => DS.FX.ladder(hero).indexOf(x) < i); if (sock[hero] && !ownsF(sock[hero])) { const have = DS.FX.ladder(hero).filter((x) => ownsF(x)); sock[hero] = have[have.length - 1] || DS.FX.ladder(hero)[0]; } } else { sock[hero] = id; demo(id); } DS.Sound.clank(); draw(); return; }
         if (i !== nextIdx()) { DS.UI.toast(`🔒 ${TN[i]} 먼저`, 2200); vPatch(); return; }
         const f = fxOf(id); if (!f.shop) { DS.UI.toast(`🔒 ${f.cond || '해금 조건은 추후 공개'}`, 3000); return; }
         if (gemLeft() < f.shop.price || scrLeft() < (f.shop.scroll || 0)) { DS.UI.toast(gemLeft() < f.shop.price ? `💎 조각이 ${f.shop.price - gemLeft()}개 모자라요` : `📜 서술 조각이 ${(f.shop.scroll || 0) - scrLeft()}개 모자라요`, 2600); demo(id); vPatch(); return; }
-        P.sk.push(id); DS.Sound.clank(); draw(); demo(id); }));
+        P.sk.push(id); sock[hero] = id; DS.Sound.clank(); draw(); demo(id); })); // ⚔ 2026-11-14 선생님 「A」: 새로 연 스킬 단계 = 바로 끼움 (저장하면 그대로 · ↺ 되돌리기 전까지 되돌릴 수 있음)
       el.querySelectorAll('[data-ttl]').forEach((b) => (b.onclick = () => { if (b.classList.contains('lock')) { DS.UI.toast(`🔒 ${b.title}`, 2600); return; } title = b.dataset.ttl; DS.Sound.clank(); draw(); }));
       { const u = el.querySelector('#mh-undo'); if (u) u.onclick = () => { P = { heroes: [], enh: 0, sk: [] }; hero = H0; title = TTL0; Object.keys(sock).forEach((k) => delete sock[k]); Object.assign(sock, JSON.parse(SOCK0)); skPick = null; DS.Sound.clank(); DS.UI.toast('↺ 모두 되돌렸어요', 1800); draw(); demo(); }; }
       { const s = el.querySelector('#set-ok'); if (s) s.onclick = () => DS.Control.run(saveAll); }

@@ -3574,3 +3574,5 @@ body.trial-teach .trial-tch .tch-pc { color: #c9b896; font-size: 11px; }
 /* 🚪 2026-11-13 밤: 처음 화면으로 · 로그아웃 (학생 「내 용사」 맨 아래 · 교사 화면 맨 아래) */
 .camp-bye, .t-bye { display: block; width: 100%; margin: 14px 0 4px; background: #3a2a2a !important; color: #f5e6c8 !important; border: 2px solid #8a5a4a !important; }
 .t-bye:disabled { opacity: .45; }
+
+.atk-prev { position: relative; } .atk-prev .ap-re { position: absolute; right: 6px; bottom: 6px; z-index: 3; padding: 4px 10px; border-radius: 12px; border: 1px solid #f5b84a; background: #1b1610e6; color: #f5e6c8; font-size: 12px; font-weight: 700; cursor: pointer; } /* ⚔ 2026-11-14 ▶ 다시 보기 */

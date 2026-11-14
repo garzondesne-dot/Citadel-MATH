@@ -12,6 +12,7 @@ const OUT = process.argv[2] || '.', U = `http://localhost:${process.env.PORT || 
   await open('gem');
   let v = await T.evaluate(() => ({ head: (document.querySelector('.set-head') || {}).textContent || '', tabs: [...document.querySelectorAll('[data-tab]')].map((b) => b.dataset.tab).join(), lad: [...document.querySelectorAll('.lad [data-fx]')].map((b) => b.className).join('|'), reset: !!document.querySelector('#t-reset') }));
   ok(/9999/.test(v.head) && /30/.test(v.head), `교사 지갑 💎 9,999 · 📜 30 (${v.head.trim().slice(0, 30)})`);
+  ok(await T.evaluate(() => !!document.querySelector('#ap #ap-re')), '⚔ 스킬 미리 보기 장면 · ▶ 다시 보기');
   ok(v.tabs === 'enh,gem,ttl' && v.reset, `탭 = 🔨 강화 · ⚔ 스킬 · 🏅 호칭 · 「↺ 처음으로 되돌리기」 (${v.tabs})`);
   await T.screenshot({ path: `${OUT}/151-skill.png` });
   const before = await T.evaluate(() => DS.Gem.teacherWallet());
@@ -20,6 +21,7 @@ const OUT = process.argv[2] || '.', U = `http://localhost:${process.env.PORT || 
   await T.evaluate(() => { const s = document.querySelector('#set-ok'); if (s) s.click(); }); await T.waitForTimeout(1500);
   const after = await T.evaluate(() => DS.Gem.teacherWallet());
   ok(bought && after.buy[`fx_${bought}`] && after.total < before.total, `스킬 Ⅱ 「${bought}」 해금 = 학생과 같은 길 · 💎 ${before.total} → ${after.total}`);
+  { const lk = await T.evaluate(() => DS.Art.teacherLook()); ok(lk.fx === bought && (lk.socket || {})[lk.hero] === bought, `⚔ 2026-11-14: 새로 연 스킬 = 바로 끼움 (끼운 것 ${lk.fx})`); }
   ok(await T.evaluate(async () => { const t = await DS.Net.get('gcfg/teacher/tw'); return !!(t && t.total < 9999); }), '교사 지갑 = 서버 gcfg/teacher/tw (학생 기록과 따로)');
   await open('enh'); await T.screenshot({ path: `${OUT}/151-enh.png` });
   await T.evaluate(() => document.querySelector('#t-reset').click()); await T.waitForTimeout(2000);
