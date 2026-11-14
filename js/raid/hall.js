@@ -577,7 +577,7 @@ DS.Hall = (function () {
       const b = document.createElement('div'); b.className = 'atk-banner'; b.innerHTML = `💥 몬스터의 공격! <small>${c.lock}초 멈춤</small>`; arena.appendChild(b); setTimeout(() => b.remove(), 1600);
       if (DS.FX) DS.FX.play(arena, 'flame', { scale: 0.7 });
       Snd().squish(); setTimeout(() => Snd().hit(), 120);
-      document.querySelectorAll('.fh2').forEach((h) => {
+      document.querySelectorAll('.fh2:not(.teach)').forEach((h) => { // 🧑‍🏫 2026-11-14 선생님: 시연 중 선생님 용사 = 몬스터 공격 없음 (맞는 모습 · 헉헉 · 그림 바뀜 없음)
         const u = h.id.slice(3), hid = ((R.players || {})[u] || {}).hero || 0;
         h.classList.remove('struck'); void h.offsetWidth; h.classList.add('struck'); setTimeout(() => h.classList.remove('struck'), 600);
         pose(h, hid, 'hit', 400); setTimeout(() => pose(h, hid, 'pant', c.lock * 1000 + 900), 400);
