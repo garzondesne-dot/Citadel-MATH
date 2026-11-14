@@ -2510,3 +2510,4 @@
 - 선생님 「방패로 막는 피격음 소리가 너무 댕댕해 · 나무 방패로 물렁하게 막는 소리도 괜찮을 것 같아」 → ElevenLabs 후보 A~E(https://claude.ai/artifact/RHJWkSDBcoNhgZfcnWvZy9) → 「지금 거랑 B C 사용해 줘」: 막는 소리 = 지금(block-v2) · B(가죽 덧댄 나무 「쿵」) · C(작은 나무 「똑」) 셋을 번갈아(정식 「번갈아」 방식과 같게). 베타 · 정식 모두. 상태: ⏳ 테스트 #1 · 손발 #7(다음 배포).
 - 구현(정식): release a82cbac · assets/sfx/block-v3b · v3c.mp3 · manifest sfx.files.block = [v2, v3b, v3c] (block-v2b 뺌) · CREDITS · 효과음은 sw CORE 밖이라 sw 목록 변경 없음 · ⏳ 다음 배포 (손발 #7)
 - 같은 날 「아까 추천한 효과음 전부 후보 3개씩」 → 같은 페이지에 묶음별 후보 · 🥇🥈🥉 순위.
+- (2026-11-14 · 메타인지 6) 🎲 랜덤 던전 그림 TV 확대 = 선생님 「원본 그대로 가자」(평가판 「📺 TV 1080p 확대 비교」 · 2배 구운 것 안 씀 · 보스 다시 뽑지 않음).
