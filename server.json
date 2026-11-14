@@ -1,0 +1,10 @@
+{
+  "mode": "server",
+  "firebase": {
+    "apiKey": "AIzaSyDyJKQFDRywKGUl9DCtzUCHs6rtmrKsv9g",
+    "authDomain": "citadel-math-test-c6a9b.firebaseapp.com",
+    "databaseURL": "https://citadel-math-test-c6a9b-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "projectId": "citadel-math-test-c6a9b",
+    "appId": "1:1005057733910:web:23a4af3ea9bea22e5f8c37"
+  }
+}

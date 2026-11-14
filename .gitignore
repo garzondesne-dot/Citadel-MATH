@@ -1,8 +1,0 @@
-tools/motion/out/
-tools/motion/out720/
-tools/worksheet/*.html
-tools/worksheet/*.pdf
-tools/qr/*.pdf
-_demo-record.html
-__pycache__/
-tools/worksheet/ws*.html
