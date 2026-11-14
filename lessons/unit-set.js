@@ -139,7 +139,8 @@ DS.Unit = (function () {
       op: 'imp', in: ['card:contra', 'card:imp'], ordered: true, hint: '대우가 참이면 명제는?',
       ex: q({ type: 'ox', question: '명제 ‘n²이 짝수이면 n은 짝수이다.’는 대우 ‘n이 홀수이면 n²은 홀수이다.’를 보여 증명할 수 있다.', answer: true, solution: '대우가 참 → 명제도 참' }) },
     // ── 06 명제의 증명 · 절대부등식 (2026-11-05 재배열: 수업에서 대우 증명 맛보기는 8차시지만 카드는 ⇒ 연산이 9차시라 9차시 묶음 · 귀류법 · 절대부등식 = 10차시) ──
-    { id: 'contradiction', no: 11, sec: '06 명제의 증명', name: '귀류법', fm: '결론을 부정 → 모순 → 처음 명제가 참', desc: '결론을 부정하여 모순을 이끌어 내는 증명', grade: 3, art: 0, flip: true, page: '10차시 학습지', op: 'then', in: ['card:neg', 'X'], ordered: true, hint: '아니라고 가정했더니 말이 안 된다면?',
+    { id: 'contradiction', no: 12, // 📚 2026-11-14 12차시 수업 = 11 → 12 (선생님 「추천대로」)
+      sec: '06 명제의 증명', name: '귀류법', fm: '결론을 부정 → 모순 → 처음 명제가 참', desc: '결론을 부정하여 모순을 이끌어 내는 증명', grade: 3, art: 0, flip: true, page: '12차시 학습지', op: 'then', in: ['card:neg', 'X'], ordered: true, hint: '아니라고 가정했더니 말이 안 된다면?',
       ex: q({ type: 'choice', question: '‘√2는 무리수이다.’를 귀류법으로 증명할 때 처음 가정은?', choices: ['√2는 유리수이다.', '√2는 무리수이다.', '√2는 정수이다.'], answerIndex: 0, solution: '결론(무리수)을 부정 → 유리수라고 가정' }) },
     { id: 'absineq', no: 11, sec: '06 명제의 증명', name: '절대부등식', fm: '모든 실수 x 에 대하여 항상 성립하는 부등식', desc: '예: x² ≥ 0', grade: 2, art: 7, page: '10차시 학습지', op: 'all', in: ['I'], hint: '어떤 값을 넣어도 성립하면',
       ex: q({ type: 'ox', question: '부등식 x² ≥ 0 은 모든 실수 x 에 대하여 성립하는 절대부등식이다.', answer: true, solution: '제곱은 0 이상' }) },
