@@ -98,6 +98,11 @@ for (const mid of Object.keys(L.monsters)) { let same = 0; for (let s = 0; s < 6
 check(assumeOk('실수 a, b에 대하여 a + b > 2이면 a > 1 또는 b > 1이다.', 'a ≤ 1이고 b ≤ 1이다.') && !assumeOk('실수 a, b에 대하여 a + b > 2이면 a > 1 또는 b > 1이다.', 'a ≤ 1 또는 b ≤ 1이다.'), '판정기 = 또는 ↔ 이고');
 check(assumeOk('학생 10명을 3개 반으로 나누면 어떤 반은 4명 이상이다.', '모든 반이 3명 이하이다.') && near(val('a − 1', { a: 1 + R2 }), R2), '판정기 = 반 나누기 · 1 + √2');
 
+// 🎬 영상 (#52 · #53 · #54)
+{ const fs = require('fs'), path = require('path'); const V = L.videos || {};
+  check(V.c1 === 'assets/video/v12-52.mp4' && V.m1 === V.c1 && V.c2 === 'assets/video/v12-53.mp4' && V.m2 === V.c2 && V.m3 === 'assets/video/v12-54.mp4', '🎬 영상 칸');
+  Object.values(V).forEach((f) => check(fs.existsSync(path.join(__dirname, '..', f)) && fs.statSync(path.join(__dirname, '..', f)).size < 1.05e6, `🎬 ${f} 있음 · 1MB 이내`)); }
+
 // (4) 📸 서술형 채점 기준 (m3)
 const RB = ((DS.Rubrics || {})['set-12'] || {}).m3;
 check(RB && RB.on && RB.raid && RB.total === 4 && RB.steps.length === 4 && RB.steps.reduce((s, x) => s + x.pts, 0) === 4 && RB.pass === 3, '📸 채점 기준 4단계 · 통과 3');
