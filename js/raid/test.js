@@ -170,7 +170,7 @@ DS.Test = (function () {
     const on = R && DS.Fun && DS.Raid.restOn(R) && !DS.Raid.isLobby(R) && !demo;
     if (!on) { if (row) row.remove(); return; }
     if (!row) { row = document.createElement('div'); row.id = 'test-fun'; row.className = 'test-fun'; document.body.appendChild(row); }
-    const f = R.fun, extra = trial ? '' : !f && !(DS.OFF && DS.OFF('td')) ? `<select id="tf-map" title="🏰 디펜스 지도"><option value="">🏰 지도: 차례대로</option>${MAPS().map((m) => `<option value="${m.id}"${tdMap === m.id ? ' selected' : ''}>${esc(m.name)}</option>`).join('')}</select>`
+    const f = R.fun, extra = trial ? '' : !f ? `<select id="tf-map" title="🏰 디펜스 지도"><option value="">🏰 지도: 차례대로</option>${MAPS().map((m) => `<option value="${m.id}"${tdMap === m.id ? ' selected' : ''}>${esc(m.name)}</option>`).join('')}</select>`
       : f.kind === 'td' ? `<button class="btn small" id="tf-fast" title="화면 확인용 빨리 감기">⏩ ${fast ? '3배속' : '보통'}</button>` : '';
     let html = `${DS.Fun.ctlHtml(R)}${extra}`;
     if (trial) html = html.replace(/<button[^>]*k-td[^>]*>[\s\S]*?<\/button>/g, ''); // 👩‍🏫 체험판: 🏰 디펜스 뺌

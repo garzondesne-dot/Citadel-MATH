@@ -112,7 +112,6 @@ DS.Fun = (function () {
   // ── 교사 · 종합상황실 ───────────────────────────────────
   const studentsIn = (R) => Object.keys(R.players || {}).filter((u) => !R.players[u].teacher && (R.active || {})[u]);
   async function start(code, R, kind = 'bal', which = 'now', opt = {}) { // which (OX 타임): prev = 지난 차시 · now = 이번 차시 · opt = 🏰 디펜스 옵션 (테스트 모드)
-    if (kind === 'td' && DS.OFF && DS.OFF('td')) return; // 🏰 정식 = 디펜스 숨김 (2026-11-14)
     if (kind === 'td' && DS.TD) { await N().set(P(code, 'fv'), null).catch(() => {}); return DS.TD.start(code, R, opt); } // 🏰 타워 디펜스 (2026-11-07)
     if (kind === 'nun' && DS.Nunchi) { await N().set(P(code, 'fv'), null).catch(() => {}); return DS.Nunchi.start(code, R); } // 🙊 눈치 게임 (2026-11-08)
     kind = KIND[kind] ? kind : 'bal';
@@ -188,7 +187,7 @@ DS.Fun = (function () {
   };
   const ctlHtml = (R) => (R.fun && R.fun.kind === 'td' && DS.TD ? DS.TD.ctlHtml(R) : R.fun && R.fun.kind === 'nun' && DS.Nunchi ? DS.Nunchi.ctlHtml(R) : R.fun
     ? `<div class="fun-ctl"><span>${esc(status(R))}</span><button class="btn small" data-fun="stop">⏹ 게임 끝</button><button class="btn small" data-fun="again">🔄 새 게임</button></div>`
-    : `<div class="fun-ctl pick"><span class="muted small">쉬는 시간 놀이</span>${Object.entries(KIND).filter(([k]) => k !== 'quiz').map(([k, v]) => `<button class="btn small fun-btn k-${k}" data-fun="start:${k}" title="${esc(v.rule)}">${esc(v.short)}</button>`).join('')}<button class="btn small fun-btn k-quiz" data-oxq="prev" title="탈락 없는 복습 5문장">⭕ OX 지난</button><button class="btn small fun-btn k-quiz" data-oxq="now" title="이번 차시 점검 5문장">⭕ OX 오늘</button><button class="btn small fun-btn k-nun" data-fun="start:nun" title="1부터 차례로 외치기 · 겹치면 탈락 (교실 TV 필요)">🙊 눈치</button>${DS.OFF && DS.OFF('td') ? '' : '<button class="btn small fun-btn k-td" data-fun="start:td" title="반 모두 타워가 되어 성을 지켜요 (교실 TV 필요)">🏰 디펜스</button>'}</div>`); // 🏰 2026-11-14 정식 = 디펜스 숨김 // 2026-11-05: OX 타임은 쉼터 안에서만
+    : `<div class="fun-ctl pick"><span class="muted small">쉬는 시간 놀이</span>${Object.entries(KIND).filter(([k]) => k !== 'quiz').map(([k, v]) => `<button class="btn small fun-btn k-${k}" data-fun="start:${k}" title="${esc(v.rule)}">${esc(v.short)}</button>`).join('')}<button class="btn small fun-btn k-quiz" data-oxq="prev" title="탈락 없는 복습 5문장">⭕ OX 지난</button><button class="btn small fun-btn k-quiz" data-oxq="now" title="이번 차시 점검 5문장">⭕ OX 오늘</button><button class="btn small fun-btn k-nun" data-fun="start:nun" title="1부터 차례로 외치기 · 겹치면 탈락 (교실 TV 필요)">🙊 눈치</button><button class="btn small fun-btn k-td" data-fun="start:td" title="반 모두 타워가 되어 성을 지켜요 (교실 TV 필요)">🏰 디펜스</button></div>`); // 2026-11-05: OX 타임은 쉼터 안에서만
   function bind(el, code, R, opt) { // opt (🧪 테스트 모드): 🏰 디펜스 옵션을 돌려주는 함수
     if (R.fun) drive(code);
     if (R.fun && R.fun.kind === 'td' && DS.TD) DS.TD.bindCtl(el, code, R);
