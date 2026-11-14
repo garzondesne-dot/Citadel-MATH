@@ -1,0 +1,231 @@
+<title>제출 모드 시안</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@600;700&display=swap">
+<style>
+/* 레이아웃: 위 = 원칙 표 · 아래 = 화면마다 「게임(지금 베타 실제) ↔ 제출(시안)」 폰 한 쌍 + 다른 점 / 제출 폰 = 한 가지 바탕색 · 학습지 꼴 */
+:root{--bg:#ecebe6;--ink:#1d1c19;--sub:#67635a;--line:#d6d2c7;--pane:#f8f7f3;
+--paper:#f7f6f1;--rule:#d9dde3;--pen:#1f3a68;--red:#c8312b;--penl:#e7ecf5;--grey:#6b7280;
+--f:"Noto Sans KR",system-ui,sans-serif;--fs:"Noto Serif KR","Noto Sans KR",serif}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e0f12;--ink:#ecebe6;--sub:#9b968c;--line:#2b2d35;--pane:#17181d;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e0f12;--ink:#ecebe6;--sub:#9b968c;--line:#2b2d35;--pane:#17181d;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.6 var(--f)}
+.wrap{max-width:1000px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:22px}
+h1{font-size:22px;margin:0}h2{font-size:17px;margin:0}
+.lead{margin:0;color:var(--sub);max-width:72ch}
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--pane)}
+table{border-collapse:collapse;width:100%;min-width:560px;font-size:14px}
+th,td{padding:8px 12px;border-top:1px solid var(--line);text-align:left;vertical-align:top}
+th{border-top:0;font-size:12.5px;color:var(--sub)}td:first-child{font-weight:700;white-space:nowrap}
+section{display:grid;gap:10px}
+.pair{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start}
+figure{margin:0;display:grid;gap:6px;width:300px;max-width:100%}
+figcaption{font-size:13.5px;font-weight:700}figcaption small{font-weight:400;color:var(--sub)}
+.shot{width:300px;max-width:100%;border-radius:16px;border:1px solid var(--line);display:block}
+ul{margin:0;padding-left:1.2em;font-size:14px;display:grid;gap:3px;flex:1;min-width:220px}
+/* ── 제출 모드 폰: 바탕 한 색(종이) · 공책 줄 · 파란 펜 · 빨간 채점 펜 · 그림 · 이모지 없음 ── */
+.ph{width:300px;max-width:100%;height:634px;background:var(--paper);color:#1d1f24;border-radius:16px;border:1px solid var(--line);overflow:hidden;display:flex;flex-direction:column;font:13px/1.45 var(--f)}
+.tb{display:flex;align-items:center;gap:8px;padding:10px 12px 8px;border-bottom:1.5px solid #1d1f24}
+.tb .bk{font-size:15px;color:var(--grey)}.tb b{flex:1;font:700 13.5px var(--fs)}
+.sw{display:flex;border:1px solid #b9bec7;border-radius:6px;overflow:hidden;font-size:11px;font-weight:700}
+.sw span{padding:3px 8px;color:var(--grey)}.sw span.on{background:#1d1f24;color:var(--paper)}
+.bd{flex:1;min-height:0;padding:10px 12px;display:flex;flex-direction:column;gap:10px;background-image:repeating-linear-gradient(transparent 0 25px,var(--rule) 25px 26px)}
+.meta{display:flex;justify-content:space-between;font-size:11.5px;color:var(--grey)}
+.qn{font:700 14.5px var(--fs);color:#1d1f24}
+.qn i{font-style:normal;display:inline-block;min-width:22px;height:22px;border:1.5px solid #1d1f24;border-radius:50%;text-align:center;line-height:19px;font-size:12px;margin-right:6px}
+.given{font-size:12.5px;color:#3a3d44}
+.opts{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
+.opts span{border:1px solid #b9bec7;background:#fff;border-radius:4px;text-align:center;padding:6px 0;font-weight:700}
+.opts span.on{border:1.5px solid var(--pen);background:var(--penl);color:var(--pen)}
+.blank{display:flex;align-items:center;gap:6px;font-size:13px}
+.blank b{flex:1;border-bottom:1.5px solid #1d1f24;padding:2px 4px;font:700 15px "Noto Sans KR";color:var(--pen)}
+.left{display:flex;justify-content:space-between;font-size:12px;color:var(--grey);border-top:1px dashed #c8ccd3;padding-top:6px}
+.left b{color:#1d1f24}
+.prog{display:flex;gap:3px}.prog i{width:14px;height:14px;border:1.5px solid #1d1f24;border-radius:3px}.prog i.ok{background:#1d1f24}.prog i.now{border-color:var(--pen);background:var(--penl)}
+.bot{padding:8px 12px 12px;display:flex;gap:6px;border-top:1px solid #d3d6dc;background:var(--paper)}
+.bot span{border:1.5px solid #1d1f24;border-radius:6px;display:grid;place-items:center;font-weight:700;font-size:12.5px;padding:10px 6px;background:#fff}
+.bot .m{flex:1;background:#1d1f24;color:var(--paper);font-size:14.5px}
+.row{display:grid;grid-template-columns:22px 1fr auto 22px;gap:6px;align-items:center;font-size:12.5px;padding:3px 0}
+.row .n{font-weight:700}.row b{color:var(--pen)}
+.mk{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font:700 13px var(--fs)}
+.mk.o{border:2px solid var(--red);color:var(--red)}
+.mk.x{color:var(--red);font-size:18px}
+.score{font:700 22px var(--fs);color:var(--red);transform:rotate(-6deg);align-self:flex-end;border:2px solid var(--red);border-radius:6px;padding:0 8px}
+.note{font-size:12px;color:var(--grey)}
+.todo{display:grid;gap:0}
+.todo div{display:flex;gap:10px;align-items:center;padding:7px 2px;border-bottom:1px solid var(--rule);font-size:13px}
+.todo div .bx{width:14px;height:14px;border:1.5px solid #1d1f24;border-radius:2px;flex:none}
+.todo div .bx.done{background:#1d1f24}
+.todo div span{flex:1}.todo div em{font-style:normal;color:var(--grey);font-size:12px}
+.todo .now{font-weight:700}
+.box{border:1px solid #c8ccd3;background:#fff;border-radius:6px;padding:8px 10px;font-size:12.5px;display:grid;gap:6px}
+.box b{font-family:var(--fs)}
+.btnl{border:1.5px solid #1d1f24;border-radius:6px;padding:8px;text-align:center;font-weight:700;background:#fff}
+.key{display:grid;grid-template-columns:repeat(5,1fr);gap:4px}.key span{border:1px solid #b9bec7;background:#fff;border-radius:4px;text-align:center;padding:6px 0;font-weight:700}
+.ttl{font:700 15px var(--fs);border-bottom:1px solid #1d1f24;padding-bottom:4px}
+.q-tag{font-size:10.5px;border:1px solid var(--pen);color:var(--pen);border-radius:3px;padding:0 5px}
+</style>
+<div class="wrap">
+  <header style="display:grid;gap:6px">
+    <h1>제출 모드 시안</h1>
+    <p class="lead">v2 · 2026-11-14 선생님 「게임 느낌 아예 지우고 · 제출 모드도 테마처럼 · 배경색 한 가지로 고정 · 딱 봐도 학습지나 수학 공부다 싶은 느낌」 반영. 왼쪽 = 지금 베타 b111 게임 화면(실제) · 오른쪽 = 제출 모드 시안.</p>
+  </header>
+
+  <section>
+    <h2>원칙</h2>
+    <div class="tbl"><table><thead><tr><th>항목</th><th>게임 모드</th><th>제출 모드 (v2)</th></tr></thead><tbody>
+      <tr><td>켜는 법</td><td colspan="2">테마처럼 작동: ⚙ 설정의 테마 줄에 「제출」 하나 더 · 위 막대 「게임 | 제출」로도 바로 바꿈 · 학생마다 기억 · 진행 그대로</td></tr>
+      <tr><td>바탕</td><td>던전 그림 · 어두운 색</td><td><b>종이색 한 가지 고정</b> + 연한 공책 줄 · 다른 테마 · 어두운 화면 설정과 상관없이 늘 같음</td></tr>
+      <tr><td>그림 · 효과</td><td>용사 · 몬스터 · 체력 막대 · 공격 · 소리</td><td>없음 (이모지 · 아이콘도 빼고 글자만)</td></tr>
+      <tr><td>글꼴 · 색</td><td>게임 글꼴 · 금빛</td><td>문제 = 명조 · 내 답 = 파란 펜 · 채점 = 빨간 펜(○ ✗) · 그 밖은 검정</td></tr>
+      <tr><td>하트</td><td>❤❤❤❤</td><td>「남은 기회 3번」 글자</td></tr>
+      <tr><td>보상</td><td>💎 · EXP · 전리품 알림</td><td>화면에 안 보임(뒤에서는 똑같이 쌓임) · 게임 모드로 오면 한꺼번에</td></tr>
+      <tr><td>수업 밖</td><td>캠프</td><td>「오늘 할 일」 체크 목록</td></tr>
+    </tbody></table></div>
+  </section>
+
+  <section>
+    <h2>① 문제 풀기</h2>
+    <div class="pair">
+      <figure><figcaption>게임 <small>지금 베타</small></figcaption><img class="shot" src="g-problem.webp" alt="게임 모드 문제" width="360" height="760"></figure>
+      <figure><figcaption>제출 <small>시안</small></figcaption><div class="ph">
+        <div class="tb"><span class="bk">‹</span><b>6차시 · 문제 1</b><span class="sw"><span>게임</span><span class="on">제출</span></span></div>
+        <div class="bd">
+          <div class="meta"><span>소문제 1 / 4</span><span class="prog"><i class="now"></i><i></i><i></i><i></i></span></div>
+          <div class="given">U = {1, 2, 3, 4, 5, 6}, A = {1, 2, 3}, B = {3, 4} 일 때</div>
+          <div class="qn"><i>1</i>(A ∪ B)ᶜ 의 원소를 모두 고르시오.</div>
+          <div class="opts"><span>1</span><span>2</span><span>3</span><span>4</span><span class="on">5</span><span class="on">6</span></div>
+          <div class="blank">답 <b>{5, 6}</b></div>
+          <div style="flex:1"></div>
+          <div class="left"><span>남은 기회 <b>4번</b></span><span>학습지 숫자</span></div>
+        </div>
+        <div class="bot"><span>힌트</span><span class="m">다음 소문제</span><span>서술형</span></div>
+      </div></figure>
+      <ul><li>그림 · 체력 막대 · 아이콘 없음 · 공책 줄 위에 문제</li><li>고른 답 = 파란 펜 · 빈칸 밑줄에 「답 {5, 6}」</li><li>아래 줄 자리(힌트 · 다음 · 서술형)는 게임과 같음 · 글자만</li></ul>
+    </div>
+  </section>
+
+  <section>
+    <h2>② 정찰 (문제 나오기 전)</h2>
+    <div class="pair">
+      <figure><figcaption>게임</figcaption><img class="shot" src="g-scout.webp" alt="게임 모드 정찰" width="360" height="760"></figure>
+      <figure><figcaption>제출</figcaption><div class="ph">
+        <div class="tb"><span class="bk">‹</span><b>6차시 · 문제 1</b><span class="sw"><span>게임</span><span class="on">제출</span></span></div>
+        <div class="bd"><div class="ttl">학습지 문제 1 을 먼저 풀어 두세요</div><div class="note">5초 뒤 답 칸이 열려요. 선생님이 일찍 열 수도 있어요.</div><div style="flex:1"></div></div>
+        <div class="bot"><span class="m">준비 완료</span></div>
+      </div></figure>
+      <ul><li>그림자 몬스터 대신 안내 두 줄</li></ul>
+    </div>
+  </section>
+
+  <section>
+    <h2>③ 소레이드 (단계 문제)</h2>
+    <div class="pair">
+      <figure><figcaption>게임</figcaption><img class="shot" src="g-soraid.webp" alt="게임 모드 소레이드" width="360" height="780"></figure>
+      <figure><figcaption>제출</figcaption><div class="ph">
+        <div class="tb"><span class="bk">‹</span><b>6차시 · 문제 4</b><span class="sw"><span>게임</span><span class="on">제출</span></span></div>
+        <div class="bd">
+          <div class="meta"><span>단계 1 / 3</span><span class="prog"><i class="now"></i><i></i><i></i></span></div>
+          <div class="qn"><i>4</i>A 와 B 의 원소를 각각 모두 고르시오.</div>
+          <div class="given">A = {x | x는 4의 약수}</div>
+          <div class="opts"><span>1</span><span class="on">2</span><span>4</span><span>5</span><span>6</span><span>10</span></div>
+          <div class="given">B = {x | x는 24 이하의 4의 배수}</div>
+          <div class="opts"><span>4</span><span>8</span><span>9</span><span>12</span><span>14</span><span>16</span></div>
+          <div style="flex:1"></div>
+          <div class="left"><span>남은 기회 <b>4번</b></span><span>학습지 숫자</span></div>
+        </div>
+        <div class="bot"><span>힌트</span><span class="m">제출</span><span>서술형</span></div>
+      </div></figure>
+      <ul><li>졸개 · 대장 대신 「단계 1 / 3」 네모 칸</li><li>앞 단계 답 줄은 그대로(검정 글자)</li></ul>
+    </div>
+  </section>
+
+  <section>
+    <h2>④ 형성평가</h2>
+    <div class="pair">
+      <figure><figcaption>게임</figcaption><img class="shot" src="g-boss.webp" alt="게임 모드 형성평가" width="360" height="760"></figure>
+      <figure><figcaption>제출</figcaption><div class="ph">
+        <div class="tb"><span class="bk">‹</span><b>6차시 · 형성평가</b><span class="sw"><span>게임</span><span class="on">제출</span></span></div>
+        <div class="bd">
+          <div class="meta"><span>문항 2 / 3</span><span class="q-tag">숫자 바뀜</span></div>
+          <div class="qn"><i>2</i>n(U) = 17, n(B) = 11 일 때 n(Bᶜ) 의 값은?</div>
+          <div class="blank">답 <b>&nbsp;</b></div>
+          <div class="key"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>0</span></div>
+          <div style="flex:1"></div>
+          <div class="left"><span>남은 기회 <b>3번</b></span><span>보너스 문항 1</span></div>
+        </div>
+        <div class="bot"><span class="m">모두 제출</span></div>
+      </div></figure>
+      <ul><li>보스 대신 시험지 문항 꼴</li><li>「⭐ 보너스」 → 「보너스 문항」 글자</li></ul>
+    </div>
+  </section>
+
+  <section>
+    <h2>⑤ 채점 (빨간 펜)</h2>
+    <div class="pair">
+      <figure><figcaption>게임</figcaption><img class="shot" src="g-grade.webp" alt="게임 모드 채점" width="360" height="760"></figure>
+      <figure><figcaption>제출</figcaption><div class="ph">
+        <div class="tb"><span class="bk">‹</span><b>6차시 · 문제 1</b><span class="sw"><span>게임</span><span class="on">제출</span></span></div>
+        <div class="bd">
+          <div class="meta"><span>문제 1 채점</span><span class="score">3 / 4</span></div>
+          <div class="row"><span class="n">(1)</span><span>(A ∪ B)ᶜ</span><b>{5, 6}</b><span class="mk o">○</span></div>
+          <div class="row"><span class="n">(2)</span><span>Aᶜ ∩ Bᶜ</span><b>{5, 6}</b><span class="mk o">○</span></div>
+          <div class="row"><span class="n">(3)</span><span>(A ∩ B)ᶜ</span><b>{1, 2, 3, 4, 5, 6}</b><span class="mk x">✗</span></div>
+          <div class="row"><span class="n">(4)</span><span>Aᶜ ∪ Bᶜ</span><b>{1, 2, 4, 5, 6}</b><span class="mk o">○</span></div>
+          <div style="flex:1"></div>
+          <div class="left"><span>남은 기회 <b>3번</b></span><span>(3) 만 다시</span></div>
+        </div>
+        <div class="bot"><span class="m">(3) 다시 풀기</span></div>
+      </div></figure>
+      <ul><li>선생님 채점처럼 빨간 ○ ✗ + 비스듬한 점수</li><li>💎 · EXP 알림 없음 (뒤에서는 쌓임)</li></ul>
+    </div>
+  </section>
+
+  <section>
+    <h2>⑥ 다 맞힘 (기력)</h2>
+    <div class="pair">
+      <figure><figcaption>게임</figcaption><img class="shot" src="g-cards.webp" alt="게임 모드 기력 카드" width="360" height="799"></figure>
+      <figure><figcaption>제출</figcaption><div class="ph">
+        <div class="tb"><span class="bk">‹</span><b>6차시 · 문제 1</b><span class="sw"><span>게임</span><span class="on">제출</span></span></div>
+        <div class="bd">
+          <div class="meta"><span>문제 1</span><span class="score">4 / 4</span></div>
+          <div class="ttl">다 맞혔어요</div>
+          <div class="box"><b>더 해 볼 것 (3번 남음)</b>
+            <div class="btnl">친구 돕기 · 기회가 0 인 친구에게 1번</div>
+            <div class="btnl">연습 문제 · 숫자를 바꿔 한 번 더</div></div>
+          <div style="flex:1"></div>
+        </div>
+        <div class="bot"><span class="m">다음 문제로</span></div>
+      </div></figure>
+      <ul><li>⚡ 카드 · 기력 이름 대신 「더 해 볼 것」 두 줄</li><li>묶기 · 진필살기 · 전리품 표시 없음</li></ul>
+    </div>
+  </section>
+
+  <section>
+    <h2>⑦ 수업 밖 = 오늘 할 일</h2>
+    <div class="pair">
+      <figure><figcaption>게임</figcaption><img class="shot" src="g-camp.webp" alt="게임 모드 캠프" width="360" height="760"></figure>
+      <figure><figcaption>제출</figcaption><div class="ph">
+        <div class="tb"><b>오늘 할 일 · 1-3 반 1 번</b><span class="sw"><span>게임</span><span class="on">제출</span></span></div>
+        <div class="bd"><div class="todo">
+          <div class="now"><span class="bx"></span><span>6차시 수업 · 지금</span><em>들어가기 ›</em></div>
+          <div><span class="bx"></span><span>복습 · 2문항 (5차시)</span><em>풀기 ›</em></div>
+          <div><span class="bx"></span><span>단원 평가 · 새 문항 1</span><em>풀기 ›</em></div>
+          <div><span class="bx"></span><span>문제 만들기 · 사진 올리기</span><em>올리기 ›</em></div>
+          <div><span class="bx done"></span><span>선생님 소식 · 1</span><em>읽음</em></div>
+        </div><div class="note">끝낸 것은 칸이 채워져요.</div></div>
+      </div></figure>
+      <ul><li>캠프 그림 대신 체크 목록 · 아이콘 없음</li><li>❓ 이름 = 게임 이름(허수아비 · 성채 던전) 대신 학습 이름(복습 · 단원 평가) — 11/12 「용어 통일」과 부딪힘 → 정하실 것</li></ul>
+    </div>
+  </section>
+
+  <section>
+    <h2>정하실 것</h2>
+    <div class="tbl"><table><thead><tr><th>#</th><th>질문</th><th>머리 추천</th></tr></thead><tbody>
+      <tr><td>1</td><td>제출 모드 이름 · 목록 글자: 11/12 「용어 통일(허수아비 · 성채 던전 그대로)」을 지킬까, 학습 이름(복습 · 단원 평가 · 문제 만들기)으로 바꿀까?</td><td>학습 이름 + 괄호로 게임 이름 한 번 (예: 「복습 (허수아비)」) — 둘 다 알아보게</td></tr>
+      <tr><td>2</td><td>바탕 종이색 = 이 시안 색(연한 미색 + 공책 줄)으로 고정</td><td>이대로</td></tr>
+      <tr><td>3</td><td>더 해 볼 것 = 친구 돕기 · 연습 문제만 (묶기 · 진필살기 없음)</td><td>이대로</td></tr>
+      <tr><td>4</td><td>교실 TV 에서는 제출 모드 학생도 용사로 보임 (11/12 결정)</td><td>그대로 (반 친구와 같게)</td></tr>
+    </tbody></table></div>
+  </section>
+</div>
