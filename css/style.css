@@ -440,7 +440,8 @@ textarea { display: block; width: 100%; font: 15px var(--pixel); color: var(--te
 .crop-box .h.br { right: -8px; bottom: -8px; cursor: nwse-resize; }
 
 /* ═══════════ v0.5.0 ═══════════ */
-html, body { overscroll-behavior-y: none; } /* 아래로 당겨 새로고침 막기 (새로고침돼도 장면 복귀) */
+html, body { overscroll-behavior-y: none; }
+:root { color-scheme: only dark; } /* 📱 2026-11-14 강제 어둡게 무시 (앱 = 이미 어두운 색 · 밝은 칸 · 그림이 뒤집히지 않게) */ /* 아래로 당겨 새로고침 막기 (새로고침돼도 장면 복귀) */
 .huff { animation: huff 0.9s ease-in-out infinite; transform-origin: 50% 100%; }
 @keyframes huff { 0%, 100% { transform: scale(1, 1); } 45% { transform: scale(1.04, 0.93) translateY(2px); } 60% { transform: scale(0.98, 1.04); } }
 .jump { animation: jump 0.7s cubic-bezier(.3, .7, .4, 1) infinite; }
