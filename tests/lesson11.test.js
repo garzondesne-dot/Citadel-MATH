@@ -128,7 +128,7 @@ check(isContra('a + b가 홀수이면 a, b 중 적어도 하나는 홀수이다.
 
 // 🎬 영상 (#49 · #50) = 개념 · 문제 칸에 연결 · 파일 있음 · 1MB 이내
 { const fs = require('fs'), path = require('path'); const V = L.videos || {};
-  check(V.c1 === 'assets/video/v11-49.mp4' && V.m1 === V.c1 && V.c2 === 'assets/video/v11-50.mp4' && V.m2 === V.c2 && V.m3 === V.c2, '🎬 영상 칸');
+  check(V.c1 === 'assets/video/v11-49.mp4' && V.m1 === V.c1 && V.c2 === 'assets/video/v11-50.mp4' && V.m2 === V.c2 && V.m3 === V.c2 && V.m4 === 'assets/video/v11-51.mp4', '🎬 영상 칸 (#49 · #50 · #51)');
   Object.values(V).forEach((f) => check(fs.existsSync(path.join(__dirname, '..', f)) && fs.statSync(path.join(__dirname, '..', f)).size < 1.05e6, `🎬 ${f} 있음 · 1MB 이내`)); }
 
 // (4) 📸 서술형 채점 기준 (m3) · 모루 카드 「대우를 이용한 증명」 = 11차시
