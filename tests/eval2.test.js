@@ -129,7 +129,7 @@ function verify(id, q, tag) {
 // (1) 방 구성
 check(L.eval && L.floor === 2 && L.steps.length === 0 && L.rooms.map((r) => r.id).join() === 'q01,q02,q03,q04,q05,q06,q07,q08,q09,q10,q11', '2층 = 11방');
 check(L.rooms.filter((r) => r.boss).map((r) => r.id).join() === 'q11' && L.rooms.filter((r) => r.photo).map((r) => r.id).join() === 'q07,q10', '👑 11 · 📷 07 · 10');
-check(L.rooms.map((r) => r.no).join() === '8,8,9,10,8,9,9,10,9,10,11', '열리는 차시 (제안서)');
+check(L.rooms.map((r) => r.no).join() === '8,8,9,10,8,9,9,10,9,10,13', '열리는 차시 (제안서 · 👑 11 = 13차시 절대부등식 · 2026-11-14)');
 
 // (2) 첫 시도 = 제안서 정답
 const ans = (q) => (q.type === 'multi' ? picked(q).join(',') : String(q.answer));
@@ -157,6 +157,11 @@ for (let s = 0; s < 300; s++) for (let a = 0; a <= 3; a++) for (const r of L.roo
 check(JSON.stringify(L.items('q04', 'x', 1)) === JSON.stringify(L.items('q04', 'x', 1)), '같은 시드 = 같은 문제');
 const diff = (id) => new Set(R(0, 99).map((s) => L.items(id, `d${s}`, 1).map((q) => q.question + (q.options || q.choices || []).join('/')).join('|'))).size;
 L.rooms.forEach((r) => check(diff(r.id) >= (r.id === 'q11' ? 10 : 15), `${r.id} 재도전 문제가 충분히 다양 (${diff(r.id)})`));
+
+// 🏰 2026-11-14: 👑 11 (절대부등식) = 13차시부터 · 다른 방을 다 깨도 11 · 12차시 진도에서는 보스 방이 안 열림 (60% 규칙은 열린 방 기준 그대로)
+{ const DSb = load(['assets/manifest.js', 'js/engine/ui.js', 'js/engine/setgen.js', 'js/engine/quiz.js', 'js/engine/lessons.js', 'lessons/eval-2.js', 'js/raid/bonus.js']), Lb = DSb.Lessons.get('eval-2'), all = {};
+  Lb.rooms.forEach((r) => { all[r.id] = { clear: true }; }); const st = (up) => DSb.Bonus.roomsState(Lb, { 'eval-2': all }, up, false);
+  check(!st(11).bossOpen && !st(12).bossOpen && st(13).bossOpen, `👑 보스 방 = 13차시부터 (11 ${st(11).bossOpen} · 12 ${st(12).bossOpen} · 13 ${st(13).bossOpen})`); }
 
 if (fail) { console.error(`\n${fail}건 실패 (${count}건 중)`); process.exit(1); }
 console.log(`OK: 🏰 성채던전 2층 「명제 중단원」 11방 — 제안서 정답 · 교과서 숫자 안 씀 · 재도전 ${n}문항 독립 검산 (${count}건) 통과`);

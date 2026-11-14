@@ -190,7 +190,7 @@
     R('q08', 10, '08 충분조건이 되는 a', 'castle2:3@h240', m08),
     R('q09', 9, '09 항상 참인 명제', 'castle2:1@h240', m09),
     R('q10', 10, '10 두 명제가 거짓 (서술형)', 'castle2:4@h240', m10, { photo: true }),
-    R('q11', 11, '👑 11 절대부등식 최솟값', 'castleboss2:0', m11, { boss: true }),
+    R('q11', 13, '👑 11 절대부등식 최솟값', 'castleboss2:0', m11, { boss: true }), // 🏰 2026-11-14 선생님 「추천대로」: 11 → 13 (새 차시표 = 13차시 절대부등식 · 안 배운 문제가 열리지 않게)
   ];
   const MONSTERS = Object.fromEntries(ROOMS.map((r) => [r.id, r]));
 
