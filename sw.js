@@ -3,8 +3,8 @@
  *  ② index.html · version.json · server.json = 늘 네트워크 먼저(안 되면 저장본) → 옛 판에 갇히지 않음
  *  ③ 그림 · 소리 · 배경음 · 글꼴 = 쓸 때 저장(dgb-media · 판이 바뀌어도 둠 · 그림을 바꾸면 파일 이름을 바꿈)
  *  ④ 다른 곳(Firebase · 구글) · GET 아닌 것 = 손대지 않음 */
-const BUILD = 'b189';
-const CORE = ["./","./index.html","./manifest.webmanifest","./icons/icon-192-v2.png","./icons/icon-512-v2.png","./icons/icon-maskable-512-v2.png","./icons/apple-touch-icon-v2.png","./art/brand-bg-v1.webp","./art/brand-school-logo-v1.webp","./assets/classic-5VUnfA4C.css","./assets/FxBake-DnxWekcF.css","./assets/index-DAMjvwq-.css","./assets/packExport-CSc7Q3BR.js","./assets/pixi-Dj1kZKwz.js","./assets/pdfPages-De1Iavnk.js","./assets/pdf-z6sF223D.js","./assets/pdf.worker.min-7WEkucD6.js","./assets/FxBake-uclMru7Z.js","./assets/browserAll-Dqvp9WSR.js","./assets/server-Bcx9wyvD.js","./assets/slash-DDxcrryT.js","./assets/index-ChkmmBwS.js","./assets/lib-DA_BEckY.js","./assets/index.esm-BvwL5Tfa.js","./assets/webworkerAll-CVQu4eQ4.js"];
+const BUILD = 'b196';
+const CORE = ["./","./index.html","./manifest.webmanifest","./icons/icon-192-v2.png","./icons/icon-512-v2.png","./icons/icon-maskable-512-v2.png","./icons/apple-touch-icon-v2.png","./art/brand-bg-v1.webp","./art/brand-school-logo-v1.webp","./assets/classic-5VUnfA4C.css","./assets/FxBake-DnxWekcF.css","./assets/index-BEGylgCd.css","./assets/packExport-BpJ6rNcM.js","./assets/pixi-Czawak0P.js","./assets/pdfPages-C-PF9TAN.js","./assets/pdf-z6sF223D.js","./assets/pdf.worker.min-7WEkucD6.js","./assets/FxBake-Cvrje1Wd.js","./assets/browserAll-Cz4UDyA8.js","./assets/server-Ou4IuJ4a.js","./assets/slash-D3Lv8bXi.js","./assets/index-F9d6HWuC.js","./assets/lib-BBM7xcDL.js","./assets/index.esm-BvwL5Tfa.js","./assets/webworkerAll-1_t-4Bu7.js"];
 const CORE_CACHE = `dgb-core-${BUILD}`, MEDIA = 'dgb-media-v1';
 const scopeUrl = new URL(self.registration.scope);
 const rel = (u) => { const p = new URL(u).pathname; return p.startsWith(scopeUrl.pathname) ? p.slice(scopeUrl.pathname.length) : p; };
