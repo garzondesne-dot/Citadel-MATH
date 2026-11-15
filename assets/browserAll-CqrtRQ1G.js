@@ -1,0 +1,1 @@
+import{extensions as i,AccessibilitySystem as t,Container as e,accessibilityTarget as n,EventSystem as m,FederatedContainer as r}from"./lib-DmPRRec-.js";import"./webworkerAll-C6-fOc0p.js";import"./index-mfkvltf0.js";i.add(t);e.mixin(n);i.add(m);e.mixin(r);
