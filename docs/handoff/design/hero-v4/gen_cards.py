@@ -1,0 +1,270 @@
+#!/usr/bin/env python3
+"""용사 세밀화 v4 · GPT 주문 카드 만들기 (설계 묶음 #1)
+
+python3 gen_cards.py  →  cards.json (작업대 카드 33장) · heroes.json (make_refs.py 가 읽음)
+용사 한 명 = 카드 한 장 = prompt 하나(혼자 완결 · 다른 카드 참고 없음).
+"""
+import json, os
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+GREEN = {1, 4, 10, 20, 25}          # 보라 · 분홍 용사 = 초록 배경 (메인 지정)
+# 초상 칸 [열, 행] = 베타 hero-data portraits.list
+PORT = {0:[0,0],1:[0,2],2:[0,4],3:[1,4],4:[1,5],5:[5,0],6:[5,3],7:[5,1],8:[4,0],9:[0,5],10:[4,4],11:[5,4],
+        12:[1,2],13:[2,3],14:[3,2],15:[3,4],17:[2,1],18:[0,1],19:[3,1],20:[4,1],21:[4,2],22:[5,2],23:[2,0],
+        24:[3,0],25:[3,5],26:[2,4],27:[4,3],28:[0,3],29:[3,3],30:[1,3],31:[1,1],32:[2,2],33:[2,5]}
+
+# id, 이름, 직업, 시트 파일, en, look(겉모습), gear(꼭 지킬 소지품), mat(재질), sway(걸을 때 흔들리는 것),
+# atk(공격 4칸), win(승리 2칸), heal(힐 시전 손), sit(앉을 때 내려놓는 것), note(덧붙임)
+H = [
+ (0,'로안','검사','hero-sword-v3c.webp','Roan the swordsman',
+  'a young swordsman with brown spiky hair and big blue eyes, blue tunic armor with gold trim, silver shoulder plates, a red cape, brown boots, a straight steel sword with a gold guard',
+  'red cape and straight sword','shiny steel blade and shoulder plates, soft cape folds, spiky hair in small strand clusters, leather belt and boots','the red cape',
+  '(1) wind-up, sword raised behind the head (2) big downward slash with a white crescent trail (3) forward thrust hitting, a star-shaped spark at the sword tip (4) recover, sword lowered in guard',
+  '(1) jumping, free fist punched up, mouth open cheering (2) landed, fist still up, eyes closed, big smile','the free hand','the sword laid on the ground beside him',''),
+ (1,'누아','마녀','hero-witch-v2c.webp','Nua the witch',
+  'a witch girl with long wavy purple hair and violet eyes, a big purple pointed hat with one gold star, a purple dress with a ribbon bow, a short gold wand topped with a purple orb',
+  'pointed star hat and orb wand','soft felt hat, wavy hair strands, glossy glass orb, cloth dress folds','the long hair and hat tip',
+  '(1) wind-up, wand pulled back over the shoulder (2) wand swung forward with a pale crescent trail (3) a purple orb bursting into a star-shaped spark in front of the wand (4) recover, wand held low',
+  '(1) jumping, wand raised, mouth open cheering (2) landed, one hand holding the hat brim, eyes closed, big grin','the wand','the wand laid across her lap',''),
+ (2,'리아넬','엘프 궁수','hero-elf-v2c.webp','Rianel the elf archer',
+  'an elf archer with short brown hair, long pointed ears and blue eyes, a green hooded cloak over a green tunic, a quiver of white-feathered arrows on the back, a curved wooden bow',
+  'pointed ears, green cloak, quiver and bow','wood grain on the bow, soft cloak folds, feathered arrows, leather straps','the cloak',
+  '(1) pulling an arrow from the quiver, bow raised (2) bow fully drawn, aiming forward (3) arrow released, a star-shaped spark at the bow, string snapped forward (4) recover, bow lowered',
+  '(1) jumping, bow raised overhead, mouth open cheering (2) landed, free fist up, eyes closed, big smile','the free hand','the bow laid on the ground beside her',''),
+ (3,'시엔','닌자','hero-ninja-v2c.webp','Sien the ninja',
+  'a ninja with black hair in a high ponytail tied with a red band, sharp red-brown eyes, a red scarf covering the mouth with long trailing ends, a dark fitted outfit with a red sash, a short steel dagger in each hand',
+  'red scarf-mask, ponytail and twin daggers','matte dark cloth, flowing scarf, small sharp steel blades','the scarf ends and ponytail',
+  '(1) crouching low, both daggers pulled back (2) dashing forward, one dagger slashing with a white crescent trail (3) second dagger stabbing forward, a star-shaped spark (4) recover, low stance, daggers crossed',
+  '(1) arms folded, daggers tucked away, a calm nod (2) one dagger spun in the raised hand, eyes smiling above the scarf','one empty hand','both daggers laid on the ground in front',''),
+ (4,'루멘','사제','hero-priest-v2c.webp','Lumen the priest',
+  'a gentle priest with long lavender hair in a side braid and blue eyes, a white cap-veil with a gold cross, a white robe with mint-green trim and a gold cross on the front, a gold staff whose head is a cross with a teal gem',
+  'white cross cap, braided hair and cross staff','soft robe cloth, polished gold staff, glowing teal gem, braided hair','the veil and robe hem',
+  '(1) wind-up, staff raised high with both hands (2) staff swung forward with a pale gold crescent trail (3) a burst of holy light, a big star-shaped spark at the staff head (4) recover, staff upright at the side',
+  '(1) jumping, staff raised, mouth open cheering (2) landed, both hands on the staff, eyes closed, warm smile','the staff','the staff resting against the shoulder',''),
+ (5,'하스타','창술사','hero-lancer-v2c.webp','Hasta the lancer',
+  'a lancer with dark blue hair in a high ponytail tied with a yellow ribbon, blue eyes, a blue-and-white armor dress with gold trim and a round gold brooch, white leg armor, a long spear with a steel head',
+  'yellow ribbon ponytail and long spear','polished spear head, cloth skirt folds over armor plates, silky ponytail','the ponytail and skirt',
+  '(1) wind-up, spear raised diagonally behind (2) low lunge, spear thrust forward at full reach (3) spear tip hitting, a star-shaped spark at the tip (4) recover, spear pulled back level',
+  '(1) spear planted upright, free fist up, mouth open cheering (2) spear spun once overhead, eyes closed, big smile','the free hand','the spear laid on the ground beside her',''),
+ (6,'보르간','드워프','hero-dwarf-v2c.webp','Borgan the dwarf',
+  'a stocky dwarf with orange hair in a topknot, thick eyebrows and a huge braided orange beard, heavy bronze-and-gold plate armor, a big stone war hammer with a metal-banded head',
+  'braided orange beard, topknot and stone hammer','hammered bronze plates, rough stone hammer head, thick braided beard strands','the beard',
+  '(1) wind-up, hammer lifted high behind the head (2) hammer swinging down with a white crescent trail (3) hammer smashing forward, a big star-shaped spark (4) recover, hammer head resting on the ground',
+  '(1) hammer on the shoulder, free fist up, laughing with mouth wide open (2) both arms up, hammer raised overhead, eyes closed','the free hand','the hammer standing head-down beside him',''),
+ (7,'올드윈','현자','hero-sage-v2c.webp','Oldwin the sage',
+  'an old sage with swept-back white hair, a white beard and round glasses, a cream-and-gold robe with a short cape, a golden staff with a ring-shaped head holding a small gem',
+  'white beard, round glasses and ring-head staff','soft heavy robe folds, polished gold staff, fine beard strands, glass glint on the glasses','the cape and robe hem',
+  '(1) wind-up, staff raised high (2) staff swept forward with a gold crescent trail (3) a golden magic circle bursting at the staff head (4) recover, staff lowered, cape settling',
+  '(1) staff raised, a gentle laugh, mouth open (2) stroking the beard, eyes closed, knowing smile','the free hand','the staff resting against the shoulder',''),
+ (8,'발도르','성기사','hero-paladin-v2c.webp','Baldor the paladin',
+  'a paladin with short dark navy hair and teal-blue eyes, white-and-gold plate armor, a yellow scarf, a blue kite shield with a gold cross on the front arm, a straight sword in the other hand',
+  'blue cross shield, yellow scarf and sword','bright polished white armor, painted shield with gold rim, steel blade, cloth scarf','the scarf',
+  '(1) wind-up behind the shield, sword raised (2) downward slash over the shield with a white crescent trail (3) sword thrust hitting, a star-shaped spark (4) recover, shield forward, sword low',
+  '(1) sword raised high, shield at the side, mouth open cheering (2) shield raised overhead, eyes closed, broad smile','the sword hand, sword pointing down','the shield leaning against his knee and the sword laid beside',''),
+ (9,'바루','격투가','hero-monk-v2c.webp','Baru the fighter',
+  'a bare-fisted martial artist with brown spiky hair and brown eyes, a red headband with two long trailing tails, a white sleeveless training outfit with a red belt, red wraps on both fists, no weapon',
+  'red headband with long tails and red fist wraps','cotton training cloth, wrapped cloth on the fists, toned bare arms, spiky hair','the headband tails',
+  '(1) wind-up, rear fist pulled back, front hand guarding (2) straight punch forward with a white crescent trail (3) fist hitting, a star-shaped spark (4) recover, both fists up in a guard stance',
+  '(1) jumping, one fist punched up, mouth open cheering (2) landed, both fists on the hips, eyes closed, big grin','one open palm','legs crossed, hands on the knees (no weapon)',''),
+ (10,'셰라','무희','hero-dancer-v2c.webp','Shera the blade dancer',
+  'a dancer with red hair in a high side tail decorated with a big yellow flower and gold hair ties, bright eyes, an orange-and-red dance dress with gold trim, a golden folding fan in each hand',
+  'yellow flower, red hair tail and two golden fans','pleated paper fans with gold ribs, light flowing dress cloth, glossy hair','the hair tail and dress hem',
+  '(1) wind-up, both fans opened behind her, body twisted (2) spinning, one fan slashing forward with a pale crescent trail (3) second fan snapped forward, a star-shaped spark (4) recover, one fan covering the chest, the other low',
+  '(1) one fan raised overhead, one leg kicked back, mouth open cheering (2) both fans spread out wide, eyes closed, big smile','one closed fan','both fans folded and laid on her lap',''),
+ (11,'리라','음유시인','hero-bard-v2c.webp','Lyra the bard',
+  'a cheerful bard with short brown hair and brown eyes, a wide green hat with a white feather and a gold badge, a green cape over a cream shirt, a round wooden lute',
+  'green feathered hat and wooden lute','wood grain and strings on the lute, soft felt hat, light feather, cloth cape','the cape and hat feather',
+  '(1) wind-up, strumming hand raised high above the lute (2) hard strum, a pale sound-wave arc flying forward (3) a burst of small glowing music-note shapes in front (4) recover, lute held ready',
+  '(1) lute raised overhead with both hands, mouth open singing (2) strumming happily, eyes closed, big smile','the free hand, lute held in the other arm','the lute resting on her lap',''),
+ (12,'파셀','연금술사','hero-alchemist-v2c.webp','Pasel the alchemist',
+  'an excitable alchemist with messy orange-brown hair and amber eyes, brass goggles with blue lenses pushed up on the head, an orange-brown coat with a brown belt and small pouches, brown gloves, a round glass flask of bubbling green potion',
+  'brass goggles on the head and green potion flask','clear glass with a highlight, bubbling liquid, worn leather gloves and belt, brass goggle rims','the coat tails',
+  '(1) wind-up, flask shaken up beside the head, bubbles rising (2) flask arm swung forward with a green crescent trail (3) a splash of green potion with bubbles and a spark in front (4) recover, a fresh flask held ready',
+  '(1) flask raised high, mouth wide open in delight (2) hugging the flask, eyes closed, big grin','the flask','the flask standing on the ground beside him',''),
+ (13,'바르코','해적','hero-pirate-v2c.webp','Barco the pirate',
+  'a cocky pirate captain with black hair and dark eyes, a big red captain hat with gold trim, a white feather and a small skull badge, a red scarf at the neck, a red coat over a white shirt, brown boots, a curved steel cutlass',
+  'red captain hat with feather and curved cutlass','curved steel blade, thick felt hat, gold trim, leather boots','the coat tails and hat feather',
+  '(1) wind-up, cutlass raised behind the head (2) wide downward slash with a white crescent trail (3) cutlass hitting forward, a star-shaped spark (4) recover, cutlass lowered, free hand on the hip',
+  '(1) cutlass raised high, mouth open in a hearty laugh (2) tipping the hat with one hand, eyes closed, cocky grin','the free hand','the cutlass stuck upright in the ground beside him',''),
+ (14,'글라세','빙결 마법사','hero-frost-v2c.webp','Glace the frost mage',
+  'a calm frost mage with very long pale-blue hair and ice-blue eyes, a white pointed hood-hat with a blue snowflake emblem and round pom-poms, a white-and-blue robe with gold trim, a staff tipped with a cluster of ice crystals',
+  'white snowflake hood-hat and ice crystal staff','faceted translucent ice crystals, soft thick robe, long silky hair','the long hair and robe hem',
+  '(1) wind-up, staff raised, small frost specks gathering (2) staff swept forward with an icy blue crescent trail (3) a large six-pointed snowflake crystal bursting in front (4) recover, staff upright, a few ice specks falling',
+  '(1) staff raised, a small quiet smile (2) both hands on the staff, eyes closed, calm happy face','the staff','the staff laid on the ground beside her',''),
+ (15,'타미','조련사','hero-tamer-v2c.webp','Tami the tamer',
+  'a friendly beast tamer with short brown hair and green eyes, a wide brown explorer hat with a green leaf and a white feather, a green scarf, a tan short-sleeved explorer outfit with a brown belt, a golden rope lasso',
+  'brown explorer hat, green scarf and golden lasso','braided rope, worn leather hat, cotton explorer cloth','the scarf',
+  '(1) wind-up, lasso loop spinning above the head (2) arm swung forward, the rope flying out with a pale crescent trail (3) the rope fully stretched forward, loop open, small sparks at the loop (4) recover, coiling the rope back in the hand',
+  '(1) jumping, coiled lasso raised, mouth open cheering (2) landed, one hand waving, eyes closed, big smile','the free hand','the coiled lasso laid on the ground beside',''),
+ (17,'공식','수학자','hero-math-v2c.webp','Gongsik the math teacher',
+  'a kind math teacher with neat black hair and dark eyes, a long navy coat with gold trim over a white shirt and a yellow tie, a large golden drawing compass (the geometry tool with two legs) held like a wand',
+  'navy coat, yellow tie and large golden drawing compass','polished gold compass with a hinge, crisp coat cloth, neat hair','the coat tails',
+  '(1) wind-up, compass raised high, legs open (2) compass swept forward drawing a glowing gold circle arc (3) a complete glowing gold circle with a small triangle on its rim in front (4) recover, compass closed and lowered',
+  '(1) compass raised, free fist up, mouth open cheering (2) hand on the hip, eyes closed, proud teacher smile','the free hand','the compass laid on the ground beside him','Glowing shapes are plain circles and triangles only: no letters, no digits.'),
+ (18,'녹스','흑기사','hero-dknight-v2c.webp','Nox the dark knight',
+  'a silent knight in full black spiked plate armor, a closed horned helmet whose visor slit glows crimson (the face is never shown), a tattered crimson cape, a huge dark greatsword with a crimson edge glow',
+  'closed glowing-visor helmet, tattered crimson cape and huge greatsword','dark polished steel with cold highlights, sharp armor spikes, torn cloth edge, faint crimson glow on the blade','the tattered cape',
+  '(1) wind-up, greatsword raised high over the shoulder with both hands (2) heavy overhead swing coming down, a crimson crescent trail (3) blade hitting the ground in front, crimson sparks (4) recover, blade dragged low, cape settling',
+  '(1) greatsword planted point-down, both hands on the pommel, standing tall (2) one gauntlet fist raised, the visor glow brighter','one gauntlet','the greatsword laid on the ground beside him','The helmet stays closed in every cell, also when sitting, thinking and tired; show feeling with posture and the visor glow only. The greatsword is big: tilt it so it stays inside its cell.'),
+ (19,'한수','수식 책사(남)','hero-mathboy-v2c.webp','Hansu the student strategist',
+  'a modern school boy with short black hair, glasses and blue eyes, a yellow pencil tucked behind one ear, a navy school blazer over a white shirt and a dark tie, grey trousers, a golden drawing compass (the geometry tool with two legs)',
+  'glasses, pencil behind the ear and golden drawing compass','glass glint on the lenses, crisp blazer cloth, polished gold compass','the blazer hem',
+  '(1) wind-up, compass raised, legs open (2) compass swept forward drawing a glowing gold arc (3) a glowing gold circle with a triangle inside it in front (4) the circle shooting forward as a thin beam of light',
+  '(1) pushing the glasses up with one finger, a small proud smile (2) free fist punched up, eyes closed, big smile','the free hand','the compass laid on the ground beside him','Glowing shapes are plain circles and triangles only: no letters, no digits.'),
+ (20,'미지','수식 책사(여)','hero-mathgirl-v2c.webp','Miji the student strategist',
+  'a modern school girl with long dark-purple hair in a high ponytail, glasses and violet eyes, a navy school blazer with a white collar, a navy pleated skirt, white socks, a golden set square (a triangle ruler) held in both hands',
+  'glasses, high ponytail and golden set square','glass glint on the lenses, crisp blazer and pleats, polished gold ruler, silky ponytail','the ponytail and skirt',
+  '(1) wind-up, set square raised high overhead (2) set square swung forward, a glowing gold circle with crossed lines appearing in front (3) the set square pointing forward, shooting a triangle-shaped beam of light (4) recover, set square hugged to the chest',
+  '(1) jumping, set square raised, mouth open cheering (2) landed, hugging the set square, eyes closed, big smile','one hand, set square held in the other','the set square laid on her lap','Glowing shapes are plain circles, lines and triangles only: no letters, no digits.'),
+ (21,'볼트','메카닉','hero-mechanic-v2c.webp','Bolt the mechanic',
+  'a curious mechanic with messy orange hair and blue eyes, brass goggles with blue lenses on the head, orange work overalls over a cream shirt, a metal backpack with one small jointed mechanical claw arm rising over the shoulder, a big steel wrench',
+  'goggles, backpack claw arm and big wrench','brushed steel wrench, brass fittings and rivets, thick canvas overalls, jointed metal arm','the mechanical claw arm',
+  '(1) wind-up, wrench raised behind the head with both hands (2) wrench swung down with a white crescent trail (3) wrench hitting forward, a spark and one small spinning gear flying off (4) recover, wrench resting on the shoulder',
+  '(1) wrench raised high, mouth open cheering, the claw arm raised too (2) thumbs-up, eyes closed, big grin','the free hand','the wrench laid on the ground beside him',''),
+ (22,'핑','해커','hero-hacker-v2c.webp','Ping the hacker',
+  'a sly hacker with black hair and green eyes, a dark hoodie with the hood up and bright green trim, green glowing headphones over the hood, a small backpack, a tablet with a glowing green screen held in both hands',
+  'dark hood, green headphones and green-screen tablet','soft thick hoodie cloth, glossy headphone shells, glowing screen light on the face and hands','the hood strings and backpack straps',
+  '(1) wind-up, one finger raised above the tablet, small spark above it (2) finger tapping the screen, the screen flashing bright (3) a cyan-green beam of small square light blocks shooting forward from the tablet (4) recover, tablet lowered, a few blocks fading',
+  '(1) tablet raised overhead, mouth open cheering (2) a V sign with one hand, eyes closed, sly grin','one hand, tablet held in the other','the tablet resting on the knees, screen glow on the face','The screen shows plain glowing lines only: no letters, no digits.'),
+ (23,'이그니','용기사','hero-dragoon-v2c.webp','Igni the dragon knight',
+  'a proud dragon knight with blond hair and amber eyes, a red-and-gold dragon helmet with horns and small wing fins, red plate armor with gold trim, a long lance, and a tiny red baby dragon riding on the shoulder',
+  'dragon helmet, lance and tiny red baby dragon on the shoulder','glossy red lacquered armor with gold edges, steel lance tip, small scales on the baby dragon','the baby dragon\'s wings and tail',
+  '(1) wind-up, lance pulled back level, body low (2) charging thrust, lance at full reach, a pale speed streak (3) lance tip hitting, a star-shaped spark, the baby dragon puffing a tiny flame (4) recover, lance upright',
+  '(1) lance planted upright, free fist up, mouth open cheering, the baby dragon flapping (2) eyes closed, big grin, the baby dragon nuzzling the cheek','the free hand','the lance laid on the ground, the baby dragon curled up on the lap','The baby dragon appears in every cell, always on or near the shoulder.'),
+ (24,'케라운','마검사','hero-spellblade-v2c.webp','Keraun the spellblade',
+  'a cool spellblade with spiky lavender-silver hair and violet eyes, light purple-and-silver armor with a short purple cape, a one-handed sword in the right hand, a small glowing violet rune circle floating over the left palm',
+  'sword in one hand and floating violet rune circle over the other palm','silver armor edges, glowing rune ring, sharp steel blade, soft cape cloth','the short cape',
+  '(1) wind-up, sword raised, the rune circle flaring, blue lightning crawling up the blade (2) forward slash with a blue lightning crescent trail (3) blade hitting, a jagged blue lightning burst (4) recover, sword lowered, small sparks fading',
+  '(1) sword raised high, small sparks on the blade, mouth open cheering (2) sword resting on the shoulder, eyes closed, cool half-smile','the rune-circle hand','the sword laid on the ground beside him, the rune circle floating dimly',''),
+ (25,'칼시','해골 소환사','hero-bone-v3c.webp','Calci the bone summoner',
+  'a friendly summoner with pale lavender hair and violet eyes under a deep purple hood decorated with two small skull ornaments, a deep purple robe with bone buttons and gold trim, a wooden staff topped with a small skull',
+  'purple hood with skull ornaments and skull-topped staff','heavy robe folds, smooth ivory bone, dark wood staff','the robe hem and hood tip',
+  '(1) wind-up, staff raised, a pale magic circle appearing on the ground in front (2) staff swung forward with a pale crescent trail, the circle glowing (3) a tiny cute skeleton popping out of the circle and throwing a bone forward (4) recover, staff upright, the circle fading',
+  '(1) staff raised, mouth open cheering, a tiny cute skeleton beside her cheering with both arms up (2) eyes closed, big smile, patting the tiny skeleton on the head','the staff','the staff laid beside her, a tiny cute skeleton sitting next to her','The tiny skeleton is cute, round-headed and school-friendly, never scary. It appears only in the cells that mention it.'),
+ (26,'아르발','석궁 사냥꾼','hero-crossbow-v2c.webp','Arbal the crossbow hunter',
+  'a quiet hunter with brown hair and sharp brown eyes, a wide brown leather hat with a white feather and a gold buckle, a dark green cloak over brown leather clothes, a bolt quiver on the hip, a compact wooden repeating crossbow',
+  'wide feathered leather hat, green cloak and crossbow','worn leather hat and straps, wood and steel crossbow, heavy cloak cloth','the cloak',
+  '(1) raising the crossbow to the shoulder, aiming (2) firing, a small star-shaped flash at the crossbow tip (3) two bolts flying forward with thin white trails (4) recover, crossbow lowered, one hand reaching for the quiver',
+  '(1) crossbow resting on the shoulder, tipping the hat brim with two fingers (2) free fist raised a little, eyes closed, small satisfied smile','the free hand','the crossbow laid on the ground beside him',''),
+ (27,'아바쿠','주판 술사','hero-abacus-v2c.webp','Abaku the abacus adept',
+  'a careful scholar with brown hair in a topknot held by a gold bead and a teal ribbon, calm dark eyes, a teal-and-cream East-Asian style scholar robe with wide sleeves, a large wooden abacus with orange beads held like a weapon',
+  'topknot with teal ribbon and large wooden abacus','wood frame with round glossy beads, soft wide sleeves, tied hair','the ribbon and sleeves',
+  '(1) wind-up, abacus held forward in one hand, the other hand raised to flick (2) fingers flicking the beads, small curved motion lines (3) three glowing orange bead bullets flying forward with short trails (4) recover, abacus hugged to the chest',
+  '(1) abacus raised overhead, mouth open cheering (2) free fist up, eyes closed, proud smile','the abacus','the abacus resting on the lap','The abacus has plain round beads only: no letters, no digits.'),
+ (28,'콤파','기하 마도사','hero-geometry-v2c.webp','Compa the geometry mage',
+  'a thoughtful mage with spiky blond hair and blue eyes, a white-and-pale-blue robe with gold trim and a short cape, a short staff tipped with a blue crystal, and three small blue crystals floating around the head: a tetrahedron, a cube and an octahedron',
+  'three floating crystals (tetrahedron, cube, octahedron) and crystal staff','sharp faceted crystals with bright highlights, soft robe cloth, spiky hair','the three floating crystals and the cape',
+  '(1) wind-up, staff raised, the three crystals drifting in front of him (2) the three crystals lined up in a row in front of the staff, glowing (3) a volley of icy crystal shards shooting forward with a white flash (4) recover, the crystals returning around the head',
+  '(1) staff raised, the crystals circling fast overhead, mouth open cheering (2) free fist up, eyes closed, big smile','the staff','the staff laid beside him, the three crystals resting on the ground','The three crystals appear in every cell, each a different shape.'),
+ (29,'마진','상인','hero-merchant-v2c.webp','Margin the merchant',
+  'a clever merchant with chestnut hair and blue eyes, a round green cap with a gold badge and a small white feather, a green cape over a cream shirt and a gold-trimmed vest, a fat orange coin pouch on the belt, a small brass balance scale in one hand',
+  'green cap, coin pouch and brass balance scale','shiny gold coins, polished brass scale pans, leather pouch, cloth cape','the cape',
+  '(1) wind-up, free hand digging into the coin pouch (2) arm swung forward, three gold coins leaving the hand (3) a fan of gold coins flying forward with sparkles (4) recover, patting the pouch, scale held level',
+  '(1) flipping one gold coin up with the thumb, mouth open cheering (2) catching the coin, eyes closed, clever grin','the balance scale','the coin pouch and the scale set on the ground beside him','Coins are plain gold discs: no letters, no digits.'),
+ (30,'호버','드론 조종사','hero-drone-v2c.webp','Hover the drone pilot',
+  'a shy drone pilot with brown hair and blue eyes, a white flight helmet with orange goggles pushed up and blue ear pieces, a blue jacket, a small backpack, a grey handheld controller, and three tiny white drones hovering around the head',
+  'white flight helmet with orange goggles, controller and three tiny drones','smooth helmet shell, glossy goggle lenses, small plastic drones with rotor blur, padded jacket','the three hovering drones',
+  '(1) wind-up, controller raised, thumbs on the sticks, the drones lining up (2) the three drones flying forward in a row with thin speed lines (3) the drones firing small jagged blue electric zaps forward (4) recover, the drones flying back around the head',
+  '(1) controller raised high, the drones circling overhead, mouth open cheering (2) free fist up, eyes closed, shy smile','the free hand, controller in the other','the controller on the lap, the three drones landed on the ground','The three drones appear in every cell. No logos on the helmet or controller.'),
+ (31,'에이라','발키리','hero-valkyrie-v2c.webp','Eira the valkyrie',
+  'a graceful valkyrie with long blonde braided hair and ice-blue eyes, a silver helmet with a small white wing on each side, silver-and-white plate armor with gold details, a long spear with a broad steel head',
+  'winged silver helmet, long blonde braid and spear','mirror-bright silver armor, soft white wing feathers, thick braided hair, steel spear head','the long braid',
+  '(1) wind-up, spear raised diagonally overhead (2) wide sweeping strike with a large pale-blue crescent trail (3) spear thrust hitting, a star-shaped spark and a few white feathers bursting out (4) recover, spear level, feathers drifting down',
+  '(1) spear raised straight up, mouth open cheering (2) spear planted upright, eyes closed, bright smile, one feather drifting','the free hand','the spear laid on the ground beside her',''),
+ (32,'칸델','정령사','hero-elemental-v2c.webp','Kandel the elementalist',
+  'a nature mage with long auburn hair, green eyes and a white flower hair clip, a flowing orange-and-teal robe with gold trim, and three tiny cute spirits floating above the head: an orange fire spirit, a blue water-drop spirit and a green wind-swirl spirit',
+  'white flower clip and three tiny spirits (fire, water, wind)','soft flowing robe, glowing little spirits with simple dot eyes, long layered hair','the long hair and the three spirits',
+  '(1) wind-up, one hand raised, the fire spirit flying down in front of her (2) the fire spirit growing bigger and brighter in front of the hand (3) the fire spirit shooting forward as a round fireball with a flame tail (4) recover, the small fire spirit floating back up',
+  '(1) both arms up, the three spirits spinning in a circle overhead, mouth open cheering (2) hands clasped, eyes closed, big smile, the spirits bobbing','one hand, with the blue water spirit hovering above it','hands on the lap, the three spirits resting on her shoulders and knee','The three spirits appear in every cell.'),
+ (33,'폴라','별점술사','hero-astro-v2c.webp','Pola the astrologer',
+  'a hopeful astrologer with long pale lavender-white hair and blue eyes, a navy pointed hat with a gold crescent moon and small stars, a navy robe covered with tiny gold star dots, a rolled star-map scroll',
+  'navy crescent-moon hat, starry robe and star-map scroll','soft felt hat, parchment scroll with curled ends, gold star dots, long fine hair','the long hair and hat tip',
+  '(1) wind-up, unrolling the star-map scroll in both hands (2) one hand tracing a glowing constellation of five linked star dots in the air (3) a shooting star with a gold tail streaking forward (4) recover, scroll rolled up, a few star specks fading',
+  '(1) scroll raised overhead, small star sparkles bursting, mouth open cheering (2) hugging the scroll, eyes closed, big smile','the rolled scroll','the scroll opened on her lap','The star map shows dots and lines only: no letters, no digits.'),
+]
+
+SPRITE = {h[0]: h[3] for h in H}
+
+def prompt(h):
+    i, ko, job, _, en, look, gear, mat, sway, atk, win, heal, sit, note = h
+    green = i in GREEN
+    bg = 'pure green #00FF00' if green else 'magenta #FF00FF'
+    ban = ('No pure green inside the character or the effects.' if green
+           else 'No magenta, pink or purple-pink inside the character or the effects.')
+    glow = ('a round pale mint-white healing glow with a plus-shaped light in it, drawn with a dark teal outline'
+            if green else 'a round green healing glow with a plus-shaped light in it')
+    spark = 'pale mint-white (dark teal outline)' if green else 'green'
+    ref1 = ('(1) DETAIL TARGET: this same hero, one standing pose, drawn at the detail level I want.' if i == 0 else
+            '(1) DETAIL TARGET: a DIFFERENT hero (a brown-haired swordsman). Use it ONLY for the level of pixel detail and shading. Do not copy his face, clothes, colors or sword.')
+    lines = [
+     "Redraw ONE game hero's sprite sheet as finer pixel art. Same character, same poses, same grid: only the drawing quality goes up.",
+     '',
+     'ATTACHED (3 images):',
+     ref1,
+     "(2) CURRENT SHEET: this hero's sprite sheet now, 4 columns x 12 rows. Copy its grid, its poses and its chibi body.",
+     "(3) PORTRAIT: this hero's official face. Match its face, eyes, hair and colors.",
+     '',
+     f'HERO: "{en}", {look}. Facing RIGHT.',
+     '',
+     'RULE 1. SAME DESIGN, SAME BODY',
+     f'- Design = images (2) and (3): face, hair, outfit, colors, {gear}. Change nothing.',
+     '- Body = chibi exactly as in image (2): big head, short body, about 2.5 heads tall. Never taller, never longer legs, never realistic.',
+     '',
+     'RULE 2. FINER PIXELS (the detail level of image 1)',
+     '- 3 shade steps + 1 highlight on hair, skin, cloth and metal. Light from the top-left.',
+     f'- Materials read clearly: {mat}.',
+     '- Eyes bright and readable, each with a 1-pixel white highlight.' if i != 18 else '- The visor slit glows as a clean crimson line with a 1-pixel bright core.',
+     '- Outline: 1 pixel, dark navy-brown, on the outside; lighter colored lines inside.',
+     '- True pixel art: each cell is drawn at 80 x 64 px and scaled exactly 2x with nearest-neighbor, so every art pixel is a sharp 2x2 block. No anti-aliasing, no blur, no gradients, no painterly strokes. At most 48 colors in the whole sheet.',
+     '',
+     'RULE 3. STRICT GRID',
+     '- Sheet = 640 x 1536 px = 4 columns x 12 rows. Every cell is exactly 160 px wide x 128 px tall. Row N starts at y = (N - 1) x 128. No extra space between rows.',
+     f'- If your canvas is wider than 640 px, put the sheet at the LEFT edge and fill the rest with plain {bg}.',
+     f'- Background: solid flat {bg} everywhere. {ban} The dark outline sits directly on the background: no light, pink or colored fringe pixels.',
+     '- The hero is the SAME size in every cell (about 100 px tall when standing), centered, feet on one baseline 8 px above the cell bottom.',
+     '- Keep 6 px of empty background inside every cell edge. Weapons and effects never touch or cross a cell edge. Cells not listed below stay plain background.',
+     '',
+     'RULE 4. EVERY CELL IS A DIFFERENT DRAWING',
+     '- 28 cells are filled. Each one is a clearly different pose. Never paste the same drawing twice. Spend the effort on detail, not on repeats.',
+     '',
+     'CELLS (c1 to c4 = left to right; facing RIGHT unless noted):',
+     'Row 1 STAND: c1 only. Relaxed standing pose, exactly the pose of image (2) row 1. This is the key cell: give it the highest detail of the whole sheet.',
+     f'Row 2 WALK: c1-c4. (1) front foot stepping out (2) feet passing (3) other foot stepping out (4) feet passing. Arms, and {sway}, swing with each step.',
+     f'Row 3 ATTACK: c1-c4. {atk}.',
+     'Row 4 HIT: c1 only. Knocked backward, eyes squeezed shut, mouth open, small yellow impact lines.' if i != 18 else 'Row 4 HIT: c1 only. Knocked backward, one knee bending, small yellow impact lines.',
+     f'Row 5 VICTORY: c1-c2. {win}.',
+     'Row 6 FALL: c1-c2. (1) falling backward, feet off the ground (2) lying flat on the ground.',
+     f'Row 7 HEAL-CAST: c1-c2. (1) {heal} raised, a few small {spark} sparkles (2) eyes closed, {glow} above the raised hand.' if i != 18 else
+     f'Row 7 HEAL-CAST: c1-c2. (1) {heal} raised, a few small {spark} sparkles (2) head bowed, {glow} above the raised gauntlet.',
+     'Row 8 PORTAL: c1-c4, walking AWAY from the viewer into the screen. (1) turning, 3/4 back view (2) back view, left foot forward (3) back view, right foot forward (4) back view, one arm reaching forward. No door or portal drawn.',
+     f'Row 9 SIT: c1-c2. Sitting on the ground, {sit}. (1) eyes open, looking ahead (2) eyes closed, head tilted, small relaxed smile.' if i != 18 else
+     f'Row 9 SIT: c1-c2. Sitting on the ground, {sit}. (1) helmet facing ahead (2) helmet tilted down, visor glow dimmed, at rest.',
+     f'Row 10 HEALED: c1-c2. Small {spark} sparkles around the body. (1) surprised, eyes wide (2) happy, eyes closed, both fists up.' if i != 18 else
+     f'Row 10 HEALED: c1-c2. Small {spark} sparkles around the body. (1) startled, arms slightly out (2) standing taller, one fist clenched, visor glow brighter.',
+     'Row 11 THINK: c1-c2. (1) hand on the chin, looking down (2) hand still on the chin, eyes looking up.' if i != 18 else
+     'Row 11 THINK: c1-c2. (1) gauntlet on the chin of the helmet, head down (2) gauntlet still on the chin, helmet tilted up.',
+     'Row 12 TIRED: c1-c2. (1) bent forward, hands on the knees, small blue sweat drops (2) straightening up, wiping the forehead with the back of one hand.' if i != 18 else
+     'Row 12 TIRED: c1-c2. (1) bent forward, gauntlets on the knees (2) straightening up, one hand on the hip, shoulders dropped.',
+    ]
+    if note:
+        lines += ['', 'THIS HERO: ' + note]
+    lines += ['',
+     'NEVER: grid lines, cell borders, labels, numbers, letters, logos, watermarks, ground shadows, frames, speech bubbles, doors. Never change the design or the proportions. Original character, not based on any existing game character.']
+    return '\n'.join(lines)
+
+cards, heroes = [], []
+for h in H:
+    i, ko, job = h[0], h[1], h[2]
+    n = '%02d' % i
+    cards.append({
+        'id': f'v4-h{n}',
+        'name': f'{job} {ko} 세밀화 시트',
+        'use': f'용사 {i}번 {ko}({job}) · 지금 꼬마 화풍 · 비율 그대로 그림 질만 · 12줄 28칸 · 640×1536 · 배경 {"초록 #00FF00" if i in GREEN else "마젠타 #FF00FF"} · 1줄 = 서 있는 1칸(숨쉬기는 PixelLab 따로)',
+        'prompt': prompt(h),
+        'ref': ['style-roan-v4.png', f'ref-v4-h{n}-sheet-nb.png', f'ref-v4-h{n}-port.png'],
+    })
+    heroes.append({'id': i, 'name': ko, 'job': job, 'sprite': SPRITE[i], 'port': PORT[i], 'bg': 'green' if i in GREEN else 'magenta'})
+
+json.dump(cards, open(os.path.join(HERE, 'cards.json'), 'w', encoding='utf8'), ensure_ascii=False, indent=1)
+json.dump(heroes, open(os.path.join(HERE, 'heroes.json'), 'w', encoding='utf8'), ensure_ascii=False, indent=1)
+print('카드', len(cards), '장 · 가장 긴 주문', max(len(c['prompt']) for c in cards), '자')
