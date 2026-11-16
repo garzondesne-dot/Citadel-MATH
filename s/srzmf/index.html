@@ -21,22 +21,32 @@
       html, body { background: #0f1115; }
       #boot { position: fixed; inset: 0; z-index: 2147483000; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: #0f1115; color: #f2f3f5; font: 600 16px/1.4 system-ui, -apple-system, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; text-align: center; padding: 16px; transition: opacity 0.18s ease-out; }
       #boot.out { opacity: 0; pointer-events: none; }
-      #boot .spin { width: 40px; height: 40px; display: grid; place-items: center; font-size: 30px; color: #f5b84a; animation: bootspin 1s steps(8) infinite; text-shadow: 2px 2px 0 #8a6420; }
+      /* 🚶 걷는 용사 (📜 2026-11-16 · DECISIONS 「⏳ 로딩 화면 = 걷는 용사 + 한 줄 팁」): 용사 시트(80 × 64 · 4열 × 12줄)의 1줄 = 걷기 4칸 · 2배 · 제자리 · 그림은 스크립트가 붙임(이 기기에 기억한 내 용사 · 없으면 로안) */
+      #boot .walk { width: 160px; height: 128px; background-repeat: no-repeat; background-size: 640px 1536px; background-position: 0 -128px; image-rendering: pixelated; animation: bootwalk 0.64s steps(4) infinite; }
+      #boot .tip { min-height: 2.8em; max-width: 340px; margin: 0; color: #b4b8c2; font-size: 14px; font-weight: 500; transition: opacity 0.16s ease-out; }
+      #boot .tip.fade { opacity: 0; }
       #boot .slow { display: none; flex-direction: column; align-items: center; gap: 10px; color: #b4b8c2; font-size: 14px; font-weight: 500; }
       #boot.late .slow { display: flex; }
       #boot button { min-height: 48px; padding: 0 22px; border: 0; border-radius: 12px; background: #f5b84a; color: #2a1a00; font: inherit; font-weight: 700; box-shadow: 0 3px 0 #8a6420; }
       #boot button:active { transform: translateY(2px); box-shadow: none; }
-      @keyframes bootspin { to { transform: rotate(360deg); } }
-      @media (prefers-reduced-motion: reduce) { #boot .spin { animation-duration: 3s; } }
+      @keyframes bootwalk { to { background-position-x: -640px; } }
+      @media (prefers-reduced-motion: reduce) { #boot .walk { animation-duration: 1.6s; } }
     </style>
-    <script type="module" crossorigin src="./assets/index-C0BIX17J.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-CGvkFlm_.css">
+    <script type="module" crossorigin src="./assets/index-CaWryPbC.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-CNGVpIL7.css">
   </head>
   <body>
-    <div id="boot" role="status" aria-live="polite" data-k="boot"><span class="spin" aria-hidden="true">↻</span><b id="boot-t">⏳ 불러오는 중…</b><div class="slow"><span>인터넷이 느려요</span><button type="button" onclick="location.reload()">🔄 새로 고침</button></div></div>
+    <div id="boot" role="status" aria-live="polite" data-k="boot"><i class="walk" id="boot-w" aria-hidden="true" data-k="boot-walk"></i><b id="boot-t">⏳ 불러오는 중…</b><p class="tip" id="boot-tip" data-k="boot-tip"></p><div class="slow"><span>인터넷이 느려요</span><button type="button" onclick="location.reload()">🔄 새로 고침</button></div></div>
     <script>
       // ⏳ 첫 화면 (검은 화면 금지): 새 판 받는 중(새로 고침 단추로 온 길) = 글자만 바꿈 · 8초 넘으면 「인터넷이 느려요」 + 🔄 새로 고침 · 앱이 뜨면 bootDone() 이 지움
       (function () { try { if (/[?&]v=/.test(location.search) || sessionStorage.getItem('citadel-upd')) { document.getElementById('boot-t').textContent = '🔄 새 판 받는 중…'; sessionStorage.removeItem('citadel-upd'); } } catch (e) {}
+        // 🚶 + 💡 (src/boot.ts 가 앱이 뜰 때 'citadel-boot' = { h: 내 용사 시트 파일, t: 켜진 기능의 팁 번호 } 를 이 기기에 적어 둠 · 처음 연 폰 = 로안 · 늘 맞는 팁 1 · 6 · 12)
+        var BT = ['💡 학습지에 먼저 쓰고, 폰에 답해요.', '⚔ 칼 4개 = 공격 기회 4번. 틀려도 숫자만 바뀌어 다시!', '💡 막히면 「도움」을 눌러요. 개념 → 첫 줄 → 비슷한 예, 공짜예요.', '🎯 틀린 문제는 허수아비에서 숫자를 바꿔 다시 풀 수 있어요.', '⚔ 허수아비로 복습하면 다음 수업 첫 몬스터가 약해져요.', '📝 「준비 완료」 전에 학습지 빈칸을 다 채웠는지 봐요.', '🔥 다 맞히고 남은 칼은 「한 번 더」 연습이 돼요.', '💚 친구가 힐을 주면 칼이 하나 늘어요.', '✅ 학습지를 다 쓰면 선생님께 도장 받기 → 📜 +1.', '🏰 성채 던전은 진도를 나갈수록 방이 열려요.', '⚒ 모루에서 개념 카드를 만들 수 있어요. 처음 만든 카드는 예제를 맞혀야 완성!', '🐉 몬스터는 문제예요. 정답이 바로 몬스터의 약점!'];
+        var bm = null; try { bm = JSON.parse(localStorage.getItem('citadel-boot') || 'null'); } catch (e) {}
+        var hs = bm && /^[\w.-]+\.webp$/.test(bm.h || '') ? bm.h : 'hero-sword-v3c.webp', tl = (bm && bm.t && bm.t.length ? bm.t : [1, 6, 12]).filter(function (n) { return BT[n - 1]; });
+        document.getElementById('boot-w').style.backgroundImage = 'url(art/heroes/' + hs + ')';
+        var ti = Math.floor(Math.random() * tl.length), tip = document.getElementById('boot-tip'), showTip = function () { tip.textContent = BT[tl[ti % tl.length] - 1] || ''; };
+        showTip(); var tt = setInterval(function () { var b = document.getElementById('boot'); if (!b || b.style.display === 'none') return; tip.classList.add('fade'); setTimeout(function () { ti++; showTip(); tip.classList.remove('fade'); }, 160); }, 4000);
         var t = setTimeout(function () { var b = document.getElementById('boot'); if (b) b.classList.add('late'); }, 8000);
         window.bootShow = function (text) { var b = document.getElementById('boot'); if (!b) return; if (text) document.getElementById('boot-t').textContent = text; b.classList.remove('out', 'late'); b.style.display = ''; clearTimeout(t); t = setTimeout(function () { b.classList.add('late'); }, 8000); };
         window.bootDone = function () { clearTimeout(t); var b = document.getElementById('boot'); if (!b) return; b.classList.add('out'); setTimeout(function () { if (b.classList.contains('out')) b.style.display = 'none'; }, 200); };
