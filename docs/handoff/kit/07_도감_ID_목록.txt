@@ -1,0 +1,9 @@
+※ 그림을 직접 고를 때만 씁니다. 고르지 않으면 팩의 theme · sprite 를 모두 "" 로 두세요 — 앱이 던전을 입히고, 앱 「📦 차시 팩 → 차시 카드 → 🎲 던전」에서 12곳 중 고를 수도 있어요.
+
+[배경 theme] 01-burrow · 02-deep-forest · 04-mine · 05-ruins · 06-frost · 07-volcano · 11-keyvault · 12-skygarden
+[몬스터 · 보스 sprite · 쓸 때 뒤에 :0]
+base0 수정 슬라임(기본값) · base1 바위 골렘 · base2 성채 드래곤
+garden0 천칭 가고일 · garden1 필요 덩굴 · garden2 충분 나비 · garden3 쌍둥이 구름 정령 · garden4 거울 웅덩이 두꺼비 · gardenboss0 필요충분의 천칭 수호자(보스)
+keyvault0 자물쇠 미믹 · keyvault1 열쇠 유령 · keyvault2 사슬 기사 · keyvault3 봉인 석상 · keyvault4 뒤집개 박쥐 · keyvaultboss0 역과 대우의 문지기(보스)
+mirror0 거울 박쥐 · mirror1 반사 골렘 · mirror2 뒤집힌 거미 · mirror3 수정 광부 유령 · mirror4 반쪽 슬라임 · mirrorboss80 부정의 수정 여왕(보스)
+crown0 ~ crown9 왕관 몬스터 · new0 ~ new9 새 몬스터 · extra0 ~ extra4 · extra6 ~ extra9 덧붙인 몬스터

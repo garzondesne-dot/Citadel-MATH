@@ -1,0 +1,179 @@
+<!DOCTYPE html><html><head><meta charset='utf-8'><!-- 학습지 틀 예시 = 10차시 레이드용 v1 · <head><style> 은 그대로 쓰고 <body> 안 내용만 바꾼다 · 인쇄: 브라우저 인쇄 → PDF 로 저장 · A4 · 여백 없음 · 배경 그래픽 켬 --><link rel='stylesheet' href='https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Noto+Serif+KR:ital@0;1&display=swap'><title>학습과정 10차시 레이드용 v1</title><style>
+@page { size: A4; margin: 0; }
+* { box-sizing: border-box; }
+html, body { margin:0; padding:0; }
+body { font-family:'Noto Sans CJK KR','Noto Sans KR','Malgun Gothic','Apple SD Gothic Neo',sans-serif; color:#111; font-size:10.5pt; line-height:1.5; }
+i.v { font-family:'DejaVu Serif','Noto Serif KR','Times New Roman',serif; font-style:italic; }
+.page { width:210mm; height:297mm; padding:9mm 14mm 9mm 14mm; page-break-after:always; position:relative; overflow:hidden; }
+.page:last-child { page-break-after:auto; }
+.pno { position:absolute; bottom:4.5mm; left:0; right:0; text-align:center; font-size:8.5pt; color:#555; }
+.hd { display:flex; border:1.5px solid #234; border-radius:4px; overflow:hidden; margin-bottom:2mm; }
+.hd .l { width:36mm; border-right:1px solid #234; }
+.hd .l .s { text-align:center; font-weight:700; font-size:9.6pt; padding:1mm 0; }
+.hd .l .m { background:#3d6aa5; color:#fff; text-align:center; font-size:18pt; font-weight:700; padding:0.8mm 0; }
+.hd .c { flex:1; text-align:center; padding:1.2mm 2mm; }
+.hd .c .t { font-size:17pt; font-weight:700; letter-spacing:2px; }
+.hd .c .r { font-size:9pt; margin-top:0.5mm; }
+.hd .rr { width:56mm; border-left:1px solid #234; padding:1.5mm 3mm; font-size:9.4pt; }
+.hd .rr div { border-bottom:1px solid #888; margin-bottom:1.3mm; padding-bottom:0.3mm; }
+.goal { border-bottom:2px solid #234; padding:0 1mm 1.2mm 1mm; font-size:10pt; margin-bottom:2mm; line-height:1.55; }
+.goal b { color:#2a4468; }
+h3 { font-size:11.6pt; margin:2.4mm 0 1.2mm 0; padding:0.6mm 3mm; background:#3d6aa5; color:#fff; border-radius:12px; display:inline-block; }
+h3.o { background:#e07b1f; }
+.box { border:1.4px solid #222; padding:2mm 3mm; margin:1.5mm 0 2.2mm 0; }
+.soft { background:#fff8dc; border:1px solid #d9b94a; border-radius:4px; padding:1.8mm 3mm; margin:1.5mm 0 2.2mm 0; }
+.warn { background:#fdeaea; border:1px solid #d77; border-radius:4px; padding:1.8mm 3mm; margin:1.5mm 0 2.2mm 0; }
+.wb { border:1.4px dashed #3d6aa5; border-radius:6px; padding:1.5mm 3mm; margin:1.5mm 0 2.2mm 0; background:#eef4fb; text-align:center; font-weight:600; }
+.fa { border:2px solid #16845a; border-radius:6px; padding:1.5mm 3.5mm; margin:2.4mm 0 1mm 0; background:#f2fbf6; }
+table.menu { border-collapse:collapse; width:100%; font-size:8.8pt; line-height:1.35; margin:0.5mm 0 2mm 0; }
+table.menu th, table.menu td { border:1px solid #888; padding:0.8mm 1.6mm; vertical-align:middle; }
+table.menu th { background:#fde9d4; }
+table.menu tr.today td { background:#fff4c2; font-weight:600; }
+.endrow { display:flex; gap:4mm; align-items:stretch; margin-top:2.4mm; }
+.endrow .fa { flex:1; margin:0; min-width:0; }
+.nw { white-space:nowrap; }
+.stamp { width:40mm; height:40mm; flex:0 0 40mm; border:1.6px solid #222; border-radius:2mm; position:relative; align-self:flex-end; }
+.stamp span { position:absolute; top:1.2mm; left:0; right:0; text-align:center; font-size:8.5pt; color:#555; }
+.fa .tt { font-weight:700; color:#0f6642; font-size:12pt; margin-bottom:1mm; }
+.bl { display:inline-block; border-bottom:1.2px solid #222; min-width:16mm; height:1.2em; vertical-align:bottom; }
+.bl.s { min-width:10mm; } .bl.m { min-width:26mm; } .bl.l { min-width:38mm; } .bl.xl { min-width:55mm; }
+.sq { display:inline-block; width:1.7em; height:1.5em; border:1.3px solid #222; vertical-align:middle; margin:0 1px; background:#fff; }
+.ex { font-weight:700; color:#2a4468; }
+table.t { border-collapse:collapse; width:100%; margin:1mm 0 2mm 0; font-size:11pt; }
+table.t th, table.t td { border:1px solid #444; padding:1.2mm 2mm; vertical-align:middle; }
+table.t th { background:#e8eef7; }
+table.t td.h { height:9mm; }
+.q { margin:1mm 0; }
+.ln { display:block; border-bottom:1px dotted #777; height:7mm; margin-left:6mm; }
+.mini { font-size:9pt; color:#444; }
+.two { display:flex; gap:5mm; }
+.two > div { flex:1; }
+.cb { display:inline-block; width:3.6mm; height:3.6mm; border:1.2px solid #222; vertical-align:middle; margin:0 1mm 0 2mm; }
+.th { background:#2a4468; color:#fff; padding:3mm 5mm; border-radius:4px; margin-bottom:3mm; }
+.th .a { font-size:15pt; font-weight:700; } .th .b { font-size:9pt; opacity:.92; }
+h2 { font-size:11.2pt; margin:3.5mm 0 1.3mm 0; padding-left:2.5mm; border-left:4px solid #3d6aa5; }
+.tp { font-size:9.2pt; line-height:1.5; }
+.tp ul { margin:1mm 0 1mm 4.5mm; padding:0; } .tp li { margin-bottom:0.7mm; }
+table.f { border-collapse:collapse; width:100%; font-size:8.7pt; line-height:1.42; margin:1.3mm 0 2mm 0; }
+table.f th, table.f td { border:1px solid #666; padding:1.1mm 1.7mm; vertical-align:top; }
+table.f th { background:#dfe8f5; }
+.ans { color:#b02020; font-weight:600; }
+.tag { display:inline-block; background:#2e7d4f; color:#fff; font-size:8pt; padding:0 2mm; border-radius:8px; margin-left:2mm; }
+body { font-size:11pt; line-height:1.6; }
+.q { margin:1.8mm 0; }
+.page { padding:9mm 11mm 9mm 11mm; }
+.cols { display:flex; }
+.col { width:50%; padding:0 3.2mm; }
+.col:first-child { border-right:1.2px dashed #555; padding-left:0; }
+.col:last-child { padding-right:0; }
+h3 { font-size:11.8pt; margin:3mm 0 1.6mm 0; }
+.box, .soft, .warn, .wb { padding:1.6mm 2.4mm; margin:1.3mm 0 2mm 0; }
+table.t { font-size:10.5pt; } table.t td.h { height:10mm; }
+table.menu { font-size:9pt; line-height:1.35; }
+table.menu th, table.menu td { padding:0.6mm 1.2mm; }
+.bl.l { min-width:32mm; } .bl.xl { min-width:44mm; }
+.fa { margin:2mm 0 0 0; }
+.stampwrap { display:flex; justify-content:flex-end; margin-top:3mm; }
+.stamp { align-self:auto; }
+.mini { font-size:9.2pt; }
+.add { background:#f3ecfb; border:1.4px solid #8e5bd0; border-radius:4px; padding:1.6mm 2.4mm; margin:1.6mm 0 2mm 0; }
+.addt { display:inline-block; background:#8e5bd0; color:#fff; font-size:8pt; font-weight:700; padding:0 1.6mm; border-radius:6px; margin-right:1.5mm; vertical-align:middle; }
+.addc { color:#6a2fb0; }
+body { font-size:10.2pt; line-height:1.5; }
+.q { margin:1.2mm 0; }
+h3 { margin:2mm 0 1.2mm 0; }
+.box, .soft, .warn, .wb, .add { margin:1mm 0 1.5mm 0; }
+table.t td.h { height:8.5mm; }
+.stampwrap { margin-top:1.5mm; }
+.fa .q { margin:1.1mm 0; }
+.tbl { border-collapse:collapse; font-size:9.6pt; margin:1mm 0; }
+.tbl td, .tbl th { border:1px solid #777; padding:0.8mm 2mm; text-align:center; }
+.tbl th { background:#eef3fa; }
+.add { background:#f3ecfb; border:1.4px solid #8e5bd0; border-radius:4px; padding:1.6mm 2.4mm; margin:1.6mm 0 2mm 0; }
+.gtag { display:inline-block; background:#5b6475; color:#fff; font-size:7.8pt; font-weight:600; padding:0.2mm 1.6mm; border-radius:5px; margin-left:1mm; vertical-align:1px; white-space:nowrap; }
+.opt { white-space:nowrap; margin-right:2.5mm; }
+.sel { white-space:nowrap; }
+.memo { border:1.3px dashed #8a93a6; border-radius:5px; padding:1.5mm 2.5mm; color:#6b7385; font-size:9pt; margin-top:2mm; }
+
+.col { display:flex; flex-direction:column; }
+.page { display:flex; flex-direction:column; } .cols { flex:1; min-height:0; }
+.ex { color:#2a4a8a; }
+body { font-size:10.2pt; line-height:1.55; } .q { margin:1.3mm 0; } h3 { margin:2.6mm 0 1.2mm 0; }
+.hd .l { width:34mm; } .hd .rr { width:50mm; }
+.word { border:1px dashed #9ab; padding:1mm 2mm; font-size:9pt; margin:1mm 0; }
+.mon { display:flex; align-items:center; gap:2mm; margin:2mm 0 0.5mm 0; }
+.mon .nm { font-size:8.6pt; color:#6b5a40; }
+.review { border:1px solid #9bb; background:#f4f8fb; border-radius:2mm; padding:1.5mm 2.5mm; margin:1.5mm 0 2mm 0; font-size:9.4pt; }
+.essay { border:1.5px solid #6a7fa8; border-radius:2mm; padding:1.5mm 2.5mm; margin:1.5mm 0; }
+.essay .ln { border-bottom:1px dashed #b9c4d8; height:7mm; }
+.hint { font-size:8.8pt; color:#6b4a00; background:#fff6dc; border-radius:1.5mm; padding:0.8mm 2mm; margin:1mm 0; }
+</style></head><body><div class="page"><div class="hd"><div class="l"><div class="s">한국항만물류고등학교</div><div class="m" style="font-size:14pt;padding:2mm 0">공통수학2</div></div>
+<div class="c"><div class="t">학 습 과 정 · 10차시</div><div class="r">공통수학2 Ⅱ. 집합과 명제 2. 명제 02. 명제 사이의 관계 (10차시) · 레이드용 v1</div></div>
+<div class="rr"><div>학년     반     번</div><div>이름</div></div></div><div class="goal"><b>학습목표</b> ① 충분조건 · 필요조건 · 필요충분조건의 뜻을 안다. ② 진리집합의 포함 관계로 충분조건 · 필요조건 · 필요충분조건을 판정할 수 있다.</div><div class="review"><b>🔁 전시 확인</b> (지난 시간) &nbsp;
+① 명제 <i class="v">p</i> → <i class="v">q</i>가 참이면 진리집합 사이에 <i class="v">P</i> <span class="bl s"></span> <i class="v">Q</i> &nbsp;
+② 명제와 그 대우의 참 · 거짓은 <span class="bl s"></span>.</div><div class="cols"><div class="col">
+<h3>STEP 1 충분조건과 필요조건</h3>
+<div class="word">낱말 상자 [ 충분 · 필요 · 필요충분 ]</div>
+<div class="box">명제 <i class="v">p</i> → <i class="v">q</i>가 참일 때, 이것을 기호로 <i class="v">p</i> ⇒ <i class="v">q</i>와 같이 나타낸다. 이때<br>
+&nbsp;&nbsp;<i class="v">p</i>는 <i class="v">q</i>이기 위한 <span class="bl s"></span>조건, &nbsp;<i class="v">q</i>는 <i class="v">p</i>이기 위한 <span class="bl s"></span>조건<br>
+이라고 한다. <span class="mini">(화살표가 <b>나가는</b> 쪽 = 충분 · 화살표를 <b>받는</b> 쪽 = 필요)</span><br>
+<span class="mini">보기 ‘<i class="v">a</i>는 4의 배수’ ⇒ ‘<i class="v">a</i>는 2의 배수’ — 4의 배수이면 2의 배수가 되기에 <b>충분</b>하고, 2의 배수인 것은 4의 배수가 되기 위해 꼭 <b>필요</b>하다.</span></div>
+<div class="mon"><b class="ex">👾 몬스터 1</b> <span class="nm">충분 나비</span></div>
+<div class="q"><b class="ex">문제 1)</b> 빈칸에 알맞은 말을 고르시오. <span class="mini" style="color:#a0620a">(교과서 89쪽)</span> <span class="gtag">게임: ★ 칸만</span></div>
+<div class="q"><i class="v">p</i> : <i class="v">x</i>는 4의 배수이다. &nbsp; <i class="v">q</i> : <i class="v">x</i>는 2의 배수이다. &nbsp;→ <i class="v">p</i> ⇒ <i class="v">q</i></div>
+<div class="q">(1) <b style="color:#d32f2f">★</b><i class="v">p</i>는 <i class="v">q</i>이기 위한 ( 충분 / 필요 )조건</div>
+<div class="q">(2) <b style="color:#d32f2f">★</b><i class="v">q</i>는 <i class="v">p</i>이기 위한 ( 충분 / 필요 )조건</div>
+<div class="q">(3) <b style="color:#d32f2f">★</b><i class="v">x</i> = 2 ⇒ <i class="v">x</i>² = 4 이므로 <i class="v">x</i>² = 4는 <i class="v">x</i> = 2이기 위한 ( 충분 / 필요 )조건</div>
+
+<h3>📝 오늘 정리</h3>
+<div class="box" style="font-size:9.6pt;line-height:1.7">
+<b><i class="v">p</i> ⇒ <i class="v">q</i></b> 일 때 &nbsp;<i class="v">p</i> = <i class="v">q</i>이기 위한 <b>충분조건</b> · <i class="v">q</i> = <i class="v">p</i>이기 위한 <b>필요조건</b><br>
+<b><i class="v">p</i> ⇔ <i class="v">q</i></b> 일 때 &nbsp;<i class="v">p</i> = <i class="v">q</i>이기 위한 <b>필요충분조건</b><br>
+<b>진리집합</b> &nbsp;<i class="v">P</i> ⊂ <i class="v">Q</i> → 충분 &nbsp;·&nbsp; <i class="v">Q</i> ⊂ <i class="v">P</i> → 필요 &nbsp;·&nbsp; <i class="v">P</i> = <i class="v">Q</i> → 필요충분<br>
+<span class="mini">⚠ 한쪽 화살표만 참인지 확인할 때 = 반례 하나로 끝!</span></div>
+<div class="memo" style="flex:1">✏ 풀이 · 메모</div></div><div class="col">
+<h3>STEP 2 필요충분조건 · 진리집합으로 판정</h3>
+<div class="box"><i class="v">p</i> ⇒ <i class="v">q</i>이고 <i class="v">q</i> ⇒ <i class="v">p</i>일 때, 이것을 기호로 <i class="v">p</i> ⇔ <i class="v">q</i>와 같이 나타내고, <i class="v">p</i>는 <i class="v">q</i>이기 위한 <span class="bl m"></span>조건이라고 한다.<br>
+두 조건 <i class="v">p</i>, <i class="v">q</i>의 진리집합을 <i class="v">P</i>, <i class="v">Q</i>라 할 때<br>
+&nbsp;<i class="v">P</i> ⊂ <i class="v">Q</i> → <i class="v">p</i>는 <i class="v">q</i>이기 위한 충분조건 &nbsp;·&nbsp; <i class="v">Q</i> ⊂ <i class="v">P</i> → 필요조건 &nbsp;·&nbsp; <i class="v">P</i> = <i class="v">Q</i> → 필요충분조건</div>
+<div class="mon"><b class="ex">👾 몬스터 2</b> <span class="nm">천칭 가고일</span></div>
+<div class="q"><b class="ex">문제 2)</b> <i class="v">p</i>는 <i class="v">q</i>이기 위한 어떤 조건인지 말하시오. <span class="mini" style="color:#a0620a">(교과서 90쪽 예제 2 · 문제 4)</span> <span class="gtag">게임: ★ 칸만</span></div>
+<div class="q">(1) <b style="color:#d32f2f">★</b><i class="v">p</i> : <i class="v">x</i>는 3의 배수이다. &nbsp;<i class="v">q</i> : <i class="v">x</i>는 9의 배수이다. &nbsp;<span class="bl s"></span>조건</div>
+<div class="q">(2) <b style="color:#d32f2f">★</b><i class="v">p</i> : <i class="v">x</i>² ≤ 25 &nbsp;&nbsp;<i class="v">q</i> : |<i class="v">x</i>| ≤ 5 &nbsp;<span class="bl s"></span>조건</div>
+<div class="q">(3) <b style="color:#d32f2f">★</b><i class="v">p</i> : <i class="v">a</i> = 0이고 <i class="v">b</i> = 0 &nbsp;<i class="v">q</i> : ab = 0 &nbsp;<span class="bl s"></span>조건</div>
+<div class="q">(4) <b style="color:#d32f2f">★</b><i class="v">p</i> : 2<i class="v">x</i> − 1 < 5 &nbsp;&nbsp;<i class="v">q</i> : −1 < 2 − <i class="v">x</i> &nbsp;<span class="bl s"></span>조건</div>
+<div class="memo" style="flex:1">✏ 풀이 · 메모</div></div></div><div class="pno">- 10차시 (1/2) -</div></div><div class="page"><div class="hd"><div class="l"><div class="s">한국항만물류고등학교</div><div class="m" style="font-size:14pt;padding:2mm 0">공통수학2</div></div>
+<div class="c"><div class="t">학 습 과 정 · 10차시</div><div class="r">공통수학2 Ⅱ. 집합과 명제 2. 명제 02. 명제 사이의 관계 (10차시) · 레이드용 v1</div></div>
+<div class="rr"><div>학년     반     번</div><div>이름</div></div></div><div class="cols"><div class="col">
+<h3>STEP 3 🔭 생각 넓히기 — 세 조건</h3>
+<div class="box">세 조건 <i class="v">p</i>, <i class="v">q</i>, <i class="v">r</i>의 진리집합을 각각 <i class="v">P</i>, <i class="v">Q</i>, <i class="v">R</i>라 하자.<br>
+‘<i class="v">p</i>는 <i class="v">q</i>이기 위한 필요조건’ → <i class="v">q</i> ⇒ <i class="v">p</i> → <i class="v">Q</i> <span class="bl s"></span> <i class="v">P</i><br>
+‘<i class="v">r</i>은 <i class="v">q</i>이기 위한 충분조건’ → <i class="v">r</i> ⇒ <i class="v">q</i> → <i class="v">R</i> <span class="bl s"></span> <i class="v">Q</i>
+<div style="display:flex;gap:2mm;align-items:center"><svg viewBox="0 0 150 92" width="40mm" height="25mm" xmlns="http://www.w3.org/2000/svg" font-family="DejaVu Serif" font-style="italic" font-size="12">
+<rect x="2" y="2" width="146" height="88" rx="6" fill="#fbfaf6" stroke="#7a6a50"/>
+<ellipse cx="75" cy="48" rx="66" ry="38" fill="#eef7ee" stroke="#3f8a4f"/><text x="18" y="30" fill="#3f8a4f" font-weight="700">P</text>
+<ellipse cx="85" cy="52" rx="44" ry="26" fill="#f3f7fb" stroke="#4a6fa5"/><text x="50" y="44" fill="#4a6fa5" font-weight="700">Q</text>
+<ellipse cx="96" cy="56" rx="22" ry="13" fill="#ffe9d6" stroke="#c46a1a"/><text x="92" y="61" fill="#c46a1a" font-weight="700">R</text></svg><div style="font-size:8.6pt;line-height:1.45">따라서 <i class="v">R</i> ⊂ <i class="v">Q</i> ⊂ <i class="v">P</i><br>안쪽 집합의 조건 ⇒ 바깥쪽 집합의 조건<br><span class="mini">(예: <i class="v">r</i> ⇒ <i class="v">p</i>는 참)</span></div></div></div>
+<div class="mon"><b class="ex">👾 몬스터 3</b> <span class="nm">필요 덩굴</span></div>
+<div class="q"><b class="ex">문제 3)</b> 세 조건 <i class="v">p</i>, <i class="v">q</i>, <i class="v">r</i>에 대하여 <i class="v">p</i>는 <i class="v">q</i>이기 위한 필요조건이고, <i class="v">r</i>은 <i class="v">q</i>이기 위한 충분조건일 때 물음에 답하시오. <span class="mini" style="color:#a0620a">(교과서 90쪽 생각 넓히기)</span> <span class="gtag">게임: ★ 칸만</span></div>
+<div class="q">(1) <b style="color:#d32f2f">★</b><i class="v">P</i>, <i class="v">Q</i>, <i class="v">R</i> 사이의 포함 관계 : ( &nbsp;&nbsp; ) ⊂ ( &nbsp;&nbsp; ) ⊂ ( &nbsp;&nbsp; )</div>
+<div class="q">(2) <b style="color:#d32f2f">★</b>다음 중 참인 명제를 모두 고르시오.<br>&nbsp;&nbsp;ㄱ. <i class="v">r</i> → <i class="v">p</i> &nbsp;&nbsp; ㄴ. <i class="v">q</i> → ~<i class="v">p</i> &nbsp;&nbsp; ㄷ. ~<i class="v">q</i> → ~<i class="v">r</i> &nbsp;&nbsp; ㄹ. ~<i class="v">p</i> → <i class="v">r</i></div>
+<div class="hint">💡 ~<i class="v">q</i> → ~<i class="v">r</i>는 <i class="v">r</i> → <i class="v">q</i>의 <span class="bl s"></span>이다.</div>
+<div class="mon"><b class="ex">👾 몬스터 4</b> <span class="nm">쌍둥이 구름 정령 · ✍ 서술형</span></div>
+<div class="q"><b class="ex">문제 4)</b> 두 조건 <i class="v">p</i>, <i class="v">q</i>가 다음과 같을 때, <i class="v">p</i>는 <i class="v">q</i>이기 위한 어떤 조건인지 말하시오. (단, <i class="v">x</i>, <i class="v">a</i>, <i class="v">b</i>는 실수) <span class="mini" style="color:#a0620a">(교과서 96쪽 중단원 마무리 04)</span> <span class="gtag">게임: ★ 칸 · ✍ 서술형 📸</span></div>
+<div class="q">(1) <b style="color:#d32f2f">★</b><i class="v">p</i> : <i class="v">x</i> ≤ 1, &nbsp;<i class="v">q</i> : −3 ≤ <i class="v">x</i> ≤ 0 &nbsp;→ <i class="v">P</i>, <i class="v">Q</i>의 포함 관계 <span class="bl s"></span> → <span class="bl s"></span>조건</div>
+<div class="q">(2) <b style="color:#d32f2f">★</b><i class="v">p</i> : <i class="v">a</i> = <i class="v">b</i>, &nbsp;<i class="v">q</i> : <i class="v">a</i>² = <i class="v">b</i>² &nbsp;→ <i class="v">q</i> ⇒ <i class="v">p</i>의 반례 <span class="bl s"></span> → <span class="bl s"></span>조건</div>
+<div class="q">(3) <b style="color:#d32f2f">★</b><i class="v">p</i> : |<i class="v">x</i>| ≤ 1, &nbsp;<i class="v">q</i> : −1 ≤ <i class="v">x</i> ≤ 1 &nbsp;→ <span class="bl s"></span>조건</div>
+<div class="hint">💡 근거 : <i class="v">q</i> ⇒ <i class="v">p</i>이면 <i class="v">p</i>는 <i class="v">q</i>이기 위한 <span class="bl s"></span>조건이다.</div>
+<div class="essay"><b>✍ 나의 풀이</b> <span class="mini">(진리집합의 포함 관계 · 반례 → 어떤 조건인지와 그 까닭을 문장으로)</span>
+<div class="ln"></div><div class="ln"></div><div class="ln"></div><div class="ln"></div></div>
+<div class="memo" style="flex:1">✏ 풀이 · 메모</div></div><div class="col">
+<div class="fa" style="margin-top:0"><div class="tt">✔ 10차시 형성평가 <span class="mini" style="font-weight:400">(혼자 풀기 · 4문항)</span><span class="gtag">게임: 보스</span></div>
+<div class="mon"><b class="ex">👑 보스</b> <span class="nm">필요충분의 천칭 수호자</span></div>
+<div class="q mini">1 ~ 3. 두 조건 <i class="v">p</i>, <i class="v">q</i>에 대하여 <i class="v">p</i>는 <i class="v">q</i>이기 위한 어떤 조건인지 말하시오. <span class="mini">(단, <i class="v">x</i>는 실수)</span></div>
+<div class="q">1. <i class="v">p</i> : <i class="v">x</i>는 2의 배수이다. &nbsp;<i class="v">q</i> : <i class="v">x</i>는 4의 배수이다. &nbsp;<span class="bl s"></span>조건</div><div style="height:11mm"></div>
+<div class="q">2. <i class="v">p</i> : <i class="v">x</i> > 3 &nbsp;&nbsp;<i class="v">q</i> : <i class="v">x</i> > 1 &nbsp;<span class="bl s"></span>조건</div><div style="height:11mm"></div>
+<div class="q">3. <i class="v">p</i> : |<i class="v">x</i>| ≤ 2 &nbsp;&nbsp;<i class="v">q</i> : −2 ≤ <i class="v">x</i> ≤ 2 &nbsp;<span class="bl s"></span>조건</div><div style="height:11mm"></div>
+<div class="q">4. 세 조건 <i class="v">p</i>, <i class="v">q</i>, <i class="v">r</i>에 대하여 <i class="v">q</i>는 <i class="v">p</i>이기 위한 필요조건이고, <i class="v">r</i>은 <i class="v">q</i>이기 위한 필요조건일 때, 진리집합 <i class="v">P</i>, <i class="v">Q</i>, <i class="v">R</i> 사이의 포함 관계를 쓰시오.</div><div style="height:14mm"></div>
+<div class="mini" style="border-top:1px dashed #9bb;padding-top:1.5mm">맞은 개수 <span class="bl s"></span> / 4 &nbsp;어려웠던 부분<br><span class="cb"></span>충분 · 필요 뜻 <span class="cb"></span>진리집합으로 판정 <span class="cb"></span>반례 <span class="cb"></span>필요충분 <span class="cb"></span>세 조건</div></div>
+<div class="add mini">🎯 <b>더 해 보고 싶다면</b> — 캠프의 복습 허수아비 · 👑 형성평가 재대결</div><div class="stampwrap" style="margin-top:auto"><div class="stamp"><span>확인 도장</span></div></div></div></div><div class="pno">- 10차시 (2/2) -</div></div></body></html>
