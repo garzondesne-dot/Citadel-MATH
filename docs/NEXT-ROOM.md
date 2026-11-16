@@ -396,3 +396,9 @@ cd /home/user/Citadel-MATH && git checkout main && git pull origin main && git m
 ## 7. 시험
 
 `for t in tests/*.test.js; do node $t; done` · 브라우저: `python3 -m http.server 8765` 뒤 `NODE_PATH=$(npm root -g) node tools/e2e/e2eNN.js <출력 폴더>` — 최근 것: e2e53 설문 · e2e54 성채 · 허수아비 · 우편함 · e2e55 타임바 · 이어하기 · e2e56 상점 · 레벨업 · **e2e57 박쥐 · 상자 · 퍼펙트 · 콤보 · 보스 단계 · 펀치 기계**. 로컬 체험 모드는 여러 창이 같은 순간 저장하면 하나가 덮일 수 있음(실서버 Firebase 는 아님) — e2e57 이 가끔 틀리면 한 번 더. 옛 중단원던전 e2e(14 · 20 · 21 · 23 · 24 · 25 · 34 · 36 · 37 · 39)는 예전 화면 기준이라 맞지 않을 수 있음.
+
+## 🌊 설계 방 (Fable 5.2 · 메인이 묶어서 넘김 · CLAUDE.md 「🌊 설계 방」)
+- 방 = 「모두의 던전 설계 1」 session_014JJv1gNxiR4EbqPvhG9Ym8 (2026-11-17 새벽 열림 · 모델 claude-fable-5-2 확인)
+- 보낸 것: 첫 안내(읽을 파일 · 「🌊 준비 끝」 보고) · 묶음 아직 없음
+- 받은 완료: —
+- 보낼 후보: #1 차시(14차시 이후 · 명제 정리 레이드 검토) · #2 새 놀이(🎉 축제의 날 · 🧰 미믹 규칙) · #3 용사 33명 세밀화 카드(로안 결과 뒤)
