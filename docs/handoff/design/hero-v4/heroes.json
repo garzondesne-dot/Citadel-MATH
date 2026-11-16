@@ -1,0 +1,365 @@
+[
+ {
+  "id": 0,
+  "name": "로안",
+  "job": "검사",
+  "sprite": "hero-sword-v3c.webp",
+  "port": [
+   0,
+   0
+  ],
+  "bg": "magenta"
+ },
+ {
+  "id": 1,
+  "name": "누아",
+  "job": "마녀",
+  "sprite": "hero-witch-v2c.webp",
+  "port": [
+   0,
+   2
+  ],
+  "bg": "green"
+ },
+ {
+  "id": 2,
+  "name": "리아넬",
+  "job": "엘프 궁수",
+  "sprite": "hero-elf-v2c.webp",
+  "port": [
+   0,
+   4
+  ],
+  "bg": "magenta"
+ },
+ {
+  "id": 3,
+  "name": "시엔",
+  "job": "닌자",
+  "sprite": "hero-ninja-v2c.webp",
+  "port": [
+   1,
+   4
+  ],
+  "bg": "magenta"
+ },
+ {
+  "id": 4,
+  "name": "루멘",
+  "job": "사제",
+  "sprite": "hero-priest-v2c.webp",
+  "port": [
+   1,
+   5
+  ],
+  "bg": "green"
+ },
+ {
+  "id": 5,
+  "name": "하스타",
+  "job": "창술사",
+  "sprite": "hero-lancer-v2c.webp",
+  "port": [
+   5,
+   0
+  ],
+  "bg": "magenta"
+ },
+ {
+  "id": 6,
+  "name": "보르간",
+  "job": "드워프",
+  "sprite": "hero-dwarf-v2c.webp",
+  "port": [
+   5,
+   3
+  ],
+  "bg": "magenta"
+ },
+ {
+  "id": 7,
+  "name": "올드윈",
+  "job": "현자",
+  "sprite": "hero-sage-v2c.webp",
+  "port": [
+   5,
+   1
+  ],
+  "bg": "magenta"
+ },
+ {
+  "id": 8,
+  "name": "발도르",
+  "job": "성기사",
+  "sprite": "hero-paladin-v2c.webp",
+  "port": [
+   4,
+   0
+  ],
+  "bg": "magenta"
+ },
+ {
+  "id": 9,
+  "name": "바루",
+  "job": "격투가",
+  "sprite": "hero-monk-v2c.webp",
+  "port": [
+   0,
+   5
+  ],
+  "bg": "magenta"
+ },
+ {
+  "id": 10,
+  "name": "셰라",
+  "job": "무희",
+  "sprite": "hero-dancer-v2c.webp",
+  "port": [
+   4,
+   4
+  ],
+  "bg": "green"
+ },
+ {
+  "id": 11,
+  "name": "리라",
+  "job": "음유시인",
+  "sprite": "hero-bard-v2c.webp",
+  "port": [
+   5,
+   4
+  ],
+  "bg": "magenta"
+ },
+ {
+  "id": 12,
+  "name": "파셀",
+  "job": "연금술사",
+  "sprite": "hero-alchemist-v2c.webp",
+  "port": [
+   1,
+   2
+  ],
+  "bg": "magenta"
+ },
+ {
+  "id": 13,
+  "name": "바르코",
+  "job": "해적",
+  "sprite": "hero-pirate-v2c.webp",
+  "port": [
+   2,
+   3
+  ],
+  "bg": "magenta"
+ },
+ {
+  "id": 14,
+  "name": "글라세",
+  "job": "빙결 마법사",
+  "sprite": "hero-frost-v2c.webp",
+  "port": [
+   3,
+   2
+  ],
+  "bg": "magenta"
+ },
+ {
+  "id": 15,
+  "name": "타미",
+  "job": "조련사",
+  "sprite": "hero-tamer-v2c.webp",
+  "port": [
+   3,
+   4
+  ],
+  "bg": "magenta"
+ },
+ {
+  "id": 17,
+  "name": "공식",
+  "job": "수학자",
+  "sprite": "hero-math-v2c.webp",
+  "port": [
+   2,
+   1
+  ],
+  "bg": "magenta"
+ },
+ {
+  "id": 18,
+  "name": "녹스",
+  "job": "흑기사",
+  "sprite": "hero-dknight-v2c.webp",
+  "port": [
+   0,
+   1
+  ],
+  "bg": "magenta"
+ },
+ {
+  "id": 19,
+  "name": "한수",
+  "job": "수식 책사(남)",
+  "sprite": "hero-mathboy-v2c.webp",
+  "port": [
+   3,
+   1
+  ],
+  "bg": "magenta"
+ },
+ {
+  "id": 20,
+  "name": "미지",
+  "job": "수식 책사(여)",
+  "sprite": "hero-mathgirl-v2c.webp",
+  "port": [
+   4,
+   1
+  ],
+  "bg": "green"
+ },
+ {
+  "id": 21,
+  "name": "볼트",
+  "job": "메카닉",
+  "sprite": "hero-mechanic-v2c.webp",
+  "port": [
+   4,
+   2
+  ],
+  "bg": "magenta"
+ },
+ {
+  "id": 22,
+  "name": "핑",
+  "job": "해커",
+  "sprite": "hero-hacker-v2c.webp",
+  "port": [
+   5,
+   2
+  ],
+  "bg": "magenta"
+ },
+ {
+  "id": 23,
+  "name": "이그니",
+  "job": "용기사",
+  "sprite": "hero-dragoon-v2c.webp",
+  "port": [
+   2,
+   0
+  ],
+  "bg": "magenta"
+ },
+ {
+  "id": 24,
+  "name": "케라운",
+  "job": "마검사",
+  "sprite": "hero-spellblade-v2c.webp",
+  "port": [
+   3,
+   0
+  ],
+  "bg": "magenta"
+ },
+ {
+  "id": 25,
+  "name": "칼시",
+  "job": "해골 소환사",
+  "sprite": "hero-bone-v3c.webp",
+  "port": [
+   3,
+   5
+  ],
+  "bg": "green"
+ },
+ {
+  "id": 26,
+  "name": "아르발",
+  "job": "석궁 사냥꾼",
+  "sprite": "hero-crossbow-v2c.webp",
+  "port": [
+   2,
+   4
+  ],
+  "bg": "magenta"
+ },
+ {
+  "id": 27,
+  "name": "아바쿠",
+  "job": "주판 술사",
+  "sprite": "hero-abacus-v2c.webp",
+  "port": [
+   4,
+   3
+  ],
+  "bg": "magenta"
+ },
+ {
+  "id": 28,
+  "name": "콤파",
+  "job": "기하 마도사",
+  "sprite": "hero-geometry-v2c.webp",
+  "port": [
+   0,
+   3
+  ],
+  "bg": "magenta"
+ },
+ {
+  "id": 29,
+  "name": "마진",
+  "job": "상인",
+  "sprite": "hero-merchant-v2c.webp",
+  "port": [
+   3,
+   3
+  ],
+  "bg": "magenta"
+ },
+ {
+  "id": 30,
+  "name": "호버",
+  "job": "드론 조종사",
+  "sprite": "hero-drone-v2c.webp",
+  "port": [
+   1,
+   3
+  ],
+  "bg": "magenta"
+ },
+ {
+  "id": 31,
+  "name": "에이라",
+  "job": "발키리",
+  "sprite": "hero-valkyrie-v2c.webp",
+  "port": [
+   1,
+   1
+  ],
+  "bg": "magenta"
+ },
+ {
+  "id": 32,
+  "name": "칸델",
+  "job": "정령사",
+  "sprite": "hero-elemental-v2c.webp",
+  "port": [
+   2,
+   2
+  ],
+  "bg": "magenta"
+ },
+ {
+  "id": 33,
+  "name": "폴라",
+  "job": "별점술사",
+  "sprite": "hero-astro-v2c.webp",
+  "port": [
+   2,
+   5
+  ],
+  "bg": "magenta"
+ }
+]
