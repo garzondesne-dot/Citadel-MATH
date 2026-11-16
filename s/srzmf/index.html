@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <!-- 🌐 #131 브라우저가 색을 바꾸지 않게 (삼성 인터넷 강제 다크 막기) · 테마가 바뀌면 theme.ts 가 고쳐 넣음 -->
+    <meta name="color-scheme" content="only dark" />
+    <meta name="theme-color" content="#0f1115" />
+    <title>모두의 던전 : 중학수학1</title>
+    <!-- 📲 베타 PWA (#38): 정식 앱과 따로 깔림(id · scope = /citadel-MATH-test/) · 아이콘 = 정식 hero-v2 icon-beta 그대로 줄임(Lanczos) -->
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" type="image/png" href="./icons/icon-192-v2.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon-v2.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="모두의 던전" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <!-- 📱 모든 판 공통 화면 규칙 (📜 2026-11-14 선생님 · 정식 CLAUDE.md 4e7d5e3): ① 당겨서 새로 고침 막기 ② 검은 화면 금지 = HTML 에 바로 든 로딩 표시 (스크립트가 늦어도 첫 순간부터) -->
+    <style>
+      html, body { overscroll-behavior-y: none; }
+      html, body { background: #0f1115; }
+      #boot { position: fixed; inset: 0; z-index: 2147483000; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: #0f1115; color: #f2f3f5; font: 600 16px/1.4 system-ui, -apple-system, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; text-align: center; padding: 16px; transition: opacity 0.18s ease-out; }
+      #boot.out { opacity: 0; pointer-events: none; }
+      #boot .spin { width: 40px; height: 40px; display: grid; place-items: center; font-size: 30px; color: #f5b84a; animation: bootspin 1s steps(8) infinite; text-shadow: 2px 2px 0 #8a6420; }
+      #boot .slow { display: none; flex-direction: column; align-items: center; gap: 10px; color: #b4b8c2; font-size: 14px; font-weight: 500; }
+      #boot.late .slow { display: flex; }
+      #boot button { min-height: 48px; padding: 0 22px; border: 0; border-radius: 12px; background: #f5b84a; color: #2a1a00; font: inherit; font-weight: 700; box-shadow: 0 3px 0 #8a6420; }
+      #boot button:active { transform: translateY(2px); box-shadow: none; }
+      @keyframes bootspin { to { transform: rotate(360deg); } }
+      @media (prefers-reduced-motion: reduce) { #boot .spin { animation-duration: 3s; } }
+    </style>
+    <script type="module" crossorigin src="./assets/index-C0BIX17J.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-CGvkFlm_.css">
+  </head>
+  <body>
+    <div id="boot" role="status" aria-live="polite" data-k="boot"><span class="spin" aria-hidden="true">↻</span><b id="boot-t">⏳ 불러오는 중…</b><div class="slow"><span>인터넷이 느려요</span><button type="button" onclick="location.reload()">🔄 새로 고침</button></div></div>
+    <script>
+      // ⏳ 첫 화면 (검은 화면 금지): 새 판 받는 중(새로 고침 단추로 온 길) = 글자만 바꿈 · 8초 넘으면 「인터넷이 느려요」 + 🔄 새로 고침 · 앱이 뜨면 bootDone() 이 지움
+      (function () { try { if (/[?&]v=/.test(location.search) || sessionStorage.getItem('citadel-upd')) { document.getElementById('boot-t').textContent = '🔄 새 판 받는 중…'; sessionStorage.removeItem('citadel-upd'); } } catch (e) {}
+        var t = setTimeout(function () { var b = document.getElementById('boot'); if (b) b.classList.add('late'); }, 8000);
+        window.bootShow = function (text) { var b = document.getElementById('boot'); if (!b) return; if (text) document.getElementById('boot-t').textContent = text; b.classList.remove('out', 'late'); b.style.display = ''; clearTimeout(t); t = setTimeout(function () { b.classList.add('late'); }, 8000); };
+        window.bootDone = function () { clearTimeout(t); var b = document.getElementById('boot'); if (!b) return; b.classList.add('out'); setTimeout(function () { if (b.classList.contains('out')) b.style.display = 'none'; }, 200); };
+      })();
+    </script>
+    <div id="app"></div>
+  </body>
+</html>

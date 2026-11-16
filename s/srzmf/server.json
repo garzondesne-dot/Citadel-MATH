@@ -1,0 +1,18 @@
+{
+  "mode": "server",
+  "firebase": {
+    "apiKey": "AIzaSyCRA48IQMfgcwVbnggJr8CyEqnt5fvpUvo",
+    "authDomain": "dungeon-hpms.firebaseapp.com",
+    "databaseURL": "https://dungeon-hpms-default-rtdb.firebaseio.com",
+    "projectId": "dungeon-hpms",
+    "storageBucket": "dungeon-hpms.firebasestorage.app",
+    "messagingSenderId": "271517619583",
+    "appId": "1:271517619583:web:e191274034baedb401764a",
+    "measurementId": "G-Z5NNL2BMKV"
+  },
+  "school": {
+    "code": "srzmf",
+    "name": "무안행복중학교",
+    "subject": "중학수학1"
+  }
+}
