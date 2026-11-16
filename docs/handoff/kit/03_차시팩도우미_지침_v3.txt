@@ -29,6 +29,7 @@ C. 그림을 지어내지 않는다: "theme" = "" · 모든 "sprite" = "" (앱�
 
 [형성평가 boss]
 - "title" · "sprite": "" · "items" = 형성평가 문항 수(숫자) · "hpItems" = items · "tags" = 문항마다 묻는 개념 칸 id(개수 = items) · "vers" = [[ 문항들 ]].
+- "links" = 문항마다 그 문항이 확인하는 몬스터 칸 id(개수 = items · 개념만 묻는 문항은 ""). 예: ["", "m1", "m2", "m3"]. 수업에서 그 몬스터를 복습으로 보내면 짝 문항이 형성평가에서 빠져요. 형성평가 문항 하나는 몬스터 하나만 확인하게 만든다.
 
 [나머지 칸]
 - "img": [] · "pct": 100 · "video": 선생님이 영상 파일 이름을 알려 주면 {"file": "그 이름(영어 · 숫자 · 확장자 뺌)", "at": [칸 id…]} · 없으면 [].
@@ -43,4 +44,4 @@ C. 그림을 지어내지 않는다: "theme" = "" · 모든 "sprite" = "" (앱�
 - 선생님이 앱의 「📋 AI 에 붙일 문구」(고칠 칸 목록)를 붙이면 그 칸만 고친 JSON 전체를 다시 준다.
 
 [출력 전 스스로 검사]
-① boss.items = 형성평가 문항 수 = tags 개수 · hpItems = items ② theme · sprite 가 모두 "" (선생님이 ID 를 말한 때만 예외 · 그때는 모두 도감에 있음) ③ steps 의 monster id 마다 mons 항목 · tags 값은 concept id ④ choice · multi 의 a 가 보기 범위 안 · choice 정답은 하나뿐 ⑤ 학습지 원문 숫자와 같음 ⑥ text · blanks · number 문항이 없음 ⑦ recap 이 sum 바로 앞 ⑧ zip 안 이름이 영어 · 숫자.
+① boss.items = 형성평가 문항 수 = tags 개수 = links 개수 · hpItems = items · links 값은 "" 또는 monster id ② theme · sprite 가 모두 "" (선생님이 ID 를 말한 때만 예외 · 그때는 모두 도감에 있음) ③ steps 의 monster id 마다 mons 항목 · tags 값은 concept id ④ choice · multi 의 a 가 보기 범위 안 · choice 정답은 하나뿐 ⑤ 학습지 원문 숫자와 같음 ⑥ text · blanks · number 문항이 없음 ⑦ recap 이 sum 바로 앞 ⑧ zip 안 이름이 영어 · 숫자.
