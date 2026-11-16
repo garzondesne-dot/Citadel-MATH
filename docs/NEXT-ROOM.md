@@ -399,6 +399,6 @@ cd /home/user/Citadel-MATH && git checkout main && git pull origin main && git m
 
 ## 🌊 설계 방 (Fable 5.2 · 메인이 묶어서 넘김 · CLAUDE.md 「🌊 설계 방」)
 - 방 = 「모두의 던전 설계 1」 session_014JJv1gNxiR4EbqPvhG9Ym8 (2026-11-17 새벽 열림 · 모델 claude-fable-5-2 확인)
-- 보낸 것: 첫 안내(읽을 파일 · 「🌊 준비 끝」 보고) · 묶음 아직 없음
+- 보낸 것: 첫 안내 → 「🌊 준비 끝」 받음(질문 7 답함) · 🌊 #1 용사 34명 세밀화 GPT 주문서(로안 다듬기 + 33명 · 첨부 스크립트 · docs/handoff/design/hero-v4/)
 - 받은 완료: —
 - 보낼 후보: #1 차시(14차시 이후 · 명제 정리 레이드 검토) · #2 새 놀이(🎉 축제의 날 · 🧰 미믹 규칙) · #3 용사 33명 세밀화 카드(로안 결과 뒤)
