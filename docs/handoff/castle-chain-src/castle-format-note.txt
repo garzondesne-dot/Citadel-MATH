@@ -1,0 +1,12 @@
+// 🏰 성채 팩 (📜 2026-11-14 · 메타인지 6 · DECISIONS 「🏰 성채던전 팩 · ➕ 추가 팩 관리」 · 정식 js/raid/bonus.js 규칙)
+//   꼴 = { kind: 'castle', id: 'eval-N', floor, title, unit, theme, goal, bossPct: 60, rooms: [{ id, no(열림 차시), title, sprite, boss?, photo?, chain?, note?, video?, vers: [문항 판 × 7] }] }
+//   문항 = 차시 팩 문항 꼴 그대로(toQ · 덧칸 say · why · groups · ref) · 판 0 = 첫 판 · 1~6 = 재도전 판
+//   방 하나 = 몬스터 한 마리(1:1 · 혼자) · 열림 = 그 반 진도(연 차시 번호) ≥ 방 no · 👑 보스 방 = 열린 방(보스 빼고)의 60%(올림) 처치
+//   처치 = 소문제 모두 · 기회 4 · 틀린 소문제만 다음 판 숫자로(raid.ts castleVers) · 소레이드 방 = 틀린 단계부터 · 실패 = 💧 벌 없음
+//   저장: 팩 = prep/addons/castle/{id}(올린 글 그대로 + hide · at) · 처치 기록 = bonus/{반}/{번호}/{팩 id}/{방 id} = { clear?, tries, runs, at } (정식 경로)
+import type { LessonPack, Question, Store } from '../model/types';
+import { type Issue, recheckAll, toQ, versions } from './packUpload';
+import { PACKS } from '../engine/packs';
+import { forget } from '../engine/lessons';
+import { CLASSES, lastClass, lastTest } from './school';
+
