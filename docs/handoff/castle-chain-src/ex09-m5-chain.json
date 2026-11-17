@@ -1,0 +1,14 @@
+{
+ "m5": {
+  "title": "문제 5 · 역과 대우 (중단원)",
+  "sprite": "keyvault4:0",
+  "noteText": "역 · 대우를 하나씩 · 반례는 모두 골라요",
+  "retry": {
+   "gen": "set09.m5"
+  },
+  "chain": {
+   "gen": "set09.m5"
+  },
+  "attack": "confuse"
+ }
+}
