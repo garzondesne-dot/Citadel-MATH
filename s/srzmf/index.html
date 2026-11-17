@@ -30,10 +30,10 @@
       #boot.late .slow { display: flex; }
       #boot button { min-height: 48px; padding: 0 22px; border: 0; border-radius: 12px; background: #f5b84a; color: #2a1a00; font: inherit; font-weight: 700; box-shadow: 0 3px 0 #8a6420; }
       #boot button:active { transform: translateY(2px); box-shadow: none; }
-      @keyframes bootwalk { to { background-position-x: -640px; } }
+      @keyframes bootwalk { to { background-position-x: var(--bx, -640px); } }
       @media (prefers-reduced-motion: reduce) { #boot .walk { animation-duration: 1.6s; } }
     </style>
-    <script type="module" crossorigin src="./assets/index-5GIBWN7p.js"></script>
+    <script type="module" crossorigin src="./assets/index-HzLzndYd.js"></script>
     <link rel="stylesheet" crossorigin href="./assets/index-MKPNrjTz.css">
   </head>
   <body>
@@ -44,8 +44,11 @@
         // 🚶 + 💡 (src/boot.ts 가 앱이 뜰 때 'citadel-boot' = { h: 내 용사 시트 파일, t: 켜진 기능의 팁 번호 } 를 이 기기에 적어 둠 · 처음 연 폰 = 로안 · 늘 맞는 팁 1 · 6 · 12)
         var BT = ['💡 학습지에 먼저 쓰고, 폰에 답해요.', '⚔ 칼 4개 = 공격 기회 4번. 틀려도 숫자만 바뀌어 다시!', '💡 막히면 「도움」을 눌러요. 개념 → 첫 줄 → 비슷한 예, 공짜예요.', '🎯 틀린 문제는 허수아비에서 숫자를 바꿔 다시 풀 수 있어요.', '⚔ 허수아비로 복습하면 다음 수업 첫 몬스터가 약해져요.', '📝 「준비 완료」 전에 학습지 빈칸을 다 채웠는지 봐요.', '🔥 다 맞히고 남은 칼은 「한 번 더」 연습이 돼요.', '💚 친구가 힐을 주면 칼이 하나 늘어요.', '✅ 학습지를 다 쓰면 선생님께 도장 받기 → 📜 +1.', '🏰 성채 던전은 진도를 나갈수록 방이 열려요.', '⚒ 모루에서 개념 카드를 만들 수 있어요. 처음 만든 카드는 예제를 맞혀야 완성!', '🐉 몬스터는 문제예요. 정답이 바로 몬스터의 약점!'];
         var bm = null; try { bm = JSON.parse(localStorage.getItem('citadel-boot') || 'null'); } catch (e) {}
-        var hs = bm && /^[\w.-]+\.webp$/.test(bm.h || '') ? bm.h : 'hero-sword-v3c.webp', tl = (bm && bm.t && bm.t.length ? bm.t : [1, 6, 12]).filter(function (n) { return BT[n - 1]; });
-        document.getElementById('boot-w').style.backgroundImage = 'url(art/heroes/' + hs + ')';
+        var hs = bm && /^[\w.-]+\.webp$/.test(bm.h || '') ? bm.h : 'hero-sword-v5.webp', tl = (bm && bm.t && bm.t.length ? bm.t : [1, 6, 12]).filter(function (n) { return BT[n - 1]; });
+        var bw = document.getElementById('boot-w'); bw.style.backgroundImage = 'url(art/heroes/' + hs + ')';
+        // 🧙 #50 세밀 시트 = 칸 g = [가로, 세로, k] (앱이 적어 둠 · 처음 연 폰 = 로안 v5 = 256 × 144 · k 2) · 옛 80 × 64 시트 = g 없음(CSS 그대로) · 화면 = 칸 × 2 / k
+        var g = bm && bm.h ? bm.g : [256, 144, 2];
+        if (g && g.length === 3 && g[0] > 0 && g[1] > 0 && g[2] > 0) { var z = 2 / g[2], cw = g[0] * z, ch = g[1] * z; bw.style.width = cw + 'px'; bw.style.height = ch + 'px'; bw.style.backgroundSize = 4 * cw + 'px ' + 12 * ch + 'px'; bw.style.backgroundPosition = '0 ' + -ch + 'px'; bw.style.setProperty('--bx', -4 * cw + 'px'); }
         var ti = Math.floor(Math.random() * tl.length), tip = document.getElementById('boot-tip'), showTip = function () { tip.textContent = BT[tl[ti % tl.length] - 1] || ''; };
         showTip(); var tt = setInterval(function () { var b = document.getElementById('boot'); if (!b || b.style.display === 'none') return; tip.classList.add('fade'); setTimeout(function () { ti++; showTip(); tip.classList.remove('fade'); }, 160); }, 4000);
         var t = setTimeout(function () { var b = document.getElementById('boot'); if (b) b.classList.add('late'); }, 8000);
