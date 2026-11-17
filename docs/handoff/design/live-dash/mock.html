@@ -1,0 +1,180 @@
+<title>수업 길잡이 시안</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<style>
+/* 배치: 장면마다 한 구획 = 왼쪽 설명(언제 · 보고 · 누르고) + 오른쪽 폰 틀 2대(띠 / 창). 폰 틀 안은 게임의 어두운 던전 색 그대로. */
+:root{
+  --bg:#f3efe6;--ink:#241a10;--muted:#6b5f50;--line:#d9cfbd;--panel:#fffcf5;--accent:#7a5a1e;
+  --p-bg:#14110f;--p-panel:#1f1a16;--p-line:#3a3028;--p-ink:#f3ecdc;--p-muted:#ad9f8a;
+  --gold:#ebb84f;--ok:#4fbf82;--warn:#e0b040;--bad:#e2604f;--info:#6fb3d9;
+  --f:"Noto Sans KR",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17130f;--ink:#f1e9d8;--muted:#a99b85;--line:#3a3028;--panel:#211b16;--accent:#e0b560;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#17130f;--ink:#f1e9d8;--muted:#a99b85;--line:#3a3028;--panel:#211b16;--accent:#e0b560;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.6 var(--f)}
+.wrap{max-width:1040px;margin:0 auto;padding-block:28px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:28px}
+h1{font-size:26px;margin:0;text-wrap:balance}
+h2{font-size:19px;margin:0;text-wrap:balance}
+.lead{color:var(--muted);max-width:62ch;margin:6px 0 0}
+.note{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:14px}
+.note b{color:var(--accent)}
+.scene{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:20px 28px;align-items:start;border-top:1px solid var(--line);padding-top:24px}
+.scene .txt{display:grid;gap:10px;min-width:0}
+.num{font-size:12.5px;letter-spacing:.06em;color:var(--accent);font-weight:700}
+dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;margin:0;font-size:14.5px}
+dt{color:var(--muted);white-space:nowrap}
+dd{margin:0}
+.cond{font-size:13.5px;color:var(--muted)}
+.phones{display:flex;gap:14px;flex-wrap:wrap}
+figure{margin:0;display:grid;gap:6px;justify-items:center}
+figcaption{font-size:12.5px;color:var(--muted)}
+/* 폰 틀 */
+.ph{width:236px;height:468px;background:var(--p-bg);color:var(--p-ink);border-radius:22px;border:3px solid #2c2620;padding:8px 7px;display:grid;grid-template-rows:auto auto auto 1fr auto auto auto;gap:5px;font-size:10px;line-height:1.25;position:relative;overflow:hidden}
+.bar{display:flex;justify-content:space-between;align-items:center;color:var(--p-muted);font-size:9.5px}
+.flow{display:flex;gap:3px}
+.flow i{flex:1;height:5px;border-radius:3px;background:var(--p-line);font-style:normal}
+.flow i.on{background:var(--gold)}
+.ask{display:grid;grid-template-columns:repeat(3,1fr);gap:3px}
+.ask span{border:1px dashed var(--p-line);border-radius:5px;height:17px;display:grid;place-items:center;color:var(--p-muted);font-size:9px}
+.ask span.r{border:1px solid var(--bad);color:var(--p-ink);background:#3a1c18}
+.bw{display:grid;min-height:0}
+.board{display:grid;height:100%;grid-template-columns:repeat(6,1fr);grid-template-rows:repeat(4,1fr);gap:3px}
+.st{background:var(--p-panel);border:1px solid var(--p-line);border-radius:5px;padding:2px 2px 3px;display:grid;align-content:space-between;gap:1px;min-width:0}
+.st b{font-size:8.5px;font-weight:500;white-space:nowrap;overflow:hidden}
+.st u{display:block;height:3px;border-radius:2px;background:linear-gradient(90deg,var(--gold) var(--w,40%),#3a3028 0);text-decoration:none}
+.st.ok{border-color:var(--ok);background:#173325}
+.st.sos{border-color:var(--bad)}
+.st.stop{border-color:var(--warn)}
+.st.hl{outline:2px solid var(--info);outline-offset:0}
+.now{background:var(--p-panel);border:1px solid var(--p-line);border-radius:7px;padding:4px 5px;display:grid;gap:3px;height:50px}
+.now .top{display:flex;justify-content:space-between;align-items:center;gap:4px;min-width:0;height:19px}
+.now .top .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.now .adj{display:grid;grid-template-columns:auto 1fr auto;gap:4px;align-items:center}
+.now .adj em{font-style:normal;border:1px solid var(--p-line);border-radius:4px;padding:1px 4px;color:var(--p-muted);font-size:9px}
+.now .adj i{height:7px;border-radius:4px;background:linear-gradient(90deg,var(--bad) var(--w,60%),#3a3028 0)}
+.now.guide{border-color:var(--info)}
+.now.guide .top{background:#14303f;margin:-2px -3px 0;padding:0 3px;border-radius:5px}
+.go{background:var(--info);color:#0c1c26;border:0;border-radius:5px;font:700 9px var(--f);padding:3px 6px;white-space:nowrap}
+.dot{color:var(--info);font-size:10px}
+.two{display:grid;grid-template-columns:repeat(5,1fr);gap:3px}
+.two span{background:var(--p-panel);border:1px solid var(--p-line);border-radius:5px;height:21px;display:grid;place-items:center;font-size:8.5px;color:var(--p-muted)}
+.two span.ring{border-color:var(--info);color:var(--p-ink)}
+.main{background:var(--gold);color:#2a1c05;border-radius:7px;text-align:center;font-weight:700;padding:6px;font-size:11px}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:#26201a;border-top:2px solid var(--info);border-radius:14px 14px 0 0;padding:10px 10px 12px;display:grid;gap:6px;font-size:10.5px;box-shadow:0 -8px 20px #0008}
+.sheet h3{margin:0;font-size:11.5px;color:var(--info)}
+.sheet ul{margin:0;padding:0;list-style:none;display:grid;gap:3px}
+.sheet li{display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid var(--p-line);padding-bottom:3px}
+.sheet li b{font-variant-numeric:tabular-nums;white-space:nowrap}
+.sheet .btns{display:grid;grid-template-columns:1fr auto;gap:5px}
+.sheet .btns .go{padding:7px;font-size:10.5px}
+.sheet .skip{border:1px solid var(--p-line);border-radius:5px;padding:6px 8px;color:var(--p-muted)}
+.dim{opacity:.35}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:500;white-space:nowrap}
+.tw{overflow-x:auto}
+ol{margin:0;padding-left:22px;display:grid;gap:6px}
+@media (max-width:760px){.scene{grid-template-columns:minmax(0,1fr)}.phones{justify-content:center}}
+</style>
+<div class="wrap">
+  <header>
+    <h1>수업 길잡이 시안</h1>
+    <p class="lead">대시보드를 수업 중에 열지 않습니다. 대시보드만 아는 사실(지난 차시 · 다른 반 · 시간) 하나를 리모컨 「지금」 칸의 한 줄 띠와 단추 하나로 가져옵니다. 컨펌 전 시안이고, 숫자와 이름은 모두 예시입니다.</p>
+  </header>
+  <div class="note"><b>자리 규칙</b> 「지금」 칸의 윗줄만 잠깐 바뀝니다. 칸 높이, 🙋 순서 줄, 👥 학생판, 2×5 막대, 주 단추는 그대로입니다. 띠는 교사 폰에만 뜨고 종합실(TV)과 학생 폰에는 나오지 않습니다. 급한 띠(🙋 · 🧱 같은 칸 막힘)가 먼저이고, 8초 뒤에는 작은 📊 점으로 접힙니다.</div>
+  <div id="scenes"></div>
+  <section style="display:grid;gap:10px;border-top:1px solid var(--line);padding-top:24px">
+    <h2>버린 안</h2>
+    <div class="tw"><table>
+      <tr><th>안</th><th>까닭</th></tr>
+      <tr><td>리모컨에 대시보드 탭</td><td>수업 중 탭을 옮기고 표를 읽어야 합니다. 누르면 바로 할 일이 아닙니다.</td></tr>
+      <tr><td>2×5 막대에 📊 단추</td><td>10칸이 다 찼고 「🔎 풀이(📊 고비)」와 뜻이 겹칩니다.</td></tr>
+      <tr><td>TV에 실시간 그래프</td><td>반 합계라도 다른 반과의 비교가 교실에 비칩니다.</td></tr>
+      <tr><td>학생판 칸에 지난 성적 색</td><td>수업 내내 보이는 낙인이 됩니다. 칸을 눌렀을 때 창 안 한 줄로만 둡니다.</td></tr>
+      <tr><td>AI가 문장으로 조언</td><td>느리고 틀릴 수 있습니다. 규칙으로 고른 숫자 한 줄만 씁니다.</td></tr>
+    </table></div>
+  </section>
+  <section style="display:grid;gap:10px;border-top:1px solid var(--line);padding-top:24px">
+    <h2>선생님이 정하실 것</h2>
+    <ol>
+      <li>방향: 「지금」 칸 띠 한 줄로 가져오는 안으로 갈지</li>
+      <li>장면 ①~⑥ 중 넣을 것 (추천 순서: ④ 시간 → ⑤ 형성평가 앞 → ③ 도우미 → ① → ② → ⑥)</li>
+      <li>스위치 처음 값 (추천: 우리 학교 켬 · 학교판 끔)</li>
+      <li>③ 도우미: 단체 부르기(추천) / 1 : 1 지정도 / 안 함</li>
+      <li>⑥ 학생 창에 지난 기록 한 줄을 넣을지</li>
+      <li>문턱값(60% · 50% · 30% + 3명 · +5분)으로 시작할지</li>
+      <li>이름 「📊 길잡이」</li>
+    </ol>
+  </section>
+</div>
+<script>
+const NAMES=['민준','서연','도윤','하은','시우','지유','예준','수아','주원','지호','건우','채원','우진','다은','선우','유나','서진','소율','연우','가은','정우','나은','승현','예린'];
+// 학생판 상태: o 다 맞힘 · s 🙋 · t 🤝 멈춤 · 숫자 = 진행 %
+const B={
+ wait:'........................',
+ mid:'o5o73os8o2t6o4o9s7o3t5o6',
+ late:'oooo7ooo5ooos8oooo6ooooo'
+};
+function board(k,hl){
+  const v=B[k];let h='<div class="board">';
+  for(let i=0;i<24;i++){
+    const c=v[i];let cls='st',w='0%';
+    if(c==='o'){cls+=' ok';w='100%'}else if(c==='s'){cls+=' sos';w='30%'}else if(c==='t'){cls+=' stop';w='20%'}else if(c!=='.'){w=(+c*10)+'%'}
+    if(hl&&c==='o')cls+=' hl';
+    h+=`<div class="${cls}"><b>${i+1} ${NAMES[i]}</b><u style="--w:${w}"></u></div>`;
+  }
+  return h+'</div>';
+}
+function two(ring){
+  const a=['🔴 집중','🏕 쉼터','🎬 영상','📄 문제','⏰ +5분','✔ 체크','🔎 풀이','🎯 복습','💎 선물','⚔ 보급'];
+  return '<div class="two">'+a.map(x=>`<span class="${ring&&x.includes(ring)?'ring':''}">${x}</span>`).join('')+'</div>';
+}
+function phone(s,open){
+  const nowTop = s.band
+    ? `<div class="top"><span class="nm">📊 ${s.band}</span>${s.btn?`<button class="go" type="button" tabindex="-1">${s.btn}</button>`:'<span class="dot">자세히 ▸</span>'}</div>`
+    : `<div class="top"><span class="nm">${s.stage}</span><span>${s.right}</span></div>`;
+  const sheet = open ? `<div class="sheet"><h3>${s.sheet.t}</h3><ul>${s.sheet.rows.map(r=>`<li><span>${r[0]}</span><b>${r[1]}</b></li>`).join('')}</ul><div class="btns">${s.sheet.btn?`<button class="go" type="button" tabindex="-1">${s.sheet.btn}</button>`:'<span></span>'}<span class="skip">${s.sheet.skip||'넘기기'}</span></div></div>` : '';
+  return `<div class="ph">
+    <div class="bar"><span>1-3 · 12차시</span><span>⏱ ${s.clock}</span></div>
+    <div class="flow">${[0,1,2,3,4,5,6].map(i=>`<i class="${i<=s.step?'on':''}"></i>`).join('')}</div>
+    <div class="ask">${s.ask.map((a,i)=>a?`<span class="r">🙋${'①②③'[i]} ${a}</span>`:'<span>·</span>').join('')}</div>
+    <div class="bw ${open?'dim':''}">${board(s.board,s.hl)}</div>
+    <div class="now ${s.band?'guide':''}">${nowTop}<div class="adj"><em>${s.adj[0]}</em><i style="--w:${s.adj[1]}"></i><em>${s.adj[2]}</em></div></div>
+    ${two(s.ring)}
+    <div class="main">${s.main}</div>${sheet}
+  </div>`;
+}
+const S=[
+ {n:'장면 ① 도입',h:'지난 시간 약점부터 짚고 시작',when:'도입 단계에 들어왔을 때',see:'이 반의 지난 차시 형성평가에서 가장 약했던 개념 하나',press:'「📺 전시 확인」 — 도입 칸 그림을 TV에 띄우고 말로 묻습니다',cond:'뜨는 조건: 지난 차시에 첫 시도 60% 아래인 개념이 있을 때',
+  stage:'도입',right:'',clock:'02:10',step:0,ask:[0,0,0],board:'wait',adj:['−30초','0%','+30초'],main:'▶ 다음 단계',
+  band:'지난 시간 약점 = 대우 41%',btn:'📺 전시 확인',
+  sheet:{t:'📊 지난 11차시 · 이 반',rows:[['대우 쓰기 (개념 1)','첫 시도 78%'],['대우로 증명 (개념 2)','첫 시도 41%'],['지난 시간 결석','3명']],btn:'📺 전시 확인 칸 띄우기'}},
+ {n:'장면 ② 정찰',h:'다른 반이 막힌 곳을 미리 알기',when:'몬스터 등장 전 정찰 60초',see:'같은 문제를 먼저 한 반의 첫 시도 비율과 가장 힘들었던 칸',press:'단추 없음. 양끝 −30초 · +30초는 그대로이고, 띠를 누르면 다른 반이 많이 한 실수를 봅니다',cond:'뜨는 조건: 이 문제를 먼저 한 반이 있고 첫 시도 평균이 60% 아래일 때. 첫 반 수업에는 안 뜹니다',
+  stage:'🌫 정찰 · 문제 2',right:'📝 준비 완료 9 / 24',clock:'14:30',step:2,ask:[0,0,0],board:'wait',adj:['−30초','55%','+30초'],main:'⚔ 몬스터 등장',
+  band:'다른 반 첫 시도 52% · 🔥 ②칸',btn:'',
+  sheet:{t:'📊 문제 2 · 먼저 한 3개 반',rows:[['첫 시도 다 맞힘','52%'],['🔥 제일 힘들었던 칸','② 홀짝 나누기'],['평균 걸린 시간','6분 20초'],['많이 한 실수','결론을 거꾸로 씀']],btn:'',skip:'닫기'}},
+ {n:'장면 ③ 몬스터 푸는 중',h:'다 맞힌 학생을 도우미로',when:'먼저 끝낸 학생과 막힌 학생이 함께 늘었을 때',see:'다 맞힌 학생 수와 막힌 학생 수',press:'「🤝 도우미」 — 다 맞힌 학생 폰에 「아직 푸는 친구가 있어요 · 💡 힌트 주기 / 옆 친구 돕기」가 뜹니다. 막힌 학생 이름은 어디에도 안 나옵니다',cond:'뜨는 조건: 다 맞힘 30% 이상이고 막힘(🙋 · 🤝 멈춤 · ⚔0 · 같은 칸 2번 틀림) 3명 이상. 몬스터마다 한 번',
+  stage:'문제 2 · 체력 46%',right:'제출 17 / 24',clock:'21:05',step:3,ask:['7 예준','17 서진',0],board:'mid',hl:1,adj:['−5%','46%','+5%'],main:'▶ 다음 단계',
+  band:'다 맞힘 9 · 막힘 5',btn:'🤝 도우미',
+  sheet:{t:'📊 지금 문제 2',rows:[['다 맞힌 학생','9명'],['막힌 학생 (🙋 2 · 🤝 2 · ⚔0 1)','5명'],['이 반 💡 힌트 준 횟수 (오늘)','4번']],btn:'🤝 다 맞힌 9명에게 도우미 부탁'}},
+ {n:'장면 ④ 몬스터 사이',h:'시간이 모자라면 보낼 문제를 추천',when:'몬스터 하나를 끝내고 다음으로 넘어가기 전',see:'지금 속도로 가면 끝 시각을 몇 분 넘는지',press:'「🎯 문제 4」 — 지금 있는 「복습으로 보내기」를 그 문제로 바로 실행합니다. 짝인 형성평가 문항이 같이 빠지는 것도 창에서 보여 줍니다',cond:'뜨는 조건: 걸린 시간 + 남은 단계 예상이 끝 시각을 5분 이상 넘을 때',
+  stage:'문제 2 처치',right:'',clock:'29:40',step:3,ask:[0,0,0],board:'late',adj:['−5%','0%','+5%'],main:'▶ 문제 3 으로',ring:'복습',
+  band:'이 속도면 +8분',btn:'🎯 문제 4',
+  sheet:{t:'📊 남은 시간 20분 · 남은 수업 28분',rows:[['문제 3 (산)','약 9분'],['문제 4','약 8분'],['👑 형성평가 5문항','약 8분'],['문제 4 를 보내면','−8분 · 형성평가 5번도 같이']],btn:'🎯 문제 4 복습으로 보내기'}},
+ {n:'장면 ⑤ 형성평가 앞',h:'오늘 약한 개념을 1분 다시',when:'마지막 몬스터를 끝내고 👑 형성평가를 열기 전',see:'오늘 몬스터 기록에서 가장 약한 개념과 그 개념을 묻는 형성평가 문항',press:'「📺 개념 2」 — 그 개념 칸 그림을 TV에 다시 띄웁니다',cond:'뜨는 조건: 오늘 첫 시도 50% 아래인 개념이 있고 형성평가에 그 개념 문항이 있을 때',
+  stage:'문제 3 처치',right:'',clock:'38:15',step:5,ask:[0,0,0],board:'late',adj:['−5%','0%','+5%'],main:'👑 형성평가 열기',
+  band:'약한 개념 = 개념 2 · 38%',btn:'📺 개념 2',
+  sheet:{t:'📊 오늘 이 반 · 개념별 첫 시도',rows:[['개념 1 · 귀류법의 뜻','81%'],['개념 2 · 결론을 부정하기','38%'],['형성평가에서 개념 2 문항','3번 · 4번']],btn:'📺 개념 2 칸 다시 띄우기'}},
+ {n:'장면 ⑥ 학생 칸을 눌렀을 때',h:'그 학생의 지난 기록 한 줄',when:'🙋 또는 🤝 멈춤 학생의 칸을 눌러 창을 열었을 때',see:'지난 차시 참여와 최근 2주 수업 밖 접속',press:'보기만 합니다. 학생판 칸 자체에는 아무 표시도 더하지 않습니다',cond:'띠가 아니라 지금 있는 학생 창 맨 아래 한 줄입니다',
+  stage:'문제 2 · 체력 46%',right:'제출 17 / 24',clock:'21:40',step:3,ask:['7 예준','17 서진',0],board:'mid',adj:['−5%','46%','+5%'],main:'▶ 다음 단계',
+  band:'',btn:'',only:1,
+  sheet:{t:'7 예준 · 지금 ⚔ 1칸 · ②칸에서 멈춤',rows:[['오늘 쓴 한 번 더','5번'],['문제 1','✔'],['📊 지난 11차시','결석'],['📊 최근 2주 수업 밖','0회']],btn:'⚔ 보급',skip:'✅ 도장'}}
+];
+document.getElementById('scenes').outerHTML = S.map(s=>`<section class="scene">
+  <div class="txt"><div class="num">${s.n}</div><h2>${s.h}</h2>
+    <dl><dt>언제</dt><dd>${s.when}</dd><dt>무엇을 보고</dt><dd>${s.see}</dd><dt>무엇을 누르나</dt><dd>${s.press}</dd></dl>
+    <div class="cond">${s.cond}</div></div>
+  <div class="phones">${s.only?'':`<figure>${phone(s,false)}<figcaption>「지금」 칸에 띠가 뜬 모습</figcaption></figure>`}<figure>${phone(s,true)}<figcaption>${s.only?'학생 칸을 눌러 연 창':'띠를 눌러 연 창'}</figcaption></figure></div>
+</section>`).join('');
+</script>
