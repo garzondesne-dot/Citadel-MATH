@@ -4,7 +4,7 @@
 python3 gen_keys.py <팩 폴더(pack11 · 12 · 13.json)>  →  keys-11 · 12 · 13.json · 열쇠표.md
 열쇠 = 그 차시 문제를 막는 중학교 내용 하나 · 3지선다 · 30초 · 판 0 + 숫자 바꾼 판 2.
 정답은 여기 적은 식이 아니라 아래 check 함수(직접 계산)로 다시 구해 대조하고, uses 가 팩에 실제 있는 칸인지 본다."""
-import json, os, sys, random, math
+import json, os, re, sys, random, math
 HERE = os.path.dirname(os.path.abspath(__file__)); PACK = sys.argv[1]
 
 def Q(q, right, traps, seed):
@@ -60,16 +60,16 @@ def k12():
     return [
         dict(id='k1', name='유리수끼리의 계산', grade='중2 · 유리수와 순환소수', help='유리수에 유리수를 더하거나 빼거나 곱해도 유리수예요(분수 ± 분수 = 분수).', mk=a,
              uses=[('m3', 3)]),
-        dict(id='k2', name='서로소', grade='중1 · 소인수분해(최대공약수)', help='공약수가 1 뿐이어야 서로소 · 둘을 함께 나누는 수가 1 말고 또 있으면 서로소가 아니에요.', mk=b,
+        dict(id='k2', name='서로소', pre='√2 = n/m (m, n 은 서로소인 자연수)라 하고 풀었더니 ', grade='중1 · 소인수분해(최대공약수)', help='공약수가 1 뿐이어야 서로소 · 둘을 함께 나누는 수가 1 말고 또 있으면 서로소가 아니에요.', mk=b,
              uses=[('m2', 4)]),
         dict(id='k3', name='제곱근의 제곱', grade='중3 · 제곱근의 성질', help='(√3a)² = (√3)² × a² = 3a² · 루트는 제곱하면 벗겨져요.', mk=c,
              uses=[('m2', 2)]),
     ]
 def k13():
-    v1 = [('x − 5', lambda x: (x - 5) ** 2), ('x + 2', lambda x: (x + 2) ** 2), ('a − 1', lambda x: (x - 1) ** 2)]   # 수업 m1-1 · m2-3 = (a − b)² ≥ 0 · (x − 3)² ≥ 0
+    v1 = [('(x − 5)² ≥ 0', lambda x: (x - 5) ** 2 >= 0), ('(x + 2)² > 0', lambda x: (x + 2) ** 2 > 0), ('(a − 1)² ≥ 0', lambda x: (x - 1) ** 2 >= 0)]   # 수업 m1-1 = (a − b)² ≥ 0 은 절대부등식? (○ ×)
     def a(i):
-        e, f = v1[i]; assert all(f(x / 4) >= 0 for x in range(-80, 81)) and any(f(x / 4) == 0 for x in range(-80, 81))
-        return Q(f'{e[0]} 에 어떤 실수를 넣어도 ({e})² 의 값은?', '0 이상이다', ['0 보다 작다', '항상 0 보다 크다'], 1310 + i), '0 이상이다'
+        e, f = v1[i]; ok = all(f(x / 4) for x in range(-80, 81))
+        return {'type': 'ox', 'q': f'다음 부등식이 절대부등식이면 ○, 아니면 ×\n{e}', 'a': 'O' if ok else 'X', 'ch': []}, ('O' if ok else 'X')
     v2 = [(2, '+'), (5, '−'), (4, '+')]                             # 수업 m2-2 = x² − 6x + 9 = (□)²
     def b(i):
         k, s = v2[i]; right = f'x {s} {k}'; o = '−' if s == '+' else '+'
@@ -85,7 +85,7 @@ def k13():
              uses=[('m1', 1), ('m2', 3)]),
         dict(id='k2', name='완전제곱식', grade='중3 · 인수분해 공식', help='x² ± 2kx + k² = (x ± k)² · 가운데 항의 절반을 제곱하면 끝 항이에요.', mk=b,
              uses=[('m2', 2), ('boss', 3)]),
-        dict(id='k3', name='제곱근 계산', grade='중3 · 제곱근의 뜻', help='√81 = 9 처럼 제곱해서 그 수가 되는 양수 · 2√81 = 2 × 9.', mk=c,
+        dict(id='k3', name='제곱근 계산', pre='x > 0 일 때 ', grade='중3 · 제곱근의 뜻', help='√81 = 9 처럼 제곱해서 그 수가 되는 양수 · 2√81 = 2 × 9.', mk=c,
              uses=[('m3', 2), ('m4', 3), ('boss', 4)]),
     ]
 
@@ -97,6 +97,13 @@ def count(pk, at):
     if 'vers' in m: return len(m['vers'][0])
     if isinstance(m.get('chain'), dict): return len(m['chain']['pool'][0])
     return len(m['first'])
+def item(pk, at, n):
+    m = (pk.get('mons') or pk.get('monsters'))[at]
+    return (m['vers'][0] if 'vers' in m else (m['chain']['pool'][0] if isinstance(m.get('chain'), dict) else m['first']))[n - 1]
+def is_chain(pk, at): return bool((pk.get('mons') or pk.get('monsters'))[at].get('chain'))
+# 판 0 = 수업 소문제 그대로(2026-11-18 선생님 「숫자도 똑같이 · 눈높이」) — 그 문제의 정답을 손으로 적어 대조
+SAME = {(11, 'k1'): '2k − 1', (11, 'k2'): '2k² − 2k', (11, 'k3'): 'n = 3k − 1 또는 n = 3k − 2', (12, 'k1'): '유리수', (12, 'k2'): 'm, n은 서로소', (12, 'k3'): '2m²',
+        (13, 'k1'): 'O', (13, 'k2'): 'x − 3', (13, 'k3'): '4'}
 def text(pk, at, n):
     if at == 'boss':
         b = pk['boss']; it = b['vers'][0][n - 1] if 'vers' in b else b['pool'][n - 1][0]
@@ -105,15 +112,27 @@ def text(pk, at, n):
         it = m['vers'][0][n - 1] if 'vers' in m else (m['chain']['pool'][0] if isinstance(m.get('chain'), dict) else m['first'])[n - 1]
     return (it.get('q') or it.get('question')).split('\n')[-1]
 
-md = ['# 🔑 입장 열쇠 · 11 · 12 · 13차시 열쇠표 (v2 · 쓰이는 소문제와 같은 꼴 · 숫자만 다르게)', '', '열쇠 문제 = 3지선다 · 30초 · 판 0 + 다시 풀 판 2 · 틀리면 💡 한 줄 → 다시 풀면 열쇠.', '']
+md = ['# 🔑 입장 열쇠 · 11 · 12 · 13차시 열쇠표 (v3 · 판 0 = 쓰이는 수업 소문제와 같은 물음 · 같은 숫자 / 판 1 · 2 = 숫자만 다르게)', '', '열쇠 문제 = 3지선다 · 30초 · 판 0 + 다시 풀 판 2 · 틀리면 💡 한 줄 → 다시 풀면 열쇠.', '']
 for no, fn, title in ((11, k11, '대우를 이용한 증명'), (12, k12, '귀류법'), (13, k13, '절대부등식')):
     pk = json.load(open(os.path.join(PACK, f'pack{no}.json'), encoding='utf8'))
     keys = []; seen = set()
-    md += [f'## {no}차시 · {title}', '', '| 열쇠 | 중학교 어디 | 문제(판 0) | 정답 | 💡 한 줄 | 다시 풀 판 | 쓰이는 칸 |', '|---|---|---|---|---|---|---|']
+    md += [f'## {no}차시 · {title}', '', '| 열쇠 | 중학교 어디 | 문제(판 0) | 정답 | 판 0 = 수업 문제 | 💡 한 줄 | 다시 풀 판 2 | 쓰이는 칸 |', '|---|---|---|---|---|---|---|---|']
     for k in fn():
-        vers = []
-        for i in range(3):
-            it, want = k['mk'](i); assert it['ch'][int(it['a'])] == want, (no, k['id'], i); vers.append(it)
+        at0, n0 = k['uses'][0]; src = item(pk, at0, n0); chain = is_chain(pk, at0)
+        q0 = re.sub(r'^\(\d\)\s*', '', (src.get('q') or src.get('question')).split('\n')[-1])
+        if src['type'] == 'ox':
+            ans0 = src['a'] if 'a' in src else ('O' if src['answer'] else 'X'); first = {'type': 'ox', 'q': '다음 부등식이 절대부등식이면 ○, 아니면 ×\n' + q0, 'a': ans0, 'ch': []}; right0 = ans0
+        else:
+            ch0 = src.get('ch') or src['choices']; ai = int(src['a']) if 'a' in src else src['answerIndex']
+            first = {'type': 'choice', 'q': k.get('pre', '') + q0, 'a': str(ai), 'ch': ch0}; right0 = ch0[ai]
+        assert right0 == SAME[(no, k['id'])], (no, k['id'], right0)          # 수업 정답을 손으로 적어 둔 것과 대조
+        first['same'] = {'at': at0, 'n': n0}
+        vers = [first]
+        for i in range(2):
+            it, want = k['mk'](i); assert (it['ch'][int(it['a'])] if it['ch'] else it['a']) == want, (no, k['id'], i)
+            assert it['type'] == first['type'], (no, k['id'], '판 꼴이 다름'); vers.append(it)
+        where = f'문제 {at0[1:]} 의 ' + (f'{"①②③④⑤"[n0 - 1]} 단계' if chain else f'({n0})')
+        k['help'] = k['help'] + f' · 이 열쇠는 {where}에서 써요.'
         assert len({v['q'] + '|'.join(sorted(v['ch'])) for v in vers}) == 3, (no, k['id'], '판끼리 같은 문제')
         uses = []
         for at, n in k['uses']:
@@ -122,9 +141,9 @@ for no, fn, title in ((11, k11, '대우를 이용한 증명'), (12, k12, '귀류
         assert any(u['at'] != 'boss' for u in uses)
         keys.append({'id': k['id'], 'name': k['name'], 'grade': k['grade'], 'help': k['help'], 'vers': vers, 'uses': uses})
         v0 = vers[0]
-        md.append(f'| 🔑 {k["name"]} | {k["grade"]} | {v0["q"]}<br>{" / ".join(v0["ch"])} | **{v0["ch"][int(v0["a"])]}** | {k["help"]} | ' +
-                  '<br>'.join(f'{v["q"]} → {v["ch"][int(v["a"])]}' for v in vers[1:]) + ' | ' +
-                  '<br>'.join(f'`{u["at"]}` {u["n"]}번 — {text(pk, u["at"], u["n"])[:46]}' for u in uses) + ' |')
+        show = lambda v: (v['q'].replace('\n', ' ') + ' → ' + (v['ch'][int(v['a'])] if v['ch'] else {'O': '○', 'X': '×'}[v['a']]))
+        md.append(f'| 🔑 {k["name"]} | {k["grade"]} | {v0["q"].replace(chr(10), " ")}<br>{" / ".join(v0["ch"]) or "○ / ×"} | **{show(v0).split(" → ")[-1]}** | = `{at0}` {n0}번 그대로 | {k["help"]} | ' +
+                  '<br>'.join(show(v) for v in vers[1:]) + ' | ' + '<br>'.join(f'`{u["at"]}` {u["n"]}번' for u in uses) + ' |')
     md.append('')
     json.dump({'lesson': no, 'pack': pk['id'], 'keys': keys}, open(os.path.join(HERE, f'keys-{no}.json'), 'w', encoding='utf8'), ensure_ascii=False, indent=1)
 open(os.path.join(HERE, '열쇠표.md'), 'w', encoding='utf8').write('\n'.join(md) + '\n')

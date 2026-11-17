@@ -24,10 +24,12 @@ KCSS = '''
 def slip(no, teacher=False):
     d = json.load(open(os.path.join(HERE, f'keys-{no}.json'), encoding='utf8')); cells = ''
     for i, k in enumerate(d['keys']):
-        it = k['vers'][0]; opts = ' &nbsp;'.join(f'{"①②③"[j]} {v(c)}' for j, c in enumerate(it['ch']))
-        blank = f'<span class="par ans">{"①②③"[int(it["a"])]}</span>' if teacher else '<span class="par">&nbsp;</span>'
+        it = k['vers'][0]; ox = it['type'] == 'ox'
+        opts = '( ○ / × )' if ox else ' &nbsp;'.join(f'{"①②③④"[j]} {v(c)}' for j, c in enumerate(it['ch']))
+        mark = {'O': '○', 'X': '×'}[it['a']] if ox else "①②③④"[int(it["a"])]
+        blank = f'<span class="par ans">{mark}</span>' if teacher else '<span class="par">&nbsp;</span>'
         extra = f'<div class="tip">💡 {k["help"]}<br><span style="color:#888">{k["grade"]} · 쓰이는 칸 {", ".join(u["at"] + "-" + str(u["n"]) for u in k["uses"])}</span></div>' if teacher else ''
-        cells += f'<div class="k"><b>🔑{i + 1} {k["name"]}</b><br>{v(it["q"])} {blank}<br>{opts}{extra}</div>'
+        cells += f'<div class="k"><b>🔑{i + 1} {k["name"]}</b><br>{v(it["q"]).replace(chr(10), '<br>')} {blank}<br>{opts}{extra}</div>'
     name = '' if teacher else '<span class="nm">(&nbsp;&nbsp;&nbsp;&nbsp;)반 (&nbsp;&nbsp;&nbsp;&nbsp;)번 이름 ______________</span>'
     foot = '' if teacher else '<div class="foot">폰 대기실의 「🔑 열쇠 얻기」로도 풀 수 있어요 · 열쇠가 있으면 오늘 🔑 표시 문제를 한 번에 맞힐 때 🎁 보물상자</div>'
     return (f'<div class="slip"><div class="hd2"><span class="tt">🔑 입장 열쇠 <span>· {no}차시 {TITLE[no]}</span></span>{name}</div>'
