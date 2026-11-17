@@ -11,6 +11,7 @@ sys.path.insert(0, os.environ.get('WSLIB_DIR', os.path.join(HERE, '..', '..', '.
 from wslib import v, C, BL, build, teacher
 PACK = sys.argv[1]; OUT = sys.argv[2] if len(sys.argv) > 2 else HERE
 EXTRA = '''
+.hd .c .t { font-size:15pt; letter-spacing:1px; white-space:nowrap; }
 body { font-size:10.2pt; line-height:1.55; }
 .rm { margin:0 0 2.2mm 0; padding:1.6mm 2.4mm 1.2mm; border:1px solid #b9c0cf; border-radius:2mm; break-inside:avoid; }
 .rm.boss { border:1.6px solid #b8860b; background:#fffaf0; }
