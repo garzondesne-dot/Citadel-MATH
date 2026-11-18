@@ -1,0 +1,207 @@
+{
+ "hero-sword-v5.webp": {
+  "src": "aura10-sword-v1.webp",
+  "frames": 8,
+  "cell": 160,
+  "scale": 0.9
+ },
+ "hero-witch-v5.webp": {
+  "src": "aura10-witch-v1.webp",
+  "frames": 8,
+  "cell": 160,
+  "scale": 1.05
+ },
+ "hero-elf-v5.webp": {
+  "src": "aura10-elf-v1.webp",
+  "frames": 8,
+  "cell": 160,
+  "scale": 0.95
+ },
+ "hero-ninja-v5.webp": {
+  "src": "aura10-ninja-v1.webp",
+  "frames": 8,
+  "cell": 160,
+  "scale": 0.9
+ },
+ "hero-priest-v5.webp": {
+  "src": "aura10-priest-v1.webp",
+  "frames": 8,
+  "cell": 160,
+  "scale": 0.9
+ },
+ "hero-lancer-v5.webp": {
+  "src": "aura10-lancer-v1.webp",
+  "frames": 8,
+  "cell": 160,
+  "scale": 0.95
+ },
+ "hero-dwarf-v5.webp": {
+  "src": "aura10-dwarf-v1.webp",
+  "frames": 8,
+  "cell": 160,
+  "scale": 1.1
+ },
+ "hero-sage-v5.webp": {
+  "src": "aura10-sage-v1.webp",
+  "frames": 8,
+  "cell": 160,
+  "scale": 1.0
+ },
+ "hero-paladin-v5.webp": {
+  "src": "aura10-paladin-v1.webp",
+  "frames": 8,
+  "cell": 160,
+  "scale": 1.05
+ },
+ "hero-monk-v5.webp": {
+  "src": "aura10-monk-v1.webp",
+  "frames": 8,
+  "cell": 160,
+  "scale": 0.9
+ },
+ "hero-dancer-v5.webp": {
+  "src": "aura10-dancer-v1.webp",
+  "frames": 8,
+  "cell": 160,
+  "scale": 0.9
+ },
+ "hero-bard-v5.webp": {
+  "src": "aura10-bard-v1.webp",
+  "frames": 8,
+  "cell": 160,
+  "scale": 0.9
+ },
+ "hero-alchemist-v5.webp": {
+  "src": "aura10-alchemist-v1.webp",
+  "frames": 8,
+  "cell": 160,
+  "scale": 1.05
+ },
+ "hero-pirate-v5.webp": {
+  "src": "aura10-pirate-v1.webp",
+  "frames": 8,
+  "cell": 160,
+  "scale": 0.95
+ },
+ "hero-frost-v5.webp": {
+  "src": "aura10-frost-v1.webp",
+  "frames": 8,
+  "cell": 160,
+  "scale": 0.9
+ },
+ "hero-tamer-v5.webp": {
+  "src": "aura10-tamer-v1.webp",
+  "frames": 8,
+  "cell": 160,
+  "scale": 0.95
+ },
+ "hero-math-v5.webp": {
+  "src": "aura10-math-v1.webp",
+  "frames": 8,
+  "cell": 160,
+  "scale": 1.1
+ },
+ "hero-dknight-v5.webp": {
+  "src": "aura10-dknight-v1.webp",
+  "frames": 8,
+  "cell": 160,
+  "scale": 0.95
+ },
+ "hero-mathboy-v5.webp": {
+  "src": "aura10-mathboy-v1.webp",
+  "frames": 8,
+  "cell": 160,
+  "scale": 1.0
+ },
+ "hero-mathgirl-v5.webp": {
+  "src": "aura10-mathgirl-v1.webp",
+  "frames": 8,
+  "cell": 160,
+  "scale": 0.9
+ },
+ "hero-mechanic-v5.webp": {
+  "src": "aura10-mechanic-v1.webp",
+  "frames": 8,
+  "cell": 160,
+  "scale": 1.15
+ },
+ "hero-hacker-v5.webp": {
+  "src": "aura10-hacker-v1.webp",
+  "frames": 8,
+  "cell": 160,
+  "scale": 0.95
+ },
+ "hero-dragoon-v5.webp": {
+  "src": "aura10-dragoon-v1.webp",
+  "frames": 8,
+  "cell": 160,
+  "scale": 1.0
+ },
+ "hero-spellblade-v5.webp": {
+  "src": "aura10-spellblade-v1.webp",
+  "frames": 8,
+  "cell": 160,
+  "scale": 0.9
+ },
+ "hero-bone-v5.webp": {
+  "src": "aura10-bone-v1.webp",
+  "frames": 8,
+  "cell": 160,
+  "scale": 0.95
+ },
+ "hero-crossbow-v5.webp": {
+  "src": "aura10-crossbow-v1.webp",
+  "frames": 8,
+  "cell": 160,
+  "scale": 0.9
+ },
+ "hero-abacus-v5.webp": {
+  "src": "aura10-abacus-v1.webp",
+  "frames": 8,
+  "cell": 160,
+  "scale": 0.95
+ },
+ "hero-geometry-v5.webp": {
+  "src": "aura10-geometry-v1.webp",
+  "frames": 8,
+  "cell": 160,
+  "scale": 0.95
+ },
+ "hero-merchant-v5.webp": {
+  "src": "aura10-merchant-v1.webp",
+  "frames": 8,
+  "cell": 160,
+  "scale": 0.9
+ },
+ "hero-drone-v5.webp": {
+  "src": "aura10-drone-v1.webp",
+  "frames": 8,
+  "cell": 160,
+  "scale": 0.9
+ },
+ "hero-valkyrie-v5.webp": {
+  "src": "aura10-valkyrie-v1.webp",
+  "frames": 8,
+  "cell": 160,
+  "scale": 1.15
+ },
+ "hero-elemental-v5.webp": {
+  "src": "aura10-elemental-v1.webp",
+  "frames": 8,
+  "cell": 160,
+  "scale": 1.1
+ },
+ "hero-astro-v5.webp": {
+  "src": "aura10-astro-v1.webp",
+  "frames": 8,
+  "cell": 160,
+  "scale": 1.0
+ },
+ "hero-blond-v5.webp": {
+  "src": "aura-halo-v1.webp (지금 성스러운 후광 · halo-burst 같이)",
+  "frames": 4,
+  "cell": 160,
+  "scale": 1.0,
+  "keep": true
+ }
+}
