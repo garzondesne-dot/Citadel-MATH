@@ -1,1 +1,0 @@
-import{extensions as i,AccessibilitySystem as e,Container as t,accessibilityTarget as m,EventSystem as n,FederatedContainer as r}from"./lib-C2P-ADMR.js";import"./webworkerAll-Dy1B-XIm.js";import"./index-uMdR5QTK.js";import"./_commonjsHelpers-CqkleIqs.js";i.add(e);t.mixin(m);i.add(n);t.mixin(r);
