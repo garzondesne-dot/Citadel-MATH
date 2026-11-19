@@ -1,0 +1,654 @@
+{
+ "app": "PixelLab VFX Creator",
+ "name": "awk-drone",
+ "fps": 12,
+ "frame_ms": 83,
+ "frames": 18,
+ "loop": false,
+ "canvas": {
+  "w": 286,
+  "h": 216
+ },
+ "anchor": {
+  "kind": "feet",
+  "x": 168,
+  "y": 184
+ },
+ "clips": [
+  {
+   "name": "whole",
+   "title": "the whole effect, no sprite",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 18,
+   "frame": {
+    "w": 277,
+    "h": 210
+   },
+   "sheets": [
+    {
+     "file": "whole.png",
+     "first_frame": 0,
+     "frames": 18,
+     "columns": 5,
+     "rows": 4
+    }
+   ],
+   "offset": {
+    "x": -165,
+    "y": -181
+   }
+  },
+  {
+   "name": "whole-with-sprite",
+   "title": "the whole effect with the sprite in it",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 18,
+   "frame": {
+    "w": 277,
+    "h": 210
+   },
+   "sheets": [
+    {
+     "file": "whole-with-sprite.png",
+     "first_frame": 0,
+     "frames": 18,
+     "columns": 5,
+     "rows": 4
+    }
+   ],
+   "offset": {
+    "x": -165,
+    "y": -181
+   }
+  },
+  {
+   "name": "behind",
+   "title": "everything behind the sprite",
+   "depth": "behind",
+   "loop": false,
+   "start_frame": 2,
+   "frames": 16,
+   "frame": {
+    "w": 265,
+    "h": 130
+   },
+   "sheets": [
+    {
+     "file": "behind.png",
+     "first_frame": 0,
+     "frames": 16,
+     "columns": 4,
+     "rows": 4
+    }
+   ],
+   "offset": {
+    "x": -165,
+    "y": -181
+   }
+  },
+  {
+   "name": "front",
+   "title": "everything in front of the sprite",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 16,
+   "frame": {
+    "w": 263,
+    "h": 187
+   },
+   "sheets": [
+    {
+     "file": "front.png",
+     "first_frame": 0,
+     "frames": 16,
+     "columns": 4,
+     "rows": 4
+    }
+   ],
+   "offset": {
+    "x": -151,
+    "y": -158
+   }
+  },
+  {
+   "name": "part-charge",
+   "title": "the charge up part",
+   "role": "cast",
+   "part": "charge_up",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 6,
+   "frame": {
+    "w": 97,
+    "h": 97
+   },
+   "sheets": [
+    {
+     "file": "part-charge.png",
+     "first_frame": 0,
+     "frames": 6,
+     "columns": 3,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -52,
+    "y": -135
+   }
+  },
+  {
+   "name": "part-drones",
+   "title": "the drones part",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 7,
+   "frame": {
+    "w": 263,
+    "h": 29
+   },
+   "sheets": [
+    {
+     "file": "part-drones.png",
+     "first_frame": 0,
+     "frames": 7,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -151,
+    "y": -158
+   }
+  },
+  {
+   "name": "part-missile_a",
+   "title": "the missile_a part, in place",
+   "role": "projectile",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 2,
+   "frames": 5,
+   "frame": {
+    "w": 10,
+    "h": 10
+   },
+   "sheets": [
+    {
+     "file": "part-missile_a.png",
+     "first_frame": 0,
+     "frames": 5,
+     "columns": 3,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -102,
+    "y": -157
+   },
+   "moves": [
+    {
+     "x": 4.94,
+     "y": 1.06
+    },
+    {
+     "x": 21.41,
+     "y": 11.69
+    },
+    {
+     "x": 37.88,
+     "y": 35.56
+    },
+    {
+     "x": 54.35,
+     "y": 72.66
+    },
+    {
+     "x": 70,
+     "y": 120
+    }
+   ]
+  },
+  {
+   "name": "part-rocket_exhaust",
+   "title": "the rocket exhaust part, in place",
+   "role": "projectile",
+   "part": "rocket_exhaust",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 2,
+   "frames": 4,
+   "frame": {
+    "w": 73,
+    "h": 19
+   },
+   "sheets": [
+    {
+     "file": "part-rocket_exhaust.png",
+     "first_frame": 0,
+     "frames": 4,
+     "columns": 2,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -168,
+    "y": -161
+   },
+   "moves": [
+    {
+     "x": 4.94,
+     "y": 1.06
+    },
+    {
+     "x": 21.41,
+     "y": 11.69
+    },
+    {
+     "x": 37.88,
+     "y": 35.56
+    },
+    {
+     "x": 54.35,
+     "y": 72.66
+    }
+   ]
+  },
+  {
+   "name": "part-missile_b",
+   "title": "the missile_b part, in place",
+   "role": "projectile",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 3,
+   "frames": 5,
+   "frame": {
+    "w": 1,
+    "h": 3
+   },
+   "sheets": [
+    {
+     "file": "part-missile_b.png",
+     "first_frame": 0,
+     "frames": 5,
+     "columns": 3,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": 117,
+    "y": -154
+   },
+   "moves": [
+    {
+     "x": -15.2,
+     "y": 3.09
+    },
+    {
+     "x": -39.71,
+     "y": 19.19
+    },
+    {
+     "x": -64.22,
+     "y": 49.71
+    },
+    {
+     "x": -88.73,
+     "y": 94.63
+    },
+    {
+     "x": -100,
+     "y": 120
+    }
+   ]
+  },
+  {
+   "name": "part-rocket_exhau2",
+   "title": "the rocket exhaust part, in place",
+   "role": "projectile",
+   "part": "rocket_exhaust",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 3,
+   "frames": 4,
+   "frame": {
+    "w": 73,
+    "h": 20
+   },
+   "sheets": [
+    {
+     "file": "part-rocket_exhau2.png",
+     "first_frame": 0,
+     "frames": 4,
+     "columns": 2,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": 45,
+    "y": -164
+   },
+   "moves": [
+    {
+     "x": -15.2,
+     "y": 3.09
+    },
+    {
+     "x": -39.71,
+     "y": 19.19
+    },
+    {
+     "x": -64.22,
+     "y": 49.71
+    },
+    {
+     "x": -88.73,
+     "y": 94.63
+    }
+   ]
+  },
+  {
+   "name": "part-chain1",
+   "title": "the fire blast part",
+   "role": "impact",
+   "part": "fire_blast",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 6,
+   "frames": 3,
+   "frame": {
+    "w": 33,
+    "h": 26
+   },
+   "sheets": [
+    {
+     "file": "part-chain1.png",
+     "first_frame": 0,
+     "frames": 3,
+     "columns": 2,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -43,
+    "y": -45
+   }
+  },
+  {
+   "name": "part-chain2",
+   "title": "the fire blast part",
+   "role": "impact",
+   "part": "fire_blast",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 7,
+   "frames": 3,
+   "frame": {
+    "w": 30,
+    "h": 30
+   },
+   "sheets": [
+    {
+     "file": "part-chain2.png",
+     "first_frame": 0,
+     "frames": 3,
+     "columns": 2,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": 9,
+    "y": -58
+   }
+  },
+  {
+   "name": "part-chain3",
+   "title": "the fire blast part",
+   "role": "impact",
+   "part": "fire_blast",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 7,
+   "frames": 4,
+   "frame": {
+    "w": 30,
+    "h": 32
+   },
+   "sheets": [
+    {
+     "file": "part-chain3.png",
+     "first_frame": 0,
+     "frames": 4,
+     "columns": 2,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": 53,
+    "y": -34
+   }
+  },
+  {
+   "name": "part-sparks2",
+   "title": "the sparks shower part",
+   "role": "impact",
+   "part": "sparks_shower",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 7,
+   "frames": 5,
+   "frame": {
+    "w": 40,
+    "h": 50
+   },
+   "sheets": [
+    {
+     "file": "part-sparks2.png",
+     "first_frame": 0,
+     "frames": 5,
+     "columns": 3,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": 47,
+    "y": -80
+   }
+  },
+  {
+   "name": "part-boom",
+   "title": "the cartoon boom part",
+   "role": "impact",
+   "part": "cartoon_boom",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 8,
+   "frames": 7,
+   "frame": {
+    "w": 117,
+    "h": 122
+   },
+   "sheets": [
+    {
+     "file": "part-boom.png",
+     "first_frame": 0,
+     "frames": 7,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -68,
+    "y": -148
+   }
+  },
+  {
+   "name": "part-shock",
+   "title": "the shockwave ring part",
+   "role": "impact",
+   "part": "shockwave_ring",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 8,
+   "frames": 6,
+   "frame": {
+    "w": 152,
+    "h": 60
+   },
+   "sheets": [
+    {
+     "file": "part-shock.png",
+     "first_frame": 0,
+     "frames": 6,
+     "columns": 3,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -80,
+    "y": -78
+   }
+  },
+  {
+   "name": "part-sparks",
+   "title": "the sparks shower part",
+   "role": "impact",
+   "part": "sparks_shower",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 8,
+   "frames": 7,
+   "frame": {
+    "w": 71,
+    "h": 69
+   },
+   "sheets": [
+    {
+     "file": "part-sparks.png",
+     "first_frame": 0,
+     "frames": 7,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -12,
+    "y": -106
+   }
+  },
+  {
+   "name": "part-debris",
+   "title": "the debris burst part",
+   "role": "impact",
+   "part": "debris_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 8,
+   "frames": 8,
+   "frame": {
+    "w": 47,
+    "h": 38
+   },
+   "sheets": [
+    {
+     "file": "part-debris.png",
+     "first_frame": 0,
+     "frames": 8,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -22,
+    "y": -71
+   }
+  },
+  {
+   "name": "part-chain4",
+   "title": "the fire blast part",
+   "role": "impact",
+   "part": "fire_blast",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 8,
+   "frames": 3,
+   "frame": {
+    "w": 28,
+    "h": 26
+   },
+   "sheets": [
+    {
+     "file": "part-chain4.png",
+     "first_frame": 0,
+     "frames": 3,
+     "columns": 2,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -16,
+    "y": -11
+   }
+  },
+  {
+   "name": "part-stars",
+   "title": "the star burst part",
+   "role": "impact",
+   "part": "star_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 8,
+   "frames": 5,
+   "frame": {
+    "w": 68,
+    "h": 83
+   },
+   "sheets": [
+    {
+     "file": "part-stars.png",
+     "first_frame": 0,
+     "frames": 5,
+     "columns": 3,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -1,
+    "y": -54
+   }
+  },
+  {
+   "name": "part-smoke",
+   "title": "the smoke column part",
+   "role": "linger",
+   "part": "smoke_column",
+   "depth": "behind",
+   "loop": false,
+   "start_frame": 11,
+   "frames": 7,
+   "frame": {
+    "w": 38,
+    "h": 129
+   },
+   "sheets": [
+    {
+     "file": "part-smoke.png",
+     "first_frame": 0,
+     "frames": 7,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -23,
+    "y": -181
+   }
+  }
+ ]
+}

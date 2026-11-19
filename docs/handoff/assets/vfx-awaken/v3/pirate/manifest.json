@@ -1,0 +1,623 @@
+{
+ "app": "PixelLab VFX Creator",
+ "name": "awk-pirate",
+ "fps": 16,
+ "frame_ms": 63,
+ "frames": 24,
+ "loop": false,
+ "canvas": {
+  "w": 363,
+  "h": 289
+ },
+ "anchor": {
+  "kind": "feet",
+  "x": 232,
+  "y": 200
+ },
+ "clips": [
+  {
+   "name": "whole",
+   "title": "the whole effect, no sprite",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 24,
+   "frame": {
+    "w": 357,
+    "h": 283
+   },
+   "sheets": [
+    {
+     "file": "whole.png",
+     "first_frame": 0,
+     "frames": 24,
+     "columns": 5,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -229,
+    "y": -197
+   }
+  },
+  {
+   "name": "whole-with-sprite",
+   "title": "the whole effect with the sprite in it",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 24,
+   "frame": {
+    "w": 357,
+    "h": 283
+   },
+   "sheets": [
+    {
+     "file": "whole-with-sprite.png",
+     "first_frame": 0,
+     "frames": 24,
+     "columns": 5,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -229,
+    "y": -197
+   }
+  },
+  {
+   "name": "behind",
+   "title": "everything behind the sprite",
+   "depth": "behind",
+   "loop": false,
+   "start_frame": 1,
+   "frames": 22,
+   "frame": {
+    "w": 349,
+    "h": 239
+   },
+   "sheets": [
+    {
+     "file": "behind.png",
+     "first_frame": 0,
+     "frames": 22,
+     "columns": 5,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -229,
+    "y": -197
+   }
+  },
+  {
+   "name": "front",
+   "title": "everything in front of the sprite",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 24,
+   "frame": {
+    "w": 291,
+    "h": 275
+   },
+   "sheets": [
+    {
+     "file": "front.png",
+     "first_frame": 0,
+     "frames": 24,
+     "columns": 5,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -163,
+    "y": -189
+   }
+  },
+  {
+   "name": "part-anticipation",
+   "title": "the flash burst part",
+   "role": "cast",
+   "part": "flash_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 6,
+   "frame": {
+    "w": 68,
+    "h": 69
+   },
+   "sheets": [
+    {
+     "file": "part-anticipation.png",
+     "first_frame": 0,
+     "frames": 6,
+     "columns": 3,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -33,
+    "y": -109
+   }
+  },
+  {
+   "name": "part-ball_a",
+   "title": "the ball_a part, in place",
+   "role": "projectile",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 1,
+   "frames": 7,
+   "frame": {
+    "w": 10,
+    "h": 10
+   },
+   "sheets": [
+    {
+     "file": "part-ball_a.png",
+     "first_frame": 0,
+     "frames": 7,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -159,
+    "y": -176
+   },
+   "moves": [
+    {
+     "x": 0,
+     "y": 0
+    },
+    {
+     "x": 13.3,
+     "y": -6.48
+    },
+    {
+     "x": 28.96,
+     "y": -5.35
+    },
+    {
+     "x": 44.61,
+     "y": 4.7
+    },
+    {
+     "x": 60.26,
+     "y": 25.43
+    },
+    {
+     "x": 75.91,
+     "y": 55.26
+    },
+    {
+     "x": 90,
+     "y": 90
+    }
+   ]
+  },
+  {
+   "name": "part-smoke_trail",
+   "title": "the smoke trail part, in place",
+   "role": "projectile",
+   "part": "smoke_trail",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 1,
+   "frames": 7,
+   "frame": {
+    "w": 77,
+    "h": 22
+   },
+   "sheets": [
+    {
+     "file": "part-smoke_trail.png",
+     "first_frame": 0,
+     "frames": 7,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -229,
+    "y": -184
+   },
+   "moves": [
+    {
+     "x": 0,
+     "y": 0
+    },
+    {
+     "x": 13.3,
+     "y": -6.48
+    },
+    {
+     "x": 28.96,
+     "y": -5.35
+    },
+    {
+     "x": 44.61,
+     "y": 4.7
+    },
+    {
+     "x": 60.26,
+     "y": 25.43
+    },
+    {
+     "x": 75.91,
+     "y": 55.26
+    },
+    {
+     "x": 90,
+     "y": 90
+    }
+   ]
+  },
+  {
+   "name": "part-ball_b",
+   "title": "the ball_b part, in place",
+   "role": "projectile",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 3,
+   "frames": 8,
+   "frame": {
+    "w": 10,
+    "h": 10
+   },
+   "sheets": [
+    {
+     "file": "part-ball_b.png",
+     "first_frame": 0,
+     "frames": 8,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": 118,
+    "y": -188
+   },
+   "moves": [
+    {
+     "x": 0,
+     "y": 0
+    },
+    {
+     "x": -12.4,
+     "y": -1.33
+    },
+    {
+     "x": -34.94,
+     "y": -0.01
+    },
+    {
+     "x": -57.49,
+     "y": 8.3
+    },
+    {
+     "x": -80.03,
+     "y": 22.52
+    },
+    {
+     "x": -102.58,
+     "y": 42.66
+    },
+    {
+     "x": -125.12,
+     "y": 69.28
+    },
+    {
+     "x": -140,
+     "y": 90
+    }
+   ]
+  },
+  {
+   "name": "part-smoke_trail2",
+   "title": "the smoke trail part, in place",
+   "role": "projectile",
+   "part": "smoke_trail",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 3,
+   "frames": 8,
+   "frame": {
+    "w": 77,
+    "h": 22
+   },
+   "sheets": [
+    {
+     "file": "part-smoke_trail2.png",
+     "first_frame": 0,
+     "frames": 8,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": 48,
+    "y": -196
+   },
+   "moves": [
+    {
+     "x": 0,
+     "y": 0
+    },
+    {
+     "x": -12.4,
+     "y": -1.33
+    },
+    {
+     "x": -34.94,
+     "y": -0.01
+    },
+    {
+     "x": -57.49,
+     "y": 8.3
+    },
+    {
+     "x": -80.03,
+     "y": 22.52
+    },
+    {
+     "x": -102.58,
+     "y": 42.66
+    },
+    {
+     "x": -125.12,
+     "y": 69.28
+    },
+    {
+     "x": -140,
+     "y": 90
+    }
+   ]
+  },
+  {
+   "name": "part-boom_a",
+   "title": "the cartoon boom part",
+   "role": "impact",
+   "part": "cartoon_boom",
+   "depth": "behind",
+   "loop": false,
+   "start_frame": 7,
+   "frames": 10,
+   "frame": {
+    "w": 70,
+    "h": 75
+   },
+   "sheets": [
+    {
+     "file": "part-boom_a.png",
+     "first_frame": 0,
+     "frames": 10,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -132,
+    "y": -175
+   }
+  },
+  {
+   "name": "part-cartoon_boom",
+   "title": "the cartoon boom part",
+   "role": "impact",
+   "part": "cartoon_boom",
+   "depth": "behind",
+   "loop": false,
+   "start_frame": 7,
+   "frames": 16,
+   "frame": {
+    "w": 51,
+    "h": 57
+   },
+   "sheets": [
+    {
+     "file": "part-cartoon_boom.png",
+     "first_frame": 0,
+     "frames": 16,
+     "columns": 4,
+     "rows": 4
+    }
+   ],
+   "offset": {
+    "x": -89,
+    "y": -117
+   }
+  },
+  {
+   "name": "part-boom_b",
+   "title": "the cartoon boom part",
+   "role": "impact",
+   "part": "cartoon_boom",
+   "depth": "behind",
+   "loop": false,
+   "start_frame": 9,
+   "frames": 11,
+   "frame": {
+    "w": 87,
+    "h": 81
+   },
+   "sheets": [
+    {
+     "file": "part-boom_b.png",
+     "first_frame": 0,
+     "frames": 11,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -53,
+    "y": -188
+   }
+  },
+  {
+   "name": "part-shock",
+   "title": "the shockwave ring part",
+   "role": "impact",
+   "part": "shockwave_ring",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 9,
+   "frames": 12,
+   "frame": {
+    "w": 218,
+    "h": 84
+   },
+   "sheets": [
+    {
+     "file": "part-shock.png",
+     "first_frame": 0,
+     "frames": 12,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -109,
+    "y": -42
+   }
+  },
+  {
+   "name": "part-sparkles",
+   "title": "the twinkles part",
+   "role": "linger",
+   "part": "twinkles",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 9,
+   "frames": 15,
+   "frame": {
+    "w": 52,
+    "h": 85
+   },
+   "sheets": [
+    {
+     "file": "part-sparkles.png",
+     "first_frame": 0,
+     "frames": 15,
+     "columns": 4,
+     "rows": 4
+    }
+   ],
+   "offset": {
+    "x": -16,
+    "y": -117
+   }
+  },
+  {
+   "name": "part-coins",
+   "title": "the coin burst part",
+   "role": "impact",
+   "part": "coin_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 10,
+   "frames": 13,
+   "frame": {
+    "w": 103,
+    "h": 102
+   },
+   "sheets": [
+    {
+     "file": "part-coins.png",
+     "first_frame": 0,
+     "frames": 13,
+     "columns": 4,
+     "rows": 4
+    }
+   ],
+   "offset": {
+    "x": -43,
+    "y": -124
+   }
+  },
+  {
+   "name": "part-cartoon_boom2",
+   "title": "the cartoon boom part",
+   "role": "impact",
+   "part": "cartoon_boom",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 10,
+   "frames": 13,
+   "frame": {
+    "w": 47,
+    "h": 58
+   },
+   "sheets": [
+    {
+     "file": "part-cartoon_boom2.png",
+     "first_frame": 0,
+     "frames": 13,
+     "columns": 4,
+     "rows": 4
+    }
+   ],
+   "offset": {
+    "x": -42,
+    "y": -131
+   }
+  },
+  {
+   "name": "part-wave_splash",
+   "title": "the water splash part",
+   "role": "impact",
+   "part": "water_splash",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 12,
+   "frames": 11,
+   "frame": {
+    "w": 216,
+    "h": 173
+   },
+   "sheets": [
+    {
+     "file": "part-wave_splash.png",
+     "first_frame": 0,
+     "frames": 11,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -111,
+    "y": -87
+   }
+  },
+  {
+   "name": "part-aftermath",
+   "title": "the smoke column part",
+   "role": "linger",
+   "part": "smoke_column",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 14,
+   "frames": 10,
+   "frame": {
+    "w": 28,
+    "h": 93
+   },
+   "sheets": [
+    {
+     "file": "part-aftermath.png",
+     "first_frame": 0,
+     "frames": 10,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -19,
+    "y": -101
+   }
+  }
+ ]
+}

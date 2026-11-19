@@ -1,0 +1,416 @@
+{
+ "app": "PixelLab VFX Creator",
+ "name": "awk-witch",
+ "fps": 12,
+ "frame_ms": 83,
+ "frames": 18,
+ "loop": false,
+ "canvas": {
+  "w": 338,
+  "h": 219
+ },
+ "anchor": {
+  "kind": "feet",
+  "x": 169,
+  "y": 153
+ },
+ "clips": [
+  {
+   "name": "whole",
+   "title": "the whole effect, no sprite",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 18,
+   "frame": {
+    "w": 332,
+    "h": 215
+   },
+   "sheets": [
+    {
+     "file": "whole.png",
+     "first_frame": 0,
+     "frames": 18,
+     "columns": 5,
+     "rows": 4
+    }
+   ],
+   "offset": {
+    "x": -166,
+    "y": -152
+   }
+  },
+  {
+   "name": "whole-with-sprite",
+   "title": "the whole effect with the sprite in it",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 18,
+   "frame": {
+    "w": 332,
+    "h": 215
+   },
+   "sheets": [
+    {
+     "file": "whole-with-sprite.png",
+     "first_frame": 0,
+     "frames": 18,
+     "columns": 5,
+     "rows": 4
+    }
+   ],
+   "offset": {
+    "x": -166,
+    "y": -152
+   }
+  },
+  {
+   "name": "behind",
+   "title": "everything behind the sprite",
+   "depth": "behind",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 17,
+   "frame": {
+    "w": 332,
+    "h": 126
+   },
+   "sheets": [
+    {
+     "file": "behind.png",
+     "first_frame": 0,
+     "frames": 17,
+     "columns": 5,
+     "rows": 4
+    }
+   ],
+   "offset": {
+    "x": -166,
+    "y": -63
+   }
+  },
+  {
+   "name": "front",
+   "title": "everything in front of the sprite",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 2,
+   "frames": 16,
+   "frame": {
+    "w": 210,
+    "h": 202
+   },
+   "sheets": [
+    {
+     "file": "front.png",
+     "first_frame": 0,
+     "frames": 16,
+     "columns": 4,
+     "rows": 4
+    }
+   ],
+   "offset": {
+    "x": -101,
+    "y": -152
+   }
+  },
+  {
+   "name": "part-anticip",
+   "title": "the soft glow part",
+   "role": "cast",
+   "part": "soft_glow",
+   "depth": "behind",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 8,
+   "frame": {
+    "w": 70,
+    "h": 26
+   },
+   "sheets": [
+    {
+     "file": "part-anticip.png",
+     "first_frame": 0,
+     "frames": 8,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -35,
+    "y": -13
+   }
+  },
+  {
+   "name": "part-hexcircle",
+   "title": "the rune circle part",
+   "role": "cast",
+   "part": "rune_circle",
+   "depth": "behind",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 11,
+   "frame": {
+    "w": 332,
+    "h": 126
+   },
+   "sheets": [
+    {
+     "file": "part-hexcircle.png",
+     "first_frame": 0,
+     "frames": 11,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -166,
+    "y": -63
+   }
+  },
+  {
+   "name": "part-cauldron",
+   "title": "the smoke column part",
+   "role": "cast",
+   "part": "smoke_column",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 2,
+   "frames": 11,
+   "frame": {
+    "w": 41,
+    "h": 138
+   },
+   "sheets": [
+    {
+     "file": "part-cauldron.png",
+     "first_frame": 0,
+     "frames": 11,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -20,
+    "y": -146
+   }
+  },
+  {
+   "name": "part-flash",
+   "title": "the flash burst part",
+   "role": "impact",
+   "part": "flash_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 7,
+   "frames": 3,
+   "frame": {
+    "w": 128,
+    "h": 138
+   },
+   "sheets": [
+    {
+     "file": "part-flash.png",
+     "first_frame": 0,
+     "frames": 3,
+     "columns": 2,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -64,
+    "y": -152
+   }
+  },
+  {
+   "name": "part-starburst",
+   "title": "the star burst part",
+   "role": "impact",
+   "part": "star_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 8,
+   "frames": 7,
+   "frame": {
+    "w": 153,
+    "h": 182
+   },
+   "sheets": [
+    {
+     "file": "part-starburst.png",
+     "first_frame": 0,
+     "frames": 7,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -73,
+    "y": -141
+   }
+  },
+  {
+   "name": "part-shock",
+   "title": "the shockwave ring part",
+   "role": "impact",
+   "part": "shockwave_ring",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 8,
+   "frames": 6,
+   "frame": {
+    "w": 272,
+    "h": 104
+   },
+   "sheets": [
+    {
+     "file": "part-shock.png",
+     "first_frame": 0,
+     "frames": 6,
+     "columns": 3,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -136,
+    "y": -52
+   }
+  },
+  {
+   "name": "part-sparks",
+   "title": "the spark burst part",
+   "role": "impact",
+   "part": "spark_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 8,
+   "frames": 7,
+   "frame": {
+    "w": 148,
+    "h": 75
+   },
+   "sheets": [
+    {
+     "file": "part-sparks.png",
+     "first_frame": 0,
+     "frames": 7,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -77,
+    "y": -110
+   }
+  },
+  {
+   "name": "part-debris",
+   "title": "the debris burst part",
+   "role": "impact",
+   "part": "debris_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 8,
+   "frames": 8,
+   "frame": {
+    "w": 96,
+    "h": 75
+   },
+   "sheets": [
+    {
+     "file": "part-debris.png",
+     "first_frame": 0,
+     "frames": 8,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -38,
+    "y": -25
+   }
+  },
+  {
+   "name": "part-twinkle",
+   "title": "the twinkles part",
+   "role": "linger",
+   "part": "twinkles",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 8,
+   "frames": 10,
+   "frame": {
+    "w": 68,
+    "h": 112
+   },
+   "sheets": [
+    {
+     "file": "part-twinkle.png",
+     "first_frame": 0,
+     "frames": 10,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -21,
+    "y": -131
+   }
+  },
+  {
+   "name": "part-greenstar",
+   "title": "the star burst part",
+   "role": "impact",
+   "part": "star_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 8,
+   "frames": 8,
+   "frame": {
+    "w": 128,
+    "h": 163
+   },
+   "sheets": [
+    {
+     "file": "part-greenstar.png",
+     "first_frame": 0,
+     "frames": 8,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -70,
+    "y": -130
+   }
+  },
+  {
+   "name": "part-aftersmoke",
+   "title": "the smoke puff part",
+   "role": "linger",
+   "part": "smoke_puff",
+   "depth": "behind",
+   "loop": false,
+   "start_frame": 11,
+   "frames": 6,
+   "frame": {
+    "w": 84,
+    "h": 84
+   },
+   "sheets": [
+    {
+     "file": "part-aftersmoke.png",
+     "first_frame": 0,
+     "frames": 6,
+     "columns": 3,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -40,
+    "y": -42
+   }
+  }
+ ]
+}

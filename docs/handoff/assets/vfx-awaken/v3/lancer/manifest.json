@@ -1,0 +1,412 @@
+{
+ "app": "PixelLab VFX Creator",
+ "name": "awk-lancer",
+ "fps": 12,
+ "frame_ms": 83,
+ "frames": 14,
+ "loop": false,
+ "canvas": {
+  "w": 451,
+  "h": 161
+ },
+ "anchor": {
+  "kind": "feet",
+  "x": 103,
+  "y": 158
+ },
+ "clips": [
+  {
+   "name": "whole",
+   "title": "the whole effect, no sprite",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 14,
+   "frame": {
+    "w": 392,
+    "h": 149
+   },
+   "sheets": [
+    {
+     "file": "whole.png",
+     "first_frame": 0,
+     "frames": 14,
+     "columns": 4,
+     "rows": 4
+    }
+   ],
+   "offset": {
+    "x": -47,
+    "y": -155
+   }
+  },
+  {
+   "name": "whole-with-sprite",
+   "title": "the whole effect with the sprite in it",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 14,
+   "frame": {
+    "w": 445,
+    "h": 155
+   },
+   "sheets": [
+    {
+     "file": "whole-with-sprite.png",
+     "first_frame": 0,
+     "frames": 14,
+     "columns": 4,
+     "rows": 4
+    }
+   ],
+   "offset": {
+    "x": -100,
+    "y": -155
+   }
+  },
+  {
+   "name": "behind",
+   "title": "everything behind the sprite",
+   "depth": "behind",
+   "loop": false,
+   "start_frame": 2,
+   "frames": 11,
+   "frame": {
+    "w": 230,
+    "h": 84
+   },
+   "sheets": [
+    {
+     "file": "behind.png",
+     "first_frame": 0,
+     "frames": 11,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": 115,
+    "y": -120
+   }
+  },
+  {
+   "name": "front",
+   "title": "everything in front of the sprite",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 14,
+   "frame": {
+    "w": 371,
+    "h": 149
+   },
+   "sheets": [
+    {
+     "file": "front.png",
+     "first_frame": 0,
+     "frames": 14,
+     "columns": 4,
+     "rows": 4
+    }
+   ],
+   "offset": {
+    "x": -47,
+    "y": -155
+   }
+  },
+  {
+   "name": "part-charge",
+   "title": "the charge up part",
+   "role": "cast",
+   "part": "charge_up",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 4,
+   "frame": {
+    "w": 95,
+    "h": 97
+   },
+   "sheets": [
+    {
+     "file": "part-charge.png",
+     "first_frame": 0,
+     "frames": 4,
+     "columns": 2,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -47,
+    "y": -121
+   }
+  },
+  {
+   "name": "part-spear",
+   "title": "the spear part",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 2,
+   "frames": 7,
+   "frame": {
+    "w": 167,
+    "h": 14
+   },
+   "sheets": [
+    {
+     "file": "part-spear.png",
+     "first_frame": 0,
+     "frames": 7,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": 85,
+    "y": -81
+   }
+  },
+  {
+   "name": "part-speed",
+   "title": "the speed lines part",
+   "part": "speed_lines",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 2,
+   "frames": 9,
+   "frame": {
+    "w": 115,
+    "h": 49
+   },
+   "sheets": [
+    {
+     "file": "part-speed.png",
+     "first_frame": 0,
+     "frames": 9,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": 113,
+    "y": -99
+   }
+  },
+  {
+   "name": "part-twinkle",
+   "title": "the twinkles part",
+   "role": "ambient",
+   "part": "twinkles",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 2,
+   "frames": 12,
+   "frame": {
+    "w": 68,
+    "h": 112
+   },
+   "sheets": [
+    {
+     "file": "part-twinkle.png",
+     "first_frame": 0,
+     "frames": 12,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": 145,
+    "y": -146
+   }
+  },
+  {
+   "name": "part-thrust",
+   "title": "the thrust streak part",
+   "role": "projectile",
+   "part": "thrust_streak",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 3,
+   "frames": 5,
+   "frame": {
+    "w": 170,
+    "h": 27
+   },
+   "sheets": [
+    {
+     "file": "part-thrust.png",
+     "first_frame": 0,
+     "frames": 5,
+     "columns": 3,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -15,
+    "y": -87
+   }
+  },
+  {
+   "name": "part-cone",
+   "title": "the wave slash part",
+   "part": "wave_slash",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 4,
+   "frames": 5,
+   "frame": {
+    "w": 250,
+    "h": 124
+   },
+   "sheets": [
+    {
+     "file": "part-cone.png",
+     "first_frame": 0,
+     "frames": 5,
+     "columns": 3,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -8,
+    "y": -135
+   }
+  },
+  {
+   "name": "part-flash",
+   "title": "the flash burst part",
+   "role": "impact",
+   "part": "flash_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 7,
+   "frames": 3,
+   "frame": {
+    "w": 132,
+    "h": 136
+   },
+   "sheets": [
+    {
+     "file": "part-flash.png",
+     "first_frame": 0,
+     "frames": 3,
+     "columns": 2,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": 170,
+    "y": -155
+   }
+  },
+  {
+   "name": "part-ring",
+   "title": "the shockwave ring part",
+   "role": "impact",
+   "part": "shockwave_ring",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 7,
+   "frames": 6,
+   "frame": {
+    "w": 218,
+    "h": 84
+   },
+   "sheets": [
+    {
+     "file": "part-ring.png",
+     "first_frame": 0,
+     "frames": 6,
+     "columns": 3,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": 127,
+    "y": -120
+   }
+  },
+  {
+   "name": "part-sparks",
+   "title": "the spark burst part",
+   "role": "impact",
+   "part": "spark_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 7,
+   "frames": 6,
+   "frame": {
+    "w": 120,
+    "h": 59
+   },
+   "sheets": [
+    {
+     "file": "part-sparks.png",
+     "first_frame": 0,
+     "frames": 6,
+     "columns": 3,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": 174,
+    "y": -106
+   }
+  },
+  {
+   "name": "part-debris",
+   "title": "the debris burst part",
+   "role": "linger",
+   "part": "debris_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 7,
+   "frames": 6,
+   "frame": {
+    "w": 76,
+    "h": 60
+   },
+   "sheets": [
+    {
+     "file": "part-debris.png",
+     "first_frame": 0,
+     "frames": 6,
+     "columns": 3,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": 206,
+    "y": -98
+   }
+  },
+  {
+   "name": "part-stars",
+   "title": "the star burst part",
+   "role": "linger",
+   "part": "star_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 8,
+   "frames": 5,
+   "frame": {
+    "w": 97,
+    "h": 117
+   },
+   "sheets": [
+    {
+     "file": "part-stars.png",
+     "first_frame": 0,
+     "frames": 5,
+     "columns": 3,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": 188,
+    "y": -123
+   }
+  }
+ ]
+}

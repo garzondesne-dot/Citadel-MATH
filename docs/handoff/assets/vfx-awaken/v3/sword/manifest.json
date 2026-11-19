@@ -1,0 +1,281 @@
+{
+ "app": "PixelLab VFX Creator",
+ "name": "awk-sword",
+ "fps": 16,
+ "frame_ms": 63,
+ "frames": 24,
+ "loop": false,
+ "canvas": {
+  "w": 284,
+  "h": 203
+ },
+ "anchor": {
+  "kind": "feet",
+  "x": 134,
+  "y": 150
+ },
+ "clips": [
+  {
+   "name": "whole",
+   "title": "the whole effect, no sprite",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 23,
+   "frame": {
+    "w": 278,
+    "h": 169
+   },
+   "sheets": [
+    {
+     "file": "whole.png",
+     "first_frame": 0,
+     "frames": 23,
+     "columns": 5,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -131,
+    "y": -119
+   }
+  },
+  {
+   "name": "whole-with-sprite",
+   "title": "the whole effect with the sprite in it",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 24,
+   "frame": {
+    "w": 278,
+    "h": 197
+   },
+   "sheets": [
+    {
+     "file": "whole-with-sprite.png",
+     "first_frame": 0,
+     "frames": 24,
+     "columns": 5,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -131,
+    "y": -147
+   }
+  },
+  {
+   "name": "behind",
+   "title": "everything behind the sprite",
+   "depth": "behind",
+   "loop": false,
+   "start_frame": 12,
+   "frames": 10,
+   "frame": {
+    "w": 262,
+    "h": 100
+   },
+   "sheets": [
+    {
+     "file": "behind.png",
+     "first_frame": 0,
+     "frames": 10,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -131,
+    "y": -50
+   }
+  },
+  {
+   "name": "front",
+   "title": "everything in front of the sprite",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 23,
+   "frame": {
+    "w": 260,
+    "h": 151
+   },
+   "sheets": [
+    {
+     "file": "front.png",
+     "first_frame": 0,
+     "frames": 23,
+     "columns": 5,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -113,
+    "y": -119
+   }
+  },
+  {
+   "name": "part-anticipation",
+   "title": "the flash burst part",
+   "role": "cast",
+   "part": "flash_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 5,
+   "frame": {
+    "w": 60,
+    "h": 59
+   },
+   "sheets": [
+    {
+     "file": "part-anticipation.png",
+     "first_frame": 0,
+     "frames": 5,
+     "columns": 3,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -29,
+    "y": -103
+   }
+  },
+  {
+   "name": "part-slash",
+   "title": "the dash slash part",
+   "role": "projectile",
+   "part": "dash_slash",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 5,
+   "frames": 7,
+   "frame": {
+    "w": 260,
+    "h": 61
+   },
+   "sheets": [
+    {
+     "file": "part-slash.png",
+     "first_frame": 0,
+     "frames": 7,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -113,
+    "y": -112
+   }
+  },
+  {
+   "name": "part-impact",
+   "title": "the flash burst part",
+   "role": "impact",
+   "part": "flash_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 11,
+   "frames": 3,
+   "frame": {
+    "w": 85,
+    "h": 85
+   },
+   "sheets": [
+    {
+     "file": "part-impact.png",
+     "first_frame": 0,
+     "frames": 3,
+     "columns": 2,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -41,
+    "y": -119
+   }
+  },
+  {
+   "name": "part-sparks",
+   "title": "the spark burst part",
+   "role": "impact",
+   "part": "spark_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 11,
+   "frames": 10,
+   "frame": {
+    "w": 94,
+    "h": 48
+   },
+   "sheets": [
+    {
+     "file": "part-sparks.png",
+     "first_frame": 0,
+     "frames": 10,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -48,
+    "y": -96
+   }
+  },
+  {
+   "name": "part-shock",
+   "title": "the shockwave ring part",
+   "role": "impact",
+   "part": "shockwave_ring",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 12,
+   "frames": 10,
+   "frame": {
+    "w": 262,
+    "h": 100
+   },
+   "sheets": [
+    {
+     "file": "part-shock.png",
+     "first_frame": 0,
+     "frames": 10,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -131,
+    "y": -50
+   }
+  },
+  {
+   "name": "part-wind",
+   "title": "the speed lines part",
+   "role": "linger",
+   "part": "speed_lines",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 12,
+   "frames": 11,
+   "frame": {
+    "w": 80,
+    "h": 27
+   },
+   "sheets": [
+    {
+     "file": "part-wind.png",
+     "first_frame": 0,
+     "frames": 11,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -58,
+    "y": -90
+   }
+  }
+ ]
+}

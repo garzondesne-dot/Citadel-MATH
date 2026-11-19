@@ -1,0 +1,308 @@
+{
+ "app": "PixelLab VFX Creator",
+ "name": "awk-mathboy",
+ "fps": 20,
+ "frame_ms": 50,
+ "frames": 30,
+ "loop": false,
+ "canvas": {
+  "w": 242,
+  "h": 198
+ },
+ "anchor": {
+  "kind": "feet",
+  "x": 121,
+  "y": 150
+ },
+ "clips": [
+  {
+   "name": "whole",
+   "title": "the whole effect, no sprite",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 30,
+   "frame": {
+    "w": 236,
+    "h": 189
+   },
+   "sheets": [
+    {
+     "file": "whole.png",
+     "first_frame": 0,
+     "frames": 30,
+     "columns": 6,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -118,
+    "y": -144
+   }
+  },
+  {
+   "name": "whole-with-sprite",
+   "title": "the whole effect with the sprite in it",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 30,
+   "frame": {
+    "w": 236,
+    "h": 192
+   },
+   "sheets": [
+    {
+     "file": "whole-with-sprite.png",
+     "first_frame": 0,
+     "frames": 30,
+     "columns": 6,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -118,
+    "y": -147
+   }
+  },
+  {
+   "name": "behind",
+   "title": "everything behind the sprite",
+   "depth": "behind",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 26,
+   "frame": {
+    "w": 236,
+    "h": 90
+   },
+   "sheets": [
+    {
+     "file": "behind.png",
+     "first_frame": 0,
+     "frames": 26,
+     "columns": 6,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -118,
+    "y": -45
+   }
+  },
+  {
+   "name": "front",
+   "title": "everything in front of the sprite",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 9,
+   "frames": 21,
+   "frame": {
+    "w": 135,
+    "h": 166
+   },
+   "sheets": [
+    {
+     "file": "front.png",
+     "first_frame": 0,
+     "frames": 21,
+     "columns": 5,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -66,
+    "y": -144
+   }
+  },
+  {
+   "name": "part-compass",
+   "title": "the rune circle part",
+   "role": "cast",
+   "part": "rune_circle",
+   "depth": "behind",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 25,
+   "frame": {
+    "w": 236,
+    "h": 90
+   },
+   "sheets": [
+    {
+     "file": "part-compass.png",
+     "first_frame": 0,
+     "frames": 25,
+     "columns": 5,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -118,
+    "y": -45
+   }
+  },
+  {
+   "name": "part-twinkle",
+   "title": "the twinkles part",
+   "role": "linger",
+   "part": "twinkles",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 9,
+   "frames": 21,
+   "frame": {
+    "w": 34,
+    "h": 55
+   },
+   "sheets": [
+    {
+     "file": "part-twinkle.png",
+     "first_frame": 0,
+     "frames": 21,
+     "columns": 5,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -10,
+    "y": -101
+   }
+  },
+  {
+   "name": "part-strike",
+   "title": "the sky beam part",
+   "role": "impact",
+   "part": "sky_beam",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 14,
+   "frames": 12,
+   "frame": {
+    "w": 90,
+    "h": 162
+   },
+   "sheets": [
+    {
+     "file": "part-strike.png",
+     "first_frame": 0,
+     "frames": 12,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -45,
+    "y": -144
+   }
+  },
+  {
+   "name": "part-flash",
+   "title": "the flash burst part",
+   "role": "impact",
+   "part": "flash_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 15,
+   "frames": 5,
+   "frame": {
+    "w": 68,
+    "h": 67
+   },
+   "sheets": [
+    {
+     "file": "part-flash.png",
+     "first_frame": 0,
+     "frames": 5,
+     "columns": 3,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -33,
+    "y": -108
+   }
+  },
+  {
+   "name": "part-sparks",
+   "title": "the sparks shower part",
+   "role": "impact",
+   "part": "sparks_shower",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 15,
+   "frames": 12,
+   "frame": {
+    "w": 48,
+    "h": 46
+   },
+   "sheets": [
+    {
+     "file": "part-sparks.png",
+     "first_frame": 0,
+     "frames": 12,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -5,
+    "y": -96
+   }
+  },
+  {
+   "name": "part-shock",
+   "title": "the shockwave ring part",
+   "role": "impact",
+   "part": "shockwave_ring",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 16,
+   "frames": 10,
+   "frame": {
+    "w": 176,
+    "h": 68
+   },
+   "sheets": [
+    {
+     "file": "part-shock.png",
+     "first_frame": 0,
+     "frames": 10,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -88,
+    "y": -34
+   }
+  },
+  {
+   "name": "part-debris",
+   "title": "the debris burst part",
+   "role": "impact",
+   "part": "debris_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 16,
+   "frames": 12,
+   "frame": {
+    "w": 47,
+    "h": 39
+   },
+   "sheets": [
+    {
+     "file": "part-debris.png",
+     "first_frame": 0,
+     "frames": 12,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -18,
+    "y": -87
+   }
+  }
+ ]
+}

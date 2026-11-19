@@ -1,0 +1,582 @@
+{
+ "app": "PixelLab VFX Creator",
+ "name": "awk-elemental",
+ "fps": 16,
+ "frame_ms": 63,
+ "frames": 24,
+ "loop": false,
+ "canvas": {
+  "w": 251,
+  "h": 262
+ },
+ "anchor": {
+  "kind": "feet",
+  "x": 139,
+  "y": 186
+ },
+ "clips": [
+  {
+   "name": "whole",
+   "title": "the whole effect, no sprite",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 24,
+   "frame": {
+    "w": 246,
+    "h": 256
+   },
+   "sheets": [
+    {
+     "file": "whole.png",
+     "first_frame": 0,
+     "frames": 24,
+     "columns": 5,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -136,
+    "y": -183
+   }
+  },
+  {
+   "name": "whole-with-sprite",
+   "title": "the whole effect with the sprite in it",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 24,
+   "frame": {
+    "w": 246,
+    "h": 256
+   },
+   "sheets": [
+    {
+     "file": "whole-with-sprite.png",
+     "first_frame": 0,
+     "frames": 24,
+     "columns": 5,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -136,
+    "y": -183
+   }
+  },
+  {
+   "name": "behind",
+   "title": "everything behind the sprite",
+   "depth": "behind",
+   "loop": false,
+   "start_frame": 13,
+   "frames": 8,
+   "frame": {
+    "w": 219,
+    "h": 218
+   },
+   "sheets": [
+    {
+     "file": "behind.png",
+     "first_frame": 0,
+     "frames": 8,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -109,
+    "y": -176
+   }
+  },
+  {
+   "name": "front",
+   "title": "everything in front of the sprite",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 24,
+   "frame": {
+    "w": 244,
+    "h": 256
+   },
+   "sheets": [
+    {
+     "file": "front.png",
+     "first_frame": 0,
+     "frames": 24,
+     "columns": 5,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -136,
+    "y": -183
+   }
+  },
+  {
+   "name": "part-anticipation",
+   "title": "the flash burst part",
+   "role": "cast",
+   "part": "flash_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 8,
+   "frame": {
+    "w": 68,
+    "h": 68
+   },
+   "sheets": [
+    {
+     "file": "part-anticipation.png",
+     "first_frame": 0,
+     "frames": 8,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -33,
+    "y": -109
+   }
+  },
+  {
+   "name": "part-orb_fire",
+   "title": "the magic orb part, in place",
+   "role": "projectile",
+   "part": "magic_orb",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 1,
+   "frames": 14,
+   "frame": {
+    "w": 52,
+    "h": 26
+   },
+   "sheets": [
+    {
+     "file": "part-orb_fire.png",
+     "first_frame": 0,
+     "frames": 14,
+     "columns": 4,
+     "rows": 4
+    }
+   ],
+   "offset": {
+    "x": -139,
+    "y": -146
+   },
+   "moves": [
+    {
+     "x": 0,
+     "y": 0
+    },
+    {
+     "x": 8.21,
+     "y": 4.93
+    },
+    {
+     "x": 17.87,
+     "y": 10.72
+    },
+    {
+     "x": 27.54,
+     "y": 16.52
+    },
+    {
+     "x": 37.2,
+     "y": 22.32
+    },
+    {
+     "x": 46.86,
+     "y": 28.12
+    },
+    {
+     "x": 56.52,
+     "y": 33.91
+    },
+    {
+     "x": 66.18,
+     "y": 39.71
+    },
+    {
+     "x": 75.85,
+     "y": 45.51
+    },
+    {
+     "x": 85.51,
+     "y": 51.3
+    },
+    {
+     "x": 95.17,
+     "y": 57.1
+    },
+    {
+     "x": 100,
+     "y": 60
+    },
+    {
+     "x": 100,
+     "y": 60
+    },
+    {
+     "x": 100,
+     "y": 60
+    }
+   ]
+  },
+  {
+   "name": "part-orb_water",
+   "title": "the magic orb part, in place",
+   "role": "projectile",
+   "part": "magic_orb",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 2,
+   "frames": 13,
+   "frame": {
+    "w": 56,
+    "h": 30
+   },
+   "sheets": [
+    {
+     "file": "part-orb_water.png",
+     "first_frame": 0,
+     "frames": 13,
+     "columns": 4,
+     "rows": 4
+    }
+   ],
+   "offset": {
+    "x": 56,
+    "y": -138
+   },
+   "moves": [
+    {
+     "x": -1.66,
+     "y": 0.83
+    },
+    {
+     "x": -12.01,
+     "y": 6
+    },
+    {
+     "x": -22.36,
+     "y": 11.18
+    },
+    {
+     "x": -32.71,
+     "y": 16.36
+    },
+    {
+     "x": -43.06,
+     "y": 21.53
+    },
+    {
+     "x": -53.42,
+     "y": 26.71
+    },
+    {
+     "x": -63.77,
+     "y": 31.88
+    },
+    {
+     "x": -74.12,
+     "y": 37.06
+    },
+    {
+     "x": -84.47,
+     "y": 42.24
+    },
+    {
+     "x": -94.82,
+     "y": 47.41
+    },
+    {
+     "x": -100,
+     "y": 50
+    },
+    {
+     "x": -100,
+     "y": 50
+    },
+    {
+     "x": -100,
+     "y": 50
+    }
+   ]
+  },
+  {
+   "name": "part-orb_wind",
+   "title": "the magic orb part, in place",
+   "role": "projectile",
+   "part": "magic_orb",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 2,
+   "frames": 13,
+   "frame": {
+    "w": 70,
+    "h": 24
+   },
+   "sheets": [
+    {
+     "file": "part-orb_wind.png",
+     "first_frame": 0,
+     "frames": 13,
+     "columns": 4,
+     "rows": 4
+    }
+   ],
+   "offset": {
+    "x": -57,
+    "y": -185
+   },
+   "moves": [
+    {
+     "x": 0,
+     "y": 0
+    },
+    {
+     "x": 0,
+     "y": 4.18
+    },
+    {
+     "x": 0,
+     "y": 10.16
+    },
+    {
+     "x": 0,
+     "y": 16.14
+    },
+    {
+     "x": 0,
+     "y": 22.12
+    },
+    {
+     "x": 0,
+     "y": 28.1
+    },
+    {
+     "x": 0,
+     "y": 34.08
+    },
+    {
+     "x": 0,
+     "y": 40.05
+    },
+    {
+     "x": 0,
+     "y": 46.03
+    },
+    {
+     "x": 0,
+     "y": 52.01
+    },
+    {
+     "x": 0,
+     "y": 55
+    },
+    {
+     "x": 0,
+     "y": 55
+    },
+    {
+     "x": 0,
+     "y": 55
+    }
+   ]
+  },
+  {
+   "name": "part-wind_swirl",
+   "title": "the wind gusts part",
+   "role": "projectile",
+   "part": "wind_gusts",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 7,
+   "frames": 11,
+   "frame": {
+    "w": 166,
+    "h": 83
+   },
+   "sheets": [
+    {
+     "file": "part-wind_swirl.png",
+     "first_frame": 0,
+     "frames": 11,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -84,
+    "y": -111
+   }
+  },
+  {
+   "name": "part-impact_fire",
+   "title": "the fire blast part",
+   "role": "impact",
+   "part": "fire_blast",
+   "depth": "behind",
+   "loop": false,
+   "start_frame": 13,
+   "frames": 7,
+   "frame": {
+    "w": 213,
+    "h": 205
+   },
+   "sheets": [
+    {
+     "file": "part-impact_fire.png",
+     "first_frame": 0,
+     "frames": 7,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -103,
+    "y": -176
+   }
+  },
+  {
+   "name": "part-impact_water",
+   "title": "the water splash part",
+   "role": "impact",
+   "part": "water_splash",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 13,
+   "frames": 8,
+   "frame": {
+    "w": 128,
+    "h": 94
+   },
+   "sheets": [
+    {
+     "file": "part-impact_water.png",
+     "first_frame": 0,
+     "frames": 8,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -66,
+    "y": -49
+   }
+  },
+  {
+   "name": "part-impact_ring",
+   "title": "the shockwave ring part",
+   "role": "impact",
+   "part": "shockwave_ring",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 13,
+   "frames": 8,
+   "frame": {
+    "w": 218,
+    "h": 84
+   },
+   "sheets": [
+    {
+     "file": "part-impact_ring.png",
+     "first_frame": 0,
+     "frames": 8,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -109,
+    "y": -42
+   }
+  },
+  {
+   "name": "part-rainbow_burst",
+   "title": "the star burst part",
+   "role": "impact",
+   "part": "star_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 13,
+   "frames": 10,
+   "frame": {
+    "w": 190,
+    "h": 231
+   },
+   "sheets": [
+    {
+     "file": "part-rainbow_burst.png",
+     "first_frame": 0,
+     "frames": 10,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -90,
+    "y": -158
+   }
+  },
+  {
+   "name": "part-sparkles",
+   "title": "the sparks shower part",
+   "role": "impact",
+   "part": "sparks_shower",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 13,
+   "frames": 9,
+   "frame": {
+    "w": 116,
+    "h": 107
+   },
+   "sheets": [
+    {
+     "file": "part-sparkles.png",
+     "first_frame": 0,
+     "frames": 9,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -13,
+    "y": -128
+   }
+  },
+  {
+   "name": "part-aftermath",
+   "title": "the twinkles part",
+   "role": "linger",
+   "part": "twinkles",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 14,
+   "frames": 10,
+   "frame": {
+    "w": 34,
+    "h": 55
+   },
+   "sheets": [
+    {
+     "file": "part-aftermath.png",
+     "first_frame": 0,
+     "frames": 10,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -10,
+    "y": -101
+   }
+  }
+ ]
+}

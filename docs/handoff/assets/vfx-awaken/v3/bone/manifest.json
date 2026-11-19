@@ -1,0 +1,356 @@
+{
+ "app": "PixelLab VFX Creator",
+ "name": "awk-bone",
+ "fps": 14,
+ "frame_ms": 71,
+ "frames": 22,
+ "loop": false,
+ "canvas": {
+  "w": 290,
+  "h": 208
+ },
+ "anchor": {
+  "kind": "feet",
+  "x": 145,
+  "y": 150
+ },
+ "clips": [
+  {
+   "name": "whole",
+   "title": "the whole effect, no sprite",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 22,
+   "frame": {
+    "w": 284,
+    "h": 204
+   },
+   "sheets": [
+    {
+     "file": "whole.png",
+     "first_frame": 0,
+     "frames": 22,
+     "columns": 5,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -142,
+    "y": -149
+   }
+  },
+  {
+   "name": "whole-with-sprite",
+   "title": "the whole effect with the sprite in it",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 22,
+   "frame": {
+    "w": 284,
+    "h": 204
+   },
+   "sheets": [
+    {
+     "file": "whole-with-sprite.png",
+     "first_frame": 0,
+     "frames": 22,
+     "columns": 5,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -142,
+    "y": -149
+   }
+  },
+  {
+   "name": "behind",
+   "title": "everything behind the sprite",
+   "depth": "behind",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 18,
+   "frame": {
+    "w": 284,
+    "h": 171
+   },
+   "sheets": [
+    {
+     "file": "behind.png",
+     "first_frame": 0,
+     "frames": 18,
+     "columns": 5,
+     "rows": 4
+    }
+   ],
+   "offset": {
+    "x": -142,
+    "y": -116
+   }
+  },
+  {
+   "name": "front",
+   "title": "everything in front of the sprite",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 1,
+   "frames": 21,
+   "frame": {
+    "w": 219,
+    "h": 183
+   },
+   "sheets": [
+    {
+     "file": "front.png",
+     "first_frame": 0,
+     "frames": 21,
+     "columns": 5,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -105,
+    "y": -149
+   }
+  },
+  {
+   "name": "part-spawn_rift",
+   "title": "the spawn rift part",
+   "role": "cast",
+   "part": "spawn_rift",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 8,
+   "frame": {
+    "w": 104,
+    "h": 136
+   },
+   "sheets": [
+    {
+     "file": "part-spawn_rift.png",
+     "first_frame": 0,
+     "frames": 8,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -52,
+    "y": -116
+   }
+  },
+  {
+   "name": "part-portal",
+   "title": "the portal part",
+   "depth": "behind",
+   "loop": false,
+   "start_frame": 1,
+   "frames": 11,
+   "frame": {
+    "w": 38,
+    "h": 12
+   },
+   "sheets": [
+    {
+     "file": "part-portal.png",
+     "first_frame": 0,
+     "frames": 11,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -19,
+    "y": -6
+   }
+  },
+  {
+   "name": "part-skull_parade",
+   "title": "the skull_parade part",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 2,
+   "frames": 12,
+   "frame": {
+    "w": 72,
+    "h": 103
+   },
+   "sheets": [
+    {
+     "file": "part-skull_parade.png",
+     "first_frame": 0,
+     "frames": 12,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -37,
+    "y": -77
+   }
+  },
+  {
+   "name": "part-hands",
+   "title": "the hands part",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 2,
+   "frames": 16,
+   "frame": {
+    "w": 42,
+    "h": 43
+   },
+   "sheets": [
+    {
+     "file": "part-hands.png",
+     "first_frame": 0,
+     "frames": 16,
+     "columns": 4,
+     "rows": 4
+    }
+   ],
+   "offset": {
+    "x": -21,
+    "y": -16
+   }
+  },
+  {
+   "name": "part-ghostfire",
+   "title": "the ember rise part",
+   "role": "linger",
+   "part": "ember_rise",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 7,
+   "frames": 15,
+   "frame": {
+    "w": 100,
+    "h": 156
+   },
+   "sheets": [
+    {
+     "file": "part-ghostfire.png",
+     "first_frame": 0,
+     "frames": 15,
+     "columns": 4,
+     "rows": 4
+    }
+   ],
+   "offset": {
+    "x": -46,
+    "y": -148
+   }
+  },
+  {
+   "name": "part-hit_flash",
+   "title": "the flash burst part",
+   "role": "impact",
+   "part": "flash_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 9,
+   "frames": 5,
+   "frame": {
+    "w": 111,
+    "h": 112
+   },
+   "sheets": [
+    {
+     "file": "part-hit_flash.png",
+     "first_frame": 0,
+     "frames": 5,
+     "columns": 3,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -55,
+    "y": -133
+   }
+  },
+  {
+   "name": "part-hit_ring",
+   "title": "the shockwave ring part",
+   "role": "impact",
+   "part": "shockwave_ring",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 9,
+   "frames": 9,
+   "frame": {
+    "w": 284,
+    "h": 110
+   },
+   "sheets": [
+    {
+     "file": "part-hit_ring.png",
+     "first_frame": 0,
+     "frames": 9,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -142,
+    "y": -55
+   }
+  },
+  {
+   "name": "part-bone_frags",
+   "title": "the debris burst part",
+   "role": "impact",
+   "part": "debris_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 9,
+   "frames": 11,
+   "frame": {
+    "w": 106,
+    "h": 84
+   },
+   "sheets": [
+    {
+     "file": "part-bone_frags.png",
+     "first_frame": 0,
+     "frames": 11,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -42,
+    "y": -102
+   }
+  },
+  {
+   "name": "part-sparkles",
+   "title": "the twinkles part",
+   "role": "ambient",
+   "part": "twinkles",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 9,
+   "frames": 13,
+   "frame": {
+    "w": 89,
+    "h": 148
+   },
+   "sheets": [
+    {
+     "file": "part-sparkles.png",
+     "first_frame": 0,
+     "frames": 13,
+     "columns": 4,
+     "rows": 4
+    }
+   ],
+   "offset": {
+    "x": -28,
+    "y": -149
+   }
+  }
+ ]
+}

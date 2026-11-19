@@ -1,0 +1,445 @@
+{
+ "app": "PixelLab VFX Creator",
+ "name": "awk-crossbow",
+ "fps": 16,
+ "frame_ms": 63,
+ "frames": 24,
+ "loop": false,
+ "canvas": {
+  "w": 242,
+  "h": 210
+ },
+ "anchor": {
+  "kind": "feet",
+  "x": 124,
+  "y": 150
+ },
+ "clips": [
+  {
+   "name": "whole",
+   "title": "the whole effect, no sprite",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 23,
+   "frame": {
+    "w": 236,
+    "h": 172
+   },
+   "sheets": [
+    {
+     "file": "whole.png",
+     "first_frame": 0,
+     "frames": 23,
+     "columns": 5,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -121,
+    "y": -115
+   }
+  },
+  {
+   "name": "whole-with-sprite",
+   "title": "the whole effect with the sprite in it",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 24,
+   "frame": {
+    "w": 236,
+    "h": 204
+   },
+   "sheets": [
+    {
+     "file": "whole-with-sprite.png",
+     "first_frame": 0,
+     "frames": 24,
+     "columns": 5,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -121,
+    "y": -147
+   }
+  },
+  {
+   "name": "behind",
+   "title": "everything behind the sprite",
+   "depth": "behind",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 22,
+   "frame": {
+    "w": 212,
+    "h": 149
+   },
+   "sheets": [
+    {
+     "file": "behind.png",
+     "first_frame": 0,
+     "frames": 22,
+     "columns": 5,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -117,
+    "y": -92
+   }
+  },
+  {
+   "name": "front",
+   "title": "everything in front of the sprite",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 23,
+   "frame": {
+    "w": 236,
+    "h": 151
+   },
+   "sheets": [
+    {
+     "file": "front.png",
+     "first_frame": 0,
+     "frames": 23,
+     "columns": 5,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -121,
+    "y": -115
+   }
+  },
+  {
+   "name": "part-reticle",
+   "title": "the lock on part",
+   "role": "cast",
+   "part": "lock_on",
+   "depth": "behind",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 10,
+   "frame": {
+    "w": 174,
+    "h": 114
+   },
+   "sheets": [
+    {
+     "file": "part-reticle.png",
+     "first_frame": 0,
+     "frames": 10,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -87,
+    "y": -57
+   }
+  },
+  {
+   "name": "part-anticipation",
+   "title": "the charge up part",
+   "role": "cast",
+   "part": "charge_up",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 8,
+   "frame": {
+    "w": 73,
+    "h": 73
+   },
+   "sheets": [
+    {
+     "file": "part-anticipation.png",
+     "first_frame": 0,
+     "frames": 8,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -36,
+    "y": -110
+   }
+  },
+  {
+   "name": "part-bolt",
+   "title": "the bolt part, in place",
+   "role": "projectile",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 5,
+   "frames": 10,
+   "frame": {
+    "w": 17,
+    "h": 5
+   },
+   "sheets": [
+    {
+     "file": "part-bolt.png",
+     "first_frame": 0,
+     "frames": 10,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -121,
+    "y": -90
+   },
+   "moves": [
+    {
+     "x": 0,
+     "y": 0
+    },
+    {
+     "x": 11.83,
+     "y": 1.94
+    },
+    {
+     "x": 24.42,
+     "y": 4
+    },
+    {
+     "x": 37,
+     "y": 6.05
+    },
+    {
+     "x": 49.59,
+     "y": 8.11
+    },
+    {
+     "x": 62.17,
+     "y": 10.17
+    },
+    {
+     "x": 74.76,
+     "y": 12.23
+    },
+    {
+     "x": 87.35,
+     "y": 14.29
+    },
+    {
+     "x": 99.93,
+     "y": 16.35
+    },
+    {
+     "x": 110,
+     "y": 18
+    }
+   ]
+  },
+  {
+   "name": "part-comet_trail",
+   "title": "the comet trail part, in place",
+   "role": "projectile",
+   "part": "comet_trail",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 5,
+   "frames": 10,
+   "frame": {
+    "w": 122,
+    "h": 97
+   },
+   "sheets": [
+    {
+     "file": "part-comet_trail.png",
+     "first_frame": 0,
+     "frames": 10,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -117,
+    "y": -92
+   },
+   "moves": [
+    {
+     "x": 0,
+     "y": 0
+    },
+    {
+     "x": 11.83,
+     "y": 1.94
+    },
+    {
+     "x": 24.42,
+     "y": 4
+    },
+    {
+     "x": 37,
+     "y": 6.05
+    },
+    {
+     "x": 49.59,
+     "y": 8.11
+    },
+    {
+     "x": 62.17,
+     "y": 10.17
+    },
+    {
+     "x": 74.76,
+     "y": 12.23
+    },
+    {
+     "x": 87.35,
+     "y": 14.29
+    },
+    {
+     "x": 99.93,
+     "y": 16.35
+    },
+    {
+     "x": 110,
+     "y": 18
+    }
+   ]
+  },
+  {
+   "name": "part-impact_flash",
+   "title": "the crit hit part",
+   "role": "impact",
+   "part": "crit_hit",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 14,
+   "frames": 4,
+   "frame": {
+    "w": 96,
+    "h": 97
+   },
+   "sheets": [
+    {
+     "file": "part-impact_flash.png",
+     "first_frame": 0,
+     "frames": 4,
+     "columns": 2,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -51,
+    "y": -115
+   }
+  },
+  {
+   "name": "part-wind_ring",
+   "title": "the shockwave ring part",
+   "role": "impact",
+   "part": "shockwave_ring",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 14,
+   "frames": 8,
+   "frame": {
+    "w": 190,
+    "h": 106
+   },
+   "sheets": [
+    {
+     "file": "part-wind_ring.png",
+     "first_frame": 0,
+     "frames": 8,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -95,
+    "y": -53
+   }
+  },
+  {
+   "name": "part-debris",
+   "title": "the debris burst part",
+   "role": "impact",
+   "part": "debris_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 14,
+   "frames": 8,
+   "frame": {
+    "w": 47,
+    "h": 37
+   },
+   "sheets": [
+    {
+     "file": "part-debris.png",
+     "first_frame": 0,
+     "frames": 8,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -18,
+    "y": -76
+   }
+  },
+  {
+   "name": "part-stars",
+   "title": "the star burst part",
+   "role": "impact",
+   "part": "star_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 14,
+   "frames": 7,
+   "frame": {
+    "w": 58,
+    "h": 70
+   },
+   "sheets": [
+    {
+     "file": "part-stars.png",
+     "first_frame": 0,
+     "frames": 7,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -29,
+    "y": -100
+   }
+  },
+  {
+   "name": "part-aftermath",
+   "title": "the smoke puff part",
+   "role": "linger",
+   "part": "smoke_puff",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 17,
+   "frames": 6,
+   "frame": {
+    "w": 39,
+    "h": 37
+   },
+   "sheets": [
+    {
+     "file": "part-aftermath.png",
+     "first_frame": 0,
+     "frames": 6,
+     "columns": 3,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -21,
+    "y": -40
+   }
+  }
+ ]
+}

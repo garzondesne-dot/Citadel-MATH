@@ -1,0 +1,306 @@
+{
+ "app": "PixelLab VFX Creator",
+ "name": "awk-merchant",
+ "fps": 16,
+ "frame_ms": 63,
+ "frames": 24,
+ "loop": false,
+ "canvas": {
+  "w": 212,
+  "h": 342
+ },
+ "anchor": {
+  "kind": "feet",
+  "x": 106,
+  "y": 305
+ },
+ "clips": [
+  {
+   "name": "whole",
+   "title": "the whole effect, no sprite",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 24,
+   "frame": {
+    "w": 206,
+    "h": 336
+   },
+   "sheets": [
+    {
+     "file": "whole.png",
+     "first_frame": 0,
+     "frames": 24,
+     "columns": 5,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -103,
+    "y": -302
+   }
+  },
+  {
+   "name": "whole-with-sprite",
+   "title": "the whole effect with the sprite in it",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 24,
+   "frame": {
+    "w": 206,
+    "h": 336
+   },
+   "sheets": [
+    {
+     "file": "whole-with-sprite.png",
+     "first_frame": 0,
+     "frames": 24,
+     "columns": 5,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -103,
+    "y": -302
+   }
+  },
+  {
+   "name": "behind",
+   "title": "everything behind the sprite",
+   "depth": "behind",
+   "loop": false,
+   "start_frame": 12,
+   "frames": 9,
+   "frame": {
+    "w": 176,
+    "h": 68
+   },
+   "sheets": [
+    {
+     "file": "behind.png",
+     "first_frame": 0,
+     "frames": 9,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -88,
+    "y": -34
+   }
+  },
+  {
+   "name": "front",
+   "title": "everything in front of the sprite",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 24,
+   "frame": {
+    "w": 206,
+    "h": 324
+   },
+   "sheets": [
+    {
+     "file": "front.png",
+     "first_frame": 0,
+     "frames": 24,
+     "columns": 5,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -103,
+    "y": -302
+   }
+  },
+  {
+   "name": "part-anticip",
+   "title": "the flash burst part",
+   "role": "cast",
+   "part": "flash_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 7,
+   "frame": {
+    "w": 68,
+    "h": 69
+   },
+   "sheets": [
+    {
+     "file": "part-anticip.png",
+     "first_frame": 0,
+     "frames": 7,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -33,
+    "y": -109
+   }
+  },
+  {
+   "name": "part-coins",
+   "title": "the coin burst part",
+   "role": "projectile",
+   "part": "coin_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 3,
+   "frames": 17,
+   "frame": {
+    "w": 103,
+    "h": 107
+   },
+   "sheets": [
+    {
+     "file": "part-coins.png",
+     "first_frame": 0,
+     "frames": 17,
+     "columns": 5,
+     "rows": 4
+    }
+   ],
+   "offset": {
+    "x": -44,
+    "y": -115
+   }
+  },
+  {
+   "name": "part-rest",
+   "title": "the layers in no part",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 5,
+   "frames": 9,
+   "frame": {
+    "w": 206,
+    "h": 225
+   },
+   "sheets": [
+    {
+     "file": "part-rest.png",
+     "first_frame": 0,
+     "frames": 9,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -103,
+    "y": -302
+   }
+  },
+  {
+   "name": "part-impact",
+   "title": "the crit hit part",
+   "role": "impact",
+   "part": "crit_hit",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 12,
+   "frames": 5,
+   "frame": {
+    "w": 97,
+    "h": 102
+   },
+   "sheets": [
+    {
+     "file": "part-impact.png",
+     "first_frame": 0,
+     "frames": 5,
+     "columns": 3,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -52,
+    "y": -115
+   }
+  },
+  {
+   "name": "part-ring",
+   "title": "the shockwave ring part",
+   "role": "impact",
+   "part": "shockwave_ring",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 12,
+   "frames": 9,
+   "frame": {
+    "w": 176,
+    "h": 68
+   },
+   "sheets": [
+    {
+     "file": "part-ring.png",
+     "first_frame": 0,
+     "frames": 9,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -88,
+    "y": -34
+   }
+  },
+  {
+   "name": "part-debris",
+   "title": "the debris burst part",
+   "role": "impact",
+   "part": "debris_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 12,
+   "frames": 9,
+   "frame": {
+    "w": 67,
+    "h": 53
+   },
+   "sheets": [
+    {
+     "file": "part-debris.png",
+     "first_frame": 0,
+     "frames": 9,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -26,
+    "y": -92
+   }
+  },
+  {
+   "name": "part-sparkles",
+   "title": "the twinkles part",
+   "role": "linger",
+   "part": "twinkles",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 13,
+   "frames": 11,
+   "frame": {
+    "w": 47,
+    "h": 77
+   },
+   "sheets": [
+    {
+     "file": "part-sparkles.png",
+     "first_frame": 0,
+     "frames": 11,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -14,
+    "y": -113
+   }
+  }
+ ]
+}

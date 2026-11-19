@@ -1,0 +1,306 @@
+{
+ "app": "PixelLab VFX Creator",
+ "name": "awk-priest",
+ "fps": 16,
+ "frame_ms": 63,
+ "frames": 24,
+ "loop": false,
+ "canvas": {
+  "w": 224,
+  "h": 253
+ },
+ "anchor": {
+  "kind": "feet",
+  "x": 112,
+  "y": 208
+ },
+ "clips": [
+  {
+   "name": "whole",
+   "title": "the whole effect, no sprite",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 24,
+   "frame": {
+    "w": 218,
+    "h": 247
+   },
+   "sheets": [
+    {
+     "file": "whole.png",
+     "first_frame": 0,
+     "frames": 24,
+     "columns": 5,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -109,
+    "y": -205
+   }
+  },
+  {
+   "name": "whole-with-sprite",
+   "title": "the whole effect with the sprite in it",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 24,
+   "frame": {
+    "w": 218,
+    "h": 247
+   },
+   "sheets": [
+    {
+     "file": "whole-with-sprite.png",
+     "first_frame": 0,
+     "frames": 24,
+     "columns": 5,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -109,
+    "y": -205
+   }
+  },
+  {
+   "name": "behind",
+   "title": "everything behind the sprite",
+   "depth": "behind",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 19,
+   "frame": {
+    "w": 218,
+    "h": 247
+   },
+   "sheets": [
+    {
+     "file": "behind.png",
+     "first_frame": 0,
+     "frames": 19,
+     "columns": 5,
+     "rows": 4
+    }
+   ],
+   "offset": {
+    "x": -109,
+    "y": -205
+   }
+  },
+  {
+   "name": "front",
+   "title": "everything in front of the sprite",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 24,
+   "frame": {
+    "w": 181,
+    "h": 194
+   },
+   "sheets": [
+    {
+     "file": "front.png",
+     "first_frame": 0,
+     "frames": 24,
+     "columns": 5,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -88,
+    "y": -167
+   }
+  },
+  {
+   "name": "part-rest",
+   "title": "the layers in no part",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 24,
+   "frame": {
+    "w": 181,
+    "h": 223
+   },
+   "sheets": [
+    {
+     "file": "part-rest.png",
+     "first_frame": 0,
+     "frames": 24,
+     "columns": 5,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -88,
+    "y": -205
+   }
+  },
+  {
+   "name": "part-lantern_beam",
+   "title": "the sky beam part",
+   "role": "cast",
+   "part": "sky_beam",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 11,
+   "frame": {
+    "w": 104,
+    "h": 184
+   },
+   "sheets": [
+    {
+     "file": "part-lantern_beam.png",
+     "first_frame": 0,
+     "frames": 11,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -52,
+    "y": -164
+   }
+  },
+  {
+   "name": "part-impact_flash",
+   "title": "the flash burst part",
+   "role": "impact",
+   "part": "flash_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 7,
+   "frames": 7,
+   "frame": {
+    "w": 94,
+    "h": 98
+   },
+   "sheets": [
+    {
+     "file": "part-impact_flash.png",
+     "first_frame": 0,
+     "frames": 7,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -46,
+    "y": -127
+   }
+  },
+  {
+   "name": "part-gold_ring",
+   "title": "the shockwave ring part",
+   "role": "impact",
+   "part": "shockwave_ring",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 8,
+   "frames": 11,
+   "frame": {
+    "w": 218,
+    "h": 84
+   },
+   "sheets": [
+    {
+     "file": "part-gold_ring.png",
+     "first_frame": 0,
+     "frames": 11,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -109,
+    "y": -42
+   }
+  },
+  {
+   "name": "part-impact_stars",
+   "title": "the star burst part",
+   "role": "impact",
+   "part": "star_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 8,
+   "frames": 11,
+   "frame": {
+    "w": 89,
+    "h": 114
+   },
+   "sheets": [
+    {
+     "file": "part-impact_stars.png",
+     "first_frame": 0,
+     "frames": 11,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -44,
+    "y": -114
+   }
+  },
+  {
+   "name": "part-heal_sparkles",
+   "title": "the heal plus part",
+   "role": "linger",
+   "part": "heal_plus",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 10,
+   "frames": 12,
+   "frame": {
+    "w": 46,
+    "h": 76
+   },
+   "sheets": [
+    {
+     "file": "part-heal_sparkles.png",
+     "first_frame": 0,
+     "frames": 12,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -23,
+    "y": -126
+   }
+  },
+  {
+   "name": "part-afterglow",
+   "title": "the twinkles part",
+   "role": "linger",
+   "part": "twinkles",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 12,
+   "frames": 12,
+   "frame": {
+    "w": 60,
+    "h": 101
+   },
+   "sheets": [
+    {
+     "file": "part-afterglow.png",
+     "first_frame": 0,
+     "frames": 12,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -18,
+    "y": -126
+   }
+  }
+ ]
+}

@@ -1,0 +1,523 @@
+{
+ "app": "PixelLab VFX Creator",
+ "name": "awk-alchemist",
+ "fps": 24,
+ "frame_ms": 42,
+ "frames": 24,
+ "loop": false,
+ "canvas": {
+  "w": 206,
+  "h": 183
+ },
+ "anchor": {
+  "kind": "feet",
+  "x": 103,
+  "y": 150
+ },
+ "clips": [
+  {
+   "name": "whole",
+   "title": "the whole effect, no sprite",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 23,
+   "frame": {
+    "w": 165,
+    "h": 171
+   },
+   "sheets": [
+    {
+     "file": "whole.png",
+     "first_frame": 0,
+     "frames": 23,
+     "columns": 5,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -88,
+    "y": -141
+   }
+  },
+  {
+   "name": "whole-with-sprite",
+   "title": "the whole effect with the sprite in it",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 24,
+   "frame": {
+    "w": 200,
+    "h": 177
+   },
+   "sheets": [
+    {
+     "file": "whole-with-sprite.png",
+     "first_frame": 0,
+     "frames": 24,
+     "columns": 5,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -100,
+    "y": -147
+   }
+  },
+  {
+   "name": "behind",
+   "title": "everything behind the sprite",
+   "depth": "behind",
+   "loop": false,
+   "start_frame": 11,
+   "frames": 6,
+   "frame": {
+    "w": 100,
+    "h": 40
+   },
+   "sheets": [
+    {
+     "file": "behind.png",
+     "first_frame": 0,
+     "frames": 6,
+     "columns": 3,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -50,
+    "y": -20
+   }
+  },
+  {
+   "name": "front",
+   "title": "everything in front of the sprite",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 23,
+   "frame": {
+    "w": 165,
+    "h": 171
+   },
+   "sheets": [
+    {
+     "file": "front.png",
+     "first_frame": 0,
+     "frames": 23,
+     "columns": 5,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -88,
+    "y": -141
+   }
+  },
+  {
+   "name": "part-anticipation",
+   "title": "the flash burst part",
+   "role": "cast",
+   "part": "flash_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 7,
+   "frame": {
+    "w": 68,
+    "h": 69
+   },
+   "sheets": [
+    {
+     "file": "part-anticipation.png",
+     "first_frame": 0,
+     "frames": 7,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -33,
+    "y": -109
+   }
+  },
+  {
+   "name": "part-potions",
+   "title": "the potions part, in place",
+   "role": "projectile",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 13,
+   "frame": {
+    "w": 10,
+    "h": 10
+   },
+   "sheets": [
+    {
+     "file": "part-potions.png",
+     "first_frame": 0,
+     "frames": 13,
+     "columns": 4,
+     "rows": 4
+    }
+   ],
+   "offset": {
+    "x": -88,
+    "y": -115
+   },
+   "moves": [
+    {
+     "x": 0,
+     "y": 0
+    },
+    {
+     "x": 10.87,
+     "y": -14.13
+    },
+    {
+     "x": 21.74,
+     "y": -22.72
+    },
+    {
+     "x": 32.61,
+     "y": -25.76
+    },
+    {
+     "x": 43.48,
+     "y": -23.26
+    },
+    {
+     "x": 54.35,
+     "y": -15.22
+    },
+    {
+     "x": 65.22,
+     "y": -1.63
+    },
+    {
+     "x": 76.09,
+     "y": 17.5
+    },
+    {
+     "x": 86.96,
+     "y": 42.5
+    },
+    {
+     "x": 97.83,
+     "y": 73.7
+    },
+    {
+     "x": 100,
+     "y": 80
+    },
+    {
+     "x": 100,
+     "y": 80
+    },
+    {
+     "x": 100,
+     "y": 80
+    }
+   ]
+  },
+  {
+   "name": "part-bubbles",
+   "title": "the poison bubbles part",
+   "role": "linger",
+   "part": "poison_bubbles",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 5,
+   "frames": 17,
+   "frame": {
+    "w": 34,
+    "h": 48
+   },
+   "sheets": [
+    {
+     "file": "part-bubbles.png",
+     "first_frame": 0,
+     "frames": 17,
+     "columns": 5,
+     "rows": 4
+    }
+   ],
+   "offset": {
+    "x": -14,
+    "y": -103
+   }
+  },
+  {
+   "name": "part-cha",
+   "title": "the cartoon boom part",
+   "role": "impact",
+   "part": "cartoon_boom",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 5,
+   "frames": 5,
+   "frame": {
+    "w": 36,
+    "h": 39
+   },
+   "sheets": [
+    {
+     "file": "part-cha.png",
+     "first_frame": 0,
+     "frames": 5,
+     "columns": 3,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -51,
+    "y": -64
+   }
+  },
+  {
+   "name": "part-chb",
+   "title": "the cartoon boom part",
+   "role": "impact",
+   "part": "cartoon_boom",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 7,
+   "frames": 5,
+   "frame": {
+    "w": 33,
+    "h": 39
+   },
+   "sheets": [
+    {
+     "file": "part-chb.png",
+     "first_frame": 0,
+     "frames": 5,
+     "columns": 3,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": 15,
+    "y": -70
+   }
+  },
+  {
+   "name": "part-chc",
+   "title": "the cartoon boom part",
+   "role": "impact",
+   "part": "cartoon_boom",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 8,
+   "frames": 5,
+   "frame": {
+    "w": 46,
+    "h": 44
+   },
+   "sheets": [
+    {
+     "file": "part-chc.png",
+     "first_frame": 0,
+     "frames": 5,
+     "columns": 3,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -26,
+    "y": -47
+   }
+  },
+  {
+   "name": "part-cartoon_boom",
+   "title": "the cartoon boom part",
+   "role": "impact",
+   "part": "cartoon_boom",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 9,
+   "frames": 14,
+   "frame": {
+    "w": 62,
+    "h": 59
+   },
+   "sheets": [
+    {
+     "file": "part-cartoon_boom.png",
+     "first_frame": 0,
+     "frames": 14,
+     "columns": 4,
+     "rows": 4
+    }
+   ],
+   "offset": {
+    "x": -11,
+    "y": -66
+   }
+  },
+  {
+   "name": "part-blast",
+   "title": "the cartoon boom part",
+   "role": "impact",
+   "part": "cartoon_boom",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 10,
+   "frames": 8,
+   "frame": {
+    "w": 70,
+    "h": 75
+   },
+   "sheets": [
+    {
+     "file": "part-blast.png",
+     "first_frame": 0,
+     "frames": 8,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -38,
+    "y": -120
+   }
+  },
+  {
+   "name": "part-ring",
+   "title": "the shockwave ring part",
+   "role": "impact",
+   "part": "shockwave_ring",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 10,
+   "frames": 7,
+   "frame": {
+    "w": 154,
+    "h": 60
+   },
+   "sheets": [
+    {
+     "file": "part-ring.png",
+     "first_frame": 0,
+     "frames": 7,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -77,
+    "y": -30
+   }
+  },
+  {
+   "name": "part-debris",
+   "title": "the debris burst part",
+   "role": "impact",
+   "part": "debris_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 10,
+   "frames": 11,
+   "frame": {
+    "w": 47,
+    "h": 38
+   },
+   "sheets": [
+    {
+     "file": "part-debris.png",
+     "first_frame": 0,
+     "frames": 11,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -18,
+    "y": -86
+   }
+  },
+  {
+   "name": "part-stars",
+   "title": "the star burst part",
+   "role": "impact",
+   "part": "star_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 10,
+   "frames": 10,
+   "frame": {
+    "w": 59,
+    "h": 72
+   },
+   "sheets": [
+    {
+     "file": "part-stars.png",
+     "first_frame": 0,
+     "frames": 10,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -29,
+    "y": -100
+   }
+  },
+  {
+   "name": "part-glass",
+   "title": "the ice shatter part",
+   "role": "impact",
+   "part": "ice_shatter",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 10,
+   "frames": 12,
+   "frame": {
+    "w": 86,
+    "h": 114
+   },
+   "sheets": [
+    {
+     "file": "part-glass.png",
+     "first_frame": 0,
+     "frames": 12,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -46,
+    "y": -114
+   }
+  },
+  {
+   "name": "part-aftersmoke",
+   "title": "the smoke puff part",
+   "role": "linger",
+   "part": "smoke_puff",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 14,
+   "frames": 9,
+   "frame": {
+    "w": 83,
+    "h": 80
+   },
+   "sheets": [
+    {
+     "file": "part-aftersmoke.png",
+     "first_frame": 0,
+     "frames": 9,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -42,
+    "y": -115
+   }
+  }
+ ]
+}

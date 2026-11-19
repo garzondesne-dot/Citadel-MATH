@@ -1,0 +1,387 @@
+{
+ "app": "PixelLab VFX Creator",
+ "name": "awk-spellblade",
+ "fps": 12,
+ "frame_ms": 83,
+ "frames": 18,
+ "loop": false,
+ "canvas": {
+  "w": 272,
+  "h": 507
+ },
+ "anchor": {
+  "kind": "feet",
+  "x": 123,
+  "y": 434
+ },
+ "clips": [
+  {
+   "name": "whole",
+   "title": "the whole effect, no sprite",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 17,
+   "frame": {
+    "w": 265,
+    "h": 501
+   },
+   "sheets": [
+    {
+     "file": "whole.png",
+     "first_frame": 0,
+     "frames": 17,
+     "columns": 5,
+     "rows": 4
+    }
+   ],
+   "offset": {
+    "x": -118,
+    "y": -431
+   }
+  },
+  {
+   "name": "whole-with-sprite",
+   "title": "the whole effect with the sprite in it",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 18,
+   "frame": {
+    "w": 265,
+    "h": 501
+   },
+   "sheets": [
+    {
+     "file": "whole-with-sprite.png",
+     "first_frame": 0,
+     "frames": 18,
+     "columns": 5,
+     "rows": 4
+    }
+   ],
+   "offset": {
+    "x": -118,
+    "y": -431
+   }
+  },
+  {
+   "name": "behind",
+   "title": "everything behind the sprite",
+   "depth": "behind",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 15,
+   "frame": {
+    "w": 218,
+    "h": 473
+   },
+   "sheets": [
+    {
+     "file": "behind.png",
+     "first_frame": 0,
+     "frames": 15,
+     "columns": 4,
+     "rows": 4
+    }
+   ],
+   "offset": {
+    "x": -109,
+    "y": -431
+   }
+  },
+  {
+   "name": "front",
+   "title": "everything in front of the sprite",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 17,
+   "frame": {
+    "w": 265,
+    "h": 442
+   },
+   "sheets": [
+    {
+     "file": "front.png",
+     "first_frame": 0,
+     "frames": 17,
+     "columns": 5,
+     "rows": 4
+    }
+   ],
+   "offset": {
+    "x": -118,
+    "y": -372
+   }
+  },
+  {
+   "name": "part-circle",
+   "title": "the circle part",
+   "depth": "behind",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 15,
+   "frame": {
+    "w": 132,
+    "h": 132
+   },
+   "sheets": [
+    {
+     "file": "part-circle.png",
+     "first_frame": 0,
+     "frames": 15,
+     "columns": 4,
+     "rows": 4
+    }
+   ],
+   "offset": {
+    "x": -66,
+    "y": -265
+   }
+  },
+  {
+   "name": "part-charge",
+   "title": "the charge up part",
+   "role": "cast",
+   "part": "charge_up",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 6,
+   "frame": {
+    "w": 60,
+    "h": 59
+   },
+   "sheets": [
+    {
+     "file": "part-charge.png",
+     "first_frame": 0,
+     "frames": 6,
+     "columns": 3,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -30,
+    "y": -102
+   }
+  },
+  {
+   "name": "part-anticipation",
+   "title": "the flash burst part",
+   "role": "cast",
+   "part": "flash_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 2,
+   "frames": 3,
+   "frame": {
+    "w": 107,
+    "h": 106
+   },
+   "sheets": [
+    {
+     "file": "part-anticipation.png",
+     "first_frame": 0,
+     "frames": 3,
+     "columns": 2,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -51,
+    "y": -130
+   }
+  },
+  {
+   "name": "part-strike",
+   "title": "the storm strike part",
+   "role": "impact",
+   "part": "storm_strike",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 4,
+   "frames": 10,
+   "frame": {
+    "w": 241,
+    "h": 501
+   },
+   "sheets": [
+    {
+     "file": "part-strike.png",
+     "first_frame": 0,
+     "frames": 10,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -110,
+    "y": -431
+   }
+  },
+  {
+   "name": "part-slash",
+   "title": "the dash slash part",
+   "role": "impact",
+   "part": "dash_slash",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 5,
+   "frames": 5,
+   "frame": {
+    "w": 265,
+    "h": 59
+   },
+   "sheets": [
+    {
+     "file": "part-slash.png",
+     "first_frame": 0,
+     "frames": 5,
+     "columns": 3,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -118,
+    "y": -111
+   }
+  },
+  {
+   "name": "part-zap",
+   "title": "the zap hit part",
+   "role": "impact",
+   "part": "zap_hit",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 6,
+   "frames": 7,
+   "frame": {
+    "w": 119,
+    "h": 90
+   },
+   "sheets": [
+    {
+     "file": "part-zap.png",
+     "first_frame": 0,
+     "frames": 7,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -46,
+    "y": -111
+   }
+  },
+  {
+   "name": "part-sparks",
+   "title": "the spark burst part",
+   "role": "impact",
+   "part": "spark_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 6,
+   "frames": 7,
+   "frame": {
+    "w": 94,
+    "h": 47
+   },
+   "sheets": [
+    {
+     "file": "part-sparks.png",
+     "first_frame": 0,
+     "frames": 7,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -48,
+    "y": -96
+   }
+  },
+  {
+   "name": "part-shock",
+   "title": "the shockwave ring part",
+   "role": "linger",
+   "part": "shockwave_ring",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 7,
+   "frames": 7,
+   "frame": {
+    "w": 218,
+    "h": 84
+   },
+   "sheets": [
+    {
+     "file": "part-shock.png",
+     "first_frame": 0,
+     "frames": 7,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -109,
+    "y": -42
+   }
+  },
+  {
+   "name": "part-debris",
+   "title": "the debris burst part",
+   "role": "linger",
+   "part": "debris_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 7,
+   "frames": 8,
+   "frame": {
+    "w": 76,
+    "h": 61
+   },
+   "sheets": [
+    {
+     "file": "part-debris.png",
+     "first_frame": 0,
+     "frames": 8,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -30,
+    "y": -94
+   }
+  },
+  {
+   "name": "part-aftermath",
+   "title": "the smoke puff part",
+   "role": "linger",
+   "part": "smoke_puff",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 10,
+   "frames": 7,
+   "frame": {
+    "w": 62,
+    "h": 64
+   },
+   "sheets": [
+    {
+     "file": "part-aftermath.png",
+     "first_frame": 0,
+     "frames": 7,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -31,
+    "y": -105
+   }
+  }
+ ]
+}

@@ -1,0 +1,419 @@
+{
+ "app": "PixelLab VFX Creator",
+ "name": "awk-valkyrie",
+ "fps": 12,
+ "frame_ms": 83,
+ "frames": 18,
+ "loop": false,
+ "canvas": {
+  "w": 268,
+  "h": 343
+ },
+ "anchor": {
+  "kind": "feet",
+  "x": 134,
+  "y": 203
+ },
+ "clips": [
+  {
+   "name": "whole",
+   "title": "the whole effect, no sprite",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 17,
+   "frame": {
+    "w": 262,
+    "h": 337
+   },
+   "sheets": [
+    {
+     "file": "whole.png",
+     "first_frame": 0,
+     "frames": 17,
+     "columns": 5,
+     "rows": 4
+    }
+   ],
+   "offset": {
+    "x": -131,
+    "y": -200
+   }
+  },
+  {
+   "name": "whole-with-sprite",
+   "title": "the whole effect with the sprite in it",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 18,
+   "frame": {
+    "w": 262,
+    "h": 337
+   },
+   "sheets": [
+    {
+     "file": "whole-with-sprite.png",
+     "first_frame": 0,
+     "frames": 18,
+     "columns": 5,
+     "rows": 4
+    }
+   ],
+   "offset": {
+    "x": -131,
+    "y": -200
+   }
+  },
+  {
+   "name": "behind",
+   "title": "everything behind the sprite",
+   "depth": "behind",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 16,
+   "frame": {
+    "w": 262,
+    "h": 214
+   },
+   "sheets": [
+    {
+     "file": "behind.png",
+     "first_frame": 0,
+     "frames": 16,
+     "columns": 4,
+     "rows": 4
+    }
+   ],
+   "offset": {
+    "x": -131,
+    "y": -164
+   }
+  },
+  {
+   "name": "front",
+   "title": "everything in front of the sprite",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 17,
+   "frame": {
+    "w": 251,
+    "h": 337
+   },
+   "sheets": [
+    {
+     "file": "front.png",
+     "first_frame": 0,
+     "frames": 17,
+     "columns": 5,
+     "rows": 4
+    }
+   ],
+   "offset": {
+    "x": -126,
+    "y": -200
+   }
+  },
+  {
+   "name": "part-wings_glow",
+   "title": "the holy aura part",
+   "role": "cast",
+   "part": "holy_aura",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 11,
+   "frame": {
+    "w": 115,
+    "h": 157
+   },
+   "sheets": [
+    {
+     "file": "part-wings_glow.png",
+     "first_frame": 0,
+     "frames": 11,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -56,
+    "y": -154
+   }
+  },
+  {
+   "name": "part-wings",
+   "title": "the wings part",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 1,
+   "frames": 14,
+   "frame": {
+    "w": 247,
+    "h": 177
+   },
+   "sheets": [
+    {
+     "file": "part-wings.png",
+     "first_frame": 0,
+     "frames": 14,
+     "columns": 4,
+     "rows": 4
+    }
+   ],
+   "offset": {
+    "x": -126,
+    "y": -191
+   }
+  },
+  {
+   "name": "part-spear",
+   "title": "the spear part, in place",
+   "role": "projectile",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 1,
+   "frames": 7,
+   "frame": {
+    "w": 21,
+    "h": 5
+   },
+   "sheets": [
+    {
+     "file": "part-spear.png",
+     "first_frame": 0,
+     "frames": 7,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": 26,
+    "y": -198
+   },
+   "moves": [
+    {
+     "x": -0.47,
+     "y": 9.41
+    },
+    {
+     "x": -1.94,
+     "y": 38.82
+    },
+    {
+     "x": -3.41,
+     "y": 68.24
+    },
+    {
+     "x": -4.88,
+     "y": 97.65
+    },
+    {
+     "x": -6.35,
+     "y": 127.06
+    },
+    {
+     "x": -7.82,
+     "y": 156.47
+    },
+    {
+     "x": -9.29,
+     "y": 185.88
+    }
+   ]
+  },
+  {
+   "name": "part-twinkles",
+   "title": "the twinkles part, in place",
+   "role": "projectile",
+   "part": "twinkles",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 1,
+   "frames": 7,
+   "frame": {
+    "w": 24,
+    "h": 30
+   },
+   "sheets": [
+    {
+     "file": "part-twinkles.png",
+     "first_frame": 0,
+     "frames": 7,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": 26,
+    "y": -199
+   },
+   "moves": [
+    {
+     "x": -0.47,
+     "y": 9.41
+    },
+    {
+     "x": -1.94,
+     "y": 38.82
+    },
+    {
+     "x": -3.41,
+     "y": 68.24
+    },
+    {
+     "x": -4.88,
+     "y": 97.65
+    },
+    {
+     "x": -6.35,
+     "y": 127.06
+    },
+    {
+     "x": -7.82,
+     "y": 156.47
+    },
+    {
+     "x": -9.29,
+     "y": 185.88
+    }
+   ]
+  },
+  {
+   "name": "part-beam",
+   "title": "the sky beam part",
+   "role": "impact",
+   "part": "sky_beam",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 7,
+   "frames": 7,
+   "frame": {
+    "w": 104,
+    "h": 184
+   },
+   "sheets": [
+    {
+     "file": "part-beam.png",
+     "first_frame": 0,
+     "frames": 7,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -52,
+    "y": -164
+   }
+  },
+  {
+   "name": "part-flash",
+   "title": "the flash burst part",
+   "role": "impact",
+   "part": "flash_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 7,
+   "frames": 4,
+   "frame": {
+    "w": 94,
+    "h": 96
+   },
+   "sheets": [
+    {
+     "file": "part-flash.png",
+     "first_frame": 0,
+     "frames": 4,
+     "columns": 2,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -46,
+    "y": -126
+   }
+  },
+  {
+   "name": "part-shock",
+   "title": "the shockwave ring part",
+   "role": "impact",
+   "part": "shockwave_ring",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 7,
+   "frames": 9,
+   "frame": {
+    "w": 262,
+    "h": 100
+   },
+   "sheets": [
+    {
+     "file": "part-shock.png",
+     "first_frame": 0,
+     "frames": 9,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -131,
+    "y": -50
+   }
+  },
+  {
+   "name": "part-flash_burst",
+   "title": "the flash burst part",
+   "role": "impact",
+   "part": "flash_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 7,
+   "frames": 9,
+   "frame": {
+    "w": 46,
+    "h": 43
+   },
+   "sheets": [
+    {
+     "file": "part-flash_burst.png",
+     "first_frame": 0,
+     "frames": 9,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": 3,
+    "y": -18
+   }
+  },
+  {
+   "name": "part-feathers",
+   "title": "the feather burst part",
+   "role": "linger",
+   "part": "feather_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 8,
+   "frames": 9,
+   "frame": {
+    "w": 237,
+    "h": 330
+   },
+   "sheets": [
+    {
+     "file": "part-feathers.png",
+     "first_frame": 0,
+     "frames": 9,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -112,
+    "y": -193
+   }
+  }
+ ]
+}

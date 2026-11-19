@@ -1,0 +1,548 @@
+{
+ "app": "PixelLab VFX Creator",
+ "name": "awk-ninja",
+ "fps": 16,
+ "frame_ms": 63,
+ "frames": 24,
+ "loop": false,
+ "canvas": {
+  "w": 213,
+  "h": 182
+ },
+ "anchor": {
+  "kind": "feet",
+  "x": 103,
+  "y": 167
+ },
+ "clips": [
+  {
+   "name": "whole",
+   "title": "the whole effect, no sprite",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 23,
+   "frame": {
+    "w": 203,
+    "h": 176
+   },
+   "sheets": [
+    {
+     "file": "whole.png",
+     "first_frame": 0,
+     "frames": 23,
+     "columns": 5,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -96,
+    "y": -164
+   }
+  },
+  {
+   "name": "whole-with-sprite",
+   "title": "the whole effect with the sprite in it",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 24,
+   "frame": {
+    "w": 207,
+    "h": 176
+   },
+   "sheets": [
+    {
+     "file": "whole-with-sprite.png",
+     "first_frame": 0,
+     "frames": 24,
+     "columns": 5,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -100,
+    "y": -164
+   }
+  },
+  {
+   "name": "front",
+   "title": "everything in front of the sprite",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 23,
+   "frame": {
+    "w": 203,
+    "h": 176
+   },
+   "sheets": [
+    {
+     "file": "front.png",
+     "first_frame": 0,
+     "frames": 23,
+     "columns": 5,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -96,
+    "y": -164
+   }
+  },
+  {
+   "name": "part-anticip",
+   "title": "the flash burst part",
+   "role": "cast",
+   "part": "flash_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 6,
+   "frame": {
+    "w": 68,
+    "h": 69
+   },
+   "sheets": [
+    {
+     "file": "part-anticip.png",
+     "first_frame": 0,
+     "frames": 6,
+     "columns": 3,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -33,
+    "y": -109
+   }
+  },
+  {
+   "name": "part-cut1",
+   "title": "the combo slash part",
+   "role": "cast",
+   "part": "combo_slash",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 2,
+   "frames": 8,
+   "frame": {
+    "w": 79,
+    "h": 59
+   },
+   "sheets": [
+    {
+     "file": "part-cut1.png",
+     "first_frame": 0,
+     "frames": 8,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -34,
+    "y": -97
+   }
+  },
+  {
+   "name": "part-cut6",
+   "title": "the swing slash part",
+   "role": "cast",
+   "part": "swing_slash",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 2,
+   "frames": 7,
+   "frame": {
+    "w": 73,
+    "h": 67
+   },
+   "sheets": [
+    {
+     "file": "part-cut6.png",
+     "first_frame": 0,
+     "frames": 7,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -82,
+    "y": -84
+   }
+  },
+  {
+   "name": "part-cut3",
+   "title": "the swing slash part",
+   "role": "cast",
+   "part": "swing_slash",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 4,
+   "frames": 9,
+   "frame": {
+    "w": 68,
+    "h": 62
+   },
+   "sheets": [
+    {
+     "file": "part-cut3.png",
+     "first_frame": 0,
+     "frames": 9,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": 10,
+    "y": -131
+   }
+  },
+  {
+   "name": "part-shuri",
+   "title": "the shuri part, in place",
+   "role": "projectile",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 5,
+   "frames": 12,
+   "frame": {
+    "w": 9,
+    "h": 9
+   },
+   "sheets": [
+    {
+     "file": "part-shuri.png",
+     "first_frame": 0,
+     "frames": 12,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": 53,
+    "y": -24
+   },
+   "moves": [
+    {
+     "x": -5.22,
+     "y": -3.91
+    },
+    {
+     "x": -18.26,
+     "y": -13.7
+    },
+    {
+     "x": -31.3,
+     "y": -23.48
+    },
+    {
+     "x": -44.35,
+     "y": -33.26
+    },
+    {
+     "x": -57.39,
+     "y": -43.04
+    },
+    {
+     "x": -70.43,
+     "y": -52.83
+    },
+    {
+     "x": -83.48,
+     "y": -62.61
+    },
+    {
+     "x": -96.52,
+     "y": -72.39
+    },
+    {
+     "x": -109.57,
+     "y": -82.17
+    },
+    {
+     "x": -120,
+     "y": -90
+    },
+    {
+     "x": -120,
+     "y": -90
+    },
+    {
+     "x": -120,
+     "y": -90
+    }
+   ]
+  },
+  {
+   "name": "part-cut2",
+   "title": "the combo slash part",
+   "role": "cast",
+   "part": "combo_slash",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 7,
+   "frames": 7,
+   "frame": {
+    "w": 96,
+    "h": 64
+   },
+   "sheets": [
+    {
+     "file": "part-cut2.png",
+     "first_frame": 0,
+     "frames": 7,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -68,
+    "y": -84
+   }
+  },
+  {
+   "name": "part-cut7",
+   "title": "the swing slash part",
+   "role": "cast",
+   "part": "swing_slash",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 9,
+   "frames": 6,
+   "frame": {
+    "w": 73,
+    "h": 67
+   },
+   "sheets": [
+    {
+     "file": "part-cut7.png",
+     "first_frame": 0,
+     "frames": 6,
+     "columns": 3,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -22,
+    "y": -164
+   }
+  },
+  {
+   "name": "part-cut4",
+   "title": "the combo slash part",
+   "role": "cast",
+   "part": "combo_slash",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 10,
+   "frames": 6,
+   "frame": {
+    "w": 81,
+    "h": 69
+   },
+   "sheets": [
+    {
+     "file": "part-cut4.png",
+     "first_frame": 0,
+     "frames": 6,
+     "columns": 3,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -96,
+    "y": -126
+   }
+  },
+  {
+   "name": "part-cut5",
+   "title": "the combo slash part",
+   "role": "cast",
+   "part": "combo_slash",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 12,
+   "frames": 7,
+   "frame": {
+    "w": 98,
+    "h": 68
+   },
+   "sheets": [
+    {
+     "file": "part-cut5.png",
+     "first_frame": 0,
+     "frames": 7,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": 9,
+    "y": -56
+   }
+  },
+  {
+   "name": "part-xcut",
+   "title": "the cross slash part",
+   "role": "impact",
+   "part": "cross_slash",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 14,
+   "frames": 4,
+   "frame": {
+    "w": 79,
+    "h": 72
+   },
+   "sheets": [
+    {
+     "file": "part-xcut.png",
+     "first_frame": 0,
+     "frames": 4,
+     "columns": 2,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -41,
+    "y": -111
+   }
+  },
+  {
+   "name": "part-impact",
+   "title": "the flash burst part",
+   "role": "impact",
+   "part": "flash_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 17,
+   "frames": 3,
+   "frame": {
+    "w": 92,
+    "h": 99
+   },
+   "sheets": [
+    {
+     "file": "part-impact.png",
+     "first_frame": 0,
+     "frames": 3,
+     "columns": 2,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -44,
+    "y": -129
+   }
+  },
+  {
+   "name": "part-shock",
+   "title": "the shockwave ring part",
+   "role": "impact",
+   "part": "shockwave_ring",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 17,
+   "frames": 5,
+   "frame": {
+    "w": 164,
+    "h": 63
+   },
+   "sheets": [
+    {
+     "file": "part-shock.png",
+     "first_frame": 0,
+     "frames": 5,
+     "columns": 3,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -82,
+    "y": -105
+   }
+  },
+  {
+   "name": "part-sparks",
+   "title": "the spark burst part",
+   "role": "impact",
+   "part": "spark_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 17,
+   "frames": 5,
+   "frame": {
+    "w": 87,
+    "h": 45
+   },
+   "sheets": [
+    {
+     "file": "part-sparks.png",
+     "first_frame": 0,
+     "frames": 5,
+     "columns": 3,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -44,
+    "y": -95
+   }
+  },
+  {
+   "name": "part-smoke",
+   "title": "the smoke puff part",
+   "role": "linger",
+   "part": "smoke_puff",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 17,
+   "frames": 6,
+   "frame": {
+    "w": 81,
+    "h": 87
+   },
+   "sheets": [
+    {
+     "file": "part-smoke.png",
+     "first_frame": 0,
+     "frames": 6,
+     "columns": 3,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -37,
+    "y": -116
+   }
+  },
+  {
+   "name": "part-leaves",
+   "title": "the grass cut part",
+   "role": "linger",
+   "part": "grass_cut",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 17,
+   "frames": 6,
+   "frame": {
+    "w": 84,
+    "h": 54
+   },
+   "sheets": [
+    {
+     "file": "part-leaves.png",
+     "first_frame": 0,
+     "frames": 6,
+     "columns": 3,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -42,
+    "y": -43
+   }
+  }
+ ]
+}

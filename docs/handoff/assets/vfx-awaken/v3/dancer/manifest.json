@@ -1,0 +1,362 @@
+{
+ "app": "PixelLab VFX Creator",
+ "name": "awk-dancer",
+ "fps": 14,
+ "frame_ms": 71,
+ "frames": 20,
+ "loop": false,
+ "canvas": {
+  "w": 300,
+  "h": 240
+ },
+ "anchor": {
+  "kind": "feet",
+  "x": 123,
+  "y": 150
+ },
+ "clips": [
+  {
+   "name": "whole",
+   "title": "the whole effect, no sprite",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 20,
+   "frame": {
+    "w": 243,
+    "h": 172
+   },
+   "sheets": [
+    {
+     "file": "whole.png",
+     "first_frame": 0,
+     "frames": 20,
+     "columns": 5,
+     "rows": 4
+    }
+   ],
+   "offset": {
+    "x": -122,
+    "y": -126
+   }
+  },
+  {
+   "name": "whole-with-sprite",
+   "title": "the whole effect with the sprite in it",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 20,
+   "frame": {
+    "w": 243,
+    "h": 193
+   },
+   "sheets": [
+    {
+     "file": "whole-with-sprite.png",
+     "first_frame": 0,
+     "frames": 20,
+     "columns": 5,
+     "rows": 4
+    }
+   ],
+   "offset": {
+    "x": -122,
+    "y": -147
+   }
+  },
+  {
+   "name": "behind",
+   "title": "everything behind the sprite",
+   "depth": "behind",
+   "loop": false,
+   "start_frame": 11,
+   "frames": 7,
+   "frame": {
+    "w": 240,
+    "h": 92
+   },
+   "sheets": [
+    {
+     "file": "behind.png",
+     "first_frame": 0,
+     "frames": 7,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -120,
+    "y": -46
+   }
+  },
+  {
+   "name": "front",
+   "title": "everything in front of the sprite",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 20,
+   "frame": {
+    "w": 243,
+    "h": 155
+   },
+   "sheets": [
+    {
+     "file": "front.png",
+     "first_frame": 0,
+     "frames": 20,
+     "columns": 5,
+     "rows": 4
+    }
+   ],
+   "offset": {
+    "x": -122,
+    "y": -126
+   }
+  },
+  {
+   "name": "part-anticipation",
+   "title": "the charge up part",
+   "role": "cast",
+   "part": "charge_up",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 6,
+   "frame": {
+    "w": 96,
+    "h": 96
+   },
+   "sheets": [
+    {
+     "file": "part-anticipation.png",
+     "first_frame": 0,
+     "frames": 6,
+     "columns": 3,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -48,
+    "y": -121
+   }
+  },
+  {
+   "name": "part-waltz_ribbon",
+   "title": "the spin slash part",
+   "role": "cast",
+   "part": "spin_slash",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 1,
+   "frames": 11,
+   "frame": {
+    "w": 170,
+    "h": 76
+   },
+   "sheets": [
+    {
+     "file": "part-waltz_ribbon.png",
+     "first_frame": 0,
+     "frames": 11,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -82,
+    "y": -111
+   }
+  },
+  {
+   "name": "part-glints",
+   "title": "the twinkles part",
+   "role": "ambient",
+   "part": "twinkles",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 2,
+   "frames": 18,
+   "frame": {
+    "w": 47,
+    "h": 77
+   },
+   "sheets": [
+    {
+     "file": "part-glints.png",
+     "first_frame": 0,
+     "frames": 18,
+     "columns": 5,
+     "rows": 4
+    }
+   ],
+   "offset": {
+    "x": -14,
+    "y": -113
+   }
+  },
+  {
+   "name": "part-petals",
+   "title": "the confetti pop part",
+   "role": "linger",
+   "part": "confetti_pop",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 4,
+   "frames": 15,
+   "frame": {
+    "w": 125,
+    "h": 94
+   },
+   "sheets": [
+    {
+     "file": "part-petals.png",
+     "first_frame": 0,
+     "frames": 15,
+     "columns": 4,
+     "rows": 4
+    }
+   ],
+   "offset": {
+    "x": -61,
+    "y": -122
+   }
+  },
+  {
+   "name": "part-waltz_ribbon2",
+   "title": "the spin slash part",
+   "role": "cast",
+   "part": "spin_slash",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 6,
+   "frames": 8,
+   "frame": {
+    "w": 243,
+    "h": 102
+   },
+   "sheets": [
+    {
+     "file": "part-waltz_ribbon2.png",
+     "first_frame": 0,
+     "frames": 8,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -122,
+    "y": -124
+   }
+  },
+  {
+   "name": "part-strike",
+   "title": "the combo slash part",
+   "role": "impact",
+   "part": "combo_slash",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 10,
+   "frames": 4,
+   "frame": {
+    "w": 91,
+    "h": 55
+   },
+   "sheets": [
+    {
+     "file": "part-strike.png",
+     "first_frame": 0,
+     "frames": 4,
+     "columns": 2,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -40,
+    "y": -108
+   }
+  },
+  {
+   "name": "part-impact_flash",
+   "title": "the flash burst part",
+   "role": "impact",
+   "part": "flash_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 11,
+   "frames": 3,
+   "frame": {
+    "w": 94,
+    "h": 96
+   },
+   "sheets": [
+    {
+     "file": "part-impact_flash.png",
+     "first_frame": 0,
+     "frames": 3,
+     "columns": 2,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -46,
+    "y": -126
+   }
+  },
+  {
+   "name": "part-impact_ring",
+   "title": "the shockwave ring part",
+   "role": "impact",
+   "part": "shockwave_ring",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 11,
+   "frames": 7,
+   "frame": {
+    "w": 240,
+    "h": 92
+   },
+   "sheets": [
+    {
+     "file": "part-impact_ring.png",
+     "first_frame": 0,
+     "frames": 7,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -120,
+    "y": -46
+   }
+  },
+  {
+   "name": "part-sparkles",
+   "title": "the star burst part",
+   "role": "linger",
+   "part": "star_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 11,
+   "frames": 8,
+   "frame": {
+    "w": 89,
+    "h": 109
+   },
+   "sheets": [
+    {
+     "file": "part-sparkles.png",
+     "first_frame": 0,
+     "frames": 8,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -44,
+    "y": -114
+   }
+  }
+ ]
+}

@@ -1,0 +1,360 @@
+{
+ "app": "PixelLab VFX Creator",
+ "name": "awk-frost",
+ "fps": 16,
+ "frame_ms": 63,
+ "frames": 24,
+ "loop": false,
+ "canvas": {
+  "w": 397,
+  "h": 211
+ },
+ "anchor": {
+  "kind": "feet",
+  "x": 254,
+  "y": 152
+ },
+ "clips": [
+  {
+   "name": "whole",
+   "title": "the whole effect, no sprite",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 24,
+   "frame": {
+    "w": 394,
+    "h": 196
+   },
+   "sheets": [
+    {
+     "file": "whole.png",
+     "first_frame": 0,
+     "frames": 24,
+     "columns": 5,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -254,
+    "y": -140
+   }
+  },
+  {
+   "name": "whole-with-sprite",
+   "title": "the whole effect with the sprite in it",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 24,
+   "frame": {
+    "w": 394,
+    "h": 205
+   },
+   "sheets": [
+    {
+     "file": "whole-with-sprite.png",
+     "first_frame": 0,
+     "frames": 24,
+     "columns": 5,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -254,
+    "y": -149
+   }
+  },
+  {
+   "name": "behind",
+   "title": "everything behind the sprite",
+   "depth": "behind",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 24,
+   "frame": {
+    "w": 368,
+    "h": 181
+   },
+   "sheets": [
+    {
+     "file": "behind.png",
+     "first_frame": 0,
+     "frames": 24,
+     "columns": 5,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -254,
+    "y": -140
+   }
+  },
+  {
+   "name": "front",
+   "title": "everything in front of the sprite",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 24,
+   "frame": {
+    "w": 276,
+    "h": 184
+   },
+   "sheets": [
+    {
+     "file": "front.png",
+     "first_frame": 0,
+     "frames": 24,
+     "columns": 5,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -136,
+    "y": -128
+   }
+  },
+  {
+   "name": "part-mist_gather",
+   "title": "the frost mist part",
+   "role": "cast",
+   "part": "frost_mist",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 13,
+   "frame": {
+    "w": 240,
+    "h": 76
+   },
+   "sheets": [
+    {
+     "file": "part-mist_gather.png",
+     "first_frame": 0,
+     "frames": 13,
+     "columns": 4,
+     "rows": 4
+    }
+   ],
+   "offset": {
+    "x": -120,
+    "y": -42
+   }
+  },
+  {
+   "name": "part-spike_a",
+   "title": "the ice spikes part",
+   "role": "cast",
+   "part": "ice_spikes",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 3,
+   "frames": 12,
+   "frame": {
+    "w": 169,
+    "h": 190
+   },
+   "sheets": [
+    {
+     "file": "part-spike_a.png",
+     "first_frame": 0,
+     "frames": 12,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -136,
+    "y": -140
+   }
+  },
+  {
+   "name": "part-spike_b",
+   "title": "the ice spikes part",
+   "role": "cast",
+   "part": "ice_spikes",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 5,
+   "frames": 10,
+   "frame": {
+    "w": 174,
+    "h": 187
+   },
+   "sheets": [
+    {
+     "file": "part-spike_b.png",
+     "first_frame": 0,
+     "frames": 10,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -34,
+    "y": -131
+   }
+  },
+  {
+   "name": "part-block",
+   "title": "the frozen solid part",
+   "role": "impact",
+   "part": "frozen_solid",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 7,
+   "frames": 8,
+   "frame": {
+    "w": 33,
+    "h": 32
+   },
+   "sheets": [
+    {
+     "file": "part-block.png",
+     "first_frame": 0,
+     "frames": 8,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -17,
+    "y": -25
+   }
+  },
+  {
+   "name": "part-flash",
+   "title": "the flash burst part",
+   "role": "impact",
+   "part": "flash_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 14,
+   "frames": 4,
+   "frame": {
+    "w": 100,
+    "h": 101
+   },
+   "sheets": [
+    {
+     "file": "part-flash.png",
+     "first_frame": 0,
+     "frames": 4,
+     "columns": 2,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -49,
+    "y": -128
+   }
+  },
+  {
+   "name": "part-ring",
+   "title": "the shockwave ring part",
+   "role": "impact",
+   "part": "shockwave_ring",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 14,
+   "frames": 7,
+   "frame": {
+    "w": 216,
+    "h": 82
+   },
+   "sheets": [
+    {
+     "file": "part-ring.png",
+     "first_frame": 0,
+     "frames": 7,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -108,
+    "y": -41
+   }
+  },
+  {
+   "name": "part-shards",
+   "title": "the ice shatter part",
+   "role": "impact",
+   "part": "ice_shatter",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 14,
+   "frames": 8,
+   "frame": {
+    "w": 117,
+    "h": 144
+   },
+   "sheets": [
+    {
+     "file": "part-shards.png",
+     "first_frame": 0,
+     "frames": 8,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -63,
+    "y": -127
+   }
+  },
+  {
+   "name": "part-snowburst",
+   "title": "the snowburst part",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 14,
+   "frames": 6,
+   "frame": {
+    "w": 126,
+    "h": 113
+   },
+   "sheets": [
+    {
+     "file": "part-snowburst.png",
+     "first_frame": 0,
+     "frames": 6,
+     "columns": 3,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -57,
+    "y": -113
+   }
+  },
+  {
+   "name": "part-aftermath",
+   "title": "the frost mist part",
+   "role": "linger",
+   "part": "frost_mist",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 15,
+   "frames": 9,
+   "frame": {
+    "w": 375,
+    "h": 72
+   },
+   "sheets": [
+    {
+     "file": "part-aftermath.png",
+     "first_frame": 0,
+     "frames": 9,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -254,
+    "y": -36
+   }
+  }
+ ]
+}

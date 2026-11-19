@@ -1,0 +1,308 @@
+{
+ "app": "PixelLab VFX Creator",
+ "name": "awk-mechanic",
+ "fps": 12,
+ "frame_ms": 83,
+ "frames": 24,
+ "loop": false,
+ "canvas": {
+  "w": 246,
+  "h": 306
+ },
+ "anchor": {
+  "kind": "feet",
+  "x": 123,
+  "y": 229
+ },
+ "clips": [
+  {
+   "name": "whole",
+   "title": "the whole effect, no sprite",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 24,
+   "frame": {
+    "w": 240,
+    "h": 300
+   },
+   "sheets": [
+    {
+     "file": "whole.png",
+     "first_frame": 0,
+     "frames": 24,
+     "columns": 5,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -120,
+    "y": -226
+   }
+  },
+  {
+   "name": "whole-with-sprite",
+   "title": "the whole effect with the sprite in it",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 24,
+   "frame": {
+    "w": 240,
+    "h": 300
+   },
+   "sheets": [
+    {
+     "file": "whole-with-sprite.png",
+     "first_frame": 0,
+     "frames": 24,
+     "columns": 5,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -120,
+    "y": -226
+   }
+  },
+  {
+   "name": "behind",
+   "title": "everything behind the sprite",
+   "depth": "behind",
+   "loop": false,
+   "start_frame": 2,
+   "frames": 22,
+   "frame": {
+    "w": 240,
+    "h": 300
+   },
+   "sheets": [
+    {
+     "file": "behind.png",
+     "first_frame": 0,
+     "frames": 22,
+     "columns": 5,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -120,
+    "y": -226
+   }
+  },
+  {
+   "name": "front",
+   "title": "everything in front of the sprite",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 21,
+   "frame": {
+    "w": 186,
+    "h": 151
+   },
+   "sheets": [
+    {
+     "file": "front.png",
+     "first_frame": 0,
+     "frames": 21,
+     "columns": 5,
+     "rows": 5
+    }
+   ],
+   "offset": {
+    "x": -89,
+    "y": -122
+   }
+  },
+  {
+   "name": "part-anticipation",
+   "title": "the charge up part",
+   "role": "cast",
+   "part": "charge_up",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 0,
+   "frames": 7,
+   "frame": {
+    "w": 98,
+    "h": 97
+   },
+   "sheets": [
+    {
+     "file": "part-anticipation.png",
+     "first_frame": 0,
+     "frames": 7,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -48,
+    "y": -122
+   }
+  },
+  {
+   "name": "part-gear_whirl",
+   "title": "the orbit motes part",
+   "role": "cast",
+   "part": "orbit_motes",
+   "depth": "behind",
+   "loop": false,
+   "start_frame": 2,
+   "frames": 12,
+   "frame": {
+    "w": 158,
+    "h": 69
+   },
+   "sheets": [
+    {
+     "file": "part-gear_whirl.png",
+     "first_frame": 0,
+     "frames": 12,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -79,
+    "y": -108
+   }
+  },
+  {
+   "name": "part-piston",
+   "title": "the sky beam part",
+   "role": "impact",
+   "part": "sky_beam",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 10,
+   "frames": 5,
+   "frame": {
+    "w": 138,
+    "h": 300
+   },
+   "sheets": [
+    {
+     "file": "part-piston.png",
+     "first_frame": 0,
+     "frames": 5,
+     "columns": 3,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -69,
+    "y": -226
+   }
+  },
+  {
+   "name": "part-steam",
+   "title": "the steam puffs part",
+   "role": "linger",
+   "part": "steam_puffs",
+   "depth": "behind",
+   "loop": false,
+   "start_frame": 12,
+   "frames": 12,
+   "frame": {
+    "w": 54,
+    "h": 182
+   },
+   "sheets": [
+    {
+     "file": "part-steam.png",
+     "first_frame": 0,
+     "frames": 12,
+     "columns": 4,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -20,
+    "y": -208
+   }
+  },
+  {
+   "name": "part-shock",
+   "title": "the shockwave ring part",
+   "role": "impact",
+   "part": "shockwave_ring",
+   "depth": "both",
+   "loop": false,
+   "start_frame": 13,
+   "frames": 9,
+   "frame": {
+    "w": 240,
+    "h": 92
+   },
+   "sheets": [
+    {
+     "file": "part-shock.png",
+     "first_frame": 0,
+     "frames": 9,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -120,
+    "y": -46
+   }
+  },
+  {
+   "name": "part-blast_flash",
+   "title": "the zap hit part",
+   "role": "impact",
+   "part": "zap_hit",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 13,
+   "frames": 6,
+   "frame": {
+    "w": 140,
+    "h": 105
+   },
+   "sheets": [
+    {
+     "file": "part-blast_flash.png",
+     "first_frame": 0,
+     "frames": 6,
+     "columns": 3,
+     "rows": 2
+    }
+   ],
+   "offset": {
+    "x": -54,
+    "y": -121
+   }
+  },
+  {
+   "name": "part-debris",
+   "title": "the debris burst part",
+   "role": "linger",
+   "part": "debris_burst",
+   "depth": "front",
+   "loop": false,
+   "start_frame": 13,
+   "frames": 8,
+   "frame": {
+    "w": 87,
+    "h": 69
+   },
+   "sheets": [
+    {
+     "file": "part-debris.png",
+     "first_frame": 0,
+     "frames": 8,
+     "columns": 3,
+     "rows": 3
+    }
+   ],
+   "offset": {
+    "x": -34,
+    "y": -97
+   }
+  }
+ ]
+}
