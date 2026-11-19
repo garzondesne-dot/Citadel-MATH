@@ -1,18 +1,18 @@
 {
  "app": "PixelLab VFX Creator",
- "name": "awk-crossbow",
+ "name": "awk-crossbow-r2",
  "fps": 16,
  "frame_ms": 63,
- "frames": 24,
+ "frames": 32,
  "loop": false,
  "canvas": {
-  "w": 242,
-  "h": 210
+  "w": 420,
+  "h": 304
  },
  "anchor": {
   "kind": "feet",
-  "x": 124,
-  "y": 150
+  "x": 210,
+  "y": 213
  },
  "clips": [
   {
@@ -21,23 +21,23 @@
    "depth": "both",
    "loop": false,
    "start_frame": 0,
-   "frames": 23,
+   "frames": 30,
    "frame": {
-    "w": 236,
-    "h": 172
+    "w": 414,
+    "h": 285
    },
    "sheets": [
     {
      "file": "whole.png",
      "first_frame": 0,
-     "frames": 23,
-     "columns": 5,
+     "frames": 30,
+     "columns": 6,
      "rows": 5
     }
    ],
    "offset": {
-    "x": -121,
-    "y": -115
+    "x": -207,
+    "y": -197
    }
   },
   {
@@ -46,23 +46,23 @@
    "depth": "both",
    "loop": false,
    "start_frame": 0,
-   "frames": 24,
+   "frames": 32,
    "frame": {
-    "w": 236,
-    "h": 204
+    "w": 414,
+    "h": 285
    },
    "sheets": [
     {
      "file": "whole-with-sprite.png",
      "first_frame": 0,
-     "frames": 24,
-     "columns": 5,
-     "rows": 5
+     "frames": 32,
+     "columns": 6,
+     "rows": 6
     }
    ],
    "offset": {
-    "x": -121,
-    "y": -147
+    "x": -207,
+    "y": -197
    }
   },
   {
@@ -70,24 +70,24 @@
    "title": "everything behind the sprite",
    "depth": "behind",
    "loop": false,
-   "start_frame": 0,
-   "frames": 22,
+   "start_frame": 13,
+   "frames": 15,
    "frame": {
-    "w": 212,
-    "h": 149
+    "w": 316,
+    "h": 208
    },
    "sheets": [
     {
      "file": "behind.png",
      "first_frame": 0,
-     "frames": 22,
-     "columns": 5,
-     "rows": 5
+     "frames": 15,
+     "columns": 4,
+     "rows": 4
     }
    ],
    "offset": {
-    "x": -117,
-    "y": -92
+    "x": -158,
+    "y": -120
    }
   },
   {
@@ -96,232 +96,147 @@
    "depth": "front",
    "loop": false,
    "start_frame": 0,
-   "frames": 23,
+   "frames": 30,
    "frame": {
-    "w": 236,
-    "h": 151
+    "w": 414,
+    "h": 259
    },
    "sheets": [
     {
      "file": "front.png",
      "first_frame": 0,
-     "frames": 23,
-     "columns": 5,
+     "frames": 30,
+     "columns": 6,
      "rows": 5
     }
    ],
    "offset": {
-    "x": -121,
-    "y": -115
+    "x": -207,
+    "y": -197
    }
   },
   {
-   "name": "part-reticle",
+   "name": "part-lock",
    "title": "the lock on part",
    "role": "cast",
    "part": "lock_on",
-   "depth": "behind",
+   "depth": "front",
    "loop": false,
    "start_frame": 0,
-   "frames": 10,
+   "frames": 13,
    "frame": {
-    "w": 174,
-    "h": 114
+    "w": 414,
+    "h": 246
    },
    "sheets": [
     {
-     "file": "part-reticle.png",
+     "file": "part-lock.png",
      "first_frame": 0,
-     "frames": 10,
+     "frames": 13,
      "columns": 4,
-     "rows": 3
+     "rows": 4
     }
    ],
    "offset": {
-    "x": -87,
-    "y": -57
+    "x": -207,
+    "y": -197
    }
   },
   {
-   "name": "part-anticipation",
+   "name": "part-charge",
    "title": "the charge up part",
    "role": "cast",
    "part": "charge_up",
    "depth": "front",
    "loop": false,
-   "start_frame": 0,
-   "frames": 8,
+   "start_frame": 2,
+   "frames": 11,
    "frame": {
-    "w": 73,
-    "h": 73
+    "w": 122,
+    "h": 121
    },
    "sheets": [
     {
-     "file": "part-anticipation.png",
+     "file": "part-charge.png",
      "first_frame": 0,
-     "frames": 8,
-     "columns": 3,
+     "frames": 11,
+     "columns": 4,
      "rows": 3
     }
    ],
    "offset": {
-    "x": -36,
-    "y": -110
+    "x": -61,
+    "y": -134
    }
   },
   {
-   "name": "part-bolt",
-   "title": "the bolt part, in place",
-   "role": "projectile",
+   "name": "part-rest",
+   "title": "the layers in no part",
    "depth": "front",
    "loop": false,
-   "start_frame": 5,
-   "frames": 10,
+   "start_frame": 7,
+   "frames": 11,
    "frame": {
-    "w": 17,
-    "h": 5
+    "w": 406,
+    "h": 166
    },
    "sheets": [
     {
-     "file": "part-bolt.png",
+     "file": "part-rest.png",
      "first_frame": 0,
-     "frames": 10,
+     "frames": 11,
      "columns": 4,
      "rows": 3
     }
    ],
    "offset": {
-    "x": -121,
-    "y": -90
-   },
-   "moves": [
-    {
-     "x": 0,
-     "y": 0
-    },
-    {
-     "x": 11.83,
-     "y": 1.94
-    },
-    {
-     "x": 24.42,
-     "y": 4
-    },
-    {
-     "x": 37,
-     "y": 6.05
-    },
-    {
-     "x": 49.59,
-     "y": 8.11
-    },
-    {
-     "x": 62.17,
-     "y": 10.17
-    },
-    {
-     "x": 74.76,
-     "y": 12.23
-    },
-    {
-     "x": 87.35,
-     "y": 14.29
-    },
-    {
-     "x": 99.93,
-     "y": 16.35
-    },
-    {
-     "x": 110,
-     "y": 18
-    }
-   ]
+    "x": -204,
+    "y": -178
+   }
   },
   {
-   "name": "part-comet_trail",
-   "title": "the comet trail part, in place",
-   "role": "projectile",
-   "part": "comet_trail",
+   "name": "part-wind",
+   "title": "the wind gusts part",
+   "role": "impact",
+   "part": "wind_gusts",
    "depth": "both",
    "loop": false,
-   "start_frame": 5,
-   "frames": 10,
+   "start_frame": 13,
+   "frames": 14,
    "frame": {
-    "w": 122,
-    "h": 97
+    "w": 208,
+    "h": 103
    },
    "sheets": [
     {
-     "file": "part-comet_trail.png",
+     "file": "part-wind.png",
      "first_frame": 0,
-     "frames": 10,
+     "frames": 14,
      "columns": 4,
-     "rows": 3
+     "rows": 4
     }
    ],
    "offset": {
-    "x": -117,
-    "y": -92
-   },
-   "moves": [
-    {
-     "x": 0,
-     "y": 0
-    },
-    {
-     "x": 11.83,
-     "y": 1.94
-    },
-    {
-     "x": 24.42,
-     "y": 4
-    },
-    {
-     "x": 37,
-     "y": 6.05
-    },
-    {
-     "x": 49.59,
-     "y": 8.11
-    },
-    {
-     "x": 62.17,
-     "y": 10.17
-    },
-    {
-     "x": 74.76,
-     "y": 12.23
-    },
-    {
-     "x": 87.35,
-     "y": 14.29
-    },
-    {
-     "x": 99.93,
-     "y": 16.35
-    },
-    {
-     "x": 110,
-     "y": 18
-    }
-   ]
+    "x": -105,
+    "y": -120
+   }
   },
   {
-   "name": "part-impact_flash",
-   "title": "the crit hit part",
+   "name": "part-flash",
+   "title": "the flash burst part",
    "role": "impact",
-   "part": "crit_hit",
+   "part": "flash_burst",
    "depth": "front",
    "loop": false,
    "start_frame": 14,
    "frames": 4,
    "frame": {
-    "w": 96,
-    "h": 97
+    "w": 128,
+    "h": 132
    },
    "sheets": [
     {
-     "file": "part-impact_flash.png",
+     "file": "part-flash.png",
      "first_frame": 0,
      "frames": 4,
      "columns": 2,
@@ -329,35 +244,35 @@
     }
    ],
    "offset": {
-    "x": -51,
-    "y": -115
+    "x": -64,
+    "y": -145
    }
   },
   {
-   "name": "part-wind_ring",
+   "name": "part-shock",
    "title": "the shockwave ring part",
    "role": "impact",
    "part": "shockwave_ring",
    "depth": "both",
    "loop": false,
    "start_frame": 14,
-   "frames": 8,
+   "frames": 14,
    "frame": {
-    "w": 190,
-    "h": 106
+    "w": 316,
+    "h": 176
    },
    "sheets": [
     {
-     "file": "part-wind_ring.png",
+     "file": "part-shock.png",
      "first_frame": 0,
-     "frames": 8,
-     "columns": 3,
-     "rows": 3
+     "frames": 14,
+     "columns": 4,
+     "rows": 4
     }
    ],
    "offset": {
-    "x": -95,
-    "y": -53
+    "x": -158,
+    "y": -88
    }
   },
   {
@@ -368,50 +283,50 @@
    "depth": "front",
    "loop": false,
    "start_frame": 14,
-   "frames": 8,
+   "frames": 14,
    "frame": {
-    "w": 47,
-    "h": 37
+    "w": 76,
+    "h": 61
    },
    "sheets": [
     {
      "file": "part-debris.png",
      "first_frame": 0,
-     "frames": 8,
-     "columns": 3,
-     "rows": 3
+     "frames": 14,
+     "columns": 4,
+     "rows": 4
     }
    ],
    "offset": {
-    "x": -18,
-    "y": -76
+    "x": -30,
+    "y": -79
    }
   },
   {
    "name": "part-stars",
    "title": "the star burst part",
-   "role": "impact",
+   "role": "linger",
    "part": "star_burst",
    "depth": "front",
    "loop": false,
-   "start_frame": 14,
-   "frames": 7,
+   "start_frame": 15,
+   "frames": 15,
    "frame": {
-    "w": 58,
-    "h": 70
+    "w": 83,
+    "h": 104
    },
    "sheets": [
     {
      "file": "part-stars.png",
      "first_frame": 0,
-     "frames": 7,
-     "columns": 3,
-     "rows": 3
+     "frames": 15,
+     "columns": 4,
+     "rows": 4
     }
    ],
    "offset": {
-    "x": -29,
-    "y": -100
+    "x": -41,
+    "y": -112
    }
   },
   {
@@ -421,24 +336,24 @@
    "part": "smoke_puff",
    "depth": "front",
    "loop": false,
-   "start_frame": 17,
-   "frames": 6,
+   "start_frame": 19,
+   "frames": 10,
    "frame": {
-    "w": 39,
-    "h": 37
+    "w": 103,
+    "h": 104
    },
    "sheets": [
     {
      "file": "part-aftermath.png",
      "first_frame": 0,
-     "frames": 6,
-     "columns": 3,
-     "rows": 2
+     "frames": 10,
+     "columns": 4,
+     "rows": 3
     }
    ],
    "offset": {
-    "x": -21,
-    "y": -40
+    "x": -52,
+    "y": -125
    }
   }
  ]
