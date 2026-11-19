@@ -1,0 +1,651 @@
+{
+ "frames": [
+  {
+   "filename": "nox2 0.png",
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 360
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 360
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 360
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8333333333333334
+   },
+   "duration": 63
+  },
+  {
+   "filename": "nox2 1.png",
+   "frame": {
+    "x": 420,
+    "y": 0,
+    "w": 420,
+    "h": 360
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 360
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 360
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8333333333333334
+   },
+   "duration": 63
+  },
+  {
+   "filename": "nox2 2.png",
+   "frame": {
+    "x": 840,
+    "y": 0,
+    "w": 420,
+    "h": 360
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 360
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 360
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8333333333333334
+   },
+   "duration": 63
+  },
+  {
+   "filename": "nox2 3.png",
+   "frame": {
+    "x": 1260,
+    "y": 0,
+    "w": 420,
+    "h": 360
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 360
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 360
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8333333333333334
+   },
+   "duration": 63
+  },
+  {
+   "filename": "nox2 4.png",
+   "frame": {
+    "x": 1680,
+    "y": 0,
+    "w": 420,
+    "h": 360
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 360
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 360
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8333333333333334
+   },
+   "duration": 63
+  },
+  {
+   "filename": "nox2 5.png",
+   "frame": {
+    "x": 0,
+    "y": 360,
+    "w": 420,
+    "h": 360
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 360
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 360
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8333333333333334
+   },
+   "duration": 63
+  },
+  {
+   "filename": "nox2 6.png",
+   "frame": {
+    "x": 420,
+    "y": 360,
+    "w": 420,
+    "h": 360
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 360
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 360
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8333333333333334
+   },
+   "duration": 63
+  },
+  {
+   "filename": "nox2 7.png",
+   "frame": {
+    "x": 840,
+    "y": 360,
+    "w": 420,
+    "h": 360
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 360
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 360
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8333333333333334
+   },
+   "duration": 63
+  },
+  {
+   "filename": "nox2 8.png",
+   "frame": {
+    "x": 1260,
+    "y": 360,
+    "w": 420,
+    "h": 360
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 360
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 360
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8333333333333334
+   },
+   "duration": 63
+  },
+  {
+   "filename": "nox2 9.png",
+   "frame": {
+    "x": 1680,
+    "y": 360,
+    "w": 420,
+    "h": 360
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 360
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 360
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8333333333333334
+   },
+   "duration": 63
+  },
+  {
+   "filename": "nox2 10.png",
+   "frame": {
+    "x": 0,
+    "y": 720,
+    "w": 420,
+    "h": 360
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 360
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 360
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8333333333333334
+   },
+   "duration": 63
+  },
+  {
+   "filename": "nox2 11.png",
+   "frame": {
+    "x": 420,
+    "y": 720,
+    "w": 420,
+    "h": 360
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 360
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 360
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8333333333333334
+   },
+   "duration": 63
+  },
+  {
+   "filename": "nox2 12.png",
+   "frame": {
+    "x": 840,
+    "y": 720,
+    "w": 420,
+    "h": 360
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 360
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 360
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8333333333333334
+   },
+   "duration": 63
+  },
+  {
+   "filename": "nox2 13.png",
+   "frame": {
+    "x": 1260,
+    "y": 720,
+    "w": 420,
+    "h": 360
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 360
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 360
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8333333333333334
+   },
+   "duration": 63
+  },
+  {
+   "filename": "nox2 14.png",
+   "frame": {
+    "x": 1680,
+    "y": 720,
+    "w": 420,
+    "h": 360
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 360
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 360
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8333333333333334
+   },
+   "duration": 63
+  },
+  {
+   "filename": "nox2 15.png",
+   "frame": {
+    "x": 0,
+    "y": 1080,
+    "w": 420,
+    "h": 360
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 360
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 360
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8333333333333334
+   },
+   "duration": 63
+  },
+  {
+   "filename": "nox2 16.png",
+   "frame": {
+    "x": 420,
+    "y": 1080,
+    "w": 420,
+    "h": 360
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 360
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 360
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8333333333333334
+   },
+   "duration": 63
+  },
+  {
+   "filename": "nox2 17.png",
+   "frame": {
+    "x": 840,
+    "y": 1080,
+    "w": 420,
+    "h": 360
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 360
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 360
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8333333333333334
+   },
+   "duration": 63
+  },
+  {
+   "filename": "nox2 18.png",
+   "frame": {
+    "x": 1260,
+    "y": 1080,
+    "w": 420,
+    "h": 360
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 360
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 360
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8333333333333334
+   },
+   "duration": 63
+  },
+  {
+   "filename": "nox2 19.png",
+   "frame": {
+    "x": 1680,
+    "y": 1080,
+    "w": 420,
+    "h": 360
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 360
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 360
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8333333333333334
+   },
+   "duration": 63
+  },
+  {
+   "filename": "nox2 20.png",
+   "frame": {
+    "x": 0,
+    "y": 1440,
+    "w": 420,
+    "h": 360
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 360
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 360
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8333333333333334
+   },
+   "duration": 63
+  },
+  {
+   "filename": "nox2 21.png",
+   "frame": {
+    "x": 420,
+    "y": 1440,
+    "w": 420,
+    "h": 360
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 360
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 360
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8333333333333334
+   },
+   "duration": 63
+  },
+  {
+   "filename": "nox2 22.png",
+   "frame": {
+    "x": 840,
+    "y": 1440,
+    "w": 420,
+    "h": 360
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 360
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 360
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8333333333333334
+   },
+   "duration": 63
+  },
+  {
+   "filename": "nox2 23.png",
+   "frame": {
+    "x": 1260,
+    "y": 1440,
+    "w": 420,
+    "h": 360
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 360
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 360
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8333333333333334
+   },
+   "duration": 63
+  }
+ ],
+ "meta": {
+  "app": "PixelLab VFX Creator",
+  "image": "nox2.png",
+  "format": "RGBA8888",
+  "size": {
+   "w": 2100,
+   "h": 1800
+  },
+  "scale": "1",
+  "anchor": {
+   "kind": "feet",
+   "x": 210,
+   "y": 300
+  },
+  "frameTags": [
+   {
+    "name": "nox2",
+    "from": 0,
+    "to": 23,
+    "direction": "forward"
+   }
+  ]
+ }
+}

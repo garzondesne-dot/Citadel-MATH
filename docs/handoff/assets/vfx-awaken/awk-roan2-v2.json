@@ -1,0 +1,651 @@
+{
+ "frames": [
+  {
+   "filename": "roan2 0.png",
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 579
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 579
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 579
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.5734024179620034
+   },
+   "duration": 63
+  },
+  {
+   "filename": "roan2 1.png",
+   "frame": {
+    "x": 420,
+    "y": 0,
+    "w": 420,
+    "h": 579
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 579
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 579
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.5734024179620034
+   },
+   "duration": 63
+  },
+  {
+   "filename": "roan2 2.png",
+   "frame": {
+    "x": 840,
+    "y": 0,
+    "w": 420,
+    "h": 579
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 579
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 579
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.5734024179620034
+   },
+   "duration": 63
+  },
+  {
+   "filename": "roan2 3.png",
+   "frame": {
+    "x": 1260,
+    "y": 0,
+    "w": 420,
+    "h": 579
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 579
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 579
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.5734024179620034
+   },
+   "duration": 63
+  },
+  {
+   "filename": "roan2 4.png",
+   "frame": {
+    "x": 1680,
+    "y": 0,
+    "w": 420,
+    "h": 579
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 579
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 579
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.5734024179620034
+   },
+   "duration": 63
+  },
+  {
+   "filename": "roan2 5.png",
+   "frame": {
+    "x": 0,
+    "y": 579,
+    "w": 420,
+    "h": 579
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 579
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 579
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.5734024179620034
+   },
+   "duration": 63
+  },
+  {
+   "filename": "roan2 6.png",
+   "frame": {
+    "x": 420,
+    "y": 579,
+    "w": 420,
+    "h": 579
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 579
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 579
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.5734024179620034
+   },
+   "duration": 63
+  },
+  {
+   "filename": "roan2 7.png",
+   "frame": {
+    "x": 840,
+    "y": 579,
+    "w": 420,
+    "h": 579
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 579
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 579
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.5734024179620034
+   },
+   "duration": 63
+  },
+  {
+   "filename": "roan2 8.png",
+   "frame": {
+    "x": 1260,
+    "y": 579,
+    "w": 420,
+    "h": 579
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 579
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 579
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.5734024179620034
+   },
+   "duration": 63
+  },
+  {
+   "filename": "roan2 9.png",
+   "frame": {
+    "x": 1680,
+    "y": 579,
+    "w": 420,
+    "h": 579
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 579
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 579
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.5734024179620034
+   },
+   "duration": 63
+  },
+  {
+   "filename": "roan2 10.png",
+   "frame": {
+    "x": 0,
+    "y": 1158,
+    "w": 420,
+    "h": 579
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 579
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 579
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.5734024179620034
+   },
+   "duration": 63
+  },
+  {
+   "filename": "roan2 11.png",
+   "frame": {
+    "x": 420,
+    "y": 1158,
+    "w": 420,
+    "h": 579
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 579
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 579
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.5734024179620034
+   },
+   "duration": 63
+  },
+  {
+   "filename": "roan2 12.png",
+   "frame": {
+    "x": 840,
+    "y": 1158,
+    "w": 420,
+    "h": 579
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 579
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 579
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.5734024179620034
+   },
+   "duration": 63
+  },
+  {
+   "filename": "roan2 13.png",
+   "frame": {
+    "x": 1260,
+    "y": 1158,
+    "w": 420,
+    "h": 579
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 579
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 579
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.5734024179620034
+   },
+   "duration": 63
+  },
+  {
+   "filename": "roan2 14.png",
+   "frame": {
+    "x": 1680,
+    "y": 1158,
+    "w": 420,
+    "h": 579
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 579
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 579
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.5734024179620034
+   },
+   "duration": 63
+  },
+  {
+   "filename": "roan2 15.png",
+   "frame": {
+    "x": 0,
+    "y": 1737,
+    "w": 420,
+    "h": 579
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 579
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 579
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.5734024179620034
+   },
+   "duration": 63
+  },
+  {
+   "filename": "roan2 16.png",
+   "frame": {
+    "x": 420,
+    "y": 1737,
+    "w": 420,
+    "h": 579
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 579
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 579
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.5734024179620034
+   },
+   "duration": 63
+  },
+  {
+   "filename": "roan2 17.png",
+   "frame": {
+    "x": 840,
+    "y": 1737,
+    "w": 420,
+    "h": 579
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 579
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 579
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.5734024179620034
+   },
+   "duration": 63
+  },
+  {
+   "filename": "roan2 18.png",
+   "frame": {
+    "x": 1260,
+    "y": 1737,
+    "w": 420,
+    "h": 579
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 579
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 579
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.5734024179620034
+   },
+   "duration": 63
+  },
+  {
+   "filename": "roan2 19.png",
+   "frame": {
+    "x": 1680,
+    "y": 1737,
+    "w": 420,
+    "h": 579
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 579
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 579
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.5734024179620034
+   },
+   "duration": 63
+  },
+  {
+   "filename": "roan2 20.png",
+   "frame": {
+    "x": 0,
+    "y": 2316,
+    "w": 420,
+    "h": 579
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 579
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 579
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.5734024179620034
+   },
+   "duration": 63
+  },
+  {
+   "filename": "roan2 21.png",
+   "frame": {
+    "x": 420,
+    "y": 2316,
+    "w": 420,
+    "h": 579
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 579
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 579
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.5734024179620034
+   },
+   "duration": 63
+  },
+  {
+   "filename": "roan2 22.png",
+   "frame": {
+    "x": 840,
+    "y": 2316,
+    "w": 420,
+    "h": 579
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 579
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 579
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.5734024179620034
+   },
+   "duration": 63
+  },
+  {
+   "filename": "roan2 23.png",
+   "frame": {
+    "x": 1260,
+    "y": 2316,
+    "w": 420,
+    "h": 579
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 420,
+    "h": 579
+   },
+   "sourceSize": {
+    "w": 420,
+    "h": 579
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.5734024179620034
+   },
+   "duration": 63
+  }
+ ],
+ "meta": {
+  "app": "PixelLab VFX Creator",
+  "image": "roan2.png",
+  "format": "RGBA8888",
+  "size": {
+   "w": 2100,
+   "h": 2895
+  },
+  "scale": "1",
+  "anchor": {
+   "kind": "feet",
+   "x": 210,
+   "y": 332
+  },
+  "frameTags": [
+   {
+    "name": "roan2",
+    "from": 0,
+    "to": 23,
+    "direction": "forward"
+   }
+  ]
+ }
+}

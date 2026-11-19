@@ -1,0 +1,963 @@
+{
+ "frames": [
+  {
+   "filename": "nox2pro 0.png",
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 352
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 352
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 352
+   },
+   "pivot": {
+    "x": 0.4266666666666667,
+    "y": 0.6761363636363636
+   },
+   "duration": 42
+  },
+  {
+   "filename": "nox2pro 1.png",
+   "frame": {
+    "x": 300,
+    "y": 0,
+    "w": 300,
+    "h": 352
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 352
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 352
+   },
+   "pivot": {
+    "x": 0.4266666666666667,
+    "y": 0.6761363636363636
+   },
+   "duration": 42
+  },
+  {
+   "filename": "nox2pro 2.png",
+   "frame": {
+    "x": 600,
+    "y": 0,
+    "w": 300,
+    "h": 352
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 352
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 352
+   },
+   "pivot": {
+    "x": 0.4266666666666667,
+    "y": 0.6761363636363636
+   },
+   "duration": 42
+  },
+  {
+   "filename": "nox2pro 3.png",
+   "frame": {
+    "x": 900,
+    "y": 0,
+    "w": 300,
+    "h": 352
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 352
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 352
+   },
+   "pivot": {
+    "x": 0.4266666666666667,
+    "y": 0.6761363636363636
+   },
+   "duration": 42
+  },
+  {
+   "filename": "nox2pro 4.png",
+   "frame": {
+    "x": 1200,
+    "y": 0,
+    "w": 300,
+    "h": 352
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 352
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 352
+   },
+   "pivot": {
+    "x": 0.4266666666666667,
+    "y": 0.6761363636363636
+   },
+   "duration": 42
+  },
+  {
+   "filename": "nox2pro 5.png",
+   "frame": {
+    "x": 1500,
+    "y": 0,
+    "w": 300,
+    "h": 352
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 352
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 352
+   },
+   "pivot": {
+    "x": 0.4266666666666667,
+    "y": 0.6761363636363636
+   },
+   "duration": 42
+  },
+  {
+   "filename": "nox2pro 6.png",
+   "frame": {
+    "x": 0,
+    "y": 352,
+    "w": 300,
+    "h": 352
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 352
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 352
+   },
+   "pivot": {
+    "x": 0.4266666666666667,
+    "y": 0.6761363636363636
+   },
+   "duration": 42
+  },
+  {
+   "filename": "nox2pro 7.png",
+   "frame": {
+    "x": 300,
+    "y": 352,
+    "w": 300,
+    "h": 352
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 352
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 352
+   },
+   "pivot": {
+    "x": 0.4266666666666667,
+    "y": 0.6761363636363636
+   },
+   "duration": 42
+  },
+  {
+   "filename": "nox2pro 8.png",
+   "frame": {
+    "x": 600,
+    "y": 352,
+    "w": 300,
+    "h": 352
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 352
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 352
+   },
+   "pivot": {
+    "x": 0.4266666666666667,
+    "y": 0.6761363636363636
+   },
+   "duration": 42
+  },
+  {
+   "filename": "nox2pro 9.png",
+   "frame": {
+    "x": 900,
+    "y": 352,
+    "w": 300,
+    "h": 352
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 352
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 352
+   },
+   "pivot": {
+    "x": 0.4266666666666667,
+    "y": 0.6761363636363636
+   },
+   "duration": 42
+  },
+  {
+   "filename": "nox2pro 10.png",
+   "frame": {
+    "x": 1200,
+    "y": 352,
+    "w": 300,
+    "h": 352
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 352
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 352
+   },
+   "pivot": {
+    "x": 0.4266666666666667,
+    "y": 0.6761363636363636
+   },
+   "duration": 42
+  },
+  {
+   "filename": "nox2pro 11.png",
+   "frame": {
+    "x": 1500,
+    "y": 352,
+    "w": 300,
+    "h": 352
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 352
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 352
+   },
+   "pivot": {
+    "x": 0.4266666666666667,
+    "y": 0.6761363636363636
+   },
+   "duration": 42
+  },
+  {
+   "filename": "nox2pro 12.png",
+   "frame": {
+    "x": 0,
+    "y": 704,
+    "w": 300,
+    "h": 352
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 352
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 352
+   },
+   "pivot": {
+    "x": 0.4266666666666667,
+    "y": 0.6761363636363636
+   },
+   "duration": 42
+  },
+  {
+   "filename": "nox2pro 13.png",
+   "frame": {
+    "x": 300,
+    "y": 704,
+    "w": 300,
+    "h": 352
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 352
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 352
+   },
+   "pivot": {
+    "x": 0.4266666666666667,
+    "y": 0.6761363636363636
+   },
+   "duration": 42
+  },
+  {
+   "filename": "nox2pro 14.png",
+   "frame": {
+    "x": 600,
+    "y": 704,
+    "w": 300,
+    "h": 352
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 352
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 352
+   },
+   "pivot": {
+    "x": 0.4266666666666667,
+    "y": 0.6761363636363636
+   },
+   "duration": 42
+  },
+  {
+   "filename": "nox2pro 15.png",
+   "frame": {
+    "x": 900,
+    "y": 704,
+    "w": 300,
+    "h": 352
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 352
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 352
+   },
+   "pivot": {
+    "x": 0.4266666666666667,
+    "y": 0.6761363636363636
+   },
+   "duration": 42
+  },
+  {
+   "filename": "nox2pro 16.png",
+   "frame": {
+    "x": 1200,
+    "y": 704,
+    "w": 300,
+    "h": 352
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 352
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 352
+   },
+   "pivot": {
+    "x": 0.4266666666666667,
+    "y": 0.6761363636363636
+   },
+   "duration": 42
+  },
+  {
+   "filename": "nox2pro 17.png",
+   "frame": {
+    "x": 1500,
+    "y": 704,
+    "w": 300,
+    "h": 352
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 352
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 352
+   },
+   "pivot": {
+    "x": 0.4266666666666667,
+    "y": 0.6761363636363636
+   },
+   "duration": 42
+  },
+  {
+   "filename": "nox2pro 18.png",
+   "frame": {
+    "x": 0,
+    "y": 1056,
+    "w": 300,
+    "h": 352
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 352
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 352
+   },
+   "pivot": {
+    "x": 0.4266666666666667,
+    "y": 0.6761363636363636
+   },
+   "duration": 42
+  },
+  {
+   "filename": "nox2pro 19.png",
+   "frame": {
+    "x": 300,
+    "y": 1056,
+    "w": 300,
+    "h": 352
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 352
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 352
+   },
+   "pivot": {
+    "x": 0.4266666666666667,
+    "y": 0.6761363636363636
+   },
+   "duration": 42
+  },
+  {
+   "filename": "nox2pro 20.png",
+   "frame": {
+    "x": 600,
+    "y": 1056,
+    "w": 300,
+    "h": 352
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 352
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 352
+   },
+   "pivot": {
+    "x": 0.4266666666666667,
+    "y": 0.6761363636363636
+   },
+   "duration": 42
+  },
+  {
+   "filename": "nox2pro 21.png",
+   "frame": {
+    "x": 900,
+    "y": 1056,
+    "w": 300,
+    "h": 352
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 352
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 352
+   },
+   "pivot": {
+    "x": 0.4266666666666667,
+    "y": 0.6761363636363636
+   },
+   "duration": 42
+  },
+  {
+   "filename": "nox2pro 22.png",
+   "frame": {
+    "x": 1200,
+    "y": 1056,
+    "w": 300,
+    "h": 352
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 352
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 352
+   },
+   "pivot": {
+    "x": 0.4266666666666667,
+    "y": 0.6761363636363636
+   },
+   "duration": 42
+  },
+  {
+   "filename": "nox2pro 23.png",
+   "frame": {
+    "x": 1500,
+    "y": 1056,
+    "w": 300,
+    "h": 352
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 352
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 352
+   },
+   "pivot": {
+    "x": 0.4266666666666667,
+    "y": 0.6761363636363636
+   },
+   "duration": 42
+  },
+  {
+   "filename": "nox2pro 24.png",
+   "frame": {
+    "x": 0,
+    "y": 1408,
+    "w": 300,
+    "h": 352
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 352
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 352
+   },
+   "pivot": {
+    "x": 0.4266666666666667,
+    "y": 0.6761363636363636
+   },
+   "duration": 42
+  },
+  {
+   "filename": "nox2pro 25.png",
+   "frame": {
+    "x": 300,
+    "y": 1408,
+    "w": 300,
+    "h": 352
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 352
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 352
+   },
+   "pivot": {
+    "x": 0.4266666666666667,
+    "y": 0.6761363636363636
+   },
+   "duration": 42
+  },
+  {
+   "filename": "nox2pro 26.png",
+   "frame": {
+    "x": 600,
+    "y": 1408,
+    "w": 300,
+    "h": 352
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 352
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 352
+   },
+   "pivot": {
+    "x": 0.4266666666666667,
+    "y": 0.6761363636363636
+   },
+   "duration": 42
+  },
+  {
+   "filename": "nox2pro 27.png",
+   "frame": {
+    "x": 900,
+    "y": 1408,
+    "w": 300,
+    "h": 352
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 352
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 352
+   },
+   "pivot": {
+    "x": 0.4266666666666667,
+    "y": 0.6761363636363636
+   },
+   "duration": 42
+  },
+  {
+   "filename": "nox2pro 28.png",
+   "frame": {
+    "x": 1200,
+    "y": 1408,
+    "w": 300,
+    "h": 352
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 352
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 352
+   },
+   "pivot": {
+    "x": 0.4266666666666667,
+    "y": 0.6761363636363636
+   },
+   "duration": 42
+  },
+  {
+   "filename": "nox2pro 29.png",
+   "frame": {
+    "x": 1500,
+    "y": 1408,
+    "w": 300,
+    "h": 352
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 352
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 352
+   },
+   "pivot": {
+    "x": 0.4266666666666667,
+    "y": 0.6761363636363636
+   },
+   "duration": 42
+  },
+  {
+   "filename": "nox2pro 30.png",
+   "frame": {
+    "x": 0,
+    "y": 1760,
+    "w": 300,
+    "h": 352
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 352
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 352
+   },
+   "pivot": {
+    "x": 0.4266666666666667,
+    "y": 0.6761363636363636
+   },
+   "duration": 42
+  },
+  {
+   "filename": "nox2pro 31.png",
+   "frame": {
+    "x": 300,
+    "y": 1760,
+    "w": 300,
+    "h": 352
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 352
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 352
+   },
+   "pivot": {
+    "x": 0.4266666666666667,
+    "y": 0.6761363636363636
+   },
+   "duration": 42
+  },
+  {
+   "filename": "nox2pro 32.png",
+   "frame": {
+    "x": 600,
+    "y": 1760,
+    "w": 300,
+    "h": 352
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 352
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 352
+   },
+   "pivot": {
+    "x": 0.4266666666666667,
+    "y": 0.6761363636363636
+   },
+   "duration": 42
+  },
+  {
+   "filename": "nox2pro 33.png",
+   "frame": {
+    "x": 900,
+    "y": 1760,
+    "w": 300,
+    "h": 352
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 352
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 352
+   },
+   "pivot": {
+    "x": 0.4266666666666667,
+    "y": 0.6761363636363636
+   },
+   "duration": 42
+  },
+  {
+   "filename": "nox2pro 34.png",
+   "frame": {
+    "x": 1200,
+    "y": 1760,
+    "w": 300,
+    "h": 352
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 352
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 352
+   },
+   "pivot": {
+    "x": 0.4266666666666667,
+    "y": 0.6761363636363636
+   },
+   "duration": 42
+  },
+  {
+   "filename": "nox2pro 35.png",
+   "frame": {
+    "x": 1500,
+    "y": 1760,
+    "w": 300,
+    "h": 352
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 300,
+    "h": 352
+   },
+   "sourceSize": {
+    "w": 300,
+    "h": 352
+   },
+   "pivot": {
+    "x": 0.4266666666666667,
+    "y": 0.6761363636363636
+   },
+   "duration": 42
+  }
+ ],
+ "meta": {
+  "app": "PixelLab VFX Creator",
+  "image": "nox2pro.png",
+  "format": "RGBA8888",
+  "size": {
+   "w": 1800,
+   "h": 2112
+  },
+  "scale": "1",
+  "anchor": {
+   "kind": "origin",
+   "x": 128,
+   "y": 238
+  },
+  "frameTags": [
+   {
+    "name": "nox2pro",
+    "from": 0,
+    "to": 35,
+    "direction": "forward"
+   }
+  ]
+ }
+}

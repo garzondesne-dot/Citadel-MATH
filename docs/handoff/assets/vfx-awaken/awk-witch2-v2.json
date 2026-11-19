@@ -1,0 +1,495 @@
+{
+ "frames": [
+  {
+   "filename": "witch2 0.png",
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 338,
+    "h": 397
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 338,
+    "h": 397
+   },
+   "sourceSize": {
+    "w": 338,
+    "h": 397
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8337531486146096
+   },
+   "duration": 83
+  },
+  {
+   "filename": "witch2 1.png",
+   "frame": {
+    "x": 338,
+    "y": 0,
+    "w": 338,
+    "h": 397
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 338,
+    "h": 397
+   },
+   "sourceSize": {
+    "w": 338,
+    "h": 397
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8337531486146096
+   },
+   "duration": 83
+  },
+  {
+   "filename": "witch2 2.png",
+   "frame": {
+    "x": 676,
+    "y": 0,
+    "w": 338,
+    "h": 397
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 338,
+    "h": 397
+   },
+   "sourceSize": {
+    "w": 338,
+    "h": 397
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8337531486146096
+   },
+   "duration": 83
+  },
+  {
+   "filename": "witch2 3.png",
+   "frame": {
+    "x": 1014,
+    "y": 0,
+    "w": 338,
+    "h": 397
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 338,
+    "h": 397
+   },
+   "sourceSize": {
+    "w": 338,
+    "h": 397
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8337531486146096
+   },
+   "duration": 83
+  },
+  {
+   "filename": "witch2 4.png",
+   "frame": {
+    "x": 1352,
+    "y": 0,
+    "w": 338,
+    "h": 397
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 338,
+    "h": 397
+   },
+   "sourceSize": {
+    "w": 338,
+    "h": 397
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8337531486146096
+   },
+   "duration": 83
+  },
+  {
+   "filename": "witch2 5.png",
+   "frame": {
+    "x": 0,
+    "y": 397,
+    "w": 338,
+    "h": 397
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 338,
+    "h": 397
+   },
+   "sourceSize": {
+    "w": 338,
+    "h": 397
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8337531486146096
+   },
+   "duration": 83
+  },
+  {
+   "filename": "witch2 6.png",
+   "frame": {
+    "x": 338,
+    "y": 397,
+    "w": 338,
+    "h": 397
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 338,
+    "h": 397
+   },
+   "sourceSize": {
+    "w": 338,
+    "h": 397
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8337531486146096
+   },
+   "duration": 83
+  },
+  {
+   "filename": "witch2 7.png",
+   "frame": {
+    "x": 676,
+    "y": 397,
+    "w": 338,
+    "h": 397
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 338,
+    "h": 397
+   },
+   "sourceSize": {
+    "w": 338,
+    "h": 397
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8337531486146096
+   },
+   "duration": 83
+  },
+  {
+   "filename": "witch2 8.png",
+   "frame": {
+    "x": 1014,
+    "y": 397,
+    "w": 338,
+    "h": 397
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 338,
+    "h": 397
+   },
+   "sourceSize": {
+    "w": 338,
+    "h": 397
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8337531486146096
+   },
+   "duration": 83
+  },
+  {
+   "filename": "witch2 9.png",
+   "frame": {
+    "x": 1352,
+    "y": 397,
+    "w": 338,
+    "h": 397
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 338,
+    "h": 397
+   },
+   "sourceSize": {
+    "w": 338,
+    "h": 397
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8337531486146096
+   },
+   "duration": 83
+  },
+  {
+   "filename": "witch2 10.png",
+   "frame": {
+    "x": 0,
+    "y": 794,
+    "w": 338,
+    "h": 397
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 338,
+    "h": 397
+   },
+   "sourceSize": {
+    "w": 338,
+    "h": 397
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8337531486146096
+   },
+   "duration": 83
+  },
+  {
+   "filename": "witch2 11.png",
+   "frame": {
+    "x": 338,
+    "y": 794,
+    "w": 338,
+    "h": 397
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 338,
+    "h": 397
+   },
+   "sourceSize": {
+    "w": 338,
+    "h": 397
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8337531486146096
+   },
+   "duration": 83
+  },
+  {
+   "filename": "witch2 12.png",
+   "frame": {
+    "x": 676,
+    "y": 794,
+    "w": 338,
+    "h": 397
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 338,
+    "h": 397
+   },
+   "sourceSize": {
+    "w": 338,
+    "h": 397
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8337531486146096
+   },
+   "duration": 83
+  },
+  {
+   "filename": "witch2 13.png",
+   "frame": {
+    "x": 1014,
+    "y": 794,
+    "w": 338,
+    "h": 397
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 338,
+    "h": 397
+   },
+   "sourceSize": {
+    "w": 338,
+    "h": 397
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8337531486146096
+   },
+   "duration": 83
+  },
+  {
+   "filename": "witch2 14.png",
+   "frame": {
+    "x": 1352,
+    "y": 794,
+    "w": 338,
+    "h": 397
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 338,
+    "h": 397
+   },
+   "sourceSize": {
+    "w": 338,
+    "h": 397
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8337531486146096
+   },
+   "duration": 83
+  },
+  {
+   "filename": "witch2 15.png",
+   "frame": {
+    "x": 0,
+    "y": 1191,
+    "w": 338,
+    "h": 397
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 338,
+    "h": 397
+   },
+   "sourceSize": {
+    "w": 338,
+    "h": 397
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8337531486146096
+   },
+   "duration": 83
+  },
+  {
+   "filename": "witch2 16.png",
+   "frame": {
+    "x": 338,
+    "y": 1191,
+    "w": 338,
+    "h": 397
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 338,
+    "h": 397
+   },
+   "sourceSize": {
+    "w": 338,
+    "h": 397
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8337531486146096
+   },
+   "duration": 83
+  },
+  {
+   "filename": "witch2 17.png",
+   "frame": {
+    "x": 676,
+    "y": 1191,
+    "w": 338,
+    "h": 397
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 338,
+    "h": 397
+   },
+   "sourceSize": {
+    "w": 338,
+    "h": 397
+   },
+   "pivot": {
+    "x": 0.5,
+    "y": 0.8337531486146096
+   },
+   "duration": 83
+  }
+ ],
+ "meta": {
+  "app": "PixelLab VFX Creator",
+  "image": "witch2.png",
+  "format": "RGBA8888",
+  "size": {
+   "w": 1690,
+   "h": 1588
+  },
+  "scale": "1",
+  "anchor": {
+   "kind": "feet",
+   "x": 169,
+   "y": 331
+  },
+  "frameTags": [
+   {
+    "name": "witch2",
+    "from": 0,
+    "to": 17,
+    "direction": "forward"
+   }
+  ]
+ }
+}
