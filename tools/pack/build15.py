@@ -227,6 +227,7 @@ pack = {'id': 'ex-15', 'no': 15, 'v': 1, 'title': '함수의 그래프 · 여러
         'theme': '12-skygarden', 'defaultPct': 90, 'source': {'file': 'upload'},
         'next': {'title': '16차시 · 합성함수', 'ask': '함수 두 개를 이어 붙이면 — 먼저 f, 다음 g 를 하면?', 'link': '두 기계를 차례로 통과하기'},
         'imgCells': ['review', 'c1', 'm1', 'c2', 'm2', 'c3', 'm3', 'sum'],
+        'videos': {'c1': 'video/v15-62.mp4', 'c2': 'video/v15-63.mp4', 'c3': 'video/v15-64.mp4'},  # 팩 v2: zip 안 v15-62~64.mp4 (드라이브 05 「(15차시) 62 · 63 · 64」)
         'steps': steps,
         'monsters': {
             'm1': {'title': '몬스터 1 수평선 박쥐', 'sprite': 'garden1:0', 'attack': 'pause', 'first': M1[0], 'retry': {'pool': M1[1:]}, 'help': HELP1},
