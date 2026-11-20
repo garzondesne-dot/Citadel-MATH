@@ -88,3 +88,11 @@
 | hero-bard-idle8-v1.webp | hero-bard-idle8-v6.webp | 1204 | 537 | 49 |
 | hero-dknight-awk-idle8-v1.webp | hero-dknight-awk-idle8-v6.webp | 707 | 0 | 0 |
 | hero-paladin-awk-idle8-v1.webp | hero-paladin-awk-idle8-v6.webp | 31 | 0 | 0 |
+
+## v6b (2026-11-20 · 머리 지시 「초록 찌꺼기 지우기」)
+| 파일 | 내용 |
+|---|---|
+| hero-dknight-idle8-v6b.webp | 베타 쓰는 녹스 숨쉬기 v2(대검)에서 despill + **발 아래 초록 줄 · 망토 초록 점 제거**(8칸) · 비교 cmp/hero-dknight-idle8-v6b.png |
+| hero-dknight-v6b.webp | 녹스 전투 시트 v6 에서 같은 **초록 찌꺼기 제거**(녹스에는 초록이 없어 초록 쏠림 모두 처리 · 발 줄은 윤곽선 색으로) · 비교 cmp/hero-dknight-v6b.png |
+| hero-bone-v6b.webp | 해골 소환사 1,0칸 발 아래 **초록 덩어리 111px 제거**(그 칸만) · 비교 cmp/hero-bone-v6b.png |
+다른 용사 바닥 초록 줄 훑기(발 근처 가로로 8px 이상 이어진 초록): 녹스(전투 18칸 · 숨쉬기 8칸) · 해골 소환사 1칸만 해당 · 사제(8,0 · 8,1) · 마녀(5,1)는 초록 힐 이펙트라 그대로. 스크립트 = greenjunk.py.
