@@ -17,6 +17,7 @@ P0 = dict(hero_hp=100, atb=8, sub_sec=18, atk=8, atk_hit=0.8, atk_sec=3, atk_rat
 
 def run(n, p, P, mode, boss_hp, eager=False, masher=False, rng=random):
     hp = [P['hero_hp']] * n; atb = [0.0] * n
+    gold = [0] * n; weak = set(range(P.get('weak', 0)))
     e = [0] * n; tok = [0] * n                      # ⚡ · 완주 표(1 보통 · 2 퍼펙트)
     qi = [rng.randrange(len(KS)) for _ in range(n)]; prog = [0] * n; wrong = [0] * n; clean = [True] * n
     busy = [0] * n; doing = [None] * n
@@ -70,7 +71,9 @@ def run(n, p, P, mode, boss_hp, eager=False, masher=False, rng=random):
                             prog[i] += 1; solved[i] += 1; first = (wrong[i] == 0)
                             last = prog[i] == k
                             if mode == 'B': e[i] = 2 if first else 1
-                            if mode == 'C': e[i] = min(5, e[i] + (2 if last and k >= 5 else 1))
+                            if mode == 'C':
+                                add = (2 if last and k >= 5 else 1); e[i] = min(5, e[i] + add)
+                                if first and P.get('gold'): gold[i] = min(e[i], gold[i] + add)
                             if last:
                                 if mode == 'A': e[i] = 2 if clean[i] else 1
                                 if mode == 'C': tok[i] = 2 if clean[i] else 1
@@ -90,14 +93,17 @@ def run(n, p, P, mode, boss_hp, eager=False, masher=False, rng=random):
                 atb[i] = 0; fires[i] += 1
                 dn = [j for j in range(n) if hp[j] <= 0]
                 if dn and rev > 0:
-                    rev -= 1; hp[dn[0]] = P['revive_hp']; e[i] = max(0, e[i] - 1) if mode == 'C' else 0
+                    rev -= 1; hp[dn[0]] = P['revive_hp']; e[i] = max(0, e[i] - 1) if mode == 'C' else 0; gold[i] = min(gold[i], e[i])
                     continue
                 if mode == 'C':
                     if up and sh.get(i, 0) > 0 and tok[i]:
-                        sh[i] -= min(tok[i], sh[i])
+                        sh[i] -= 1
+                        if i in weak:
+                            rest = [o for o in sh if sh[o] > 0 and o != i]
+                            if rest: sh[rest[0]] -= 1
                         tok[i] = 0
-                    hit(P['skill'] * MUL[e[i]] * P['timing_bonus'], 's')
-                    e[i] = 0
+                    hit(P['skill'] * MUL[e[i]] * (1 + 0.5 * gold[i] / e[i]) * P['timing_bonus'], 's')
+                    e[i] = 0; gold[i] = 0
                     if done or i not in sh: tok[i] = 0
                 else:
                     c = e[i]; e[i] = 0
@@ -133,7 +139,26 @@ def block(title, P, mode, hps, ps=(0.4, 0.6, 0.8), ns=(1, 2, 3, 4), N=1500, **kw
             r = rate(n, p, P, mode, hps[n], N, 5, **kw)
             print(f"| {n} | {hps[n]} | {int(p*100)}% | {r['win']*100:.0f}% | {r['t']:.1f} | {r['q']:.1f} | {r['solve']*100:.0f}% | {r['gap']:.0f} | {r['share']*100:.0f}% |")
 
+def final():
+    """선생님 결정 반영: 안 C · 각자 1칸 · 금색 ⚡ · 약점 계열 1명 · 약 4분."""
+    L = dict(P0); L.update(A_mul=3.75, skill=55, own_all=True, gold=True, atk=12,
+                           shields={1: 1, 2: 2, 3: 3, 4: 4}, single=14, aoe=7)
+    for w in (0, 1):
+        Q = dict(L); Q['weak'] = w
+        hpn = {n: tune(n, Q, 'C') for n in (1, 2, 3, 4)}
+        block(f'일반 · 보스 공격 14 / 7 (1인 10 / 5) · 약점 계열 용사 {w}명', Q, 'C', hpn)
+        if w == 1:
+            E = dict(Q); E['single'] = 8; E['aoe'] = 4
+            block('연습 · HP = 일반의 70/85 · 보스 공격 8 / 4', E, 'C', {n: round(hpn[n] * 70 / 85 / 10) * 10 for n in hpn})
+            D = dict(Q); D['single'] = 18; D['aoe'] = 9
+            block('도전 · HP = 일반 ÷ 0.85 · 보스 공격 18 / 9', D, 'C', {n: round(hpn[n] / 0.85 / 10) * 10 for n in hpn}, ps=(0.6, 0.8, 0.95))
+            print()
+            for n in (1, 2, 3, 4):
+                print(f"- 문제 0개 · {n}인: 승률 {rate(n, 0.6, Q, 'C', hpn[n], 300, 9, masher=True)['win']*100:.0f}%")
+
 if __name__ == '__main__':
+    import sys
+    if len(sys.argv) > 1 and sys.argv[1] == 'final': final(); sys.exit()
     P = dict(P0); P['A_mul'] = 3.75
     print('## 1. 충전 단위 3안 — 4인 · 일반 · 보스 공격 같음 · 「정답률 60% 팀 승률 70%」가 되게 보스 HP 를 맞춤')
     for mode, own in (('A', False), ('B', False), ('C', False), ('C', True)):
