@@ -1,0 +1,37 @@
+Draw ONE sprite sheet of the character in IMAGE 1, using IMAGE 2 only as a pose map and IMAGE 3 as his ONLY sword.
+
+IMAGE 1 = CHARACTER DESIGN (the ONLY source for how he looks): "Nox", a dark knight (chibi pixel-art hero), normal (not awakened) form. Copy his look EXACTLY:
+- armor: dark gunmetal-gray plate armor with soft light-gray highlights, rounded shoulder plates
+- helmet: large spiky swept-back dark helmet, a glowing pink-red visor slit
+- cape: dark crimson tattered cape with bright red jagged edges
+- greatsword: big straight sword, gray steel guard and edges, glowing pink-red rune core down the blade
+- overall: the plain version; NO red crack lines on the armor, NO embers, NO extra glow
+Every pixel of armor, color, cape and weapon must look like IMAGE 1. Do NOT add awakened details.
+
+IMAGE 2 = POSE MAP ONLY (gray): a 6 x 7 grid of cells, each 256x144. Use it ONLY for each cell's pose, position, size, facing and feet line.
+IGNORE the gray character's armor, shapes and details in IMAGE 2 completely. It is an old design.
+Cells 1-31 = battle poses (idle, walk, attack, hit, knocked down, heal, victory, back view ...). Cells 32-34 = empty. Cells 35-42 = an 8-frame idle breathing loop.
+
+IMAGE 3 = HIS SWORD (the only sword he ever holds). Use this exact sword in every cell: same shape, same colors, same pixels, same SIZE. You may only rotate it to fit the pose. Never redraw it bigger or smaller, never change its design. The red center line of the blade blinks: IMAGE 3 left = ON, right = OFF. Battle cells 1-31 = ON. Breathing cells 35-42 blink slowly: 35-36 ON, 37-38 OFF, 39-40 ON, 41-42 OFF. Its length in the sheet = about his full height (top of helmet to feet), in ALL cells, including the attack cells 9-12.
+
+WEAPON RULE (most important): Nox ALWAYS holds his greatsword with BOTH HANDS on the hilt, in EVERY cell 1-31 and 35-42, even where IMAGE 2 shows empty fists or no sword.
+- Idle, walk, hit and small standing cells (1-8, 13, 16, 20, 21, 28-31): both hands grip the hilt in front of his chest, blade pointing diagonally up and forward (away from the cape), the whole blade visible, same sword size as in cells 9-12.
+- Cheer, sparkle and heal cells (15, 18, 19, 26, 27): he raises the sword high with both hands, blade pointing straight up; effects stay around him.
+- Back-view cells (22, 23): he holds the sword in front of him with both hands; the blade tip shows above one shoulder.
+- Attack and knocked-down cells (9-12, 14, 17, 24, 25): keep the sword exactly where IMAGE 2 puts it.
+- Breathing cells 35-42: both hands rest on the pommel, sword point planted in the ground in front of him (like IMAGE 1).
+- The sword is ALWAYS a separate, clearly readable object with its own outline: never hidden behind the body, never merged into the helmet spikes or the cape, never worn on his back, never vanishing between cells.
+
+SWORD CHECK (a first try failed these, so obey them strictly):
+- EXACTLY ONE sword in every cell. Never two swords (no extra sword held up while another is planted).
+- The sword is the SAME SIZE in every cell: total length from pommel to tip = about his full height (top of helmet to feet). Do NOT make it bigger in the attack cells 9-12 and do NOT make it smaller in idle cells. Same width, same guard, same blade in all 42 cells.
+- NO EMPTY FISTS anywhere. Cells 13, 15, 16, 18, 19, 23 must also show both hands on the sword (hit = gripping it while flinching; cheer / heal = sword raised up with both hands; back view waving = sword held up instead of waving).
+- Breathing cells 35-42: identical sword size and position in all 8, both hands on the pommel, point in the ground; only the center-line glow changes (ON / OFF as above).
+
+OUTPUT
+- ONE image 1536x1008, the same 6 x 7 grid, solid flat pure green #00FF00 background (no green inside the character; the pink blade stays pink).
+- In every cell draw the IMAGE 1 character in the pose of that cell of IMAGE 2: same position, size, facing and feet line.
+- Effects in a cell (slash trail, sparkles, heal cross, dizzy swirl) stay, in white and soft pink-red only (no green tint or green glow anywhere on the character or effects).
+- The 8 breathing cells look like IMAGE 1's frames: almost identical, only tiny breathing and cape motion, no jitter.
+- Cells 32-34 empty. Nothing crosses a cell border. No grid lines, no text, no numbers.
+- Same detailed pixel-art style as IMAGE 1, crisp pixels, no blur.

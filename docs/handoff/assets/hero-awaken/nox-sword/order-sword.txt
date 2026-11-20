@@ -1,0 +1,13 @@
+Draw ONE pixel-art image with TWO cells side by side: the dark knight's GREATSWORD alone, as a clean game asset, in two glow states.
+
+IMAGE 1 = the sword to copy: the sword he leans on in these pictures (point in the ground, hands on the hilt).
+IMAGE 2 = the same knight, for colors and pixel style.
+Copy THAT sword's design exactly: a wide, flat, straight blade with a thick light-gray steel border, a deep red center channel with a bright glowing pink-red line and small rune marks down the middle, a gray crossguard with curled ends.
+The hands hide the top of the hilt in IMAGE 1, so complete it simply: a short dark grip and a round gray pommel, in the same style.
+- Show the WHOLE sword, nothing hidden: pommel, grip, crossguard, blade and point. No hand, no knight, no cape.
+- Straight up and down, point at the BOTTOM (like it is planted), perfectly vertical, centered.
+- In each cell the sword fills about 90% of the cell height, at the same place in both cells.
+- LEFT cell = glow ON: the red center line blazes bright pink-red with a soft glow.
+- RIGHT cell = glow OFF: the exact same sword, same pixels, but the center line is dark dull red with no glow. Only the center line changes.
+- ONE image 1024x512 (two 512x512 cells, no line between them), solid flat pure green #00FF00 background, no green inside the sword, no shadow, no glow spilling onto the background.
+- Same chunky detailed pixel art as IMAGE 1, crisp pixels, no blur, no text.
