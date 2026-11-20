@@ -1,4 +1,5 @@
 # 14차시 「함수」 차시 팩 만들기 + 정답 독립 검산 (2026-11-20 · 손발 #7 · 메타인지 8 컨펌 #1: 몬스터 3 · B1 · C1)
+#   팩 v3 (11/20): 여러 개 고르기(multi) = 엔진 꼴 options · answer [번호] (v1 · v2 = choices · "0,2" 라 앱에서 채점이 깨짐 · 베타 검사기로 확인)
 #   학습지 = tools/worksheet/gen_ws14v1.py (교과서 미래엔 106~108쪽 · 중단원 05) · 꼴 = 13차시 팩(ex-13 v4) 과 같음
 #   실행: python3 -I tools/pack/build14.py <출력.json>  → 검산 표를 찍고, 하나라도 틀리면 멈춤
 import json, sys, random
@@ -57,7 +58,7 @@ def m1_set(D, tag):
         ok(f'm1{tag}-{n}', c, f'원소마다 화살표 수 = {[sum(1 for a, _ in D[n] if a == x) for x in X4]}')
     f = [n for n in (1, 2, 3) if is_fn(X4, D[n])]; assert len(f) == 1; f = f[0]; R = rng(D[f])
     out.append(ch('{a, b, c, d}', ['{' + ', '.join(R) + '}', '{1, 2, 3, 4}'], '공역 = Y 전체 = {a, b, c, d} (치역과 다름)', f'문제 1) 함수인 ({f}) 의 공역은?'))
-    out.append({'type': 'multi', 'question': f'문제 1) 함수인 ({f}) 의 치역의 원소를 모두 고르시오.', 'choices': Y4, 'answer': ','.join(str(Y4.index(y)) for y in R), 'solution': '치역 = 화살표를 받은 원소 = {' + ', '.join(R) + '}'})
+    out.append({'type': 'multi', 'question': f'문제 1) 함수인 ({f}) 의 치역의 원소를 모두 고르시오.', 'options': Y4, 'answer': [Y4.index(y) for y in R], 'solution': '치역 = 화살표를 받은 원소 = {' + ', '.join(R) + '}'})
     ok(f'm1{tag}-공역', '{a, b, c, d}', '공역 = Y'); ok(f'm1{tag}-치역', '{' + ', '.join(R) + '}', f'({f}) 의 화살표 끝 모음')
     return out
 for d in R1: assert sum(is_fn(X4, d[n]) for n in (1, 2, 3)) == 1 and {why_not(X4, d[n])[0] for n in (1, 2, 3) if why_not(X4, d[n])} == {'none', 'many'}
@@ -111,7 +112,7 @@ def b2(p, q, X, Y, tag):
     R = sorted({p * x + q for x in X}); assert set(R) <= set(Y)
     f = f'f(x) = {p}x {sgn(q)}'
     ok(f'boss2{tag}', '{' + ', '.join(map(M, R)) + '}', ' · '.join(f'f({x}) = {p * x + q}' for x in X))
-    return {'type': 'multi', 'question': f'2. X = {{{", ".join(map(str, X))}}} 에서 Y = {{{", ".join(map(str, Y))}}} 로의 함수 {f} 의 치역의 원소를 모두 고르시오.', 'choices': [M(y) for y in Y], 'answer': ','.join(str(Y.index(y)) for y in R), 'solution': '치역 = 함숫값 모음 = {' + ', '.join(map(M, R)) + '}'}
+    return {'type': 'multi', 'question': f'2. X = {{{", ".join(map(str, X))}}} 에서 Y = {{{", ".join(map(str, Y))}}} 로의 함수 {f} 의 치역의 원소를 모두 고르시오.', 'options': [M(y) for y in Y], 'answer': [Y.index(y) for y in R], 'solution': '치역 = 함숫값 모음 = {' + ', '.join(map(M, R)) + '}'}
 B2 = [b2(2, -1, [1, 2, 3], [1, 3, 5, 7], ''), b2(1, 2, [1, 2, 3], [2, 3, 4, 5, 6], 'r1'), b2(3, -2, [1, 2, 3], [1, 4, 7, 10], 'r2'), b2(2, 1, [0, 1, 2], [1, 3, 5, 7], 'r3')]
 def b3(r, tag):
     assert min((x / 10) ** 2 + r for x in range(-300, 301)) == r
@@ -191,7 +192,7 @@ def each_item():
     for p in b['pool']: yield from p
 for it in each_item():
     if it['type'] == 'choice': assert 0 <= it['answerIndex'] < len(it['choices'])
-    if it['type'] == 'multi': assert all(0 <= int(i) < len(it['choices']) for i in it['answer'].split(','))
+    if it['type'] == 'multi': assert isinstance(it['answer'], list) and it['answer'] and all(0 <= i < len(it['options']) for i in it['answer']) and 'choices' not in it  # 엔진 꼴 = options · answer 번호 배열 (v3 고침)
 for m in pack['monsters'].values():  # 판마다 문항 꼴 같음(PACK-GUIDE 14)
     sig = [i['type'] for i in m['first']]
     assert all([i['type'] for i in v] == sig for v in m['retry']['pool'])
