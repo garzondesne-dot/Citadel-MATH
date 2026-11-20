@@ -189,6 +189,7 @@ pack = {'id': 'ex-16', 'no': 16, 'v': 1, 'title': '합성함수', 'unit': '공�
         'theme': '05-ruins', 'defaultPct': 90, 'source': {'file': 'upload'},
         'next': {'title': '17차시 · 역함수', 'ask': '화살표를 거꾸로 돌려도 함수가 될까?', 'link': '되감기 = 역함수'},
         'imgCells': ['review', 'c1', 'm1', 'c2', 'm2', 'c3', 'm3', 'recap', 'sum'],
+        'videos': {'c1': 'video/v16-65.mp4', 'c2': 'video/v16-66.mp4', 'c3': 'video/v16-67.mp4'},  # 팩 v2: zip 안 v16-65~67.mp4 (드라이브 05 「(16차시) 65 · 66 · 67」)
         'steps': steps,
         'monsters': {
             'm1': {'title': '몬스터 1 톱니 병정', 'sprite': 'base1:0', 'attack': 'pause', 'first': M1[0], 'retry': {'pool': M1[1:]}, 'help': HELP1},
