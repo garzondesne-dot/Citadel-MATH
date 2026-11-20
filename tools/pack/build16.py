@@ -1,5 +1,6 @@
 # 16차시 「합성함수」 차시 팩 만들기 + 정답 독립 검산 (2026-11-20 · 손발 #7 · 메타인지 8 컨펌 #5: A1 · B1 · C1 · D1 · E1)
-#   학습지 = tools/worksheet/gen_ws16v1.py (교과서 미래엔 111~112쪽 · 중단원 03 · 07) · 꼴 = 14차시 팩 v3 (엔진 꼴 v1 · 새 꼴 없음)
+#   팩 v3 (11/20 컨펌 #8 B): 형성평가 1~3 = 교과서 그대로 g(x) = 3x² − 4 (v1 · v2 는 3x − 4 로 잘못 옮김)
+#   학습지 = tools/worksheet/gen_ws16v2.py (교과서 미래엔 111~112쪽 · 중단원 03 · 07) · 꼴 = 14차시 팩 v3 (엔진 꼴 v1 · 새 꼴 없음)
 #   실행: python3 -I tools/pack/build16.py <출력.json>  → 검산 표를 찍고, 하나라도 틀리면 멈춤
 #   앱 검사: 베타 checkUpload + 모든 문항 정답 채점 (손발 #7 scratch 시험)
 import json, sys, random
@@ -120,19 +121,19 @@ assert ps(M3s[0][1]) == '−2x + 5'  # 학습지 정답
 
 
 # ───────── 형성평가 4 (1 ~ 3 = 중단원 03 · 같은 판에서 f · g 같음) ─────────
-BF = [(-5, 3, -4, 3, 1), (2, 2, 1, 1, -1), (-3, 4, -1, 2, 2), (1, -2, 5, 0, 1)]  # f = x + a · g = mx + n · (g∘f)(u) · (g∘g)(w)
+BF = [(-5, 3, -4, 3, 1), (-3, 2, 1, 2, 1), (4, 1, -5, -2, 2), (-1, -1, 3, 4, 1)]  # f = x + a · g = mx² + n (교과서 중단원 03 = 3x² − 4 · 팩 v3 · 11/20 컨펌 #8 B) · (g∘f)(u) · (g∘g)(w)
 B1, B2, B3 = [], [], []
 for i, (a, m, n, u, w) in enumerate(BF):
-    f, g = P(a, 1), P(n, m); F, G = (lambda x, f=f: pev(f, x)), (lambda x, g=g: pev(g, x))
+    f, g = P(a, 1), P(n, 0, m); F, G = (lambda x, f=f: pev(f, x)), (lambda x, g=g: pev(g, x))
     tag = '' if i == 0 else f'r{i}'
     head = f'두 함수 f(x) = {ps(f)} 와 g(x) = {ps(g)} 에 대하여 '
     v1, v2, fg = G(F(u)), G(G(w)), pcomp(f, g)
     B1.append(ch(M(v1), pick(M(v1), [M(F(G(u))), M(G(u)), M(F(u)), M(v1 + 1)]), f'g(f({u})) = g({M(F(u))}) = {M(v1)}', '1. ' + head + f'(g∘f)({u}) 의 값은?'))
     B2.append(ch(M(v2), pick(M(v2), [M(G(w)), M(G(w) * G(w)), M(F(F(w))), M(v2 - 1)]), f'g(g({w})) = g({M(G(w))}) = {M(v2)}', '2. ' + head + f'(g∘g)({w}) 의 값은?'))
-    B3.append(ch(ps(fg), pick(ps(fg), [ps(pcomp(g, f)), ps(P(a + n, m)), ps(P(n - a, m))]), f'f(g(x)) = ({ps(g)}) {"+" if a > 0 else "−"} {abs(a)} = {ps(fg)}', '3. ' + head + '(f∘g)(x) 는?'))
-    for x in range(-3, 4): assert pev(fg, x) == (m * x + n) + a
+    B3.append(ch(ps(fg), pick(ps(fg), [ps(pcomp(g, f)), ps(P(a + n, m)), ps(P(n - a, 0, m)), ps(P(n + a, 0, -m))]), f'f(g(x)) = ({ps(g)}) {"+" if a > 0 else "−"} {abs(a)} = {ps(fg)}', '3. ' + head + '(f∘g)(x) 는?'))
+    for x in range(-3, 4): assert pev(fg, x) == (m * x * x + n) + a
     ok(f'boss1-3{tag}', f'{v1} · {v2} · {ps(fg)}', f'g(f({u})) · g(g({w})) · f(g(x))')
-assert (B1[0]['choices'][B1[0]['answerIndex']], B2[0]['choices'][B2[0]['answerIndex']], B3[0]['choices'][B3[0]['answerIndex']]) == ('−10', '−7', '3x − 9')
+assert (B1[0]['choices'][B1[0]['answerIndex']], B2[0]['choices'][B2[0]['answerIndex']], B3[0]['choices'][B3[0]['answerIndex']]) == ('8', '−1', '3x² − 9')  # 교과서 중단원 03 답
 B4 = []
 for i, (p, q, r, s) in enumerate([(3, 1, 6, -5), (2, -1, 4, 7), (5, 2, -10, 7), (3, -4, 9, 2)]):
     h = solve_h(p, q, r, s); f, g = P(q, p), P(s, r)

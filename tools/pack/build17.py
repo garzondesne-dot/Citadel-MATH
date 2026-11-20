@@ -182,6 +182,7 @@ pack = {'id': 'ex-17', 'no': 17, 'v': 1, 'title': '역함수', 'unit': '공통�
         'theme': '06-frost', 'defaultPct': 90, 'source': {'file': 'upload'},
         'next': {'title': '18차시 · 유리함수', 'ask': '분모에 x 가 있는 함수의 그래프는 어떤 모양일까?', 'link': '함수 단원 다음 걸음'},
         'imgCells': ['review', 'c1', 'm1', 'c2', 'c3', 'm2', 'm3', 'recap', 'sum'],
+        'videos': {'c1': 'video/v17-68.mp4', 'c2': 'video/v17-69.mp4', 'c3': 'video/v17-70.mp4'},  # 팩 v2: zip 안 v17-68~70.mp4 (드라이브 05 「(17차시) 68 · 69 · 70」)
         'steps': steps,
         'monsters': {
             'm1': {'title': '몬스터 1 거울 박쥐', 'sprite': 'mirror1:0', 'attack': 'pause', 'first': M1[0], 'retry': {'pool': M1[1:]}, 'help': HELP1},
