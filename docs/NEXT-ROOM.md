@@ -13,6 +13,7 @@
 > - **기다리는 것(선생님)**: ① refund228 추가 3명(💎 180) 할지 ② 학교판(dungeon-hpms) 규칙 게시 ③ 주말 GPT 각성 시트 30명 ④ 게시판 던전 확정안 ⑤ 미래교육상(마감 12/11).
 > - **방**: 손발 테스트 #1 `session_014JJv1kfRHM8SAjsHDCgfJ5`(베타 · 운영 읽기 · 선생님 직접 지시 때만 운영 쓰기) · 손발 #7 `session_014JJv1hC8cMYvB3uDZ6sFn6`(정식 배포 · 선생님 「배포」만) · 설계 방 `session_014JJv1gNxiR4EbqPvhG9Ym8`.
 > - **PixelLab** 잔량 약 990(12/18 다시 채움) · 작업대 https://claude.ai/artifact/TRT3FTbyV27EqKRtWPTZru (v62).
+> - **🆕 새 방 ID (11/20 메타인지 7 이 만듦)**: 🧠 메타인지 8 `session_014JJv1kdEKCDNEfQv1jGJga`(Opus) · ✋ 손발 #2 게시판 던전 ATB `session_014JJv1i25u9zUunrXW3xZfb`(Opus · 가지 board-atb) · 🐞 버그 사냥 `session_014JJv1hXDaQ2bEs66Tjvi11`(Opus · 가지 bughunt) · 🎨 에셋 방 `session_014JJv1iT9XzfLrj7P6GDYkT`(Sonnet) · 📝 미래교육상 보고서 `session_014JJv1koo47jA3VwyRkf6Jk`(Opus). 손발 #7 = 배포만(Sonnet 권장) · 설계 방 = Fable.
 > - **🧠 마지막 확인 커밋 (메타인지 7 마감)** = 이 줄을 넣은 커밋.
 >
 > 🧭 **새 방은 ① 이 파일 ② (메타인지 방) `docs/CLASS-LOG.md` ③ CLAUDE.md 「🧠 머리 · ✋ 손발 — 방 구조」 절 · DECISIONS 최근 항목을 읽고 시작** (2026-11-09 · 현황판 없앰)
