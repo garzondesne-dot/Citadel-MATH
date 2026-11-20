@@ -1,3 +1,5 @@
+> **✅ 메타인지 8 = session_014JJv1kdEKCDNEfQv1jGJga · 첫 할 일 (11/20 오후)** · ① 일곱 방 알림 끝 = 손발 테스트 #1 `session_014JJv1kfRHM8SAjsHDCgfJ5` · 손발 #7 `session_014JJv1hC8cMYvB3uDZ6sFn6` · 설계 `session_014JJv1gNxiR4EbqPvhG9Ym8` · **새 방(11/20 메타인지 7 이 만듦)**: ✋ 손발 #2 (게시판 던전 ATB) `session_014JJv1i25u9zUunrXW3xZfb` · 🐞 버그 사냥 `session_014JJv1hXDaQ2bEs66Tjvi11` · 🎨 에셋 방 `session_014JJv1iT9XzfLrj7P6GDYkT` · 📝 미래교육상 보고서 `session_014JJv1koo47jA3VwyRkf6Jk` ② CLAUDE.md · GLOSSARY 「메타인지 7」 → 8 ③ 대조 = 마지막 확인 커밋 ad6ed7e 뒤 새 커밋 없음 · 다른 점 없음 ④ ⏰ 11/23 08:10 예약은 아직 메타인지 7 방에 걸려 있음(trig_01AUZPUjJkKTxMnuXtpUKKQw · 이 방으로 옮기기 = 권한 막힘 → 선생님께 여쭘).
+>
 > **🧠 메타인지 7 → 8 인계 (2026-11-20 오후 마감 · 선생님 「마감 · 새 방」 · 선생님 요금제 Ultra(주간 Pro 10배 · 11/23 월 05:00 까지) → 방을 늘려 병렬로)**
 >
 > | 이 방에서 정한 것 (11/18 ~ 11/20) | DECISIONS | 만들었음 · 배포 |
