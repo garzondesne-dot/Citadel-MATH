@@ -166,7 +166,7 @@ pack = {'id': 'ex-14', 'no': 14, 'v': 1, 'title': '함수', 'unit': '공통수�
         'goal': '① 함수의 뜻을 알고 정의역 · 공역 · 치역을 구할 수 있다. ② 두 함수가 서로 같을 조건을 안다.',
         'theme': '04-mine', 'defaultPct': 90, 'source': {'file': 'upload'},
         'next': {'title': '15차시 · 함수의 그래프', 'ask': '함숫값의 순서쌍 (x, f(x)) 를 좌표평면에 점으로 찍으면?', 'link': '함수를 그림으로 보는 법'},
-        'imgCells': ['review', 'c1', 'c2', 'm1', 'c3', 'm2', 'c4', 'm3', 'recap', 'sum'], 'videos': {'c1': 'video/v14-58.mp4', 'c2': 'video/v14-59.mp4'},  # zip 안 v14-58.mp4 · v14-59.mp4 (드라이브 05 「(14차시) 58 · 59」)
+        'imgCells': ['review', 'c1', 'c2', 'm1', 'c3', 'm2', 'c4', 'm3', 'recap', 'sum'], 'videos': {'c1': 'video/v14-58.mp4', 'c2': 'video/v14-59.mp4', 'c3': 'video/v14-60.mp4', 'c4': 'video/v14-61.mp4'},  # zip 안 v14-58~61.mp4 (드라이브 05 「(14차시) 58 · 59 · 60 · 61」)
         'steps': steps,
         'monsters': {
             'm1': {'title': '몬스터 1 짝 잃은 열쇠', 'sprite': 'keyvault1:0', 'attack': 'pause', 'first': M1[0], 'retry': {'pool': M1[1:]}, 'help': HELP1},
