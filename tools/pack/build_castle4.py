@@ -127,6 +127,7 @@ R04 = [r04(GOOD[i], NOT_INJ[i % 3], NOT_ONTO[i % 3]) for i in range(7)]
 
 # ───────── 05 · 중단원 10 (발전 · 서술형 · ⚔ 5단계) ─────────
 def r05(p, q, r, s):
+    E = lambda x, y: (f'{("" if x == 1 else "−" if x == -1 else M(x))}a + b' if x else 'b') + f' = {M(y)}'
     a1 = Fr(s - r, q - p); b1 = r - a1 * p; a2 = -a1; b2 = s - a2 * p
     assert all(x.denominator == 1 for x in (a1, b1, a2, b2)) and {a1 * p + b1, a1 * q + b1} == {r, s} == {a2 * p + b2, a2 * q + b2}
     a1, b1, a2, b2 = map(int, (a1, b1, a2, b2))
@@ -134,8 +135,8 @@ def r05(p, q, r, s):
     ok('05', f'({M(a1)}, {M(b1)}), ({M(a2)}, {M(b2)})', '끝점 대입')
     return [chq(Q + '① 일대일대응인 일차함수에서 정의역의 양 끝은?', '공역의 양 끝에 하나씩 대응한다', ['공역의 가운데에 대응한다', '같은 값에 대응한다'], '직선이 치역 = 공역이 되려면 양 끝점끼리 대응', '일대일대응이므로 정의역의 양 끝이 공역의 양 끝에 하나씩 대응한다.'),
             chq(Q + '② a > 0 일 때 세울 식은?', f'f({p}) = {r}, f({q}) = {s}', [f'f({p}) = {s}, f({q}) = {r}', f'f({r}) = {p}, f({s}) = {q}'], 'a > 0 → 오른쪽 위로 → 작은 끝 ↔ 작은 끝', f'a > 0 이면 f({p}) = {r}, f({q}) = {s}'),
-            chq(Q + '③ a > 0 일 때 (a, b) 는?', f'({M(a1)}, {M(b1)})', [f'({M(b1)}, {M(a1)})', f'({M(a1)}, {M(-b1)})', f'({M(a1 + 1)}, {M(b1)})'], f'{p}a + b = {r}, {q}a + b = {s} → a = {M(a1)}, b = {M(b1)}', f'a > 0 이면 (a, b) = ({M(a1)}, {M(b1)})'),
-            chq(Q + '④ a < 0 일 때 (a, b) 는?', f'({M(a2)}, {M(b2)})', [f'({M(b2)}, {M(a2)})', f'({M(a2)}, {M(b1)})', f'({M(-a2)}, {M(b2)})'], f'{p}a + b = {s}, {q}a + b = {r} → a = {M(a2)}, b = {M(b2)}', f'a < 0 이면 (a, b) = ({M(a2)}, {M(b2)})'),
+            chq(Q + '③ a > 0 일 때 (a, b) 는?', f'({M(a1)}, {M(b1)})', [f'({M(b1)}, {M(a1)})', f'({M(a1)}, {M(-b1)})', f'({M(a1 + 1)}, {M(b1)})'], f'{E(p, r)}, {E(q, s)} → a = {M(a1)}, b = {M(b1)}', f'a > 0 이면 (a, b) = ({M(a1)}, {M(b1)})'),
+            chq(Q + '④ a < 0 일 때 (a, b) 는?', f'({M(a2)}, {M(b2)})', [f'({M(b2)}, {M(a2)})', f'({M(a2)}, {M(b1)})', f'({M(-a2)}, {M(b2)})'], f'{E(p, s)}, {E(q, r)} → a = {M(a2)}, b = {M(b2)}', f'a < 0 이면 (a, b) = ({M(a2)}, {M(b2)})'),
             chq(Q + '👑 그러므로 (a, b) 를 모두 고르면?', f'({M(a1)}, {M(b1)}), ({M(a2)}, {M(b2)})', [f'({M(a1)}, {M(b1)}) 뿐', f'({M(a2)}, {M(b2)}) 뿐'], 'a > 0 · a < 0 두 경우 모두', f'그러므로 (a, b) = ({M(a1)}, {M(b1)}), ({M(a2)}, {M(b2)})')]
 R05 = [r05(0, 2, 1, 7), r05(1, 2, 3, 8), r05(0, 3, -2, 4), r05(1, 4, 0, 6), r05(-1, 1, 2, 6), r05(2, 4, 1, 5), r05(0, 1, -3, 2)]
 
@@ -274,7 +275,7 @@ def r14(u, t, p, q, T):
     L = lambda xs: ', '.join(M(x) for x in xs)
     ok('👑14', f'{sum(c1 + c2)} (a = {L(c1 + c2)})', f'a ≤ {t}: {L(c1)} · a > {t}: {L(c2)} · 정수 −60 ~ 60 전수 조사와 같음')
     return [chq(Q + f'① (g∘f)({u}) = g({u} + a) 이고 {u} + a ≥ a 이므로?', f'({u} + a)²', [f'{gl.replace("x", f"({u} + a)")}', f'{u * u} + a'], f'{u} + a 는 늘 a 이상 → 위 식 x²', f'(g∘f)({u}) = ({u} + a)²'),
-            chq(Q + f'② a ≤ {t} 일 때 (f∘g)({t}) 는?', f'{t * t} + a', [f'{p * t + q} + a'.replace('+ -', '− '), f'{t * t}'], f'{t} ≥ a → g({t}) = {t * t} → f({t * t}) = {t * t} + a', f'a ≤ {t} 이면 (f∘g)({t}) = {t * t} + a'),
+            chq(Q + f'② a ≤ {t} 일 때 (f∘g)({t}) 는?', f'{t * t} + a', [f'{M(p * t + q)} + a', f'{t * t}'], f'{t} ≥ a → g({t}) = {t * t} → f({t * t}) = {t * t} + a', f'a ≤ {t} 이면 (f∘g)({t}) = {t * t} + a'),
             chq(Q + f'③ a > {t} 일 때 (f∘g)({t}) 는?', f'{M(p * t + q)} + a', [f'{t * t} + a', f'{M(p * t + q)}'], f'{t} < a → g({t}) = {M(p * t + q)} → f = {M(p * t + q)} + a', f'a > {t} 이면 (f∘g)({t}) = {M(p * t + q)} + a'),
             chq(Q + f'④ a ≤ {t} 에서 맞는 a 를 모두 고르면?', L(c1), [L(c1 + [x for x in [t + 1] if x not in c1]), L([-x for x in c1])], f'({u} + a)² + {t * t} + a = {T} 의 해 중 a ≤ {t}', f'a ≤ {t} 에서 a = {L(c1)}'),
             chq(Q + f'⑤ a > {t} 에서 맞는 a 를 모두 고르면?', L(c2), [L(c2 + [-c2[0] - (2 * u + 1)]), L([x - 1 for x in c2])], f'({u} + a)² + {M(p * t + q)} + a = {T} 의 해 중 a > {t} (다른 해는 버림)', f'a > {t} 에서 a = {L(c2)}'),
@@ -316,6 +317,18 @@ for rid, no, title, sp, vers, extra in ROOMS:
             if it['type'] == 'choice': assert 0 <= int(it['a']) < len(it['ch']) and len(set(it['ch'])) == len(it['ch'])
     pack['rooms'].append({'id': rid, 'no': no, 'title': title, 'sprite': sp, **extra, 'vers': vers})
 assert sum(1 for r in pack['rooms'] if r.get('boss')) == 1
+import re
+def nice(t):  # 화면 글자의 빼기 = − (그림 글 graph: · [[graph:…]] 안은 그대로)
+    if t.startswith('graph:'): return t
+    parts = re.split(r'(\[\[graph:[^\]]*\]\])', t)
+    return ''.join(x if x.startswith('[[graph:') else re.sub(r'(^|[\s(\[{,=])-(?=\d)', lambda m: m.group(1) + '−', x) for x in parts)
+for r in pack['rooms']:
+    for v in r['vers']:
+        for it in v:
+            for k in ('q', 'sol', 'say'):
+                if k in it: it[k] = nice(it[k])
+            if it.get('ch'): it['ch'] = [nice(c) for c in it['ch']]
+            if it['type'] == 'choice': assert len(set(it['ch'])) == len(it['ch'])
 json.dump(pack, open(OUT, 'w', encoding='utf8'), ensure_ascii=False, indent=1)
 print('| 방 | 정답 | 계산 | 확인 |\n|---|---|---|---|')
 for n, a, c in CHECK: print(f'| {n} | {a} | {c} | ✅ |')
