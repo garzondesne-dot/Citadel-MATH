@@ -1,4 +1,4 @@
-# 14차시 레이드용 v1 「함수」 (2026-11-20 · 손발 #7 · 메타인지 8 컨펌 #1 = A 몬스터 3 · B1 지금 꼴 · C1 🔑 열쇠) · gen_ws13v2.py 기반
+# 14차시 레이드용 v2 「함수」 (v2 = 11/20 컨펌 · 형성평가 4 정의역 {1, 2} → {1, 3}: 몬스터 3 답(3, −2)과 같아 옮겨 써도 맞던 것) · v1 (2026-11-20 · 손발 #7 · 메타인지 8 컨펌 #1 = A 몬스터 3 · B1 지금 꼴 · C1 🔑 열쇠) · gen_ws13v2.py 기반
 #   교과서 미래엔 공통수학2 106~108쪽(함수 · 정의역 · 공역 · 치역 · 서로 같은 함수) + 중단원 마무리 05(119쪽)
 #   몬스터 1 = 문제 1(대응 그림) · 몬스터 2 = 문제 2(정의역 · 치역) · 몬스터 3 = 중단원 05 ⚔ 소레이드 · 형성평가 4
 #   실행: PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers python3 tools/worksheet/gen_ws14v1.py <출력.pdf>
@@ -142,15 +142,15 @@ p2_right = f'''
 {fq(1, v("X = {1, 2, 3}") + "에서 " + v("Y = {a, b}") + "로의 대응 중 함수인 것은? ( &nbsp;&nbsp;&nbsp; )<br>① " + v("1→a, 2→a, 3→b") + " &nbsp;② " + v("1→a, 2→b") + " &nbsp;③ " + v("1→a, 1→b, 2→a, 3→b"), 4)}
 {fq(2, v("X = {1, 2, 3}") + "에서 " + v("Y = {1, 3, 5, 7}") + "로의 함수 " + v("f(x) = 2x − 1") + " 의 치역은 " + BL["m"] + "이다.", 5)}
 {fq(3, "함수 " + v("y = x² + 1") + " 의 치역은 " + BL["m"] + "이다.", 5)}
-{fq(4, "정의역이 " + v("{1, 2}") + "인 두 함수 " + v("f(x) = ax + b") + ", " + v("g(x) = x²") + " 에 대하여 " + v("f = g") + " 일 때, 상수 " + v("a") + " = " + BL["s"] + ", " + v("b") + " = " + BL["s"], 8)}
+{fq(4, "정의역이 " + v("{1, 3}") + "인 두 함수 " + v("f(x) = ax + b") + ", " + v("g(x) = x²") + " 에 대하여 " + v("f = g") + " 일 때, 상수 " + v("a") + " = " + BL["s"] + ", " + v("b") + " = " + BL["s"], 8)}
 <div class="mini" style="border-top:1px dashed #9bb;padding-top:1.5mm">맞은 개수 {BL["s"]} / 4 &nbsp;어려웠던 부분<br>{CB}함수의 뜻 {CB}정의역 · 공역 · 치역 {CB}서로 같은 함수</div></div>
 <div class="add mini">🎯 <b>더 해 보고 싶다면</b> — 캠프의 복습 허수아비 · 👑 형성평가 재대결</div>'''
 STAMP = '<div class="stampwrap" style="margin-top:auto"><div class="stamp"><span>확인 도장</span></div></div>'
-rng = '공통수학2 Ⅲ. 함수와 그래프 1. 함수 01. 함수 (14차시) · 레이드용 v1'
+rng = '공통수학2 Ⅲ. 함수와 그래프 1. 함수 01. 함수 (14차시) · 레이드용 v2'
 hd = header('14차시', rng)
 goal = '<div class="goal"><b>학습목표</b> ① 함수의 뜻을 알고 정의역 · 공역 · 치역을 구할 수 있다. ② 두 함수가 서로 같을 조건을 안다.</div>'
 pg = lambda g, l, r, n: f'<div class="page">{hd}{g}<div class="cols"><div class="col">{l}</div><div class="col">{r}</div></div><div class="pno">- 14차시 ({n}/2) -</div></div>'
-html = f"<!DOCTYPE html><html><head><meta charset='utf-8'><title>학습과정 14차시 레이드용 v1 (함수)</title><style>{CSS}{EXTRA}{KCSS}</style></head><body>{pg(goal + review, keybox + p1_left, p1_right, 1)}{pg('', p2_left, p2_right + STAMP, 2)}</body></html>"
+html = f"<!DOCTYPE html><html><head><meta charset='utf-8'><title>학습과정 14차시 레이드용 v2 (함수) v2</title><style>{CSS}{EXTRA}{KCSS}</style></head><body>{pg(goal + review, keybox + p1_left, p1_right, 1)}{pg('', p2_left, p2_right + STAMP, 2)}</body></html>"
 open(OUT.replace('.pdf', '.html'), 'w', encoding='utf-8').write(html)
 with sync_playwright() as p:
     b = p.chromium.launch(); page = b.new_page(); page.set_content(html); page.wait_for_timeout(300)

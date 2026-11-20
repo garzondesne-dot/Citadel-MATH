@@ -123,8 +123,9 @@ def b4(u, w, tag):  # f(x) = ax + b , g(x) = x² , 정의역 {u, w}
     for x in (u, w): assert a * x + b == x * x
     ok(f'boss4{tag}', f'a = {a}, b = {b}', f'{a}·{u}{sgn(b)} = {u * u} · {a}·{w}{sgn(b)} = {w * w}')
     return ch(f'a = {M(a)}, b = {M(b)}', [f'a = {M(b)}, b = {M(a)}', f'a = {M(a)}, b = {M(-b)}' if b != 0 else f'a = {M(a + 1)}, b = {M(b)}'], f'f({u}) = g({u}), f({w}) = g({w}) 를 연립', f'4. 정의역이 {{{u}, {w}}}인 두 함수 f(x) = ax + b, g(x) = x² 에 대하여 f = g 일 때, 상수 a, b 는?')
-B4 = [b4(1, 2, ''), b4(1, 3, 'r1'), b4(2, 3, 'r2'), b4(0, 2, 'r3')]
-assert (B4[0]['choices'][B4[0]['answerIndex']]) == 'a = 3, b = −2'
+B4 = [b4(1, 3, ''), b4(2, 3, 'r1'), b4(0, 2, 'r2'), b4(1, 4, 'r3')]  # 학습지 v2 = {1, 3} (몬스터 3 답과 다르게 · 11/20 컨펌)
+assert (B4[0]['choices'][B4[0]['answerIndex']]) == 'a = 4, b = −3'
+assert all(b['choices'][b['answerIndex']] != 'a = 3, b = −2' for b in B4)
 POOL = [B1, B2, B3, B4]
 
 # ───────── 🔑 열쇠 ─────────
@@ -165,7 +166,7 @@ pack = {'id': 'ex-14', 'no': 14, 'v': 1, 'title': '함수', 'unit': '공통수�
         'goal': '① 함수의 뜻을 알고 정의역 · 공역 · 치역을 구할 수 있다. ② 두 함수가 서로 같을 조건을 안다.',
         'theme': '04-mine', 'defaultPct': 90, 'source': {'file': 'upload'},
         'next': {'title': '15차시 · 함수의 그래프', 'ask': '함숫값의 순서쌍 (x, f(x)) 를 좌표평면에 점으로 찍으면?', 'link': '함수를 그림으로 보는 법'},
-        'imgCells': ['review', 'c1', 'c2', 'm1', 'c3', 'm2', 'c4', 'm3', 'recap', 'sum'], 'videos': {},
+        'imgCells': ['review', 'c1', 'c2', 'm1', 'c3', 'm2', 'c4', 'm3', 'recap', 'sum'], 'videos': {'c1': 'video/v14-58.mp4', 'c2': 'video/v14-59.mp4'},  # zip 안 v14-58.mp4 · v14-59.mp4 (드라이브 05 「(14차시) 58 · 59」)
         'steps': steps,
         'monsters': {
             'm1': {'title': '몬스터 1 짝 잃은 열쇠', 'sprite': 'keyvault1:0', 'attack': 'pause', 'first': M1[0], 'retry': {'pool': M1[1:]}, 'help': HELP1},
