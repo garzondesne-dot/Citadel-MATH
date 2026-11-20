@@ -58,4 +58,13 @@ Row 3: (9) role SUPPORT: a golden music note with small sparkles; (10) ENERGY pi
 Row 4: (13) SHIELD tile intact: a square crystal-blue shield tile; (14) SHIELD tile cracked: the same tile with glowing cracks; (15) REVIVE heart: a pink heart gem with a small sparkle; (16) WEAK badge: a red-and-gold ribbon burst shape (no letters) with a small downward arrow on a shield.`],
 ];
 ATBC.forEach(([id, name, kind, use, ref, body]) => O.push({ id, tab: 'atb', name, kind, use, att: ref.map((f) => ({ 'atb-ref-wide.png': '참고 · 전투 화면(실제 그림)', 'atb-ref-quiz.png': '참고 · 문제 연 화면(실제 그림)', 'atb-ref-layout.png': '참고 · 자리 배치 그림', 'ref-port-p1.png': '참고 · 초상 ①' }[f])), ref, prompt: id === 'atb-icons' ? `${STYLE}\n\n${body}` : `${ATBUI}\n\n${body}`, fix: [] }));
+O.push({ id: 'atb-icon-dealer', tab: 'atb', name: '⑧ 딜러 아이콘 다시 (후보 4개)', kind: '아이콘 2×2 한 장', use: '역할 「딜러」 아이콘 — 지금 칼 그림이 ⚔ 무기 계열 아이콘과 헷갈려 다시 · 후보 4개 중 하나를 고름', att: ['참고 · 아이콘 16칸(받은 그림)'], ref: ['atb-ref-icons.png'], prompt: `${STYLE}
+
+ICON SHEET: ONE square image 1024x1024, a 2x2 grid of 4 equal cells (512x512 each), no gaps, no lines, no labels, no text. Solid flat magenta #FF00FF background in every cell. Each icon centred, filling about 70% of its cell, true pixel art (native 32x32, upscaled), 1-pixel dark navy outline (#1a1228), light from top-left.
+Match the attached ICON SHEET exactly in style, outline, shading and size — these are four candidate replacements for its "DEALER role" icon (the single sword in row 2). They must read as "the one who deals big damage" and must NOT look like a sword or a hammer (the weapon-family icon already uses those).
+Cell 1 (top-left): a red-and-white bullseye target with a bright impact star in the centre.
+Cell 2 (top-right): a clenched fist punching forward with red impact lines.
+Cell 3 (bottom-left): a jagged red-orange starburst explosion with a small white core (a "critical hit" burst).
+Cell 4 (bottom-right): three sharp red claw-slash marks cutting diagonally.
+Main colour red with gold accents, same visual weight as the shield (tank), green cross (healer) and music note (support) icons in the attached sheet.`, fix: [] });
 
