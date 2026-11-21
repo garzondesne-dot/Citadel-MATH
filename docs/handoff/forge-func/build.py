@@ -56,9 +56,11 @@ CARDS = [
  # ── 16차시 합성함수 ──
  card('compose', 16, S16, '합성함수', 'g∘f', 'f 다음에 g (오른쪽 함수부터)', 1, 23, 'o', ['g', 'f'], '두 함수를 ∘ 로 이어 붙이자 (나중 함수가 왼쪽)', ordered=True, ws='16차시 STEP 1',
       ex=C('(g∘f)(x) 를 구할 때 먼저 계산하는 함수는?', ['f', 'g'], 0, '(g∘f)(x) = g(f(x)) — 오른쪽 f 먼저')),
+ card('compose2', 16, S16, '순서를 바꾼 합성함수', 'f∘g', 'g 다음에 f (g∘f 와 순서가 반대)', 1, 23, 'o', ['f', 'g'], '이번에는 f 를 왼쪽에: f∘g', ordered=True, short='f∘g', ws='16차시 STEP 2',
+      ex=C('f(x) = x + 1, g(x) = 2x 일 때 (f∘g)(3) 의 값은?', ['7', '8', '6', '5'], 0, 'g(3) = 6 을 먼저 구하고 f(6) = 6 + 1 = 7. (g∘f)(3) = g(4) = 8 과 다르다.')),
  card('compval', 16, S16, '합성함수의 값', '(g∘f)(x) = g(f(x))', 'f(x) 를 구해 g 에 넣는다', 2, 23, 'app', ['g', 'card:fval'], 'g 에 f(x) 를 통째로 넣으면', ordered=True, alt=[dict(op='app', **{'in': ['card:compose', 'x']})], ws='16차시 문제 1 · 2',
       ex=N('f(x) = x + 3, g(x) = 2x 일 때 (g∘f)(1) = ?', 8, 'f(1) = 4 → g(4) = 8')),
- card('noncomm', 16, S16, '교환법칙이 성립하지 않는다', 'g∘f ≠ f∘g', '순서를 바꾸면 결과가 달라진다', 2, 23, 'neq', ['card:compose', 'card:compose'], '합성함수 둘을 순서만 바꿔 견주면', short='교환법칙 ✕', ws='16차시 STEP 2',
+ card('noncomm', 16, S16, '교환법칙이 성립하지 않는다', 'g∘f ≠ f∘g', '순서를 바꾸면 결과가 달라진다', 2, 23, 'neq', ['card:compose', 'card:compose2'], 'g∘f 카드와 f∘g 카드를 견주면', short='교환법칙 ✕', ws='16차시 STEP 2',
       ex=C('f(x) = x + 3, g(x) = 2x 일 때 (g∘f)(1) 과 (f∘g)(1) 은?', ['8 과 5 — 다르다', '8 과 8 — 같다', '5 와 5 — 같다'], 0, '(g∘f)(1) = g(4) = 8 · (f∘g)(1) = f(2) = 5')),
  card('fassoc', 16, S16, '결합법칙', 'h∘(g∘f) = (h∘g)∘f', '묶는 자리를 바꿔도 결과가 같다', 3, 23, 'o', ['h', 'card:compose'], '합성함수 카드에 함수를 하나 더 이어 붙이자', ordered=True, ws='16차시 STEP 3',
       ex=O('함수의 합성에서 결합법칙은 성립한다.', True, '(h∘g)∘f = h∘(g∘f) — 순서는 그대로, 묶는 자리만 바뀐다')),
@@ -82,8 +84,8 @@ MISTAKES = {
  'app|f,y': 'f 에 넣는 것은 정의역의 원소 x 예요. y 는 나오는 값!',
  'app|f,card:fval': 'f(f(x)) 도 합성이지만, 이번 카드는 g 에 f(x) 를 넣어요: g(f(x))',
  'app|card:fval,g': '순서가 거꾸로예요. 나중 함수 g 가 왼쪽: g(f(x))',
- 'o|f,g': 'f∘g 는 g 를 먼저 하는 합성이에요. 이번 카드는 f 를 먼저 → g∘f (나중 함수가 왼쪽)',
- 'eq|card:compose,card:compose': 'g∘f 와 f∘g 는 보통 같지 않아요. ≠ 로 놓아 보자 (교환법칙 ✕)',
+ 'eq|card:compose,card:compose2': 'g∘f 와 f∘g 는 보통 같지 않아요. ≠ 로 놓아 보자 (교환법칙 ✕)',
+ 'neq|card:compose,card:compose': '같은 카드 두 장은 서로 같아요. f∘g 카드를 따로 만들어 견주자',
  'inv|f': '역함수는 f 가 일대일대응일 때만 있어요. 일대일대응 카드에 ⁻¹ 을 붙여 보자',
  'inv|card:inj': '일대일함수만으로는 모자라요. 치역 = 공역 까지 갖춘 일대일대응이어야 역함수가 있어요',
  'inv|card:func': '모든 함수에 역함수가 있는 것은 아니에요. 일대일대응일 때만!',
@@ -165,7 +167,7 @@ if __name__ == '__main__':
     json.dump(unit, open('unit-func.json', 'w'), ensure_ascii=False, indent=1)
     cards_map = {cid: dict(rows=r, strings=s) for cid, (r, s) in SET_MAP.items()}
     for c in CARDS: cards_map[c['id']] = dict(rows=[r['id'] for r in SYM_FUNC if r['card'] == c['id']], strings=[])
-    extra = {'feq': ['서로 같은 함수'], 'onto': ['치역', '공역'], 'compval': ['compose'], 'noncomm': ['compose', '교환법칙'], 'fassoc': ['compose', '결합법칙'], 'invval': ['inverse'], 'invinv': ['inverse'], 'invcomp': ['inverse', 'compose'], 'invfind': ['inverse'], 'invgraph': ['yx', 'inverse', 'graph']}
+    extra = {'feq': ['서로 같은 함수'], 'onto': ['치역', '공역'], 'compval': ['compose'], 'compose2': ['compose'], 'noncomm': ['compose', '교환법칙'], 'fassoc': ['compose', '결합법칙'], 'invval': ['inverse'], 'invinv': ['inverse'], 'invcomp': ['inverse', 'compose'], 'invfind': ['inverse'], 'invgraph': ['yx', 'inverse', 'graph']}
     fr = {r['id'] for r in SYM_FUNC}
     for cid, xs in extra.items():
         for x in xs:
@@ -212,5 +214,5 @@ if __name__ == '__main__':
         if v['strings'] and not v['rows']: L.append(f"| {nm.get(cid, cid)} | {' · '.join(v['strings'])} |")
     L += ["", "- 집합 · 명제 카드 이름은 `unit-set.js` id 그대로 적음(venn 벤 다이어그램 · notequal 서로 같지 않은 집합 · proper 진부분집합 · commute 교환법칙 · assoc 결합법칙 · distrib 분배법칙).", "- 한 줄을 누르면 카드는 **하나만** 찜(가장 바탕 카드) — 여러 장이 한꺼번에 찜되면 모루 배너가 넘침. 나머지 연결(cards.rows)은 「이 카드를 만들면 이 기호가 나오는 문제에 도움」 표시에 씀.", "",
           "## 7. 카드 그림", "", "- 있는 그림 시트(`card-arts-v2.webp` 8 × 2 = 16칸 · 0 ~ 15)는 집합 · 명제가 다 씀 → 함수용 **새 시트 10칸(16 ~ 25)** 이 필요.", "- 칸: 16 대응 화살표(두 타원) · 17 함숫값 기계 · 18 정의역 · 공역 · 치역 · 19 서로 같은 함수(쌍둥이 기계) · 20 그래프 · 21 일대일 짝 · 22 항등 · 상수 · 23 합성(기계 둘) · 24 역함수(되돌아오는 화살표) · 25 y = x 대칭 거울", "- 주문 카드 = 작업대 「⚒ 모루 함수」 탭(올리면 메인에 「🎨 올림」).", "",
-          "## 8. 선생님 컨펌 필요한 곳", "", "1. 카드 22장의 이름 · 수식 · 등급(레어 = 일대일대응 · 결합법칙 · 역함수와 합성 · 역함수의 그래프)", "2. 「역함수 = 일대일대응 카드에 ⁻¹」처럼 **앞 카드가 있어야 만드는 사슬**이 깊은 것(역함수까지 카드 5장) — 좋은지 · 너무 긴지", "3. 교과서 쪽수(page) — 이 방에 교과서가 없어 비워 둠", "4. 기호톡 함수 줄 13개의 쉬운 말", "5. 「함수」 한 낱말은 줄로 안 만드는 것"]
+          "## 8. 선생님이 정한 것 (2026-11-21)", "", "1. **역함수 사슬 = 그대로**(일대일대응 → 역함수) + **지름길 안내**: 재료 카드가 없으면 「먼저 만들 카드: ○○」를 눌러 바로 그 카드로 가게 한다(손발: 모루 화면에 더할 것).", "2. **f∘g 카드를 따로 만든다**(compose2) → 「교환법칙 ✕」 = g∘f 카드 ≠ f∘g 카드. 카드 23장.", "3. 구성 · 등급 = 초안대로.", "4. 교과서 쪽수(page) = 빈칸으로 먼저 넣고, 선생님이 나중에 한 번에 알려 주시면 채운다.", "", "5. 기호톡 함수 줄 13개 = 화살표 비유 그대로 · 「함수」 한 낱말은 줄로 안 만들고 「f : X → Y」 줄이 대신한다."]
     open('FORGE-FUNC-v1.md', 'w').write("\n".join(L) + "\n")
