@@ -1,0 +1,2020 @@
+{
+ "id": "ex-16",
+ "no": 16,
+ "v": 2,
+ "title": "합성함수",
+ "unit": "공통수학2 Ⅲ. 함수와 그래프 1. 함수 02. 합성함수",
+ "goal": "함수의 합성을 설명하고, 합성함수를 구할 수 있다.",
+ "theme": "05-ruins",
+ "defaultPct": 90,
+ "source": {
+  "file": "upload"
+ },
+ "next": {
+  "title": "17차시 · 역함수",
+  "ask": "화살표를 거꾸로 돌려도 함수가 될까?",
+  "link": "되감기 = 역함수"
+ },
+ "imgCells": [
+  "review",
+  "c1",
+  "m1",
+  "c2",
+  "m2",
+  "c3",
+  "m3",
+  "recap",
+  "sum"
+ ],
+ "videos": {
+  "c1": "video/v16-65.mp4",
+  "c2": "video/v16-66.mp4",
+  "c3": "video/v16-67.mp4"
+ },
+ "steps": [
+  {
+   "id": "intro",
+   "kind": "intro",
+   "img": "review",
+   "title": "도입 · 🔁 전시 확인 · 생각 열기",
+   "say": "🔁 전시 확인: ① x₁ ≠ x₂ 이면 f(x₁) ≠ f(x₂) → (일대일함수) ② f(x) = x → (항등함수)\n🔍 생각 열기: 아람 → 떡볶이 → 3000원 · 재영 → 김밥 → 4000원 · 하영 → 어묵 → 2000원 → 학생에서 가격으로 바로 가는 화살표"
+  },
+  {
+   "id": "c1",
+   "kind": "concept",
+   "title": "STEP 1 · 합성함수",
+   "say": "낱말 상자 [ 합성함수 · g∘f · g(f(x)) ]\nf : X → Y, g : Y → Z → X 의 원소 x 에 Z 의 원소 (g(f(x))) 를 대응 = f 와 g 의 (합성함수) (g∘f)\n(g∘f)(x) = g(f(x)) · 먼저 f, 다음 g · f 의 치역 ⊂ g 의 정의역",
+   "check": {
+    "type": "choice",
+    "q": "(g∘f)(x) 를 구할 때 먼저 계산하는 함수는?",
+    "ch": [
+     "f",
+     "g"
+    ],
+    "a": 0,
+    "why": "g(f(x)) — 괄호 안 f(x) 를 먼저 구하고 그 값을 g 에 넣어요."
+   }
+  },
+  {
+   "id": "m1",
+   "kind": "monster",
+   "title": "몬스터 1 톱니 병정"
+  },
+  {
+   "id": "c2",
+   "kind": "concept",
+   "title": "STEP 2 · 합성함수의 식 · 교환법칙",
+   "say": "예제) f(x) = −x + 2, g(x) = 4x + 1\n(g∘f)(x) = 4(−x + 2) + 1 = (−4x + 9) · (f∘g)(x) = −(4x + 1) + 2 = (−4x + 1)\n→ g∘f (≠) f∘g · 합성에서 교환법칙이 성립하지 않는다",
+   "check": {
+    "type": "ox",
+    "q": "합성함수에서 g∘f 와 f∘g 는 항상 같다.",
+    "a": false,
+    "why": "예제에서 −4x + 9 ≠ −4x + 1 — 순서를 바꾸면 달라질 수 있어요."
+   }
+  },
+  {
+   "id": "m2",
+   "kind": "monster",
+   "title": "몬스터 2 순서 뒤바뀐 컨베이어 미믹"
+  },
+  {
+   "id": "c3",
+   "kind": "concept",
+   "title": "STEP 3 · 결합법칙",
+   "say": "f(x) = 2x − 1, g(x) = 3x + 2, h(x) = x² + 1\n((f∘g)∘h)(x) = (f∘(g∘h))(x) = 6x² + 9 → (f∘g)∘h = f∘(g∘h)\n합성에서 교환법칙 ✕ · 결합법칙 ○",
+   "check": {
+    "type": "choice",
+    "q": "합성에서 성립하는 것은?",
+    "ch": [
+     "결합법칙",
+     "교환법칙"
+    ],
+    "a": 0,
+    "why": "(f∘g)∘h = f∘(g∘h) 는 성립하지만 g∘f 와 f∘g 는 다를 수 있어요."
+   }
+  },
+  {
+   "id": "m3",
+   "kind": "monster",
+   "title": "몬스터 3 합성 골렘 · ⚔ 소레이드"
+  },
+  {
+   "id": "recap",
+   "kind": "concept",
+   "title": "📝 오늘 정리",
+   "say": "합성함수 g∘f : X → Z, (g∘f)(x) = g(f(x)) — 먼저 f, 다음 g\n교환법칙 ✕ (g∘f ≠ f∘g) · 결합법칙 ○ ((f∘g)∘h = f∘(g∘h))"
+  },
+  {
+   "id": "sum",
+   "kind": "boss",
+   "title": "👑 16차시 형성평가 · 합성의 대기관"
+  }
+ ],
+ "monsters": {
+  "m1": {
+   "title": "몬스터 1 톱니 병정",
+   "sprite": "base1:0",
+   "attack": "pause",
+   "first": [
+    {
+     "type": "choice",
+     "question": "문제 1) 두 함수 f(x) = 2x + 1 과 g(x) = x² − 1 에 대하여\n(g∘f)(2) 의 값은?",
+     "choices": [
+      "24",
+      "5",
+      "7"
+     ],
+     "answerIndex": 0,
+     "solution": "(g∘f)(2) = g(f(2)) = g(5) = 24 · 먼저 f"
+    },
+    {
+     "type": "choice",
+     "question": "문제 1) 두 함수 f(x) = 2x + 1 과 g(x) = x² − 1 에 대하여\n(f∘g)(−1) 의 값은?",
+     "choices": [
+      "1",
+      "−1",
+      "0"
+     ],
+     "answerIndex": 0,
+     "solution": "(f∘g)(−1) = f(g(−1)) = f(0) = 1 · 먼저 g"
+    },
+    {
+     "type": "choice",
+     "question": "문제 1) 두 함수 f(x) = 2x + 1 과 g(x) = x² − 1 에 대하여\n(f∘f)(−3) 의 값은?",
+     "choices": [
+      "25",
+      "−9",
+      "−5"
+     ],
+     "answerIndex": 1,
+     "solution": "(f∘f)(−3) = f(f(−3)) = f(−5) = −9"
+    }
+   ],
+   "retry": {
+    "pool": [
+     [
+      {
+       "type": "choice",
+       "question": "문제 1) 두 함수 f(x) = 3x − 1 과 g(x) = x² + 2 에 대하여\n(g∘f)(1) 의 값은?",
+       "choices": [
+        "2",
+        "6",
+        "8"
+       ],
+       "answerIndex": 1,
+       "solution": "(g∘f)(1) = g(f(1)) = g(2) = 6 · 먼저 f"
+      },
+      {
+       "type": "choice",
+       "question": "문제 1) 두 함수 f(x) = 3x − 1 과 g(x) = x² + 2 에 대하여\n(f∘g)(−2) 의 값은?",
+       "choices": [
+        "17",
+        "6",
+        "51"
+       ],
+       "answerIndex": 0,
+       "solution": "(f∘g)(−2) = f(g(−2)) = f(6) = 17 · 먼저 g"
+      },
+      {
+       "type": "choice",
+       "question": "문제 1) 두 함수 f(x) = 3x − 1 과 g(x) = x² + 2 에 대하여\n(f∘f)(2) 의 값은?",
+       "choices": [
+        "5",
+        "25",
+        "14"
+       ],
+       "answerIndex": 2,
+       "solution": "(f∘f)(2) = f(f(2)) = f(5) = 14"
+      }
+     ],
+     [
+      {
+       "type": "choice",
+       "question": "문제 1) 두 함수 f(x) = −2x + 3 과 g(x) = x² − 3 에 대하여\n(g∘f)(3) 의 값은?",
+       "choices": [
+        "−3",
+        "−9",
+        "6"
+       ],
+       "answerIndex": 2,
+       "solution": "(g∘f)(3) = g(f(3)) = g(−3) = 6 · 먼저 f"
+      },
+      {
+       "type": "choice",
+       "question": "문제 1) 두 함수 f(x) = −2x + 3 과 g(x) = x² − 3 에 대하여\n(f∘g)(2) 의 값은?",
+       "choices": [
+        "1",
+        "−1",
+        "−2"
+       ],
+       "answerIndex": 0,
+       "solution": "(f∘g)(2) = f(g(2)) = f(1) = 1 · 먼저 g"
+      },
+      {
+       "type": "choice",
+       "question": "문제 1) 두 함수 f(x) = −2x + 3 과 g(x) = x² − 3 에 대하여\n(f∘f)(−1) 의 값은?",
+       "choices": [
+        "5",
+        "−7",
+        "25"
+       ],
+       "answerIndex": 1,
+       "solution": "(f∘f)(−1) = f(f(−1)) = f(5) = −7"
+      }
+     ],
+     [
+      {
+       "type": "choice",
+       "question": "문제 1) 두 함수 f(x) = x − 2 와 g(x) = −x² + 1 에 대하여\n(g∘f)(2) 의 값은?",
+       "choices": [
+        "1",
+        "−5",
+        "0"
+       ],
+       "answerIndex": 0,
+       "solution": "(g∘f)(2) = g(f(2)) = g(0) = 1 · 먼저 f"
+      },
+      {
+       "type": "choice",
+       "question": "문제 1) 두 함수 f(x) = x − 2 와 g(x) = −x² + 1 에 대하여\n(f∘g)(−1) 의 값은?",
+       "choices": [
+        "−8",
+        "0",
+        "−2"
+       ],
+       "answerIndex": 2,
+       "solution": "(f∘g)(−1) = f(g(−1)) = f(0) = −2 · 먼저 g"
+      },
+      {
+       "type": "choice",
+       "question": "문제 1) 두 함수 f(x) = x − 2 와 g(x) = −x² + 1 에 대하여\n(f∘f)(3) 의 값은?",
+       "choices": [
+        "−1",
+        "1",
+        "2"
+       ],
+       "answerIndex": 0,
+       "solution": "(f∘f)(3) = f(f(3)) = f(1) = −1"
+      }
+     ],
+     [
+      {
+       "type": "choice",
+       "question": "문제 1) 두 함수 f(x) = 2x − 3 과 g(x) = x² + 1 에 대하여\n(g∘f)(3) 의 값은?",
+       "choices": [
+        "3",
+        "10",
+        "17"
+       ],
+       "answerIndex": 1,
+       "solution": "(g∘f)(3) = g(f(3)) = g(3) = 10 · 먼저 f"
+      },
+      {
+       "type": "choice",
+       "question": "문제 1) 두 함수 f(x) = 2x − 3 과 g(x) = x² + 1 에 대하여\n(f∘g)(−1) 의 값은?",
+       "choices": [
+        "1",
+        "26",
+        "2"
+       ],
+       "answerIndex": 0,
+       "solution": "(f∘g)(−1) = f(g(−1)) = f(2) = 1 · 먼저 g"
+      },
+      {
+       "type": "choice",
+       "question": "문제 1) 두 함수 f(x) = 2x − 3 과 g(x) = x² + 1 에 대하여\n(f∘f)(2) 의 값은?",
+       "choices": [
+        "1",
+        "−1",
+        "0"
+       ],
+       "answerIndex": 1,
+       "solution": "(f∘f)(2) = f(f(2)) = f(1) = −1"
+      }
+     ],
+     [
+      {
+       "type": "choice",
+       "question": "문제 1) 두 함수 f(x) = −x + 4 와 g(x) = x² − 2 에 대하여\n(g∘f)(1) 의 값은?",
+       "choices": [
+        "5",
+        "7",
+        "3"
+       ],
+       "answerIndex": 1,
+       "solution": "(g∘f)(1) = g(f(1)) = g(3) = 7 · 먼저 f"
+      },
+      {
+       "type": "choice",
+       "question": "문제 1) 두 함수 f(x) = −x + 4 와 g(x) = x² − 2 에 대하여\n(f∘g)(2) 의 값은?",
+       "choices": [
+        "1",
+        "3",
+        "2"
+       ],
+       "answerIndex": 2,
+       "solution": "(f∘g)(2) = f(g(2)) = f(2) = 2 · 먼저 g"
+      },
+      {
+       "type": "choice",
+       "question": "문제 1) 두 함수 f(x) = −x + 4 와 g(x) = x² − 2 에 대하여\n(f∘f)(−1) 의 값은?",
+       "choices": [
+        "25",
+        "5",
+        "−1"
+       ],
+       "answerIndex": 2,
+       "solution": "(f∘f)(−1) = f(f(−1)) = f(5) = −1"
+      }
+     ],
+     [
+      {
+       "type": "choice",
+       "question": "문제 1) 두 함수 f(x) = 4x + 1 과 g(x) = x² − 3 에 대하여\n(g∘f)(−1) 의 값은?",
+       "choices": [
+        "−7",
+        "6",
+        "−3"
+       ],
+       "answerIndex": 1,
+       "solution": "(g∘f)(−1) = g(f(−1)) = g(−3) = 6 · 먼저 f"
+      },
+      {
+       "type": "choice",
+       "question": "문제 1) 두 함수 f(x) = 4x + 1 과 g(x) = x² − 3 에 대하여\n(f∘g)(2) 의 값은?",
+       "choices": [
+        "78",
+        "1",
+        "5"
+       ],
+       "answerIndex": 2,
+       "solution": "(f∘g)(2) = f(g(2)) = f(1) = 5 · 먼저 g"
+      },
+      {
+       "type": "choice",
+       "question": "문제 1) 두 함수 f(x) = 4x + 1 과 g(x) = x² − 3 에 대하여\n(f∘f)(1) 의 값은?",
+       "choices": [
+        "21",
+        "25",
+        "5"
+       ],
+       "answerIndex": 0,
+       "solution": "(f∘f)(1) = f(f(1)) = f(5) = 21"
+      }
+     ]
+    ]
+   },
+   "help": {
+    "concept": "(g∘f)(a) = g(f(a)) — 오른쪽 f 먼저 계산하고, 그 값을 g 에 넣어요.",
+    "example": {
+     "q": "f(x) = x + 1, g(x) = 2x 일 때 (g∘f)(3) 은?",
+     "sol": [
+      "먼저 f(3) = 4",
+      "다음 g(4) = 8",
+      "(g∘f)(3) = 8 · (f∘g)(3) = f(6) = 7 과 다르다"
+     ]
+    },
+    "first": "f(2) = □"
+   }
+  },
+  "m2": {
+   "title": "몬스터 2 순서 뒤바뀐 컨베이어 미믹",
+   "sprite": "base2:0",
+   "attack": "pause",
+   "first": [
+    {
+     "type": "choice",
+     "question": "문제 2) 두 함수 f(x) = x − 4 와 g(x) = −x² 에 대하여\n(g∘f)(x) 는?",
+     "choices": [
+      "−x² − 16",
+      "−x² − 8x − 16",
+      "−x² + 8x − 16"
+     ],
+     "answerIndex": 2,
+     "solution": "g(f(x)) = g(x − 4) = −(x − 4)² = −x² + 8x − 16"
+    },
+    {
+     "type": "choice",
+     "question": "문제 2) 두 함수 f(x) = x − 4 와 g(x) = −x² 에 대하여\n(f∘g)(x) 는?",
+     "choices": [
+      "−x² + 8x − 16",
+      "−x² − 4",
+      "−x² + 4"
+     ],
+     "answerIndex": 1,
+     "solution": "f(g(x)) = f(−x²) = −x² − 4"
+    },
+    {
+     "type": "choice",
+     "question": "문제 2) 두 함수 f(x) = x − 4 와 g(x) = −x² 에 대하여\n(g∘g)(x) 는?",
+     "choices": [
+      "−x⁴",
+      "−x²",
+      "x⁴"
+     ],
+     "answerIndex": 0,
+     "solution": "g(g(x)) = g(−x²) = −(−x²)² = −x⁴"
+    }
+   ],
+   "retry": {
+    "pool": [
+     [
+      {
+       "type": "choice",
+       "question": "문제 2) 두 함수 f(x) = x + 3 과 g(x) = −x² 에 대하여\n(g∘f)(x) 는?",
+       "choices": [
+        "−x² − 6x − 9",
+        "−x² − 9",
+        "−x² + 6x − 9"
+       ],
+       "answerIndex": 0,
+       "solution": "g(f(x)) = g(x + 3) = −(x + 3)² = −x² − 6x − 9"
+      },
+      {
+       "type": "choice",
+       "question": "문제 2) 두 함수 f(x) = x + 3 과 g(x) = −x² 에 대하여\n(f∘g)(x) 는?",
+       "choices": [
+        "−x² − 3",
+        "−x² − 6x − 9",
+        "−x² + 3"
+       ],
+       "answerIndex": 2,
+       "solution": "f(g(x)) = f(−x²) = −x² + 3"
+      },
+      {
+       "type": "choice",
+       "question": "문제 2) 두 함수 f(x) = x + 3 과 g(x) = −x² 에 대하여\n(g∘g)(x) 는?",
+       "choices": [
+        "−x⁴",
+        "−x²",
+        "x⁴"
+       ],
+       "answerIndex": 0,
+       "solution": "g(g(x)) = g(−x²) = −(−x²)² = −x⁴"
+      }
+     ],
+     [
+      {
+       "type": "choice",
+       "question": "문제 2) 두 함수 f(x) = x − 2 와 g(x) = 2x² 에 대하여\n(g∘f)(x) 는?",
+       "choices": [
+        "2x² + 8x + 8",
+        "2x² − 8x + 8",
+        "2x² + 8"
+       ],
+       "answerIndex": 1,
+       "solution": "g(f(x)) = g(x − 2) = 2(x − 2)² = 2x² − 8x + 8"
+      },
+      {
+       "type": "choice",
+       "question": "문제 2) 두 함수 f(x) = x − 2 와 g(x) = 2x² 에 대하여\n(f∘g)(x) 는?",
+       "choices": [
+        "2x² − 2",
+        "2x² + 2",
+        "2x² − 8x + 8"
+       ],
+       "answerIndex": 0,
+       "solution": "f(g(x)) = f(2x²) = 2x² − 2"
+      },
+      {
+       "type": "choice",
+       "question": "문제 2) 두 함수 f(x) = x − 2 와 g(x) = 2x² 에 대하여\n(g∘g)(x) 는?",
+       "choices": [
+        "2x²",
+        "8x⁴",
+        "−8x⁴"
+       ],
+       "answerIndex": 1,
+       "solution": "g(g(x)) = g(2x²) = 2(2x²)² = 8x⁴"
+      }
+     ],
+     [
+      {
+       "type": "choice",
+       "question": "문제 2) 두 함수 f(x) = x + 5 와 g(x) = −2x² 에 대하여\n(g∘f)(x) 는?",
+       "choices": [
+        "−2x² − 20x − 50",
+        "−2x² − 50",
+        "−2x² + 20x − 50"
+       ],
+       "answerIndex": 0,
+       "solution": "g(f(x)) = g(x + 5) = −2(x + 5)² = −2x² − 20x − 50"
+      },
+      {
+       "type": "choice",
+       "question": "문제 2) 두 함수 f(x) = x + 5 와 g(x) = −2x² 에 대하여\n(f∘g)(x) 는?",
+       "choices": [
+        "−2x² − 20x − 50",
+        "−2x² + 5",
+        "−2x² − 5"
+       ],
+       "answerIndex": 1,
+       "solution": "f(g(x)) = f(−2x²) = −2x² + 5"
+      },
+      {
+       "type": "choice",
+       "question": "문제 2) 두 함수 f(x) = x + 5 와 g(x) = −2x² 에 대하여\n(g∘g)(x) 는?",
+       "choices": [
+        "−2x²",
+        "−8x⁴",
+        "8x⁴"
+       ],
+       "answerIndex": 1,
+       "solution": "g(g(x)) = g(−2x²) = −2(−2x²)² = −8x⁴"
+      }
+     ],
+     [
+      {
+       "type": "choice",
+       "question": "문제 2) 두 함수 f(x) = x + 2 와 g(x) = −x² 에 대하여\n(g∘f)(x) 는?",
+       "choices": [
+        "−x² + 4x − 4",
+        "−x² − 4x − 4",
+        "−x² − 4"
+       ],
+       "answerIndex": 1,
+       "solution": "g(f(x)) = g(x + 2) = −(x + 2)² = −x² − 4x − 4"
+      },
+      {
+       "type": "choice",
+       "question": "문제 2) 두 함수 f(x) = x + 2 와 g(x) = −x² 에 대하여\n(f∘g)(x) 는?",
+       "choices": [
+        "−x² − 2",
+        "−x² − 4x − 4",
+        "−x² + 2"
+       ],
+       "answerIndex": 2,
+       "solution": "f(g(x)) = f(−x²) = −x² + 2"
+      },
+      {
+       "type": "choice",
+       "question": "문제 2) 두 함수 f(x) = x + 2 와 g(x) = −x² 에 대하여\n(g∘g)(x) 는?",
+       "choices": [
+        "x⁴",
+        "−x²",
+        "−x⁴"
+       ],
+       "answerIndex": 2,
+       "solution": "g(g(x)) = g(−x²) = −(−x²)² = −x⁴"
+      }
+     ],
+     [
+      {
+       "type": "choice",
+       "question": "문제 2) 두 함수 f(x) = x − 5 와 g(x) = −x² 에 대하여\n(g∘f)(x) 는?",
+       "choices": [
+        "−x² − 10x − 25",
+        "−x² − 25",
+        "−x² + 10x − 25"
+       ],
+       "answerIndex": 2,
+       "solution": "g(f(x)) = g(x − 5) = −(x − 5)² = −x² + 10x − 25"
+      },
+      {
+       "type": "choice",
+       "question": "문제 2) 두 함수 f(x) = x − 5 와 g(x) = −x² 에 대하여\n(f∘g)(x) 는?",
+       "choices": [
+        "−x² + 10x − 25",
+        "−x² + 5",
+        "−x² − 5"
+       ],
+       "answerIndex": 2,
+       "solution": "f(g(x)) = f(−x²) = −x² − 5"
+      },
+      {
+       "type": "choice",
+       "question": "문제 2) 두 함수 f(x) = x − 5 와 g(x) = −x² 에 대하여\n(g∘g)(x) 는?",
+       "choices": [
+        "−x²",
+        "x⁴",
+        "−x⁴"
+       ],
+       "answerIndex": 2,
+       "solution": "g(g(x)) = g(−x²) = −(−x²)² = −x⁴"
+      }
+     ],
+     [
+      {
+       "type": "choice",
+       "question": "문제 2) 두 함수 f(x) = x + 6 과 g(x) = −x² 에 대하여\n(g∘f)(x) 는?",
+       "choices": [
+        "−x² + 12x − 36",
+        "−x² − 12x − 36",
+        "−x² − 36"
+       ],
+       "answerIndex": 1,
+       "solution": "g(f(x)) = g(x + 6) = −(x + 6)² = −x² − 12x − 36"
+      },
+      {
+       "type": "choice",
+       "question": "문제 2) 두 함수 f(x) = x + 6 과 g(x) = −x² 에 대하여\n(f∘g)(x) 는?",
+       "choices": [
+        "−x² + 6",
+        "−x² − 6",
+        "−x² − 12x − 36"
+       ],
+       "answerIndex": 0,
+       "solution": "f(g(x)) = f(−x²) = −x² + 6"
+      },
+      {
+       "type": "choice",
+       "question": "문제 2) 두 함수 f(x) = x + 6 과 g(x) = −x² 에 대하여\n(g∘g)(x) 는?",
+       "choices": [
+        "−x²",
+        "x⁴",
+        "−x⁴"
+       ],
+       "answerIndex": 2,
+       "solution": "g(g(x)) = g(−x²) = −(−x²)² = −x⁴"
+      }
+     ]
+    ]
+   },
+   "help": {
+    "concept": "g(f(x)) = g 의 x 자리에 f(x) 를 괄호째 넣어요 · 제곱은 괄호 전체에.",
+    "example": {
+     "q": "f(x) = x + 1, g(x) = x² 일 때 (g∘f)(x) 는?",
+     "sol": [
+      "g 의 x 자리에 (x + 1) 을 넣는다",
+      "(x + 1)² = x² + 2x + 1",
+      "(f∘g)(x) = x² + 1 과 다르다"
+     ]
+    },
+    "first": "g(x − 4) = −(□)²"
+   }
+  },
+  "m3": {
+   "title": "몬스터 3 합성 골렘 · ⚔ 소레이드",
+   "sprite": "extra1:0",
+   "attack": "pause",
+   "first": [
+    {
+     "type": "choice",
+     "question": "중단원 07) 두 함수 f(x) = 2x − 7 과 g(x) = −4x + 3 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n(f∘h)(x) 를 바꿔 쓰면?",
+     "choices": [
+      "f(x) × h(x)",
+      "h(f(x))",
+      "f(h(x))"
+     ],
+     "answerIndex": 2,
+     "solution": "(f∘h)(x) = f(h(x)) — 오른쪽 h 먼저, 다음 f",
+     "say": "(f∘h)(x) = f(h(x)) 이다."
+    },
+    {
+     "type": "choice",
+     "question": "중단원 07) 두 함수 f(x) = 2x − 7 과 g(x) = −4x + 3 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\nf(h(x)) 를 h(x) 로 나타내면?",
+     "choices": [
+      "h(2x − 7)",
+      "2x − 7 + h(x)",
+      "2h(x) − 7"
+     ],
+     "answerIndex": 2,
+     "solution": "f 의 x 자리에 h(x) 를 통째로 넣는다",
+     "say": "f 의 x 자리에 h(x) 를 넣으면 f(h(x)) = 2h(x) − 7"
+    },
+    {
+     "type": "choice",
+     "question": "중단원 07) 두 함수 f(x) = 2x − 7 과 g(x) = −4x + 3 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n세울 수 있는 식은?",
+     "choices": [
+      "h(x) = −4x + 3",
+      "2h(x) − 7 = 2x − 7",
+      "2h(x) − 7 = −4x + 3"
+     ],
+     "answerIndex": 2,
+     "solution": "(f∘h)(x) = g(x) 이므로 두 식을 같다고 놓는다",
+     "say": "(f∘h)(x) = g(x) 이므로 2h(x) − 7 = −4x + 3"
+    },
+    {
+     "type": "choice",
+     "question": "중단원 07) 두 함수 f(x) = 2x − 7 과 g(x) = −4x + 3 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n2h(x) 는?",
+     "choices": [
+      "2h(x) = −4x + 10",
+      "2h(x) = −4x + 3",
+      "2h(x) = −4x − 4"
+     ],
+     "answerIndex": 0,
+     "solution": "−7 을 옮기면 2h(x) = −4x + 3 + 7 = −4x + 10",
+     "say": "2h(x) = −4x + 10"
+    },
+    {
+     "type": "choice",
+     "question": "중단원 07) 두 함수 f(x) = 2x − 7 과 g(x) = −4x + 3 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n그러므로 h(x) 는?",
+     "choices": [
+      "h(x) = −2x + 5",
+      "h(x) = −2x − 5",
+      "h(x) = −4x + 10"
+     ],
+     "answerIndex": 0,
+     "solution": "양변을 2 로 나누면 h(x) = −2x + 5 · 검산 f(h(x)) = 2(−2x + 5) − 7 = −4x + 3",
+     "say": "그러므로 h(x) = −2x + 5 (검산 f(h(x)) = −4x + 3)"
+    }
+   ],
+   "chain": {
+    "pool": [
+     [
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 2x − 7 과 g(x) = −4x + 3 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n(f∘h)(x) 를 바꿔 쓰면?",
+       "choices": [
+        "f(x) × h(x)",
+        "h(f(x))",
+        "f(h(x))"
+       ],
+       "answerIndex": 2,
+       "solution": "(f∘h)(x) = f(h(x)) — 오른쪽 h 먼저, 다음 f",
+       "say": "(f∘h)(x) = f(h(x)) 이다."
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 2x − 7 과 g(x) = −4x + 3 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\nf(h(x)) 를 h(x) 로 나타내면?",
+       "choices": [
+        "h(2x − 7)",
+        "2x − 7 + h(x)",
+        "2h(x) − 7"
+       ],
+       "answerIndex": 2,
+       "solution": "f 의 x 자리에 h(x) 를 통째로 넣는다",
+       "say": "f 의 x 자리에 h(x) 를 넣으면 f(h(x)) = 2h(x) − 7"
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 2x − 7 과 g(x) = −4x + 3 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n세울 수 있는 식은?",
+       "choices": [
+        "h(x) = −4x + 3",
+        "2h(x) − 7 = 2x − 7",
+        "2h(x) − 7 = −4x + 3"
+       ],
+       "answerIndex": 2,
+       "solution": "(f∘h)(x) = g(x) 이므로 두 식을 같다고 놓는다",
+       "say": "(f∘h)(x) = g(x) 이므로 2h(x) − 7 = −4x + 3"
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 2x − 7 과 g(x) = −4x + 3 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n2h(x) 는?",
+       "choices": [
+        "2h(x) = −4x + 10",
+        "2h(x) = −4x + 3",
+        "2h(x) = −4x − 4"
+       ],
+       "answerIndex": 0,
+       "solution": "−7 을 옮기면 2h(x) = −4x + 3 + 7 = −4x + 10",
+       "say": "2h(x) = −4x + 10"
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 2x − 7 과 g(x) = −4x + 3 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n그러므로 h(x) 는?",
+       "choices": [
+        "h(x) = −2x + 5",
+        "h(x) = −2x − 5",
+        "h(x) = −4x + 10"
+       ],
+       "answerIndex": 0,
+       "solution": "양변을 2 로 나누면 h(x) = −2x + 5 · 검산 f(h(x)) = 2(−2x + 5) − 7 = −4x + 3",
+       "say": "그러므로 h(x) = −2x + 5 (검산 f(h(x)) = −4x + 3)"
+      }
+     ],
+     [
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 2x + 3 과 g(x) = 6x − 1 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n(f∘h)(x) 를 바꿔 쓰면?",
+       "choices": [
+        "h(f(x))",
+        "f(x) × h(x)",
+        "f(h(x))"
+       ],
+       "answerIndex": 2,
+       "solution": "(f∘h)(x) = f(h(x)) — 오른쪽 h 먼저, 다음 f",
+       "say": "(f∘h)(x) = f(h(x)) 이다."
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 2x + 3 과 g(x) = 6x − 1 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\nf(h(x)) 를 h(x) 로 나타내면?",
+       "choices": [
+        "2h(x) + 3",
+        "2x + 3 + h(x)",
+        "h(2x + 3)"
+       ],
+       "answerIndex": 0,
+       "solution": "f 의 x 자리에 h(x) 를 통째로 넣는다",
+       "say": "f 의 x 자리에 h(x) 를 넣으면 f(h(x)) = 2h(x) + 3"
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 2x + 3 과 g(x) = 6x − 1 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n세울 수 있는 식은?",
+       "choices": [
+        "2h(x) + 3 = 2x + 3",
+        "2h(x) + 3 = 6x − 1",
+        "h(x) = 6x − 1"
+       ],
+       "answerIndex": 1,
+       "solution": "(f∘h)(x) = g(x) 이므로 두 식을 같다고 놓는다",
+       "say": "(f∘h)(x) = g(x) 이므로 2h(x) + 3 = 6x − 1"
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 2x + 3 과 g(x) = 6x − 1 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n2h(x) 는?",
+       "choices": [
+        "2h(x) = 6x − 4",
+        "2h(x) = 6x − 1",
+        "2h(x) = 6x + 2"
+       ],
+       "answerIndex": 0,
+       "solution": "3 을 옮기면 2h(x) = 6x − 1 − 3 = 6x − 4",
+       "say": "2h(x) = 6x − 4"
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 2x + 3 과 g(x) = 6x − 1 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n그러므로 h(x) 는?",
+       "choices": [
+        "h(x) = 3x + 2",
+        "h(x) = 6x − 4",
+        "h(x) = 3x − 2"
+       ],
+       "answerIndex": 2,
+       "solution": "양변을 2 로 나누면 h(x) = 3x − 2 · 검산 f(h(x)) = 2(3x − 2) + 3 = 6x − 1",
+       "say": "그러므로 h(x) = 3x − 2 (검산 f(h(x)) = 6x − 1)"
+      }
+     ],
+     [
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 3x − 2 와 g(x) = −6x + 7 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n(f∘h)(x) 를 바꿔 쓰면?",
+       "choices": [
+        "h(f(x))",
+        "f(h(x))",
+        "f(x) × h(x)"
+       ],
+       "answerIndex": 1,
+       "solution": "(f∘h)(x) = f(h(x)) — 오른쪽 h 먼저, 다음 f",
+       "say": "(f∘h)(x) = f(h(x)) 이다."
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 3x − 2 와 g(x) = −6x + 7 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\nf(h(x)) 를 h(x) 로 나타내면?",
+       "choices": [
+        "h(3x − 2)",
+        "3h(x) − 2",
+        "3x − 2 + h(x)"
+       ],
+       "answerIndex": 1,
+       "solution": "f 의 x 자리에 h(x) 를 통째로 넣는다",
+       "say": "f 의 x 자리에 h(x) 를 넣으면 f(h(x)) = 3h(x) − 2"
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 3x − 2 와 g(x) = −6x + 7 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n세울 수 있는 식은?",
+       "choices": [
+        "h(x) = −6x + 7",
+        "3h(x) − 2 = −6x + 7",
+        "3h(x) − 2 = 3x − 2"
+       ],
+       "answerIndex": 1,
+       "solution": "(f∘h)(x) = g(x) 이므로 두 식을 같다고 놓는다",
+       "say": "(f∘h)(x) = g(x) 이므로 3h(x) − 2 = −6x + 7"
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 3x − 2 와 g(x) = −6x + 7 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n3h(x) 는?",
+       "choices": [
+        "3h(x) = −6x + 5",
+        "3h(x) = −6x + 7",
+        "3h(x) = −6x + 9"
+       ],
+       "answerIndex": 2,
+       "solution": "−2 를 옮기면 3h(x) = −6x + 7 + 2 = −6x + 9",
+       "say": "3h(x) = −6x + 9"
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 3x − 2 와 g(x) = −6x + 7 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n그러므로 h(x) 는?",
+       "choices": [
+        "h(x) = −2x + 3",
+        "h(x) = −2x − 3",
+        "h(x) = −6x + 9"
+       ],
+       "answerIndex": 0,
+       "solution": "양변을 3 로 나누면 h(x) = −2x + 3 · 검산 f(h(x)) = 3(−2x + 3) − 2 = −6x + 7",
+       "say": "그러므로 h(x) = −2x + 3 (검산 f(h(x)) = −6x + 7)"
+      }
+     ],
+     [
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 4x + 1 과 g(x) = 8x − 3 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n(f∘h)(x) 를 바꿔 쓰면?",
+       "choices": [
+        "h(f(x))",
+        "f(x) × h(x)",
+        "f(h(x))"
+       ],
+       "answerIndex": 2,
+       "solution": "(f∘h)(x) = f(h(x)) — 오른쪽 h 먼저, 다음 f",
+       "say": "(f∘h)(x) = f(h(x)) 이다."
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 4x + 1 과 g(x) = 8x − 3 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\nf(h(x)) 를 h(x) 로 나타내면?",
+       "choices": [
+        "4h(x) + 1",
+        "4x + 1 + h(x)",
+        "h(4x + 1)"
+       ],
+       "answerIndex": 0,
+       "solution": "f 의 x 자리에 h(x) 를 통째로 넣는다",
+       "say": "f 의 x 자리에 h(x) 를 넣으면 f(h(x)) = 4h(x) + 1"
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 4x + 1 과 g(x) = 8x − 3 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n세울 수 있는 식은?",
+       "choices": [
+        "4h(x) + 1 = 8x − 3",
+        "4h(x) + 1 = 4x + 1",
+        "h(x) = 8x − 3"
+       ],
+       "answerIndex": 0,
+       "solution": "(f∘h)(x) = g(x) 이므로 두 식을 같다고 놓는다",
+       "say": "(f∘h)(x) = g(x) 이므로 4h(x) + 1 = 8x − 3"
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 4x + 1 과 g(x) = 8x − 3 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n4h(x) 는?",
+       "choices": [
+        "4h(x) = 8x − 3",
+        "4h(x) = 8x − 4",
+        "4h(x) = 8x − 2"
+       ],
+       "answerIndex": 1,
+       "solution": "1 을 옮기면 4h(x) = 8x − 3 − 1 = 8x − 4",
+       "say": "4h(x) = 8x − 4"
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 4x + 1 과 g(x) = 8x − 3 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n그러므로 h(x) 는?",
+       "choices": [
+        "h(x) = 2x + 1",
+        "h(x) = 8x − 4",
+        "h(x) = 2x − 1"
+       ],
+       "answerIndex": 2,
+       "solution": "양변을 4 로 나누면 h(x) = 2x − 1 · 검산 f(h(x)) = 4(2x − 1) + 1 = 8x − 3",
+       "say": "그러므로 h(x) = 2x − 1 (검산 f(h(x)) = 8x − 3)"
+      }
+     ],
+     [
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 3x + 5 와 g(x) = 6x + 2 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n(f∘h)(x) 를 바꿔 쓰면?",
+       "choices": [
+        "h(f(x))",
+        "f(x) × h(x)",
+        "f(h(x))"
+       ],
+       "answerIndex": 2,
+       "solution": "(f∘h)(x) = f(h(x)) — 오른쪽 h 먼저, 다음 f",
+       "say": "(f∘h)(x) = f(h(x)) 이다."
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 3x + 5 와 g(x) = 6x + 2 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\nf(h(x)) 를 h(x) 로 나타내면?",
+       "choices": [
+        "3x + 5 + h(x)",
+        "h(3x + 5)",
+        "3h(x) + 5"
+       ],
+       "answerIndex": 2,
+       "solution": "f 의 x 자리에 h(x) 를 통째로 넣는다",
+       "say": "f 의 x 자리에 h(x) 를 넣으면 f(h(x)) = 3h(x) + 5"
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 3x + 5 와 g(x) = 6x + 2 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n세울 수 있는 식은?",
+       "choices": [
+        "3h(x) + 5 = 6x + 2",
+        "h(x) = 6x + 2",
+        "3h(x) + 5 = 3x + 5"
+       ],
+       "answerIndex": 0,
+       "solution": "(f∘h)(x) = g(x) 이므로 두 식을 같다고 놓는다",
+       "say": "(f∘h)(x) = g(x) 이므로 3h(x) + 5 = 6x + 2"
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 3x + 5 와 g(x) = 6x + 2 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n3h(x) 는?",
+       "choices": [
+        "3h(x) = 6x − 3",
+        "3h(x) = 6x + 7",
+        "3h(x) = 6x + 2"
+       ],
+       "answerIndex": 0,
+       "solution": "5 를 옮기면 3h(x) = 6x + 2 − 5 = 6x − 3",
+       "say": "3h(x) = 6x − 3"
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 3x + 5 와 g(x) = 6x + 2 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n그러므로 h(x) 는?",
+       "choices": [
+        "h(x) = 2x − 1",
+        "h(x) = 6x − 3",
+        "h(x) = 2x + 1"
+       ],
+       "answerIndex": 0,
+       "solution": "양변을 3 으로 나누면 h(x) = 2x − 1 · 검산 f(h(x)) = 3(2x − 1) + 5 = 6x + 2",
+       "say": "그러므로 h(x) = 2x − 1 (검산 f(h(x)) = 6x + 2)"
+      }
+     ],
+     [
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 4x − 3 과 g(x) = −4x + 5 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n(f∘h)(x) 를 바꿔 쓰면?",
+       "choices": [
+        "f(h(x))",
+        "f(x) × h(x)",
+        "h(f(x))"
+       ],
+       "answerIndex": 0,
+       "solution": "(f∘h)(x) = f(h(x)) — 오른쪽 h 먼저, 다음 f",
+       "say": "(f∘h)(x) = f(h(x)) 이다."
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 4x − 3 과 g(x) = −4x + 5 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\nf(h(x)) 를 h(x) 로 나타내면?",
+       "choices": [
+        "h(4x − 3)",
+        "4h(x) − 3",
+        "4x − 3 + h(x)"
+       ],
+       "answerIndex": 1,
+       "solution": "f 의 x 자리에 h(x) 를 통째로 넣는다",
+       "say": "f 의 x 자리에 h(x) 를 넣으면 f(h(x)) = 4h(x) − 3"
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 4x − 3 과 g(x) = −4x + 5 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n세울 수 있는 식은?",
+       "choices": [
+        "h(x) = −4x + 5",
+        "4h(x) − 3 = 4x − 3",
+        "4h(x) − 3 = −4x + 5"
+       ],
+       "answerIndex": 2,
+       "solution": "(f∘h)(x) = g(x) 이므로 두 식을 같다고 놓는다",
+       "say": "(f∘h)(x) = g(x) 이므로 4h(x) − 3 = −4x + 5"
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 4x − 3 과 g(x) = −4x + 5 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n4h(x) 는?",
+       "choices": [
+        "4h(x) = −4x + 8",
+        "4h(x) = −4x + 2",
+        "4h(x) = −4x + 5"
+       ],
+       "answerIndex": 0,
+       "solution": "3 을 옮기면 4h(x) = −4x + 5 + 3 = −4x + 8",
+       "say": "4h(x) = −4x + 8"
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 4x − 3 과 g(x) = −4x + 5 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n그러므로 h(x) 는?",
+       "choices": [
+        "h(x) = −x + 2",
+        "h(x) = −4x + 8",
+        "h(x) = −x − 2"
+       ],
+       "answerIndex": 0,
+       "solution": "양변을 4 로 나누면 h(x) = −x + 2 · 검산 f(h(x)) = 4(−x + 2) − 3 = −4x + 5",
+       "say": "그러므로 h(x) = −x + 2 (검산 f(h(x)) = −4x + 5)"
+      }
+     ],
+     [
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 5x + 1 과 g(x) = 15x + 11 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n(f∘h)(x) 를 바꿔 쓰면?",
+       "choices": [
+        "f(x) × h(x)",
+        "f(h(x))",
+        "h(f(x))"
+       ],
+       "answerIndex": 1,
+       "solution": "(f∘h)(x) = f(h(x)) — 오른쪽 h 먼저, 다음 f",
+       "say": "(f∘h)(x) = f(h(x)) 이다."
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 5x + 1 과 g(x) = 15x + 11 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\nf(h(x)) 를 h(x) 로 나타내면?",
+       "choices": [
+        "5h(x) + 1",
+        "h(5x + 1)",
+        "5x + 1 + h(x)"
+       ],
+       "answerIndex": 0,
+       "solution": "f 의 x 자리에 h(x) 를 통째로 넣는다",
+       "say": "f 의 x 자리에 h(x) 를 넣으면 f(h(x)) = 5h(x) + 1"
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 5x + 1 과 g(x) = 15x + 11 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n세울 수 있는 식은?",
+       "choices": [
+        "5h(x) + 1 = 15x + 11",
+        "h(x) = 15x + 11",
+        "5h(x) + 1 = 5x + 1"
+       ],
+       "answerIndex": 0,
+       "solution": "(f∘h)(x) = g(x) 이므로 두 식을 같다고 놓는다",
+       "say": "(f∘h)(x) = g(x) 이므로 5h(x) + 1 = 15x + 11"
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 5x + 1 과 g(x) = 15x + 11 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n5h(x) 는?",
+       "choices": [
+        "5h(x) = 15x + 11",
+        "5h(x) = 15x + 10",
+        "5h(x) = 15x + 12"
+       ],
+       "answerIndex": 1,
+       "solution": "1 을 옮기면 5h(x) = 15x + 11 − 1 = 15x + 10",
+       "say": "5h(x) = 15x + 10"
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 5x + 1 과 g(x) = 15x + 11 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n그러므로 h(x) 는?",
+       "choices": [
+        "h(x) = 15x + 10",
+        "h(x) = 3x + 2",
+        "h(x) = 3x − 2"
+       ],
+       "answerIndex": 1,
+       "solution": "양변을 5 로 나누면 h(x) = 3x + 2 · 검산 f(h(x)) = 5(3x + 2) + 1 = 15x + 11",
+       "say": "그러므로 h(x) = 3x + 2 (검산 f(h(x)) = 15x + 11)"
+      }
+     ]
+    ]
+   },
+   "retry": {
+    "pool": [
+     [
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 2x + 3 과 g(x) = 6x − 1 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n(f∘h)(x) 를 바꿔 쓰면?",
+       "choices": [
+        "h(f(x))",
+        "f(x) × h(x)",
+        "f(h(x))"
+       ],
+       "answerIndex": 2,
+       "solution": "(f∘h)(x) = f(h(x)) — 오른쪽 h 먼저, 다음 f",
+       "say": "(f∘h)(x) = f(h(x)) 이다."
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 2x + 3 과 g(x) = 6x − 1 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\nf(h(x)) 를 h(x) 로 나타내면?",
+       "choices": [
+        "2h(x) + 3",
+        "2x + 3 + h(x)",
+        "h(2x + 3)"
+       ],
+       "answerIndex": 0,
+       "solution": "f 의 x 자리에 h(x) 를 통째로 넣는다",
+       "say": "f 의 x 자리에 h(x) 를 넣으면 f(h(x)) = 2h(x) + 3"
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 2x + 3 과 g(x) = 6x − 1 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n세울 수 있는 식은?",
+       "choices": [
+        "2h(x) + 3 = 2x + 3",
+        "2h(x) + 3 = 6x − 1",
+        "h(x) = 6x − 1"
+       ],
+       "answerIndex": 1,
+       "solution": "(f∘h)(x) = g(x) 이므로 두 식을 같다고 놓는다",
+       "say": "(f∘h)(x) = g(x) 이므로 2h(x) + 3 = 6x − 1"
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 2x + 3 과 g(x) = 6x − 1 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n2h(x) 는?",
+       "choices": [
+        "2h(x) = 6x − 4",
+        "2h(x) = 6x − 1",
+        "2h(x) = 6x + 2"
+       ],
+       "answerIndex": 0,
+       "solution": "3 을 옮기면 2h(x) = 6x − 1 − 3 = 6x − 4",
+       "say": "2h(x) = 6x − 4"
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 2x + 3 과 g(x) = 6x − 1 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n그러므로 h(x) 는?",
+       "choices": [
+        "h(x) = 3x + 2",
+        "h(x) = 6x − 4",
+        "h(x) = 3x − 2"
+       ],
+       "answerIndex": 2,
+       "solution": "양변을 2 로 나누면 h(x) = 3x − 2 · 검산 f(h(x)) = 2(3x − 2) + 3 = 6x − 1",
+       "say": "그러므로 h(x) = 3x − 2 (검산 f(h(x)) = 6x − 1)"
+      }
+     ],
+     [
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 3x − 2 와 g(x) = −6x + 7 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n(f∘h)(x) 를 바꿔 쓰면?",
+       "choices": [
+        "h(f(x))",
+        "f(h(x))",
+        "f(x) × h(x)"
+       ],
+       "answerIndex": 1,
+       "solution": "(f∘h)(x) = f(h(x)) — 오른쪽 h 먼저, 다음 f",
+       "say": "(f∘h)(x) = f(h(x)) 이다."
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 3x − 2 와 g(x) = −6x + 7 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\nf(h(x)) 를 h(x) 로 나타내면?",
+       "choices": [
+        "h(3x − 2)",
+        "3h(x) − 2",
+        "3x − 2 + h(x)"
+       ],
+       "answerIndex": 1,
+       "solution": "f 의 x 자리에 h(x) 를 통째로 넣는다",
+       "say": "f 의 x 자리에 h(x) 를 넣으면 f(h(x)) = 3h(x) − 2"
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 3x − 2 와 g(x) = −6x + 7 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n세울 수 있는 식은?",
+       "choices": [
+        "h(x) = −6x + 7",
+        "3h(x) − 2 = −6x + 7",
+        "3h(x) − 2 = 3x − 2"
+       ],
+       "answerIndex": 1,
+       "solution": "(f∘h)(x) = g(x) 이므로 두 식을 같다고 놓는다",
+       "say": "(f∘h)(x) = g(x) 이므로 3h(x) − 2 = −6x + 7"
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 3x − 2 와 g(x) = −6x + 7 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n3h(x) 는?",
+       "choices": [
+        "3h(x) = −6x + 5",
+        "3h(x) = −6x + 7",
+        "3h(x) = −6x + 9"
+       ],
+       "answerIndex": 2,
+       "solution": "−2 를 옮기면 3h(x) = −6x + 7 + 2 = −6x + 9",
+       "say": "3h(x) = −6x + 9"
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 3x − 2 와 g(x) = −6x + 7 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n그러므로 h(x) 는?",
+       "choices": [
+        "h(x) = −2x + 3",
+        "h(x) = −2x − 3",
+        "h(x) = −6x + 9"
+       ],
+       "answerIndex": 0,
+       "solution": "양변을 3 로 나누면 h(x) = −2x + 3 · 검산 f(h(x)) = 3(−2x + 3) − 2 = −6x + 7",
+       "say": "그러므로 h(x) = −2x + 3 (검산 f(h(x)) = −6x + 7)"
+      }
+     ],
+     [
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 4x + 1 과 g(x) = 8x − 3 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n(f∘h)(x) 를 바꿔 쓰면?",
+       "choices": [
+        "h(f(x))",
+        "f(x) × h(x)",
+        "f(h(x))"
+       ],
+       "answerIndex": 2,
+       "solution": "(f∘h)(x) = f(h(x)) — 오른쪽 h 먼저, 다음 f",
+       "say": "(f∘h)(x) = f(h(x)) 이다."
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 4x + 1 과 g(x) = 8x − 3 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\nf(h(x)) 를 h(x) 로 나타내면?",
+       "choices": [
+        "4h(x) + 1",
+        "4x + 1 + h(x)",
+        "h(4x + 1)"
+       ],
+       "answerIndex": 0,
+       "solution": "f 의 x 자리에 h(x) 를 통째로 넣는다",
+       "say": "f 의 x 자리에 h(x) 를 넣으면 f(h(x)) = 4h(x) + 1"
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 4x + 1 과 g(x) = 8x − 3 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n세울 수 있는 식은?",
+       "choices": [
+        "4h(x) + 1 = 8x − 3",
+        "4h(x) + 1 = 4x + 1",
+        "h(x) = 8x − 3"
+       ],
+       "answerIndex": 0,
+       "solution": "(f∘h)(x) = g(x) 이므로 두 식을 같다고 놓는다",
+       "say": "(f∘h)(x) = g(x) 이므로 4h(x) + 1 = 8x − 3"
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 4x + 1 과 g(x) = 8x − 3 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n4h(x) 는?",
+       "choices": [
+        "4h(x) = 8x − 3",
+        "4h(x) = 8x − 4",
+        "4h(x) = 8x − 2"
+       ],
+       "answerIndex": 1,
+       "solution": "1 을 옮기면 4h(x) = 8x − 3 − 1 = 8x − 4",
+       "say": "4h(x) = 8x − 4"
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 4x + 1 과 g(x) = 8x − 3 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n그러므로 h(x) 는?",
+       "choices": [
+        "h(x) = 2x + 1",
+        "h(x) = 8x − 4",
+        "h(x) = 2x − 1"
+       ],
+       "answerIndex": 2,
+       "solution": "양변을 4 로 나누면 h(x) = 2x − 1 · 검산 f(h(x)) = 4(2x − 1) + 1 = 8x − 3",
+       "say": "그러므로 h(x) = 2x − 1 (검산 f(h(x)) = 8x − 3)"
+      }
+     ],
+     [
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 3x + 5 와 g(x) = 6x + 2 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n(f∘h)(x) 를 바꿔 쓰면?",
+       "choices": [
+        "h(f(x))",
+        "f(x) × h(x)",
+        "f(h(x))"
+       ],
+       "answerIndex": 2,
+       "solution": "(f∘h)(x) = f(h(x)) — 오른쪽 h 먼저, 다음 f",
+       "say": "(f∘h)(x) = f(h(x)) 이다."
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 3x + 5 와 g(x) = 6x + 2 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\nf(h(x)) 를 h(x) 로 나타내면?",
+       "choices": [
+        "3x + 5 + h(x)",
+        "h(3x + 5)",
+        "3h(x) + 5"
+       ],
+       "answerIndex": 2,
+       "solution": "f 의 x 자리에 h(x) 를 통째로 넣는다",
+       "say": "f 의 x 자리에 h(x) 를 넣으면 f(h(x)) = 3h(x) + 5"
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 3x + 5 와 g(x) = 6x + 2 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n세울 수 있는 식은?",
+       "choices": [
+        "3h(x) + 5 = 6x + 2",
+        "h(x) = 6x + 2",
+        "3h(x) + 5 = 3x + 5"
+       ],
+       "answerIndex": 0,
+       "solution": "(f∘h)(x) = g(x) 이므로 두 식을 같다고 놓는다",
+       "say": "(f∘h)(x) = g(x) 이므로 3h(x) + 5 = 6x + 2"
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 3x + 5 와 g(x) = 6x + 2 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n3h(x) 는?",
+       "choices": [
+        "3h(x) = 6x − 3",
+        "3h(x) = 6x + 7",
+        "3h(x) = 6x + 2"
+       ],
+       "answerIndex": 0,
+       "solution": "5 를 옮기면 3h(x) = 6x + 2 − 5 = 6x − 3",
+       "say": "3h(x) = 6x − 3"
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 3x + 5 와 g(x) = 6x + 2 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n그러므로 h(x) 는?",
+       "choices": [
+        "h(x) = 2x − 1",
+        "h(x) = 6x − 3",
+        "h(x) = 2x + 1"
+       ],
+       "answerIndex": 0,
+       "solution": "양변을 3 으로 나누면 h(x) = 2x − 1 · 검산 f(h(x)) = 3(2x − 1) + 5 = 6x + 2",
+       "say": "그러므로 h(x) = 2x − 1 (검산 f(h(x)) = 6x + 2)"
+      }
+     ],
+     [
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 4x − 3 과 g(x) = −4x + 5 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n(f∘h)(x) 를 바꿔 쓰면?",
+       "choices": [
+        "f(h(x))",
+        "f(x) × h(x)",
+        "h(f(x))"
+       ],
+       "answerIndex": 0,
+       "solution": "(f∘h)(x) = f(h(x)) — 오른쪽 h 먼저, 다음 f",
+       "say": "(f∘h)(x) = f(h(x)) 이다."
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 4x − 3 과 g(x) = −4x + 5 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\nf(h(x)) 를 h(x) 로 나타내면?",
+       "choices": [
+        "h(4x − 3)",
+        "4h(x) − 3",
+        "4x − 3 + h(x)"
+       ],
+       "answerIndex": 1,
+       "solution": "f 의 x 자리에 h(x) 를 통째로 넣는다",
+       "say": "f 의 x 자리에 h(x) 를 넣으면 f(h(x)) = 4h(x) − 3"
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 4x − 3 과 g(x) = −4x + 5 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n세울 수 있는 식은?",
+       "choices": [
+        "h(x) = −4x + 5",
+        "4h(x) − 3 = 4x − 3",
+        "4h(x) − 3 = −4x + 5"
+       ],
+       "answerIndex": 2,
+       "solution": "(f∘h)(x) = g(x) 이므로 두 식을 같다고 놓는다",
+       "say": "(f∘h)(x) = g(x) 이므로 4h(x) − 3 = −4x + 5"
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 4x − 3 과 g(x) = −4x + 5 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n4h(x) 는?",
+       "choices": [
+        "4h(x) = −4x + 8",
+        "4h(x) = −4x + 2",
+        "4h(x) = −4x + 5"
+       ],
+       "answerIndex": 0,
+       "solution": "3 을 옮기면 4h(x) = −4x + 5 + 3 = −4x + 8",
+       "say": "4h(x) = −4x + 8"
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 4x − 3 과 g(x) = −4x + 5 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n그러므로 h(x) 는?",
+       "choices": [
+        "h(x) = −x + 2",
+        "h(x) = −4x + 8",
+        "h(x) = −x − 2"
+       ],
+       "answerIndex": 0,
+       "solution": "양변을 4 로 나누면 h(x) = −x + 2 · 검산 f(h(x)) = 4(−x + 2) − 3 = −4x + 5",
+       "say": "그러므로 h(x) = −x + 2 (검산 f(h(x)) = −4x + 5)"
+      }
+     ],
+     [
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 5x + 1 과 g(x) = 15x + 11 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n(f∘h)(x) 를 바꿔 쓰면?",
+       "choices": [
+        "f(x) × h(x)",
+        "f(h(x))",
+        "h(f(x))"
+       ],
+       "answerIndex": 1,
+       "solution": "(f∘h)(x) = f(h(x)) — 오른쪽 h 먼저, 다음 f",
+       "say": "(f∘h)(x) = f(h(x)) 이다."
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 5x + 1 과 g(x) = 15x + 11 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\nf(h(x)) 를 h(x) 로 나타내면?",
+       "choices": [
+        "5h(x) + 1",
+        "h(5x + 1)",
+        "5x + 1 + h(x)"
+       ],
+       "answerIndex": 0,
+       "solution": "f 의 x 자리에 h(x) 를 통째로 넣는다",
+       "say": "f 의 x 자리에 h(x) 를 넣으면 f(h(x)) = 5h(x) + 1"
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 5x + 1 과 g(x) = 15x + 11 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n세울 수 있는 식은?",
+       "choices": [
+        "5h(x) + 1 = 15x + 11",
+        "h(x) = 15x + 11",
+        "5h(x) + 1 = 5x + 1"
+       ],
+       "answerIndex": 0,
+       "solution": "(f∘h)(x) = g(x) 이므로 두 식을 같다고 놓는다",
+       "say": "(f∘h)(x) = g(x) 이므로 5h(x) + 1 = 15x + 11"
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 5x + 1 과 g(x) = 15x + 11 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n5h(x) 는?",
+       "choices": [
+        "5h(x) = 15x + 11",
+        "5h(x) = 15x + 10",
+        "5h(x) = 15x + 12"
+       ],
+       "answerIndex": 1,
+       "solution": "1 을 옮기면 5h(x) = 15x + 11 − 1 = 15x + 10",
+       "say": "5h(x) = 15x + 10"
+      },
+      {
+       "type": "choice",
+       "question": "중단원 07) 두 함수 f(x) = 5x + 1 과 g(x) = 15x + 11 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 를 구하시오.\n그러므로 h(x) 는?",
+       "choices": [
+        "h(x) = 15x + 10",
+        "h(x) = 3x + 2",
+        "h(x) = 3x − 2"
+       ],
+       "answerIndex": 1,
+       "solution": "양변을 5 로 나누면 h(x) = 3x + 2 · 검산 f(h(x)) = 5(3x + 2) + 1 = 15x + 11",
+       "say": "그러므로 h(x) = 3x + 2 (검산 f(h(x)) = 15x + 11)"
+      }
+     ]
+    ]
+   },
+   "noteText": "(f∘h)(x) = f(h(x)) → f 에 h(x) 넣기 → g(x) 와 같다고 놓기 → 이항 → h(x) · 검산",
+   "help": {
+    "concept": "(f∘h)(x) = f(h(x)) — f 의 x 자리에 h(x) 를 통째로 넣고 방정식처럼 h(x) 를 구해요.",
+    "example": {
+     "q": "f(x) = 2x + 1, g(x) = 4x + 5 일 때 (f∘h)(x) = g(x) 인 h(x) 는?",
+     "sol": [
+      "f(h(x)) = 2h(x) + 1",
+      "2h(x) + 1 = 4x + 5 → 2h(x) = 4x + 4",
+      "h(x) = 2x + 2 · 검산 2(2x + 2) + 1 = 4x + 5"
+     ]
+    },
+    "first": "f(h(x)) = 2h(x) − □"
+   }
+  }
+ },
+ "boss": {
+  "title": "👑 16차시 형성평가 · 합성의 대기관",
+  "sprite": "crown0:0",
+  "items": 4,
+  "hpItems": 4,
+  "tags": [
+   "c1",
+   "c1",
+   "c2",
+   "c2"
+  ],
+  "links": [
+   "m1",
+   "m1",
+   "m2",
+   "m3"
+  ],
+  "pool": [
+   [
+    {
+     "type": "choice",
+     "question": "1. 두 함수 f(x) = x − 5 와 g(x) = 3x² − 4 에 대하여 (g∘f)(3) 의 값은?",
+     "choices": [
+      "18",
+      "23",
+      "8"
+     ],
+     "answerIndex": 2,
+     "solution": "g(f(3)) = g(−2) = 8"
+    },
+    {
+     "type": "choice",
+     "question": "1. 두 함수 f(x) = x − 3 과 g(x) = 2x² + 1 에 대하여 (g∘f)(2) 의 값은?",
+     "choices": [
+      "9",
+      "3",
+      "6"
+     ],
+     "answerIndex": 1,
+     "solution": "g(f(2)) = g(−1) = 3"
+    },
+    {
+     "type": "choice",
+     "question": "1. 두 함수 f(x) = x + 4 와 g(x) = x² − 5 에 대하여 (g∘f)(−2) 의 값은?",
+     "choices": [
+      "−1",
+      "3",
+      "2"
+     ],
+     "answerIndex": 0,
+     "solution": "g(f(−2)) = g(2) = −1"
+    },
+    {
+     "type": "choice",
+     "question": "1. 두 함수 f(x) = x − 1 과 g(x) = −x² + 3 에 대하여 (g∘f)(4) 의 값은?",
+     "choices": [
+      "−14",
+      "−13",
+      "−6"
+     ],
+     "answerIndex": 2,
+     "solution": "g(f(4)) = g(3) = −6"
+    },
+    {
+     "type": "choice",
+     "question": "1. 두 함수 f(x) = x + 2 와 g(x) = x² − 3 에 대하여 (g∘f)(1) 의 값은?",
+     "choices": [
+      "6",
+      "0",
+      "−2"
+     ],
+     "answerIndex": 0,
+     "solution": "g(f(1)) = g(3) = 6"
+    },
+    {
+     "type": "choice",
+     "question": "1. 두 함수 f(x) = x − 2 와 g(x) = 2x² + 3 에 대하여 (g∘f)(4) 의 값은?",
+     "choices": [
+      "33",
+      "35",
+      "11"
+     ],
+     "answerIndex": 2,
+     "solution": "g(f(4)) = g(2) = 11"
+    },
+    {
+     "type": "choice",
+     "question": "1. 두 함수 f(x) = x − 4 와 g(x) = −x² + 6 에 대하여 (g∘f)(2) 의 값은?",
+     "choices": [
+      "5",
+      "2",
+      "−2"
+     ],
+     "answerIndex": 1,
+     "solution": "g(f(2)) = g(−2) = 2"
+    }
+   ],
+   [
+    {
+     "type": "choice",
+     "question": "2. 두 함수 f(x) = x − 5 와 g(x) = 3x² − 4 에 대하여 (g∘g)(1) 의 값은?",
+     "choices": [
+      "1",
+      "−1",
+      "−9"
+     ],
+     "answerIndex": 1,
+     "solution": "g(g(1)) = g(−1) = −1"
+    },
+    {
+     "type": "choice",
+     "question": "2. 두 함수 f(x) = x − 3 과 g(x) = 2x² + 1 에 대하여 (g∘g)(1) 의 값은?",
+     "choices": [
+      "3",
+      "9",
+      "19"
+     ],
+     "answerIndex": 2,
+     "solution": "g(g(1)) = g(3) = 19"
+    },
+    {
+     "type": "choice",
+     "question": "2. 두 함수 f(x) = x + 4 와 g(x) = x² − 5 에 대하여 (g∘g)(2) 의 값은?",
+     "choices": [
+      "−1",
+      "1",
+      "−4"
+     ],
+     "answerIndex": 2,
+     "solution": "g(g(2)) = g(−1) = −4"
+    },
+    {
+     "type": "choice",
+     "question": "2. 두 함수 f(x) = x − 1 과 g(x) = −x² + 3 에 대하여 (g∘g)(1) 의 값은?",
+     "choices": [
+      "2",
+      "4",
+      "−1"
+     ],
+     "answerIndex": 2,
+     "solution": "g(g(1)) = g(2) = −1"
+    },
+    {
+     "type": "choice",
+     "question": "2. 두 함수 f(x) = x + 2 와 g(x) = x² − 3 에 대하여 (g∘g)(2) 의 값은?",
+     "choices": [
+      "−4",
+      "−2",
+      "1"
+     ],
+     "answerIndex": 1,
+     "solution": "g(g(2)) = g(1) = −2"
+    },
+    {
+     "type": "choice",
+     "question": "2. 두 함수 f(x) = x − 2 와 g(x) = 2x² + 3 에 대하여 (g∘g)(−1) 의 값은?",
+     "choices": [
+      "53",
+      "25",
+      "5"
+     ],
+     "answerIndex": 0,
+     "solution": "g(g(−1)) = g(5) = 53"
+    },
+    {
+     "type": "choice",
+     "question": "2. 두 함수 f(x) = x − 4 와 g(x) = −x² + 6 에 대하여 (g∘g)(1) 의 값은?",
+     "choices": [
+      "25",
+      "−19",
+      "5"
+     ],
+     "answerIndex": 1,
+     "solution": "g(g(1)) = g(5) = −19"
+    }
+   ],
+   [
+    {
+     "type": "choice",
+     "question": "3. 두 함수 f(x) = x − 5 와 g(x) = 3x² − 4 에 대하여 (f∘g)(x) 는?",
+     "choices": [
+      "3x² − 30x + 71",
+      "3x − 9",
+      "3x² − 9"
+     ],
+     "answerIndex": 2,
+     "solution": "f(g(x)) = (3x² − 4) − 5 = 3x² − 9"
+    },
+    {
+     "type": "choice",
+     "question": "3. 두 함수 f(x) = x − 3 과 g(x) = 2x² + 1 에 대하여 (f∘g)(x) 는?",
+     "choices": [
+      "2x − 2",
+      "2x² − 2",
+      "2x² − 12x + 19"
+     ],
+     "answerIndex": 1,
+     "solution": "f(g(x)) = (2x² + 1) − 3 = 2x² − 2"
+    },
+    {
+     "type": "choice",
+     "question": "3. 두 함수 f(x) = x + 4 와 g(x) = x² − 5 에 대하여 (f∘g)(x) 는?",
+     "choices": [
+      "x² + 8x + 11",
+      "x² − 1",
+      "x − 1"
+     ],
+     "answerIndex": 1,
+     "solution": "f(g(x)) = (x² − 5) + 4 = x² − 1"
+    },
+    {
+     "type": "choice",
+     "question": "3. 두 함수 f(x) = x − 1 과 g(x) = −x² + 3 에 대하여 (f∘g)(x) 는?",
+     "choices": [
+      "−x² + 2x + 2",
+      "−x² + 2",
+      "−x + 2"
+     ],
+     "answerIndex": 1,
+     "solution": "f(g(x)) = (−x² + 3) − 1 = −x² + 2"
+    },
+    {
+     "type": "choice",
+     "question": "3. 두 함수 f(x) = x + 2 와 g(x) = x² − 3 에 대하여 (f∘g)(x) 는?",
+     "choices": [
+      "x² + 4x + 1",
+      "x − 1",
+      "x² − 1"
+     ],
+     "answerIndex": 2,
+     "solution": "f(g(x)) = (x² − 3) + 2 = x² − 1"
+    },
+    {
+     "type": "choice",
+     "question": "3. 두 함수 f(x) = x − 2 와 g(x) = 2x² + 3 에 대하여 (f∘g)(x) 는?",
+     "choices": [
+      "2x² + 1",
+      "2x + 1",
+      "2x² − 8x + 11"
+     ],
+     "answerIndex": 0,
+     "solution": "f(g(x)) = (2x² + 3) − 2 = 2x² + 1"
+    },
+    {
+     "type": "choice",
+     "question": "3. 두 함수 f(x) = x − 4 와 g(x) = −x² + 6 에 대하여 (f∘g)(x) 는?",
+     "choices": [
+      "−x² + 2",
+      "−x + 2",
+      "−x² + 8x − 10"
+     ],
+     "answerIndex": 0,
+     "solution": "f(g(x)) = (−x² + 6) − 4 = −x² + 2"
+    }
+   ],
+   [
+    {
+     "type": "choice",
+     "question": "4. 두 함수 f(x) = 3x + 1, g(x) = 6x − 5 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 는?",
+     "choices": [
+      "h(x) = 2x − 2",
+      "h(x) = 2x + 2",
+      "h(x) = 6x − 6"
+     ],
+     "answerIndex": 0,
+     "solution": "f(h(x)) = 3h(x) + 1 = 6x − 5 → h(x) = 2x − 2"
+    },
+    {
+     "type": "choice",
+     "question": "4. 두 함수 f(x) = 2x − 1, g(x) = 4x + 7 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 는?",
+     "choices": [
+      "h(x) = 2x − 4",
+      "h(x) = 2x + 4",
+      "h(x) = 4x + 8"
+     ],
+     "answerIndex": 1,
+     "solution": "f(h(x)) = 2h(x) − 1 = 4x + 7 → h(x) = 2x + 4"
+    },
+    {
+     "type": "choice",
+     "question": "4. 두 함수 f(x) = 5x + 2, g(x) = −10x + 7 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 는?",
+     "choices": [
+      "h(x) = −2x + 1",
+      "h(x) = −2x − 1",
+      "h(x) = −10x + 5"
+     ],
+     "answerIndex": 0,
+     "solution": "f(h(x)) = 5h(x) + 2 = −10x + 7 → h(x) = −2x + 1"
+    },
+    {
+     "type": "choice",
+     "question": "4. 두 함수 f(x) = 3x − 4, g(x) = 9x + 2 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 는?",
+     "choices": [
+      "h(x) = 3x + 2",
+      "h(x) = 9x + 6",
+      "h(x) = 3x − 2"
+     ],
+     "answerIndex": 0,
+     "solution": "f(h(x)) = 3h(x) − 4 = 9x + 2 → h(x) = 3x + 2"
+    },
+    {
+     "type": "choice",
+     "question": "4. 두 함수 f(x) = 3x + 4, g(x) = 6x + 1 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 는?",
+     "choices": [
+      "h(x) = 6x − 3",
+      "h(x) = 2x + 1",
+      "h(x) = 2x − 1"
+     ],
+     "answerIndex": 2,
+     "solution": "f(h(x)) = 3h(x) + 4 = 6x + 1 → h(x) = 2x − 1"
+    },
+    {
+     "type": "choice",
+     "question": "4. 두 함수 f(x) = 4x − 5, g(x) = 12x + 3 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 는?",
+     "choices": [
+      "h(x) = 12x + 8",
+      "h(x) = 3x + 2",
+      "h(x) = 3x − 2"
+     ],
+     "answerIndex": 1,
+     "solution": "f(h(x)) = 4h(x) − 5 = 12x + 3 → h(x) = 3x + 2"
+    },
+    {
+     "type": "choice",
+     "question": "4. 두 함수 f(x) = 2x + 9, g(x) = −6x + 11 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 는?",
+     "choices": [
+      "h(x) = −6x + 2",
+      "h(x) = −3x − 1",
+      "h(x) = −3x + 1"
+     ],
+     "answerIndex": 2,
+     "solution": "f(h(x)) = 2h(x) + 9 = −6x + 11 → h(x) = −3x + 1"
+    }
+   ]
+  ],
+  "sets": [
+   null,
+   [
+    {
+     "type": "choice",
+     "question": "1. 두 함수 f(x) = x − 3 과 g(x) = 2x² + 1 에 대하여 (g∘f)(2) 의 값은?",
+     "choices": [
+      "9",
+      "3",
+      "6"
+     ],
+     "answerIndex": 1,
+     "solution": "g(f(2)) = g(−1) = 3"
+    },
+    {
+     "type": "choice",
+     "question": "2. 두 함수 f(x) = x − 3 과 g(x) = 2x² + 1 에 대하여 (g∘g)(1) 의 값은?",
+     "choices": [
+      "3",
+      "9",
+      "19"
+     ],
+     "answerIndex": 2,
+     "solution": "g(g(1)) = g(3) = 19"
+    },
+    {
+     "type": "choice",
+     "question": "3. 두 함수 f(x) = x − 3 과 g(x) = 2x² + 1 에 대하여 (f∘g)(x) 는?",
+     "choices": [
+      "2x − 2",
+      "2x² − 2",
+      "2x² − 12x + 19"
+     ],
+     "answerIndex": 1,
+     "solution": "f(g(x)) = (2x² + 1) − 3 = 2x² − 2"
+    },
+    {
+     "type": "choice",
+     "question": "4. 두 함수 f(x) = 2x − 1, g(x) = 4x + 7 에 대하여 (f∘h)(x) = g(x) 를 만족시키는 h(x) 는?",
+     "choices": [
+      "h(x) = 2x − 4",
+      "h(x) = 2x + 4",
+      "h(x) = 4x + 8"
+     ],
+     "answerIndex": 1,
+     "solution": "f(h(x)) = 2h(x) − 1 = 4x + 7 → h(x) = 2x + 4"
+    }
+   ]
+  ]
+ },
+ "keys": [
+  {
+   "id": "k1",
+   "name": "괄호 풀기",
+   "grade": "중1 · 문자와 식",
+   "help": "괄호 앞의 수를 괄호 안 모든 항에 곱해요 · −(…) 는 부호가 모두 바뀌어요. · 이 열쇠는 문제 3 에서 써요.",
+   "vers": [
+    {
+     "type": "choice",
+     "q": "2(x + 3) 을 풀면?",
+     "a": "1",
+     "ch": [
+      "2x + 3",
+      "2x + 6",
+      "x + 6"
+     ]
+    },
+    {
+     "type": "choice",
+     "q": "−(4x + 1) 을 풀면?",
+     "a": "2",
+     "ch": [
+      "−4x + 1",
+      "4x − 1",
+      "−4x − 1"
+     ]
+    },
+    {
+     "type": "choice",
+     "q": "3(−x + 2) 를 풀면?",
+     "a": "0",
+     "ch": [
+      "−3x + 6",
+      "−3x + 2",
+      "3x + 6"
+     ]
+    }
+   ],
+   "uses": [
+    {
+     "at": "m3",
+     "n": 5
+    },
+    {
+     "at": "boss",
+     "n": 4
+    }
+   ]
+  },
+  {
+   "id": "k2",
+   "name": "완전제곱식 전개",
+   "grade": "중3 · 곱셈 공식",
+   "help": "(x − a)² = x² − 2ax + a² · 가운데 항을 빠뜨리지 않아요. · 이 열쇠는 문제 2 의 (1)에서 써요.",
+   "vers": [
+    {
+     "type": "choice",
+     "q": "(x − 4)² 을 전개하면?",
+     "a": "1",
+     "ch": [
+      "x² − 16",
+      "x² − 8x + 16",
+      "x² + 16"
+     ]
+    },
+    {
+     "type": "choice",
+     "q": "(x + 3)² 을 전개하면?",
+     "a": "0",
+     "ch": [
+      "x² + 6x + 9",
+      "x² + 9",
+      "x² + 3x + 9"
+     ]
+    },
+    {
+     "type": "choice",
+     "q": "(x − 1)² 을 전개하면?",
+     "a": "2",
+     "ch": [
+      "x² + 1",
+      "x² − 1",
+      "x² − 2x + 1"
+     ]
+    }
+   ],
+   "uses": [
+    {
+     "at": "m2",
+     "n": 1
+    }
+   ]
+  }
+ ]
+}
