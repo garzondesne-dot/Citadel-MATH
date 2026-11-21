@@ -1,0 +1,615 @@
+{
+ "v": 1,
+ "id": "set-06",
+ "no": 6,
+ "title": "드모르간의 법칙 · 집합 중단원 마무리",
+ "unit": "공통수학2 Ⅱ. 집합과 명제 · 6·7차시",
+ "sheet": "학습과정 6차시 레이드용 v5 + 7차시 레이드용 v4",
+ "goal": "드모르간의 법칙을 이용한다 · 여집합 · 차집합의 원소의 개수를 구한다 · 집합 단원(중단원 마무리) 문제를 해결한다",
+ "theme": "01-burrow",
+ "defaultPct": 90,
+ "parts": [
+  {
+   "no": 7,
+   "from": "u4",
+   "title": "문제 4부터 · 소레이드 4개 + 형성평가 (6차시 이어서)",
+   "boss": [
+    3,
+    6
+   ],
+   "attack": [
+    "fire",
+    "smash"
+   ]
+  }
+ ],
+ "next": {
+  "ask": "「x 는 짝수이다」 는 참일까 거짓일까? x 가 정해지면?",
+  "link": "집합에서 배운 「모임」을 이용해 참 · 거짓을 가리는 문장(명제)과 조건, 진리집합을 배워요.",
+  "title": "8차시 · 명제와 조건 (7차시 = 6차시 이어서 · 설문 · 사진 채점)"
+ },
+ "source": {
+  "file": "lessons/set-06.js",
+  "commit": "59b40f3",
+  "board": "2026-11-12T06:50:00Z"
+ },
+ "steps": [
+  {
+   "kind": "concept",
+   "id": "c1",
+   "title": "개념 1 · 드모르간의 법칙",
+   "say": "(먼저 말로: 급식에서 「둘 다 안 먹는」 친구 · 지난 시간 Aᶜ, A − B 복습) (A ∪ B)ᶜ = Aᶜ ∩ Bᶜ, (A ∩ B)ᶜ = Aᶜ ∪ Bᶜ · 괄호를 풀 때 ᶜ 이 각각 붙고 ∪ ↔ ∩ 가 바뀐다!",
+   "min": 3
+  },
+  {
+   "kind": "monster",
+   "id": "m1",
+   "title": "문제 1",
+   "min": 5
+  },
+  {
+   "kind": "concept",
+   "id": "c2",
+   "title": "개념 2 · 여집합 · 차집합의 원소의 개수",
+   "say": "n(Aᶜ) = n(U) − n(A) · n(A − B) = n(A) − n(A ∩ B) = n(A ∪ B) − n(B)",
+   "min": 3
+  },
+  {
+   "kind": "monster",
+   "id": "m2",
+   "title": "문제 2",
+   "min": 5
+  },
+  {
+   "kind": "concept",
+   "id": "c3",
+   "title": "개념 3 · 생활 속 문제",
+   "say": "벤 다이어그램 칸에 숫자를 직접 써 넣기 — 「둘 다」 칸부터!",
+   "min": 3
+  },
+  {
+   "kind": "monster",
+   "id": "m3",
+   "title": "문제 3",
+   "min": 5
+  },
+  {
+   "kind": "concept",
+   "id": "c4",
+   "title": "개념 4 · 집합 한 장 정리 (중단원 마무리)",
+   "say": "포함: 원소 n 개 → 부분집합 2ⁿ 개 · 서로소 A ∩ B = ∅ · A ∩ B = B ⇔ B ⊂ A · A ∪ B = B ⇔ A ⊂ B · n(A ∪ B) = n(A) + n(B) − n(A ∩ B) · 드모르간 — 오늘 문제 4~7 은 교과서 78~79쪽 그대로!",
+   "min": 3
+  },
+  {
+   "kind": "monster",
+   "id": "u4",
+   "title": "문제 4 · 조건을 만족하는 X",
+   "min": 5
+  },
+  {
+   "kind": "monster",
+   "id": "u5",
+   "title": "문제 5 · 미지수 x",
+   "min": 5
+  },
+  {
+   "kind": "monster",
+   "id": "u6",
+   "title": "문제 6 · 겹침의 최대 · 최소",
+   "min": 5
+  },
+  {
+   "kind": "monster",
+   "id": "u7",
+   "title": "문제 7 · 「~이 아니거나」",
+   "min": 5
+  },
+  {
+   "kind": "boss",
+   "id": "boss",
+   "title": "형성평가 · 그림자 드래곤",
+   "min": 6
+  }
+ ],
+ "monsters": {
+  "m1": {
+   "title": "문제 1",
+   "sprite": "extra3:0",
+   "retry": {
+    "gen": "set06.m1"
+   },
+   "attack": "poison"
+  },
+  "m2": {
+   "title": "문제 2",
+   "sprite": "extra6:0",
+   "retry": {
+    "gen": "set06.m2"
+   },
+   "attack": "ice"
+  },
+  "m3": {
+   "title": "문제 3",
+   "sprite": "extra7:0",
+   "retry": {
+    "gen": "set06.m3"
+   },
+   "attack": "poison"
+  },
+  "u4": {
+   "title": "문제 4 · 조건을 만족하는 X",
+   "sprite": "crown6:0",
+   "retry": {
+    "gen": "set06.u4"
+   },
+   "chain": {
+    "gen": "set06.u4"
+   },
+   "attack": "smash"
+  },
+  "u5": {
+   "title": "문제 5 · 미지수 x",
+   "sprite": "crown9:0",
+   "noteText": "B 의 원소가 모두 A 에 있어야 해요 — x 가 A 의 어느 원소와 같을 수 있을까? (B 의 두 원소는 서로 달라야 해요)",
+   "retry": {
+    "gen": "set06.u5"
+   },
+   "chain": {
+    "gen": "set06.u5"
+   },
+   "attack": "ice"
+  },
+  "u6": {
+   "title": "문제 6 · 겹침의 최대 · 최소",
+   "sprite": "extra6:0@h300",
+   "retry": {
+    "gen": "set06.u6"
+   },
+   "chain": {
+    "gen": "set06.u6"
+   },
+   "attack": "ice"
+  },
+  "u7": {
+   "title": "문제 7 · 「~이 아니거나」",
+   "sprite": "crown6:0@h120",
+   "retry": {
+    "gen": "set06.u7"
+   },
+   "chain": {
+    "gen": "set06.u7"
+   },
+   "attack": "smash"
+  },
+  "m4": {
+   "title": "문제 4 (v2 명제)",
+   "sprite": "crown6:0",
+   "retry": {
+    "gen": "set06.m4"
+   },
+   "attack": "smash"
+  },
+  "m42": {
+   "title": "문제 4-2 · 삼단논법 · 명제 고르기 (v2)",
+   "sprite": "crown6:0@h120",
+   "retry": {
+    "gen": "set06.m42"
+   },
+   "attack": "smash"
+  },
+  "m5": {
+   "title": "문제 5 (v2 명제의 부정)",
+   "sprite": "crown9:0",
+   "retry": {
+    "gen": "set06.m5"
+   },
+   "attack": "pause"
+  },
+  "m6": {
+   "title": "문제 6 · 사각형 명제 (v2)",
+   "sprite": "extra6:0@h300",
+   "retry": {
+    "gen": "set06.m6"
+   },
+   "attack": "pause"
+  },
+  "b1": {
+   "title": "보강 ① · 색칠한 부분의 원소 개수",
+   "sprite": "extra3:0@h150",
+   "retry": {
+    "gen": "set06.b1"
+   },
+   "attack": "pause"
+  }
+ },
+ "boss": {
+  "title": "6·7차시 형성평가 · 그림자 드래곤",
+  "sprite": "base2:0@h250",
+  "items": 6,
+  "hpItems": 6,
+  "tags": [
+   "c1",
+   "c2",
+   "c4",
+   "c4",
+   "c4",
+   "c1"
+  ],
+  "gen": "set06.boss",
+  "sets": {
+   "1": [
+    {
+     "type": "choice",
+     "question": "1. (A ∪ B)ᶜ = Aᶜ ( ) Bᶜ 의 ( ) 에 알맞은 것은?",
+     "choices": [
+      "∪",
+      "∩"
+     ],
+     "answerIndex": 1,
+     "answer": "∩",
+     "solution": "드모르간: 괄호를 풀면 ᶜ 이 각각 붙고 ∪ ↔ ∩ → (A ∪ B)ᶜ = Aᶜ ∩ Bᶜ",
+     "check": {
+      "dm": "(A ∪ B)ᶜ = Aᶜ ( ) Bᶜ",
+      "form": "out",
+      "op": "∪",
+      "sets": [
+       "A",
+       "B"
+      ]
+     }
+    },
+    {
+     "type": "number",
+     "question": "2. n(U) = 20, n(A) = 7 일 때 n(Aᶜ) = ?",
+     "answer": 13,
+     "solution": "n(U) − n(A) = 20 − 7",
+     "check": {
+      "u": 20,
+      "a": 7,
+      "set": "A"
+     }
+    },
+    {
+     "type": "number",
+     "question": "3. 두 집합 A 와 B 에 대하여 n(A) = 18, n(B) = 23, n(A ∪ B) = 30 일 때, n(A ∩ B) 는?",
+     "answer": 11,
+     "solution": "n(A ∩ B) = n(A) + n(B) − n(A ∪ B) = 18 + 23 − 30 = 11",
+     "check": {
+      "a": 18,
+      "b": 23,
+      "u": 30
+     }
+    },
+    {
+     "type": "multi",
+     "question": "4. 전체집합 U = {1, 2, 3, …, 10}의 두 부분집합 A = {1, 5, 9, 10}, B = {x | x는 10의 약수}에 대하여 A − B 의 원소를 모두 고르시오.",
+     "options": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10"
+     ],
+     "answer": [
+      8
+     ],
+     "solution": "B = {1, 2, 5, 10} → A 에서 B 에 있는 것 빼기 → A − B = {9}",
+     "check": {
+      "A": [
+       1,
+       5,
+       9,
+       10
+      ],
+      "n": 10,
+      "expr": "A − B"
+     }
+    },
+    {
+     "type": "multi",
+     "question": "5. 전체집합 U = {1, 2, 3, 4, 5}의 부분집합 중에서 집합 A = {1, 2, 4}와 서로소인 집합을 모두 고르시오.",
+     "options": [
+      "{1, 3}",
+      "{2}",
+      "{3, 4}",
+      "{3}",
+      "∅",
+      "{4, 5}",
+      "{3, 5}",
+      "{5}"
+     ],
+     "answer": [
+      3,
+      4,
+      6,
+      7
+     ],
+     "solution": "A 와 겹치지 않으려면 U − A = {3, 5} 의 부분집합 → ∅, {3}, {5}, {3, 5} (4개)",
+     "check": {
+      "U": [
+       1,
+       2,
+       3,
+       4,
+       5
+      ],
+      "A": [
+       1,
+       2,
+       4
+      ]
+     }
+    },
+    {
+     "type": "number",
+     "question": "6. 전체집합 U = {x | x는 30 이하의 자연수}의 두 부분집합 A = {x | x는 6의 배수}, B = {x | x는 24의 약수}에 대하여 n(Aᶜ ∩ Bᶜ) 는?",
+     "answer": 20,
+     "solution": "Aᶜ ∩ Bᶜ = (A ∪ B)ᶜ (드모르간) → n(A ∪ B) = 5 + 8 − 3 = 10 → 30 − 10 = 20",
+     "check": {
+      "N": 30,
+      "k": 6,
+      "m": 24
+     }
+    }
+   ],
+   "2": [
+    {
+     "type": "choice",
+     "question": "1. (B ∪ C)ᶜ = Bᶜ ( ) Cᶜ 의 ( ) 에 알맞은 것은?",
+     "choices": [
+      "∪",
+      "∩"
+     ],
+     "answerIndex": 1,
+     "answer": "∩",
+     "solution": "드모르간: 괄호를 풀면 ᶜ 이 각각 붙고 ∪ ↔ ∩ → (B ∪ C)ᶜ = Bᶜ ∩ Cᶜ",
+     "check": {
+      "dm": "(B ∪ C)ᶜ = Bᶜ ( ) Cᶜ",
+      "form": "out",
+      "op": "∪",
+      "sets": [
+       "B",
+       "C"
+      ]
+     }
+    },
+    {
+     "type": "number",
+     "question": "2. n(U) = 20, n(A) = 4 일 때 n(Aᶜ) = ?",
+     "answer": 16,
+     "solution": "n(U) − n(A) = 20 − 4",
+     "check": {
+      "u": 20,
+      "a": 4,
+      "set": "A"
+     }
+    },
+    {
+     "type": "number",
+     "question": "3. 두 집합 A 와 B 에 대하여 n(A) = 12, n(B) = 22, n(A ∪ B) = 28 일 때, n(A ∩ B) 는?",
+     "answer": 6,
+     "solution": "n(A ∩ B) = n(A) + n(B) − n(A ∪ B) = 12 + 22 − 28 = 6",
+     "check": {
+      "a": 12,
+      "b": 22,
+      "u": 28
+     }
+    },
+    {
+     "type": "multi",
+     "question": "4. 전체집합 U = {1, 2, 3, …, 10}의 두 부분집합 A = {2, 5, 7, 9}, B = {x | x는 8의 약수}에 대하여 A − B 의 원소를 모두 고르시오.",
+     "options": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10"
+     ],
+     "answer": [
+      4,
+      6,
+      8
+     ],
+     "solution": "B = {1, 2, 4, 8} → A 에서 B 에 있는 것 빼기 → A − B = {5, 7, 9}",
+     "check": {
+      "A": [
+       2,
+       5,
+       7,
+       9
+      ],
+      "n": 8,
+      "expr": "A − B"
+     }
+    },
+    {
+     "type": "multi",
+     "question": "5. 전체집합 U = {1, 2, 3, 4, 5, 6, 7}의 부분집합 중에서 집합 A = {1, 2, 5, 6, 7}와 서로소인 집합을 모두 고르시오.",
+     "options": [
+      "{3, 4}",
+      "{4, 5}",
+      "{2}",
+      "{3, 7}",
+      "{3}",
+      "{4}",
+      "{1, 3}",
+      "∅"
+     ],
+     "answer": [
+      0,
+      4,
+      5,
+      7
+     ],
+     "solution": "A 와 겹치지 않으려면 U − A = {3, 4} 의 부분집합 → ∅, {3}, {4}, {3, 4} (4개)",
+     "check": {
+      "U": [
+       1,
+       2,
+       3,
+       4,
+       5,
+       6,
+       7
+      ],
+      "A": [
+       1,
+       2,
+       5,
+       6,
+       7
+      ]
+     }
+    },
+    {
+     "type": "number",
+     "question": "6. 전체집합 U = {x | x는 40 이하의 자연수}의 두 부분집합 A = {x | x는 4의 배수}, B = {x | x는 40의 약수}에 대하여 n(Aᶜ ∩ Bᶜ) 는?",
+     "answer": 26,
+     "solution": "Aᶜ ∩ Bᶜ = (A ∪ B)ᶜ (드모르간) → n(A ∪ B) = 10 + 8 − 4 = 14 → 40 − 14 = 26",
+     "check": {
+      "N": 40,
+      "k": 4,
+      "m": 40
+     }
+    }
+   ]
+  },
+  "attack": [
+   "fire",
+   "smash"
+  ]
+ },
+ "crops": {
+  "c1": [
+   {
+    "p": 1,
+    "x": 0.045,
+    "y": 0.151,
+    "w": 0.455,
+    "h": 0.1692
+   }
+  ],
+  "m1": [
+   {
+    "p": 1,
+    "x": 0.045,
+    "y": 0.3112,
+    "w": 0.455,
+    "h": 0.192
+   }
+  ],
+  "c2": [
+   {
+    "p": 1,
+    "x": 0.045,
+    "y": 0.5002,
+    "w": 0.455,
+    "h": 0.1017
+   }
+  ],
+  "m2": [
+   {
+    "p": 1,
+    "x": 0.045,
+    "y": 0.5989,
+    "w": 0.455,
+    "h": 0.1288
+   }
+  ],
+  "c3": [
+   {
+    "p": 1,
+    "x": 0.045,
+    "y": 0.7247,
+    "w": 0.455,
+    "h": 0.0892
+   }
+  ],
+  "m3": [
+   {
+    "p": 1,
+    "x": 0.045,
+    "y": 0.8109,
+    "w": 0.455,
+    "h": 0.1334
+   }
+  ],
+  "c4": [
+   {
+    "p": 1,
+    "x": 0.507,
+    "y": 0.151,
+    "w": 0.452,
+    "h": 0.2383
+   }
+  ],
+  "u4": [
+   {
+    "p": 2,
+    "x": 0.045,
+    "y": 0.1303,
+    "w": 0.455,
+    "h": 0.2753
+   }
+  ],
+  "u5": [
+   {
+    "p": 2,
+    "x": 0.507,
+    "y": 0.1303,
+    "w": 0.452,
+    "h": 0.237
+   }
+  ],
+  "u6": [
+   {
+    "p": 3,
+    "x": 0.045,
+    "y": 0.0992,
+    "w": 0.455,
+    "h": 0.3572
+   }
+  ],
+  "u7": [
+   {
+    "p": 3,
+    "x": 0.507,
+    "y": 0.0992,
+    "w": 0.452,
+    "h": 0.3523
+   }
+  ],
+  "boss": [
+   {
+    "p": 4,
+    "x": 0.045,
+    "y": 0.1115,
+    "w": 0.455,
+    "h": 0.6342
+   }
+  ]
+ },
+ "videos": {
+  "c1": "https://garzondesne-dot.github.io/Citadel-MATH/assets/video/v06-09-v3.mp4",
+  "m1": "https://garzondesne-dot.github.io/Citadel-MATH/assets/video/v06-09-v3.mp4",
+  "c2": "https://garzondesne-dot.github.io/Citadel-MATH/assets/video/v06-18-v3.mp4",
+  "m2": "https://garzondesne-dot.github.io/Citadel-MATH/assets/video/v06-18-v3.mp4",
+  "b1": "https://garzondesne-dot.github.io/Citadel-MATH/assets/video/v06-18-v3.mp4",
+  "c3": "https://garzondesne-dot.github.io/Citadel-MATH/assets/video/v06-19-v3.mp4",
+  "m3": "https://garzondesne-dot.github.io/Citadel-MATH/assets/video/v06-19-v3.mp4",
+  "c4": "https://garzondesne-dot.github.io/Citadel-MATH/assets/video/v06-38-v2.mp4",
+  "u4": "https://garzondesne-dot.github.io/Citadel-MATH/assets/video/e1-34.mp4",
+  "u6": "https://garzondesne-dot.github.io/Citadel-MATH/assets/video/e1-36-v3.mp4",
+  "u7": "https://garzondesne-dot.github.io/Citadel-MATH/assets/video/v06-39-v2.mp4"
+ }
+}

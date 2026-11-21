@@ -1,0 +1,548 @@
+{
+ "v": 1,
+ "id": "set-04",
+ "no": 4,
+ "title": "교집합과 합집합",
+ "unit": "공통수학2 Ⅱ-1 집합 · 4차시",
+ "sheet": "학습과정 4차시 레이드용 v2",
+ "goal": "교집합과 합집합을 구한다 · 서로소인 두 집합을 찾는다 · 합집합의 원소의 개수를 구한다",
+ "theme": "06-frost",
+ "defaultPct": 90,
+ "next": {
+  "ask": "우리 반 전체에서 안경 쓴 친구를 빼면, 남은 친구들은 어떤 집합일까?",
+  "link": "오늘 배운 교집합(∩)으로 차집합을 A − B = A ∩ Bᶜ 처럼 나타낼 수 있어요.",
+  "title": "5차시 · 여집합과 차집합"
+ },
+ "source": {
+  "file": "lessons/set-04.js",
+  "commit": "59b40f3",
+  "board": "2026-11-12T06:50:00Z"
+ },
+ "steps": [
+  {
+   "kind": "intro",
+   "id": "intro",
+   "title": "도입 · 생각 열기",
+   "say": "선생님 폰 vs 너희 폰 — 둘 다 쓰는 앱은? 한 명이라도 쓰는 앱은 모두 몇 개?",
+   "min": 3
+  },
+  {
+   "kind": "monster",
+   "id": "r1",
+   "title": "📖 복습 · 지난 시간 기억하기",
+   "min": 5
+  },
+  {
+   "kind": "concept",
+   "id": "c1",
+   "title": "개념 1 · 교집합 · 합집합",
+   "say": "A ∩ B = 둘 다 있는 것 (그리고), A ∪ B = 모두 모으기 (또는) — 겹치는 원소는 한 번만",
+   "min": 3
+  },
+  {
+   "kind": "monster",
+   "id": "m1",
+   "title": "문제 1",
+   "min": 5
+  },
+  {
+   "kind": "concept",
+   "id": "c2",
+   "title": "개념 2 · 서로소",
+   "say": "공통인 원소가 하나도 없을 때, 즉 A ∩ B = ∅ 일 때 A와 B는 서로소",
+   "min": 3
+  },
+  {
+   "kind": "monster",
+   "id": "m2",
+   "title": "문제 2",
+   "min": 5
+  },
+  {
+   "kind": "concept",
+   "id": "c3",
+   "title": "개념 3 · 합집합의 원소의 개수 · 이런 표현도",
+   "say": "n(A ∪ B) = n(A) + n(B) − n(A ∩ B) (겹친 부분은 한 번 빼기) · A ⊂ B 이면 A ∩ B = A, A ∪ B = B",
+   "min": 3
+  },
+  {
+   "kind": "monster",
+   "id": "m3",
+   "title": "문제 3",
+   "min": 5
+  },
+  {
+   "kind": "boss",
+   "id": "boss",
+   "title": "형성평가 · 서리 늑대",
+   "min": 6
+  }
+ ],
+ "monsters": {
+  "r1": {
+   "title": "📖 복습 · 지난 시간 기억하기",
+   "sprite": "crown0:0",
+   "retry": {
+    "gen": "set04.r1"
+   },
+   "attack": "pause"
+  },
+  "m1": {
+   "title": "문제 1",
+   "sprite": "crown1:0",
+   "retry": {
+    "gen": "set04.m1"
+   },
+   "attack": "wind"
+  },
+  "m2": {
+   "title": "문제 2",
+   "sprite": "crown2:0",
+   "retry": {
+    "gen": "set04.m2"
+   },
+   "attack": "confuse"
+  },
+  "m3": {
+   "title": "문제 3",
+   "sprite": "crown4:0",
+   "retry": {
+    "gen": "set04.m3"
+   },
+   "attack": "poison"
+  },
+  "b1": {
+   "title": "보강 ① · 한 걸음 더 (∪ ∩)",
+   "sprite": "crown8:0",
+   "retry": {
+    "gen": "set04.b1"
+   },
+   "attack": "pause"
+  },
+  "b2": {
+   "title": "보강 ② · 서로소 한 걸음 더",
+   "sprite": "crown3:0",
+   "noteText": "먼저 원소나열법으로!",
+   "retry": {
+    "gen": "set04.b2"
+   },
+   "attack": "pause"
+  },
+  "b3": {
+   "title": "보강 ③ · 이런 표현도 같은 뜻",
+   "sprite": "crown5:0",
+   "retry": {
+    "gen": "set04.b3"
+   },
+   "attack": "pause"
+  }
+ },
+ "boss": {
+  "title": "4차시 형성평가 · 서리 늑대",
+  "sprite": "crown7:0",
+  "items": 6,
+  "hpItems": 5,
+  "tags": [
+   "c1",
+   "c2",
+   "c3",
+   "c1",
+   "c3",
+   "c1"
+  ],
+  "gen": "set04.boss",
+  "sets": {
+   "1": [
+    {
+     "type": "choice",
+     "question": "1. A = {1, 2, 3}, B = {2, 3, 4} 일 때 A ∩ B 와 A ∪ B 를 바르게 구한 것은?",
+     "choices": [
+      "A ∩ B = {2, 3}, A ∪ B = {1, 4}",
+      "A ∩ B = ∅, A ∪ B = {1, 2, 3, 4}",
+      "A ∩ B = {2, 3}, A ∪ B = {1, 2, 3, 4}",
+      "A ∩ B = {1, 2, 3, 4}, A ∪ B = {2, 3}"
+     ],
+     "answerIndex": 2,
+     "answer": "A ∩ B = {2, 3}, A ∪ B = {1, 2, 3, 4}",
+     "solution": "둘 다 있는 것 → {2, 3}, 모두 모으기 → {1, 2, 3, 4}",
+     "check": {
+      "a": [
+       1,
+       2,
+       3
+      ],
+      "b": [
+       2,
+       3,
+       4
+      ],
+      "pair": true
+     }
+    },
+    {
+     "type": "choice",
+     "question": "2. 서로소인 것은?",
+     "choices": [
+      "① {1, 2}, {2, 3}",
+      "② {1, 3}, {2, 4}",
+      "③ {a}, {a, b}"
+     ],
+     "answerIndex": 1,
+     "answer": "② {1, 3}, {2, 4}",
+     "solution": "공통인 원소가 하나도 없는 두 집합 → 서로소",
+     "check": {
+      "disj": [
+       [
+        "{1, 2}",
+        "{2, 3}"
+       ],
+       [
+        "{1, 3}",
+        "{2, 4}"
+       ],
+       [
+        "{a}",
+        "{a, b}"
+       ]
+      ]
+     }
+    },
+    {
+     "type": "number",
+     "question": "3. n(A) = 6, n(B) = 5, n(A ∩ B) = 3 일 때 n(A ∪ B) = ?",
+     "answer": 8,
+     "solution": "n(A ∪ B) = 6 + 5 − 3 = 8",
+     "check": {
+      "nA": 6,
+      "nB": 5,
+      "nI": 3
+     }
+    },
+    {
+     "type": "choice",
+     "question": "4. A ∪ B = {x | x ∈ A (   ) x ∈ B} 에 알맞은 말은?",
+     "choices": [
+      "그리고",
+      "또는"
+     ],
+     "answerIndex": 1,
+     "answer": "또는",
+     "solution": "교집합 → 그리고 (둘 다), 합집합 → 또는 (하나라도)",
+     "check": {
+      "word": "∪"
+     }
+    },
+    {
+     "type": "choice",
+     "question": "5. A ⊂ B 일 때, A ∩ B 와 같은 집합은?",
+     "choices": [
+      "A",
+      "B",
+      "∅"
+     ],
+     "answerIndex": 0,
+     "answer": "A",
+     "solution": "A ⊂ B 이면 A ∩ B = A, A ∪ B = B",
+     "check": {
+      "sub": "∩"
+     }
+    },
+    {
+     "type": "choice",
+     "question": "6. [보강·도전] 두 집합 A = {1, 3, a + 1}, B = {3, a, 5} 에 대하여 A ∩ B = {3, 5} 일 때, 집합 A ∪ B 는?",
+     "choices": [
+      "{1, 3, 5}",
+      "{3, 4, 5}",
+      "{1, 3, 4, 5, 6}",
+      "{1, 3, 4, 5}"
+     ],
+     "answerIndex": 3,
+     "answer": "{1, 3, 4, 5}",
+     "solution": "A ∩ B 에 5 가 있으니 a + 1 = 5 → a = 4 → A = {1, 3, 5}, B = {3, 4, 5} → A ∪ B = {1, 3, 4, 5}",
+     "check": {
+      "six": {
+       "A": "1, 3, a + 1",
+       "B": "3, a, 5",
+       "I": [
+        3,
+        5
+       ],
+       "choices": [
+        "{1, 3, 4, 5}",
+        "{1, 3, 5}",
+        "{3, 4, 5}",
+        "{1, 3, 4, 5, 6}"
+       ],
+       "sol": "A ∩ B 에 5 가 있으니 a + 1 = 5 → a = 4 → A = {1, 3, 5}, B = {3, 4, 5} → A ∪ B = {1, 3, 4, 5}"
+      }
+     }
+    }
+   ],
+   "2": [
+    {
+     "type": "choice",
+     "question": "1. A = {2, 4, 6}, B = {4, 6, 8} 일 때 A ∩ B 와 A ∪ B 를 바르게 구한 것은?",
+     "choices": [
+      "A ∩ B = {2, 4, 6, 8}, A ∪ B = {4, 6}",
+      "A ∩ B = {4, 6}, A ∪ B = {2, 8}",
+      "A ∩ B = ∅, A ∪ B = {2, 4, 6, 8}",
+      "A ∩ B = {4, 6}, A ∪ B = {2, 4, 6, 8}"
+     ],
+     "answerIndex": 3,
+     "answer": "A ∩ B = {4, 6}, A ∪ B = {2, 4, 6, 8}",
+     "solution": "둘 다 있는 것 → {4, 6}, 모두 모으기 → {2, 4, 6, 8}",
+     "check": {
+      "a": [
+       2,
+       4,
+       6
+      ],
+      "b": [
+       4,
+       6,
+       8
+      ],
+      "pair": true
+     }
+    },
+    {
+     "type": "choice",
+     "question": "2. 서로소인 것은?",
+     "choices": [
+      "① {1, 4}, {4, 5}",
+      "② {a, b}, {b}",
+      "③ {2, 5}, {3, 6}"
+     ],
+     "answerIndex": 2,
+     "answer": "③ {2, 5}, {3, 6}",
+     "solution": "공통인 원소가 하나도 없는 두 집합 → 서로소",
+     "check": {
+      "disj": [
+       [
+        "{1, 4}",
+        "{4, 5}"
+       ],
+       [
+        "{a, b}",
+        "{b}"
+       ],
+       [
+        "{2, 5}",
+        "{3, 6}"
+       ]
+      ]
+     }
+    },
+    {
+     "type": "number",
+     "question": "3. n(A) = 7, n(B) = 4, n(A ∩ B) = 2 일 때 n(A ∪ B) = ?",
+     "answer": 9,
+     "solution": "n(A ∪ B) = 7 + 4 − 2 = 9",
+     "check": {
+      "nA": 7,
+      "nB": 4,
+      "nI": 2
+     }
+    },
+    {
+     "type": "choice",
+     "question": "4. A ∩ B = {x | x ∈ A (   ) x ∈ B} 에 알맞은 말은?",
+     "choices": [
+      "그리고",
+      "또는"
+     ],
+     "answerIndex": 0,
+     "answer": "그리고",
+     "solution": "교집합 → 그리고 (둘 다), 합집합 → 또는 (하나라도)",
+     "check": {
+      "word": "∩"
+     }
+    },
+    {
+     "type": "choice",
+     "question": "5. A ⊂ B 일 때, A ∪ B 와 같은 집합은?",
+     "choices": [
+      "A",
+      "B",
+      "∅"
+     ],
+     "answerIndex": 1,
+     "answer": "B",
+     "solution": "A ⊂ B 이면 A ∩ B = A, A ∪ B = B",
+     "check": {
+      "sub": "∪"
+     }
+    },
+    {
+     "type": "choice",
+     "question": "6. [보강·도전] 두 집합 A = {1, 2, a + 3}, B = {2, a, 7} 에 대하여 A ∩ B = {2, 7} 일 때, 집합 A ∪ B 는?",
+     "choices": [
+      "{1, 2, 4, 7, 10}",
+      "{1, 2, 4, 7}",
+      "{1, 2, 7}",
+      "{2, 4, 7}"
+     ],
+     "answerIndex": 1,
+     "answer": "{1, 2, 4, 7}",
+     "solution": "A ∩ B 에 7 이 있으니 a + 3 = 7 → a = 4 → A = {1, 2, 7}, B = {2, 4, 7} → A ∪ B = {1, 2, 4, 7}",
+     "check": {
+      "six": {
+       "A": "1, 2, a + 3",
+       "B": "2, a, 7",
+       "I": [
+        2,
+        7
+       ],
+       "choices": [
+        "{1, 2, 4, 7}",
+        "{1, 2, 7}",
+        "{2, 4, 7}",
+        "{1, 2, 4, 7, 10}"
+       ],
+       "sol": "A ∩ B 에 7 이 있으니 a + 3 = 7 → a = 4 → A = {1, 2, 7}, B = {2, 4, 7} → A ∪ B = {1, 2, 4, 7}"
+      }
+     }
+    }
+   ]
+  },
+  "attack": [
+   "ice",
+   "confuse"
+  ]
+ },
+ "crops": {
+  "intro": [
+   {
+    "p": 1,
+    "x": 0.0405,
+    "y": 0.1385,
+    "w": 0.45,
+    "h": 0.3953
+   }
+  ],
+  "r1": [
+   {
+    "p": 1,
+    "x": 0.0405,
+    "y": 0.5318,
+    "w": 0.45,
+    "h": 0.1331
+   }
+  ],
+  "c1": [
+   {
+    "p": 1,
+    "x": 0.0405,
+    "y": 0.6619,
+    "w": 0.45,
+    "h": 0.2297
+   },
+   {
+    "p": 1,
+    "x": 0.5095,
+    "y": 0.1385,
+    "w": 0.45,
+    "h": 0.2663
+   }
+  ],
+  "m1": [
+   {
+    "p": 1,
+    "x": 0.5095,
+    "y": 0.4001,
+    "w": 0.45,
+    "h": 0.1279
+   }
+  ],
+  "c2": [
+   {
+    "p": 1,
+    "x": 0.5095,
+    "y": 0.6179,
+    "w": 0.45,
+    "h": 0.1357
+   }
+  ],
+  "m2": [
+   {
+    "p": 2,
+    "x": 0.0405,
+    "y": 0.0969,
+    "w": 0.45,
+    "h": 0.0949
+   }
+  ],
+  "c3": [
+   {
+    "p": 2,
+    "x": 0.0405,
+    "y": 0.2834,
+    "w": 0.45,
+    "h": 0.197
+   },
+   {
+    "p": 2,
+    "x": 0.0405,
+    "y": 0.5685,
+    "w": 0.45,
+    "h": 0.1067
+   }
+  ],
+  "m3": [
+   {
+    "p": 2,
+    "x": 0.0405,
+    "y": 0.4757,
+    "w": 0.45,
+    "h": 0.0949
+   }
+  ],
+  "boss": [
+   {
+    "p": 2,
+    "x": 0.5095,
+    "y": 0.0969,
+    "w": 0.45,
+    "h": 0.3784
+   }
+  ],
+  "b1": [
+   {
+    "p": 1,
+    "x": 0.5095,
+    "y": 0.526,
+    "w": 0.45,
+    "h": 0.0967
+   }
+  ],
+  "b2": [
+   {
+    "p": 2,
+    "x": 0.0405,
+    "y": 0.1897,
+    "w": 0.45,
+    "h": 0.0967
+   }
+  ],
+  "b3": [
+   {
+    "p": 2,
+    "x": 0.0405,
+    "y": 0.5685,
+    "w": 0.45,
+    "h": 0.1067
+   }
+  ]
+ },
+ "videos": {
+  "c1": "https://garzondesne-dot.github.io/Citadel-MATH/assets/video/v04-01.mp4",
+  "m1": "https://garzondesne-dot.github.io/Citadel-MATH/assets/video/v04-02.mp4",
+  "b1": "https://garzondesne-dot.github.io/Citadel-MATH/assets/video/v04-02.mp4",
+  "c2": "https://garzondesne-dot.github.io/Citadel-MATH/assets/video/v04-03.mp4",
+  "m2": "https://garzondesne-dot.github.io/Citadel-MATH/assets/video/v04-03.mp4",
+  "b2": "https://garzondesne-dot.github.io/Citadel-MATH/assets/video/v04-03.mp4",
+  "c3": "https://garzondesne-dot.github.io/Citadel-MATH/assets/video/v04-05.mp4",
+  "m3": "https://garzondesne-dot.github.io/Citadel-MATH/assets/video/v04-05.mp4",
+  "b3": "https://garzondesne-dot.github.io/Citadel-MATH/assets/video/v-1DJg8zMF.mp4"
+ }
+}

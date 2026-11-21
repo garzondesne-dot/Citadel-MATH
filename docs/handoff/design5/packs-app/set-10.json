@@ -1,0 +1,403 @@
+{
+ "v": 1,
+ "id": "set-10",
+ "no": 10,
+ "title": "충분조건 · 필요조건 · 필요충분조건",
+ "unit": "공통수학2 Ⅱ. 집합과 명제 · 10차시",
+ "sheet": "학습과정 10차시 레이드용 v1",
+ "goal": "충분조건 · 필요조건 · 필요충분조건의 뜻을 안다 · 진리집합의 포함 관계로 충분조건 · 필요조건 · 필요충분조건을 판정할 수 있다",
+ "theme": "12-skygarden",
+ "defaultPct": 90,
+ "next": {
+  "ask": "「x² 이 짝수이면 x 도 짝수」 — 바로 보이기 어려울 때 대우로 돌아가 볼까?",
+  "link": "오늘 배운 진리집합 · 대우로 명제를 증명하는 방법을 알아봐요",
+  "title": "11차시 · 명제의 증명"
+ },
+ "source": {
+  "file": "lessons/set-10.js",
+  "commit": "59b40f3",
+  "board": "2026-11-12T06:50:00Z"
+ },
+ "steps": [
+  {
+   "kind": "intro",
+   "id": "intro",
+   "title": "도입 · 🔁 전시 확인",
+   "say": "지난 시간: p → q 가 참이면 P ⊂ Q · 명제와 그 대우의 참 · 거짓은 같다 — 학습지 맨 위 칸을 같이 확인해요",
+   "img": "review",
+   "min": 3
+  },
+  {
+   "kind": "concept",
+   "id": "c1",
+   "title": "개념 1 · 충분조건과 필요조건",
+   "say": "p → q 가 참 = p ⇒ q · p 는 q 이기 위한 충분조건 · q 는 p 이기 위한 필요조건 · 화살표가 나가는 쪽 = 충분 · 받는 쪽 = 필요",
+   "min": 3
+  },
+  {
+   "kind": "monster",
+   "id": "m1",
+   "title": "문제 1 · 충분조건과 필요조건",
+   "min": 5
+  },
+  {
+   "kind": "concept",
+   "id": "c2",
+   "title": "개념 2 · 필요충분조건 · 진리집합으로 판정",
+   "say": "p ⇒ q 이고 q ⇒ p 이면 p ⇔ q = 필요충분조건 · P ⊂ Q → 충분 · Q ⊂ P → 필요 · P = Q → 필요충분",
+   "min": 3
+  },
+  {
+   "kind": "monster",
+   "id": "m2",
+   "title": "문제 2 · 어떤 조건인지 판정",
+   "min": 5
+  },
+  {
+   "kind": "concept",
+   "id": "c3",
+   "title": "개념 3 · 🔭 생각 넓히기 — 세 조건",
+   "say": "p 는 q 이기 위한 필요조건 → Q ⊂ P · r 은 q 이기 위한 충분조건 → R ⊂ Q · 따라서 R ⊂ Q ⊂ P",
+   "min": 3
+  },
+  {
+   "kind": "monster",
+   "id": "m3",
+   "title": "문제 3 · 세 조건 (생각 넓히기)",
+   "min": 5
+  },
+  {
+   "kind": "monster",
+   "id": "m4",
+   "title": "문제 4 · 어떤 조건인지 (중단원)",
+   "min": 5
+  },
+  {
+   "kind": "concept",
+   "id": "sum",
+   "title": "📝 오늘 정리",
+   "say": "P ⊂ Q → 충분 · Q ⊂ P → 필요 · P = Q → 필요충분 · 한쪽 화살표만 참인지 볼 때 = 반례 하나로 끝",
+   "min": 3
+  },
+  {
+   "kind": "boss",
+   "id": "boss",
+   "title": "형성평가 · 필요충분의 천칭 수호자",
+   "min": 6
+  }
+ ],
+ "monsters": {
+  "m1": {
+   "title": "문제 1 · 충분조건과 필요조건",
+   "sprite": "garden2:0",
+   "noteText": "화살표가 나가는 쪽 = 충분 · 받는 쪽 = 필요",
+   "retry": {
+    "gen": "set10.m1"
+   },
+   "attack": "fog"
+  },
+  "m2": {
+   "title": "문제 2 · 어떤 조건인지 판정",
+   "sprite": "garden0:0",
+   "noteText": "P ⊂ Q → 충분 · Q ⊂ P → 필요 · P = Q → 필요충분",
+   "retry": {
+    "gen": "set10.m2"
+   },
+   "attack": "scale"
+  },
+  "m3": {
+   "title": "문제 3 · 세 조건 (생각 넓히기)",
+   "sprite": "garden1:0",
+   "noteText": "필요조건 = 바깥 집합 · 충분조건 = 안쪽 집합",
+   "retry": {
+    "gen": "set10.m3"
+   },
+   "attack": "bind"
+  },
+  "m4": {
+   "title": "문제 4 · 어떤 조건인지 (중단원)",
+   "sprite": "garden3:0",
+   "noteText": "포함 관계 → 반례 → 어떤 조건인지 차례로",
+   "retry": {
+    "gen": "set10.m4"
+   },
+   "chain": {
+    "gen": "set10.m4"
+   },
+   "attack": "wind"
+  }
+ },
+ "boss": {
+  "title": "10차시 형성평가 · 필요충분의 천칭 수호자",
+  "sprite": "gardenboss0:0",
+  "items": 4,
+  "hpItems": 4,
+  "tags": [
+   "c1",
+   "c2",
+   "c2",
+   "c3"
+  ],
+  "gen": "set10.boss",
+  "sets": {
+   "1": [
+    {
+     "type": "choice",
+     "question": "1. p : x는 2의 배수이다, q : x는 4의 배수이다 일 때 p 는 q 이기 위한 무슨 조건인가?",
+     "choices": [
+      "필요조건",
+      "충분조건",
+      "필요충분조건"
+     ],
+     "answerIndex": 0,
+     "answer": "필요조건",
+     "solution": "q ⇒ p 이지만 p ⇏ q (Q ⊂ P) → 필요조건",
+     "check": {
+      "mult": [
+       2,
+       4
+      ]
+     }
+    },
+    {
+     "type": "choice",
+     "question": "2. p : x > 3, q : x > 1 일 때 p 는 q 이기 위한 무슨 조건인가?",
+     "choices": [
+      "필요충분조건",
+      "충분조건",
+      "필요조건"
+     ],
+     "answerIndex": 1,
+     "answer": "충분조건",
+     "solution": "p ⇒ q 이지만 q ⇏ p (P ⊂ Q) → 충분조건",
+     "check": {
+      "gt": [
+       3,
+       1
+      ]
+     }
+    },
+    {
+     "type": "choice",
+     "question": "3. p : |x| ≤ 2, q : −2 ≤ x ≤ 2 일 때 p 는 q 이기 위한 무슨 조건인가?",
+     "choices": [
+      "필요조건",
+      "필요충분조건",
+      "충분조건"
+     ],
+     "answerIndex": 1,
+     "answer": "필요충분조건",
+     "solution": "p ⇒ q 이고 q ⇒ p (P = Q) → 필요충분조건",
+     "check": {
+      "abs": [
+       2,
+       0
+      ]
+     }
+    },
+    {
+     "type": "choice",
+     "question": "4. 세 조건 p, q, r 에 대하여 q 는 p 이기 위한 필요조건이고, r 은 q 이기 위한 필요조건일 때 진리집합 P, Q, R 사이의 포함 관계는?",
+     "choices": [
+      "P ⊂ R ⊂ Q",
+      "R ⊂ Q ⊂ P",
+      "Q ⊂ P ⊂ R",
+      "P ⊂ Q ⊂ R"
+     ],
+     "answerIndex": 3,
+     "answer": "P ⊂ Q ⊂ R",
+     "solution": "q 는 p 이기 위한 필요조건 · r 은 q 이기 위한 필요조건 → P ⊂ Q ⊂ R",
+     "check": {
+      "order": [
+       "p",
+       "q",
+       "r"
+      ]
+     }
+    }
+   ],
+   "2": [
+    {
+     "type": "choice",
+     "question": "1. p : x는 3의 배수이다, q : x는 9의 배수이다 일 때 p 는 q 이기 위한 무슨 조건인가?",
+     "choices": [
+      "충분조건",
+      "필요조건",
+      "필요충분조건"
+     ],
+     "answerIndex": 1,
+     "answer": "필요조건",
+     "solution": "q ⇒ p 이지만 p ⇏ q (Q ⊂ P) → 필요조건",
+     "check": {
+      "mult": [
+       3,
+       9
+      ]
+     }
+    },
+    {
+     "type": "choice",
+     "question": "2. p : x > 2, q : x > 3 일 때 p 는 q 이기 위한 무슨 조건인가?",
+     "choices": [
+      "충분조건",
+      "필요조건",
+      "필요충분조건"
+     ],
+     "answerIndex": 1,
+     "answer": "필요조건",
+     "solution": "q ⇒ p 이지만 p ⇏ q (Q ⊂ P) → 필요조건",
+     "check": {
+      "gt": [
+       2,
+       3
+      ]
+     }
+    },
+    {
+     "type": "choice",
+     "question": "3. p : |x| ≤ 5, q : −5 ≤ x ≤ 5 일 때 p 는 q 이기 위한 무슨 조건인가?",
+     "choices": [
+      "필요조건",
+      "충분조건",
+      "필요충분조건"
+     ],
+     "answerIndex": 2,
+     "answer": "필요충분조건",
+     "solution": "p ⇒ q 이고 q ⇒ p (P = Q) → 필요충분조건",
+     "check": {
+      "abs": [
+       5,
+       0
+      ]
+     }
+    },
+    {
+     "type": "choice",
+     "question": "4. 세 조건 p, q, r 에 대하여 q 는 p 이기 위한 필요조건이고, p 는 r 이기 위한 필요조건일 때 진리집합 P, Q, R 사이의 포함 관계는?",
+     "choices": [
+      "Q ⊂ P ⊂ R",
+      "P ⊂ R ⊂ Q",
+      "R ⊂ Q ⊂ P",
+      "R ⊂ P ⊂ Q"
+     ],
+     "answerIndex": 3,
+     "answer": "R ⊂ P ⊂ Q",
+     "solution": "q 는 p 이기 위한 필요조건 · p 는 r 이기 위한 필요조건 → R ⊂ P ⊂ Q",
+     "check": {
+      "order": [
+       "r",
+       "p",
+       "q"
+      ]
+     }
+    }
+   ]
+  },
+  "attack": [
+   "scale",
+   "bind"
+  ]
+ },
+ "crops": {
+  "review": [
+   {
+    "p": 1,
+    "x": 0.045,
+    "y": 0.1557,
+    "w": 0.914,
+    "h": 0.0464
+   }
+  ],
+  "c1": [
+   {
+    "p": 1,
+    "x": 0.045,
+    "y": 0.1991,
+    "w": 0.455,
+    "h": 0.242
+   }
+  ],
+  "m1": [
+   {
+    "p": 1,
+    "x": 0.045,
+    "y": 0.4358,
+    "w": 0.455,
+    "h": 0.214
+   }
+  ],
+  "sum": [
+   {
+    "p": 1,
+    "x": 0.045,
+    "y": 0.6424,
+    "w": 0.455,
+    "h": 0.1985
+   }
+  ],
+  "c2": [
+   {
+    "p": 1,
+    "x": 0.507,
+    "y": 0.1991,
+    "w": 0.452,
+    "h": 0.172
+   }
+  ],
+  "m2": [
+   {
+    "p": 1,
+    "x": 0.507,
+    "y": 0.3681,
+    "w": 0.452,
+    "h": 0.227
+   }
+  ],
+  "c3": [
+   {
+    "p": 2,
+    "x": 0.045,
+    "y": 0.1017,
+    "w": 0.455,
+    "h": 0.2044
+   }
+  ],
+  "m3": [
+   {
+    "p": 2,
+    "x": 0.045,
+    "y": 0.3031,
+    "w": 0.455,
+    "h": 0.212
+   }
+  ],
+  "m4": [
+   {
+    "p": 2,
+    "x": 0.045,
+    "y": 0.5017,
+    "w": 0.455,
+    "h": 0.4203
+   }
+  ],
+  "boss": [
+   {
+    "p": 2,
+    "x": 0.507,
+    "y": 0.115,
+    "w": 0.452,
+    "h": 0.7104
+   }
+  ]
+ },
+ "videos": {
+  "c1": "https://garzondesne-dot.github.io/Citadel-MATH/assets/video/v10-46.mp4",
+  "m1": "https://garzondesne-dot.github.io/Citadel-MATH/assets/video/v10-46.mp4",
+  "c2": "https://garzondesne-dot.github.io/Citadel-MATH/assets/video/v10-47.mp4",
+  "m2": "https://garzondesne-dot.github.io/Citadel-MATH/assets/video/v10-47.mp4",
+  "m4": "https://garzondesne-dot.github.io/Citadel-MATH/assets/video/v10-47.mp4",
+  "sum": "https://garzondesne-dot.github.io/Citadel-MATH/assets/video/v10-47.mp4",
+  "c3": "https://garzondesne-dot.github.io/Citadel-MATH/assets/video/v10-48.mp4",
+  "m3": "https://garzondesne-dot.github.io/Citadel-MATH/assets/video/v10-48.mp4"
+ }
+}
