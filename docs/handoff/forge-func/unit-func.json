@@ -1,0 +1,733 @@
+{
+ "_note": "모루 함수 단원 (14 ~ 17차시) · unit-set.js 의 MATS · OPS · CARDS · MISTAKES 에 그대로 더하는 꼴 · art 16 ~ 25 = 새 그림 시트(작업대 「⚒ 모루 함수」) · page = 교과서 쪽(❓ 채울 것) · ws = 학습지 자리(참고 · 게임은 안 읽음)",
+ "MATS": [
+  {
+   "id": "x",
+   "sym": "x",
+   "tip": "정의역의 원소"
+  },
+  {
+   "id": "y",
+   "sym": "y",
+   "tip": "공역의 원소 · 함숫값"
+  },
+  {
+   "id": "c",
+   "sym": "c",
+   "tip": "상수 (정해진 수 하나)"
+  },
+  {
+   "id": "SX",
+   "sym": "X",
+   "tip": "집합 X (정의역이 될 집합)"
+  },
+  {
+   "id": "SY",
+   "sym": "Y",
+   "tip": "집합 Y (공역이 될 집합)"
+  },
+  {
+   "id": "f",
+   "sym": "f",
+   "tip": "함수 f"
+  },
+  {
+   "id": "g",
+   "sym": "g",
+   "tip": "함수 g"
+  },
+  {
+   "id": "h",
+   "sym": "h",
+   "tip": "함수 h"
+  }
+ ],
+ "OPS": [
+  {
+   "id": "app",
+   "sym": "( )에 넣기",
+   "no": 14
+  },
+  {
+   "id": "dom",
+   "sym": "정의역",
+   "no": 14,
+   "unary": true
+  },
+  {
+   "id": "cod",
+   "sym": "공역",
+   "no": 14,
+   "unary": true
+  },
+  {
+   "id": "ran",
+   "sym": "치역",
+   "no": 14,
+   "unary": true
+  },
+  {
+   "id": "o",
+   "sym": "∘",
+   "no": 16
+  },
+  {
+   "id": "inv",
+   "sym": "⁻¹",
+   "no": 17,
+   "unary": true
+  },
+  {
+   "id": "swap",
+   "sym": "x ↔ y",
+   "no": 17,
+   "unary": true
+  }
+ ],
+ "USES_EXISTING_OPS": [
+  "then",
+  "eq",
+  "neq",
+  "and",
+  "brace"
+ ],
+ "CARDS": [
+  {
+   "id": "func",
+   "no": 14,
+   "sec": "07 함수",
+   "name": "함수",
+   "fm": "f : X → Y",
+   "desc": "X 의 원소마다 Y 의 원소가 하나씩 대응",
+   "grade": 1,
+   "art": 16,
+   "page": "",
+   "op": "then",
+   "in": [
+    "SX",
+    "SY"
+   ],
+   "hint": "정의역이 될 집합에서 공역이 될 집합으로 화살표",
+   "ex": {
+    "type": "choice",
+    "question": "X = {1, 2, 3} 에서 Y = {a, b} 로의 대응 중 함수인 것은?",
+    "choices": [
+     "1→a, 2→b",
+     "1→a, 2→a, 3→b",
+     "1→a, 1→b, 2→a, 3→b"
+    ],
+    "answerIndex": 1,
+    "solution": "X 의 원소 1, 2, 3 마다 화살표가 꼭 하나씩 → 함수"
+   },
+   "ws": "14차시 STEP 1 · 문제 1",
+   "ordered": true
+  },
+  {
+   "id": "fval",
+   "no": 14,
+   "sec": "07 함수",
+   "name": "함숫값",
+   "fm": "y = f(x)",
+   "desc": "x 에 대응하는 Y 의 원소 f(x)",
+   "grade": 1,
+   "art": 17,
+   "page": "",
+   "op": "app",
+   "in": [
+    "f",
+    "x"
+   ],
+   "hint": "함수에 x 를 넣으면 나오는 값",
+   "ex": {
+    "type": "number",
+    "question": "f(x) = 3x − 4 일 때 f(5) = ?",
+    "answer": 11,
+    "solution": "f(5) = 3 × 5 − 4 = 11"
+   },
+   "ws": "14차시 STEP 1",
+   "ordered": true,
+   "mf": "f(x)"
+  },
+  {
+   "id": "domain",
+   "no": 14,
+   "sec": "07 함수",
+   "name": "정의역",
+   "fm": "정의역 X",
+   "desc": "함수 f : X → Y 에서 집합 X",
+   "grade": 1,
+   "art": 18,
+   "page": "",
+   "op": "dom",
+   "in": [
+    "card:func"
+   ],
+   "hint": "화살표가 출발하는 집합",
+   "ex": {
+    "type": "choice",
+    "question": "함수 f : X → Y 에서 정의역은?",
+    "choices": [
+     "집합 X",
+     "집합 Y",
+     "함숫값 전체"
+    ],
+    "answerIndex": 0,
+    "solution": "화살표가 출발하는 집합 X 가 정의역"
+   },
+   "ws": "14차시 STEP 2"
+  },
+  {
+   "id": "codomain",
+   "no": 14,
+   "sec": "07 함수",
+   "name": "공역",
+   "fm": "공역 Y",
+   "desc": "함수 f : X → Y 에서 집합 Y",
+   "grade": 1,
+   "art": 18,
+   "page": "",
+   "op": "cod",
+   "in": [
+    "card:func"
+   ],
+   "hint": "화살표가 도착할 수 있는 집합 전체",
+   "ex": {
+    "type": "choice",
+    "question": "함수 f : X → Y 에서 공역은?",
+    "choices": [
+     "집합 X",
+     "집합 Y",
+     "화살표를 받은 원소만 모은 집합"
+    ],
+    "answerIndex": 1,
+    "solution": "화살표가 향하는 집합 Y 전체가 공역 (받지 못한 원소도 포함)"
+   },
+   "ws": "14차시 STEP 2"
+  },
+  {
+   "id": "range",
+   "no": 14,
+   "sec": "07 함수",
+   "name": "치역",
+   "fm": "{f(x) | x ∈ X}",
+   "desc": "함숫값 전체의 집합 (공역의 부분집합)",
+   "grade": 2,
+   "art": 18,
+   "page": "",
+   "op": "ran",
+   "in": [
+    "card:func"
+   ],
+   "hint": "화살표를 실제로 받은 원소만 모으면?",
+   "ex": {
+    "type": "choice",
+    "question": "X = {1, 2, 3} 에서 f(x) = 2x + 1 의 치역은?",
+    "choices": [
+     "{1, 2, 3}",
+     "{3, 5, 7}",
+     "{2, 4, 6}"
+    ],
+    "answerIndex": 1,
+    "solution": "f(1) = 3, f(2) = 5, f(3) = 7 → {3, 5, 7}"
+   },
+   "ws": "14차시 STEP 2 · 문제 1 · 2"
+  },
+  {
+   "id": "feq",
+   "no": 14,
+   "sec": "07 함수",
+   "name": "서로 같은 함수",
+   "fm": "f = g",
+   "desc": "정의역이 같고 모든 원소에서 함숫값이 같다",
+   "grade": 2,
+   "art": 19,
+   "page": "",
+   "op": "eq",
+   "in": [
+    "f",
+    "g"
+   ],
+   "hint": "두 함수 사이에 =",
+   "ex": {
+    "type": "choice",
+    "question": "정의역이 {0, 1} 인 두 함수 f(x) = x, g(x) = x² 은 서로 같은 함수일까?",
+    "choices": [
+     "같다 — f(0) = g(0), f(1) = g(1)",
+     "다르다 — 식이 다르다",
+     "알 수 없다"
+    ],
+    "answerIndex": 0,
+    "solution": "f(0) = g(0) = 0, f(1) = g(1) = 1 → 정의역의 모든 원소에서 함숫값이 같다"
+   },
+   "ws": "14차시 STEP 4 · 문제 3"
+  },
+  {
+   "id": "graph",
+   "no": 15,
+   "sec": "08 여러 가지 함수",
+   "name": "함수의 그래프",
+   "fm": "{(x, f(x)) | x ∈ X}",
+   "desc": "순서쌍 (x, f(x)) 전체의 집합",
+   "grade": 2,
+   "art": 20,
+   "page": "",
+   "op": "brace",
+   "in": [
+    "card:fval"
+   ],
+   "hint": "함숫값을 순서쌍으로 모아 중괄호에",
+   "ex": {
+    "type": "choice",
+    "question": "정의역이 {0, 1, 2} 인 함수 y = x + 2 의 그래프는?",
+    "choices": [
+     "점 3개 (0, 2), (1, 3), (2, 4)",
+     "직선 y = x + 2",
+     "점 3개 (2, 0), (3, 1), (4, 2)"
+    ],
+    "answerIndex": 0,
+    "solution": "정의역이 원소 3개 → 점 3개 (0, 2), (1, 3), (2, 4)"
+   },
+   "ws": "15차시 문제 4 · 5"
+  },
+  {
+   "id": "inj",
+   "no": 15,
+   "sec": "08 여러 가지 함수",
+   "name": "일대일함수",
+   "fm": "x₁ ≠ x₂ 이면 f(x₁) ≠ f(x₂)",
+   "desc": "서로 다른 원소의 함숫값이 서로 다르다",
+   "grade": 2,
+   "art": 21,
+   "page": "",
+   "op": "neq",
+   "in": [
+    "card:fval",
+    "card:fval"
+   ],
+   "hint": "함숫값끼리 서로 다르다면?",
+   "ex": {
+    "type": "choice",
+    "question": "다음 중 일대일함수가 아닌 것은? (정의역 · 공역 = 실수 전체)",
+    "choices": [
+     "y = 2x + 5",
+     "y = x² − 3",
+     "y = −x"
+    ],
+    "answerIndex": 1,
+    "solution": "y = x² − 3 은 f(−1) = f(1) = −2 → 서로 다른 x 의 함숫값이 같다"
+   },
+   "ws": "15차시 문제 6"
+  },
+  {
+   "id": "onto",
+   "no": 15,
+   "sec": "08 여러 가지 함수",
+   "name": "치역과 공역이 같다",
+   "fm": "치역 = 공역",
+   "desc": "공역의 모든 원소가 화살표를 받는다",
+   "grade": 2,
+   "art": 18,
+   "page": "",
+   "op": "eq",
+   "in": [
+    "card:range",
+    "card:codomain"
+   ],
+   "hint": "치역 카드와 공역 카드가 같다면",
+   "ex": {
+    "type": "choice",
+    "question": "정의역 · 공역이 실수 전체인 y = x² 의 치역은 공역과 같을까?",
+    "choices": [
+     "같다",
+     "다르다 — 치역은 {y | y ≥ 0}"
+    ],
+    "answerIndex": 1,
+    "solution": "x² ≥ 0 이라 음수는 함숫값이 될 수 없다 → 치역 ≠ 공역"
+   },
+   "ws": "15차시 문제 6",
+   "short": "치역 = 공역"
+  },
+  {
+   "id": "bij",
+   "no": 15,
+   "sec": "08 여러 가지 함수",
+   "name": "일대일대응",
+   "fm": "일대일함수이고 치역 = 공역",
+   "desc": "일대일함수이면서 치역과 공역이 같은 함수",
+   "grade": 3,
+   "art": 21,
+   "page": "",
+   "op": "and",
+   "in": [
+    "card:inj",
+    "card:onto"
+   ],
+   "hint": "일대일함수이고, 치역 = 공역",
+   "ex": {
+    "type": "choice",
+    "question": "정의역 · 공역이 실수 전체일 때 일대일대응인 것은?",
+    "choices": [
+     "y = |x|",
+     "y = 4",
+     "y = −3x + 1"
+    ],
+    "answerIndex": 2,
+    "solution": "직선(기울기 ≠ 0)은 일대일함수이고 치역이 실수 전체"
+   },
+   "ws": "15차시 문제 6 · 중단원 02"
+  },
+  {
+   "id": "ident",
+   "no": 15,
+   "sec": "08 여러 가지 함수",
+   "name": "항등함수",
+   "fm": "f(x) = x",
+   "desc": "자기 자신에 대응하는 함수",
+   "grade": 2,
+   "art": 22,
+   "page": "",
+   "op": "eq",
+   "in": [
+    "card:fval",
+    "x"
+   ],
+   "hint": "함숫값이 넣은 값 그대로라면",
+   "ex": {
+    "type": "number",
+    "question": "항등함수 f 에 대하여 f(7) = ?",
+    "answer": 7,
+    "solution": "항등함수는 f(x) = x → f(7) = 7"
+   },
+   "ws": "15차시 중단원 02",
+   "ordered": true
+  },
+  {
+   "id": "const",
+   "no": 15,
+   "sec": "08 여러 가지 함수",
+   "name": "상수함수",
+   "fm": "f(x) = c",
+   "desc": "모든 x 에 같은 값 하나가 대응하는 함수",
+   "grade": 2,
+   "art": 22,
+   "page": "",
+   "op": "eq",
+   "in": [
+    "card:fval",
+    "c"
+   ],
+   "hint": "함숫값이 늘 같은 수 하나라면",
+   "ex": {
+    "type": "number",
+    "question": "상수함수 f 에서 f(1) = 6 일 때 f(100) = ?",
+    "answer": 6,
+    "solution": "상수함수는 모든 x 에서 값이 같다 → 6"
+   },
+   "ws": "15차시 중단원 02",
+   "ordered": true
+  },
+  {
+   "id": "compose",
+   "no": 16,
+   "sec": "09 합성함수",
+   "name": "합성함수",
+   "fm": "g∘f",
+   "desc": "f 다음에 g (오른쪽 함수부터)",
+   "grade": 1,
+   "art": 23,
+   "page": "",
+   "op": "o",
+   "in": [
+    "g",
+    "f"
+   ],
+   "hint": "두 함수를 ∘ 로 이어 붙이자 (나중 함수가 왼쪽)",
+   "ex": {
+    "type": "choice",
+    "question": "(g∘f)(x) 를 구할 때 먼저 계산하는 함수는?",
+    "choices": [
+     "f",
+     "g"
+    ],
+    "answerIndex": 0,
+    "solution": "(g∘f)(x) = g(f(x)) — 오른쪽 f 먼저"
+   },
+   "ws": "16차시 STEP 1",
+   "ordered": true
+  },
+  {
+   "id": "compval",
+   "no": 16,
+   "sec": "09 합성함수",
+   "name": "합성함수의 값",
+   "fm": "(g∘f)(x) = g(f(x))",
+   "desc": "f(x) 를 구해 g 에 넣는다",
+   "grade": 2,
+   "art": 23,
+   "page": "",
+   "op": "app",
+   "in": [
+    "g",
+    "card:fval"
+   ],
+   "hint": "g 에 f(x) 를 통째로 넣으면",
+   "ex": {
+    "type": "number",
+    "question": "f(x) = x + 3, g(x) = 2x 일 때 (g∘f)(1) = ?",
+    "answer": 8,
+    "solution": "f(1) = 4 → g(4) = 8"
+   },
+   "ws": "16차시 문제 1 · 2",
+   "ordered": true,
+   "alt": [
+    {
+     "op": "app",
+     "in": [
+      "card:compose",
+      "x"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "noncomm",
+   "no": 16,
+   "sec": "09 합성함수",
+   "name": "교환법칙이 성립하지 않는다",
+   "fm": "g∘f ≠ f∘g",
+   "desc": "순서를 바꾸면 결과가 달라진다",
+   "grade": 2,
+   "art": 23,
+   "page": "",
+   "op": "neq",
+   "in": [
+    "card:compose",
+    "card:compose"
+   ],
+   "hint": "합성함수 둘을 순서만 바꿔 견주면",
+   "ex": {
+    "type": "choice",
+    "question": "f(x) = x + 3, g(x) = 2x 일 때 (g∘f)(1) 과 (f∘g)(1) 은?",
+    "choices": [
+     "8 과 5 — 다르다",
+     "8 과 8 — 같다",
+     "5 와 5 — 같다"
+    ],
+    "answerIndex": 0,
+    "solution": "(g∘f)(1) = g(4) = 8 · (f∘g)(1) = f(2) = 5"
+   },
+   "ws": "16차시 STEP 2",
+   "short": "교환법칙 ✕"
+  },
+  {
+   "id": "fassoc",
+   "no": 16,
+   "sec": "09 합성함수",
+   "name": "결합법칙",
+   "fm": "h∘(g∘f) = (h∘g)∘f",
+   "desc": "묶는 자리를 바꿔도 결과가 같다",
+   "grade": 3,
+   "art": 23,
+   "page": "",
+   "op": "o",
+   "in": [
+    "h",
+    "card:compose"
+   ],
+   "hint": "합성함수 카드에 함수를 하나 더 이어 붙이자",
+   "ex": {
+    "type": "ox",
+    "question": "함수의 합성에서 결합법칙은 성립한다.",
+    "answer": true,
+    "solution": "(h∘g)∘f = h∘(g∘f) — 순서는 그대로, 묶는 자리만 바뀐다"
+   },
+   "ws": "16차시 STEP 3",
+   "ordered": true
+  },
+  {
+   "id": "inverse",
+   "no": 17,
+   "sec": "10 역함수",
+   "name": "역함수",
+   "fm": "f⁻¹ : Y → X",
+   "desc": "화살표를 거꾸로 돌린 함수 (f 가 일대일대응일 때만)",
+   "grade": 2,
+   "art": 24,
+   "page": "",
+   "op": "inv",
+   "in": [
+    "card:bij"
+   ],
+   "hint": "일대일대응인 함수에 ⁻¹ 을 붙이자",
+   "ex": {
+    "type": "choice",
+    "question": "함수 f 의 역함수가 존재하려면 f 는?",
+    "choices": [
+     "일대일함수",
+     "일대일대응",
+     "상수함수"
+    ],
+    "answerIndex": 1,
+    "solution": "화살표를 거꾸로 해도 함수가 되려면 하나씩 짝지어져야 → 일대일대응"
+   },
+   "ws": "17차시 STEP 1 · 문제 1"
+  },
+  {
+   "id": "invval",
+   "no": 17,
+   "sec": "10 역함수",
+   "name": "역함수의 값",
+   "fm": "f(a) = b ⇔ f⁻¹(b) = a",
+   "desc": "역함수 값은 원래 함수의 식으로 바꿔 쓴다",
+   "grade": 2,
+   "art": 24,
+   "page": "",
+   "op": "app",
+   "in": [
+    "card:inverse",
+    "y"
+   ],
+   "hint": "역함수에 y 를 넣으면 나오는 것은?",
+   "ex": {
+    "type": "number",
+    "question": "f(x) = 2x + 6 일 때 f⁻¹(10) = ?",
+    "answer": 2,
+    "solution": "f(a) = 10 → 2a + 6 = 10 → a = 2"
+   },
+   "ws": "17차시 문제 1 · 중단원 08",
+   "ordered": true
+  },
+  {
+   "id": "invinv",
+   "no": 17,
+   "sec": "10 역함수",
+   "name": "역함수의 역함수",
+   "fm": "(f⁻¹)⁻¹ = f",
+   "desc": "두 번 뒤집으면 제자리",
+   "grade": 2,
+   "art": 24,
+   "page": "",
+   "op": "inv",
+   "in": [
+    "card:inverse"
+   ],
+   "hint": "역함수 카드에 ⁻¹ 을 한 번 더",
+   "ex": {
+    "type": "number",
+    "question": "f(3) = 8 일 때 (f⁻¹)⁻¹(3) = ?",
+    "answer": 8,
+    "solution": "(f⁻¹)⁻¹ = f → f(3) = 8"
+   },
+   "ws": "17차시 문제 1 (4)"
+  },
+  {
+   "id": "invcomp",
+   "no": 17,
+   "sec": "10 역함수",
+   "name": "역함수와 합성",
+   "fm": "(f⁻¹∘f)(x) = x",
+   "desc": "갔다가 돌아오면 제자리 (항등함수)",
+   "grade": 3,
+   "art": 24,
+   "page": "",
+   "op": "o",
+   "in": [
+    "card:inverse",
+    "f"
+   ],
+   "hint": "역함수와 원래 함수를 ∘ 로 이으면",
+   "ex": {
+    "type": "number",
+    "question": "f 가 일대일대응일 때 (f⁻¹∘f)(9) = ?",
+    "answer": 9,
+    "solution": "f 로 갔다가 f⁻¹ 로 돌아오면 제자리 → 9"
+   },
+   "ws": "17차시 문제 1 (2) (3)",
+   "alt": [
+    {
+     "op": "o",
+     "in": [
+      "f",
+      "card:inverse"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "invfind",
+   "no": 17,
+   "sec": "10 역함수",
+   "name": "역함수 구하기",
+   "fm": "x 에 대하여 풀고 x 와 y 를 바꾼다",
+   "desc": "y = f(x) → x = … → x 와 y 를 바꿈",
+   "grade": 2,
+   "art": 25,
+   "page": "",
+   "op": "swap",
+   "in": [
+    "card:fval"
+   ],
+   "hint": "y = f(x) 에서 x 와 y 의 자리를 바꾸면",
+   "ex": {
+    "type": "choice",
+    "question": "y = 2x + 6 의 역함수는?",
+    "choices": [
+     "y = (1/2)x − 3",
+     "y = (1/2)x + 3",
+     "y = −2x − 6"
+    ],
+    "answerIndex": 0,
+    "solution": "x = (y − 6)/2 = (1/2)y − 3 → x 와 y 를 바꾸면 y = (1/2)x − 3"
+   },
+   "ws": "17차시 STEP 2 · 문제 2"
+  },
+  {
+   "id": "invgraph",
+   "no": 17,
+   "sec": "10 역함수",
+   "name": "역함수의 그래프",
+   "fm": "y = f(x) 와 y = f⁻¹(x) 는 직선 y = x 에 대하여 대칭",
+   "desc": "점 (a, b) ↔ 점 (b, a)",
+   "grade": 3,
+   "art": 25,
+   "page": "",
+   "op": "swap",
+   "in": [
+    "card:graph"
+   ],
+   "hint": "그래프의 모든 점에서 x 와 y 를 바꾸면",
+   "ex": {
+    "type": "choice",
+    "question": "점 (2, 5) 가 y = f(x) 의 그래프 위에 있으면 y = f⁻¹(x) 의 그래프 위에 있는 점은?",
+    "choices": [
+     "(2, 5)",
+     "(5, 2)",
+     "(−2, −5)"
+    ],
+    "answerIndex": 1,
+    "solution": "(a, b) ↔ (b, a) → (5, 2)"
+   },
+   "ws": "17차시 STEP 3 · 문제 4",
+   "short": "y = x 대칭"
+  }
+ ],
+ "MISTAKES": {
+  "then|SY,SX": "함수는 정의역이 왼쪽이에요: X → Y (X 의 원소마다 Y 의 원소가 하나씩)",
+  "app|x,f": "순서가 거꾸로예요. 함수가 왼쪽, 넣는 값이 오른쪽: f(x)",
+  "app|f,y": "f 에 넣는 것은 정의역의 원소 x 예요. y 는 나오는 값!",
+  "app|f,card:fval": "f(f(x)) 도 합성이지만, 이번 카드는 g 에 f(x) 를 넣어요: g(f(x))",
+  "app|card:fval,g": "순서가 거꾸로예요. 나중 함수 g 가 왼쪽: g(f(x))",
+  "o|f,g": "f∘g 는 g 를 먼저 하는 합성이에요. 이번 카드는 f 를 먼저 → g∘f (나중 함수가 왼쪽)",
+  "eq|card:compose,card:compose": "g∘f 와 f∘g 는 보통 같지 않아요. ≠ 로 놓아 보자 (교환법칙 ✕)",
+  "inv|f": "역함수는 f 가 일대일대응일 때만 있어요. 일대일대응 카드에 ⁻¹ 을 붙여 보자",
+  "inv|card:inj": "일대일함수만으로는 모자라요. 치역 = 공역 까지 갖춘 일대일대응이어야 역함수가 있어요",
+  "inv|card:func": "모든 함수에 역함수가 있는 것은 아니에요. 일대일대응일 때만!",
+  "app|card:inverse,x": "역함수 f⁻¹ 는 Y 에서 X 로 가요. 넣는 것은 y !",
+  "eq|card:range,card:domain": "치역은 공역과 견줘요 (둘 다 Y 쪽). 정의역은 X 쪽!",
+  "eq|x,card:fval": "함숫값을 왼쪽에: f(x) = x",
+  "eq|c,card:fval": "함숫값을 왼쪽에: f(x) = c",
+  "ran|card:fval": "치역은 함수 카드(f : X → Y)에서 구해요",
+  "swap|card:func": "x ↔ y 는 식 y = f(x) 나 그래프에 써요",
+  "o|card:compose,h": "이번 카드는 h 를 왼쪽에: h∘(g∘f)"
+ }
+}

@@ -1,0 +1,668 @@
+{
+ "_note": "기호톡 줄(row) → 눌렀을 때 찜할 카드(primary) · 카드 → 그 카드로 이어지는 줄(rows)과 줄이 아직 없는 글자(strings = 새 줄 후보). 함수 줄(newRows)은 symtalk.ts 에 더할 것 · find = 정규식(위에서부터 · 긴 낱말 먼저).",
+ "rowToCard": {
+  "in": "belong",
+  "notin": "notbelong",
+  "list": "roster",
+  "build": "builder",
+  "n": "count",
+  "empty": "empty",
+  "sub": "subset",
+  "eq": "equal",
+  "cap": "inter",
+  "cup": "union",
+  "disj": "disjoint",
+  "compl": "comp",
+  "diff": "diff",
+  "nsub": "notsubset",
+  "ncup": "unioncount",
+  "U": "comp",
+  "2^n": "subcount",
+  "neg": "neg",
+  "prop": "prop",
+  "cond": "cond",
+  "truth": "truth",
+  "imp": "imp",
+  "counter": "counter",
+  "conv": "conv",
+  "contra": "contra",
+  "all": "all",
+  "some": "some",
+  "dimp": "suff",
+  "suff": "suff",
+  "need": "suff",
+  "iff": "iff",
+  "absurd": "contradiction",
+  "absineq": "absineq",
+  "amgm": "absineq",
+  "bij": "bij",
+  "inj": "inj",
+  "ident": "ident",
+  "const": "const",
+  "compose": "compose",
+  "inverse": "inverse",
+  "fmap": "func",
+  "domain": "domain",
+  "codomain": "codomain",
+  "range": "range",
+  "yx": "invgraph",
+  "graph": "graph",
+  "fval": "fval"
+ },
+ "cards": {
+  "belong": {
+   "rows": [
+    "in"
+   ],
+   "strings": []
+  },
+  "notbelong": {
+   "rows": [
+    "notin"
+   ],
+   "strings": []
+  },
+  "roster": {
+   "rows": [
+    "list"
+   ],
+   "strings": []
+  },
+  "builder": {
+   "rows": [
+    "build"
+   ],
+   "strings": []
+  },
+  "venn": {
+   "rows": [],
+   "strings": [
+    "벤 다이어그램"
+   ]
+  },
+  "count": {
+   "rows": [
+    "n"
+   ],
+   "strings": []
+  },
+  "empty": {
+   "rows": [
+    "empty"
+   ],
+   "strings": []
+  },
+  "subset": {
+   "rows": [
+    "sub"
+   ],
+   "strings": []
+  },
+  "notsubset": {
+   "rows": [
+    "nsub"
+   ],
+   "strings": []
+  },
+  "self": {
+   "rows": [
+    "sub"
+   ],
+   "strings": []
+  },
+  "emptysub": {
+   "rows": [
+    "sub",
+    "empty"
+   ],
+   "strings": []
+  },
+  "equal": {
+   "rows": [
+    "eq"
+   ],
+   "strings": []
+  },
+  "notequal": {
+   "rows": [],
+   "strings": [
+    "≠"
+   ]
+  },
+  "proper": {
+   "rows": [],
+   "strings": [
+    "진부분집합"
+   ]
+  },
+  "allsub": {
+   "rows": [
+    "sub"
+   ],
+   "strings": [
+    "부분집합"
+   ]
+  },
+  "subcount": {
+   "rows": [
+    "2^n"
+   ],
+   "strings": [
+    "부분집합의 개수"
+   ]
+  },
+  "inter": {
+   "rows": [
+    "cap"
+   ],
+   "strings": []
+  },
+  "union": {
+   "rows": [
+    "cup"
+   ],
+   "strings": []
+  },
+  "disjoint": {
+   "rows": [
+    "disj"
+   ],
+   "strings": [
+    "서로소"
+   ]
+  },
+  "incl": {
+   "rows": [
+    "sub",
+    "cap",
+    "cup"
+   ],
+   "strings": []
+  },
+  "unioncount": {
+   "rows": [
+    "ncup"
+   ],
+   "strings": []
+  },
+  "disjointcount": {
+   "rows": [
+    "disj",
+    "ncup"
+   ],
+   "strings": []
+  },
+  "commute": {
+   "rows": [],
+   "strings": [
+    "교환법칙"
+   ]
+  },
+  "assoc": {
+   "rows": [],
+   "strings": [
+    "결합법칙"
+   ]
+  },
+  "distrib": {
+   "rows": [],
+   "strings": [
+    "분배법칙"
+   ]
+  },
+  "comp": {
+   "rows": [
+    "compl",
+    "U"
+   ],
+   "strings": []
+  },
+  "diff": {
+   "rows": [
+    "diff"
+   ],
+   "strings": []
+  },
+  "diffcap": {
+   "rows": [
+    "diff",
+    "compl"
+   ],
+   "strings": []
+  },
+  "compcomp": {
+   "rows": [
+    "compl"
+   ],
+   "strings": []
+  },
+  "compprop": {
+   "rows": [
+    "compl",
+    "U"
+   ],
+   "strings": []
+  },
+  "demorgan1": {
+   "rows": [
+    "compl"
+   ],
+   "strings": [
+    "드모르간"
+   ]
+  },
+  "demorgan2": {
+   "rows": [
+    "compl"
+   ],
+   "strings": [
+    "드모르간"
+   ]
+  },
+  "compcount": {
+   "rows": [
+    "n",
+    "compl"
+   ],
+   "strings": []
+  },
+  "diffcount": {
+   "rows": [
+    "n",
+    "diff"
+   ],
+   "strings": []
+  },
+  "prop": {
+   "rows": [
+    "prop"
+   ],
+   "strings": []
+  },
+  "neg": {
+   "rows": [
+    "neg"
+   ],
+   "strings": []
+  },
+  "cond": {
+   "rows": [
+    "cond"
+   ],
+   "strings": []
+  },
+  "truth": {
+   "rows": [
+    "truth"
+   ],
+   "strings": []
+  },
+  "negtruth": {
+   "rows": [
+    "neg",
+    "truth"
+   ],
+   "strings": []
+  },
+  "all": {
+   "rows": [
+    "all"
+   ],
+   "strings": []
+  },
+  "some": {
+   "rows": [
+    "some"
+   ],
+   "strings": []
+  },
+  "allneg": {
+   "rows": [
+    "all",
+    "some",
+    "neg"
+   ],
+   "strings": []
+  },
+  "imp": {
+   "rows": [
+    "imp"
+   ],
+   "strings": []
+  },
+  "conv": {
+   "rows": [
+    "conv"
+   ],
+   "strings": []
+  },
+  "truthjudge": {
+   "rows": [
+    "imp",
+    "truth"
+   ],
+   "strings": []
+  },
+  "counter": {
+   "rows": [
+    "counter"
+   ],
+   "strings": []
+  },
+  "contra": {
+   "rows": [
+    "contra"
+   ],
+   "strings": []
+  },
+  "contraeq": {
+   "rows": [
+    "contra"
+   ],
+   "strings": []
+  },
+  "suff": {
+   "rows": [
+    "dimp",
+    "suff",
+    "need"
+   ],
+   "strings": []
+  },
+  "iff": {
+   "rows": [
+    "iff"
+   ],
+   "strings": []
+  },
+  "iffset": {
+   "rows": [
+    "iff",
+    "truth"
+   ],
+   "strings": []
+  },
+  "contraproof": {
+   "rows": [
+    "contra"
+   ],
+   "strings": [
+    "증명"
+   ]
+  },
+  "contradiction": {
+   "rows": [
+    "absurd"
+   ],
+   "strings": [
+    "모순"
+   ]
+  },
+  "absineq": {
+   "rows": [
+    "absineq",
+    "amgm"
+   ],
+   "strings": []
+  },
+  "func": {
+   "rows": [
+    "fmap"
+   ],
+   "strings": []
+  },
+  "fval": {
+   "rows": [
+    "fval"
+   ],
+   "strings": []
+  },
+  "domain": {
+   "rows": [
+    "domain"
+   ],
+   "strings": []
+  },
+  "codomain": {
+   "rows": [
+    "codomain"
+   ],
+   "strings": []
+  },
+  "range": {
+   "rows": [
+    "range"
+   ],
+   "strings": []
+  },
+  "feq": {
+   "rows": [],
+   "strings": [
+    "서로 같은 함수"
+   ]
+  },
+  "graph": {
+   "rows": [
+    "graph"
+   ],
+   "strings": []
+  },
+  "inj": {
+   "rows": [
+    "inj"
+   ],
+   "strings": []
+  },
+  "onto": {
+   "rows": [],
+   "strings": [
+    "치역",
+    "공역"
+   ]
+  },
+  "bij": {
+   "rows": [
+    "bij"
+   ],
+   "strings": []
+  },
+  "ident": {
+   "rows": [
+    "ident"
+   ],
+   "strings": []
+  },
+  "const": {
+   "rows": [
+    "const"
+   ],
+   "strings": []
+  },
+  "compose": {
+   "rows": [
+    "compose"
+   ],
+   "strings": []
+  },
+  "compval": {
+   "rows": [
+    "compose"
+   ],
+   "strings": []
+  },
+  "noncomm": {
+   "rows": [
+    "compose"
+   ],
+   "strings": [
+    "교환법칙"
+   ]
+  },
+  "fassoc": {
+   "rows": [
+    "compose"
+   ],
+   "strings": [
+    "결합법칙"
+   ]
+  },
+  "inverse": {
+   "rows": [
+    "inverse"
+   ],
+   "strings": []
+  },
+  "invval": {
+   "rows": [
+    "inverse"
+   ],
+   "strings": []
+  },
+  "invinv": {
+   "rows": [
+    "inverse"
+   ],
+   "strings": []
+  },
+  "invcomp": {
+   "rows": [
+    "inverse",
+    "compose"
+   ],
+   "strings": []
+  },
+  "invfind": {
+   "rows": [
+    "inverse"
+   ],
+   "strings": []
+  },
+  "invgraph": {
+   "rows": [
+    "yx",
+    "inverse",
+    "graph"
+   ],
+   "strings": []
+  }
+ },
+ "newRows": [
+  {
+   "id": "bij",
+   "sym": "일대일대응",
+   "find": "일대일대응",
+   "card": "bij",
+   "easy": "하나씩 딱 짝이 맞는다 (남는 것도 겹치는 것도 없음)",
+   "memo": "역함수가 있으려면 꼭 일대일대응",
+   "def": "일대일함수이고 치역과 공역이 같은 함수"
+  },
+  {
+   "id": "inj",
+   "sym": "일대일함수",
+   "find": "일대일함수",
+   "card": "inj",
+   "easy": "다른 것을 넣으면 다른 것이 나온다",
+   "memo": "가로선을 그어 그래프와 한 번만 만나면 일대일함수",
+   "def": "x₁ ≠ x₂ 이면 f(x₁) ≠ f(x₂) 인 함수"
+  },
+  {
+   "id": "ident",
+   "sym": "항등함수",
+   "find": "항등함수",
+   "card": "ident",
+   "easy": "넣은 그대로 나온다",
+   "memo": "그래프는 직선 y = x",
+   "def": "정의역의 각 원소에 자기 자신이 대응하는 함수 f(x) = x"
+  },
+  {
+   "id": "const",
+   "sym": "상수함수",
+   "find": "상수함수",
+   "card": "const",
+   "easy": "무엇을 넣어도 같은 값 하나",
+   "memo": "그래프는 가로선 · 치역의 원소는 1개",
+   "def": "정의역의 모든 원소에 공역의 원소 하나가 대응하는 함수 f(x) = c"
+  },
+  {
+   "id": "compose",
+   "sym": "g∘f",
+   "find": "[fgh]⁻¹∘[fgh]|[fgh]∘[fgh]⁻¹|[fgh]∘[fgh]|합성함수",
+   "card": "compose",
+   "easy": "f 하고 나서 g (오른쪽부터)",
+   "memo": "g∘f ≠ f∘g (순서 중요) · 결합법칙은 성립",
+   "def": "(g∘f)(x) = g(f(x)) · f 와 g 의 합성함수"
+  },
+  {
+   "id": "inverse",
+   "sym": "f⁻¹",
+   "find": "[fgh]⁻¹|역함수",
+   "card": "inverse",
+   "easy": "화살표를 거꾸로 돌린 함수",
+   "memo": "f⁻¹(b) = a ⇔ f(a) = b · (f⁻¹)⁻¹ = f",
+   "def": "f 가 일대일대응일 때 y = f(x) ⇔ x = f⁻¹(y)"
+  },
+  {
+   "id": "fmap",
+   "sym": "f : X → Y",
+   "find": "[fgh]\\s*:\\s*[A-Z]\\s*→\\s*[A-Z]",
+   "card": "func",
+   "easy": "X 의 원소마다 Y 의 원소를 하나씩 짝지음",
+   "memo": "짝이 없는 원소 · 짝이 둘인 원소가 있으면 함수가 아님",
+   "def": "집합 X 의 각 원소에 집합 Y 의 원소가 오직 하나씩 대응할 때 이 대응을 X 에서 Y 로의 함수라 한다"
+  },
+  {
+   "id": "domain",
+   "sym": "정의역",
+   "find": "정의역",
+   "card": "domain",
+   "easy": "화살표가 출발하는 집합",
+   "memo": "주어지지 않으면 함수가 정의되는 실수 전체",
+   "def": "함수 f : X → Y 에서 집합 X"
+  },
+  {
+   "id": "codomain",
+   "sym": "공역",
+   "find": "공역",
+   "card": "codomain",
+   "easy": "화살표가 도착할 수 있는 집합 전체",
+   "memo": "치역은 공역의 부분집합",
+   "def": "함수 f : X → Y 에서 집합 Y"
+  },
+  {
+   "id": "range",
+   "sym": "치역",
+   "find": "치역",
+   "card": "range",
+   "easy": "화살표를 실제로 받은 것만 모음",
+   "memo": "치역 ⊂ 공역",
+   "def": "함숫값 전체의 집합 {f(x) | x ∈ X}"
+  },
+  {
+   "id": "yx",
+   "sym": "직선 y = x",
+   "find": "직선\\s*y\\s*=\\s*x(?![\\w²])|y\\s*=\\s*x\\s*(?:에 대하여 )?대칭",
+   "card": "invgraph",
+   "easy": "접으면 함수와 역함수가 겹치는 선",
+   "memo": "(a, b) ↔ (b, a)",
+   "def": "y = f(x) 와 y = f⁻¹(x) 의 그래프는 직선 y = x 에 대하여 대칭"
+  },
+  {
+   "id": "graph",
+   "sym": "그래프",
+   "find": "그래프",
+   "card": "graph",
+   "easy": "(x, f(x)) 를 좌표평면에 찍은 그림",
+   "memo": "세로선과 한 점에서만 만나야 함수의 그래프",
+   "def": "순서쌍 (x, f(x)) 전체의 집합"
+  },
+  {
+   "id": "fval",
+   "sym": "f(x)",
+   "find": "(?<![∘⁻¹A-Za-z가-힣)])[fgh]\\((?=[^)]*\\))",
+   "card": "fval",
+   "easy": "x 를 넣었을 때 나오는 값",
+   "memo": "f(2) = x 자리에 2 를 넣은 값",
+   "def": "함수 f 에서 x 에 대응하는 Y 의 원소 = 함숫값"
+  }
+ ]
+}
