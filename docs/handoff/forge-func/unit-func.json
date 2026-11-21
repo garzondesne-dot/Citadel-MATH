@@ -456,6 +456,38 @@
    "ordered": true
   },
   {
+   "id": "compose2",
+   "no": 16,
+   "sec": "09 합성함수",
+   "name": "순서를 바꾼 합성함수",
+   "fm": "f∘g",
+   "desc": "g 다음에 f (g∘f 와 순서가 반대)",
+   "grade": 1,
+   "art": 23,
+   "page": "",
+   "op": "o",
+   "in": [
+    "f",
+    "g"
+   ],
+   "hint": "이번에는 f 를 왼쪽에: f∘g",
+   "ex": {
+    "type": "choice",
+    "question": "f(x) = x + 1, g(x) = 2x 일 때 (f∘g)(3) 의 값은?",
+    "choices": [
+     "7",
+     "8",
+     "6",
+     "5"
+    ],
+    "answerIndex": 0,
+    "solution": "g(3) = 6 을 먼저 구하고 f(6) = 6 + 1 = 7. (g∘f)(3) = g(4) = 8 과 다르다."
+   },
+   "ws": "16차시 STEP 2",
+   "ordered": true,
+   "short": "f∘g"
+  },
+  {
    "id": "compval",
    "no": 16,
    "sec": "09 합성함수",
@@ -502,9 +534,9 @@
    "op": "neq",
    "in": [
     "card:compose",
-    "card:compose"
+    "card:compose2"
    ],
-   "hint": "합성함수 둘을 순서만 바꿔 견주면",
+   "hint": "g∘f 카드와 f∘g 카드를 견주면",
    "ex": {
     "type": "choice",
     "question": "f(x) = x + 3, g(x) = 2x 일 때 (g∘f)(1) 과 (f∘g)(1) 은?",
@@ -717,8 +749,8 @@
   "app|f,y": "f 에 넣는 것은 정의역의 원소 x 예요. y 는 나오는 값!",
   "app|f,card:fval": "f(f(x)) 도 합성이지만, 이번 카드는 g 에 f(x) 를 넣어요: g(f(x))",
   "app|card:fval,g": "순서가 거꾸로예요. 나중 함수 g 가 왼쪽: g(f(x))",
-  "o|f,g": "f∘g 는 g 를 먼저 하는 합성이에요. 이번 카드는 f 를 먼저 → g∘f (나중 함수가 왼쪽)",
-  "eq|card:compose,card:compose": "g∘f 와 f∘g 는 보통 같지 않아요. ≠ 로 놓아 보자 (교환법칙 ✕)",
+  "eq|card:compose,card:compose2": "g∘f 와 f∘g 는 보통 같지 않아요. ≠ 로 놓아 보자 (교환법칙 ✕)",
+  "neq|card:compose,card:compose": "같은 카드 두 장은 서로 같아요. f∘g 카드를 따로 만들어 견주자",
   "inv|f": "역함수는 f 가 일대일대응일 때만 있어요. 일대일대응 카드에 ⁻¹ 을 붙여 보자",
   "inv|card:inj": "일대일함수만으로는 모자라요. 치역 = 공역 까지 갖춘 일대일대응이어야 역함수가 있어요",
   "inv|card:func": "모든 함수에 역함수가 있는 것은 아니에요. 일대일대응일 때만!",

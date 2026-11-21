@@ -484,6 +484,12 @@
    ],
    "strings": []
   },
+  "compose2": {
+   "rows": [
+    "compose"
+   ],
+   "strings": []
+  },
   "compval": {
    "rows": [
     "compose"
