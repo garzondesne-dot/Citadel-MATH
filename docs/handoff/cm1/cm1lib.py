@@ -199,6 +199,13 @@ def write(L, outdir='out'):
     for key, v, t, ans, sol, ok in rep['rows']:
         if v == 0 or ok == '❌': md.append(f"| {key} · 판 {v} | {t} | {ans} | {sol} | {ok} |")
     if rep['lint'] or rep['dup']: md += ['', '## 걸린 곳', ''] + [f'- {x}' for x in rep['lint'] + rep['dup']]
+    if L.get('motion'):
+        md += ['', '## 🎬 모션그래픽 주문서 (영상 한 편 = 주문 한 장 = 코드 상자 하나)', '']
+        for i, m in enumerate(L['motion'], 1):
+            md += [f"### {L['no']:02d}-{i:02d} · {m['title']}", '', '```', f"[영상] 공통수학1 {L['no']}차시 「{L['title']}」 개념 영상 {i} — {m['title']}",
+                   '[형식] UI 데모 스타일 · 30초 루프 · 1280×720 · MP4 1MB 이내 · 웜그레이 캔버스 · 흰 카드 하나 · 커서 조작 · 잔잔한 배경음 + 클릭음 · 자막은 화면 글자로만(내레이션 없음)',
+                   f"[대상] 특성화고 1학년 · 기초가 약한 학생도 한 번에 따라오게 · 한 화면에 식 하나", f"[핵심 한 줄] {m['key']}", '[장면]'] + [f'{k}. {x}' for k, x in enumerate(m['scenes'], 1)] + [
+                   f"[마지막 화면] {m['end']}", f"[쓰지 말 것] 교과서 그림 그대로 · 실제 상표 · 빠른 깜박임", f"[파일 이름] cm1-{L['no']:02d}-{i:02d}.mp4 → 팩 video 칸 {m.get('at', 'c' + str(i))}", '```', '']
     if L.get('notes'): md += ['', '## 설계 방이 정한 것 · 선생님 확인 거리', ''] + [f'- {x}' for x in L['notes']]
     open(f"{outdir}/{L['id']}.md", 'w', encoding='utf8').write('\n'.join(md) + '\n')
     print(f"{L['id']} {L['title']}: ⏱ {rep['min']}분 (+여유 {rep['extra']}) · 문항 {nr} · ✅ {nc} · 눈 {ne} · ❌ {len(bad)} · 글 {len(rep['lint'])} · 같은 판 {len(rep['dup'])}")
