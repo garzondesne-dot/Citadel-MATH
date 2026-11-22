@@ -6,7 +6,7 @@ def m1a(v, rng):
     return number(f'서로 다른 주사위 두 개를 동시에 던질 때, 나오는 눈의 수의 합이 {a} 또는 {b} 인 경우의 수는?', cnt(a) + cnt(b), f'합이 {a} 인 경우 {cnt(a)}가지, {b} 인 경우 {cnt(b)}가지 — 동시에 일어나지 않으므로 더한다.', chk=lambda: sum(1 for x, y in product(range(1, 7), repeat=2) if x + y in (a, b)) == cnt(a) + cnt(b))
 def m1b(v, rng):
     n, a, b = pick(v, rng, (30, 4, 7), lambda r: (r.choice([20, 30, 40, 50]), *r.choice([(4, 7), (3, 5), (4, 9), (5, 7), (3, 7), (5, 8), (4, 5), (6, 7), (3, 8)])))
-    if a * b <= n: n = a * b - 1 if a * b - 1 >= 15 else n
+    if a * b <= n: n = a * b - 1          # 겹치는 수가 없게 범위를 줄임 (a × b 의 최솟값 15 → n ≥ 14)
     val = n // a + n // b
     return number(f'1 부터 {n} 까지의 자연수 중에서 {a} 의 배수 또는 {b} 의 배수의 개수는?', val, f'{a} 의 배수 {n//a}개, {b} 의 배수 {n//b}개 — {n} 이하에서 겹치는 수({a*b} 의 배수)가 없으므로 더한다.', chk=lambda: len([t for t in range(1, n + 1) if t % a == 0 or t % b == 0]) == val)
 def m2a(v, rng):

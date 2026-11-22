@@ -125,7 +125,11 @@ def build(L, seed0=20261122):
         for v in range(7):
             for att in range(40):
                 rng = random.Random(int(hashlib.md5(f"{seed0}|{L['id']}|{key}|{v}|{att}".encode()).hexdigest()[:12], 16))
-                it = f(v, rng); sig = it['q'] + '|' + '|'.join(it['ch'])
+                try: it = f(v, rng)
+                except (AssertionError, ZeroDivisionError):
+                    if att == 39: raise
+                    continue          # 드물게 조건이 안 맞는 숫자 → 다시 뽑기
+                sig = it['q'] + '|' + '|'.join(it['ch'])
                 if sig not in seen or att == 39: break
             if sig in seen: rep['dup'].append(f'{key} 판 {v} = 앞 판과 같은 문항')
             seen.add(sig); vers.append(it)

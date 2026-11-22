@@ -25,7 +25,7 @@ def m2b(v, rng):
 def m3a(v, rng):
     A = pick(v, rng, [[1, 2], [3, 4]], lambda rr: rmat(rr, 2, 2, -3, 4)); B = pick(v, rng, [[2, 0], [1, 1]], lambda rr: rmat(rr, 2, 2, -3, 4)); C = pick(v, rng, [[-1, 1], [0, 2]], lambda rr: rmat(rr, 2, 2, -3, 4))
     S = madd(B, C); R = mmul(A, S)
-    return number(f'A = {M(A)}, B = {M(B)}, C = {M(C)} 일 때, AB + AC 의 (1, 1) 성분은?{NOTE}', R[0][0], f'AB + AC = A(B + C). B + C = {M(S)} 를 먼저 구해 한 번만 곱한다.', chk=lambda: madd(mmul(A, B), mmul(A, C)) == R)
+    return number(f'A = {M(A)}, B = {M(B)}, C = {M(C)} 일 때, AB + AC 의 (1, 1) 성분은?{NOTE}', R[0][0], f'AB + AC = A(B + C). B + C = {M(S)} — 이것을 먼저 구해 한 번만 곱한다.', chk=lambda: madd(mmul(A, B), mmul(A, C)) == R)
 def m3b(v, rng):
     k = pick(v, rng, 0, lambda rr: rr.randrange(8))
     qs = [('(A + B)² = A² + 2AB + B²', False, '(A + B)² = A² + AB + BA + B². AB 와 BA 가 다를 수 있어 2AB 로 묶지 못한다.'),
