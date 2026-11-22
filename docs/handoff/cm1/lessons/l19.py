@@ -31,7 +31,7 @@ def m3b(v, rng):
     a, b, s = ps(v, rng); x0 = (b - a) // 2
     return number(f'{s} 하루 수입은 1000({a} + x)({b} − x) 원이다. 수입이 최대가 되는 x 의 값은?', x0, f'({a} + x)({b} − x) = −x² + {b-a}x + {a*b} → 꼭짓점 x = {x0}.', chk=lambda: max(range(0, b), key=lambda x: (a + x) * (b - x)) == x0)
 # 산: 직각삼각형 안의 직사각형 (중단원 수준)
-def TR(v, rng): return pick(v, rng, (4, 2), lambda r: (2 * ri(r, 2, 6), ri(r, 1, 4)))   # 밑변 a, 높이 b = m·a
+def TR(v, rng): return pick(v, rng, (4, 2), lambda r: (2 * ri(r, 2, 6), ri(r, 2, 4)))   # 밑변 a, 높이 b = m·a
 def ts(v, rng):
     a, m = TR(v, random.Random(rng.random() if v else 1)); b = m * a
     return a, m, b, f'직각을 낀 두 변의 길이가 {a}, {b} 인 직각삼각형 안에, 직각을 한 꼭짓점으로 하고 맞은편 꼭짓점이 빗변 위에 있는 직사각형을 그린다. 길이가 {a} 인 변 위의 직사각형의 변의 길이를 x 라 할 때,'
