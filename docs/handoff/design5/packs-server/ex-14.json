@@ -1,0 +1,2329 @@
+{
+ "id": "ex-14",
+ "no": 14,
+ "v": 2,
+ "title": "함수",
+ "unit": "공통수학2 Ⅲ. 함수와 그래프 1. 함수 01. 함수",
+ "goal": "① 함수의 뜻을 알고 정의역 · 공역 · 치역을 구할 수 있다. ② 두 함수가 서로 같을 조건을 안다.",
+ "theme": "04-mine",
+ "defaultPct": 90,
+ "source": {
+  "file": "upload"
+ },
+ "next": {
+  "title": "15차시 · 함수의 그래프",
+  "ask": "함숫값의 순서쌍 (x, f(x)) 를 좌표평면에 점으로 찍으면?",
+  "link": "함수를 그림으로 보는 법"
+ },
+ "imgCells": [
+  "review",
+  "c1",
+  "c2",
+  "m1",
+  "c3",
+  "m2",
+  "c4",
+  "m3",
+  "recap",
+  "sum"
+ ],
+ "videos": {
+  "c1": "video/v14-58.mp4",
+  "c2": "video/v14-59.mp4",
+  "c3": "video/v14-60.mp4",
+  "c4": "video/v14-61.mp4"
+ },
+ "steps": [
+  {
+   "id": "intro",
+   "kind": "intro",
+   "img": "review",
+   "title": "도입 · 🔁 전시 확인 · 생각 열기",
+   "say": "🔁 전시 확인: ① 모든 실수를 넣어도 항상 성립하는 부등식 = (절대부등식) ② a > 0, b > 0 → a + b ≥ (2√(ab))\n🔍 생각 열기: 대한민국→원 · 독일→유로 · 프랑스→유로 · 미국→달러 · 파운드는 화살표를 받지 않음 → 나라마다 화폐가 꼭 하나"
+  },
+  {
+   "id": "c1",
+   "kind": "concept",
+   "title": "STEP 1 · 함수",
+   "say": "낱말 상자 [ 대응 · 오직 하나 · 함수 ]\nX 의 원소에 Y 의 원소를 짝 지어 주는 것 = (대응)\nX 의 각 원소에 Y 의 원소가 (오직 하나)씩 대응 → X 에서 Y 로의 (함수) f : X → Y",
+   "check": {
+    "type": "ox",
+    "q": "X 의 원소 하나에 Y 의 원소 두 개가 대응해도 함수이다.",
+    "a": false,
+    "why": "함수는 X 의 원소마다 Y 의 원소가 「오직 하나」씩 대응해야 해요."
+   }
+  },
+  {
+   "id": "c2",
+   "kind": "concept",
+   "title": "STEP 2 · 정의역 · 공역 · 치역",
+   "say": "낱말 상자 [ 정의역 · 공역 · 치역 · 함숫값 ]\nf : X → Y 에서 X = (정의역) · Y = (공역) · f(x) = x 의 (함숫값) · {f(x) | x ∈ X} = (치역) ⊂ 공역\n보기) 1→b, 2→a, 3→b, 4→d → 치역 {a, b, d}"
+  },
+  {
+   "id": "m1",
+   "kind": "monster",
+   "title": "몬스터 1 짝 잃은 열쇠"
+  },
+  {
+   "id": "c3",
+   "kind": "concept",
+   "title": "STEP 3 · 정의역 · 공역이 주어지지 않을 때",
+   "say": "정의역 = 함수가 정의되는 (실수) 전체 · 공역 = (실수) 전체\n보기) y = x² − 1 : 정의역 {x | x 는 실수} · 치역 {y | y ≥ −1} · y = 1/x : 정의역 {x | x ≠ 0}"
+  },
+  {
+   "id": "m2",
+   "kind": "monster",
+   "title": "몬스터 2 정의역 문지기"
+  },
+  {
+   "id": "c4",
+   "kind": "concept",
+   "title": "STEP 4 · 서로 같은 함수",
+   "say": "낱말 상자 [ 정의역 · 모든 · 같다 ]\n(정의역)의 (모든) 원소 x 에 대하여 f(x) = g(x) → f 와 g 는 서로 (같다) · f = g\n탐구) 정의역 {−1, 0, 1} · f(x) = |2x| 와 g(x) = 2x² → 2, 0, 2 로 같다 → f = g",
+   "check": {
+    "type": "choice",
+    "q": "정의역이 {−1, 0, 1} 인 f(x) = |2x| 와 g(x) = 2x² 는?",
+    "ch": [
+     "서로 같은 함수이다",
+     "식이 달라서 같은 함수가 아니다"
+    ],
+    "a": 0,
+    "why": "f(−1) = g(−1) = 2 · f(0) = g(0) = 0 · f(1) = g(1) = 2 → 식이 달라도 같은 함수"
+   }
+  },
+  {
+   "id": "m3",
+   "kind": "monster",
+   "title": "몬스터 3 대응 사슬 기사 · ⚔ 소레이드"
+  },
+  {
+   "id": "recap",
+   "kind": "concept",
+   "title": "📝 오늘 정리",
+   "say": "함수 : X 의 각 원소에 Y 의 원소가 오직 하나씩 대응\n정의역 X · 공역 Y · 치역 {f(x) | x ∈ X} ⊂ 공역\nf = g : 정의역이 같고, 모든 원소 x 에서 f(x) = g(x)"
+  },
+  {
+   "id": "sum",
+   "kind": "boss",
+   "title": "👑 14차시 형성평가 · 대응의 사슬 군주"
+  }
+ ],
+ "monsters": {
+  "m1": {
+   "title": "몬스터 1 짝 잃은 열쇠",
+   "sprite": "keyvault1:0",
+   "attack": "pause",
+   "first": [
+    {
+     "type": "choice",
+     "question": "문제 1) X = {1, 2, 3, 4} 에서 Y = {a, b, c, d} 로의 대응\n(1) 1→c, 2→a, 4→b\n이 대응은?",
+     "choices": [
+      "함수이다",
+      "함수가 아니다 — X 의 원소 3 에 대응하는 Y 의 원소가 2개이다",
+      "함수가 아니다 — X 의 원소 3 에 대응하는 Y 의 원소가 없다"
+     ],
+     "answerIndex": 2,
+     "solution": "X 의 원소 3 에서 나가는 화살표가 없다"
+    },
+    {
+     "type": "choice",
+     "question": "문제 1) X = {1, 2, 3, 4} 에서 Y = {a, b, c, d} 로의 대응\n(2) 1→c, 2→d, 3→a, 4→c\n이 대응은?",
+     "choices": [
+      "함수이다",
+      "함수가 아니다 — X 의 원소 1 에 대응하는 Y 의 원소가 2개이다",
+      "함수가 아니다 — X 의 원소 1 에 대응하는 Y 의 원소가 없다"
+     ],
+     "answerIndex": 0,
+     "solution": "X 의 원소마다 Y 의 원소가 오직 하나씩 → 함수"
+    },
+    {
+     "type": "choice",
+     "question": "문제 1) X = {1, 2, 3, 4} 에서 Y = {a, b, c, d} 로의 대응\n(3) 1→c, 2→a, 3→b, 4→b, 4→d\n이 대응은?",
+     "choices": [
+      "함수가 아니다 — X 의 원소 4 에 대응하는 Y 의 원소가 없다",
+      "함수가 아니다 — X 의 원소 4 에 대응하는 Y 의 원소가 2개이다",
+      "함수이다"
+     ],
+     "answerIndex": 1,
+     "solution": "X 의 원소 4 에서 나가는 화살표가 2개다"
+    },
+    {
+     "type": "choice",
+     "question": "문제 1) X = {1, 2, 3, 4} 에서 Y = {a, b, c, d} 로의 함수 1→c, 2→d, 3→a, 4→c 의 공역은?",
+     "choices": [
+      "{a, b, c, d}",
+      "{a, c, d}",
+      "{1, 2, 3, 4}"
+     ],
+     "answerIndex": 0,
+     "solution": "공역 = Y 전체 = {a, b, c, d} (치역과 다름)"
+    },
+    {
+     "type": "multi",
+     "question": "문제 1) X = {1, 2, 3, 4} 에서 Y = {a, b, c, d} 로의 함수 1→c, 2→d, 3→a, 4→c 의 치역의 원소를 모두 고르시오.",
+     "options": [
+      "a",
+      "b",
+      "c",
+      "d"
+     ],
+     "answer": [
+      0,
+      2,
+      3
+     ],
+     "solution": "치역 = 화살표를 받은 원소 = {a, c, d}"
+    }
+   ],
+   "retry": {
+    "pool": [
+     [
+      {
+       "type": "choice",
+       "question": "문제 1) X = {1, 2, 3, 4} 에서 Y = {a, b, c, d} 로의 대응\n(1) 1→a, 2→c, 3→d, 4→a\n이 대응은?",
+       "choices": [
+        "함수이다",
+        "함수가 아니다 — X 의 원소 1 에 대응하는 Y 의 원소가 2개이다",
+        "함수가 아니다 — X 의 원소 1 에 대응하는 Y 의 원소가 없다"
+       ],
+       "answerIndex": 0,
+       "solution": "X 의 원소마다 Y 의 원소가 오직 하나씩 → 함수"
+      },
+      {
+       "type": "choice",
+       "question": "문제 1) X = {1, 2, 3, 4} 에서 Y = {a, b, c, d} 로의 대응\n(2) 1→b, 3→a, 4→d\n이 대응은?",
+       "choices": [
+        "함수가 아니다 — X 의 원소 2 에 대응하는 Y 의 원소가 없다",
+        "함수이다",
+        "함수가 아니다 — X 의 원소 2 에 대응하는 Y 의 원소가 2개이다"
+       ],
+       "answerIndex": 0,
+       "solution": "X 의 원소 2 에서 나가는 화살표가 없다"
+      },
+      {
+       "type": "choice",
+       "question": "문제 1) X = {1, 2, 3, 4} 에서 Y = {a, b, c, d} 로의 대응\n(3) 1→a, 1→b, 2→c, 3→c, 4→d\n이 대응은?",
+       "choices": [
+        "함수가 아니다 — X 의 원소 1 에 대응하는 Y 의 원소가 없다",
+        "함수가 아니다 — X 의 원소 1 에 대응하는 Y 의 원소가 2개이다",
+        "함수이다"
+       ],
+       "answerIndex": 1,
+       "solution": "X 의 원소 1 에서 나가는 화살표가 2개다"
+      },
+      {
+       "type": "choice",
+       "question": "문제 1) X = {1, 2, 3, 4} 에서 Y = {a, b, c, d} 로의 함수 1→a, 2→c, 3→d, 4→a 의 공역은?",
+       "choices": [
+        "{1, 2, 3, 4}",
+        "{a, b, c, d}",
+        "{a, c, d}"
+       ],
+       "answerIndex": 1,
+       "solution": "공역 = Y 전체 = {a, b, c, d} (치역과 다름)"
+      },
+      {
+       "type": "multi",
+       "question": "문제 1) X = {1, 2, 3, 4} 에서 Y = {a, b, c, d} 로의 함수 1→a, 2→c, 3→d, 4→a 의 치역의 원소를 모두 고르시오.",
+       "options": [
+        "a",
+        "b",
+        "c",
+        "d"
+       ],
+       "answer": [
+        0,
+        2,
+        3
+       ],
+       "solution": "치역 = 화살표를 받은 원소 = {a, c, d}"
+      }
+     ],
+     [
+      {
+       "type": "choice",
+       "question": "문제 1) X = {1, 2, 3, 4} 에서 Y = {a, b, c, d} 로의 대응\n(1) 1→d, 2→d, 3→b, 4→c, 3→a\n이 대응은?",
+       "choices": [
+        "함수가 아니다 — X 의 원소 3 에 대응하는 Y 의 원소가 2개이다",
+        "함수가 아니다 — X 의 원소 3 에 대응하는 Y 의 원소가 없다",
+        "함수이다"
+       ],
+       "answerIndex": 0,
+       "solution": "X 의 원소 3 에서 나가는 화살표가 2개다"
+      },
+      {
+       "type": "choice",
+       "question": "문제 1) X = {1, 2, 3, 4} 에서 Y = {a, b, c, d} 로의 대응\n(2) 1→b, 2→b, 3→d, 4→a\n이 대응은?",
+       "choices": [
+        "함수이다",
+        "함수가 아니다 — X 의 원소 1 에 대응하는 Y 의 원소가 2개이다",
+        "함수가 아니다 — X 의 원소 1 에 대응하는 Y 의 원소가 없다"
+       ],
+       "answerIndex": 0,
+       "solution": "X 의 원소마다 Y 의 원소가 오직 하나씩 → 함수"
+      },
+      {
+       "type": "choice",
+       "question": "문제 1) X = {1, 2, 3, 4} 에서 Y = {a, b, c, d} 로의 대응\n(3) 2→a, 3→c, 4→b\n이 대응은?",
+       "choices": [
+        "함수이다",
+        "함수가 아니다 — X 의 원소 1 에 대응하는 Y 의 원소가 없다",
+        "함수가 아니다 — X 의 원소 1 에 대응하는 Y 의 원소가 2개이다"
+       ],
+       "answerIndex": 1,
+       "solution": "X 의 원소 1 에서 나가는 화살표가 없다"
+      },
+      {
+       "type": "choice",
+       "question": "문제 1) X = {1, 2, 3, 4} 에서 Y = {a, b, c, d} 로의 함수 1→b, 2→b, 3→d, 4→a 의 공역은?",
+       "choices": [
+        "{1, 2, 3, 4}",
+        "{a, b, d}",
+        "{a, b, c, d}"
+       ],
+       "answerIndex": 2,
+       "solution": "공역 = Y 전체 = {a, b, c, d} (치역과 다름)"
+      },
+      {
+       "type": "multi",
+       "question": "문제 1) X = {1, 2, 3, 4} 에서 Y = {a, b, c, d} 로의 함수 1→b, 2→b, 3→d, 4→a 의 치역의 원소를 모두 고르시오.",
+       "options": [
+        "a",
+        "b",
+        "c",
+        "d"
+       ],
+       "answer": [
+        0,
+        1,
+        3
+       ],
+       "solution": "치역 = 화살표를 받은 원소 = {a, b, d}"
+      }
+     ],
+     [
+      {
+       "type": "choice",
+       "question": "문제 1) X = {1, 2, 3, 4} 에서 Y = {a, b, c, d} 로의 대응\n(1) 2→b, 3→a, 4→d\n이 대응은?",
+       "choices": [
+        "함수이다",
+        "함수가 아니다 — X 의 원소 1 에 대응하는 Y 의 원소가 2개이다",
+        "함수가 아니다 — X 의 원소 1 에 대응하는 Y 의 원소가 없다"
+       ],
+       "answerIndex": 2,
+       "solution": "X 의 원소 1 에서 나가는 화살표가 없다"
+      },
+      {
+       "type": "choice",
+       "question": "문제 1) X = {1, 2, 3, 4} 에서 Y = {a, b, c, d} 로의 대응\n(2) 1→c, 2→c, 2→a, 3→b, 4→d\n이 대응은?",
+       "choices": [
+        "함수이다",
+        "함수가 아니다 — X 의 원소 2 에 대응하는 Y 의 원소가 2개이다",
+        "함수가 아니다 — X 의 원소 2 에 대응하는 Y 의 원소가 없다"
+       ],
+       "answerIndex": 1,
+       "solution": "X 의 원소 2 에서 나가는 화살표가 2개다"
+      },
+      {
+       "type": "choice",
+       "question": "문제 1) X = {1, 2, 3, 4} 에서 Y = {a, b, c, d} 로의 대응\n(3) 1→a, 2→b, 3→b, 4→a\n이 대응은?",
+       "choices": [
+        "함수가 아니다 — X 의 원소 1 에 대응하는 Y 의 원소가 2개이다",
+        "함수가 아니다 — X 의 원소 1 에 대응하는 Y 의 원소가 없다",
+        "함수이다"
+       ],
+       "answerIndex": 2,
+       "solution": "X 의 원소마다 Y 의 원소가 오직 하나씩 → 함수"
+      },
+      {
+       "type": "choice",
+       "question": "문제 1) X = {1, 2, 3, 4} 에서 Y = {a, b, c, d} 로의 함수 1→a, 2→b, 3→b, 4→a 의 공역은?",
+       "choices": [
+        "{a, b}",
+        "{1, 2, 3, 4}",
+        "{a, b, c, d}"
+       ],
+       "answerIndex": 2,
+       "solution": "공역 = Y 전체 = {a, b, c, d} (치역과 다름)"
+      },
+      {
+       "type": "multi",
+       "question": "문제 1) X = {1, 2, 3, 4} 에서 Y = {a, b, c, d} 로의 함수 1→a, 2→b, 3→b, 4→a 의 치역의 원소를 모두 고르시오.",
+       "options": [
+        "a",
+        "b",
+        "c",
+        "d"
+       ],
+       "answer": [
+        0,
+        1
+       ],
+       "solution": "치역 = 화살표를 받은 원소 = {a, b}"
+      }
+     ],
+     [
+      {
+       "type": "choice",
+       "question": "문제 1) X = {1, 2, 3, 4} 에서 Y = {a, b, c, d} 로의 대응\n(1) 2→a, 3→c, 4→d\n이 대응은?",
+       "choices": [
+        "함수가 아니다 — X 의 원소 1 에 대응하는 Y 의 원소가 없다",
+        "함수이다",
+        "함수가 아니다 — X 의 원소 1 에 대응하는 Y 의 원소가 2개이다"
+       ],
+       "answerIndex": 0,
+       "solution": "X 의 원소 1 에서 나가는 화살표가 없다"
+      },
+      {
+       "type": "choice",
+       "question": "문제 1) X = {1, 2, 3, 4} 에서 Y = {a, b, c, d} 로의 대응\n(2) 1→d, 2→a, 2→c, 3→b, 4→b\n이 대응은?",
+       "choices": [
+        "함수가 아니다 — X 의 원소 2 에 대응하는 Y 의 원소가 없다",
+        "함수이다",
+        "함수가 아니다 — X 의 원소 2 에 대응하는 Y 의 원소가 2개이다"
+       ],
+       "answerIndex": 2,
+       "solution": "X 의 원소 2 에서 나가는 화살표가 2개다"
+      },
+      {
+       "type": "choice",
+       "question": "문제 1) X = {1, 2, 3, 4} 에서 Y = {a, b, c, d} 로의 대응\n(3) 1→b, 2→d, 3→b, 4→c\n이 대응은?",
+       "choices": [
+        "함수이다",
+        "함수가 아니다 — X 의 원소 1 에 대응하는 Y 의 원소가 2개이다",
+        "함수가 아니다 — X 의 원소 1 에 대응하는 Y 의 원소가 없다"
+       ],
+       "answerIndex": 0,
+       "solution": "X 의 원소마다 Y 의 원소가 오직 하나씩 → 함수"
+      },
+      {
+       "type": "choice",
+       "question": "문제 1) X = {1, 2, 3, 4} 에서 Y = {a, b, c, d} 로의 함수 1→b, 2→d, 3→b, 4→c 의 공역은?",
+       "choices": [
+        "{1, 2, 3, 4}",
+        "{a, b, c, d}",
+        "{b, c, d}"
+       ],
+       "answerIndex": 1,
+       "solution": "공역 = Y 전체 = {a, b, c, d} (치역과 다름)"
+      },
+      {
+       "type": "multi",
+       "question": "문제 1) X = {1, 2, 3, 4} 에서 Y = {a, b, c, d} 로의 함수 1→b, 2→d, 3→b, 4→c 의 치역의 원소를 모두 고르시오.",
+       "options": [
+        "a",
+        "b",
+        "c",
+        "d"
+       ],
+       "answer": [
+        1,
+        2,
+        3
+       ],
+       "solution": "치역 = 화살표를 받은 원소 = {b, c, d}"
+      }
+     ],
+     [
+      {
+       "type": "choice",
+       "question": "문제 1) X = {1, 2, 3, 4} 에서 Y = {a, b, c, d} 로의 대응\n(1) 1→a, 2→d, 3→b, 3→c, 4→a\n이 대응은?",
+       "choices": [
+        "함수가 아니다 — X 의 원소 3 에 대응하는 Y 의 원소가 없다",
+        "함수이다",
+        "함수가 아니다 — X 의 원소 3 에 대응하는 Y 의 원소가 2개이다"
+       ],
+       "answerIndex": 2,
+       "solution": "X 의 원소 3 에서 나가는 화살표가 2개다"
+      },
+      {
+       "type": "choice",
+       "question": "문제 1) X = {1, 2, 3, 4} 에서 Y = {a, b, c, d} 로의 대응\n(2) 1→d, 2→b, 3→a, 4→d\n이 대응은?",
+       "choices": [
+        "함수가 아니다 — X 의 원소 1 에 대응하는 Y 의 원소가 없다",
+        "함수가 아니다 — X 의 원소 1 에 대응하는 Y 의 원소가 2개이다",
+        "함수이다"
+       ],
+       "answerIndex": 2,
+       "solution": "X 의 원소마다 Y 의 원소가 오직 하나씩 → 함수"
+      },
+      {
+       "type": "choice",
+       "question": "문제 1) X = {1, 2, 3, 4} 에서 Y = {a, b, c, d} 로의 대응\n(3) 1→b, 2→b, 3→d\n이 대응은?",
+       "choices": [
+        "함수가 아니다 — X 의 원소 4 에 대응하는 Y 의 원소가 없다",
+        "함수이다",
+        "함수가 아니다 — X 의 원소 4 에 대응하는 Y 의 원소가 2개이다"
+       ],
+       "answerIndex": 0,
+       "solution": "X 의 원소 4 에서 나가는 화살표가 없다"
+      },
+      {
+       "type": "choice",
+       "question": "문제 1) X = {1, 2, 3, 4} 에서 Y = {a, b, c, d} 로의 함수 1→d, 2→b, 3→a, 4→d 의 공역은?",
+       "choices": [
+        "{a, b, d}",
+        "{1, 2, 3, 4}",
+        "{a, b, c, d}"
+       ],
+       "answerIndex": 2,
+       "solution": "공역 = Y 전체 = {a, b, c, d} (치역과 다름)"
+      },
+      {
+       "type": "multi",
+       "question": "문제 1) X = {1, 2, 3, 4} 에서 Y = {a, b, c, d} 로의 함수 1→d, 2→b, 3→a, 4→d 의 치역의 원소를 모두 고르시오.",
+       "options": [
+        "a",
+        "b",
+        "c",
+        "d"
+       ],
+       "answer": [
+        0,
+        1,
+        3
+       ],
+       "solution": "치역 = 화살표를 받은 원소 = {a, b, d}"
+      }
+     ],
+     [
+      {
+       "type": "choice",
+       "question": "문제 1) X = {1, 2, 3, 4} 에서 Y = {a, b, c, d} 로의 대응\n(1) 1→a, 2→c, 3→c, 4→a\n이 대응은?",
+       "choices": [
+        "함수이다",
+        "함수가 아니다 — X 의 원소 1 에 대응하는 Y 의 원소가 2개이다",
+        "함수가 아니다 — X 의 원소 1 에 대응하는 Y 의 원소가 없다"
+       ],
+       "answerIndex": 0,
+       "solution": "X 의 원소마다 Y 의 원소가 오직 하나씩 → 함수"
+      },
+      {
+       "type": "choice",
+       "question": "문제 1) X = {1, 2, 3, 4} 에서 Y = {a, b, c, d} 로의 대응\n(2) 1→b, 2→c, 3→d, 4→a, 4→c\n이 대응은?",
+       "choices": [
+        "함수이다",
+        "함수가 아니다 — X 의 원소 4 에 대응하는 Y 의 원소가 없다",
+        "함수가 아니다 — X 의 원소 4 에 대응하는 Y 의 원소가 2개이다"
+       ],
+       "answerIndex": 2,
+       "solution": "X 의 원소 4 에서 나가는 화살표가 2개다"
+      },
+      {
+       "type": "choice",
+       "question": "문제 1) X = {1, 2, 3, 4} 에서 Y = {a, b, c, d} 로의 대응\n(3) 1→d, 3→a, 4→b\n이 대응은?",
+       "choices": [
+        "함수가 아니다 — X 의 원소 2 에 대응하는 Y 의 원소가 없다",
+        "함수이다",
+        "함수가 아니다 — X 의 원소 2 에 대응하는 Y 의 원소가 2개이다"
+       ],
+       "answerIndex": 0,
+       "solution": "X 의 원소 2 에서 나가는 화살표가 없다"
+      },
+      {
+       "type": "choice",
+       "question": "문제 1) X = {1, 2, 3, 4} 에서 Y = {a, b, c, d} 로의 함수 1→a, 2→c, 3→c, 4→a 의 공역은?",
+       "choices": [
+        "{1, 2, 3, 4}",
+        "{a, b, c, d}",
+        "{a, c}"
+       ],
+       "answerIndex": 1,
+       "solution": "공역 = Y 전체 = {a, b, c, d} (치역과 다름)"
+      },
+      {
+       "type": "multi",
+       "question": "문제 1) X = {1, 2, 3, 4} 에서 Y = {a, b, c, d} 로의 함수 1→a, 2→c, 3→c, 4→a 의 치역의 원소를 모두 고르시오.",
+       "options": [
+        "a",
+        "b",
+        "c",
+        "d"
+       ],
+       "answer": [
+        0,
+        2
+       ],
+       "solution": "치역 = 화살표를 받은 원소 = {a, c}"
+      }
+     ]
+    ]
+   },
+   "help": {
+    "concept": "X 의 원소마다 화살표가 꼭 하나씩 나가야 함수예요. 없거나 둘이면 함수가 아니에요.",
+    "example": {
+     "q": "X = {1, 2, 3} 에서 Y = {p, q} 로 1→p, 2→p, 3→q 는 함수일까?",
+     "sol": [
+      "1, 2, 3 에서 화살표가 하나씩 나간다",
+      "같은 p 로 두 화살표가 가도 괜찮다",
+      "그러므로 함수이고 치역은 {p, q}"
+     ]
+    },
+    "first": "원소 1 에서 나가는 화살표 수 = □"
+   }
+  },
+  "m2": {
+   "title": "몬스터 2 정의역 문지기",
+   "sprite": "keyvault3:0",
+   "attack": "pause",
+   "first": [
+    {
+     "type": "choice",
+     "question": "문제 2) (1) y = 2x + 1 의 정의역은?",
+     "choices": [
+      "{x | x ≠ 0}",
+      "{x | x 는 실수}",
+      "{x | x ≥ 0}"
+     ],
+     "answerIndex": 1,
+     "solution": "정의역이 없으면 함수가 정의되는 실수 전체"
+    },
+    {
+     "type": "choice",
+     "question": "문제 2) (1) y = 2x + 1 의 치역은?",
+     "choices": [
+      "{y | y 는 실수}",
+      "{y | y > 0}",
+      "{y | y ≥ 1}"
+     ],
+     "answerIndex": 0,
+     "solution": "x 가 실수 전체를 움직이면 y 도 실수 전체"
+    },
+    {
+     "type": "choice",
+     "question": "문제 2) (2) y = −x² + 3 의 정의역은?",
+     "choices": [
+      "{x | x 는 실수}",
+      "{x | x ≥ 0}",
+      "{x | x ≤ 3}"
+     ],
+     "answerIndex": 0,
+     "solution": "정의역이 없으면 실수 전체"
+    },
+    {
+     "type": "choice",
+     "question": "문제 2) (2) y = −x² + 3 의 치역은?",
+     "choices": [
+      "{y | y ≥ 3}",
+      "{y | y ≤ 3}",
+      "{y | y 는 실수}"
+     ],
+     "answerIndex": 1,
+     "solution": "−x² ≤ 0 이므로 y ≤ 3 (x = 0 일 때 가장 큼)"
+    }
+   ],
+   "retry": {
+    "pool": [
+     [
+      {
+       "type": "choice",
+       "question": "문제 2) (1) y = 3x − 2 의 정의역은?",
+       "choices": [
+        "{x | x ≥ 0}",
+        "{x | x 는 실수}",
+        "{x | x ≠ 0}"
+       ],
+       "answerIndex": 1,
+       "solution": "정의역이 없으면 함수가 정의되는 실수 전체"
+      },
+      {
+       "type": "choice",
+       "question": "문제 2) (1) y = 3x − 2 의 치역은?",
+       "choices": [
+        "{y | y 는 실수}",
+        "{y | y ≥ −2}",
+        "{y | y > 0}"
+       ],
+       "answerIndex": 0,
+       "solution": "x 가 실수 전체를 움직이면 y 도 실수 전체"
+      },
+      {
+       "type": "choice",
+       "question": "문제 2) (2) y = −x² + 5 의 정의역은?",
+       "choices": [
+        "{x | x ≥ 0}",
+        "{x | x ≤ 5}",
+        "{x | x 는 실수}"
+       ],
+       "answerIndex": 2,
+       "solution": "정의역이 없으면 실수 전체"
+      },
+      {
+       "type": "choice",
+       "question": "문제 2) (2) y = −x² + 5 의 치역은?",
+       "choices": [
+        "{y | y ≤ 5}",
+        "{y | y ≥ 5}",
+        "{y | y 는 실수}"
+       ],
+       "answerIndex": 0,
+       "solution": "−x² ≤ 0 이므로 y ≤ 5 (x = 0 일 때 가장 큼)"
+      }
+     ],
+     [
+      {
+       "type": "choice",
+       "question": "문제 2) (1) y = −2x + 4 의 정의역은?",
+       "choices": [
+        "{x | x ≥ 0}",
+        "{x | x 는 실수}",
+        "{x | x ≠ 0}"
+       ],
+       "answerIndex": 1,
+       "solution": "정의역이 없으면 함수가 정의되는 실수 전체"
+      },
+      {
+       "type": "choice",
+       "question": "문제 2) (1) y = −2x + 4 의 치역은?",
+       "choices": [
+        "{y | y 는 실수}",
+        "{y | y > 0}",
+        "{y | y ≥ 4}"
+       ],
+       "answerIndex": 0,
+       "solution": "x 가 실수 전체를 움직이면 y 도 실수 전체"
+      },
+      {
+       "type": "choice",
+       "question": "문제 2) (2) y = −x² + 1 의 정의역은?",
+       "choices": [
+        "{x | x ≥ 0}",
+        "{x | x 는 실수}",
+        "{x | x ≤ 1}"
+       ],
+       "answerIndex": 1,
+       "solution": "정의역이 없으면 실수 전체"
+      },
+      {
+       "type": "choice",
+       "question": "문제 2) (2) y = −x² + 1 의 치역은?",
+       "choices": [
+        "{y | y ≤ 1}",
+        "{y | y 는 실수}",
+        "{y | y ≥ 1}"
+       ],
+       "answerIndex": 0,
+       "solution": "−x² ≤ 0 이므로 y ≤ 1 (x = 0 일 때 가장 큼)"
+      }
+     ],
+     [
+      {
+       "type": "choice",
+       "question": "문제 2) (1) y = 4x + 3 의 정의역은?",
+       "choices": [
+        "{x | x 는 실수}",
+        "{x | x ≥ 0}",
+        "{x | x ≠ 0}"
+       ],
+       "answerIndex": 0,
+       "solution": "정의역이 없으면 함수가 정의되는 실수 전체"
+      },
+      {
+       "type": "choice",
+       "question": "문제 2) (1) y = 4x + 3 의 치역은?",
+       "choices": [
+        "{y | y ≥ 3}",
+        "{y | y > 0}",
+        "{y | y 는 실수}"
+       ],
+       "answerIndex": 2,
+       "solution": "x 가 실수 전체를 움직이면 y 도 실수 전체"
+      },
+      {
+       "type": "choice",
+       "question": "문제 2) (2) y = −x² + 2 의 정의역은?",
+       "choices": [
+        "{x | x ≤ 2}",
+        "{x | x ≥ 0}",
+        "{x | x 는 실수}"
+       ],
+       "answerIndex": 2,
+       "solution": "정의역이 없으면 실수 전체"
+      },
+      {
+       "type": "choice",
+       "question": "문제 2) (2) y = −x² + 2 의 치역은?",
+       "choices": [
+        "{y | y 는 실수}",
+        "{y | y ≤ 2}",
+        "{y | y ≥ 2}"
+       ],
+       "answerIndex": 1,
+       "solution": "−x² ≤ 0 이므로 y ≤ 2 (x = 0 일 때 가장 큼)"
+      }
+     ],
+     [
+      {
+       "type": "choice",
+       "question": "문제 2) (1) y = −2x + 5 의 정의역은?",
+       "choices": [
+        "{x | x ≥ 0}",
+        "{x | x 는 실수}",
+        "{x | x ≠ 0}"
+       ],
+       "answerIndex": 1,
+       "solution": "정의역이 없으면 함수가 정의되는 실수 전체"
+      },
+      {
+       "type": "choice",
+       "question": "문제 2) (1) y = −2x + 5 의 치역은?",
+       "choices": [
+        "{y | y 는 실수}",
+        "{y | y > 0}",
+        "{y | y ≥ 5}"
+       ],
+       "answerIndex": 0,
+       "solution": "x 가 실수 전체를 움직이면 y 도 실수 전체"
+      },
+      {
+       "type": "choice",
+       "question": "문제 2) (2) y = x² − 4 의 정의역은?",
+       "choices": [
+        "{x | x ≤ −4}",
+        "{x | x 는 실수}",
+        "{x | x ≥ 0}"
+       ],
+       "answerIndex": 1,
+       "solution": "정의역이 없으면 실수 전체"
+      },
+      {
+       "type": "choice",
+       "question": "문제 2) (2) y = x² − 4 의 치역은?",
+       "choices": [
+        "{y | y 는 실수}",
+        "{y | y ≥ −4}",
+        "{y | y ≤ −4}"
+       ],
+       "answerIndex": 1,
+       "solution": "x² ≥ 0 이므로 y ≥ −4 (x = 0 일 때 가장 작음)"
+      }
+     ],
+     [
+      {
+       "type": "choice",
+       "question": "문제 2) (1) y = 4x + 3 의 정의역은?",
+       "choices": [
+        "{x | x 는 실수}",
+        "{x | x ≥ 0}",
+        "{x | x ≠ 0}"
+       ],
+       "answerIndex": 0,
+       "solution": "정의역이 없으면 함수가 정의되는 실수 전체"
+      },
+      {
+       "type": "choice",
+       "question": "문제 2) (1) y = 4x + 3 의 치역은?",
+       "choices": [
+        "{y | y ≥ 3}",
+        "{y | y 는 실수}",
+        "{y | y > 0}"
+       ],
+       "answerIndex": 1,
+       "solution": "x 가 실수 전체를 움직이면 y 도 실수 전체"
+      },
+      {
+       "type": "choice",
+       "question": "문제 2) (2) y = −x² + 7 의 정의역은?",
+       "choices": [
+        "{x | x 는 실수}",
+        "{x | x ≥ 0}",
+        "{x | x ≤ 7}"
+       ],
+       "answerIndex": 0,
+       "solution": "정의역이 없으면 실수 전체"
+      },
+      {
+       "type": "choice",
+       "question": "문제 2) (2) y = −x² + 7 의 치역은?",
+       "choices": [
+        "{y | y 는 실수}",
+        "{y | y ≥ 7}",
+        "{y | y ≤ 7}"
+       ],
+       "answerIndex": 2,
+       "solution": "−x² ≤ 0 이므로 y ≤ 7 (x = 0 일 때 가장 큼)"
+      }
+     ],
+     [
+      {
+       "type": "choice",
+       "question": "문제 2) (1) y = −3x − 1 의 정의역은?",
+       "choices": [
+        "{x | x 는 실수}",
+        "{x | x ≥ 0}",
+        "{x | x ≠ 0}"
+       ],
+       "answerIndex": 0,
+       "solution": "정의역이 없으면 함수가 정의되는 실수 전체"
+      },
+      {
+       "type": "choice",
+       "question": "문제 2) (1) y = −3x − 1 의 치역은?",
+       "choices": [
+        "{y | y 는 실수}",
+        "{y | y ≥ −1}",
+        "{y | y > 0}"
+       ],
+       "answerIndex": 0,
+       "solution": "x 가 실수 전체를 움직이면 y 도 실수 전체"
+      },
+      {
+       "type": "choice",
+       "question": "문제 2) (2) y = x² + 2 의 정의역은?",
+       "choices": [
+        "{x | x 는 실수}",
+        "{x | x ≤ 2}",
+        "{x | x ≥ 0}"
+       ],
+       "answerIndex": 0,
+       "solution": "정의역이 없으면 실수 전체"
+      },
+      {
+       "type": "choice",
+       "question": "문제 2) (2) y = x² + 2 의 치역은?",
+       "choices": [
+        "{y | y ≤ 2}",
+        "{y | y 는 실수}",
+        "{y | y ≥ 2}"
+       ],
+       "answerIndex": 2,
+       "solution": "x² ≥ 0 이므로 y ≥ 2 (x = 0 일 때 가장 작음)"
+      }
+     ]
+    ]
+   },
+   "help": {
+    "concept": "정의역이 없으면 실수 전체 · −x² 은 0 이하라서 −x² + r 은 r 이하예요.",
+    "example": {
+     "q": "y = −x² + 10 의 정의역과 치역은?",
+     "sol": [
+      "정의역이 없으므로 {x | x 는 실수}",
+      "−x² ≤ 0 이므로 −x² + 10 ≤ 10",
+      "치역은 {y | y ≤ 10}"
+     ]
+    },
+    "first": "−x² 의 가장 큰 값 = □"
+   }
+  },
+  "m3": {
+   "title": "몬스터 3 대응 사슬 기사 · ⚔ 소레이드",
+   "sprite": "keyvault2:0",
+   "attack": "pause",
+   "first": [
+    {
+     "type": "choice",
+     "question": "문제 3) 정의역이 {1, 2}인 두 함수 f(x) = x + a, g(x) = x² + bx + 5 에 대하여 f = g 일 때\nf = g 가 뜻하는 것은?",
+     "choices": [
+      "f(x) = g(x) 인 x 가 하나만 있으면 된다",
+      "두 함수의 식이 똑같다",
+      "f(1) = g(1), f(2) = g(2)"
+     ],
+     "answerIndex": 2,
+     "solution": "서로 같은 함수 = 정의역의 모든 원소에서 함숫값이 같다",
+     "say": "f = g 이므로 f(1) = g(1), f(2) = g(2) 이다."
+    },
+    {
+     "type": "choice",
+     "question": "문제 3) 정의역이 {1, 2}인 두 함수 f(x) = x + a, g(x) = x² + bx + 5 에 대하여 f = g 일 때\nf(1) = g(1) 을 식으로 쓰면?",
+     "choices": [
+      "1 + a = 6 + b",
+      "1 + a = 5 + b",
+      "a = 6 + b"
+     ],
+     "answerIndex": 0,
+     "solution": "f(1) = 1 + a · g(1) = 1 + b + 5",
+     "say": "f(1) = g(1) 에서 1 + a = 6 + b"
+    },
+    {
+     "type": "choice",
+     "question": "문제 3) 정의역이 {1, 2}인 두 함수 f(x) = x + a, g(x) = x² + bx + 5 에 대하여 f = g 일 때\nf(2) = g(2) 을 식으로 쓰면?",
+     "choices": [
+      "2 + a = 7 + 2b",
+      "2 + a = 4 + 2b",
+      "2 + a = 9 + 2b"
+     ],
+     "answerIndex": 2,
+     "solution": "f(2) = 2 + a · g(2) = 4 + 2b + 5",
+     "say": "f(2) = g(2) 에서 2 + a = 9 + 2b"
+    },
+    {
+     "type": "choice",
+     "question": "문제 3) 정의역이 {1, 2}인 두 함수 f(x) = x + a, g(x) = x² + bx + 5 에 대하여 f = g 일 때\n두 식을 빼서 구한 b 는?",
+     "choices": [
+      "b = −2",
+      "b = −1",
+      "b = 2"
+     ],
+     "answerIndex": 0,
+     "solution": "(뒤 식) − (앞 식) : 1 = 3 + b → b = −2",
+     "say": "두 식을 빼면 b = −2"
+    },
+    {
+     "type": "choice",
+     "question": "문제 3) 정의역이 {1, 2}인 두 함수 f(x) = x + a, g(x) = x² + bx + 5 에 대하여 f = g 일 때\n그러므로 a 와 b 는?",
+     "choices": [
+      "a = −2, b = 3",
+      "a = 3, b = −2",
+      "a = 3, b = 2"
+     ],
+     "answerIndex": 1,
+     "solution": "1 + a = 6 + b 에 b = −2 를 넣으면 a = 3",
+     "say": "그러므로 a = 3, b = −2 이다."
+    }
+   ],
+   "chain": {
+    "pool": [
+     [
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {1, 2}인 두 함수 f(x) = x + a, g(x) = x² + bx + 5 에 대하여 f = g 일 때\nf = g 가 뜻하는 것은?",
+       "choices": [
+        "f(x) = g(x) 인 x 가 하나만 있으면 된다",
+        "두 함수의 식이 똑같다",
+        "f(1) = g(1), f(2) = g(2)"
+       ],
+       "answerIndex": 2,
+       "solution": "서로 같은 함수 = 정의역의 모든 원소에서 함숫값이 같다",
+       "say": "f = g 이므로 f(1) = g(1), f(2) = g(2) 이다."
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {1, 2}인 두 함수 f(x) = x + a, g(x) = x² + bx + 5 에 대하여 f = g 일 때\nf(1) = g(1) 을 식으로 쓰면?",
+       "choices": [
+        "1 + a = 6 + b",
+        "1 + a = 5 + b",
+        "a = 6 + b"
+       ],
+       "answerIndex": 0,
+       "solution": "f(1) = 1 + a · g(1) = 1 + b + 5",
+       "say": "f(1) = g(1) 에서 1 + a = 6 + b"
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {1, 2}인 두 함수 f(x) = x + a, g(x) = x² + bx + 5 에 대하여 f = g 일 때\nf(2) = g(2) 을 식으로 쓰면?",
+       "choices": [
+        "2 + a = 7 + 2b",
+        "2 + a = 4 + 2b",
+        "2 + a = 9 + 2b"
+       ],
+       "answerIndex": 2,
+       "solution": "f(2) = 2 + a · g(2) = 4 + 2b + 5",
+       "say": "f(2) = g(2) 에서 2 + a = 9 + 2b"
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {1, 2}인 두 함수 f(x) = x + a, g(x) = x² + bx + 5 에 대하여 f = g 일 때\n두 식을 빼서 구한 b 는?",
+       "choices": [
+        "b = −2",
+        "b = −1",
+        "b = 2"
+       ],
+       "answerIndex": 0,
+       "solution": "(뒤 식) − (앞 식) : 1 = 3 + b → b = −2",
+       "say": "두 식을 빼면 b = −2"
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {1, 2}인 두 함수 f(x) = x + a, g(x) = x² + bx + 5 에 대하여 f = g 일 때\n그러므로 a 와 b 는?",
+       "choices": [
+        "a = −2, b = 3",
+        "a = 3, b = −2",
+        "a = 3, b = 2"
+       ],
+       "answerIndex": 1,
+       "solution": "1 + a = 6 + b 에 b = −2 를 넣으면 a = 3",
+       "say": "그러므로 a = 3, b = −2 이다."
+      }
+     ],
+     [
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {1, 3}인 두 함수 f(x) = x + a, g(x) = x² + bx + 2 에 대하여 f = g 일 때\nf = g 가 뜻하는 것은?",
+       "choices": [
+        "f(1) = g(1), f(3) = g(3)",
+        "f(x) = g(x) 인 x 가 하나만 있으면 된다",
+        "두 함수의 식이 똑같다"
+       ],
+       "answerIndex": 0,
+       "solution": "서로 같은 함수 = 정의역의 모든 원소에서 함숫값이 같다",
+       "say": "f = g 이므로 f(1) = g(1), f(3) = g(3) 이다."
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {1, 3}인 두 함수 f(x) = x + a, g(x) = x² + bx + 2 에 대하여 f = g 일 때\nf(1) = g(1) 을 식으로 쓰면?",
+       "choices": [
+        "1 + a = 3 + b",
+        "a = 3 + b",
+        "1 + a = 2 + b"
+       ],
+       "answerIndex": 0,
+       "solution": "f(1) = 1 + a · g(1) = 1 + b + 2",
+       "say": "f(1) = g(1) 에서 1 + a = 3 + b"
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {1, 3}인 두 함수 f(x) = x + a, g(x) = x² + bx + 2 에 대하여 f = g 일 때\nf(3) = g(3) 을 식으로 쓰면?",
+       "choices": [
+        "3 + a = 11 + 3b",
+        "3 + a = 9 + 3b",
+        "3 + a = 5 + 3b"
+       ],
+       "answerIndex": 0,
+       "solution": "f(3) = 3 + a · g(3) = 9 + 3b + 2",
+       "say": "f(3) = g(3) 에서 3 + a = 11 + 3b"
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {1, 3}인 두 함수 f(x) = x + a, g(x) = x² + bx + 2 에 대하여 f = g 일 때\n두 식을 빼서 구한 b 는?",
+       "choices": [
+        "b = −3",
+        "b = −2",
+        "b = 3"
+       ],
+       "answerIndex": 0,
+       "solution": "(뒤 식) − (앞 식) : 2 = 8 + 2b → b = −3",
+       "say": "두 식을 빼면 b = −3"
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {1, 3}인 두 함수 f(x) = x + a, g(x) = x² + bx + 2 에 대하여 f = g 일 때\n그러므로 a 와 b 는?",
+       "choices": [
+        "a = −3, b = −1",
+        "a = −1, b = −3",
+        "a = −1, b = 3"
+       ],
+       "answerIndex": 1,
+       "solution": "1 + a = 3 + b 에 b = −3 을 넣으면 a = −1",
+       "say": "그러므로 a = −1, b = −3 이다."
+      }
+     ],
+     [
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {1, 2}인 두 함수 f(x) = x + a, g(x) = x² + bx + 1 에 대하여 f = g 일 때\nf = g 가 뜻하는 것은?",
+       "choices": [
+        "f(1) = g(1), f(2) = g(2)",
+        "두 함수의 식이 똑같다",
+        "f(x) = g(x) 인 x 가 하나만 있으면 된다"
+       ],
+       "answerIndex": 0,
+       "solution": "서로 같은 함수 = 정의역의 모든 원소에서 함숫값이 같다",
+       "say": "f = g 이므로 f(1) = g(1), f(2) = g(2) 이다."
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {1, 2}인 두 함수 f(x) = x + a, g(x) = x² + bx + 1 에 대하여 f = g 일 때\nf(1) = g(1) 을 식으로 쓰면?",
+       "choices": [
+        "a = 2 + b",
+        "1 + a = 2 + b",
+        "1 + a = 1 + b"
+       ],
+       "answerIndex": 1,
+       "solution": "f(1) = 1 + a · g(1) = 1 + b + 1",
+       "say": "f(1) = g(1) 에서 1 + a = 2 + b"
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {1, 2}인 두 함수 f(x) = x + a, g(x) = x² + bx + 1 에 대하여 f = g 일 때\nf(2) = g(2) 을 식으로 쓰면?",
+       "choices": [
+        "2 + a = 5 + 2b",
+        "2 + a = 4 + 2b",
+        "2 + a = 3 + 2b"
+       ],
+       "answerIndex": 0,
+       "solution": "f(2) = 2 + a · g(2) = 4 + 2b + 1",
+       "say": "f(2) = g(2) 에서 2 + a = 5 + 2b"
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {1, 2}인 두 함수 f(x) = x + a, g(x) = x² + bx + 1 에 대하여 f = g 일 때\n두 식을 빼서 구한 b 는?",
+       "choices": [
+        "b = 2",
+        "b = −1",
+        "b = −2"
+       ],
+       "answerIndex": 2,
+       "solution": "(뒤 식) − (앞 식) : 1 = 3 + b → b = −2",
+       "say": "두 식을 빼면 b = −2"
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {1, 2}인 두 함수 f(x) = x + a, g(x) = x² + bx + 1 에 대하여 f = g 일 때\n그러므로 a 와 b 는?",
+       "choices": [
+        "a = −1, b = −2",
+        "a = −1, b = 2",
+        "a = −2, b = −1"
+       ],
+       "answerIndex": 0,
+       "solution": "1 + a = 2 + b 에 b = −2 를 넣으면 a = −1",
+       "say": "그러므로 a = −1, b = −2 이다."
+      }
+     ],
+     [
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {2, 3}인 두 함수 f(x) = x + a, g(x) = x² + bx + 4 에 대하여 f = g 일 때\nf = g 가 뜻하는 것은?",
+       "choices": [
+        "f(2) = g(2), f(3) = g(3)",
+        "f(x) = g(x) 인 x 가 하나만 있으면 된다",
+        "두 함수의 식이 똑같다"
+       ],
+       "answerIndex": 0,
+       "solution": "서로 같은 함수 = 정의역의 모든 원소에서 함숫값이 같다",
+       "say": "f = g 이므로 f(2) = g(2), f(3) = g(3) 이다."
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {2, 3}인 두 함수 f(x) = x + a, g(x) = x² + bx + 4 에 대하여 f = g 일 때\nf(2) = g(2) 을 식으로 쓰면?",
+       "choices": [
+        "a = 8 + 2b",
+        "2 + a = 4 + 2b",
+        "2 + a = 8 + 2b"
+       ],
+       "answerIndex": 2,
+       "solution": "f(2) = 2 + a · g(2) = 4 + 2b + 4",
+       "say": "f(2) = g(2) 에서 2 + a = 8 + 2b"
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {2, 3}인 두 함수 f(x) = x + a, g(x) = x² + bx + 4 에 대하여 f = g 일 때\nf(3) = g(3) 을 식으로 쓰면?",
+       "choices": [
+        "3 + a = 9 + 3b",
+        "3 + a = 13 + 3b",
+        "3 + a = 7 + 3b"
+       ],
+       "answerIndex": 1,
+       "solution": "f(3) = 3 + a · g(3) = 9 + 3b + 4",
+       "say": "f(3) = g(3) 에서 3 + a = 13 + 3b"
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {2, 3}인 두 함수 f(x) = x + a, g(x) = x² + bx + 4 에 대하여 f = g 일 때\n두 식을 빼서 구한 b 는?",
+       "choices": [
+        "b = −4",
+        "b = −3",
+        "b = 4"
+       ],
+       "answerIndex": 0,
+       "solution": "(뒤 식) − (앞 식) : 1 = 5 + b → b = −4",
+       "say": "두 식을 빼면 b = −4"
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {2, 3}인 두 함수 f(x) = x + a, g(x) = x² + bx + 4 에 대하여 f = g 일 때\n그러므로 a 와 b 는?",
+       "choices": [
+        "a = −2, b = −4",
+        "a = −2, b = 4",
+        "a = −4, b = −2"
+       ],
+       "answerIndex": 0,
+       "solution": "2 + a = 8 + 2b 에 b = −4 를 넣으면 a = −2",
+       "say": "그러므로 a = −2, b = −4 이다."
+      }
+     ],
+     [
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {2, 3}인 두 함수 f(x) = x + a, g(x) = x² + bx + 4 에 대하여 f = g 일 때\nf = g 가 뜻하는 것은?",
+       "choices": [
+        "f(2) = g(2), f(3) = g(3)",
+        "두 함수의 식이 똑같다",
+        "f(x) = g(x) 인 x 가 하나만 있으면 된다"
+       ],
+       "answerIndex": 0,
+       "solution": "서로 같은 함수 = 정의역의 모든 원소에서 함숫값이 같다",
+       "say": "f = g 이므로 f(2) = g(2), f(3) = g(3) 이다."
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {2, 3}인 두 함수 f(x) = x + a, g(x) = x² + bx + 4 에 대하여 f = g 일 때\nf(2) = g(2) 를 식으로 쓰면?",
+       "choices": [
+        "a = 8 + 2b",
+        "2 + a = 8 + 2b",
+        "2 + a = 4 + 2b"
+       ],
+       "answerIndex": 1,
+       "solution": "f(2) = 2 + a · g(2) = 4 + 2b + 4",
+       "say": "f(2) = g(2) 에서 2 + a = 8 + 2b"
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {2, 3}인 두 함수 f(x) = x + a, g(x) = x² + bx + 4 에 대하여 f = g 일 때\nf(3) = g(3) 를 식으로 쓰면?",
+       "choices": [
+        "3 + a = 9 + 3b",
+        "3 + a = 7 + 3b",
+        "3 + a = 13 + 3b"
+       ],
+       "answerIndex": 2,
+       "solution": "f(3) = 3 + a · g(3) = 9 + 3b + 4",
+       "say": "f(3) = g(3) 에서 3 + a = 13 + 3b"
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {2, 3}인 두 함수 f(x) = x + a, g(x) = x² + bx + 4 에 대하여 f = g 일 때\n두 식을 빼서 구한 b 는?",
+       "choices": [
+        "b = −4",
+        "b = 4",
+        "b = −3"
+       ],
+       "answerIndex": 0,
+       "solution": "(뒤 식) − (앞 식) : 1 = 5 + b → b = −4",
+       "say": "두 식을 빼면 b = −4"
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {2, 3}인 두 함수 f(x) = x + a, g(x) = x² + bx + 4 에 대하여 f = g 일 때\n그러므로 a 와 b 는?",
+       "choices": [
+        "a = −4, b = −2",
+        "a = −2, b = 4",
+        "a = −2, b = −4"
+       ],
+       "answerIndex": 2,
+       "solution": "2 + a = 8 + 2b 에 b = −4 를 넣으면 a = −2",
+       "say": "그러므로 a = −2, b = −4 이다."
+      }
+     ],
+     [
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {1, 4}인 두 함수 f(x) = x + a, g(x) = x² + bx + 3 에 대하여 f = g 일 때\nf = g 가 뜻하는 것은?",
+       "choices": [
+        "f(x) = g(x) 인 x 가 하나만 있으면 된다",
+        "두 함수의 식이 똑같다",
+        "f(1) = g(1), f(4) = g(4)"
+       ],
+       "answerIndex": 2,
+       "solution": "서로 같은 함수 = 정의역의 모든 원소에서 함숫값이 같다",
+       "say": "f = g 이므로 f(1) = g(1), f(4) = g(4) 이다."
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {1, 4}인 두 함수 f(x) = x + a, g(x) = x² + bx + 3 에 대하여 f = g 일 때\nf(1) = g(1) 를 식으로 쓰면?",
+       "choices": [
+        "a = 4 + b",
+        "1 + a = 5 + b",
+        "1 + a = 4 + b"
+       ],
+       "answerIndex": 2,
+       "solution": "f(1) = 1 + a · g(1) = 1 + b + 3",
+       "say": "f(1) = g(1) 에서 1 + a = 4 + b"
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {1, 4}인 두 함수 f(x) = x + a, g(x) = x² + bx + 3 에 대하여 f = g 일 때\nf(4) = g(4) 를 식으로 쓰면?",
+       "choices": [
+        "4 + a = 16 + 4b",
+        "4 + a = 19 + 4b",
+        "4 + a = 7 + 4b"
+       ],
+       "answerIndex": 1,
+       "solution": "f(4) = 4 + a · g(4) = 16 + 4b + 3",
+       "say": "f(4) = g(4) 에서 4 + a = 19 + 4b"
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {1, 4}인 두 함수 f(x) = x + a, g(x) = x² + bx + 3 에 대하여 f = g 일 때\n두 식을 빼서 구한 b 는?",
+       "choices": [
+        "b = −4",
+        "b = 4",
+        "b = −3"
+       ],
+       "answerIndex": 0,
+       "solution": "(뒤 식) − (앞 식) : 3 = 15 + 3b → b = −4",
+       "say": "두 식을 빼면 b = −4"
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {1, 4}인 두 함수 f(x) = x + a, g(x) = x² + bx + 3 에 대하여 f = g 일 때\n그러므로 a 와 b 는?",
+       "choices": [
+        "a = −1, b = 4",
+        "a = −1, b = −4",
+        "a = −4, b = −1"
+       ],
+       "answerIndex": 1,
+       "solution": "1 + a = 4 + b 에 b = −4 를 넣으면 a = −1",
+       "say": "그러므로 a = −1, b = −4 이다."
+      }
+     ],
+     [
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {2, 4}인 두 함수 f(x) = x + a, g(x) = x² + bx + 6 에 대하여 f = g 일 때\nf = g 가 뜻하는 것은?",
+       "choices": [
+        "두 함수의 식이 똑같다",
+        "f(2) = g(2), f(4) = g(4)",
+        "f(x) = g(x) 인 x 가 하나만 있으면 된다"
+       ],
+       "answerIndex": 1,
+       "solution": "서로 같은 함수 = 정의역의 모든 원소에서 함숫값이 같다",
+       "say": "f = g 이므로 f(2) = g(2), f(4) = g(4) 이다."
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {2, 4}인 두 함수 f(x) = x + a, g(x) = x² + bx + 6 에 대하여 f = g 일 때\nf(2) = g(2) 를 식으로 쓰면?",
+       "choices": [
+        "2 + a = 6 + 2b",
+        "a = 10 + 2b",
+        "2 + a = 10 + 2b"
+       ],
+       "answerIndex": 2,
+       "solution": "f(2) = 2 + a · g(2) = 4 + 2b + 6",
+       "say": "f(2) = g(2) 에서 2 + a = 10 + 2b"
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {2, 4}인 두 함수 f(x) = x + a, g(x) = x² + bx + 6 에 대하여 f = g 일 때\nf(4) = g(4) 를 식으로 쓰면?",
+       "choices": [
+        "4 + a = 16 + 4b",
+        "4 + a = 22 + 4b",
+        "4 + a = 10 + 4b"
+       ],
+       "answerIndex": 1,
+       "solution": "f(4) = 4 + a · g(4) = 16 + 4b + 6",
+       "say": "f(4) = g(4) 에서 4 + a = 22 + 4b"
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {2, 4}인 두 함수 f(x) = x + a, g(x) = x² + bx + 6 에 대하여 f = g 일 때\n두 식을 빼서 구한 b 는?",
+       "choices": [
+        "b = 5",
+        "b = −4",
+        "b = −5"
+       ],
+       "answerIndex": 2,
+       "solution": "(뒤 식) − (앞 식) : 2 = 12 + 2b → b = −5",
+       "say": "두 식을 빼면 b = −5"
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {2, 4}인 두 함수 f(x) = x + a, g(x) = x² + bx + 6 에 대하여 f = g 일 때\n그러므로 a 와 b 는?",
+       "choices": [
+        "a = −2, b = 5",
+        "a = −5, b = −2",
+        "a = −2, b = −5"
+       ],
+       "answerIndex": 2,
+       "solution": "2 + a = 10 + 2b 에 b = −5 를 넣으면 a = −2",
+       "say": "그러므로 a = −2, b = −5 이다."
+      }
+     ]
+    ]
+   },
+   "retry": {
+    "pool": [
+     [
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {1, 3}인 두 함수 f(x) = x + a, g(x) = x² + bx + 2 에 대하여 f = g 일 때\nf = g 가 뜻하는 것은?",
+       "choices": [
+        "f(1) = g(1), f(3) = g(3)",
+        "f(x) = g(x) 인 x 가 하나만 있으면 된다",
+        "두 함수의 식이 똑같다"
+       ],
+       "answerIndex": 0,
+       "solution": "서로 같은 함수 = 정의역의 모든 원소에서 함숫값이 같다",
+       "say": "f = g 이므로 f(1) = g(1), f(3) = g(3) 이다."
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {1, 3}인 두 함수 f(x) = x + a, g(x) = x² + bx + 2 에 대하여 f = g 일 때\nf(1) = g(1) 을 식으로 쓰면?",
+       "choices": [
+        "1 + a = 3 + b",
+        "a = 3 + b",
+        "1 + a = 2 + b"
+       ],
+       "answerIndex": 0,
+       "solution": "f(1) = 1 + a · g(1) = 1 + b + 2",
+       "say": "f(1) = g(1) 에서 1 + a = 3 + b"
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {1, 3}인 두 함수 f(x) = x + a, g(x) = x² + bx + 2 에 대하여 f = g 일 때\nf(3) = g(3) 을 식으로 쓰면?",
+       "choices": [
+        "3 + a = 11 + 3b",
+        "3 + a = 9 + 3b",
+        "3 + a = 5 + 3b"
+       ],
+       "answerIndex": 0,
+       "solution": "f(3) = 3 + a · g(3) = 9 + 3b + 2",
+       "say": "f(3) = g(3) 에서 3 + a = 11 + 3b"
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {1, 3}인 두 함수 f(x) = x + a, g(x) = x² + bx + 2 에 대하여 f = g 일 때\n두 식을 빼서 구한 b 는?",
+       "choices": [
+        "b = −3",
+        "b = −2",
+        "b = 3"
+       ],
+       "answerIndex": 0,
+       "solution": "(뒤 식) − (앞 식) : 2 = 8 + 2b → b = −3",
+       "say": "두 식을 빼면 b = −3"
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {1, 3}인 두 함수 f(x) = x + a, g(x) = x² + bx + 2 에 대하여 f = g 일 때\n그러므로 a 와 b 는?",
+       "choices": [
+        "a = −3, b = −1",
+        "a = −1, b = −3",
+        "a = −1, b = 3"
+       ],
+       "answerIndex": 1,
+       "solution": "1 + a = 3 + b 에 b = −3 을 넣으면 a = −1",
+       "say": "그러므로 a = −1, b = −3 이다."
+      }
+     ],
+     [
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {1, 2}인 두 함수 f(x) = x + a, g(x) = x² + bx + 1 에 대하여 f = g 일 때\nf = g 가 뜻하는 것은?",
+       "choices": [
+        "f(1) = g(1), f(2) = g(2)",
+        "두 함수의 식이 똑같다",
+        "f(x) = g(x) 인 x 가 하나만 있으면 된다"
+       ],
+       "answerIndex": 0,
+       "solution": "서로 같은 함수 = 정의역의 모든 원소에서 함숫값이 같다",
+       "say": "f = g 이므로 f(1) = g(1), f(2) = g(2) 이다."
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {1, 2}인 두 함수 f(x) = x + a, g(x) = x² + bx + 1 에 대하여 f = g 일 때\nf(1) = g(1) 을 식으로 쓰면?",
+       "choices": [
+        "a = 2 + b",
+        "1 + a = 2 + b",
+        "1 + a = 1 + b"
+       ],
+       "answerIndex": 1,
+       "solution": "f(1) = 1 + a · g(1) = 1 + b + 1",
+       "say": "f(1) = g(1) 에서 1 + a = 2 + b"
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {1, 2}인 두 함수 f(x) = x + a, g(x) = x² + bx + 1 에 대하여 f = g 일 때\nf(2) = g(2) 을 식으로 쓰면?",
+       "choices": [
+        "2 + a = 5 + 2b",
+        "2 + a = 4 + 2b",
+        "2 + a = 3 + 2b"
+       ],
+       "answerIndex": 0,
+       "solution": "f(2) = 2 + a · g(2) = 4 + 2b + 1",
+       "say": "f(2) = g(2) 에서 2 + a = 5 + 2b"
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {1, 2}인 두 함수 f(x) = x + a, g(x) = x² + bx + 1 에 대하여 f = g 일 때\n두 식을 빼서 구한 b 는?",
+       "choices": [
+        "b = 2",
+        "b = −1",
+        "b = −2"
+       ],
+       "answerIndex": 2,
+       "solution": "(뒤 식) − (앞 식) : 1 = 3 + b → b = −2",
+       "say": "두 식을 빼면 b = −2"
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {1, 2}인 두 함수 f(x) = x + a, g(x) = x² + bx + 1 에 대하여 f = g 일 때\n그러므로 a 와 b 는?",
+       "choices": [
+        "a = −1, b = −2",
+        "a = −1, b = 2",
+        "a = −2, b = −1"
+       ],
+       "answerIndex": 0,
+       "solution": "1 + a = 2 + b 에 b = −2 를 넣으면 a = −1",
+       "say": "그러므로 a = −1, b = −2 이다."
+      }
+     ],
+     [
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {2, 3}인 두 함수 f(x) = x + a, g(x) = x² + bx + 4 에 대하여 f = g 일 때\nf = g 가 뜻하는 것은?",
+       "choices": [
+        "f(2) = g(2), f(3) = g(3)",
+        "f(x) = g(x) 인 x 가 하나만 있으면 된다",
+        "두 함수의 식이 똑같다"
+       ],
+       "answerIndex": 0,
+       "solution": "서로 같은 함수 = 정의역의 모든 원소에서 함숫값이 같다",
+       "say": "f = g 이므로 f(2) = g(2), f(3) = g(3) 이다."
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {2, 3}인 두 함수 f(x) = x + a, g(x) = x² + bx + 4 에 대하여 f = g 일 때\nf(2) = g(2) 을 식으로 쓰면?",
+       "choices": [
+        "a = 8 + 2b",
+        "2 + a = 4 + 2b",
+        "2 + a = 8 + 2b"
+       ],
+       "answerIndex": 2,
+       "solution": "f(2) = 2 + a · g(2) = 4 + 2b + 4",
+       "say": "f(2) = g(2) 에서 2 + a = 8 + 2b"
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {2, 3}인 두 함수 f(x) = x + a, g(x) = x² + bx + 4 에 대하여 f = g 일 때\nf(3) = g(3) 을 식으로 쓰면?",
+       "choices": [
+        "3 + a = 9 + 3b",
+        "3 + a = 13 + 3b",
+        "3 + a = 7 + 3b"
+       ],
+       "answerIndex": 1,
+       "solution": "f(3) = 3 + a · g(3) = 9 + 3b + 4",
+       "say": "f(3) = g(3) 에서 3 + a = 13 + 3b"
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {2, 3}인 두 함수 f(x) = x + a, g(x) = x² + bx + 4 에 대하여 f = g 일 때\n두 식을 빼서 구한 b 는?",
+       "choices": [
+        "b = −4",
+        "b = −3",
+        "b = 4"
+       ],
+       "answerIndex": 0,
+       "solution": "(뒤 식) − (앞 식) : 1 = 5 + b → b = −4",
+       "say": "두 식을 빼면 b = −4"
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {2, 3}인 두 함수 f(x) = x + a, g(x) = x² + bx + 4 에 대하여 f = g 일 때\n그러므로 a 와 b 는?",
+       "choices": [
+        "a = −2, b = −4",
+        "a = −2, b = 4",
+        "a = −4, b = −2"
+       ],
+       "answerIndex": 0,
+       "solution": "2 + a = 8 + 2b 에 b = −4 를 넣으면 a = −2",
+       "say": "그러므로 a = −2, b = −4 이다."
+      }
+     ],
+     [
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {2, 3}인 두 함수 f(x) = x + a, g(x) = x² + bx + 4 에 대하여 f = g 일 때\nf = g 가 뜻하는 것은?",
+       "choices": [
+        "f(2) = g(2), f(3) = g(3)",
+        "두 함수의 식이 똑같다",
+        "f(x) = g(x) 인 x 가 하나만 있으면 된다"
+       ],
+       "answerIndex": 0,
+       "solution": "서로 같은 함수 = 정의역의 모든 원소에서 함숫값이 같다",
+       "say": "f = g 이므로 f(2) = g(2), f(3) = g(3) 이다."
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {2, 3}인 두 함수 f(x) = x + a, g(x) = x² + bx + 4 에 대하여 f = g 일 때\nf(2) = g(2) 를 식으로 쓰면?",
+       "choices": [
+        "a = 8 + 2b",
+        "2 + a = 8 + 2b",
+        "2 + a = 4 + 2b"
+       ],
+       "answerIndex": 1,
+       "solution": "f(2) = 2 + a · g(2) = 4 + 2b + 4",
+       "say": "f(2) = g(2) 에서 2 + a = 8 + 2b"
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {2, 3}인 두 함수 f(x) = x + a, g(x) = x² + bx + 4 에 대하여 f = g 일 때\nf(3) = g(3) 를 식으로 쓰면?",
+       "choices": [
+        "3 + a = 9 + 3b",
+        "3 + a = 7 + 3b",
+        "3 + a = 13 + 3b"
+       ],
+       "answerIndex": 2,
+       "solution": "f(3) = 3 + a · g(3) = 9 + 3b + 4",
+       "say": "f(3) = g(3) 에서 3 + a = 13 + 3b"
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {2, 3}인 두 함수 f(x) = x + a, g(x) = x² + bx + 4 에 대하여 f = g 일 때\n두 식을 빼서 구한 b 는?",
+       "choices": [
+        "b = −4",
+        "b = 4",
+        "b = −3"
+       ],
+       "answerIndex": 0,
+       "solution": "(뒤 식) − (앞 식) : 1 = 5 + b → b = −4",
+       "say": "두 식을 빼면 b = −4"
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {2, 3}인 두 함수 f(x) = x + a, g(x) = x² + bx + 4 에 대하여 f = g 일 때\n그러므로 a 와 b 는?",
+       "choices": [
+        "a = −4, b = −2",
+        "a = −2, b = 4",
+        "a = −2, b = −4"
+       ],
+       "answerIndex": 2,
+       "solution": "2 + a = 8 + 2b 에 b = −4 를 넣으면 a = −2",
+       "say": "그러므로 a = −2, b = −4 이다."
+      }
+     ],
+     [
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {1, 4}인 두 함수 f(x) = x + a, g(x) = x² + bx + 3 에 대하여 f = g 일 때\nf = g 가 뜻하는 것은?",
+       "choices": [
+        "f(x) = g(x) 인 x 가 하나만 있으면 된다",
+        "두 함수의 식이 똑같다",
+        "f(1) = g(1), f(4) = g(4)"
+       ],
+       "answerIndex": 2,
+       "solution": "서로 같은 함수 = 정의역의 모든 원소에서 함숫값이 같다",
+       "say": "f = g 이므로 f(1) = g(1), f(4) = g(4) 이다."
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {1, 4}인 두 함수 f(x) = x + a, g(x) = x² + bx + 3 에 대하여 f = g 일 때\nf(1) = g(1) 를 식으로 쓰면?",
+       "choices": [
+        "a = 4 + b",
+        "1 + a = 5 + b",
+        "1 + a = 4 + b"
+       ],
+       "answerIndex": 2,
+       "solution": "f(1) = 1 + a · g(1) = 1 + b + 3",
+       "say": "f(1) = g(1) 에서 1 + a = 4 + b"
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {1, 4}인 두 함수 f(x) = x + a, g(x) = x² + bx + 3 에 대하여 f = g 일 때\nf(4) = g(4) 를 식으로 쓰면?",
+       "choices": [
+        "4 + a = 16 + 4b",
+        "4 + a = 19 + 4b",
+        "4 + a = 7 + 4b"
+       ],
+       "answerIndex": 1,
+       "solution": "f(4) = 4 + a · g(4) = 16 + 4b + 3",
+       "say": "f(4) = g(4) 에서 4 + a = 19 + 4b"
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {1, 4}인 두 함수 f(x) = x + a, g(x) = x² + bx + 3 에 대하여 f = g 일 때\n두 식을 빼서 구한 b 는?",
+       "choices": [
+        "b = −4",
+        "b = 4",
+        "b = −3"
+       ],
+       "answerIndex": 0,
+       "solution": "(뒤 식) − (앞 식) : 3 = 15 + 3b → b = −4",
+       "say": "두 식을 빼면 b = −4"
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {1, 4}인 두 함수 f(x) = x + a, g(x) = x² + bx + 3 에 대하여 f = g 일 때\n그러므로 a 와 b 는?",
+       "choices": [
+        "a = −1, b = 4",
+        "a = −1, b = −4",
+        "a = −4, b = −1"
+       ],
+       "answerIndex": 1,
+       "solution": "1 + a = 4 + b 에 b = −4 를 넣으면 a = −1",
+       "say": "그러므로 a = −1, b = −4 이다."
+      }
+     ],
+     [
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {2, 4}인 두 함수 f(x) = x + a, g(x) = x² + bx + 6 에 대하여 f = g 일 때\nf = g 가 뜻하는 것은?",
+       "choices": [
+        "두 함수의 식이 똑같다",
+        "f(2) = g(2), f(4) = g(4)",
+        "f(x) = g(x) 인 x 가 하나만 있으면 된다"
+       ],
+       "answerIndex": 1,
+       "solution": "서로 같은 함수 = 정의역의 모든 원소에서 함숫값이 같다",
+       "say": "f = g 이므로 f(2) = g(2), f(4) = g(4) 이다."
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {2, 4}인 두 함수 f(x) = x + a, g(x) = x² + bx + 6 에 대하여 f = g 일 때\nf(2) = g(2) 를 식으로 쓰면?",
+       "choices": [
+        "2 + a = 6 + 2b",
+        "a = 10 + 2b",
+        "2 + a = 10 + 2b"
+       ],
+       "answerIndex": 2,
+       "solution": "f(2) = 2 + a · g(2) = 4 + 2b + 6",
+       "say": "f(2) = g(2) 에서 2 + a = 10 + 2b"
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {2, 4}인 두 함수 f(x) = x + a, g(x) = x² + bx + 6 에 대하여 f = g 일 때\nf(4) = g(4) 를 식으로 쓰면?",
+       "choices": [
+        "4 + a = 16 + 4b",
+        "4 + a = 22 + 4b",
+        "4 + a = 10 + 4b"
+       ],
+       "answerIndex": 1,
+       "solution": "f(4) = 4 + a · g(4) = 16 + 4b + 6",
+       "say": "f(4) = g(4) 에서 4 + a = 22 + 4b"
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {2, 4}인 두 함수 f(x) = x + a, g(x) = x² + bx + 6 에 대하여 f = g 일 때\n두 식을 빼서 구한 b 는?",
+       "choices": [
+        "b = 5",
+        "b = −4",
+        "b = −5"
+       ],
+       "answerIndex": 2,
+       "solution": "(뒤 식) − (앞 식) : 2 = 12 + 2b → b = −5",
+       "say": "두 식을 빼면 b = −5"
+      },
+      {
+       "type": "choice",
+       "question": "문제 3) 정의역이 {2, 4}인 두 함수 f(x) = x + a, g(x) = x² + bx + 6 에 대하여 f = g 일 때\n그러므로 a 와 b 는?",
+       "choices": [
+        "a = −2, b = 5",
+        "a = −5, b = −2",
+        "a = −2, b = −5"
+       ],
+       "answerIndex": 2,
+       "solution": "2 + a = 10 + 2b 에 b = −5 를 넣으면 a = −2",
+       "say": "그러므로 a = −2, b = −5 이다."
+      }
+     ]
+    ]
+   },
+   "noteText": "f = g 의 뜻 → f(1) = g(1) → f(2) = g(2) → 빼서 b → a",
+   "help": {
+    "concept": "서로 같은 함수 = 정의역의 원소마다 함숫값이 같다 → 원소 하나에 식 하나.",
+    "example": {
+     "q": "정의역이 {0, 1} 인 f(x) = x + a, g(x) = x² + b 에서 f = g 이면?",
+     "sol": [
+      "f(0) = g(0) : a = b",
+      "f(1) = g(1) : 1 + a = 1 + b",
+      "두 식이 같으므로 a = b 이면 된다 (a, b 는 하나로 정해지지 않는다)"
+     ]
+    },
+    "first": "f(1) = 1 + a · g(1) = 1 + b + □"
+   }
+  }
+ },
+ "boss": {
+  "title": "👑 14차시 형성평가 · 대응의 사슬 군주",
+  "sprite": "keyvaultboss0:0",
+  "items": 4,
+  "hpItems": 4,
+  "tags": [
+   "c1",
+   "c2",
+   "c3",
+   "c4"
+  ],
+  "links": [
+   "m1",
+   "m1",
+   "m2",
+   "m3"
+  ],
+  "pool": [
+   [
+    {
+     "type": "choice",
+     "question": "1. X = {1, 2, 3} 에서 Y = {a, b} 로의 대응 중 함수인 것은?",
+     "choices": [
+      "① 1→a, 2→a, 3→b",
+      "② 1→a, 2→b",
+      "③ 1→a, 1→b, 2→a, 3→b"
+     ],
+     "answerIndex": 0,
+     "solution": "X 의 원소마다 화살표가 꼭 하나 → 함수"
+    },
+    {
+     "type": "choice",
+     "question": "1. X = {1, 2, 3} 에서 Y = {a, b} 로의 대응 중 함수인 것은?",
+     "choices": [
+      "① 1→b, 3→a",
+      "② 1→b, 2→b, 3→b",
+      "③ 1→a, 2→a, 2→b, 3→a"
+     ],
+     "answerIndex": 1,
+     "solution": "X 의 원소마다 화살표가 꼭 하나 → 함수"
+    },
+    {
+     "type": "choice",
+     "question": "1. X = {1, 2, 3} 에서 Y = {a, b} 로의 대응 중 함수인 것은?",
+     "choices": [
+      "① 1→a, 2→b, 2→a, 3→b",
+      "② 2→a, 3→b",
+      "③ 1→b, 2→a, 3→a"
+     ],
+     "answerIndex": 2,
+     "solution": "X 의 원소마다 화살표가 꼭 하나 → 함수"
+    },
+    {
+     "type": "choice",
+     "question": "1. X = {1, 2, 3} 에서 Y = {a, b} 로의 대응 중 함수인 것은?",
+     "choices": [
+      "① 1→a, 2→b, 3→a",
+      "② 1→b, 2→a",
+      "③ 1→a, 2→b, 3→a, 3→b"
+     ],
+     "answerIndex": 0,
+     "solution": "X 의 원소마다 화살표가 꼭 하나 → 함수"
+    },
+    {
+     "type": "choice",
+     "question": "1. X = {1, 2, 3} 에서 Y = {a, b} 로의 대응 중 함수인 것은?",
+     "choices": [
+      "① 1→b, 3→a",
+      "② 1→b, 2→a, 3→b",
+      "③ 1→a, 2→b, 3→a, 3→b"
+     ],
+     "answerIndex": 1,
+     "solution": "X 의 원소마다 화살표가 꼭 하나 → 함수"
+    },
+    {
+     "type": "choice",
+     "question": "1. X = {1, 2, 3} 에서 Y = {a, b} 로의 대응 중 함수인 것은?",
+     "choices": [
+      "① 1→b, 2→a, 2→b, 3→b",
+      "② 2→a, 3→b",
+      "③ 1→a, 2→a, 3→b"
+     ],
+     "answerIndex": 2,
+     "solution": "X 의 원소마다 화살표가 꼭 하나 → 함수"
+    },
+    {
+     "type": "choice",
+     "question": "1. X = {1, 2, 3} 에서 Y = {a, b} 로의 대응 중 함수인 것은?",
+     "choices": [
+      "① 1→b, 2→b, 3→a",
+      "② 1→a, 1→b, 2→b, 3→a",
+      "③ 1→a, 2→b"
+     ],
+     "answerIndex": 0,
+     "solution": "X 의 원소마다 화살표가 꼭 하나 → 함수"
+    }
+   ],
+   [
+    {
+     "type": "multi",
+     "question": "2. X = {1, 2, 3} 에서 Y = {1, 3, 5, 7} 로의 함수 f(x) = 2x − 1 의 치역의 원소를 모두 고르시오.",
+     "options": [
+      "1",
+      "3",
+      "5",
+      "7"
+     ],
+     "answer": [
+      0,
+      1,
+      2
+     ],
+     "solution": "치역 = 함숫값 모음 = {1, 3, 5}"
+    },
+    {
+     "type": "multi",
+     "question": "2. X = {1, 2, 3} 에서 Y = {2, 3, 4, 5, 6} 로의 함수 f(x) = x + 2 의 치역의 원소를 모두 고르시오.",
+     "options": [
+      "2",
+      "3",
+      "4",
+      "5",
+      "6"
+     ],
+     "answer": [
+      1,
+      2,
+      3
+     ],
+     "solution": "치역 = 함숫값 모음 = {3, 4, 5}"
+    },
+    {
+     "type": "multi",
+     "question": "2. X = {1, 2, 3} 에서 Y = {1, 4, 7, 10} 로의 함수 f(x) = 3x − 2 의 치역의 원소를 모두 고르시오.",
+     "options": [
+      "1",
+      "4",
+      "7",
+      "10"
+     ],
+     "answer": [
+      0,
+      1,
+      2
+     ],
+     "solution": "치역 = 함숫값 모음 = {1, 4, 7}"
+    },
+    {
+     "type": "multi",
+     "question": "2. X = {0, 1, 2} 에서 Y = {1, 3, 5, 7} 로의 함수 f(x) = 2x + 1 의 치역의 원소를 모두 고르시오.",
+     "options": [
+      "1",
+      "3",
+      "5",
+      "7"
+     ],
+     "answer": [
+      0,
+      1,
+      2
+     ],
+     "solution": "치역 = 함숫값 모음 = {1, 3, 5}"
+    },
+    {
+     "type": "multi",
+     "question": "2. X = {1, 2, 3} 에서 Y = {1, 2, 4, 7} 로의 함수 f(x) = 3x − 2 의 치역의 원소를 모두 고르시오.",
+     "options": [
+      "1",
+      "2",
+      "4",
+      "7"
+     ],
+     "answer": [
+      0,
+      2,
+      3
+     ],
+     "solution": "치역 = 함숫값 모음 = {1, 4, 7}"
+    },
+    {
+     "type": "multi",
+     "question": "2. X = {1, 2, 3} 에서 Y = {1, 2, 3, 4, 5} 로의 함수 f(x) = −x + 5 의 치역의 원소를 모두 고르시오.",
+     "options": [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+     ],
+     "answer": [
+      1,
+      2,
+      3
+     ],
+     "solution": "치역 = 함숫값 모음 = {2, 3, 4}"
+    },
+    {
+     "type": "multi",
+     "question": "2. X = {1, 2, 3} 에서 Y = {3, 5, 7, 9} 로의 함수 f(x) = 2x + 3 의 치역의 원소를 모두 고르시오.",
+     "options": [
+      "3",
+      "5",
+      "7",
+      "9"
+     ],
+     "answer": [
+      1,
+      2,
+      3
+     ],
+     "solution": "치역 = 함숫값 모음 = {5, 7, 9}"
+    }
+   ],
+   [
+    {
+     "type": "choice",
+     "question": "3. 함수 y = x² + 1 의 치역은?",
+     "choices": [
+      "{y | y ≥ 1}",
+      "{y | y 는 실수}",
+      "{y | y ≤ 1}"
+     ],
+     "answerIndex": 0,
+     "solution": "x² ≥ 0 이므로 y ≥ 1"
+    },
+    {
+     "type": "choice",
+     "question": "3. 함수 y = x² + 4 의 치역은?",
+     "choices": [
+      "{y | y ≤ 4}",
+      "{y | y ≥ 4}",
+      "{y | y 는 실수}"
+     ],
+     "answerIndex": 1,
+     "solution": "x² ≥ 0 이므로 y ≥ 4"
+    },
+    {
+     "type": "choice",
+     "question": "3. 함수 y = x² − 2 의 치역은?",
+     "choices": [
+      "{y | y 는 실수}",
+      "{y | y ≤ −2}",
+      "{y | y ≥ −2}"
+     ],
+     "answerIndex": 2,
+     "solution": "x² ≥ 0 이므로 y ≥ −2"
+    },
+    {
+     "type": "choice",
+     "question": "3. 함수 y = x² + 3 의 치역은?",
+     "choices": [
+      "{y | y 는 실수}",
+      "{y | y ≥ 3}",
+      "{y | y ≤ 3}"
+     ],
+     "answerIndex": 1,
+     "solution": "x² ≥ 0 이므로 y ≥ 3"
+    },
+    {
+     "type": "choice",
+     "question": "3. 함수 y = −x² + 6 의 치역은?",
+     "choices": [
+      "{y | y ≥ 6}",
+      "{y | y ≤ 6}",
+      "{y | y 는 실수}"
+     ],
+     "answerIndex": 1,
+     "solution": "−x² ≤ 0 이므로 y ≤ 6"
+    },
+    {
+     "type": "choice",
+     "question": "3. 함수 y = x² − 2 의 치역은?",
+     "choices": [
+      "{y | y 는 실수}",
+      "{y | y ≥ −2}",
+      "{y | y ≤ −2}"
+     ],
+     "answerIndex": 1,
+     "solution": "x² ≥ 0 이므로 y ≥ −2"
+    },
+    {
+     "type": "choice",
+     "question": "3. 함수 y = −x² − 3 의 치역은?",
+     "choices": [
+      "{y | y ≤ −3}",
+      "{y | y ≥ −3}",
+      "{y | y 는 실수}"
+     ],
+     "answerIndex": 0,
+     "solution": "−x² ≤ 0 이므로 y ≤ −3"
+    }
+   ],
+   [
+    {
+     "type": "choice",
+     "question": "4. 정의역이 {1, 3}인 두 함수 f(x) = ax + b, g(x) = x² 에 대하여 f = g 일 때, 상수 a, b 는?",
+     "choices": [
+      "a = 4, b = 3",
+      "a = 4, b = −3",
+      "a = −3, b = 4"
+     ],
+     "answerIndex": 1,
+     "solution": "f(1) = g(1), f(3) = g(3) 를 연립"
+    },
+    {
+     "type": "choice",
+     "question": "4. 정의역이 {2, 3}인 두 함수 f(x) = ax + b, g(x) = x² 에 대하여 f = g 일 때, 상수 a, b 는?",
+     "choices": [
+      "a = −6, b = 5",
+      "a = 5, b = 6",
+      "a = 5, b = −6"
+     ],
+     "answerIndex": 2,
+     "solution": "f(2) = g(2), f(3) = g(3) 를 연립"
+    },
+    {
+     "type": "choice",
+     "question": "4. 정의역이 {0, 2}인 두 함수 f(x) = ax + b, g(x) = x² 에 대하여 f = g 일 때, 상수 a, b 는?",
+     "choices": [
+      "a = 3, b = 0",
+      "a = 2, b = 0",
+      "a = 0, b = 2"
+     ],
+     "answerIndex": 1,
+     "solution": "f(0) = g(0), f(2) = g(2) 를 연립"
+    },
+    {
+     "type": "choice",
+     "question": "4. 정의역이 {1, 4}인 두 함수 f(x) = ax + b, g(x) = x² 에 대하여 f = g 일 때, 상수 a, b 는?",
+     "choices": [
+      "a = 5, b = 4",
+      "a = −4, b = 5",
+      "a = 5, b = −4"
+     ],
+     "answerIndex": 2,
+     "solution": "f(1) = g(1), f(4) = g(4) 를 연립"
+    },
+    {
+     "type": "choice",
+     "question": "4. 정의역이 {2, 4}인 두 함수 f(x) = ax + b, g(x) = x² 에 대하여 f = g 일 때, 상수 a, b 는?",
+     "choices": [
+      "a = 6, b = −8",
+      "a = −8, b = 6",
+      "a = 6, b = 8"
+     ],
+     "answerIndex": 0,
+     "solution": "f(2) = g(2), f(4) = g(4) 를 연립"
+    },
+    {
+     "type": "choice",
+     "question": "4. 정의역이 {1, 2}인 두 함수 f(x) = ax + b, g(x) = x² 에 대하여 f = g 일 때, 상수 a, b 는?",
+     "choices": [
+      "a = 3, b = 2",
+      "a = −2, b = 3",
+      "a = 3, b = −2"
+     ],
+     "answerIndex": 2,
+     "solution": "f(1) = g(1), f(2) = g(2) 를 연립"
+    },
+    {
+     "type": "choice",
+     "question": "4. 정의역이 {3, 4}인 두 함수 f(x) = ax + b, g(x) = x² 에 대하여 f = g 일 때, 상수 a, b 는?",
+     "choices": [
+      "a = 7, b = −12",
+      "a = −12, b = 7",
+      "a = 7, b = 12"
+     ],
+     "answerIndex": 0,
+     "solution": "f(3) = g(3), f(4) = g(4) 를 연립"
+    }
+   ]
+  ],
+  "sets": [
+   null,
+   [
+    {
+     "type": "choice",
+     "question": "1. X = {1, 2, 3} 에서 Y = {a, b} 로의 대응 중 함수인 것은?",
+     "choices": [
+      "① 1→b, 3→a",
+      "② 1→b, 2→b, 3→b",
+      "③ 1→a, 2→a, 2→b, 3→a"
+     ],
+     "answerIndex": 1,
+     "solution": "X 의 원소마다 화살표가 꼭 하나 → 함수"
+    },
+    {
+     "type": "multi",
+     "question": "2. X = {1, 2, 3} 에서 Y = {2, 3, 4, 5, 6} 로의 함수 f(x) = x + 2 의 치역의 원소를 모두 고르시오.",
+     "options": [
+      "2",
+      "3",
+      "4",
+      "5",
+      "6"
+     ],
+     "answer": [
+      1,
+      2,
+      3
+     ],
+     "solution": "치역 = 함숫값 모음 = {3, 4, 5}"
+    },
+    {
+     "type": "choice",
+     "question": "3. 함수 y = x² + 4 의 치역은?",
+     "choices": [
+      "{y | y ≤ 4}",
+      "{y | y ≥ 4}",
+      "{y | y 는 실수}"
+     ],
+     "answerIndex": 1,
+     "solution": "x² ≥ 0 이므로 y ≥ 4"
+    },
+    {
+     "type": "choice",
+     "question": "4. 정의역이 {2, 3}인 두 함수 f(x) = ax + b, g(x) = x² 에 대하여 f = g 일 때, 상수 a, b 는?",
+     "choices": [
+      "a = −6, b = 5",
+      "a = 5, b = 6",
+      "a = 5, b = −6"
+     ],
+     "answerIndex": 2,
+     "solution": "f(2) = g(2), f(3) = g(3) 를 연립"
+    }
+   ]
+  ]
+ },
+ "keys": [
+  {
+   "id": "k1",
+   "name": "식에 수 넣기",
+   "grade": "중1 · 문자와 식",
+   "help": "x 자리에 수를 넣고 곱셈부터 · 음수는 괄호. · 이 열쇠는 문제 3 의 ②에서 써요.",
+   "vers": [
+    {
+     "type": "choice",
+     "q": "x + 3 에 x = 1 을 넣으면?",
+     "a": "1",
+     "ch": [
+      "2",
+      "4",
+      "−2"
+     ]
+    },
+    {
+     "type": "choice",
+     "q": "x² − 2x + 5 에 x = 2 를 넣으면?",
+     "a": "0",
+     "ch": [
+      "5",
+      "9",
+      "1"
+     ]
+    },
+    {
+     "type": "choice",
+     "q": "2x − 1 에 x = −3 을 넣으면?",
+     "a": "2",
+     "ch": [
+      "5",
+      "−5",
+      "−7"
+     ]
+    }
+   ],
+   "uses": [
+    {
+     "at": "m3",
+     "n": 2
+    },
+    {
+     "at": "boss",
+     "n": 4
+    }
+   ]
+  },
+  {
+   "id": "k2",
+   "name": "y = −x² + r 의 가장 큰 값",
+   "grade": "중3 · 이차함수",
+   "help": "−x² 은 0 이하 → x = 0 일 때 가장 커요. · 이 열쇠는 문제 2 의 (2)에서 써요.",
+   "vers": [
+    {
+     "type": "choice",
+     "q": "y = −x² + 3 의 가장 큰 값은?",
+     "a": "1",
+     "ch": [
+      "0",
+      "3",
+      "−3"
+     ]
+    },
+    {
+     "type": "choice",
+     "q": "y = −x² + 7 의 가장 큰 값은?",
+     "a": "2",
+     "ch": [
+      "0",
+      "−7",
+      "7"
+     ]
+    },
+    {
+     "type": "choice",
+     "q": "y = −x² − 1 의 가장 큰 값은?",
+     "a": "0",
+     "ch": [
+      "−1",
+      "1",
+      "0"
+     ]
+    }
+   ],
+   "uses": [
+    {
+     "at": "m2",
+     "n": 4
+    },
+    {
+     "at": "boss",
+     "n": 3
+    }
+   ]
+  }
+ ]
+}
