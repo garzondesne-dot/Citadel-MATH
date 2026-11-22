@@ -34,10 +34,10 @@ def m3b(v, rng):
 def TR(v, rng): return pick(v, rng, (4, 2), lambda r: (2 * ri(r, 2, 6), ri(r, 2, 4)))   # 밑변 a, 높이 b = m·a
 def ts(v, rng):
     a, m = TR(v, random.Random(rng.random() if v else 1)); b = m * a
-    return a, m, b, f'직각을 낀 두 변의 길이가 {a}, {b} 인 직각삼각형 안에, 직각을 한 꼭짓점으로 하고 맞은편 꼭짓점이 빗변 위에 있는 직사각형을 그린다. 길이가 {a} 인 변 위의 직사각형의 변의 길이를 x 라 할 때,'
+    return a, m, b, f'직각을 낀 두 변의 길이가 {a}, {b} 인 직각삼각형 안에, 직각을 한 꼭짓점으로 하고 맞은편 꼭짓점이 빗변 위에 있는 직사각형을 그린다. 길이가 {a} 인 변에 놓인 직사각형의 변의 길이를 x 라 할 때,'
 def m4a(v, rng):
     a, m, b, s = ts(v, rng)
-    return choice(rng, f'{s} 길이가 {b} 인 변 위의 직사각형의 변의 길이는?', D(f'{b}-{m}*x'), [D(f'{b}-x'), D(f'{a}-{m}*x'), D(f'{m}*x')], f'닮음: 빗변 위의 점은 x 가 1 늘 때 높이가 {m} 씩 줄어든다 ({b} ÷ {a} = {m}).', chk=True)
+    return choice(rng, f'{s} 길이가 {b} 인 변에 놓인 직사각형의 변의 길이는?', D(f'{b}-{m}*x'), [D(f'{b}-x'), D(f'{a}-{m}*x'), D(f'{m}*x')], f'닮음: 빗변에 있는 점은 x 가 1 늘 때 높이가 {m} 씩 줄어든다 ({b} ÷ {a} = {m}).', chk=True)
 def m4b(v, rng):
     a, m, b, s = ts(v, rng)
     return choice(rng, f'{s} 직사각형의 넓이 y 를 x 에 대한 식으로 나타내면?', 'y = ' + X([-m, b, 0]), ['y = ' + X([m, -b, 0]), 'y = ' + X([-1, b, 0]), 'y = ' + X([-m, a, 0])], f'y = x({D(f"{b}-{m}*x")}).', chk=lambda: same(P([-m, b, 0]), f'x*({b}-{m}*x)'))
