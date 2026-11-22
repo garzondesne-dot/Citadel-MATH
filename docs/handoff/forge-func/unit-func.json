@@ -1,5 +1,5 @@
 {
- "_note": "모루 함수 단원 (14 ~ 17차시) · unit-set.js 의 MATS · OPS · CARDS · MISTAKES 에 그대로 더하는 꼴 · art 16 ~ 25 = 새 그림 시트(작업대 「⚒ 모루 함수」) · page = 교과서 쪽(❓ 채울 것) · ws = 학습지 자리(참고 · 게임은 안 읽음)",
+ "_note": "모루 함수 단원 (14 ~ 17차시) · unit-set.js 의 MATS · OPS · CARDS · MISTAKES 에 그대로 더하는 꼴 · art 16 ~ 25 = 새 그림 시트(작업대 「⚒ 모루 함수」) · page = 교과서 쪽(미래엔 공통수학2 · 11/22 PDF 확인) · ws = 학습지 자리(참고 · 게임은 안 읽음)",
  "MATS": [
   {
    "id": "x",
@@ -101,7 +101,7 @@
    "desc": "X 의 원소마다 Y 의 원소가 하나씩 대응",
    "grade": 1,
    "art": 16,
-   "page": "",
+   "page": "106쪽",
    "op": "then",
    "in": [
     "SX",
@@ -131,7 +131,7 @@
    "desc": "x 에 대응하는 Y 의 원소 f(x)",
    "grade": 1,
    "art": 17,
-   "page": "",
+   "page": "106쪽",
    "op": "app",
    "in": [
     "f",
@@ -157,7 +157,7 @@
    "desc": "함수 f : X → Y 에서 집합 X",
    "grade": 1,
    "art": 18,
-   "page": "",
+   "page": "106쪽",
    "op": "dom",
    "in": [
     "card:func"
@@ -185,7 +185,7 @@
    "desc": "함수 f : X → Y 에서 집합 Y",
    "grade": 1,
    "art": 18,
-   "page": "",
+   "page": "106쪽",
    "op": "cod",
    "in": [
     "card:func"
@@ -213,7 +213,7 @@
    "desc": "함숫값 전체의 집합 (공역의 부분집합)",
    "grade": 2,
    "art": 18,
-   "page": "",
+   "page": "106쪽",
    "op": "ran",
    "in": [
     "card:func"
@@ -241,7 +241,7 @@
    "desc": "정의역이 같고 모든 원소에서 함숫값이 같다",
    "grade": 2,
    "art": 19,
-   "page": "",
+   "page": "107쪽",
    "op": "eq",
    "in": [
     "f",
@@ -270,7 +270,7 @@
    "desc": "순서쌍 (x, f(x)) 전체의 집합",
    "grade": 2,
    "art": 20,
-   "page": "",
+   "page": "108쪽",
    "op": "brace",
    "in": [
     "card:fval"
@@ -298,7 +298,7 @@
    "desc": "서로 다른 원소의 함숫값이 서로 다르다",
    "grade": 2,
    "art": 21,
-   "page": "",
+   "page": "109쪽",
    "op": "neq",
    "in": [
     "card:fval",
@@ -327,7 +327,7 @@
    "desc": "공역의 모든 원소가 화살표를 받는다",
    "grade": 2,
    "art": 18,
-   "page": "",
+   "page": "109쪽",
    "op": "eq",
    "in": [
     "card:range",
@@ -356,7 +356,7 @@
    "desc": "일대일함수이면서 치역과 공역이 같은 함수",
    "grade": 3,
    "art": 21,
-   "page": "",
+   "page": "109쪽",
    "op": "and",
    "in": [
     "card:inj",
@@ -385,7 +385,7 @@
    "desc": "자기 자신에 대응하는 함수",
    "grade": 2,
    "art": 22,
-   "page": "",
+   "page": "110쪽",
    "op": "eq",
    "in": [
     "card:fval",
@@ -410,7 +410,7 @@
    "desc": "모든 x 에 같은 값 하나가 대응하는 함수",
    "grade": 2,
    "art": 22,
-   "page": "",
+   "page": "110쪽",
    "op": "eq",
    "in": [
     "card:fval",
@@ -435,7 +435,7 @@
    "desc": "f 다음에 g (오른쪽 함수부터)",
    "grade": 1,
    "art": 23,
-   "page": "",
+   "page": "111쪽",
    "op": "o",
    "in": [
     "g",
@@ -464,7 +464,7 @@
    "desc": "g 다음에 f (g∘f 와 순서가 반대)",
    "grade": 1,
    "art": 23,
-   "page": "",
+   "page": "112쪽",
    "op": "o",
    "in": [
     "f",
@@ -496,7 +496,7 @@
    "desc": "f(x) 를 구해 g 에 넣는다",
    "grade": 2,
    "art": 23,
-   "page": "",
+   "page": "112쪽",
    "op": "app",
    "in": [
     "g",
@@ -530,7 +530,7 @@
    "desc": "순서를 바꾸면 결과가 달라진다",
    "grade": 2,
    "art": 23,
-   "page": "",
+   "page": "112쪽",
    "op": "neq",
    "in": [
     "card:compose",
@@ -560,7 +560,7 @@
    "desc": "묶는 자리를 바꿔도 결과가 같다",
    "grade": 3,
    "art": 23,
-   "page": "",
+   "page": "112쪽",
    "op": "o",
    "in": [
     "h",
@@ -585,7 +585,7 @@
    "desc": "화살표를 거꾸로 돌린 함수 (f 가 일대일대응일 때만)",
    "grade": 2,
    "art": 24,
-   "page": "",
+   "page": "113쪽",
    "op": "inv",
    "in": [
     "card:bij"
@@ -613,7 +613,7 @@
    "desc": "역함수 값은 원래 함수의 식으로 바꿔 쓴다",
    "grade": 2,
    "art": 24,
-   "page": "",
+   "page": "113쪽",
    "op": "app",
    "in": [
     "card:inverse",
@@ -638,7 +638,7 @@
    "desc": "두 번 뒤집으면 제자리",
    "grade": 2,
    "art": 24,
-   "page": "",
+   "page": "113쪽",
    "op": "inv",
    "in": [
     "card:inverse"
@@ -661,7 +661,7 @@
    "desc": "갔다가 돌아오면 제자리 (항등함수)",
    "grade": 3,
    "art": 24,
-   "page": "",
+   "page": "113쪽",
    "op": "o",
    "in": [
     "card:inverse",
@@ -694,7 +694,7 @@
    "desc": "y = f(x) → x = … → x 와 y 를 바꿈",
    "grade": 2,
    "art": 25,
-   "page": "",
+   "page": "114쪽",
    "op": "swap",
    "in": [
     "card:fval"
@@ -722,7 +722,7 @@
    "desc": "점 (a, b) ↔ 점 (b, a)",
    "grade": 3,
    "art": 25,
-   "page": "",
+   "page": "116쪽",
    "op": "swap",
    "in": [
     "card:graph"

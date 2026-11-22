@@ -18,8 +18,13 @@ USE_OLD = ['then', 'eq', 'neq', 'and', 'brace']
 C = lambda q, ch, a, sol: dict(type='choice', question=q, choices=ch, answerIndex=a, solution=sol)
 N = lambda q, a, sol: dict(type='number', question=q, answer=a, solution=sol)
 O = lambda q, a, sol: dict(type='ox', question=q, answer=a, solution=sol)
+# 📖 교과서 쪽 (미래엔 공통수학2 Ⅲ-1 함수 · 드라이브 「학습지 > 공통수학교과서」 PDF 에서 확인 · 2026-11-22)
+PAGE = {'func': '106쪽', 'fval': '106쪽', 'domain': '106쪽', 'codomain': '106쪽', 'range': '106쪽', 'feq': '107쪽',
+        'graph': '108쪽', 'inj': '109쪽', 'onto': '109쪽', 'bij': '109쪽', 'ident': '110쪽', 'const': '110쪽',
+        'compose': '111쪽', 'compose2': '112쪽', 'compval': '112쪽', 'noncomm': '112쪽', 'fassoc': '112쪽',
+        'inverse': '113쪽', 'invval': '113쪽', 'invinv': '113쪽', 'invcomp': '113쪽', 'invfind': '114쪽', 'invgraph': '116쪽'}
 def card(id, no, sec, name, fm, desc, grade, art, op, inn, hint, ex, ordered=False, alt=None, mf=None, short=None, ws=''):
-    d = dict(id=id, no=no, sec=sec, name=name, fm=fm, desc=desc, grade=grade, art=art, page='', op=op, **{'in': inn}, hint=hint, ex=ex, ws=ws)
+    d = dict(id=id, no=no, sec=sec, name=name, fm=fm, desc=desc, grade=grade, art=art, page=PAGE.get(id, ''), op=op, **{'in': inn}, hint=hint, ex=ex, ws=ws)
     if ordered: d['ordered'] = True
     if alt: d['alt'] = alt
     if mf: d['mf'] = mf
@@ -162,7 +167,7 @@ def verify():
 
 if __name__ == '__main__':
     nrec = verify()
-    unit = dict(_note='모루 함수 단원 (14 ~ 17차시) · unit-set.js 의 MATS · OPS · CARDS · MISTAKES 에 그대로 더하는 꼴 · art 16 ~ 25 = 새 그림 시트(작업대 「⚒ 모루 함수」) · page = 교과서 쪽(❓ 채울 것) · ws = 학습지 자리(참고 · 게임은 안 읽음)',
+    unit = dict(_note='모루 함수 단원 (14 ~ 17차시) · unit-set.js 의 MATS · OPS · CARDS · MISTAKES 에 그대로 더하는 꼴 · art 16 ~ 25 = 새 그림 시트(작업대 「⚒ 모루 함수」) · page = 교과서 쪽(미래엔 공통수학2 · 11/22 PDF 확인) · ws = 학습지 자리(참고 · 게임은 안 읽음)',
                 MATS=MATS, OPS=OPS, USES_EXISTING_OPS=USE_OLD, CARDS=CARDS, MISTAKES=MISTAKES)
     json.dump(unit, open('unit-func.json', 'w'), ensure_ascii=False, indent=1)
     cards_map = {cid: dict(rows=r, strings=s) for cid, (r, s) in SET_MAP.items()}
@@ -214,5 +219,5 @@ if __name__ == '__main__':
         if v['strings'] and not v['rows']: L.append(f"| {nm.get(cid, cid)} | {' · '.join(v['strings'])} |")
     L += ["", "- 집합 · 명제 카드 이름은 `unit-set.js` id 그대로 적음(venn 벤 다이어그램 · notequal 서로 같지 않은 집합 · proper 진부분집합 · commute 교환법칙 · assoc 결합법칙 · distrib 분배법칙).", "- 한 줄을 누르면 카드는 **하나만** 찜(가장 바탕 카드) — 여러 장이 한꺼번에 찜되면 모루 배너가 넘침. 나머지 연결(cards.rows)은 「이 카드를 만들면 이 기호가 나오는 문제에 도움」 표시에 씀.", "",
           "## 7. 카드 그림", "", "- 있는 그림 시트(`card-arts-v2.webp` 8 × 2 = 16칸 · 0 ~ 15)는 집합 · 명제가 다 씀 → 함수용 **새 시트 10칸(16 ~ 25)** 이 필요.", "- 칸: 16 대응 화살표(두 타원) · 17 함숫값 기계 · 18 정의역 · 공역 · 치역 · 19 서로 같은 함수(쌍둥이 기계) · 20 그래프 · 21 일대일 짝 · 22 항등 · 상수 · 23 합성(기계 둘) · 24 역함수(되돌아오는 화살표) · 25 y = x 대칭 거울", "- 주문 카드 = 작업대 「⚒ 모루 함수」 탭(올리면 메인에 「🎨 올림」).", "",
-          "## 8. 선생님이 정한 것 (2026-11-21)", "", "1. **역함수 사슬 = 그대로**(일대일대응 → 역함수) + **지름길 안내**: 재료 카드가 없으면 「먼저 만들 카드: ○○」를 눌러 바로 그 카드로 가게 한다(손발: 모루 화면에 더할 것).", "2. **f∘g 카드를 따로 만든다**(compose2) → 「교환법칙 ✕」 = g∘f 카드 ≠ f∘g 카드. 카드 23장.", "3. 구성 · 등급 = 초안대로.", "4. 교과서 쪽수(page) = 빈칸으로 먼저 넣고, 선생님이 나중에 한 번에 알려 주시면 채운다.", "", "5. 기호톡 함수 줄 13개 = 화살표 비유 그대로 · 「함수」 한 낱말은 줄로 안 만들고 「f : X → Y」 줄이 대신한다."]
+          "## 8. 선생님이 정한 것 (2026-11-21)", "", "1. **역함수 사슬 = 그대로**(일대일대응 → 역함수) + **지름길 안내**: 재료 카드가 없으면 「먼저 만들 카드: ○○」를 눌러 바로 그 카드로 가게 한다(손발: 모루 화면에 더할 것).", "2. **f∘g 카드를 따로 만든다**(compose2) → 「교환법칙 ✕」 = g∘f 카드 ≠ f∘g 카드. 카드 23장.", "3. 구성 · 등급 = 초안대로.", "4. 교과서 쪽수(page) = **채움**(11/22 · 미래엔 공통수학2 Ⅲ-1 함수 106 ~ 116쪽 · 드라이브 「공통수학교과서」 PDF 로 확인).", "", "5. 기호톡 함수 줄 13개 = 화살표 비유 그대로 · 「함수」 한 낱말은 줄로 안 만들고 「f : X → Y」 줄이 대신한다.", "", "## 9. 교과서 · 지도서와 맞춰 본 것 (2026-11-22)", "", "- 정의 문구(함수 · 정의역 · 공역 · 치역 · 서로 같은 함수 · 그래프 · 일대일함수 · 일대일대응 · 항등 · 상수 · 합성 · 역함수 · 역함수 구하기 · 그래프 대칭) = 교과서와 어긋나는 곳 없음.", "- **결합법칙** = 교과서 본문 용어가 아님: 112쪽 「생각 넓히기」 활동 「( f∘g)∘h = f∘(g∘h) 가 성립하는지 알아보려고 한다」로만 나오고, 「결합법칙」이라는 말은 지도서에만 있음 → 카드 이름을 「묶는 자리를 바꿔도 같다」처럼 풀어 쓰거나 3등급(심화) 표시를 유지할지 = 선생님 컨펌.", "- **교환법칙** = 112쪽 옆 글 「일반적으로 g∘f ≠ f∘g · 함수의 합성에서 교환법칙이 성립하지 않는다」 → 카드 그대로.", "- **역함수와 합성** = 113쪽 옆 글 「f⁻¹∘f 와 f∘f⁻¹ 는 일반적으로 서로 같은 함수가 아니다」(앞 = X 에서의 항등함수 · 뒤 = Y 에서의 항등함수) → 지금 카드는 두 순서를 같은 카드의 레시피로 받음. 힌트에 「둘 다 항등함수지만 사는 집합이 달라요」 한 줄을 더하는 것을 권함.", "- 교과서 옆 글 「항등함수는 일대일대응이다」(110쪽) · 「함수의 치역은 공역의 부분집합이다」(106쪽) = 카드 설명에 쓸 만한 한 줄."]
     open('FORGE-FUNC-v1.md', 'w').write("\n".join(L) + "\n")
