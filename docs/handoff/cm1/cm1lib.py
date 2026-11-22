@@ -236,3 +236,18 @@ def ri(rng, lo, hi, no=(0,)):
     while True:
         x = rng.randint(lo, hi)
         if x not in no: return x
+
+# ── 복소수 (a, b) = a + bi ──
+def cf(a, b=0):
+    """복소수 글자: cf(3, -2) → '3 − 2i' · cf(0, 1) → 'i' · cf(0, 0) → '0'"""
+    A = N(a) if a != 0 else ''; bb = abs(b)
+    B = '' if b == 0 else ('' if bb == 1 else N(bb)) + 'i'
+    if not A and not B: return '0'
+    if not B: return A
+    if not A: return ('−' if b < 0 else '') + B
+    return f"{A} {'−' if b < 0 else '+'} {B}"
+cadd = lambda z, w, s=1: (z[0] + s * w[0], z[1] + s * w[1])
+cmul = lambda z, w: (z[0] * w[0] - z[1] * w[1], z[0] * w[1] + z[1] * w[0])
+conj = lambda z: (z[0], -z[1])
+def cdiv(z, w):
+    d = w[0] ** 2 + w[1] ** 2; n = cmul(z, conj(w)); return (Fr(n[0], d), Fr(n[1], d))
