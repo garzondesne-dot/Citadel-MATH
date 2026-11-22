@@ -35,8 +35,8 @@
       @keyframes bootwalk { to { background-position-x: var(--bx, -640px); } }
       @media (prefers-reduced-motion: reduce) { #boot .walk { animation-duration: 1.6s; } }
     </style>
-    <script type="module" crossorigin src="./assets/index-B-mrHxXx.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-CSe5JQkq.css">
+    <script type="module" crossorigin src="./assets/index-Bpbwj5d6.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-D7ij8Rew.css">
   </head>
   <body>
     <div id="boot" role="status" aria-live="polite" data-k="boot"><i class="walk" id="boot-w" aria-hidden="true" data-k="boot-walk"></i><b id="boot-t">⏳ 불러오는 중…</b><p class="tip" id="boot-tip" data-k="boot-tip"></p><div class="slow"><span>인터넷이 느려요</span><button type="button" onclick="location.reload()">🔄 새로 고침</button></div></div>
@@ -46,7 +46,7 @@
         // 🚶 + 💡 (src/boot.ts 가 앱이 뜰 때 'citadel-boot' = { h: 내 용사 시트 파일, t: 켜진 기능의 팁 번호 } 를 이 기기에 적어 둠 · 처음 연 폰 = 로안 · 늘 맞는 팁 1 · 6 · 12)
         var BT = ['💡 학습지에 먼저 쓰고, 폰에 답해요.', '⚔ 칼 4개 = 공격 기회 4번. 틀려도 숫자만 바뀌어 다시!', '💡 막히면 「도움」을 눌러요. 개념 → 첫 줄 → 비슷한 예, 공짜예요.', '🎯 틀린 문제는 허수아비에서 숫자를 바꿔 다시 풀 수 있어요.', '⚔ 허수아비로 복습하면 다음 수업 첫 몬스터가 약해져요.', '📝 「준비 완료」 전에 학습지 빈칸을 다 채웠는지 봐요.', '🔥 다 맞히고 남은 칼은 「한 번 더」 연습이 돼요.', '💚 친구가 힐을 주면 칼이 하나 늘어요.', '✅ 학습지를 다 쓰면 선생님께 도장 받기 → 📜 +1.', '🏰 성채 던전은 진도를 나갈수록 방이 열려요.', '⚒ 모루에서 개념 카드를 만들 수 있어요. 처음 만든 카드는 예제를 맞혀야 완성!', '🐉 몬스터는 문제예요. 정답이 바로 몬스터의 약점!'];
         var bm = null; try { bm = JSON.parse(localStorage.getItem('citadel-boot') || 'null'); } catch (e) {}
-        var hs = bm && /^[\w.-]+\.webp$/.test(bm.h || '') ? bm.h : 'hero-sword-v5.webp', tl = (bm && bm.t && bm.t.length ? bm.t : [1, 6, 12]).filter(function (n) { return BT[n - 1]; });
+        var hs = bm && /^[\w.-]+\.webp$/.test(bm.h || '') ? bm.h : 'hero-sword-v7.webp', tl = (bm && bm.t && bm.t.length ? bm.t : [1, 6, 12]).filter(function (n) { return BT[n - 1]; });
         var bw = document.getElementById('boot-w'); bw.style.backgroundImage = 'url(art/heroes/' + hs + ')';
         // 🧙 #50 세밀 시트 = 칸 g = [가로, 세로, k] (앱이 적어 둠 · 처음 연 폰 = 로안 v5 = 256 × 144 · k 2) · 옛 80 × 64 시트 = g 없음(CSS 그대로) · 화면 = 칸 × 2 / k
         var g = bm && bm.h ? bm.g : [256, 144, 2];
