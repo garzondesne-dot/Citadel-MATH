@@ -4,6 +4,7 @@
 > - **메타인지 8 진행 (11/20 오후)**: 선생님 고르기 = 각성 묶음 주말 배포(외형 GPT 30명 다 온 뒤) · 전용 칭호 30 시안 확정 · 효과음 a · 운영 정리 3건 「한다」(선생님이 테스트 #1 에 직접 말씀 대기) · 🔨 #83 각성 묶음 → 테스트 #1(기준값 표 먼저 받기) · 메타인지 7 에 월요일 예약 무시 알림 · 정할 것은 고르기 창으로(DECISIONS).
 >
 > **✅ 메타인지 8 = session_014JJv1kdEKCDNEfQv1jGJga · 첫 할 일 (11/20 오후)** · ① 일곱 방 알림 끝 = 손발 테스트 #1 `session_014JJv1kfRHM8SAjsHDCgfJ5` · 손발 #7 `session_014JJv1hC8cMYvB3uDZ6sFn6` · 설계 `session_014JJv1gNxiR4EbqPvhG9Ym8` · **새 방(11/20 메타인지 7 이 만듦)**: ✋ 손발 #2 (게시판 던전 ATB) `session_014JJv1i25u9zUunrXW3xZfb` · 🐞 버그 사냥 `session_014JJv1hXDaQ2bEs66Tjvi11` · 🎨 에셋 방 `session_014JJv1iT9XzfLrj7P6GDYkT` · 📝 미래교육상 보고서 `session_014JJv1koo47jA3VwyRkf6Jk` ② CLAUDE.md · GLOSSARY 「메타인지 7」 → 8 ③ 대조 = 마지막 확인 커밋 ad6ed7e 뒤 새 커밋 없음 · 다른 점 없음 ④ ⏰ 11/23 08:10 예약은 아직 메타인지 7 방에 걸려 있음(trig_01AUZPUjJkKTxMnuXtpUKKQw · 이 방으로 옮기기 = 권한 막힘 → 선생님께 여쭘).
+> - **🧠 마지막 확인 커밋 (메타인지 8 · 11/22 마감)** = `1a370b5` · 오늘 정한 것 = 게시판 규칙 확정판(#101 · 스킬 1 · 2 · 실드 2칸 · 홀리 자동 · 응급붕대 · 부활 2/힐러 1 · 회복 자동) · UI 확정(#102 · `docs/handoff/board-atb/UI-FINAL-1122.md` · 시안 PmmLyiaMnqLbiwWRFFE8o4) · 수호자 「도와줘」(#103 · #104) · 전투 멈춤 없앰 · 빈자리 봇 = 빈 속성(#100) · 컨셉 몬스터 5동작(cm5-a · b · 함수 던전 18장) · 스킬 그림 9개 비교(#99 · 도감 WZPWDML9TLGXG41erZCMcV) · 개선단(#98 · ux98) · 📚 차시팩 #1 방(session_014JJv1kJi5yCyh44WVJKUYY) 새로 · 손발 #1 = ux98 가지에 모아 둠(main 합치기 = 선생님이 손발 #1 방에 「합쳐」 + 규칙 게시) · v1.1 = 선생님 「배포」 때 최신 전부.
 >
 > **🧠 메타인지 7 → 8 인계 (2026-11-20 오후 마감 · 선생님 「마감 · 새 방」 · 선생님 요금제 Ultra(주간 Pro 10배 · 11/23 월 05:00 까지) → 방을 늘려 병렬로)**
 >
