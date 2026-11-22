@@ -81,7 +81,7 @@
 > - **기다리는 것(선생님)**: ① 알림 중계 규칙 다시 게시(citadel-math-test · 프로젝트 이름 먼저 · 옛 citadel-math 잠김 확인) → 「게시함」 ② GPT 로안 시트 다시(새 대화 · zip v4-h00 폴더) ③ 12차시 팩 v2 가볍게 「📦 팩 올리기」 ④ 18번 교사 내 캠프 어디서 눌렀는지 ⑤ 로안 카드 다듬은 점 컨펌(로안 결과 보고) ⑥ 옛 기다림: 🧰 미믹(⏸) · 축제의 날 · 킵 상자 · 미래교육상 「①② 진행」 · 📥 수업 기록 4개 처리(위 표).
 > - **기다리는 것(손발 테스트 #1)**: 묶음 1~20 → #21 → 「✅ 완료 · 베타에서 확인할 것」 · 알림 중계(규칙 게시 뒤).
 > - **설계 방**: 묶음 #1 끝(카드 33장 · 메인이 작업대에 올림) · 지금 할 일 없음.
-> - **설계 방 (2026-11-22 밤)**: 🌊 묶음 #7 🏰 성채 레이드 보냄(규칙 · 수치 · 봇 모의 · 문항 · 에셋) · 선생님 「진행」 기다림 · 그 전 = 땅따먹기 v1 · 서버 팩 검산 끝.
+> - **설계 방 (2026-11-22 밤)**: 🌊 묶음 #8 🏰 성채 레이드 보냄(규칙 · 수치 · 봇 모의 · 문항 · 에셋) · 선생님 「진행」 기다림 · 그 전 = 땅따먹기 v1 · 서버 팩 검산 끝.
 > - **🧠 마지막 확인 커밋 (메타인지 6 마감)** = `ec45900`
 > - **메타인지 7 첫 할 일**: ① 손발 테스트 #1 `session_014JJv1kfRHM8SAjsHDCgfJ5` · 손발 #7 `session_014JJv1hC8cMYvB3uDZ6sFn6` · 설계 방 `session_014JJv1gNxiR4EbqPvhG9Ym8` · 모션 `session_014JJv1h6rMxAggRpE7f443N` 에 「🧠 새 메인 머리 = 메타인지 7 · 보고는 여기로」(옛 = `session_014JJv1hBEnQCcJrXvhEtnKk`) ② CLAUDE.md · GLOSSARY 「메타인지 6」 → 7 ③ 🧷 5번 대조(`ec45900` 뒤 git log) ④ 작업대 https://claude.ai/artifact/TRT3FTbyV27EqKRtWPTZru · 시안 https://claude.ai/artifact/Uj7jgeePofh2x9fmKzjqGZ · https://claude.ai/artifact/92y5uHBaWvACKgsCQWU6VF 다시 publish 하려면 Artifact read 로 받아서(이 방 scratchpad 는 사라짐).
 >
