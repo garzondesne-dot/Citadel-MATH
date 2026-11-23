@@ -27,6 +27,7 @@
 > | 📚 차시팩 #1 | session_014JJv1kJi5yCyh44WVJKUYY |
 > | 🌊 설계(F설계 1) | session_014JJv1gNxiR4EbqPvhG9Ym8 |
 > | 📝 미래교육상 보고서 | session_014JJv1koo47jA3VwyRkf6Jk |
+> | 🎨 에셋 방 2 (미니게임 시안 · 이미지 스킬 · 11/24 새로) | session_014JJv1ioE1uuu1uLzo26R9z |
 >
 > | 이 방에서 정한 것 (11/22 밤 ~ 11/24) | DECISIONS | 만들었음 · 배포 | 지침 |
 > |---|---|---|---|
