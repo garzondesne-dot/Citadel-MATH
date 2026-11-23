@@ -1,11 +1,14 @@
 # 13차시 레이드용 v2 (🔑 입장 열쇠) · 교사용 (2026-11-23 · 📚 차시팩 #1 · 메인 머리 요청 「13차시 교사용 레이드학습지」)
 #   학생용 gen_ws13v2.py 를 그대로 읽어 빈칸 · 괄호 · 서술 칸 · 메모 칸만 정답(빨간 글씨) · 풀이로 바꿈 → 같은 판 · 같은 쪽 배치
 #   정답 출처 = 운영 서버 13차시 팩(docs/handoff/design5/packs-server/ex-13.json)의 첫 판 정답 · sol 과 같은 숫자 · 독립 검산 = 아래 CHECK
-#   쓰는 법: PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers python3 tools/worksheet/gen_ws13v2_teacher.py <출력.pdf>
+#   쓰는 법: PLAYWRIGHT_BROWSERS_PATH=/opt/pw-browsers python3 tools/worksheet/gen_ws13v2_teacher.py <출력.pdf> [학생용 생성기=gen_ws13v2.py] [열쇠 json]
+#   (2026-11-23) v3 = gen_ws13v3.py + docs/handoff/pack-13keys/keys-13.json (열쇠만 바뀜)
 import os, sys, re, json, math
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(os.path.dirname(HERE))
 OUT = sys.argv[1]
+BASE = sys.argv[2] if len(sys.argv) > 2 else 'gen_ws13v2.py'
+KEYS = sys.argv[3] if len(sys.argv) > 3 else os.path.join(ROOT, 'docs/handoff/design/entry-keys/keys-13.json')
 
 # ── 독립 검산 (팩을 읽지 않고 다시 계산) ─────────────────────────────
 import itertools
@@ -30,8 +33,11 @@ bad = [k for k, ok in CHECK.items() if not ok]
 assert not bad, f'독립 검산 실패: {bad}'
 print('독립 검산', len(CHECK), '항목 모두 ✔')
 
-src = open(os.path.join(HERE, 'gen_ws13v2.py'), encoding='utf-8').read()
-src = src.replace(src[src.index('WSD = '):src.index('\n', src.index('WSD = '))], f'WSD = {HERE!r}')
+src = open(os.path.join(HERE, BASE), encoding='utf-8').read()
+if 'WSD = os.path' not in src:
+    src = src.replace(src[src.index('WSD = '):src.index('\n', src.index('WSD = '))], f'WSD = {HERE!r}')
+src = src.replace('os.path.abspath(__file__)', repr(os.path.join(HERE, BASE)))
+src = src.replace('def keybox(', 'def _keybox_student(')   # v3 처럼 생성기 안에 keybox 가 있으면 교사용 keybox 를 씀
 src = src.replace('OUT = sys.argv[1]', '')
 src = src.replace('from keybox import keybox, KCSS', 'from keybox import KCSS')
 
@@ -107,21 +113,22 @@ src = src.replace(old, "fq = lambda n, s, h: f'<div class=\"q\">{n}. {s}</div><d
 
 # 머리 · 제목 · 출력
 src = src.replace("hd = header('13차시', rng)", "hd = header('13차시 · 교사용', rng)")
-src = src.replace("레이드용 v2 (🔑 입장 열쇠)'\n", "레이드용 v2 (🔑 입장 열쇠) · 교사용 정답 · 학생 배포 ✕'\n")
-src = src.replace('<title>학습과정 13차시 레이드용 v2 (🔑 입장 열쇠)</title><style>{CSS}{EXTRA}{KCSS}</style>',
-                  '<title>학습과정 13차시 레이드용 v2 (🔑 입장 열쇠) · 교사용</title><style>{CSS}{EXTRA}{KCSS}{TCSS}</style>')
+src = re.sub(r"(레이드용 v\d \(🔑 입장 열쇠\))'\n", r"\1 · 교사용 정답 · 학생 배포 ✕'\n", src, count=1)
+src = re.sub(r"(<title>학습과정 13차시 레이드용 v\d \(🔑 입장 열쇠\))</title><style>\{CSS\}\{EXTRA\}\{KCSS\}</style>",
+             r"\1 · 교사용</title><style>{CSS}{EXTRA}{KCSS}{TCSS}</style>", src, count=1)
+assert '교사용 정답 · 학생 배포' in src
 assert '{TCSS}' in src
 
 def keybox(n, one=False):
     """학생용 keybox.py 와 같은 꼴 · 답 칸에 정답"""
     from wslib import v
-    d = json.load(open(os.path.join(ROOT, f'docs/handoff/design/entry-keys/keys-{n}.json'), encoding='utf8'))
+    d = json.load(open(KEYS, encoding='utf8'))
     C = '①②③④⑤'
     rows = ''
     for i, k in enumerate(d['keys']):
         q = k['vers'][0]
         use = k['help'].split('·')[-1].strip().replace('이 열쇠는 ', '').replace('에서 써요.', '')
-        ch = ' &nbsp; '.join(f'{C[j]} {v(c)}' for j, c in enumerate(q['ch']))
+        ch = ' &nbsp; '.join(f'{C[j]} {v(c)}' for j, c in enumerate(q['ch'])) if q['ch'] else '○ / ×'
         a = ('○' if str(q['a']).upper() in ('O', 'TRUE') else '×') if q['type'] == 'ox' else f'{C[int(q["a"])]} {q["ch"][int(q["a"])]}'
         rows += (f'<div class="kq"><b>🔑{i+1} {k["name"]}</b> <span class="kg"> · {use}</span><br>'
                  f'{v(q["q"])}<div class="kc">{ch} &nbsp;&nbsp; 답 ( {A(a)} )</div></div>')
