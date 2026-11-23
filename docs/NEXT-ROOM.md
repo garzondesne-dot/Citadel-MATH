@@ -1,4 +1,4 @@
-> **🧠 메타인지 8 → 9 인계 (2026-11-24 새벽 · 선생님 「마감 새방으로 옮겨」)** · 메타인지 8 = session_014JJv1kdEKCDNEfQv1jGJga · 대화가 여러 번 압축됨(앞부분은 DECISIONS · git log 로 대조) · **🧠 마지막 확인 커밋 = `5b61dfb`**
+> **🧠 메타인지 8 → 9 인계 (2026-11-24 새벽 · 선생님 「마감 새방으로 옮겨」)** · 메타인지 8 = session_014JJv1kdEKCDNEfQv1jGJga → **메타인지 9 = session_014JJv1jk5Hn3wF54gsfciU5 「🧠 모두의던전 머리 9」** · 대화가 여러 번 압축됨(앞부분은 DECISIONS · git log 로 대조) · **🧠 마지막 확인 커밋 = `5b61dfb`**
 >
 > **새 방 첫 일**: ① 이 절 → DECISIONS 11/22 ~ 11/24 줄 → CLASS-LOG 11/23 ② `git log 5b61dfb..origin/hero-v2` 훑고 다른 점 보고 ③ CLAUDE.md 「🧠 메타인지 방」 이름 · session 을 새 방으로(이 방이 만들면서 이미 고침 · 확인만) ④ 아래 「선생님 할 일」 번호 목록을 첫 인사로.
 >
