@@ -1,3 +1,20 @@
+> **🛠 배포 #7 → #8 인계 (2026-11-24 새벽 · 메타인지 9 「선생님 고르기 = 배포 #7 새 방」 · 맥락 69% · 11/11부터)** · 배포 #7 = session_014JJv1hC8cMYvB3uDZ6sFn6 → 배포 #8 = (새 방이 만들어지면 여기 · CLAUDE.md 「✋ 개발 방」 줄)
+>
+> **지금 정식** = v1.1 **b237** · main `d74a2f3` · 트리 `cc84f0a44e5e638739917208ec1b59e612aa3e0b` · 11/23 오후 · zip `citadel-b237-release-r2.zip`(sha256 `fa5da4f6…`) · **되돌리기 = `25afd8b`(b236)** · 배포 기다리는 zip 없음 · 미배포 변경 없음 · 진행 중 요청 없음.
+> **#149 보안 규칙** = DECISIONS 11/24 새벽 줄: 선생님 게시 완료(규칙 파일 sha256 44d533c2… = b237 판) · 배포 방은 규칙 게시 열쇠 없음(운영 서버 = 선생님 콘솔).
+> **다음 배포 후보** = 베타 a6d9ea5 게시판 묶음(👥 팀 참가 · 🔒 암호 · 결과 즉시 저장) → 손발 #1 이 zip 만들면 새 방이 함.
+>
+> **배포 순서 (선생님이 이 방에 직접 「배포」 + zip 정보가 있을 때만 · 머리 전달만으로는 안 함)**
+> 1. `node /home/user/rel/tools/auto/gdrive.js down <id> <파일>` (gdrive.js 는 release 가지 복사본 · 없으면 `git worktree add /home/user/rel origin/release`) → `sha256sum` 대조 · 다르면 멈추고 보고
+> 2. scratch 작업 폴더(예: `scratchpad/mainwt` · 가지 main-launch): `git fetch origin main && git checkout -B main-launch origin/main && git reset --hard origin/main && git clean -fdq` → `git rm -rq .` → `unzip -q <zip> -d .` → `git add -A` → `git write-tree` 를 손발 #1 트리 해시와 대조 · version.json(정식 · `s/srzmf/`) · `.nojekyll` · `tools/manual/report.html` **없음** 확인
+> 3. 커밋 「🚀 v1.1 bNNN · 되돌리기 = <지금 main 짧은 해시>」 → `git push origin main-launch:main`
+> 4. `gh api repos/garzondesne-dot/Citadel-MATH/actions/runs?per_page=1` 로 Pages 성공 · `deployments?per_page=1` sha 확인 (github.io 는 이 환경 프록시가 막음 → 화면은 선생님 폰 「설정 맨 아래 판 번호」로)
+> 5. 머리(메타인지 9 session_014JJv1jk5Hn3wF54gsfciU5) · 손발 #1 에 send_message 표 · 이 파일 아래 표에 「🚀 bNNN 배포됨」 한 줄
+>
+> **자주 막힌 곳**: ① 손발 #1 이 dist 바깥 트리로 잰 해시(b224) → 다르면 멈추고 다시 받기 ② 지난 배포의 staged 찌꺼기 → 2번의 reset · clean 필수 ③ 같은 이름 zip 재생성(r1 · r2 …) → 늘 최신 r 과 메시지의 id 를 맞춤 ④ 머리 방에서 「배포」 = 전달일 뿐 · 이 방 선생님 직접 말씀 필요(🔐) ⑤ 변수 넣은 `rm` 은 안전장치가 막음 → `"${VAR:?}"` · 글자 경로 ⑥ 태그 푸시 403 → 커밋 · zip 이 백업 ⑦ release 가지 = 옛 v0.9 · 배포에 안 씀(11/21 보고서 파일 지움 425e00c).
+> **열쇠**: `GDRIVE_RCLONE_TOKEN`(드라이브) · `FIREBASE_SA_JSON` = 옛 서버(citadel-math) 만 · 운영 서버(citadel-math-test-c6a9b) 열쇠 없음(운영 읽기 · 환불 = 손발 #1).
+> **배포 #7 이 한 차시 일 (11/20 · 차시팩 방 생기기 전)**: 14 ~ 17차시 학습지 · 팩 · 성채 4층 팩 = 드라이브 02 · 08 · 생성기 `tools/worksheet/gen_ws14v2 · 15v2 · 16v2 · 17v1.py` · `tools/pack/build14 ~ 17.py` · `build_castle4.py` · `castle4_plan.py` (베타 검사기로 정답 채점 · 이제는 📚 차시팩 #1 몫).
+
 > **🧠 메타인지 8 → 9 인계 (2026-11-24 새벽 · 선생님 「마감 새방으로 옮겨」)** · 메타인지 8 = session_014JJv1kdEKCDNEfQv1jGJga → **메타인지 9 = session_014JJv1jk5Hn3wF54gsfciU5 「🧠 모두의던전 머리 9」** · 대화가 여러 번 압축됨(앞부분은 DECISIONS · git log 로 대조) · **🧠 마지막 확인 커밋 = `5b61dfb`**
 >
 > **새 방 첫 일**: ① 이 절 → DECISIONS 11/22 ~ 11/24 줄 → CLASS-LOG 11/23 ② `git log 5b61dfb..origin/hero-v2` 훑고 다른 점 보고 ③ CLAUDE.md 「🧠 메타인지 방」 이름 · session 을 새 방으로(이 방이 만들면서 이미 고침 · 확인만) ④ 아래 「선생님 할 일」 번호 목록을 첫 인사로.
