@@ -92,7 +92,7 @@ S['ajae-tv-1'] = () => `<div class="screen tv"><div class="rays"></div><div clas
  <div class="topbar"><span class="t">😆 아재 퀴즈</span><span class="pill">3회차</span>
   ${[1,2,3,4,5,6].map(n=>`<span class="pill ${n===2?'on':''}">${n}</span>`).join('')}
   <span class="sp"></span><span style="color:var(--muted)">참가 24명</span><div class="ring" style="--p:56%;width:50px;height:50px;font-size:22px"><span>17</span></div></div>
- <img class="host" src="../assets/minigame/ajae-host-talk-v1.png" style="left:40px;top:150px;width:384px;height:384px">
+ <img class="host" src="sage-host-talk.png" style="left:-90px;top:190px;width:512px;height:288px">
  <div class="bubble" style="left:410px;top:150px;font-size:54px;">자동차를 톡 치면?</div>
  <div class="blanks" style="left:520px;top:330px"><div class="blank">?</div><div class="blank">?</div></div>
  <div style="position:absolute;left:430px;top:458px;color:var(--muted);font-size:18px">폰에서 글자를 골라 맞혀요 · 2글자</div>
@@ -115,7 +115,7 @@ S['ajae-tv-2'] = () => `<div class="screen tv"><div class="rays"></div><div clas
   ${[1,2,3,4,5,6].map(n=>`<span class="pill ${n===2?'on':''}">${n}</span>`).join('')}
   <span class="sp"></span><span style="color:var(--gold);font-weight:700">정답 공개!</span></div>
  <div class="burst" style="left:420px;top:180px;width:420px;height:420px"></div>
- <img class="host" src="../assets/minigame/ajae-host-laugh-v1.png" style="left:40px;top:150px;width:384px;height:384px">
+ <img class="host" src="sage-host-laugh.png" style="left:-90px;top:190px;width:512px;height:288px">
  <div class="bubble" style="left:410px;top:120px;font-size:40px;">자동차를 톡 치면?</div>
  <div class="blanks" style="left:520px;top:300px"><div class="blank fill">카</div><div class="blank fill">톡</div></div>
  <div class="why" style="left:440px;top:440px;font-size:34px">카(car) + 톡 = <span style="color:var(--gold)">카톡</span> 😆</div>
@@ -137,7 +137,7 @@ S['ajae-ph-1'] = () => `<div class="screen ph"><div class="rays"></div><div clas
   <b style="color:var(--gold)">😆 아재 퀴즈</b><span class="pill on" style="font-size:13px">2 / 6</span><span class="sp"></span>
   <div class="ring" style="--p:56%;width:44px;height:44px;font-size:18px"><span>17</span></div></div>
  <div style="position:absolute;left:14px;right:14px;top:78px;display:flex;align-items:flex-end;gap:6px">
-  <img src="../assets/minigame/ajae-host-talk-v1.png" style="width:110px;height:110px;image-rendering:pixelated;margin-bottom:-8px">
+  <div style="width:112px;height:90px;overflow:hidden;flex:none;margin-bottom:-6px"><img src="sage-host-talk.png" style="width:256px;height:144px;margin:-50px 0 0 -62px;image-rendering:pixelated"></div>
   <div class="bubble" style="position:relative;font-size:24px;padding:14px 16px;flex:1;border-width:3px">자동차를 톡 치면?</div></div>
  <div class="blanks" style="left:50%;transform:translateX(-50%);top:226px;gap:14px"><div class="blank fill" style="width:84px;height:84px;font-size:48px;box-shadow:0 0 0 3px #000">카</div><div class="blank" style="width:84px;height:84px;font-size:48px">□</div></div>
  <div style="position:absolute;left:0;right:0;top:322px;text-align:center;color:var(--muted);font-size:14px">글자를 눌러 빈칸을 채우면 바로 확인!</div>
@@ -163,79 +163,102 @@ S['ajae-ph-2'] = () => `<div class="screen ph"><div class="rays"></div><div clas
  <div class="note" style="left:16px;top:520px">틀린 글자 조합 = 빈칸 흔들림 + 칩 돌려줌(벌 없음 · 30초 안에 다시)</div>
 </div>`;
 
-// 알까기 판 배치
-function alkPieces(cx, cy, R, d, meIdx, opt={}) {
-  const pts = [[.0,.0],[.32,-.2],[-.3,.25],[.55,.35],[-.58,-.3],[.15,.6],[-.15,-.62],[.68,-.35],[-.7,.18],[.4,.05],[-.35,-.05],[.05,.32],[.25,-.48],[-.48,.52],[.62,.62],[-.05,-.3]];
-  return pts.map(([x,y],i)=>{
-    let cls = i===meIdx?'me':''; if (i===opt.ghost) cls+=' ghost';
-    const ring = ['#ff6b6b','#6cc6ea','#9be07a','#c69cff','#ffd36a','#ff9fd1','#fff'][i%7];
-    return egg(i, cx+x*R, cy+y*R, d, cls, ring) + (i===opt.crown?`<div class="crown" style="left:${cx+x*R}px;top:${cy+y*R-d/2+4}px">👑</div>`:'') + (opt.names?`<div class="lbl" style="left:${cx+x*R}px;top:${cy+y*R+d/2+2}px">${NM[i]}</div>`:'');
-  }).join('');
+// ───────── 🥏 알까기 v2 (11/24 선생님 피드백: 판 크게 · 알 크게 + 이름 · TV = 판 전체 · 폰 = 내 알 따라가는 창 + 확대 · 축소)
+// 판 단위: 알 반지름 0.9 (설계 v1 0.7 → 0.9 제안) · 판 반지름 = max(5.5, 2 + 1.2√n) 그대로 · 28명 = 8.3
+const N28 = 28, BR = Math.max(5.5, 2 + 1.2 * Math.sqrt(N28)), ER = 0.9;
+const NM2 = NM.concat(['정하율','문가온','배서윤','고은찬']);
+const ALK = (() => { let s = 7; const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647; const P = [[-3.2, 2.2]];
+  while (P.length < N28) { const a = rnd() * 6.283, r = Math.sqrt(rnd()) * (BR - 1.3), x = Math.cos(a) * r, y = Math.sin(a) * r;
+    if (P.every(([u, v]) => Math.hypot(u - x, v - y) > 2 * ER + 0.35)) P.push([x, y]); } return P; })();
+const ME = 0, CROWN = 5, GHOST = 11, RINGS = ['#ff6b6b','#6cc6ea','#9be07a','#c69cff','#ffd36a','#ff9fd1','#ffffff'];
+// sc = 화면 px / 판 단위 · (ox, oy) = 판 가운데가 놓일 화면 자리
+function alkDraw(ox, oy, sc, o = {}) {
+  let h = `<img class="board" src="../assets/minigame/alk-board-v1.png" style="left:${ox - BR * sc * 1.06}px;top:${oy - BR * sc * 1.06}px;width:${BR * sc * 2.12}px;height:${BR * sc * 2.12}px;${o.dim ? 'filter:brightness(.55)' : ''}">`;
+  const d = 2 * ER * sc;
+  ALK.forEach(([x, y], i) => {
+    if (i === o.skip) return;
+    const X = ox + x * sc, Y = oy + y * sc;
+    if (o.clip && (X < -d || X > o.clip[0] + d || Y < o.clip[1] - d || Y > o.clip[2] + d)) return;
+    let cls = i === ME ? 'me' : ''; if (i === GHOST) cls += ' ghost';
+    h += egg(i, X, Y, d, cls, RINGS[i % 7]);
+    if (i === CROWN) h += `<div class="crown" style="left:${X}px;top:${Y - d / 2 + 6}px;font-size:${Math.max(16, d * .38)}px">👑</div>`;
+    if (o.names !== false) h += `<div class="lbl" style="left:${X}px;top:${Y + d / 2 - 2}px;font-size:${o.fs || 12}px;${i === ME ? 'background:#ebb84f;color:#1a120a;font-weight:700' : ''}">${i === ME ? '나' : NM2[i]}</div>`;
+  });
+  return h;
 }
-
-// ───────── 🥏 알까기 · TV
-S['alk-tv'] = () => { const cx=470, cy=388, R=255; return `<div class="screen tv"><div class="abyss"></div>
- <div class="topbar"><span class="t">🥏 알까기 난장판</span><span class="pill">참가 16명</span><span class="pill">2 / 3판(보상)</span><span class="sp"></span>
+S['alk-tv'] = () => { const sc = 316 / (BR * 1.06), ox = 450, oy = 400; return `<div class="screen tv"><div class="abyss"></div>
+ <div class="topbar"><span class="t">🥏 알까기 난장판</span><span class="pill">참가 28명</span><span class="sp"></span>
   <span style="font-size:15px;color:var(--muted)">남은 시간</span><b style="font-size:30px;color:var(--gold)">1:23</b></div>
- <img class="board" src="../assets/minigame/alk-board-v1.png" style="left:${cx-300}px;top:${cy-300}px;width:600px;height:600px">
- ${alkPieces(cx, cy, R, 52, -1, {crown:3, ghost:10, names:true})}
- ${egg(14, cx+330, cy+190, 52, 'fall', '#ff6b6b')}
- <div class="lbl" style="left:${cx+330}px;top:${cy+214}px;color:#ff9a9a">💨 떨어짐!</div>
- <div style="position:absolute;left:${cx+180}px;top:${cy+110}px;width:120px;height:4px;background:repeating-linear-gradient(90deg,#fff8 0 8px,#0000 8px 14px);transform:rotate(28deg);transform-origin:left"></div>
- <div class="box" style="position:absolute;right:24px;top:92px;width:330px;height:310px;padding:14px">
+ ${alkDraw(ox, oy, sc, { fs: 12 })}
+ ${egg(14, ox + (BR + .9) * sc * .72, oy + (BR + .9) * sc * .7, 2 * ER * sc, 'fall', '#ff6b6b')}
+ <div class="lbl" style="left:${ox + (BR + .9) * sc * .72}px;top:${oy + (BR + .9) * sc * .7 + 22}px;color:#ff9a9a">💨 ${NM2[14]} 떨어짐!</div>
+ <div class="box" style="position:absolute;right:20px;top:88px;width:330px;height:340px;padding:14px">
   <div style="font-weight:700;color:var(--gold);font-size:19px;margin-bottom:4px">🏆 점수</div>
   <ul class="rank">
-   <li style="height:56px"><span class="no n1">1</span><div class="hmini">${hero(3)}</div><div>${NM[3]} 👑</div><span class="pt">14</span></li>
-   <li style="height:56px"><span class="no n2">2</span><div class="hmini">${hero(7)}</div><div>${NM[7]}</div><span class="pt">11</span></li>
-   <li style="height:56px"><span class="no n3">3</span><div class="hmini">${hero(1)}</div><div>${NM[1]}</div><span class="pt">9</span></li>
-   <li style="height:56px"><span class="no nx">4</span><div class="hmini">${hero(12)}</div><div>${NM[12]}</div><span class="pt">8</span></li>
+   <li style="height:58px"><span class="no n1">1</span><div class="hmini">${hero(CROWN)}</div><div>${NM2[CROWN]} 👑</div><span class="pt">14</span></li>
+   <li style="height:58px"><span class="no n2">2</span><div class="hmini">${hero(7)}</div><div>${NM2[7]}</div><span class="pt">11</span></li>
+   <li style="height:58px"><span class="no n3">3</span><div class="hmini">${hero(1)}</div><div>${NM2[1]}</div><span class="pt">9</span></li>
+   <li style="height:58px"><span class="no nx">4</span><div class="hmini">${hero(12)}</div><div>${NM2[12]}</div><span class="pt">8</span></li>
   </ul></div>
- <div class="box feed" style="position:absolute;right:24px;top:416px;width:330px;height:200px;padding:12px 14px">
+ <div class="box feed" style="position:absolute;right:20px;top:442px;width:330px;height:190px;padding:12px 14px">
   <div style="font-weight:700;color:var(--gold);font-size:17px;margin-bottom:2px">📣 방금</div>
-  <div><b>${NM[7]}</b> → ${NM[14]} 떨어뜨림 <b>+3</b></div>
-  <div><b>${NM[1]}</b> → ${NM[5]} 맞힘 <b>+1</b></div>
-  <div><b>${NM[12]}</b> → 👑 ${NM[3]}? 아깝다!</div>
-  <div style="color:var(--muted)">${NM[10]} 되살아남(무적 2초)</div></div>
- <div class="note" style="left:20px;bottom:18px">판 = 스킬로 만든 나무 원판(alk-board-v1) · 알 = 장착 용사 머리 · 테두리 색 = 사람마다 · 반투명 점선 = 되살아난 무적 · 👑 = 지금 1등(+5)</div>
+  <div><b>${NM2[7]}</b> → ${NM2[14]} 떨어뜨림 <b>+3</b></div>
+  <div><b>${NM2[1]}</b> → ${NM2[20]} 맞힘 <b>+1</b></div>
+  <div style="color:var(--muted)">${NM2[GHOST]} 되살아남(무적 2초)</div></div>
+ <div class="note" style="left:${ox + BR * sc + 40}px;bottom:16px;max-width:330px">28명 판 전체 = 한 화면 · 알 지름 ${Math.round(2 * ER * sc)}px · 이름표 = 알 아래</div>
 </div>`; };
-
-// ───────── 🥏 알까기 · 폰 ① 당겨서 조준
-S['alk-ph-1'] = () => { const cx=195, cy=470, R=158, me=0; const mx=cx, my=cy; return `<div class="screen ph"><div class="abyss"></div>
- <div style="position:absolute;left:10px;right:10px;top:10px;height:52px;display:flex;align-items:center;gap:8px;padding:0 12px" class="box">
-  <b style="color:var(--gold)">🥏 알까기</b><span class="sp"></span><span style="color:var(--muted);font-size:13px">남은</span><b style="color:var(--gold);font-size:20px">1:23</b></div>
- <div class="box" style="position:absolute;left:10px;right:10px;top:70px;height:40px;display:flex;align-items:center;gap:10px;padding:0 12px;font-size:14px">
-  <span>내 점수 <b style="color:var(--gold)">6</b></span><span style="color:var(--muted)">· 5등</span><span class="sp"></span><span style="font-size:12px;color:var(--muted)">1등 ${NM[3]} 14 👑</span></div>
- <img class="board" src="../assets/minigame/alk-board-v1.png" style="left:${cx-188}px;top:${cy-188}px;width:376px;height:376px">
- ${alkPieces(cx, cy, R, 34, me, {crown:3, ghost:10})}
+// 폰: 내 알을 가운데 두는 창(카메라) · 창 밖 알 = 가장자리 화살표 + 이름
+function edgeMarks(ox, oy, sc, W, top, bot) {
+  const cx = W / 2, cy = (top + bot) / 2; let h = '';
+  ALK.forEach(([x, y], i) => { const X = ox + x * sc, Y = oy + y * sc, rr = ER * sc * .6; if (X > -rr && X < W + rr && Y > top - rr && Y < bot + rr) return;
+    const dx = X - cx, dy = Y - cy, k = Math.min((W / 2 - 22) / Math.abs(dx || 1e-6), ((bot - top) / 2 - 22) / Math.abs(dy || 1e-6));
+    const ex = cx + dx * k, ey = cy + dy * k, ang = Math.atan2(dy, dx) * 180 / Math.PI;
+    h += `<div style="position:absolute;left:${ex}px;top:${ey}px;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:1px">
+      <div style="width:0;height:0;border:8px solid transparent;border-left:13px solid ${i === CROWN ? '#ffd36a' : '#ffffffcc'};transform:rotate(${ang}deg)"></div>
+      <div style="font-size:10px;background:#000b;padding:0 4px;border-radius:3px;white-space:nowrap">${i === CROWN ? '👑' : ''}${NM2[i]}</div></div>`; });
+  return h;
+}
+const zoomUI = (z) => `<div style="position:absolute;left:10px;top:${z.top}px;display:flex;flex-direction:column;gap:8px;z-index:3">
+  <div class="btn dark" style="width:48px;height:48px;font-size:22px">＋</div><div class="btn dark" style="width:48px;height:48px;font-size:22px">－</div>
+  <div class="btn ${z.all ? 'gold' : 'dark'}" style="width:48px;height:48px;font-size:12px;line-height:1.1;text-align:center">⛶<br>전체</div></div>`;
+const phTop = (t) => `<div style="position:absolute;left:10px;right:10px;top:10px;height:52px;display:flex;align-items:center;gap:8px;padding:0 12px;z-index:3" class="box">
+  <b style="color:var(--gold)">🥏 알까기</b><span style="font-size:13px">내 점수 <b style="color:var(--gold)">6</b> · 5등</span><span class="sp"></span><span style="color:var(--muted);font-size:13px">남은</span><b style="color:var(--gold);font-size:20px">${t}</b></div>`;
+S['alk-ph-1'] = () => { const sc = 33, [mx, my] = ALK[ME], cxu = mx * .6, cyu = my * .6, ox = 195 - cxu * sc, oy = 470 - cyu * sc, top = 70, bot = 790, MX = ox + mx * sc, MY = oy + my * sc;
+  const tgt = ALK.map((p, i) => [p, i]).filter(([p, i]) => i !== ME).sort((a, b) => Math.hypot(a[0][0] - mx - 1.5, a[0][1] - my + 2.2) - Math.hypot(b[0][0] - mx - 1.5, b[0][1] - my + 2.2))[0];
+  const tx = ox + tgt[0][0] * sc, ty = oy + tgt[0][1] * sc, ang = Math.atan2(ty - MY, tx - MX);
+  return `<div class="screen ph"><div class="abyss"></div>
+ ${alkDraw(ox, oy, sc, { fs: 11 })}
  <svg style="position:absolute;left:0;top:0" width="390" height="844">
-  <line x1="${mx}" y1="${my}" x2="${mx-36}" y2="${my+70}" stroke="#ebb84f" stroke-width="5" stroke-linecap="round"/>
-  <circle cx="${mx-36}" cy="${my+70}" r="14" fill="#ebb84f55" stroke="#ebb84f" stroke-width="3"/>
-  <line x1="${mx}" y1="${my}" x2="${cx+0.32*R}" y2="${cy-0.2*R}" stroke="#fff" stroke-width="3" stroke-dasharray="6 6"/>
-  <line x1="${cx+0.32*R}" y1="${cy-0.2*R}" x2="${cx+0.32*R+70}" y2="${cy-0.2*R-45}" stroke="#ff5a6e" stroke-width="3" stroke-dasharray="6 6"/>
-  <polygon points="${cx+0.32*R+70},${cy-0.2*R-45} ${cx+0.32*R+54},${cy-0.2*R-44} ${cx+0.32*R+64},${cy-0.2*R-31}" fill="#ff5a6e"/>
+  <line x1="${MX}" y1="${MY}" x2="${MX - Math.cos(ang) * 80}" y2="${MY - Math.sin(ang) * 80}" stroke="#ebb84f" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="${MX - Math.cos(ang) * 80}" cy="${MY - Math.sin(ang) * 80}" r="16" fill="#ebb84f55" stroke="#ebb84f" stroke-width="3"/>
+  <line x1="${MX}" y1="${MY}" x2="${tx - Math.cos(ang) * 30}" y2="${ty - Math.sin(ang) * 30}" stroke="#fff" stroke-width="3" stroke-dasharray="6 6"/>
+  <line x1="${tx}" y1="${ty}" x2="${tx + Math.cos(ang - .35) * 110}" y2="${ty + Math.sin(ang - .35) * 110}" stroke="#ff5a6e" stroke-width="3" stroke-dasharray="6 6"/>
  </svg>
- <div class="lbl" style="left:${cx+0.32*R+60}px;top:${cy-0.2*R-80}px;color:#ff9aa6;font-size:13px">이대로면 떨어짐!</div>
- <div class="box" style="position:absolute;left:12px;right:12px;bottom:92px;padding:10px 12px;display:flex;align-items:center;gap:10px;font-size:15px">
-  <span>세기</span><div style="display:flex;gap:4px">${[1,1,0].map(v=>`<div style="width:34px;height:14px;border:2px solid #000;background:${v?'#ebb84f':'#3a2f25'}"></div>`).join('')}</div><b style="color:var(--gold)">중</b><span class="sp"></span><span style="color:var(--muted);font-size:13px">놓으면 발사</span></div>
- <div style="position:absolute;left:12px;right:12px;bottom:22px;text-align:center;color:var(--muted);font-size:13px">내 알(금테)을 누르고 뒤로 당겼다 놓아요<br>쏘면 4초 쉬어요 — 그동안 맞으면 밀려요</div>
- <div class="note" style="left:12px;top:118px">점선 = 내 폰에만 · 첫 부딪힘 알 + 밀려갈 방향 · 판 밖이면 빨강</div>
+ <div class="lbl" style="left:${tx + Math.cos(ang - .35) * 110}px;top:${ty + Math.sin(ang - .35) * 110 - 24}px;color:#ff9aa6;font-size:12px">이대로면 떨어짐!</div>
+ ${edgeMarks(ox, oy, sc, 390, top, bot)}
+ ${phTop('1:23')}
+ ${zoomUI({ top: 560 })}
+ <div class="box" style="position:absolute;left:12px;right:12px;bottom:14px;padding:8px 12px;display:flex;align-items:center;gap:10px;font-size:14px;z-index:3">
+  <span>세기</span><div style="display:flex;gap:4px">${[1,1,0].map(v=>`<div style="width:30px;height:12px;border:2px solid #000;background:${v?'#ebb84f':'#3a2f25'}"></div>`).join('')}</div><b style="color:var(--gold)">중</b><span class="sp"></span><span style="color:var(--muted);font-size:12px">놓으면 발사 · 쏘면 4초 쉼</span></div>
+ <div class="note" style="left:12px;top:72px;z-index:4">창 = 내 알을 따라감(판 쪽으로 조금 당겨 빈 하늘을 덜 보임 · 판의 약 65%) · 창 밖 알 = 가장자리 화살표 + 이름 · 두 손가락 = 판만 확대 · 축소</div>
 </div>`; };
-
-// ───────── 🥏 알까기 · 폰 ② 쿨타임 + 떨어짐
-S['alk-ph-2'] = () => { const cx=195, cy=470, R=158; return `<div class="screen ph"><div class="abyss"></div>
- <div style="position:absolute;left:10px;right:10px;top:10px;height:52px;display:flex;align-items:center;gap:8px;padding:0 12px" class="box">
-  <b style="color:var(--gold)">🥏 알까기</b><span class="sp"></span><span style="color:var(--muted);font-size:13px">남은</span><b style="color:var(--gold);font-size:20px">1:19</b></div>
- <img class="board" src="../assets/minigame/alk-board-v1.png" style="left:${cx-188}px;top:${cy-188}px;width:376px;height:376px;filter:brightness(.55)">
- ${alkPieces(cx, cy, R, 34, -1, {crown:3, ghost:10})}
+S['alk-ph-2'] = () => { const sc = 390 / (BR * 2.25), ox = 195, oy = 430; return `<div class="screen ph"><div class="abyss"></div>
+ ${alkDraw(ox, oy, sc, { fs: 9 })}
+ ${phTop('1:21')}
+ ${zoomUI({ top: 620, all: true })}
+ <div class="toast" style="top:680px;left:70px;right:12px;background:#1f1a16ee;color:var(--text);border-color:#c99a3a;font-size:14px;padding:10px">⛶ 전체 보기 · 내 알을 누르면 다시 따라가기</div>
+ <div class="note" style="left:12px;top:72px;z-index:4">「⛶ 전체」 = 판 전체(알이 작아짐 · 이름 작게) · 조준은 따라가기 창에서 권장</div>
+</div>`; };
+S['alk-ph-3'] = () => { const sc = 33, [mx, my] = ALK[ME], ox = 195 - mx * .6 * sc, oy = 470 - my * .6 * sc; return `<div class="screen ph"><div class="abyss"></div>
+ ${alkDraw(ox, oy, sc, { fs: 11, dim: true, skip: ME })}
  <div style="position:absolute;inset:0;background:#0008"></div>
- <div style="position:absolute;left:0;right:0;top:300px;text-align:center">
+ ${phTop('1:19')}
+ <div style="position:absolute;left:0;right:0;top:330px;text-align:center">
   <div style="font-size:20px;color:#ff9aa6;font-weight:700">💨 떨어졌어요!</div>
   <div style="font-size:96px;font-weight:700;color:#fff;text-shadow:0 6px 0 #000;line-height:1.2">2</div>
-  <div style="font-size:15px">${NM[7]} 이(가) 밀었어요</div>
+  <div style="font-size:15px">${NM2[7]} 이(가) 밀었어요</div>
   <div style="font-size:13px;color:var(--muted);margin-top:6px">돌아오면 2초 무적 · 점수는 그대로</div></div>
- <div class="box" style="position:absolute;left:12px;right:12px;bottom:22px;padding:10px 12px;display:flex;align-items:center;gap:10px;font-size:15px">
-  <div class="hmini">${hero(0)}</div><div>내 점수 <b style="color:var(--gold)">6</b><div style="color:var(--muted);font-size:13px">떨어뜨림 1 · 맞힘 3</div></div></div>
- <div class="note" style="left:12px;top:76px">떨어짐 = 판 어둡게 + 3·2·1 · 누가 밀었는지 한 줄</div>
+ <div class="note" style="left:12px;top:72px">떨어짐 = 판 어둡게 + 3·2·1 · 먼지는 코드 효과(그림 주문 안 함)</div>
 </div>`; };
 
 const s = new URLSearchParams(location.search).get('s') || 'ajae-tv-1';
