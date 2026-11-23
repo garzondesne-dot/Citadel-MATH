@@ -222,9 +222,9 @@ S['alk-tv'] = () => { const sc = 316 / (BR * 1.06), ox = 450, oy = 400; return `
  <svg style="position:absolute;left:0;top:0;pointer-events:none" width="1280" height="720"><circle cx="${ox}" cy="${oy}" r="${RHO * sc}" fill="none" stroke="#ffffff33" stroke-width="2" stroke-dasharray="6 8"/></svg>
 </div>`; };
 // 폰: 내 알을 가운데 두는 창(카메라) · 창 밖 알 = 가장자리 화살표 + 이름
-function edgeMarks(ox, oy, sc, W, top, bot) {
+function edgeMarks(ox, oy, sc, W, top, bot, PTS = ALK) {
   const cx = W / 2, cy = (top + bot) / 2; let h = '';
-  ALK.forEach(([x, y], i) => { const X = ox + x * sc, Y = oy + y * sc, rr = ER * sc * .6; if (X > -rr && X < W + rr && Y > top - rr && Y < bot + rr) return;
+  PTS.forEach(([x, y], i) => { const X = ox + x * sc, Y = oy + y * sc, rr = ER * sc * .6; if (X > -rr && X < W + rr && Y > top - rr && Y < bot + rr) return;
     const dx = X - cx, dy = Y - cy, k = Math.min((W / 2 - 22) / Math.abs(dx || 1e-6), ((bot - top) / 2 - 22) / Math.abs(dy || 1e-6));
     const ex = cx + dx * k, ey = cy + dy * k, ang = Math.atan2(dy, dx) * 180 / Math.PI;
     h += `<div style="position:absolute;left:${ex}px;top:${ey}px;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:1px">
@@ -256,8 +256,38 @@ S['alk-ph-1'] = () => { const sc = 59 / (2 * ER), [mx, my] = ALK[ME], cxu = mx *
   <span>세기</span><div style="display:flex;gap:4px">${[1,1,0].map(v=>`<div style="width:30px;height:12px;border:2px solid #000;background:${v?'#ebb84f':'#3a2f25'}"></div>`).join('')}</div><b style="color:var(--gold)">중</b><span class="sp"></span><span style="color:var(--muted);font-size:12px">놓으면 발사 · 쏘면 4초 쉼</span></div>
  <div class="note" style="left:12px;top:72px;z-index:4">창 = 내 알을 따라감(판 쪽으로 조금 당김 · 28명 판이면 폭의 약 30%) · 창 밖 알 = 가장자리 화살표 + 이름 · 두 손가락 = 판만 확대 · 축소</div>
 </div>`; };
+// ① 출발 직전 (원 위 내 알이 가운데)
+S['alk-ph-start'] = () => { const sc = 59 / (2 * ER), [mx, my] = START[ME], ox = 195 - mx * sc, oy = 440 - my * sc; return `<div class="screen ph"><div class="abyss"></div>
+ ${alkDraw(ox, oy, sc, { fs: 11, pts: START })}
+ <svg style="position:absolute;left:0;top:0" width="390" height="844"><circle cx="${ox}" cy="${oy}" r="${RHO * sc}" fill="none" stroke="#ffffff55" stroke-width="2" stroke-dasharray="6 8"/></svg>
+ ${edgeMarks(ox, oy, sc, 390, 70, 790, START)}
+ ${phTop('2:30')}
+ <div class="toast" style="top:250px;background:#1f1a16ee;color:var(--gold);border-color:#c99a3a;font-size:30px">준비 · 3</div>
+ <div class="lbl" style="left:${ox}px;top:${oy - 10}px;font-size:12px">● 판 가운데 ↑</div>
+ ${zoomUI({ top: 560 })}
+ <div class="box" style="position:absolute;left:12px;right:12px;bottom:14px;padding:10px 12px;font-size:14px;text-align:center;z-index:3">모두 가운데에서 <b style="color:var(--gold)">같은 거리</b> · 자리는 무작위</div>
+ <div class="note" style="left:12px;top:72px;z-index:4">출발 = 내 알이 화면 가운데 · 점선 = 출발 원 · 양옆 = 이웃 알 이름 · 창 밖 알 = 가장자리 ▶</div>
+</div>`; };
+// ③ 쏜 뒤 4초 쉬는 중
+S['alk-ph-cool'] = () => { const sc = 59 / (2 * ER), [mx, my] = ALK[ME], ox = 195 - mx * .6 * sc, oy = 470 - my * .6 * sc, MX = ox + mx * sc, MY = oy + my * sc;
+  const near = ALK.map((p, i) => [p, i]).filter(([p, i]) => { const X = ox + p[0] * sc, Y = oy + p[1] * sc; return i !== ME && X > 60 && X < 330 && Y > 140 && Y < 720; }).sort((a, b) => Math.hypot(a[0][0] - mx, a[0][1] - my) - Math.hypot(b[0][0] - mx, b[0][1] - my))[0];
+  const NX = ox + near[0][0] * sc, NY = oy + near[0][1] * sc, ang = Math.atan2(MY - NY, MX - NX);
+  return `<div class="screen ph"><div class="abyss"></div>
+ ${alkDraw(ox, oy, sc, { fs: 11 })}
+ <div class="cd" style="left:${MX}px;top:${MY}px;width:${2 * ER * sc + 22}px;height:${2 * ER * sc + 22}px;--p:40%"></div>
+ <div class="lbl" style="left:${MX}px;top:${MY - ER * sc - 34}px;color:#9fe6ff;font-size:13px;font-weight:700">⏳ 2.4초</div>
+ <svg style="position:absolute;left:0;top:0" width="390" height="844">${[1, 2, 3].map(k => `<line x1="${NX - Math.cos(ang) * (ER * sc + 6 * k)}" y1="${NY - Math.sin(ang) * (ER * sc + 6 * k)}" x2="${NX - Math.cos(ang) * (ER * sc + 22 + 14 * k)}" y2="${NY - Math.sin(ang) * (ER * sc + 22 + 14 * k)}" stroke="#fff" stroke-opacity="${.7 - k * .18}" stroke-width="3" stroke-linecap="round"/>`).join('')}</svg>
+ <div class="lbl" style="left:${(NX + MX) / 2}px;top:${(NY + MY) / 2 - 30}px;color:#ff9aa6;font-size:12px">⚠ ${NM2[near[1]]} 다가와요!</div>
+ ${edgeMarks(ox, oy, sc, 390, 70, 790)}
+ ${phTop('1:17')}
+ ${zoomUI({ top: 560 })}
+ <div class="box" style="position:absolute;left:12px;right:12px;bottom:14px;padding:10px 12px;font-size:14px;display:flex;gap:10px;align-items:center;z-index:3"><span style="color:#9fe6ff">⏳ 쉬는 중</span><span style="color:var(--muted);font-size:12px">고리가 다 차면 다시 쏠 수 있어요 · 지금 맞으면 밀려요</span></div>
+ <div class="note" style="left:12px;top:72px;z-index:4">쏜 뒤 4초 = 내 알 둘레 하늘색 고리가 차오름 · 다가오는 알 = 흰 줄(움직임)</div>
+</div>`; };
 S['alk-ph-2'] = () => { const sc = 390 / (BR * 2.25), ox = 195, oy = 430; return `<div class="screen ph"><div class="abyss"></div>
  ${alkDraw(ox, oy, sc, { fs: 9 })}
+ <div style="position:absolute;left:${ox + ALK[ME][0] * sc}px;top:${oy + ALK[ME][1] * sc}px;width:${ER * sc * 4.2}px;height:${ER * sc * 4.2}px;transform:translate(-50%,-50%);border:3px solid #ebb84f;border-radius:50%;box-shadow:0 0 16px #ffd36a"></div>
+ <div class="lbl" style="left:${ox + ALK[ME][0] * sc}px;top:${oy + ALK[ME][1] * sc - ER * sc * 2.1 - 22}px;background:#ebb84f;color:#1a120a;font-weight:700;font-size:13px">▼ 나</div>
  ${phTop('1:21')}
  ${zoomUI({ top: 620, all: true })}
  <div class="toast" style="top:680px;left:70px;right:12px;background:#1f1a16ee;color:var(--text);border-color:#c99a3a;font-size:14px;padding:10px">⛶ 전체 보기 · 내 알을 누르면 다시 따라가기</div>
