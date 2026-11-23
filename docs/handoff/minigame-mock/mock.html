@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8">
+<title>쉼터 놀이 시안</title>
+<!-- 🎨 에셋 방 2 · 2026-11-24 · 화면 시안(최종 아님) · 렌더: node render.js -->
+<style>
+@font-face { font-family: 'Galmuri11'; src: url('../../../assets/fonts/Galmuri11.woff2'); }
+@font-face { font-family: 'Galmuri11'; font-weight: 700; src: url('../../../assets/fonts/Galmuri11-Bold.woff2'); }
+@font-face { font-family: 'DS Gothic'; src: url('../../../assets/fonts/ds-gothic-400-v1.woff2'); }
+@font-face { font-family: 'DS Gothic'; font-weight: 700; src: url('../../../assets/fonts/ds-gothic-700-v1.woff2'); }
+:root { --bg:#14110f; --panel:#1f1a16; --panel2:#2b241e; --line:#5b4a36; --text:#f3ecdc; --muted:#ad9f8a; --gold:#ebb84f; --red:#ff3355; --teal:#2ec4b6; --violet:#a77bff; --cyan:#6cc6ea; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #000; color: var(--text); font-family: 'Galmuri11', monospace; image-rendering: pixelated; }
+.screen { position: relative; overflow: hidden; }
+.tv { width: 1280px; height: 720px; }
+.ph { width: 390px; height: 844px; }
+.rays { position:absolute; inset:0; background:
+  repeating-conic-gradient(from 0deg at 50% 52%, #ffffff0d 0 5deg, #0000 5deg 15deg),
+  radial-gradient(circle at 50% 52%, #5b3a8a 0, #3a2560 35%, #1d1233 75%); }
+.dots { position:absolute; inset:0; background-image: radial-gradient(#ffffff14 2px, transparent 2.5px); background-size: 34px 34px; }
+.abyss { position:absolute; inset:0; background: radial-gradient(circle at 50% 55%, #1b2a4a 0, #0d1426 45%, #04060d 80%); }
+.abyss::after { content:''; position:absolute; inset:0; background-image: radial-gradient(#fff9 1px, transparent 1.5px), radial-gradient(#9cf6 1px, transparent 1.5px); background-size: 97px 89px, 53px 61px; background-position: 13px 7px, 31px 40px; opacity:.55; }
+/* 윗줄 (지금 게임 리모컨 · 종합실 윗막대 꼴) */
+.topbar { position:absolute; left:12px; right:12px; top:10px; height:62px; display:flex; align-items:center; gap:14px; padding:0 18px; background:linear-gradient(#2b241e,#1f1a16); border:2px solid #c99a3a; border-radius:8px; box-shadow:0 0 0 2px #000, inset 0 0 0 2px #5b4a36; }
+.topbar .t { font-weight:700; color:var(--gold); font-size:22px; }
+.pill { padding:4px 12px; border-radius:999px; border:2px solid var(--line); color:var(--muted); font-size:15px; }
+.pill.on { background:var(--gold); color:#1a120a; border-color:var(--gold); font-weight:700; }
+.sp { flex:1; }
+.box { background:#1f1a16ee; border:2px solid #c99a3a; border-radius:10px; box-shadow:0 0 0 2px #000, inset 0 0 0 2px #5b4a36; }
+.hero { width:80px; height:64px; background-repeat:no-repeat; background-size:320px 768px; background-position:0 0; }
+.big2 { transform: scale(2); transform-origin: top left; }
+/* 아재 퀴즈 */
+.host { position:absolute; image-rendering:pixelated; }
+.bubble { position:absolute; background:#fff8e6; color:#2a1a0a; border:4px solid #000; border-radius:18px; padding:22px 34px; font-family:'DS Gothic',sans-serif; font-weight:700; box-shadow: 6px 6px 0 #0008; }
+.bubble::after { content:''; position:absolute; left:-30px; top:58px; border:16px solid transparent; border-right:22px solid #000; }
+.blanks { position:absolute; display:flex; gap:18px; }
+.blank { width:104px; height:104px; border:4px solid var(--gold); background:#2b241e; border-radius:10px; display:flex; align-items:center; justify-content:center; font-family:'DS Gothic',sans-serif; font-weight:700; font-size:64px; color:#5b4a36; box-shadow:0 0 0 3px #000, inset 0 -6px 0 #0006; }
+.blank.fill { background:#ffe39a; color:#2a1a0a; border-color:#fff3c4; box-shadow:0 0 0 3px #000, 0 0 28px #ffd36a, inset 0 -6px 0 #c9902a; }
+.ring { width:96px; height:96px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:38px; color:#fff;
+  background: conic-gradient(var(--gold) 0 var(--p), #3a2f25 var(--p) 100%); position:relative; }
+.ring::before { content:''; position:absolute; inset:6px; border-radius:50%; background:#1f1a16; }
+.ring span { position:relative; }
+.rank { list-style:none; }
+.rank li { display:flex; align-items:center; gap:10px; padding:6px 10px; border-bottom:2px dashed #3a2f25; font-size:17px; height:66px; }
+.rank .no { width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; color:#1a120a; }
+.n1 { background:#ffd34d; } .n2 { background:#d6dde6; } .n3 { background:#d9925a; } .nx { background:#5b4a36; color:#f3ecdc !important; }
+.rank .pt { margin-left:auto; color:var(--gold); font-weight:700; }
+.rank .tm { color:var(--muted); font-size:13px; }
+.hmini { width:56px; height:56px; overflow:hidden; position:relative; }
+.hmini .hero { position:absolute; left:-12px; top:-6px; transform:scale(1); }
+.why { position:absolute; font-family:'DS Gothic',sans-serif; font-weight:700; color:#fff; text-shadow:0 3px 0 #000; }
+.burst { position:absolute; border-radius:50%; background: repeating-conic-gradient(#fff3 0 6deg, #0000 6deg 18deg), radial-gradient(circle, #fff8d0 0, #ffcf5a 22%, #a04a0800 60%); }
+.chips { display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; }
+.chip { height:68px; border-radius:10px; background:#f3ecdc; color:#2a1a0a; border:3px solid #000; box-shadow: inset 0 -6px 0 #c4b393, 0 4px 0 #000; display:flex; align-items:center; justify-content:center; font-family:'DS Gothic',sans-serif; font-weight:700; font-size:32px; }
+.chip.used { background:#4a4036; color:#7a6a58; box-shadow: inset 0 -6px 0 #3a3128; }
+.btn { height:56px; border-radius:10px; border:3px solid #000; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:18px; box-shadow: 0 4px 0 #000; }
+.btn.gold { background:var(--gold); color:#1a120a; box-shadow: inset 0 -5px 0 #b8862a, 0 4px 0 #000; }
+.btn.dark { background:#2b241e; color:var(--text); border-color:#5b4a36; }
+.toast { position:absolute; left:20px; right:20px; padding:18px; text-align:center; border-radius:14px; border:3px solid #000; font-weight:700; }
+/* 알까기 */
+.board { position:absolute; image-rendering:pixelated; }
+.egg { position:absolute; border-radius:50%; overflow:hidden; border:3px solid #fff; box-shadow: 0 4px 0 #0009, 0 0 0 2px #000; background:#3b2a1e; transform:translate(-50%,-50%); }
+.egg .hero { position:absolute; }
+.egg.me { border-color: var(--gold); box-shadow: 0 0 0 3px #000, 0 0 18px #ffd36a, 0 4px 0 #0009; }
+.egg.ghost { opacity:.45; border-style:dashed; }
+.egg.fall { transform: translate(-50%,-50%) scale(.55) rotate(25deg); opacity:.6; }
+.crown { position:absolute; transform:translate(-50%,-100%); font-size:22px; filter: drop-shadow(0 2px 0 #000); }
+.cd { position:absolute; border-radius:50%; transform:translate(-50%,-50%); background: conic-gradient(#6cc6ea 0 var(--p), #0000 var(--p)); -webkit-mask: radial-gradient(circle, #0000 58%, #000 60%); mask: radial-gradient(circle, #0000 58%, #000 60%); }
+.feed div { padding:6px 0; border-bottom:2px dashed #3a2f25; font-size:15px; }
+.feed b { color:var(--gold); }
+.lbl { position:absolute; font-size:12px; padding:1px 6px; background:#000a; border-radius:4px; transform:translate(-50%, 0); white-space:nowrap; }
+.note { position:absolute; font-size:12px; color:#9fe6ff; background:#002a3acc; border:1px dashed #6cc6ea; padding:3px 7px; border-radius:6px; }
+</style></head>
+<body>
+<div id="root"></div>
+<script>
+const HER = ['sword-v3c','witch-v2c','elf-v2c','ninja-v2c','priest-v2c','lancer-v2c','dwarf-v2c','sage-v2c','paladin-v2c','monk-v2c','dancer-v2c','bard-v2c','alchemist-v2c','pirate-v2c','frost-v2c','tamer-v2c','dknight-v2c','mathgirl-v2c','mechanic-v2c','valkyrie-v2c','hacker-v2c','dragoon-v2c','mathboy-v2c','elemental-v2c'];
+const HD = {"sword-v3c": [36, 13], "witch-v2c": [29, 13], "elf-v2c": [32, 13], "ninja-v2c": [23, 13], "priest-v2c": [33, 13], "lancer-v2c": [28, 13], "dwarf-v2c": [26, 13], "sage-v2c": [34, 13], "paladin-v2c": [33, 13], "monk-v2c": [27, 13], "dancer-v2c": [25, 13], "bard-v2c": [30, 13], "alchemist-v2c": [31, 13], "pirate-v2c": [27, 13], "frost-v2c": [29, 13], "tamer-v2c": [26, 13], "dknight-v2c": [28, 14], "mathgirl-v2c": [24, 13], "mechanic-v2c": [21, 13], "valkyrie-v2c": [32, 13], "hacker-v2c": [28, 13], "dragoon-v2c": [31, 13], "mathboy-v2c": [22, 13], "elemental-v2c": [32, 14]};
+const CX = { 'sword-v3c':.45,'witch-v2c':.375,'elf-v2c':.375,'ninja-v2c':.3,'priest-v2c':.438,'lancer-v2c':.35,'dwarf-v2c':.325,'sage-v2c':.425,'paladin-v2c':.412,'monk-v2c':.338,'dancer-v2c':.325,'bard-v2c':.375,'alchemist-v2c':.375,'pirate-v2c':.35,'frost-v2c':.388,'tamer-v2c':.325 };
+const NM = ['김민준','이서연','박도윤','최하은','정시우','강지유','조주원','윤서아','장하준','임지안','한은우','오수아','서건우','신윤서','권선우','황채원','안유준','송다은','전이안','홍소율','남궁민','선우현','사공희','이바다'];
+const A = '../../../assets/art/hero-';
+const hero = (i, s=1) => `<div class="hero" style="background-image:url(${A}${HER[i%HER.length]}.webp);${s!==1?`transform:scale(${s});transform-origin:top left;`:''}"></div>`;
+// 알 = 용사 머리 동그라미 (대기 첫 칸에서 머리 쪽)
+const egg = (i, x, y, d, cls='', ring='#fff') => {
+  const k = HER[i%HER.length], [hx, hy] = HD[k], sc = d/28;
+  return `<div class="egg ${cls}" style="left:${x}px;top:${y}px;width:${d}px;height:${d}px;${cls.includes('me')?'':`border-color:${ring};`}">
+    <div class="hero" style="background-image:url(${A}${k}.webp);transform:scale(${sc});transform-origin:0 0;left:${-(hx-14)*sc}px;top:${-(hy+3)*sc}px"></div></div>`;
+};
+const S = {};
+
+// ───────── 😆 아재 퀴즈 · TV ① 문제 중
+S['ajae-tv-1'] = () => `<div class="screen tv"><div class="rays"></div><div class="dots"></div>
+ <div class="topbar"><span class="t">😆 아재 퀴즈</span><span class="pill">3회차</span>
+  ${[1,2,3,4,5,6].map(n=>`<span class="pill ${n===2?'on':''}">${n}</span>`).join('')}
+  <span class="sp"></span><span style="color:var(--muted)">참가 24명</span><div class="ring" style="--p:56%;width:50px;height:50px;font-size:22px"><span>17</span></div></div>
+ <img class="host" src="../assets/minigame/ajae-host-talk-v1.png" style="left:40px;top:150px;width:384px;height:384px">
+ <div class="bubble" style="left:410px;top:150px;font-size:54px;">자동차를 톡 치면?</div>
+ <div class="blanks" style="left:520px;top:330px"><div class="blank">?</div><div class="blank">?</div></div>
+ <div style="position:absolute;left:430px;top:458px;color:var(--muted);font-size:18px">폰에서 글자를 골라 맞혀요 · 2글자</div>
+ <div class="box" style="position:absolute;right:24px;top:92px;width:290px;height:430px;padding:14px">
+  <div style="font-weight:700;color:var(--gold);font-size:19px;margin-bottom:6px">⚡ 맞힌 순서</div>
+  <ul class="rank">
+   <li><span class="no n1">1</span><div class="hmini">${hero(3)}</div><div>${NM[2]}<div class="tm">3.1초</div></div><span class="pt">+3</span></li>
+   <li><span class="no n2">2</span><div class="hmini">${hero(9)}</div><div>${NM[9]}<div class="tm">4.8초</div></div><span class="pt">+2</span></li>
+   <li><span class="no n3">3</span><div class="hmini">${hero(1)}</div><div>${NM[1]}<div class="tm">6.0초</div></div><span class="pt">+1</span></li>
+   <li style="color:var(--muted);height:auto;border:0;padding-top:12px">그 뒤 맞힌 4명 = 점수 없음</li>
+  </ul></div>
+ <div style="position:absolute;left:40px;right:40px;bottom:96px;height:18px;background:#000;border:2px solid #5b4a36;border-radius:9px;overflow:hidden"><div style="width:56%;height:100%;background:linear-gradient(90deg,#ebb84f,#ffd36a)"></div></div>
+ <div style="position:absolute;left:40px;right:40px;bottom:26px;display:flex;gap:8px;align-items:flex-end;overflow:hidden;height:66px">${Array.from({length:16},(_,i)=>`<div style="opacity:${i<7?1:.4}">${hero(i+4)}</div>`).join('')}</div>
+ <div class="note" style="left:40px;bottom:120px">아래 줄 = 참가 용사 · 맞힌 사람은 밝게(누가 몇 등인지는 위 3명만)</div>
+</div>`;
+
+// ───────── 😆 아재 퀴즈 · TV ② 정답 공개 (5초)
+S['ajae-tv-2'] = () => `<div class="screen tv"><div class="rays"></div><div class="dots"></div>
+ <div class="topbar"><span class="t">😆 아재 퀴즈</span><span class="pill">3회차</span>
+  ${[1,2,3,4,5,6].map(n=>`<span class="pill ${n===2?'on':''}">${n}</span>`).join('')}
+  <span class="sp"></span><span style="color:var(--gold);font-weight:700">정답 공개!</span></div>
+ <div class="burst" style="left:420px;top:180px;width:420px;height:420px"></div>
+ <img class="host" src="../assets/minigame/ajae-host-laugh-v1.png" style="left:40px;top:150px;width:384px;height:384px">
+ <div class="bubble" style="left:410px;top:120px;font-size:40px;">자동차를 톡 치면?</div>
+ <div class="blanks" style="left:520px;top:300px"><div class="blank fill">카</div><div class="blank fill">톡</div></div>
+ <div class="why" style="left:440px;top:440px;font-size:34px">카(car) + 톡 = <span style="color:var(--gold)">카톡</span> 😆</div>
+ <div style="position:absolute;left:440px;top:496px;color:var(--muted);font-size:18px">다음 문제까지 3초 · 맞힌 사람 7 / 24</div>
+ <div class="box" style="position:absolute;right:24px;top:92px;width:290px;height:430px;padding:14px">
+  <div style="font-weight:700;color:var(--gold);font-size:19px;margin-bottom:6px">🏆 지금 순위 (2 / 6)</div>
+  <ul class="rank">
+   <li><span class="no n1">1</span><div class="hmini">${hero(3)}</div><div>${NM[2]}</div><span class="pt">6점</span></li>
+   <li><span class="no n2">2</span><div class="hmini">${hero(9)}</div><div>${NM[9]}</div><span class="pt">3점</span></li>
+   <li><span class="no n2">2</span><div class="hmini">${hero(5)}</div><div>${NM[5]}</div><span class="pt">3점</span></li>
+   <li><span class="no n3">4</span><div class="hmini">${hero(1)}</div><div>${NM[1]}</div><span class="pt">1점</span></li>
+  </ul></div>
+ <div class="note" style="left:440px;top:540px">같은 점수 = 같은 등수(결정 11/24) · 6번째 공개 뒤 = 최종 순위 화면(시상대 1~3등)</div>
+</div>`;
+
+// ───────── 😆 아재 퀴즈 · 폰 ① 글자 고르기
+S['ajae-ph-1'] = () => `<div class="screen ph"><div class="rays"></div><div class="dots"></div>
+ <div style="position:absolute;left:10px;right:10px;top:10px;height:52px;display:flex;align-items:center;gap:8px;padding:0 12px" class="box">
+  <b style="color:var(--gold)">😆 아재 퀴즈</b><span class="pill on" style="font-size:13px">2 / 6</span><span class="sp"></span>
+  <div class="ring" style="--p:56%;width:44px;height:44px;font-size:18px"><span>17</span></div></div>
+ <div style="position:absolute;left:14px;right:14px;top:78px;display:flex;align-items:flex-end;gap:6px">
+  <img src="../assets/minigame/ajae-host-talk-v1.png" style="width:110px;height:110px;image-rendering:pixelated;margin-bottom:-8px">
+  <div class="bubble" style="position:relative;font-size:24px;padding:14px 16px;flex:1;border-width:3px">자동차를 톡 치면?</div></div>
+ <div class="blanks" style="left:50%;transform:translateX(-50%);top:226px;gap:14px"><div class="blank fill" style="width:84px;height:84px;font-size:48px;box-shadow:0 0 0 3px #000">카</div><div class="blank" style="width:84px;height:84px;font-size:48px">□</div></div>
+ <div style="position:absolute;left:0;right:0;top:322px;text-align:center;color:var(--muted);font-size:14px">글자를 눌러 빈칸을 채우면 바로 확인!</div>
+ <div class="chips" style="position:absolute;left:16px;right:16px;top:356px">
+  ${['콩','하','카','덕','톡','궁','킹','언'].map(c=>`<div class="chip ${c==='카'?'used':''}">${c}</div>`).join('')}</div>
+ <div style="position:absolute;left:16px;right:16px;top:526px;display:flex;gap:10px"><div class="btn dark" style="flex:1">↩ 한 글자 지우기</div></div>
+ <div class="box" style="position:absolute;left:16px;right:16px;bottom:24px;padding:12px 14px;display:flex;align-items:center;gap:10px">
+  <div class="hmini">${hero(0)}</div><div>내 점수 <b style="color:var(--gold)">3점</b><div style="color:var(--muted);font-size:13px">지금 2등 · 남은 문제 5</div></div></div>
+ <div class="note" style="left:16px;top:600px">칩 8개 = 정답 글자 + 다른 정답의 글자(bank.json 규칙)</div>
+</div>`;
+
+// ───────── 😆 아재 퀴즈 · 폰 ② 맞힘
+S['ajae-ph-2'] = () => `<div class="screen ph"><div class="rays"></div><div class="dots"></div>
+ <div style="position:absolute;left:10px;right:10px;top:10px;height:52px;display:flex;align-items:center;gap:8px;padding:0 12px" class="box">
+  <b style="color:var(--gold)">😆 아재 퀴즈</b><span class="pill on" style="font-size:13px">2 / 6</span><span class="sp"></span>
+  <div class="ring" style="--p:44%;width:44px;height:44px;font-size:18px"><span>13</span></div></div>
+ <div class="burst" style="left:45px;top:120px;width:300px;height:300px"></div>
+ <div class="blanks" style="left:50%;transform:translateX(-50%);top:226px;gap:14px"><div class="blank fill" style="width:84px;height:84px;font-size:48px">카</div><div class="blank fill" style="width:84px;height:84px;font-size:48px">톡</div></div>
+ <div class="toast" style="top:350px;background:var(--gold);color:#1a120a;font-size:26px">✔ 정답! <span style="font-size:20px">2등</span> +2</div>
+ <div style="position:absolute;left:0;right:0;top:440px;text-align:center;color:var(--text);font-size:15px">친구들이 푸는 중… 정답 공개까지 13초<br><span style="color:var(--muted)">TV 를 봐요 📺</span></div>
+ <div class="box" style="position:absolute;left:16px;right:16px;bottom:24px;padding:12px 14px;display:flex;align-items:center;gap:10px">
+  <div class="hmini">${hero(0)}</div><div>내 점수 <b style="color:var(--gold)">5점</b><div style="color:var(--muted);font-size:13px">지금 1등 · 남은 문제 4</div></div></div>
+ <div class="note" style="left:16px;top:520px">틀린 글자 조합 = 빈칸 흔들림 + 칩 돌려줌(벌 없음 · 30초 안에 다시)</div>
+</div>`;
+
+// 알까기 판 배치
+function alkPieces(cx, cy, R, d, meIdx, opt={}) {
+  const pts = [[.0,.0],[.32,-.2],[-.3,.25],[.55,.35],[-.58,-.3],[.15,.6],[-.15,-.62],[.68,-.35],[-.7,.18],[.4,.05],[-.35,-.05],[.05,.32],[.25,-.48],[-.48,.52],[.62,.62],[-.05,-.3]];
+  return pts.map(([x,y],i)=>{
+    let cls = i===meIdx?'me':''; if (i===opt.ghost) cls+=' ghost';
+    const ring = ['#ff6b6b','#6cc6ea','#9be07a','#c69cff','#ffd36a','#ff9fd1','#fff'][i%7];
+    return egg(i, cx+x*R, cy+y*R, d, cls, ring) + (i===opt.crown?`<div class="crown" style="left:${cx+x*R}px;top:${cy+y*R-d/2+4}px">👑</div>`:'') + (opt.names?`<div class="lbl" style="left:${cx+x*R}px;top:${cy+y*R+d/2+2}px">${NM[i]}</div>`:'');
+  }).join('');
+}
+
+// ───────── 🥏 알까기 · TV
+S['alk-tv'] = () => { const cx=470, cy=388, R=255; return `<div class="screen tv"><div class="abyss"></div>
+ <div class="topbar"><span class="t">🥏 알까기 난장판</span><span class="pill">참가 16명</span><span class="pill">2 / 3판(보상)</span><span class="sp"></span>
+  <span style="font-size:15px;color:var(--muted)">남은 시간</span><b style="font-size:30px;color:var(--gold)">1:23</b></div>
+ <img class="board" src="../assets/minigame/alk-board-v1.png" style="left:${cx-300}px;top:${cy-300}px;width:600px;height:600px">
+ ${alkPieces(cx, cy, R, 52, -1, {crown:3, ghost:10, names:true})}
+ ${egg(14, cx+330, cy+190, 52, 'fall', '#ff6b6b')}
+ <div class="lbl" style="left:${cx+330}px;top:${cy+214}px;color:#ff9a9a">💨 떨어짐!</div>
+ <div style="position:absolute;left:${cx+180}px;top:${cy+110}px;width:120px;height:4px;background:repeating-linear-gradient(90deg,#fff8 0 8px,#0000 8px 14px);transform:rotate(28deg);transform-origin:left"></div>
+ <div class="box" style="position:absolute;right:24px;top:92px;width:330px;height:310px;padding:14px">
+  <div style="font-weight:700;color:var(--gold);font-size:19px;margin-bottom:4px">🏆 점수</div>
+  <ul class="rank">
+   <li style="height:56px"><span class="no n1">1</span><div class="hmini">${hero(3)}</div><div>${NM[3]} 👑</div><span class="pt">14</span></li>
+   <li style="height:56px"><span class="no n2">2</span><div class="hmini">${hero(7)}</div><div>${NM[7]}</div><span class="pt">11</span></li>
+   <li style="height:56px"><span class="no n3">3</span><div class="hmini">${hero(1)}</div><div>${NM[1]}</div><span class="pt">9</span></li>
+   <li style="height:56px"><span class="no nx">4</span><div class="hmini">${hero(12)}</div><div>${NM[12]}</div><span class="pt">8</span></li>
+  </ul></div>
+ <div class="box feed" style="position:absolute;right:24px;top:416px;width:330px;height:200px;padding:12px 14px">
+  <div style="font-weight:700;color:var(--gold);font-size:17px;margin-bottom:2px">📣 방금</div>
+  <div><b>${NM[7]}</b> → ${NM[14]} 떨어뜨림 <b>+3</b></div>
+  <div><b>${NM[1]}</b> → ${NM[5]} 맞힘 <b>+1</b></div>
+  <div><b>${NM[12]}</b> → 👑 ${NM[3]}? 아깝다!</div>
+  <div style="color:var(--muted)">${NM[10]} 되살아남(무적 2초)</div></div>
+ <div class="note" style="left:20px;bottom:18px">판 = 스킬로 만든 나무 원판(alk-board-v1) · 알 = 장착 용사 머리 · 테두리 색 = 사람마다 · 반투명 점선 = 되살아난 무적 · 👑 = 지금 1등(+5)</div>
+</div>`; };
+
+// ───────── 🥏 알까기 · 폰 ① 당겨서 조준
+S['alk-ph-1'] = () => { const cx=195, cy=470, R=158, me=0; const mx=cx, my=cy; return `<div class="screen ph"><div class="abyss"></div>
+ <div style="position:absolute;left:10px;right:10px;top:10px;height:52px;display:flex;align-items:center;gap:8px;padding:0 12px" class="box">
+  <b style="color:var(--gold)">🥏 알까기</b><span class="sp"></span><span style="color:var(--muted);font-size:13px">남은</span><b style="color:var(--gold);font-size:20px">1:23</b></div>
+ <div class="box" style="position:absolute;left:10px;right:10px;top:70px;height:40px;display:flex;align-items:center;gap:10px;padding:0 12px;font-size:14px">
+  <span>내 점수 <b style="color:var(--gold)">6</b></span><span style="color:var(--muted)">· 5등</span><span class="sp"></span><span style="font-size:12px;color:var(--muted)">1등 ${NM[3]} 14 👑</span></div>
+ <img class="board" src="../assets/minigame/alk-board-v1.png" style="left:${cx-188}px;top:${cy-188}px;width:376px;height:376px">
+ ${alkPieces(cx, cy, R, 34, me, {crown:3, ghost:10})}
+ <svg style="position:absolute;left:0;top:0" width="390" height="844">
+  <line x1="${mx}" y1="${my}" x2="${mx-36}" y2="${my+70}" stroke="#ebb84f" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="${mx-36}" cy="${my+70}" r="14" fill="#ebb84f55" stroke="#ebb84f" stroke-width="3"/>
+  <line x1="${mx}" y1="${my}" x2="${cx+0.32*R}" y2="${cy-0.2*R}" stroke="#fff" stroke-width="3" stroke-dasharray="6 6"/>
+  <line x1="${cx+0.32*R}" y1="${cy-0.2*R}" x2="${cx+0.32*R+70}" y2="${cy-0.2*R-45}" stroke="#ff5a6e" stroke-width="3" stroke-dasharray="6 6"/>
+  <polygon points="${cx+0.32*R+70},${cy-0.2*R-45} ${cx+0.32*R+54},${cy-0.2*R-44} ${cx+0.32*R+64},${cy-0.2*R-31}" fill="#ff5a6e"/>
+ </svg>
+ <div class="lbl" style="left:${cx+0.32*R+60}px;top:${cy-0.2*R-80}px;color:#ff9aa6;font-size:13px">이대로면 떨어짐!</div>
+ <div class="box" style="position:absolute;left:12px;right:12px;bottom:92px;padding:10px 12px;display:flex;align-items:center;gap:10px;font-size:15px">
+  <span>세기</span><div style="display:flex;gap:4px">${[1,1,0].map(v=>`<div style="width:34px;height:14px;border:2px solid #000;background:${v?'#ebb84f':'#3a2f25'}"></div>`).join('')}</div><b style="color:var(--gold)">중</b><span class="sp"></span><span style="color:var(--muted);font-size:13px">놓으면 발사</span></div>
+ <div style="position:absolute;left:12px;right:12px;bottom:22px;text-align:center;color:var(--muted);font-size:13px">내 알(금테)을 누르고 뒤로 당겼다 놓아요<br>쏘면 4초 쉬어요 — 그동안 맞으면 밀려요</div>
+ <div class="note" style="left:12px;top:118px">점선 = 내 폰에만 · 첫 부딪힘 알 + 밀려갈 방향 · 판 밖이면 빨강</div>
+</div>`; };
+
+// ───────── 🥏 알까기 · 폰 ② 쿨타임 + 떨어짐
+S['alk-ph-2'] = () => { const cx=195, cy=470, R=158; return `<div class="screen ph"><div class="abyss"></div>
+ <div style="position:absolute;left:10px;right:10px;top:10px;height:52px;display:flex;align-items:center;gap:8px;padding:0 12px" class="box">
+  <b style="color:var(--gold)">🥏 알까기</b><span class="sp"></span><span style="color:var(--muted);font-size:13px">남은</span><b style="color:var(--gold);font-size:20px">1:19</b></div>
+ <img class="board" src="../assets/minigame/alk-board-v1.png" style="left:${cx-188}px;top:${cy-188}px;width:376px;height:376px;filter:brightness(.55)">
+ ${alkPieces(cx, cy, R, 34, -1, {crown:3, ghost:10})}
+ <div style="position:absolute;inset:0;background:#0008"></div>
+ <div style="position:absolute;left:0;right:0;top:300px;text-align:center">
+  <div style="font-size:20px;color:#ff9aa6;font-weight:700">💨 떨어졌어요!</div>
+  <div style="font-size:96px;font-weight:700;color:#fff;text-shadow:0 6px 0 #000;line-height:1.2">2</div>
+  <div style="font-size:15px">${NM[7]} 이(가) 밀었어요</div>
+  <div style="font-size:13px;color:var(--muted);margin-top:6px">돌아오면 2초 무적 · 점수는 그대로</div></div>
+ <div class="box" style="position:absolute;left:12px;right:12px;bottom:22px;padding:10px 12px;display:flex;align-items:center;gap:10px;font-size:15px">
+  <div class="hmini">${hero(0)}</div><div>내 점수 <b style="color:var(--gold)">6</b><div style="color:var(--muted);font-size:13px">떨어뜨림 1 · 맞힘 3</div></div></div>
+ <div class="note" style="left:12px;top:76px">떨어짐 = 판 어둡게 + 3·2·1 · 누가 밀었는지 한 줄</div>
+</div>`; };
+
+const s = new URLSearchParams(location.search).get('s') || 'ajae-tv-1';
+document.getElementById('root').innerHTML = S[s]();
+</script></body></html>
