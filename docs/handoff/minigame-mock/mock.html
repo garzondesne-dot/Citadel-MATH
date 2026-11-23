@@ -166,9 +166,10 @@ S['ajae-ph-2'] = () => `<div class="screen ph"><div class="rays"></div><div clas
 // ───────── 🥏 알까기 v2 (11/24 선생님 피드백: 판 크게 · 알 크게 + 이름 · TV = 판 전체 · 폰 = 내 알 따라가는 창 + 확대 · 축소)
 // 판 단위: 알 반지름 0.9 (설계 v1 0.7 → 0.9 제안) · 판 반지름 = max(5.5, 2 + 1.2√n) 그대로 · 28명 = 8.3
 // 제안 C: 판 반지름 = 설계 공식 그대로 · 알 반지름 = 0.9 를 넘지 않고 출발 원(판의 0.8 안)에 n명이 같은 간격으로 들어가는 크기
-const N28 = 28, RING_GAP = 0.3, BR = Math.max(5.5, 2 + 1.2 * Math.sqrt(N28)), ER = Math.min(0.9, (2 * Math.PI * 0.8 * BR / N28 - RING_GAP) / 2);
-const RHO = Math.max(0.6 * BR, N28 * (2 * ER + RING_GAP) / (2 * Math.PI)); // 출발 원 반지름
-const START = Array.from({ length: N28 }, (_, i) => { const a = -Math.PI / 2 + 2 * Math.PI * i / N28; return [RHO * Math.cos(a), RHO * Math.sin(a)]; });
+// 11/24 선생님 확정: 판 반지름 = 2 × 설계 공식 · 출발 원 = 판 반지름의 0.5 · 알 = min(0.9, 그 원에 n명 같은 간격) · 자리 = 무작위
+const N28 = 28, RING_GAP = 0.3, BR = 2 * Math.max(5.5, 2 + 1.2 * Math.sqrt(N28)), RHO = 0.5 * BR, ER = Math.min(0.9, (2 * Math.PI * RHO / N28 - RING_GAP) / 2);
+const PERM = (() => { let s = 11; const r = () => (s = (s * 16807) % 2147483647) / 2147483647; const a = Array.from({ length: N28 }, (_, i) => i); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; })(); // 출발 자리 무작위
+const START = Array.from({ length: N28 }, (_, i) => { const a = -Math.PI / 2 + 2 * Math.PI * PERM[i] / N28; return [RHO * Math.cos(a), RHO * Math.sin(a)]; });
 const NM2 = NM.concat(['정하율','문가온','배서윤','고은찬']);
 const ALK_RAND = (() => { let s = 7; const rnd = () => (s = (s * 16807) % 2147483647) / 2147483647; const P = [[-3.2, 2.2]];
   while (P.length < N28) { const a = rnd() * 6.283, r = Math.sqrt(rnd()) * (BR - 1.3), x = Math.cos(a) * r, y = Math.sin(a) * r;
@@ -253,7 +254,7 @@ S['alk-ph-1'] = () => { const sc = 59 / (2 * ER), [mx, my] = ALK[ME], cxu = mx *
  ${zoomUI({ top: 560 })}
  <div class="box" style="position:absolute;left:12px;right:12px;bottom:14px;padding:8px 12px;display:flex;align-items:center;gap:10px;font-size:14px;z-index:3">
   <span>세기</span><div style="display:flex;gap:4px">${[1,1,0].map(v=>`<div style="width:30px;height:12px;border:2px solid #000;background:${v?'#ebb84f':'#3a2f25'}"></div>`).join('')}</div><b style="color:var(--gold)">중</b><span class="sp"></span><span style="color:var(--muted);font-size:12px">놓으면 발사 · 쏘면 4초 쉼</span></div>
- <div class="note" style="left:12px;top:72px;z-index:4">창 = 내 알을 따라감(판 쪽으로 조금 당겨 빈 하늘을 덜 보임 · 판의 약 65%) · 창 밖 알 = 가장자리 화살표 + 이름 · 두 손가락 = 판만 확대 · 축소</div>
+ <div class="note" style="left:12px;top:72px;z-index:4">창 = 내 알을 따라감(판 쪽으로 조금 당김 · 28명 판이면 폭의 약 30%) · 창 밖 알 = 가장자리 화살표 + 이름 · 두 손가락 = 판만 확대 · 축소</div>
 </div>`; };
 S['alk-ph-2'] = () => { const sc = 390 / (BR * 2.25), ox = 195, oy = 430; return `<div class="screen ph"><div class="abyss"></div>
  ${alkDraw(ox, oy, sc, { fs: 9 })}
