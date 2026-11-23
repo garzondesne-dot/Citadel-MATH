@@ -1,4 +1,4 @@
-> **🛠 배포 #7 → #8 인계 (2026-11-24 새벽 · 메타인지 9 「선생님 고르기 = 배포 #7 새 방」 · 맥락 69% · 11/11부터)** · 배포 #7 = session_014JJv1hC8cMYvB3uDZ6sFn6 → 배포 #8 = (새 방이 만들어지면 여기 · CLAUDE.md 「✋ 개발 방」 줄)
+> **🛠 배포 #7 → #8 인계 (2026-11-24 새벽 · 메타인지 9 「선생님 고르기 = 배포 #7 새 방」 · 맥락 69% · 11/11부터)** · 배포 #7 = session_014JJv1hC8cMYvB3uDZ6sFn6 → **배포 #8 = session_014JJv1j6rv9Wq9QakL1Ek66 「🛠️배포#8」** (CLAUDE.md 「✋ 개발 방」 줄도 고침)
 >
 > **지금 정식** = v1.1 **b237** · main `d74a2f3` · 트리 `cc84f0a44e5e638739917208ec1b59e612aa3e0b` · 11/23 오후 · zip `citadel-b237-release-r2.zip`(sha256 `fa5da4f6…`) · **되돌리기 = `25afd8b`(b236)** · 배포 기다리는 zip 없음 · 미배포 변경 없음 · 진행 중 요청 없음.
 > **#149 보안 규칙** = DECISIONS 11/24 새벽 줄: 선생님 게시 완료(규칙 파일 sha256 44d533c2… = b237 판) · 배포 방은 규칙 게시 열쇠 없음(운영 서버 = 선생님 콘솔).
@@ -22,7 +22,7 @@
 > | 방 | session |
 > |---|---|
 > | ✋ 손발 #1 (베타 · ux98 · 운영 읽기) | session_014JJv1kfRHM8SAjsHDCgfJ5 |
-> | 🛠 배포 #7 (정식 main) | session_014JJv1hC8cMYvB3uDZ6sFn6 |
+> | 🛠 배포 #8 (정식 main · 11/24 새벽부터 · 앞 방 #7 = session_014JJv1hC8cMYvB3uDZ6sFn6) | session_014JJv1j6rv9Wq9QakL1Ek66 |
 > | 📚 차시팩 #1 | session_014JJv1kJi5yCyh44WVJKUYY |
 > | 🌊 설계(F설계 1) | session_014JJv1gNxiR4EbqPvhG9Ym8 |
 > | 📝 미래교육상 보고서 | session_014JJv1koo47jA3VwyRkf6Jk |
