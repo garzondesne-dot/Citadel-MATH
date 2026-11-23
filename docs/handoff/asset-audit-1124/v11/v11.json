@@ -1,0 +1,398 @@
+[
+ {
+  "hero": "ninja",
+  "row": 1,
+  "col": 0,
+  "h_before": 114,
+  "h_after": 114,
+  "foot_before": 135,
+  "foot_after": 135
+ },
+ {
+  "hero": "ninja",
+  "row": 1,
+  "col": 1,
+  "h_before": 112,
+  "h_after": 112,
+  "foot_before": 135,
+  "foot_after": 135
+ },
+ {
+  "hero": "ninja",
+  "row": 1,
+  "col": 2,
+  "h_before": 113,
+  "h_after": 113,
+  "foot_before": 135,
+  "foot_after": 135
+ },
+ {
+  "hero": "ninja",
+  "row": 1,
+  "col": 3,
+  "h_before": 109,
+  "h_after": 109,
+  "foot_before": 135,
+  "foot_after": 135
+ },
+ {
+  "hero": "spellblade",
+  "row": 0,
+  "col": 0,
+  "h_before": 118,
+  "h_after": 118,
+  "foot_before": 135,
+  "foot_after": 135
+ },
+ {
+  "hero": "spellblade",
+  "row": 0,
+  "col": 1,
+  "h_before": 118,
+  "h_after": 118,
+  "foot_before": 135,
+  "foot_after": 135
+ },
+ {
+  "hero": "spellblade",
+  "row": 0,
+  "col": 2,
+  "h_before": 118,
+  "h_after": 118,
+  "foot_before": 135,
+  "foot_after": 135
+ },
+ {
+  "hero": "spellblade",
+  "row": 0,
+  "col": 3,
+  "h_before": 118,
+  "h_after": 118,
+  "foot_before": 135,
+  "foot_after": 135
+ },
+ {
+  "hero": "spellblade",
+  "row": 1,
+  "col": 0,
+  "h_before": 116,
+  "h_after": 116,
+  "foot_before": 135,
+  "foot_after": 135
+ },
+ {
+  "hero": "spellblade",
+  "row": 1,
+  "col": 1,
+  "h_before": 113,
+  "h_after": 113,
+  "foot_before": 135,
+  "foot_after": 135
+ },
+ {
+  "hero": "spellblade",
+  "row": 1,
+  "col": 2,
+  "h_before": 116,
+  "h_after": 116,
+  "foot_before": 135,
+  "foot_after": 135
+ },
+ {
+  "hero": "spellblade",
+  "row": 1,
+  "col": 3,
+  "h_before": 113,
+  "h_after": 113,
+  "foot_before": 135,
+  "foot_after": 135
+ },
+ {
+  "hero": "elf",
+  "row": 9,
+  "col": 0,
+  "h_before": 84,
+  "h_after": 106,
+  "foot_before": 135,
+  "foot_after": 135
+ },
+ {
+  "hero": "elf",
+  "row": 9,
+  "col": 1,
+  "h_before": 82,
+  "h_after": 106,
+  "foot_before": 135,
+  "foot_after": 135
+ },
+ {
+  "hero": "elf",
+  "row": 10,
+  "col": 0,
+  "h_before": 83,
+  "h_after": 106,
+  "foot_before": 135,
+  "foot_after": 135
+ },
+ {
+  "hero": "elf",
+  "row": 10,
+  "col": 1,
+  "h_before": 83,
+  "h_after": 106,
+  "foot_before": 135,
+  "foot_after": 135
+ },
+ {
+  "hero": "bard",
+  "row": 9,
+  "col": 0,
+  "h_before": 93,
+  "h_after": 106,
+  "foot_before": 135,
+  "foot_after": 135
+ },
+ {
+  "hero": "bard",
+  "row": 9,
+  "col": 1,
+  "h_before": 89,
+  "h_after": 107,
+  "foot_before": 135,
+  "foot_after": 135
+ },
+ {
+  "hero": "bard",
+  "row": 10,
+  "col": 0,
+  "h_before": 88,
+  "h_after": 106,
+  "foot_before": 135,
+  "foot_after": 135
+ },
+ {
+  "hero": "bard",
+  "row": 10,
+  "col": 1,
+  "h_before": 88,
+  "h_after": 106,
+  "foot_before": 135,
+  "foot_after": 135
+ },
+ {
+  "hero": "dragoon",
+  "row": 9,
+  "col": 0,
+  "h_before": 102,
+  "h_after": 107,
+  "foot_before": 135,
+  "foot_after": 135
+ },
+ {
+  "hero": "dragoon",
+  "row": 9,
+  "col": 1,
+  "h_before": 104,
+  "h_after": 106,
+  "foot_before": 135,
+  "foot_after": 135
+ },
+ {
+  "hero": "dragoon",
+  "row": 10,
+  "col": 0,
+  "h_before": 90,
+  "h_after": 107,
+  "foot_before": 135,
+  "foot_after": 135
+ },
+ {
+  "hero": "dragoon",
+  "row": 10,
+  "col": 1,
+  "h_before": 91,
+  "h_after": 107,
+  "foot_before": 135,
+  "foot_after": 135
+ },
+ {
+  "hero": "pirate",
+  "row": 9,
+  "col": 0,
+  "h_before": 102,
+  "h_after": 107,
+  "foot_before": 135,
+  "foot_after": 135
+ },
+ {
+  "hero": "pirate",
+  "row": 9,
+  "col": 1,
+  "h_before": 101,
+  "h_after": 106,
+  "foot_before": 135,
+  "foot_after": 135
+ },
+ {
+  "hero": "pirate",
+  "row": 10,
+  "col": 0,
+  "h_before": 90,
+  "h_after": 106,
+  "foot_before": 134,
+  "foot_after": 135
+ },
+ {
+  "hero": "pirate",
+  "row": 10,
+  "col": 1,
+  "h_before": 90,
+  "h_after": 107,
+  "foot_before": 135,
+  "foot_after": 135
+ },
+ {
+  "hero": "drone",
+  "row": 9,
+  "col": 0,
+  "h_before": 98,
+  "h_after": 106,
+  "foot_before": 135,
+  "foot_after": 135
+ },
+ {
+  "hero": "drone",
+  "row": 9,
+  "col": 1,
+  "h_before": 98,
+  "h_after": 106,
+  "foot_before": 135,
+  "foot_after": 135
+ },
+ {
+  "hero": "drone",
+  "row": 10,
+  "col": 0,
+  "h_before": 98,
+  "h_after": 106,
+  "foot_before": 135,
+  "foot_after": 135
+ },
+ {
+  "hero": "drone",
+  "row": 10,
+  "col": 1,
+  "h_before": 105,
+  "h_after": 105,
+  "foot_before": 135,
+  "foot_after": 135
+ },
+ {
+  "hero": "merchant",
+  "row": 9,
+  "col": 0,
+  "h_before": 95,
+  "h_after": 106,
+  "foot_before": 135,
+  "foot_after": 135
+ },
+ {
+  "hero": "merchant",
+  "row": 9,
+  "col": 1,
+  "h_before": 94,
+  "h_after": 107,
+  "foot_before": 135,
+  "foot_after": 135
+ },
+ {
+  "hero": "merchant",
+  "row": 10,
+  "col": 0,
+  "h_before": 92,
+  "h_after": 106,
+  "foot_before": 135,
+  "foot_after": 135
+ },
+ {
+  "hero": "merchant",
+  "row": 10,
+  "col": 1,
+  "h_before": 92,
+  "h_after": 106,
+  "foot_before": 135,
+  "foot_after": 135
+ },
+ {
+  "hero": "paladin",
+  "row": 9,
+  "col": 0,
+  "h_before": 96,
+  "h_after": 101,
+  "foot_before": 135,
+  "foot_after": 135
+ },
+ {
+  "hero": "paladin",
+  "row": 9,
+  "col": 1,
+  "h_before": 93,
+  "h_after": 105,
+  "foot_before": 135,
+  "foot_after": 135
+ },
+ {
+  "hero": "paladin",
+  "row": 10,
+  "col": 0,
+  "h_before": 98,
+  "h_after": 106,
+  "foot_before": 135,
+  "foot_after": 135
+ },
+ {
+  "hero": "paladin",
+  "row": 10,
+  "col": 1,
+  "h_before": 99,
+  "h_after": 106,
+  "foot_before": 135,
+  "foot_after": 135
+ },
+ {
+  "hero": "hacker",
+  "row": 9,
+  "col": 0,
+  "h_before": 98,
+  "h_after": 106,
+  "foot_before": 135,
+  "foot_after": 135
+ },
+ {
+  "hero": "hacker",
+  "row": 9,
+  "col": 1,
+  "h_before": 100,
+  "h_after": 107,
+  "foot_before": 135,
+  "foot_after": 135
+ },
+ {
+  "hero": "hacker",
+  "row": 10,
+  "col": 0,
+  "h_before": 96,
+  "h_after": 106,
+  "foot_before": 135,
+  "foot_after": 135
+ },
+ {
+  "hero": "hacker",
+  "row": 10,
+  "col": 1,
+  "h_before": 96,
+  "h_after": 106,
+  "foot_before": 135,
+  "foot_after": 135
+ }
+]
