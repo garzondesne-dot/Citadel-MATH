@@ -1,7 +1,8 @@
-# v4 독립 검산 — gen_v4.py 를 쓰지 않음 · 학습지 PDF 글(pdftotext)에서 따로 옮겨 적은 원자료로 물음 글을 읽어 다시 풂
-#   학습지 자료 필요 ✔ 차시(선생님 2026-11-23): 문항 글 = 「학습지 ○) 자료 이름」 + 물음 → 그 자료가 학습지에 있는지 · 다른 칸 가리킴 말이 없는지
-#   쓰는 법: python3 verify_v4.py <v4 폴더> → 검산 표(markdown) · 하나라도 틀리면 멈춤
+# v4 독립 검산 (최종 · 2026-11-23 선생님 「v4 쓰고 히스토그램만 고침」)
+#   자료를 문항 글에 적은 문항 = solve_text (글만 읽어 다시 풂 · 혼자 풀림) · 「학습지 …를 보고」 문항(2차시 문제 3 히스토그램) = solve_sheet (학습지에서 따로 옮긴 자료로 다시 풂 · 학습지 자료 필요)
+#   gen_v4.py 를 쓰지 않음 · 쓰는 법: python3 verify_v4.py <v4 폴더>
 import json, re, sys, os
+from fractions import Fraction as Fr
 D = sys.argv[1]
 # ── 학습지에서 따로 옮긴 자료 ──
 COMMUTE = {(0, 10): 3, (10, 20): None, (20, 30): 15, (30, 40): 8, (40, 50): 2}; COMMUTE_T = 34
@@ -24,7 +25,7 @@ lab = lambda c: tuple(int(x) for x in re.findall(r'(\d+)', c)[:2])
 
 def pick(ch, cls):
     o = [i for i, c in enumerate(ch) if lab(c) == cls]; assert len(o) == 1, (ch, cls); return o[0]
-def solve(q, it):
+def solve_sheet(q, it):
     ask = q.split('\n')[-1]; ch = it['ch']
     if '\n' not in q: return None                                   # 개념 문항 = 눈으로 확인
     head = q.split('\n')[0]; assert head.startswith('학습지 '), head
@@ -80,6 +81,86 @@ def solve(q, it):
     n = rng(nums[0], nums[1]) if ('이상' in ask and '미만' in ask) else rng(nums[0], 10 ** 9) if '이상' in ask else rng(-1, nums[0])
     return asknum(n)
 
+BAD_REF_T = ['[표', '[그림', '위의', '위 표', '위 그림', '아래 표', '앞에서', '(2)의', '왼쪽 표']   # 「줄기와 잎 그림에서는 …」 같은 개념 문장은 괜찮음
+rows = []
+
+def table(q):        # 「a~b: n · …」 (n = 숫자 · ? · A) → [(a, b, n)] · 합계
+    head = q.split('\n')[0]
+    cells = [(int(a), int(b), n) for a, b, n in re.findall(r'(\d+)~(\d+): (\d+|\?|A)(?= ·| \(|$)', head)]
+    tot = re.search(r'합계 (\d+)', head) or re.search(r'복숭아 (\d+)개', head)   # 복숭아 = 문제 첫머리의 전체 개수
+    return cells, int(tot.group(1)) if tot else None
+def raw(q):
+    return [float(x) for x in re.findall(r'(\d+\.\d)', q.split('\n')[0].split('—')[1])]
+def stemleaf(q):
+    body = q.split('\n')[0].split('—')[1]
+    out = []
+    for s, l in re.findall(r'(\d+) \| ([\d ]+)', body):
+        out += [Fr(int(s)) + Fr(int(c), 10) for c in l.split()]
+    return out
+def bars(q):
+    g = re.search(r'\[\[graph:(.*?)\]\]', q).group(1)
+    out = []
+    for m in re.finditer(r'poly \((\d+),0\) \((\d+),0\) \((\d+),(\d+)\) \((\d+),(\d+)\)', g):
+        a, b, _, h, _, _ = map(int, m.groups()); out.append((a, b, h))
+    lo, hi = map(int, re.search(r'계급 (\d+)~(\d+)cm', q).groups())
+    for a in range(lo, hi, 50):                      # 높이 0 인 계급도 계급
+        if not any(x[0] == a for x in out): out.append((a, a + 50, 0))
+    return sorted(out)
+def fill(cells, tot):
+    miss = [i for i, c in enumerate(cells) if not str(c[2]).isdigit()]
+    known = sum(int(c[2]) for c in cells if str(c[2]).isdigit())
+    if miss: assert len(miss) == 1 and tot is not None
+    return [(a, b, int(n) if str(n).isdigit() else tot - known) for a, b, n in cells], (cells[miss[0]] if miss else None)
+lab_rng = lambda s: tuple(int(x) for x in re.findall(r'(\d+)', s)[:2])
+
+def solve_text(q, it):
+    ask = q.split('\n')[-1]; t = it['type']; ch = it['ch']
+    if '줄기와 잎' in q and '\n' in q:
+        xs = stemleaf(q)
+        m = re.search(r'(\d+\.\d)초 이상 (\d+\.\d)초 미만', ask)
+        if m: a, b = Fr(m.group(1)), Fr(m.group(2)); return sum(1 for x in xs if a <= x < b)
+        m = re.search(r'(\d+\.\d)초 미만', ask); return sum(1 for x in xs if x < Fr(m.group(1)))
+    if '투표율' in q and '\n' in q:
+        xs = raw(q); assert len(xs) == 20
+        m = re.search(r'(\d+)% 이상 (\d+)% 미만', ask)
+        if m: a, b = map(int, m.groups()); return sum(1 for x in xs if a <= x < b)
+        m = re.search(r'(\d+)% 이상', ask); return sum(1 for x in xs if x >= int(m.group(1)))
+    if '[[graph:' in q:
+        cs = bars(q)
+        if '모두 몇' in ask: return sum(h for _, _, h in cs)
+        if '가장 작은' in ask:
+            mn = min(h for *_, h in cs); hits = [i for i, c in enumerate(ch) if [h for a, b, h in cs if (a, b) == lab_rng(c)] == [mn]]
+            assert len(hits) == 1; return hits[0]
+        a, b = map(int, re.search(r'(\d+)cm 이상 (\d+)cm 미만', ask).groups()); return sum(h for x, y, h in cs if a <= x and y <= b)
+    if '\n' not in q: return None                          # 개념 문항 (숫자 없음) = 눈으로 확인
+    cells, tot = table(q); full, missc = fill(cells, tot)
+    if tot is not None: assert sum(n for *_, n in full) == tot
+    if '계급의 크기' in ask and '넓이' not in ask: ws = {b - a for a, b, _ in full}; assert len(ws) == 1; return ws.pop()
+    if '도수(?)' in ask or 'A의 값' in ask or re.search(r'g 이상 \d+g 미만인 복숭아는 몇 개', ask): return missc and [n for a, b, n in full if (a, b) == missc[:2]][0]
+    if '전체의 몇 %' in ask:
+        T = sum(n for *_, n in full)
+        m = re.search(r'(\d+)g 이상 (\d+)g 미만', ask)
+        part = [n for a, b, n in full if (a, b) == tuple(map(int, m.groups()))][0] if m else sum(n for a, b, n in full if a >= int(re.search(r'(\d+)점 이상', ask).group(1)))
+        assert part * 100 % T == 0; return part * 100 // T
+    if '두 번째로 큰' in ask or '가장 높은 직사각형은' in ask or '가장 높은 점' in ask:
+        hs = sorted({n for *_, n in full}, reverse=True); want = hs[1] if '두 번째' in ask else hs[0]
+        assert [n for *_, n in full].count(want) == 1
+        hits = [i for i, c in enumerate(ch) if [n for a, b, n in full if (a, b) == (lab_rng(c) if '만~' not in c else tuple(int(x) for x in re.findall(r'(\d+)만', c)))] == [want]]
+        assert len(hits) == 1, (ask, ch); return hits[0]
+    if '넓이' in ask: mx = max(n for *_, n in full); return [(b - a) * n for a, b, n in full if n == mx][0]
+    if '양 끝에' in ask:
+        lo, hi, w = full[0][0], full[-1][1], full[0][1] - full[0][0]
+        want = f'{lo - w}~{lo} 과 {hi}~{hi + w}'; assert ch.count(want) == 1; return ch.index(want)
+    if '모두 몇 편' in ask: return sum(n for *_, n in full)
+    m = re.search(r'(\d+)만 명 이상이', ask)
+    if m: return sum(n for a, b, n in full if a >= int(m.group(1)))
+    m = re.search(r'(\d+)분 이상인', ask) or re.search(r'(\d+)점 이상인', ask)
+    if m: return sum(n for a, b, n in full if a >= int(m.group(1)))
+    raise ValueError(ask)
+
+
+def solve(q, it):
+    return solve_sheet(q, it) if q.startswith('학습지 ') else solve_text(q, it)
 rows, n_ok = [], 0
 for f in ('mid1-stat-01.json', 'mid1-stat-02.json'):
     d = json.load(open(os.path.join(D, f), encoding='utf8'))
@@ -94,7 +175,7 @@ for f in ('mid1-stat-01.json', 'mid1-stat-02.json'):
                 got = solve(q, it); want = int(it['a']) if it['type'] in ('number', 'choice') else it['a']
                 ok = '눈으로 확인' if got is None else '✅' if got == want else '❌'
                 assert ok != '❌', (f, mid, v, i, q.split('\n')[-1], got, it['a'])
-                need = '학습지 자료 필요 ✔' if '\n' in q else '혼자 풀림 ✔'
+                need = '학습지 자료 필요 ✔' if q.startswith('학습지 ') else '혼자 풀림 ✔'
                 ans = it['ch'][int(it['a'])] if it['type'] == 'choice' else it['a']
                 rows.append(f"| {f[10:12]}차시 {mid}-{i + 1} · 판 {v} | {q.split(chr(10))[-1]} | {ans} | {ok} | {need} | ✔ |")
                 n_ok += 1
