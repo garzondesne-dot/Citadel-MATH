@@ -176,11 +176,15 @@ pack = {'id': 'ex-14', 'no': 14, 'v': 1, 'title': '함수', 'unit': '공통수�
                    'noteText': 'f = g 의 뜻 → f(1) = g(1) → f(2) = g(2) → 빼서 b → a', 'help': HELP3}},
         'boss': {'title': '👑 14차시 형성평가 · 대응의 사슬 군주', 'sprite': 'keyvaultboss0:0', 'items': 4, 'hpItems': 4,
                  'tags': ['c1', 'c2', 'c3', 'c4'], 'links': ['m1', 'm1', 'm2', 'm3'],
-                 'pool': POOL, 'sets': [None, [p[1] for p in POOL]]},
+                 'pool': [p[1:] for p in POOL], 'sets': [None, [p[0] for p in POOL]]},
         'keys': KEYS}
 
 # ───────── 팩 스스로 검사 (PACK-GUIDE 7 · 16) ─────────
 b = pack['boss']
+# PACK-GUIDE 검사 15 (11/24): 👑 첫 시도 = 세트 1 = 학습지 판(POOL[i][0] · 태그 '') · pool = 숫자 바꾼 판만 (엔진: 시도 0 = sets[1] · 1 ~ = pool)
+assert b['sets'][1] == [p[0] for p in POOL] and all(b['sets'][1][i] not in b['pool'][i] and b['pool'][i] == POOL[i][1:] for i in range(len(POOL)))
+WS = ["1. X = {1, 2, 3} 에서 Y = {a, b} 로의 대응 중 함수인 것은?", "f(x) = 2x − 1 의 치", "3. 함수 y = x² + 1 의 치역은?", "4. 정의역이 {1, 3}인 두 함수"]  # 레이드용 학습지 형성평가 글 조각 (14 v7 · 15 v5 · 16 v6 · 17 v6 세트 1 과 대조 · 11/24)
+assert all(w in b['sets'][1][i]['question'] for i, w in enumerate(WS)), '세트 1 ≠ 학습지 글'
 assert b['items'] == len(b['tags']) == len(b['links']) == len(b['pool']) == 4 and 1 <= b['hpItems'] <= b['items']
 cids = {s['id'] for s in steps if s['kind'] == 'concept'}; assert set(b['tags']) <= cids
 assert all(s['id'] in pack['monsters'] for s in steps if s['kind'] == 'monster') and steps[-1]['kind'] == 'boss'
@@ -190,6 +194,7 @@ def each_item():
         yield from m['first']
         for v in m['retry']['pool']: yield from v
     for p in b['pool']: yield from p
+    yield from b['sets'][1]
 for it in each_item():
     if it['type'] == 'choice': assert 0 <= it['answerIndex'] < len(it['choices'])
     if it['type'] == 'multi': assert isinstance(it['answer'], list) and it['answer'] and all(0 <= i < len(it['options']) for i in it['answer']) and 'choices' not in it  # 엔진 꼴 = options · answer 번호 배열 (v3 고침)

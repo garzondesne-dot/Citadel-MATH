@@ -199,11 +199,15 @@ pack = {'id': 'ex-16', 'no': 16, 'v': 1, 'title': '합성함수', 'unit': '공�
                    'noteText': '(f∘h)(x) = f(h(x)) → f 에 h(x) 넣기 → g(x) 와 같다고 놓기 → 이항 → h(x) · 검산', 'help': HELP3}},
         'boss': {'title': '👑 16차시 형성평가 · 합성의 대기관', 'sprite': 'crown0:0', 'items': 4, 'hpItems': 4,
                  'tags': ['c1', 'c1', 'c2', 'c2'], 'links': ['m1', 'm1', 'm2', 'm3'],
-                 'pool': POOL, 'sets': [None, [p[1] for p in POOL]]},
+                 'pool': [p[1:] for p in POOL], 'sets': [None, [p[0] for p in POOL]]},
         'keys': KEYS}
 
 # ───────── 팩 스스로 검사 ─────────
 b = pack['boss']
+# PACK-GUIDE 검사 15 (11/24): 👑 첫 시도 = 세트 1 = 학습지 판(POOL[i][0] · 태그 '') · pool = 숫자 바꾼 판만 (엔진: 시도 0 = sets[1] · 1 ~ = pool)
+assert b['sets'][1] == [p[0] for p in POOL] and all(b['sets'][1][i] not in b['pool'][i] and b['pool'][i] == POOL[i][1:] for i in range(len(POOL)))
+WS = ["f(x) = x − 5 와 g(x) = 3x² − 4 에 대하여 (g∘f)(3)", "f(x) = x − 5 와 g(x) = 3x² − 4 에 대하여 (g∘g)(1)", "f(x) = x − 5 와 g(x) = 3x² − 4 에 대하여 (f∘g)(x)", "f(x) = 3x + 1, g(x) = 6x − 5 에 대하여 (f∘h)(x) = g(x)"]  # 레이드용 학습지 형성평가 글 조각 (14 v7 · 15 v5 · 16 v6 · 17 v6 세트 1 과 대조 · 11/24)
+assert all(w in b['sets'][1][i]['question'] for i, w in enumerate(WS)), '세트 1 ≠ 학습지 글'
 assert b['items'] == len(b['tags']) == len(b['links']) == len(b['pool']) == 4 and 1 <= b['hpItems'] <= b['items']
 cids = {s['id'] for s in steps if s['kind'] == 'concept'}; assert set(b['tags']) <= cids
 assert all(s['id'] in pack['monsters'] for s in steps if s['kind'] == 'monster') and steps[-1]['kind'] == 'boss'
@@ -212,6 +216,7 @@ def each_item():
         yield from m['first']
         for v in m['retry']['pool']: yield from v
     for p in b['pool']: yield from p
+    yield from b['sets'][1]
 for it in each_item():
     assert 'question' in it
     if it['type'] == 'choice': assert 0 <= it['answerIndex'] < len(it['choices'])

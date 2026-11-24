@@ -236,11 +236,15 @@ pack = {'id': 'ex-15', 'no': 15, 'v': 1, 'title': '함수의 그래프 · 여러
                    'noteText': '상수함수 → 항등함수 → 이차함수가 일대일이 아닌 까닭 → 직선의 치역 → 짝 맞추기', 'help': HELP3}},
         'boss': {'title': '👑 15차시 형성평가 · 그래프 용', 'sprite': 'gardenboss0:0', 'items': 4, 'hpItems': 4,
                  'tags': ['c1', 'c1', 'c2', 'c3'], 'links': ['m1', 'm1', 'm2', 'm3'],
-                 'pool': POOL, 'sets': [None, [p[1] for p in POOL]]},
+                 'pool': [p[1:] for p in POOL], 'sets': [None, [p[0] for p in POOL]]},
         'keys': KEYS}
 
 # ───────── 팩 스스로 검사 (PACK-GUIDE 7 · 16) ─────────
 b = pack['boss']
+# PACK-GUIDE 검사 15 (11/24): 👑 첫 시도 = 세트 1 = 학습지 판(POOL[i][0] · 태그 '') · pool = 숫자 바꾼 판만 (엔진: 시도 0 = sets[1] · 1 ~ = pool)
+assert b['sets'][1] == [p[0] for p in POOL] and all(b['sets'][1][i] not in b['pool'][i] and b['pool'][i] == POOL[i][1:] for i in range(len(POOL)))
+WS = ["f(x) = 2x − 1 의 그래프는?", "2. 다음 중 함수의 그래프가 아닌 것은?", "3. 정의역 · 공역이 실수 전체일 때, 일대일대응인 것을", "4. 보기에서 일대일대응 · 항등함수 · 상수함수를"]  # 레이드용 학습지 형성평가 글 조각 (14 v7 · 15 v5 · 16 v6 · 17 v6 세트 1 과 대조 · 11/24)
+assert all(w in b['sets'][1][i]['question'] for i, w in enumerate(WS)), '세트 1 ≠ 학습지 글'
 assert b['items'] == len(b['tags']) == len(b['links']) == len(b['pool']) == 4 and 1 <= b['hpItems'] <= b['items']
 cids = {s['id'] for s in steps if s['kind'] == 'concept'}; assert set(b['tags']) <= cids
 assert all(s['id'] in pack['monsters'] for s in steps if s['kind'] == 'monster') and steps[-1]['kind'] == 'boss'
@@ -249,6 +253,7 @@ def each_item():
         yield from m['first']
         for v in m['retry']['pool']: yield from v
     for p in b['pool']: yield from p
+    yield from b['sets'][1]
 for it in each_item():
     assert 'question' in it
     if it['type'] == 'choice': assert 0 <= it['answerIndex'] < len(it['choices'])
