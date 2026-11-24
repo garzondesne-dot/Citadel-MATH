@@ -23,3 +23,7 @@ PixelLab(pixflux · 이 환경 연결 · 선생님이 말씀하신 「이미지 
 | rest-podium-codex-v1-src.png | mg-o-podium | 1536 × 1024 | 원본(자홍 배경) · 드라이브 「코덱스 받은편지함」에서 받음 |
 | rest-podium-codex-v1.png | mg-o-podium | 1536 × 1024 | 자홍 지움(투명) · 내용 영역 (189, 168) ~ (1345, 950) · ⚠ 도트 칸이 고르지 않음(GPT 그림 = 흉내 도트 · 같은 색 이어짐 2 ~ 3px) → 게임에 넣을 땐 손발이 1/4 ~ 1/6 로 줄여(nearest) 칸을 맞춤 |
 | alk-board-codex-v1-src.png · alk-board-codex-v1.png | mg-o-alk-board | 2048 × 2048 | 🤖 코덱스 다리 첫 자동 주문(80초) · 나란한 판재 · 쇠 허브 · 판 반지름 절반 금빛 출발 고리 · 돌 테두리 · 자홍 지움 |
+| alk-bg-codex-v1.png | mg-o-alk-bg | 1920 × 1080 | 🤖 자동 주문 · 밤하늘 심연 · 왼쪽 원판 자리 비움 · 팔레트 PNG(진짜 도트로 줄여 저장됨) |
+| ajae-stage-codex-v1.png | mg-o-ajae-stage | 1920 × 1080 | 🤖 자동 주문 · 주막 퀴즈 무대 · 왼쪽 아래 둥근 무대(현자 자리) · 가운데 비움 · 칠판 낙서만(글자 없음) |
+| land-tiles-codex-v1.png | mg-o-land-tiles | 1536 × 256 (칸 256 × 6) | 🤖 자동 주문 · 빈 · 붉은 · 푸른 · 금빛 · 초록 · ⭐ |
+| land-flag-codex-v1.png (+ -src) | mg-o-land-flag | 512 × 512 | 🤖 자동 주문 · 흰 깃발 · 자홍 지움 |
