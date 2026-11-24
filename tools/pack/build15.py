@@ -263,6 +263,9 @@ for m in pack['monsters'].values():  # 판마다 문항 꼴 같음(PACK-GUIDE 14
     sig = [i['type'] for i in m['first']]
     assert all([i['type'] for i in v] == sig for v in m['retry']['pool'])
 for p in b['pool']: assert len({i['type'] for i in p}) == 1
+import os; sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from overlay import apply_file  # 드라이브 팩 손질(판 1 ~ 6 · 조사 · 형성평가 세트 1 = 학습지 …) = overlays/<id>.json · 2026-11-24
+pack = apply_file(pack, pack['id'])
 json.dump(pack, open(OUT, 'w', encoding='utf8'), ensure_ascii=False, indent=1)
 print('| 문항 | 정답 | 계산 한 줄 | 확인 |\n|---|---|---|---|')
 for n, a, c in CHECK: print(f'| {n} | {a} | {c} | ✅ |')
