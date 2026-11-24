@@ -27,3 +27,14 @@ PixelLab(pixflux · 이 환경 연결 · 선생님이 말씀하신 「이미지 
 | ajae-stage-codex-v1.png | mg-o-ajae-stage | 1920 × 1080 | 🤖 자동 주문 · 주막 퀴즈 무대 · 왼쪽 아래 둥근 무대(현자 자리) · 가운데 비움 · 칠판 낙서만(글자 없음) |
 | land-tiles-codex-v1.png | mg-o-land-tiles | 1536 × 256 (칸 256 × 6) | 🤖 자동 주문 · 빈 · 붉은 · 푸른 · 금빛 · 초록 · ⭐ |
 | land-flag-codex-v1.png (+ -src) | mg-o-land-flag | 512 × 512 | 🤖 자동 주문 · 흰 깃발 · 자홍 지움 |
+
+## ⬆ v2 = 생성 원본 (2026-11-25 KST) — 위 v1 표의 코덱스 그림은 코덱스가 스스로 줄이고 64색으로 뭉갠 판이라 지움
+
+| 파일 | 카드 | 크기 |
+|---|---|---|
+| alk-board-codex-v2.png | mg-o-alk-board | 1254 × 1254 (자홍 지움) |
+| alk-bg-codex-v2.png | mg-o-alk-bg | 1672 × 941 |
+| ajae-stage-codex-v2.png | mg-o-ajae-stage | 1672 × 941 |
+| land-tiles-codex-v2.png | mg-o-land-tiles | 2172 × 356 (6칸 · 자홍 지움 · 칸 폭 약 362) |
+| land-flag-codex-v2.png | mg-o-land-flag | 1254 × 1254 (자홍 지움) |
+| rest-podium-codex-v1.png | mg-o-podium | 1536 × 1024 (원래 원본이라 그대로) |
