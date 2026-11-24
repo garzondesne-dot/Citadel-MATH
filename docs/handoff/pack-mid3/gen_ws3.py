@@ -86,7 +86,7 @@ body {{ font-size:10.2pt; line-height:1.55; }}
 .hd .l {{ width:34mm; }} .hd .rr {{ width:46mm; }}
 .word {{ border:1px dashed #9ab; padding:1mm 2mm; font-size:9.2pt; margin:1mm 0; font-weight:600; }}
 table.d {{ border-collapse:collapse; font-size:9pt; line-height:1.3; margin:1mm 0; }}
-table.d {{ flex:0 0 auto; }} table.d th, table.d td {{ border:1px solid #777; padding:0.5mm 1.6mm; text-align:center; white-space:nowrap; }}
+table.d {{ flex:0 0 auto; }} table.d th, table.d td {{ border:1px solid #777; padding:0.5mm 1.2mm; text-align:center; white-space:nowrap; }}
 table.d th {{ background:#e8eef7; }} table.d tr.sum td {{ background:#f3f3f3; font-weight:700; }}
 .q {{ margin:1mm 0; }} .ex {{ color:#2a4a8a; }}
 .gtag {{ display:inline-block; background:#55657e; color:#fff; font-size:7.6pt; font-weight:700; padding:0 1.6mm; border-radius:6px; margin-left:1mm; vertical-align:middle; }}
@@ -107,10 +107,10 @@ goal = '<div class="goal"><b>학습목표</b> ① 상대도수를 구하고 상�
 
 # ── 1쪽 ──
 blocks = []
-blocks.append(f'''<h3 class="o">지난 시간 기억하기</h3>
+blocks.append(f'''<div class="review"><h3 class="o">지난 시간 기억하기</h3>
 <div class="q">① 히스토그램의 직사각형의 넓이 = 계급의 크기 × {B('도수', 'm')}</div>
 <div class="q">② 도수분포다각형은 직사각형 윗변의 {B('중앙', 'm')} 에 점을 찍어 이은 그래프</div>
-<div class="q">③ 도수분포다각형의 양 끝에는 도수가 {B('0')} 인 계급을 하나씩 더한다</div>''')
+<div class="q">③ 도수분포다각형의 양 끝에는 도수가 {B('0')} 인 계급을 하나씩 더한다</div></div>''')
 
 HINT0 = '<br><span class="mini">(3 ÷ 20 = 0.15)</span>' if T else ''
 t5 = ''.join(f'<tr><td>{a}{"<sup>이상</sup>" if i == 0 else ""} ~ {b}{"<sup>미만</sup>" if i == 0 else ""}</td><td>{n}</td></tr>' for i, (a, b, n) in enumerate(READ))
@@ -164,7 +164,7 @@ blocks.append(f'''<h3>STEP 5 도수의 총합이 다른 두 자료 비교</h3>
 → 도수의 총합이 다른 두 자료는 도수보다 {B('상대도수', 'm')} 로 비교한다.</div></div>''')
 
 g4 = graph(['2', '4', '6', '8', '10', '12'], [('#c0392b', SVC_A), ('#1b3d8f', SVC_B)], ymax=0.45, w=62, h=36, xunit='시간', legend=[('#c0392b', 'A'), ('#1b3d8f', 'B')])
-blocks.append(f'''<div class="blk"><div class="q"><b class="ex">문제 3)</b> A 중학교 1학년 150명(빨강)과 B 중학교 1학년 200명(파랑)의 한 달 동안 봉사 활동 시간의 상대도수 그래프이다. {GAME('몬스터 3')}</div>
+blocks.append(f'''<div class="blk q"><div class="q"><b class="ex">문제 3)</b> A 중학교 1학년 150명(빨강)과 B 중학교 1학년 200명(파랑)의 한 달 동안 봉사 활동 시간의 상대도수 그래프이다. {GAME('몬스터 3')}</div>
 <div>{g4}</div>
 <div class="q" style="font-size:9.6pt">⑴ 봉사 활동 시간이 8시간 이상 12시간 미만인 학생 수<br>&nbsp;&nbsp;&nbsp;A 중학교 → {B('48')} 명 &nbsp;&nbsp; B 중학교 → {B('44')} 명<br>
 ⑵ A 중학교 학생의 봉사 활동 시간이 B 중학교보다 상대적으로 더 많다고 할 수 있을까? {SEL(['있다', '없다'], '있다')}<br>
@@ -173,10 +173,10 @@ blocks.append(f'''<div class="blk"><div class="q"><b class="ex">문제 3)</b> A 
 
 fq = lambda n, s: f'<div class="q">{n}. {s}</div>'
 CL = [('0', '10', 3), ('10', '20', 7), ('20', '30', 8), ('30', '40', 5), ('40', '50', 2)]
-tc = '<tr><th>통학 시간(분)</th>' + ''.join(f'<td>{a} ~ {b}</td>' for a, b, _ in CL) + '<td>합계</td></tr><tr><th>학생 수</th>' + ''.join(f'<td>{n}</td>' for *_, n in CL) + '<td>25</td></tr>'
+tc = '<tr><th>시간(분)</th>' + ''.join(f'<td>{a} ~ {b}</td>' for a, b, _ in CL) + '<td>합계</td></tr><tr><th>학생 수</th>' + ''.join(f'<td>{n}</td>' for *_, n in CL) + '<td>25</td></tr>'
 blocks.append(f'''<div class="fa"><div class="tt">✔ 3차시 형성평가 <span class="mini" style="font-weight:400">(혼자 풀기 · 6문항)</span>{GAME('보스')}</div>
 <div class="q" style="margin-bottom:0">어느 반 학생 25명의 통학 시간이다. (1 ~ 2) <span class="mini">(a ~ b = a 이상 b 미만)</span></div>
-<table class="d" style="width:100%">{tc}</table>
+<table class="d" style="width:100%;font-size:8.4pt">{tc}</table>
 {fq(1, f"10분 이상 20분 미만인 계급의 상대도수는? → {B('0.28')}")}
 {fq(2, f"통학 시간이 20분 이상인 학생은 전체의 몇 %? → {B('60')} %")}
 {fq(3, f"어떤 자료에서 상대도수의 합은 항상 1 이다. {SEL(['O', 'X'], 'O')}")}
