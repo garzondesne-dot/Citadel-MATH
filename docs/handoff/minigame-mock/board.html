@@ -72,7 +72,6 @@ const T = [
  { ch: 11, boss: '모순의 리바이어던', name: '모험가 다섯', h: 12, n: 1, lock: true },
  { ch: 10, boss: '필요충분의 천칭 수호자', name: '모험가 여섯', h: 14, n: 3, pw: true },
  { ch: 8, boss: '부정의 수정 여왕', name: '모험가 일곱', h: 5, n: 1 },
- { ch: 7, boss: '명제의 거울 기사', name: '모험가 여덟', h: 16, n: 4, full: true },
  { ch: 9, boss: '역과 대우의 문지기', name: '모험가 아홉', h: 18, n: 1 },
  { ch: 12, boss: '귀류의 그림자 군주', name: '모험가 열', h: 10, n: 2, lock: true },
 ];
@@ -102,7 +101,7 @@ S['3-many'] = () => { const G = {}; T.forEach((t) => (G[t.ch] = G[t.ch] || []).p
  <div class="chips"><div class="chip on">✓ 전체 ${T.length}</div><div class="chip">빈자리 있음</div><div class="chip">🛡 수호자</div><div class="chip">🔒 빼기</div></div>
  <div class="list withchips">${keys.map((k) => `<div class="grp">${k}차시 · ${G[k].length}팀 ${G[k][0].lock ? '· 🔒 아직 안 배움' : ''}<span class="bar"></span></div>${G[k].map(row).join('')}`).join('')}</div>
  ${bottomJoin}
- <div class="note" style="right:16px;top:170px;max-width:220px">팀 10개 = 차시별 묶음 · 배운 차시가 위 · 안 배운 차시는 맨 아래 흐리게</div>
+ <div class="note" style="right:16px;top:170px;max-width:220px">팀이 많을 때 = 차시별 묶음 · 배운 차시가 위 · 안 배운 차시는 맨 아래 흐리게 · 꽉 찬 팀(4/4)은 숨김</div>
 </div>`; };
 S['4-password'] = () => `<div class="ph">${TOPBAR}${seg(5)}
  <div class="list"><div class="hint"><span>지금 열린 팀 5</span><span>↻ 방금</span></div>${[T[0], T[1], T[2], T[3], T[4]].map(row).join('')}</div>
