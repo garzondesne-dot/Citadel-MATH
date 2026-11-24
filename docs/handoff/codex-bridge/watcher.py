@@ -57,11 +57,17 @@ def handle(f):
     target = OUT_DIR / name
     prompt = (order["prompt"].strip() +
               f"\n\n---\n그림 생성 도구로 그림 1장을 만들고, 최종 PNG 를 이 작업 폴더 안의 `{target.as_posix()}` 에 저장해. "
+              "생성된 원본 이미지를 그대로 복사해 저장하고, 크기 바꾸기 · 색 수 줄이기(quantize) · 다시 늘리기 · 필터 같은 후처리는 절대 하지 마 "
+              "(위 주문 글의 '픽셀 격자 · 색 수 · 출력 크기' 문장은 그림을 그릴 때의 화풍 설명일 뿐 후처리 지시가 아님 · 크기는 생성 도구가 고를 수 있는 가장 가까운 크기로). "
               "다른 파일은 만들거나 고치지 마. 끝나면 저장한 경로 한 줄만 말해.")
     log(f"주문 시작: {oid}")
     t0 = time.time()
     r, args = run_codex(prompt)
     (INBOX / f"{oid}.log.txt").write_text(f"명령: codex {' '.join(args)}\n종료 코드: {r.returncode}\n\n[출력]\n{r.stdout}\n\n[오류]\n{r.stderr}", encoding="utf-8")
+    gen = Path(os.environ.get("CODEX_HOME", Path.home() / ".codex")) / "generated_images"
+    stem = Path(name).stem
+    for k, g in enumerate(sorted((x for x in gen.rglob("*.png") if x.stat().st_mtime >= t0), key=lambda x: x.stat().st_mtime), 1):
+        shutil.copy2(g, INBOX / f"{stem}-orig{'' if k == 1 else '-' + str(k)}.png")   # 생성 원본(후처리 전)도 같이
     src = REPO / target
     if src.exists():
         shutil.copy2(src, INBOX / name)
