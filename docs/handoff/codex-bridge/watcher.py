@@ -45,6 +45,12 @@ def run_codex(prompt):
     return r, args
 
 def handle(f):
+    run = DONE / (f.name + ".running")   # 먼저 옮겨서 감시 프로그램이 둘 켜져도 한 번만 처리
+    try:
+        shutil.move(str(f), str(run))
+    except Exception:
+        return
+    f = run
     order = json.loads(f.read_text(encoding="utf-8"))
     oid = order.get("id") or f.stem
     name = order.get("name") or f"{oid}.png"
@@ -62,7 +68,7 @@ def handle(f):
         log(f"완료: {oid} → 받은편지함/{name} ({time.time()-t0:.0f}초)")
     else:
         log(f"그림 없음: {oid} (기록 {oid}.log.txt 확인)")
-    shutil.move(str(f), str(DONE / f.name))
+    shutil.move(str(f), str(DONE / f.name.replace('.running', '')))
 
 log(f"코덱스 다리 시작 · 주문함 = {ORDERS}")
 while True:
@@ -72,7 +78,8 @@ while True:
                 handle(f)
             except Exception:
                 log("오류: " + f.name + "\n" + traceback.format_exc())
-                shutil.move(str(f), str(DONE / (f.name + ".error")))
+                for g in DONE.glob(f.name + ".running"):
+                    shutil.move(str(g), str(DONE / (f.name + ".error")))
     except Exception:
         log("감시 오류\n" + traceback.format_exc())
     time.sleep(WAIT)
