@@ -1016,5 +1016,12 @@
   "m3",
   "sum"
  ],
- "video": []
+ "video": [
+  {
+   "file": "mid1-03-video.mp4",
+   "at": [
+    "c1"
+   ]
+  }
+ ]
 }
