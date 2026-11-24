@@ -19,7 +19,7 @@
 > **열쇠**: `GDRIVE_RCLONE_TOKEN`(드라이브) · `FIREBASE_SA_JSON` = 옛 서버(citadel-math) 만 · 운영 서버(citadel-math-test-c6a9b) 열쇠 없음(운영 읽기 · 환불 = 손발 #1).
 > **배포 #7 이 한 차시 일 (11/20 · 차시팩 방 생기기 전)**: 14 ~ 17차시 학습지 · 팩 · 성채 4층 팩 = 드라이브 02 · 08 · 생성기 `tools/worksheet/gen_ws14v2 · 15v2 · 16v2 · 17v1.py` · `tools/pack/build14 ~ 17.py` · `build_castle4.py` · `castle4_plan.py` (베타 검사기로 정답 채점 · 이제는 📚 차시팩 #1 몫).
 
-> **🧠 메타인지 8 → 9 인계 (2026-11-24 새벽 · 선생님 「마감 새방으로 옮겨」)** · 메타인지 8 = session_014JJv1kdEKCDNEfQv1jGJga → **메타인지 9 = session_014JJv1jk5Hn3wF54gsfciU5 「🧠 모두의던전 머리 9」** · 대화가 여러 번 압축됨(앞부분은 DECISIONS · git log 로 대조) · **🧠 마지막 확인 커밋 = `33579f2`**(메타인지 9 · 11/24)
+> **🧠 메타인지 8 → 9 인계 (2026-11-24 새벽 · 선생님 「마감 새방으로 옮겨」)** · 메타인지 8 = session_014JJv1kdEKCDNEfQv1jGJga → **메타인지 9 = session_014JJv1jk5Hn3wF54gsfciU5 「🧠 모두의던전 머리 9」** · 대화가 여러 번 압축됨(앞부분은 DECISIONS · git log 로 대조) · **🧠 마지막 확인 커밋 = `fa8c756`**(메타인지 9 · 11/25 새벽 마감 · 그 전 33579f2) · 11/24 ~ 25 새벽 정한 것 = DECISIONS 4402 ~ 끝(b240 · b241 배포 · 게시판 별 버그 · 코덱스 다리 · 쉼터 그림 · 함수 배경 · 버그 사냥꾼 · 축제의 날 v1 → 컨셉 v2(무지의 마왕 · 설계 방이 맡음) · 💎 옷장 · 둥지 · 내 던전 간직하기 · 기말 출정 컷인 · D-day 띠 · 모의전 · 답안이 칼이 되어)
 >
 > **새 방 첫 일**: ① 이 절 → DECISIONS 11/22 ~ 11/24 줄 → CLASS-LOG 11/23 ② `git log 5b61dfb..origin/hero-v2` 훑고 다른 점 보고 ③ CLAUDE.md 「🧠 메타인지 방」 이름 · session 을 새 방으로(이 방이 만들면서 이미 고침 · 확인만) ④ 아래 「선생님 할 일」 번호 목록을 첫 인사로.
 >
