@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8">
+<title>게시판 출정 시안</title>
+<!-- 🎨 에셋 방 2 · 2026-11-24 KST · 📋 게시판 던전 출정 = 👥 팀 참가 기본 · 열린 팀 전부 게시판 목록 · ui-senior 토큰 · 렌더: node render-board.js -->
+<style>
+@font-face { font-family: 'DS Gothic'; src: url('../../../assets/fonts/ds-gothic-400-v1.woff2'); }
+@font-face { font-family: 'DS Gothic'; font-weight: 700; src: url('../../../assets/fonts/ds-gothic-700-v1.woff2'); }
+:root { --bg:#0f1115; --surface:#181b22; --surface-2:#222632; --text:#f2f3f5; --text-2:#b4b8c2; --text-3:#7c8190; --accent:#f5b84a; --ok:#4cc38a; --bad:#f0605d; --gem:#6cc6ff; --scroll:#c79bff; --hp:#e5484d; --r-sm:8px; --r:12px; --r-lg:20px; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #000; color: var(--text); font-family: 'DS Gothic', system-ui, sans-serif; font-size: 16px; }
+.ph { width: 390px; height: 844px; position: relative; overflow: hidden; background: var(--bg); }
+.top { height: 56px; display: flex; align-items: center; gap: 8px; padding: 0 16px; }
+.top .back { font-size: 26px; color: var(--text-2); width: 32px; }
+.top h1 { font-size: 20px; font-weight: 700; flex: 1; }
+.wallet { display: flex; gap: 8px; font-size: 14px; font-weight: 700; }
+.wallet span { background: var(--surface); border-radius: 999px; padding: 4px 10px; }
+.seg { margin: 4px 16px 0; height: 48px; display: grid; grid-template-columns: 1fr 1fr; background: var(--surface); border-radius: var(--r); padding: 4px; gap: 4px; }
+.seg div { display: flex; align-items: center; justify-content: center; gap: 6px; border-radius: var(--r-sm); font-weight: 700; font-size: 16px; color: var(--text-2); }
+.seg .on { background: var(--accent); color: #1a1205; box-shadow: 0 3px 0 #b8862a; }
+.seg .n { font-size: 13px; background: #0004; border-radius: 999px; padding: 1px 7px; }
+.chips { display: flex; gap: 8px; padding: 12px 16px 0; overflow: hidden; }
+.chip { height: 36px; padding: 0 12px; border-radius: 999px; background: var(--surface); color: var(--text-2); font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 4px; white-space: nowrap; border: 1px solid #2c3140; }
+.chip.on { background: #f5b84a22; color: var(--accent); border-color: var(--accent); }
+.list { position: absolute; left: 0; right: 0; top: 116px; bottom: 96px; padding: 0 16px; overflow: hidden; }
+.list.withchips { top: 164px; }
+.hint { font-size: 14px; color: var(--text-3); padding: 12px 2px 8px; display: flex; justify-content: space-between; }
+.grp { font-size: 14px; color: var(--text-2); font-weight: 700; padding: 12px 2px 6px; display: flex; gap: 6px; align-items: center; }
+.grp .bar { flex: 1; height: 1px; background: #2c3140; }
+.row { background: var(--surface); border-radius: var(--r); padding: 10px 12px; display: grid; grid-template-columns: 52px 1fr auto; gap: 10px; align-items: center; margin-bottom: 8px; min-height: 76px; }
+.row.lock { opacity: .45; }
+.face { width: 52px; height: 52px; border-radius: 50%; overflow: hidden; position: relative; background: #2a2f3d; border: 2px solid #3a4052; }
+.face .hero { position: absolute; width: 80px; height: 64px; background-repeat: no-repeat; background-size: 320px 768px; image-rendering: pixelated; transform-origin: 0 0; }
+.mid { min-width: 0; }
+.l1 { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-2); font-weight: 700; }
+.badge { background: #2c3140; color: var(--text); border-radius: 6px; padding: 1px 6px; font-size: 13px; }
+.l2 { font-size: 16px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 2px 0; }
+.l3 { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--text-2); }
+.dots { display: flex; gap: 3px; }
+.dots i { width: 10px; height: 10px; border-radius: 50%; background: var(--ok); display: block; }
+.dots i.e { background: transparent; border: 2px solid #4a5063; }
+.tag { font-size: 13px; padding: 1px 6px; border-radius: 6px; font-weight: 700; }
+.tag.g { background: #4cc38a22; color: var(--ok); }
+.tag.p { background: #f5b84a1f; color: var(--accent); }
+.join { height: 48px; min-width: 72px; padding: 0 14px; border-radius: var(--r-sm); background: var(--surface-2); color: var(--text); font-weight: 700; font-size: 16px; display: flex; align-items: center; justify-content: center; border: 1px solid #3a4052; box-shadow: 0 3px 0 #0b0d12; }
+.join.dim { box-shadow: none; color: var(--text-3); background: transparent; }
+.bottom { position: absolute; left: 0; right: 0; bottom: 0; height: 96px; padding: 0 16px 20px; display: flex; flex-direction: column; justify-content: flex-end; gap: 6px; background: linear-gradient(#0f111500, var(--bg) 30%); }
+.primary { height: 56px; border-radius: var(--r); background: var(--accent); color: #1a1205; font-weight: 700; font-size: 18px; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 3px 0 #b8862a; }
+.ghost { height: 56px; border-radius: var(--r); border: 2px solid #3a4052; color: var(--text); font-weight: 700; font-size: 18px; display: flex; align-items: center; justify-content: center; }
+.empty { position: absolute; left: 16px; right: 16px; top: 220px; text-align: center; color: var(--text-2); }
+.empty .pic { font-size: 64px; margin-bottom: 12px; filter: grayscale(.3); }
+.empty b { display: block; color: var(--text); font-size: 18px; margin-bottom: 6px; }
+.note { position: absolute; font-size: 12px; color: #9fe6ff; background: #002a3add; border: 1px dashed #6cc6ea; padding: 3px 7px; border-radius: 6px; line-height: 1.35; z-index: 5; }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; background: var(--surface); border-radius: 20px 20px 0 0; padding: 12px 16px 20px; box-shadow: 0 -8px 24px #0009; }
+.grab { width: 40px; height: 4px; border-radius: 2px; background: #3a4052; margin: 0 auto 12px; }
+.pin { display: flex; gap: 10px; justify-content: center; margin: 14px 0; }
+.pin div { width: 52px; height: 60px; border-radius: var(--r-sm); background: var(--bg); border: 2px solid #3a4052; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 700; }
+.pin div.f { border-color: var(--accent); }
+.dim-bg { position: absolute; inset: 0; background: #0009; }
+</style></head>
+<body><div id="root"></div>
+<script>
+const A = '../../../assets/art/hero-';
+const HD = {"sword-v3c": [36, 13], "witch-v2c": [29, 13], "elf-v2c": [32, 13], "ninja-v2c": [23, 13], "priest-v2c": [33, 13], "lancer-v2c": [28, 13], "dwarf-v2c": [26, 13], "sage-v2c": [34, 13], "paladin-v2c": [33, 13], "monk-v2c": [27, 13], "dancer-v2c": [25, 13], "bard-v2c": [30, 13], "alchemist-v2c": [31, 13], "pirate-v2c": [27, 13], "frost-v2c": [29, 13], "tamer-v2c": [26, 13], "dknight-v2c": [28, 14], "mathgirl-v2c": [24, 13], "mechanic-v2c": [21, 13], "valkyrie-v2c": [32, 13]};
+const K = Object.keys(HD);
+const face = (i) => { const k = K[i % K.length], [hx, hy] = HD[k], sc = 48 / 28; return `<div class="face"><div class="hero" style="background-image:url(${A}${k}.webp);transform:scale(${sc});left:${-(hx - 14) * sc}px;top:${-(hy + 3) * sc}px"></div></div>`; };
+// 시안용 가짜 이름(실명 아님)
+const T = [
+ { ch: 9, boss: '역과 대우의 문지기', name: '모험가 하나', h: 3, n: 3, guard: true },
+ { ch: 10, boss: '필요충분의 천칭 수호자', name: '모험가 둘', h: 9, n: 1 },
+ { ch: 9, boss: '역과 대우의 문지기', name: '모험가 셋', h: 1, n: 2, pw: true },
+ { ch: 8, boss: '부정의 수정 여왕', name: '모험가 넷', h: 7, n: 2, guard: true },
+ { ch: 11, boss: '모순의 리바이어던', name: '모험가 다섯', h: 12, n: 1, lock: true },
+ { ch: 10, boss: '필요충분의 천칭 수호자', name: '모험가 여섯', h: 14, n: 3, pw: true },
+ { ch: 8, boss: '부정의 수정 여왕', name: '모험가 일곱', h: 5, n: 1 },
+ { ch: 7, boss: '명제의 거울 기사', name: '모험가 여덟', h: 16, n: 4, full: true },
+ { ch: 9, boss: '역과 대우의 문지기', name: '모험가 아홉', h: 18, n: 1 },
+ { ch: 12, boss: '귀류의 그림자 군주', name: '모험가 열', h: 10, n: 2, lock: true },
+];
+const row = (t) => `<div class="row ${t.lock ? 'lock' : ''}">${face(t.h)}
+ <div class="mid"><div class="l1"><span class="badge">${t.ch}차시</span>${t.pw ? '<span>🔒 암호</span>' : ''}${t.guard ? '<span class="tag g">🛡 수호자</span>' : ''}</div>
+  <div class="l2">${t.boss}</div>
+  <div class="l3"><span>${t.name}</span><span class="dots">${[0,1,2,3].map(k => `<i class="${k < t.n ? '' : 'e'}"></i>`).join('')}</span><span>${t.n}/4</span></div></div>
+ ${t.lock ? `<div class="join dim" style="font-size:13px;line-height:1.2;text-align:center">아직<br>안 배움</div>` : t.full ? `<div class="join dim">꽉 참</div>` : `<div class="join">참가</div>`}</div>`;
+const TOPBAR = `<div class="top"><span class="back">‹</span><h1>📋 출정</h1><div class="wallet"><span style="color:var(--gem)">💎 340</span><span style="color:var(--scroll)">📜 4</span></div></div>`;
+const seg = (n, join = true) => `<div class="seg"><div class="${join ? 'on' : ''}">👥 팀 참가 <span class="n">${n}</span></div><div class="${join ? '' : 'on'}">➕ 팀 모집</div></div>`;
+const bottomJoin = `<div class="bottom"><div class="ghost">⚔ 혼자 도전 (봇 3명)</div></div>`;
+const S = {};
+S['1-list'] = () => { const L = [T[0], T[1], T[2], T[3], T[4]]; return `<div class="ph">${TOPBAR}${seg(L.length)}
+ <div class="list"><div class="hint"><span>지금 열린 팀 ${L.length}</span><span>↻ 방금</span></div>${L.map(row).join('')}</div>
+ ${bottomJoin}
+ <div class="note" style="left:16px;top:60px;width:358px;display:none"></div>
+ <div class="note" style="left:16px;top:650px;width:358px">기본 = 👥 팀 참가(왼쪽) · 누르지 않아도 열린 팀 전부 · 안 배운 차시 팀 = 흐리게 「아직 안 배움」</div>
+ <div class="note" style="left:16px;bottom:100px">아래 = 혼자 도전(보조 · 지금 기능 그대로) · 팀 모집 = 위 오른쪽 탭</div>
+</div>`; };
+S['2-empty'] = () => `<div class="ph">${TOPBAR}${seg(0)}
+ <div class="empty"><div class="pic">📋</div><b>지금 열린 팀이 없어요</b>먼저 팀을 열면 친구들이 여기서 보고 들어와요</div>
+ <div class="bottom" style="height:160px"><div class="ghost">⚔ 혼자 도전 (봇 3명)</div><div class="primary">➕ 내가 모집하기</div></div>
+ <div class="note" style="left:16px;top:470px;width:358px">빈 상태 = 그림 + 한 줄 + 주요 단추 「➕ 내가 모집하기」(누르면 오른쪽 탭 · 팀 모집 시트)</div>
+</div>`;
+S['3-many'] = () => { const G = {}; T.forEach((t) => (G[t.ch] = G[t.ch] || []).push(t)); const keys = Object.keys(G).sort((a, b) => (G[a][0].lock - G[b][0].lock) || a - b);
+ return `<div class="ph">${TOPBAR}${seg(T.length)}
+ <div class="chips"><div class="chip on">✓ 전체 ${T.length}</div><div class="chip">빈자리 있음</div><div class="chip">🛡 수호자</div><div class="chip">🔒 빼기</div></div>
+ <div class="list withchips">${keys.map((k) => `<div class="grp">${k}차시 · ${G[k].length}팀 ${G[k][0].lock ? '· 🔒 아직 안 배움' : ''}<span class="bar"></span></div>${G[k].map(row).join('')}`).join('')}</div>
+ ${bottomJoin}
+ <div class="note" style="right:16px;top:170px;max-width:220px">팀 10개 = 차시별 묶음 · 배운 차시가 위 · 안 배운 차시는 맨 아래 흐리게</div>
+</div>`; };
+S['4-password'] = () => `<div class="ph">${TOPBAR}${seg(5)}
+ <div class="list"><div class="hint"><span>지금 열린 팀 5</span><span>↻ 방금</span></div>${[T[0], T[1], T[2], T[3], T[4]].map(row).join('')}</div>
+ <div class="dim-bg"></div>
+ <div class="sheet" style="height:380px"><div class="grab"></div>
+  <div style="display:flex;gap:12px;align-items:center">${face(1)}<div><div style="font-size:13px;color:var(--text-2);font-weight:700">9차시 · 모험가 셋 · 2/4</div><div style="font-size:18px;font-weight:700">🔒 암호를 넣어 주세요</div></div></div>
+  <div class="pin"><div class="f">4</div><div class="f">7</div><div></div><div></div></div>
+  <div style="text-align:center;color:var(--text-3);font-size:14px">방장에게 숫자 4자리를 물어보세요</div>
+  <div style="position:absolute;left:16px;right:16px;bottom:20px" class="primary">👥 참가</div></div>
+ <div class="note" style="left:16px;top:120px;width:358px">🔒 팀 [참가] = 아래 시트로 숫자 4자리(11/23 「암호 설정은 선택」 그대로) · 숫자판 = 룬 키패드(시안에선 생략)</div>
+</div>`;
+const s = new URLSearchParams(location.search).get('s') || '1-list';
+document.getElementById('root').innerHTML = S[s]();
+</script></body></html>
