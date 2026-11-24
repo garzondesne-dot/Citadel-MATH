@@ -27,7 +27,7 @@ CHECK = {
 bad = [k for k, ok in CHECK.items() if not ok]; assert not bad, bad
 print('독립 검산', len(CHECK), '항목 모두 ✔')
 ANS = [A('g(f(x))'), A('결합법칙'),
-       A('일대일대응'), A('역함수'), A('f⁻¹'),
+       A('일대일대응'), A('역함수'), A('f<sup>−1</sup>'),
        A('7'), A('3'), A('4'), A('3'), A('5'),
        A('(y − 4)/3'), A('(x − 4)/3'),
        A('y = x'),
@@ -38,14 +38,14 @@ ANS = [A('g(f(x))'), A('결합법칙'),
 PAR = ['{KA[i]}', '①', '①']
 CIRCLE = [('( 일대일함수 · 일대일대응 · 상수함수 )', '일대일대응'),
           ('( {v("x")} 와 {v("y")} 를 바꾼다 · 양변을 제곱한다 )', '{v("x")} 와 {v("y")} 를 바꾼다')]
-MEMOS = ['<div class="tmemo"><b>판서</b> 생각 열기 = 일대일대응이라 거꾸로도 함수 ✔ · y = f(x) ⇔ x = f⁻¹(y) · (f⁻¹∘f)(x) = x</div>',
-         '<div class="tmemo"><b>판서</b> 문제 1 : 남은 짝 3 → 7 · (f⁻¹)⁻¹ = f · 구하기 = x 에 대해 풀고 → x, y 바꾸기 · 그래프 = y = x 대칭</div>',
-         '<div class="tmemo"><b>판서</b> f⁻¹(3) = −2 ⇔ f(−2) = 3 · −a + b = 1, −2a + b = 3 → a = −2, b = −1 → f(x) = −2x − 1</div>']
-ESSAY = ['f⁻¹(3) = −2 이므로 f(−2) = 3',
+MEMOS = ['<div class="tmemo"><b>판서</b> 생각 열기 = 일대일대응이라 거꾸로도 함수 ✔ · y = f(x) ⇔ x = f<sup>−1</sup>(y) · (f<sup>−1</sup>∘f)(x) = x</div>',
+         '<div class="tmemo"><b>판서</b> 문제 1 : 남은 짝 3 → 7 · (f<sup>−1</sup>)<sup>−1</sup> = f · 구하기 = x 에 대해 풀고 → x, y 바꾸기 · 그래프 = y = x 대칭</div>',
+         '<div class="tmemo"><b>판서</b> f<sup>−1</sup>(3) = −2 ⇔ f(−2) = 3 · −a + b = 1, −2a + b = 3 → a = −2, b = −1 → f(x) = −2x − 1</div>']
+ESSAY = ['f<sup>−1</sup>(3) = −2 이므로 f(−2) = 3',
          'f(−1) = 1 : −a + b = 1 · f(−2) = 3 : −2a + b = 3',
          '빼면 a = −2 → b = −1 → f(x) = −2x − 1',
          'f(4) = −8 − 1 = −9']
-RUBRIC = '4점 · 3점 통과 ① f⁻¹(3) = −2 → f(−2) = 3 ② 식 두 개 ③ a, b ④ f(4) 답 (① 을 거꾸로 쓰면 이어진 단계 0)'
-FS = {1: '4x + 6 = 2 → x = −1', 2: 'y = 4x + 6 → x = (y − 6)/4 → x, y 바꿈', 4: 'f⁻¹(2) = 0 → f(0) = 2 → b = 2 · a + b = 5 → a = 3 → f(2) = 8'}
+RUBRIC = '4점 · 3점 통과 ① f<sup>−1</sup>(3) = −2 → f(−2) = 3 ② 식 두 개 ③ a, b ④ f(4) 답 (① 을 거꾸로 쓰면 이어진 단계 0)'
+FS = {1: '4x + 6 = 2 → x = −1', 2: 'y = 4x + 6 → x = (y − 6)/4 → x, y 바꿈', 4: 'f<sup>−1</sup>(2) = 0 → f(0) = 2 → b = 2 · a + b = 5 → a = 3 → f(2) = 8'}
 KA = ['① 2', '① 3']
 build('gen_ws17v1.py', sys.argv[1], lesson=17, ANS=ANS, PAR=PAR, CIRCLE=CIRCLE, MEMOS=MEMOS, ESSAY=ESSAY, RUBRIC=RUBRIC, FS=FS, KA=KA)
