@@ -307,6 +307,33 @@ for p in b['pool']: assert len({i['type'] for i in p}) == 1
 import os; sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from overlay import apply_file  # 드라이브 팩 손질(판 1 ~ 6 · 조사 · 형성평가 세트 1 = 학습지 …) = overlays/<id>.json · 2026-11-24
 pack = apply_file(pack, pack['id'])
+
+# ───────── 문제 4 = 학습지 꼴 (2026-11-25 · 1-3반 수업 뒤 선생님 「문제4번 학습지 작성한 정답이랑 보기에서 고르는거랑 완전 달라서 혼란스러움. 학습지에 맞춰」 · DECISIONS c14fb98) ─────────
+#   학습지 (1) {(0, □), (1, □), (2, □), (3, □)} 빈칸 4개 · (2) ( 점 4개 · 직선 · 포물선 ) → 게임도 같은 꼴 (그림 보기 → 수 · 낱말 보기) · 판 7 모두 (오버레이 판 1 ~ 6 포함)
+r4 = random.Random(1504)
+def parse_lin(q):
+    import re
+    m = re.search(r'함수 y = (−?\d*)x(?: ([+−]) (\d+))? 의', q); assert m, q
+    c = m.group(1); p = {'': 1, '−': -1}.get(c, None) or int(c.replace('−', '-'))
+    k = 0 if not m.group(2) else (int(m.group(3)) * (1 if m.group(2) == '+' else -1))
+    return p, k
+def p4(items):
+    p, q = parse_lin(items[0]['question']); f = f'y = {lin(p, q)}'
+    X = [0, 1, 2, 3]; Y = [p * x + q for x in X]
+    nums = lambda ys: ', '.join(M(y) for y in ys)
+    good = nums(Y); bad = [nums([-p * x + q for x in X]), nums(Y[::-1])]
+    assert len({good, *bad}) == 3
+    it1 = ch(good, bad, ' · '.join(f'x = {x} → {M(y)}' for x, y in zip(X, Y)) + f' ({f} 에 넣기)',
+             f'문제 4) 정의역이 {{0, 1, 2, 3}} 인 함수 {f} 의 그래프는 {{(0, □), (1, □), (2, □), (3, □)}} 이다. □ 에 들어갈 수를 차례로 고르면?',
+             say='그래프 = {' + ', '.join(f'({x}, {M(y)})' for x, y in zip(X, Y)) + '}', r=r4)
+    it2 = {'type': 'choice', 'question': f'문제 4) 정의역이 {{x | x 는 실수}} 인 함수 {f} 의 그래프 모양은?', 'choices': ['점 4개', '직선', '포물선'], 'answerIndex': 1,
+           'solution': f'정의역이 실수 전체 → x 마다 점이 빈틈없이 이어져 직선 {f}'}
+    ok(f'p4 {f}', good, f'x = 0, 1, 2, 3 → {good} · 실수 전체 = 직선')
+    assert len(it1['solution']) <= 90
+    return [it1, it2] + items[2:]
+m1 = pack['monsters']['m1']
+m1['first'] = p4(m1['first']); m1['retry']['pool'] = [p4(v) for v in m1['retry']['pool']]
+assert m1['first'][0]['choices'][m1['first'][0]['answerIndex']] == '3, 1, −1, −3'   # 학습지 v3 문제 4 (1) 그대로
 json.dump(pack, open(OUT, 'w', encoding='utf8'), ensure_ascii=False, indent=1)
 print('| 문항 | 정답 | 계산 한 줄 | 확인 |\n|---|---|---|---|')
 for n, a, c in CHECK: print(f'| {n} | {a} | {c} | ✅ |')
