@@ -334,6 +334,29 @@ def p4(items):
 m1 = pack['monsters']['m1']
 m1['first'] = p4(m1['first']); m1['retry']['pool'] = [p4(v) for v in m1['retry']['pool']]
 assert m1['first'][0]['choices'][m1['first'][0]['answerIndex']] == '3, 1, −1, −3'   # 학습지 v3 문제 4 (1) 그대로
+
+
+# ───────── 문제 6 = 그래프 (1) ~ (4) + 식 · 두 번 묻기 (2026-11-25 · 선생님 「문제 6번은 소문항 (4) 그래프만 문제에 나와있어서 아이들이 혼란스러워해. 그냥 (1)~(4) 그래프랑 그밑에 함수 식 적힌걸로 일대일함수를 고르시오. 그다음 일대일 대응을 고르시오. 두번 물어보게하면 될것같아.」) ─────────
+#   단계 ① 일대일함수 모두 ② 일대일대응 모두 · 두 단계 모두 네 그래프 + 식을 다시 보여 줌(혼자 풀림) · 옛 단계 ③(까닭 고르기) 뺌 · 판 7 모두
+G6W = '@-3,3,-5,7'
+def gexpr(opt):
+    e = opt.split(') ', 1)[1].replace(' ', '').replace('−', '-').replace('²', '^2')
+    return e
+def p6(items):
+    import re
+    opts = items[0]['options']
+    pw = re.search(r'\[\[graph:(.+?) @', items[0]['question']).group(1)          # (4) 조각 그래프 글 (옛 판 그대로)
+    figs = [f'[[graph:{gexpr(o)} {G6W}]] {o}' for o in opts[:3]] + [f'[[graph:{pw} {G6W}]] {opts[3]}']   # 그래프 밑에 식
+    head = '문제 6) 함수 (1) ~ (4) 의 그래프 (정의역 · 공역 = 실수 전체)   ' + '   '.join(figs)
+    it1 = {'type': 'multi', 'question': head + '\n일대일함수를 모두 고르시오.', 'options': opts, 'answer': [0, 3],
+           'solution': '가로줄을 그었을 때 그래프와 한 번만 만나는 것 = (1), (4) · (2) (3) 은 x = −1, 1 에서 값이 같다'}
+    it2 = {'type': 'multi', 'question': head + '\n일대일대응을 모두 고르시오.', 'options': opts, 'answer': [0, 3],
+           'solution': '(1) · (4) 는 일대일함수이고 치역 = 실수 전체 = 공역 → 일대일대응'}
+    return [it1, it2]
+m2 = pack['monsters']['m2']
+m2['first'] = p6(m2['first']); m2['retry']['pool'] = [p6(v) for v in m2['retry']['pool']]
+for k in pack['keys']:
+    k['uses'] = [({'at': 'm2', 'n': 1} if u == {'at': 'm2', 'n': 3} else u) for u in k['uses']]   # 「제곱한 값」 = (2) 가 x = ±1 에서 같은 값 → 단계 ① 에서 씀
 json.dump(pack, open(OUT, 'w', encoding='utf8'), ensure_ascii=False, indent=1)
 print('| 문항 | 정답 | 계산 한 줄 | 확인 |\n|---|---|---|---|')
 for n, a, c in CHECK: print(f'| {n} | {a} | {c} | ✅ |')
