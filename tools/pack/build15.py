@@ -1,4 +1,4 @@
-# 15차시 「함수의 그래프 · 여러 가지 함수」 차시 팩 만들기 + 정답 독립 검산 (2026-11-20 · 손발 #7 · 메타인지 8 컨펌 #3: A1 · B1 · C1 · D1)
+# 15차시 「함수의 그래프 · 여러 가지 함수」 차시 팩 만들기 (2026-11-25 팩 v7: 몬스터 3 = 중단원 10 · 119쪽 서술형 · 학습지 v3 · 📚 차시팩 #1) + 정답 독립 검산 (2026-11-20 · 손발 #7 · 메타인지 8 컨펌 #3: A1 · B1 · C1 · D1)
 #   학습지 = tools/worksheet/gen_ws15v2.py (v2 = 형성평가 4 보기 순서) (교과서 미래엔 108~110쪽 · 중단원 02) · 꼴 = 14차시 팩 v3 (엔진 꼴 v1)
 #   새 꼴(손발 #2 fn-input · 11/24 정식): 그래프 고르기 = choice 보기 "graph:<그림 글>" · 짝 맞추기 = match { xs, ys, answer [[X번, Y번]] }
 #   실행: python3 -I tools/pack/build15.py <출력.json>  → 검산 표를 찍고, 하나라도 틀리면 멈춤
@@ -19,9 +19,9 @@ def lin(p, q, var='x'):  # 「3x − 1」 꼴 (화면용)
 def glin(p, q): return f'y={p}x{q:+d}'.replace('+0', '') if q else f'y={p}x'  # 그림 글 (ASCII)
 
 
-def ch(correct, wrong, sol, q, say=None):
+def ch(correct, wrong, sol, q, say=None, r=None):
     c = [correct] + list(wrong); assert len(set(c)) == len(c), c
-    rnd.shuffle(c)
+    (r or rnd).shuffle(c)
     it = {'type': 'choice', 'question': q, 'choices': c, 'answerIndex': c.index(correct), 'solution': sol}
     if say: it['say'] = say
     return it
@@ -120,7 +120,7 @@ def name(kind):
     if kind[0] == 'l': return f'y = {lin(kind[1], kind[2])}'
     if kind[0] == 'a': return 'y = |x|' + (f' + {kind[1]}' if kind[1] > 0 else f' − {-kind[1]}' if kind[1] < 0 else '')
     a, r = kind[1], kind[2]; return f'y = {"" if a == 1 else "−" if a == -1 else M(a)}x² ' + (f'+ {r}' if r > 0 else f'− {-r}')
-def m3_set(K, tag):
+def cls_set(K, tag):  # 옛 몬스터 3(중단원 02) 꼴 · 지금은 형성평가 4 가 씀
     C = [classify(k) for k in K]
     onto = [i for i, c in enumerate(C) if c[0]]; ident = [i for i, c in enumerate(C) if c[1]]; const = [i for i, c in enumerate(C) if c[2]]
     assert len(onto) == 2 and len(ident) == 1 and len(const) == 1 and ident[0] in onto
@@ -140,14 +140,56 @@ def m3_set(K, tag):
             'xs': ['일대일대응', '항등함수', '상수함수'], 'ys': LET, 'answer': ans, 'xn': '이름', 'yn': '보기',
             'solution': f'일대일대응 {LET[onto[0]]}, {LET[onto[1]]} · 항등함수 {LET[ident[0]]} · 상수함수 {LET[const[0]]}',
             'say': f'그러므로 일대일대응 {LET[onto[0]]}, {LET[onto[1]]} · 항등함수 {LET[ident[0]]} · 상수함수 {LET[const[0]]}'}
-    ok(f'm3{tag}', boss['solution'], f'샘플: 대응 {onto} · 항등 {ident} · 상수 {const} · {LET[qi]} f(±1) = {fv}')
+    ok(f'cls{tag}', boss['solution'], f'샘플: 대응 {onto} · 항등 {ident} · 상수 {const} · {LET[qi]} f(±1) = {fv}')
     return [s1, s2, s3, s4, boss]
-M3K = [[('c', -1), ('id',), ('l', -4, 1), ('q', 2, -3)],   # 교과서 118쪽 중단원 02 그대로
-       [('id',), ('l', -3, 2), ('q', -1, 4), ('c', 7)],
-       [('q', 1, -1), ('c', -2), ('id',), ('l', 5, 3)],
-       [('l', 4, -1), ('c', 3), ('q', 3, -2), ('id',)]]
-M3 = [m3_set(k, '' if i == 0 else f'r{i}') for i, k in enumerate(M3K)]
-assert M3[0][-1]['answer'] == [[0, 1], [0, 2], [1, 1], [2, 0]]
+
+# 옛 몬스터 3 판 4개가 쓰던 섞기 수만큼 rnd 를 그대로 돌림 → 형성평가 · 나머지 보기 순서가 팩 v6 와 같게 (11/25)
+_n = len(CHECK)
+for K in [[('c', -1), ('id',), ('l', -4, 1), ('q', 2, -3)], [('id',), ('l', -3, 2), ('q', -1, 4), ('c', 7)],
+          [('q', 1, -1), ('c', -2), ('id',), ('l', 5, 3)], [('l', 4, -1), ('c', 3), ('q', 3, -2), ('id',)]]: cls_set(K, 'old')
+del CHECK[_n:]
+r3 = random.Random(1510)   # 새 몬스터 3 전용 섞기
+
+
+# ───────── 몬스터 3 = 중단원 10 (119쪽 서술형 · 2026-11-25 선생님 「서술형문항 … 119 서술형 10번문항으로 교체」 · DECISIONS bd5c7e4) ─────────
+#   X = {x | p ≤ x ≤ q} → Y = {y | r ≤ y ≤ s} 의 f(x) = ax + b 가 일대일대응 → 양 끝끼리 대응 → a > 0 · a < 0 두 경우
+def sg(n): return M(n)
+def eq(c, k):  # 「c·a + b = k」 화면 글
+    return f'{"" if c == 1 else "−" if c == -1 else M(c)}a + b = {M(k)}'
+def pair(x, y): return f'({M(x)}, {M(y)})'
+def m3_set(p, q, r, s_, tag):
+    d = q - p; A = (s_ - r) // d; assert A * d == s_ - r and A > 0
+    b1 = r - A * p; b2 = s_ + A * p                       # a > 0 : f(p) = r · a < 0 : f(p) = s
+    assert A * p + b1 == r and A * q + b1 == s_ and -A * p + b2 == s_ and -A * q + b2 == r
+    Q = (f'중단원 10) 두 집합 X = {{x | {M(p)} ≤ x ≤ {M(q)}}}, Y = {{y | {M(r)} ≤ y ≤ {M(s_)}}} 에 대하여 X 에서 Y 로의 함수 f(x) = ax + b 가 '
+         f'일대일대응일 때, 상수 a, b 의 순서쌍 (a, b) 를 모두 구하시오.\n')
+    s1 = ch(f'양 끝끼리 대응 : {{f({M(p)}), f({M(q)})}} = {{{M(r)}, {M(s_)}}}', [f'f({M(p)}) = {M(p)}, f({M(q)}) = {M(q)} (항등함수)', f'f({M(p)}) = {M(r)} 만 성립하면 된다'],
+            f'일대일대응 → 치역 = Y → 일차함수는 정의역 양 끝의 함숫값 = 공역 양 끝 {M(r)}, {M(s_)}', Q + '일대일대응이 되려면 무엇이 성립해야 할까?',
+            say=f'일대일대응 → 양 끝끼리 대응 : {{f({M(p)}), f({M(q)})}} = {{{M(r)}, {M(s_)}}}', r=r3)
+    ops = [eq(p, r), eq(q, s_), eq(p, s_), eq(q, r), eq(q, s_ - r)]
+    assert len(set(ops)) == 5
+    r3.shuffle(ops)
+    s2 = {'type': 'multi', 'question': Q + 'a > 0 (오른쪽 위로 올라가는 직선) 일 때 맞는 식을 모두 고르시오.', 'options': ops,
+          'answer': sorted([ops.index(eq(p, r)), ops.index(eq(q, s_))]), 'solution': f'a > 0 → 작은 끝끼리 f({M(p)}) = {M(r)} · 큰 끝끼리 f({M(q)}) = {M(s_)}',
+          'say': f'a > 0 이면 f({M(p)}) = {M(r)}, f({M(q)}) = {M(s_)} → {eq(p, r)}, {eq(q, s_)}'}
+    s3 = ch(pair(A, b1), [pair(-A, b2), pair(A, -b1) if b1 else pair(A, A)], f'두 식을 빼면 {M(d)}a = {M(s_ - r)} → a = {M(A)}, b = {M(b1)}',
+            Q + f'a > 0 일 때 {eq(p, r)}, {eq(q, s_)} 이다. 순서쌍 (a, b) 는?', say=f'a > 0 : a = {M(A)}, b = {M(b1)}', r=r3)
+    t3 = pair(-A, b1) if b1 != b2 else pair(-A, -b2)
+    s4 = ch(pair(-A, b2), [pair(A, b1), t3], f'a < 0 → f({M(p)}) = {M(s_)}, f({M(q)}) = {M(r)} → a = {M(-A)}, b = {M(b2)}',
+            Q + 'a < 0 (오른쪽 아래로 내려가는 직선) 일 때 순서쌍 (a, b) 는?', say=f'a < 0 : f({M(p)}) = {M(s_)}, f({M(q)}) = {M(r)} → a = {M(-A)}, b = {M(b2)}', r=r3)
+    opts = [pair(A, b1), pair(-A, b2), pair(A, b2), pair(-A, b1), pair(b1, A)]
+    assert len(set(opts)) == 5, opts
+    r3.shuffle(opts)
+    boss = {'type': 'multi', 'question': Q + '그러므로 순서쌍 (a, b) 를 모두 고르시오.', 'options': opts,
+            'answer': sorted([opts.index(pair(A, b1)), opts.index(pair(-A, b2))]),
+            'solution': f'a > 0 → {pair(A, b1)} · a < 0 → {pair(-A, b2)}', 'say': f'그러므로 (a, b) = {pair(A, b1)}, {pair(-A, b2)}'}
+    ok(f'm3{tag}', f'{pair(A, b1)}, {pair(-A, b2)}', f'X [{p}, {q}] → Y [{r}, {s_}] · {A}·{p}+{b1}={r} · {A}·{q}+{b1}={s_} · {-A}·{p}+{b2}={s_} · {-A}·{q}+{b2}={r}')
+    return [s1, s2, s3, s4, boss]
+M3P = [(1, 3, -1, 5),       # 교과서 119쪽 중단원 10 그대로 → (3, −4), (−3, 8)
+       (2, 4, 1, 9), (1, 4, -2, 4), (-2, 1, -1, 5), (1, 2, -3, 1), (2, 5, -4, 2), (3, 5, 1, 7)]   # 0 · 대칭 정의역(b 가 같아짐) 피함
+M3 = [m3_set(*t, '' if i == 0 else f'r{i}') for i, t in enumerate(M3P)]
+assert M3[0][-1]['solution'] == 'a > 0 → (3, −4) · a < 0 → (−3, 8)'
+assert len({x[-1]['solution'] for x in M3}) == len(M3)
 
 
 # ───────── 형성평가 4 ─────────
@@ -172,14 +214,13 @@ def b3(K, tag):
 B3 = [b3([('l', 1, 2), ('q', 1, 0), ('a', 1), ('l', -3, 0)], ''), b3([('q', -1, 3), ('l', 2, -1), ('l', -1, 5), ('a', -2)], 'r1'),
       b3([('l', 4, 1), ('c', 0), ('q', 2, 1), ('id',)], 'r2'), b3([('c', 6), ('l', -2, 3), ('q', 1, -4), ('l', 5, 0)], 'r3')]
 def b4(K, tag):
-    it = dict(m3_set(K, f'b{tag}')[-1]); it.pop('say', None)
+    it = dict(cls_set(K, f'b{tag}')[-1]); it.pop('say', None)
     it['question'] = '4. 보기에서 일대일대응 · 항등함수 · 상수함수를 찾아 이름에서 보기로 화살표를 이으시오. (정의역 · 공역 = 실수 전체)\n' + '   '.join(f'{LET[i]}. {name(k)}' for i, k in enumerate(K))
     return it
 B4 = [b4([('id',), ('q', 1, 1), ('c', 5), ('l', 2, 0)], ''), b4([('l', -1, 3), ('q', 2, 0), ('id',), ('c', -4)], 'r1'),
       b4([('id',), ('c', 1), ('l', 3, -2), ('q', -1, -1)], 'r2'), b4([('q', 1, 2), ('l', -5, 1), ('c', 8), ('id',)], 'r3')]
 assert B4[0]['answer'] == [[0, 0], [0, 3], [1, 0], [2, 2]]  # 학습지 v2 형성평가 4 = ㄱ y=x ㄴ y=x²+1 ㄷ y=5 ㄹ y=2x → 대응 ㄱㄹ · 항등 ㄱ · 상수 ㄷ
 key = lambda a: sorted(map(tuple, a))
-assert not ({str(key(x['answer'])) for x in B4} & {str(key(s[-1]['answer'])) for s in M3})  # 형성평가 4 어느 판도 몬스터 3 어느 판과 기호 답 꼴이 안 겹침 (11/20 컨펌)
 POOL = [B1, B2, B3, B4]
 # 그래프 글이 겹치지 않음 · 몬스터 3 첫 판과 형성평가 4 첫 판의 보기 식이 다름
 
@@ -189,10 +230,10 @@ KEYS = [{'id': 'k1', 'name': '일차함수에 수 넣기', 'grade': '중2 · 일
          'vers': [{'type': 'choice', 'q': 'y = −2x + 3 에 x = 2 를 넣으면?', 'a': '0', 'ch': ['−1', '1', '7']},
                   {'type': 'choice', 'q': 'y = 3x − 1 에 x = −1 을 넣으면?', 'a': '1', 'ch': ['2', '−4', '4']},
                   {'type': 'choice', 'q': 'y = −x + 5 에 x = 3 을 넣으면?', 'a': '2', 'ch': ['8', '−2', '2']}], 'uses': [{'at': 'm1', 'n': 1}, {'at': 'boss', 'n': 1}]},
-        {'id': 'k2', 'name': '제곱한 값', 'grade': '중1 · 거듭제곱', 'help': '(−1)² = (−1) × (−1) = 1 · 부호가 반대인 두 수는 제곱이 같아요. · 이 열쇠는 문제 6 과 몬스터 3 에서 써요.',
+        {'id': 'k2', 'name': '제곱한 값', 'grade': '중1 · 거듭제곱', 'help': '(−1)² = (−1) × (−1) = 1 · 부호가 반대인 두 수는 제곱이 같아요. · 이 열쇠는 문제 6 에서 써요.',
          'vers': [{'type': 'choice', 'q': '(−1)² 과 1² 의 값은?', 'a': '1', 'ch': ['−1 과 1', '1 과 1', '−2 와 2']},
                   {'type': 'choice', 'q': '(−2)² 과 2² 의 값은?', 'a': '0', 'ch': ['4 와 4', '−4 와 4', '−4 와 −4']},
-                  {'type': 'choice', 'q': '(−3)² 의 값은?', 'a': '2', 'ch': ['−9', '−6', '9']}], 'uses': [{'at': 'm2', 'n': 3}, {'at': 'm3', 'n': 3}]}]
+                  {'type': 'choice', 'q': '(−3)² 의 값은?', 'a': '2', 'ch': ['−9', '−6', '9']}], 'uses': [{'at': 'm2', 'n': 3}]}]
 val = {'y = −2x + 3 에 x = 2 를 넣으면?': '−1', 'y = 3x − 1 에 x = −1 을 넣으면?': '−4', 'y = −x + 5 에 x = 3 을 넣으면?': '2',
        '(−1)² 과 1² 의 값은?': '1 과 1', '(−2)² 과 2² 의 값은?': '4 와 4', '(−3)² 의 값은?': '9'}
 assert -2 * 2 + 3 == -1 and 3 * -1 - 1 == -4 and -3 + 5 == 2 and (-1) ** 2 == 1 ** 2 == 1 and (-2) ** 2 == 2 ** 2 == 4 and (-3) ** 2 == 9
@@ -206,8 +247,8 @@ HELP1 = {'concept': '정의역이 수 몇 개면 그래프는 점 몇 개 · 실
          'example': {'q': '정의역이 {1, 2} 인 y = x + 1 의 그래프는?', 'sol': ['x = 1 → y = 2, x = 2 → y = 3', '그래프 = {(1, 2), (2, 3)}', '좌표평면 위의 점 2개']}, 'first': 'x = 0 일 때 y = □'}
 HELP2 = {'concept': '가로줄을 그었을 때 그래프와 한 번만 만나면 일대일함수 · (4) 는 두 부분의 y 값이 겹치지 않고, 합치면 실수 전체예요.',
          'example': {'q': 'y = x² 은 일대일함수일까?', 'sol': ['x = −1 → 1 · x = 1 → 1', '−1 ≠ 1 인데 함숫값이 같다', '일대일함수가 아니다 (일대일대응도 아님)']}, 'first': '(2) 에서 f(−1) 과 f(1) 은 □'}
-HELP3 = {'concept': '상수함수 = 모든 x 에 같은 값 · 항등함수 = f(x) = x · 일대일대응 = 일대일함수 + 치역 = 공역.',
-         'example': {'q': 'y = 4, y = x, y = 3x 중 일대일대응은?', 'sol': ['y = 4 는 상수함수 (모두 4)', 'y = x · y = 3x 는 직선 → 일대일함수 · 치역 = 실수 전체', '일대일대응 = y = x, y = 3x']}, 'first': '모든 x 에 같은 값이 대응하는 것 = □'}
+HELP3 = {'concept': '일차함수 f(x) = ax + b 가 일대일대응 → 치역 = 공역 → 정의역의 양 끝이 공역의 양 끝에 대응해요. a > 0 이면 작은 끝끼리 · a < 0 이면 엇갈려서.',
+         'example': {'q': 'X = {x | 0 ≤ x ≤ 2} → Y = {y | 1 ≤ y ≤ 7}, f(x) = ax + b 가 일대일대응이고 a > 0 이면?', 'sol': ['a > 0 → f(0) = 1, f(2) = 7', 'b = 1 · 2a + b = 7', 'a = 3, b = 1 → (3, 1)']}, 'first': 'a > 0 이면 f(작은 끝) = □'}
 steps = [
     {'id': 'intro', 'kind': 'intro', 'img': 'review', 'title': '도입 · 🔁 전시 확인 · 생각 열기',
      'say': '🔁 전시 확인: ① X 의 각 원소에 Y 의 원소가 (오직 하나)씩 대응 → 함수 ② 함숫값 전체의 집합 = (치역)\n🔍 생각 열기: 학생 3명 → 영화 · (가) 모두 다른 영화 (나) 모두 같은 영화 → 둘 다 함수 · 무엇이 다를까?'},
@@ -233,9 +274,9 @@ pack = {'id': 'ex-15', 'no': 15, 'v': 1, 'title': '함수의 그래프 · 여러
             'm1': {'title': '몬스터 1 수평선 박쥐', 'sprite': 'garden1:0', 'attack': 'pause', 'first': M1[0], 'retry': {'pool': M1[1:]}, 'help': HELP1},
             'm2': {'title': '몬스터 2 대각선 골렘', 'sprite': 'garden2:0', 'attack': 'pause', 'first': M2[0], 'retry': {'pool': M2[1:]}, 'help': HELP2},
             'm3': {'title': '몬스터 3 쌍둥이 뿔 늑대 · ⚔ 소레이드', 'sprite': 'garden3:0', 'attack': 'pause', 'first': M3[0], 'chain': {'pool': M3}, 'retry': {'pool': M3[1:]},
-                   'noteText': '상수함수 → 항등함수 → 이차함수가 일대일이 아닌 까닭 → 직선의 치역 → 짝 맞추기', 'help': HELP3}},
+                   'noteText': '양 끝끼리 대응 → a > 0 식 고르기 → a > 0 의 (a, b) → a < 0 의 (a, b) → 모두 고르기', 'help': HELP3}},
         'boss': {'title': '👑 15차시 형성평가 · 그래프 용', 'sprite': 'gardenboss0:0', 'items': 4, 'hpItems': 4,
-                 'tags': ['c1', 'c1', 'c2', 'c3'], 'links': ['m1', 'm1', 'm2', 'm3'],
+                 'tags': ['c1', 'c1', 'c2', 'c3'], 'links': ['m1', 'm1', 'm2', ''],
                  'pool': [p[1:] for p in POOL], 'sets': [None, [p[0] for p in POOL]]},
         'keys': KEYS}
 
