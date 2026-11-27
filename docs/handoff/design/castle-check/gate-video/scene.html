@@ -25,7 +25,7 @@ html,body{margin:0;background:#000;overflow:hidden}
 <div class="eye" id="e1" style="left:594px"></div><div class="eye" id="e2" style="left:646px"></div>
 <div id="hs"></div><div id="os"></div><div id="vx"></div>
 <div id="cut"></div><div id="vg"></div>
-<div class="t" id="t1" style="top:560px;font-size:44px"></div><div class="t" id="t2" style="top:300px;font-size:92px;color:#f2c14e"></div>
+<div class="t" id="t1" style="top:560px;font-size:44px"></div><div class="t" id="t2" style="top:300px;font-size:76px;color:#f2c14e"></div>
 <div id="fl"></div></div>
 <script>
 const $=i=>document.getElementById(i), cl=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)), ln=(t,a,b)=>cl((t-a)/(b-a)), ez=x=>x*x*(3-2*x), rnd=(i,k=1)=>{const x=Math.sin(i*127.1+k*311.7)*43758.5453;return x-Math.floor(x)};
@@ -75,7 +75,7 @@ function render(t){
   const T=(a,b,s)=>t>=a&&t<b?[s,Math.min(ln(t,a,a+.4),1-ln(t,b-.4,b))]:null;
   const m=T(.6,3.2,'벽돌은 쌓였다. 빛은 모였다.')||T(4.2,7.6,'이제, 우리가 지은 문 앞에 선다.')||T(12.6,14.4,'현자 「…… 문을 연다.」')||T(19.9,22.9,'12월 10일, 교실에서.');
   $('t1').textContent=m?m[0]:''; $('t1').style.opacity=m?m[1]:0; $('t1').style.zIndex=5000;
-  const b=T(18.6,22.9,'문이 열렸다'); $('t2').textContent=b?b[0]:''; $('t2').style.opacity=b?b[1]:0; $('t2').style.transform=`scale(${1+ln(t,18.6,22.9)*.06})`; $('t2').style.zIndex=5000; $('t2').style.top='18px';
+  const b=T(18.6,22.9,'마왕성 차원문이 열렸다'); $('t2').textContent=b?b[0]:''; $('t2').style.opacity=b?b[1]:0; $('t2').style.transform=`scale(${1+ln(t,18.6,22.9)*.06})`; $('t2').style.zIndex=5000; $('t2').style.top='18px';
   $('s').style.opacity=Math.min(ln(t,0,.6),1-ln(t,22.6,23));
 }
 render(0);
