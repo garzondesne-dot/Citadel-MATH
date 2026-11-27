@@ -1,0 +1,82 @@
+<!doctype html><meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Do+Hyeon&display=swap">
+<style>
+html,body{margin:0;background:#000;overflow:hidden}
+#s{position:relative;width:1280px;height:720px;overflow:hidden;background:#04050a;font-family:"Do Hyeon","Noto Sans CJK KR",sans-serif}
+#bg{position:absolute;inset:-20px;background:url(camp.jpg) center/cover;image-rendering:pixelated}
+#tint{position:absolute;inset:0;background:linear-gradient(#3a0610cc,#08040ccc 55%,#000d)}
+.g{position:absolute;left:479px;top:96px;width:322px;height:362px;background-size:100% 100%;image-rendering:pixelated}
+#goff{background-image:url(gate_off.png)}#gon{background-image:url(gate_on.png)}
+#glow{position:absolute;left:340px;top:20px;width:600px;height:520px;border-radius:50%;background:radial-gradient(closest-side,#ff3b5ccc,#b01cff55 45%,transparent 72%)}
+.h{position:absolute;width:160px;height:128px;background:url(back.png) 0 0/640px 4224px;image-rendering:pixelated;transform-origin:50% 100%}
+.o{position:absolute;width:10px;height:10px;border-radius:50%;background:#fff;box-shadow:0 0 14px 6px #ffd27a}
+#cut{position:absolute;inset:0;background:#05040a;z-index:2500}
+.f{position:absolute;background:url(faces.jpg);image-rendering:pixelated}
+.bar{position:absolute;left:0;right:0;height:6px;background:#f2c14e}
+.t{position:absolute;left:0;right:0;text-align:center;color:#f4ecd8;text-shadow:0 3px 0 #000,0 0 18px #000}
+#vx{position:absolute;left:640px;top:280px;width:2400px;height:2400px;margin:-1200px;border-radius:50%;background:radial-gradient(circle,#fff 0 3%,transparent 16%),repeating-radial-gradient(circle,#0000 0 60px,#1a021f66 60px 120px),conic-gradient(#ff2b4d,#7a12c9,#ff7a3d,#2a0638,#ff2b4d,#b01cff,#ffd27a,#3a0610,#ff2b4d,#7a12c9,#ff7a3d,#2a0638,#ff2b4d)}
+#fl{position:absolute;inset:0;background:#fff}
+.eye{position:absolute;top:246px;width:40px;height:22px;z-index:3;border-radius:50% 50% 45% 45%;background:#ff1f2e;box-shadow:0 0 26px 10px #ff3b2f}
+#rays{position:absolute;left:640px;top:280px;width:1800px;height:1800px;margin:-900px;background:repeating-conic-gradient(#ffd27a55 0 4deg,transparent 4deg 16deg);border-radius:50%}
+#vg{position:absolute;inset:0;box-shadow:inset 0 0 220px 80px #000}
+</style>
+<div id="s"><div id="bg"></div><div id="tint"></div><div id="rays"></div><div id="glow"></div>
+<div class="g" id="goff"></div><div class="g" id="gon"></div>
+<div class="eye" id="e1" style="left:594px"></div><div class="eye" id="e2" style="left:646px"></div>
+<div id="hs"></div><div id="os"></div><div id="vx"></div>
+<div id="cut"></div><div id="vg"></div>
+<div class="t" id="t1" style="top:560px;font-size:44px"></div><div class="t" id="t2" style="top:300px;font-size:92px;color:#f2c14e"></div>
+<div id="fl"></div></div>
+<script>
+const $=i=>document.getElementById(i), cl=(x,a=0,b=1)=>Math.max(a,Math.min(b,x)), ln=(t,a,b)=>cl((t-a)/(b-a)), ez=x=>x*x*(3-2*x), rnd=(i,k=1)=>{const x=Math.sin(i*127.1+k*311.7)*43758.5453;return x-Math.floor(x)};
+// 용사 33명: 문을 바라보고 세 줄(뒷모습) · 현자(7번)는 앞으로
+const N=33, H=[]; const order=[...Array(N).keys()].filter(i=>i!==7);
+order.forEach((k,j)=>{const row=j<9?0:j<20?1:2, n=[9,11,12][row], idx=j-[0,9,20][row], sc=[.95,1.2,1.5][row], y=[500,585,690][row], span=[620,900,1180][row];
+  const x=640+(idx-(n-1)/2)*span/(n-1)+(rnd(j)-.5)*18; const el=document.createElement('div');el.className='h';$('hs').append(el);
+  H.push({el,k,x,y:y+(rnd(j,2)-.5)*14,sc,delay:rnd(j,3)*2.6,side:x<640?-1:1,row})});
+const sage=document.createElement('div');sage.className='h';$('hs').append(sage);
+const O=H.map((h,i)=>{const o=document.createElement('div');o.className='o';$('os').append(o);return o});
+const FACE=[0,3,10,18,5,23, 1,6,13,20,26,31, 2,9,16,22,28,33, 4,11,14,19,24,30];
+function face(i,x,y,w,h){const d=document.createElement('div');d.className='f';const c=i%3,r=Math.floor(i/3);d.style.cssText=`left:${x}px;top:${y}px;width:${w}px;height:${h}px;background-size:${w*3}px ${h*12}px;background-position:${-c*w}px ${-r*h}px`;return d}
+function render(t){
+  // 배경
+  $('bg').style.transform=`scale(${1.06+t*.004}) translateY(${-t*1.2}px)`; 
+  const E=ez(ln(t,14.5,17.4));                         // 에너지 주입 0 → 1
+  const open=t>=17.6;
+  $('tint').style.opacity=open?.55:.95-.25*E;
+  $('gon').style.opacity=open?1:cl(.12+.88*E); $('gon').style.filter=`hue-rotate(${open?150:150*ez(ln(E,.3,1))}deg) saturate(${1+E*.8}) brightness(${1+E*.5+(open?.3:0)})`;
+  const shake=(t>14.5&&t<17.6)?E*5:0, sx=(rnd(Math.floor(t*30),5)-.5)*shake*2, sy=(rnd(Math.floor(t*30),6)-.5)*shake*2;
+  for(const id of ['goff','gon'])$(id).style.transform=`translate(${sx}px,${sy}px) scale(${1+(open?.06:0)+.02*Math.sin(t*3)})`;
+  $('glow').style.opacity=open?.95:.15+.6*E+.08*Math.sin(t*2.2); $('glow').style.transform=`scale(${open?1.5:.8+.5*E})`;
+  $('rays').style.opacity=open?.5*ln(t,17.9,18.6):0; $('rays').style.transform=`rotate(${t*14}deg)`;
+  // 용사
+  H.forEach((h,i)=>{const p=ez(ln(t,3+h.delay,5.2+h.delay)), x0=h.x+h.side*520, y0=h.y+260, x=x0+(h.x-x0)*p, y=y0+(h.y-y0)*p;
+    const walking=p>0&&p<1, fr=walking?1+Math.floor(t*7+i)%2:3, bob=(t>14.5&&!open)?Math.sin(t*9+i)*1.5*E:0, back=open?ln(t,17.6,18)*-10*Math.sin(Math.min(1,ln(t,17.6,18.4))*Math.PI):0;
+    h.el.style.cssText+=`;left:${x-80}px;top:${y-128+bob-back}px;transform:scale(${h.sc});background-position:${-fr*160}px ${-h.k*128}px;opacity:${p>0?1:0};z-index:${Math.round(y)};filter:brightness(${.55+.35*E+(open?.5:0)})`});
+  const sp=ez(ln(t,12.2,13.6)); sage.style.cssText+=`;left:${640-80}px;top:${(610-(610-455)*sp)-128}px;transform:scale(${1.5-.35*sp});background-position:${-(sp>0&&sp<1?(1+Math.floor(t*6)%2):3)*160}px ${-7*128}px;opacity:${t>12?1:0};z-index:${Math.round(610-155*sp)+1};filter:brightness(${.8+.6*E}) drop-shadow(0 0 ${6+E*14}px #ffd27a)`;
+  // 빛 구슬
+  O.forEach((o,i)=>{const h=H[i], st=14.5+Math.pow(i/N,.6)*2.2, p=ln(t,st,st+.55), q=p*p; const x=h.x+(640-h.x)*q, y=(h.y-70)+(285-(h.y-70))*q-Math.sin(p*Math.PI)*70;
+    o.style.cssText+=`;left:${x-5}px;top:${y-5}px;opacity:${p>0&&p<1?1:0};z-index:2000`});
+  // 눈
+  const ey=ez(ln(t,19.6,20.1)); for(const id of ['e1','e2']){$(id).style.opacity=ey; $(id).style.transform=`scaleY(${ey})`}
+  // 컷인(8 ~ 12초)
+  const cut=$('cut'); 
+  if(t>=8&&t<12.1){cut.style.opacity=1; const u=t-8; let key, html=[];
+    if(u<2.1){const n=Math.floor(u/.35), w=(u-n*.35)/.35; key='a'+n; if(cut.dataset.k!==key){cut.dataset.k=key;cut.innerHTML='';const f=face(FACE[n],0,40,1280,640);f.id='cf';cut.append(f);const b1=document.createElement('div');b1.className='bar';b1.style.top='34px';const b2=b1.cloneNode();b2.style.top='680px';cut.append(b1,b2)}
+      const f=$('cf'); f.style.transform=`translateX(${(1-ez(cl(w*3)))*(n%2?-1:1)*160+(n%2?1:-1)*w*24}px) scale(${1.04+w*.03})`; f.style.filter=`brightness(${1+.9*(1-cl(w*4))})`}
+    else if(u<3.3){const n=Math.min(12,1+Math.floor((u-2.1)/.09)); key='b'+n; if(cut.dataset.k!==key){cut.dataset.k=key;cut.innerHTML='';for(let i=0;i<n;i++)cut.append(face(FACE[6+i],(i%4)*320,120+(Math.floor(i/4))*160,320,160))}}
+    else{const n=Math.min(34,1+Math.floor((u-3.3)/.014)); key='c'+n; if(cut.dataset.k!==key){cut.dataset.k=key;cut.innerHTML='';for(let i=0;i<n;i++){const j=(i*7)%34;cut.append(face(j,(i%7)*183-1,130+(Math.floor(i/7))*92,184,92))}} cut.style.filter=`brightness(${1+ln(u,3.85,4.1)*4})`}
+  }else{cut.style.opacity=0;cut.dataset.k='';cut.style.filter=''}
+  // 소용돌이 폭발 · 번쩍
+  const v=ln(t,17.55,19.3); $('vx').style.opacity=v>0&&v<1?Math.sin(v*Math.PI)**.6:0; $('vx').style.transform=`scale(${.05+v*1.2}) rotate(${-t*260}deg)`; $('vx').style.zIndex=3000;
+  let fl=0; fl=Math.max(fl,1-ln(t,17.5,18.3)*1, 0)*(t>=17.5?1:0); fl=Math.max(fl,(t>=12.05&&t<12.5)?1-ln(t,12.05,12.5):0,(t>=7.95&&t<8.2)?1-ln(t,7.95,8.2):0); $('fl').style.opacity=fl; $('fl').style.zIndex=4000;
+  $('vg').style.zIndex=3500;
+  // 글
+  const T=(a,b,s)=>t>=a&&t<b?[s,Math.min(ln(t,a,a+.4),1-ln(t,b-.4,b))]:null;
+  const m=T(.6,3.2,'벽돌은 쌓였다. 빛은 모였다.')||T(4.2,7.6,'이제, 우리가 지은 문 앞에 선다.')||T(12.6,14.4,'현자 「…… 문을 연다.」')||T(19.9,22.9,'12월 10일, 교실에서.');
+  $('t1').textContent=m?m[0]:''; $('t1').style.opacity=m?m[1]:0; $('t1').style.zIndex=5000;
+  const b=T(18.6,22.9,'문이 열렸다'); $('t2').textContent=b?b[0]:''; $('t2').style.opacity=b?b[1]:0; $('t2').style.transform=`scale(${1+ln(t,18.6,22.9)*.06})`; $('t2').style.zIndex=5000; $('t2').style.top='18px';
+  $('s').style.opacity=Math.min(ln(t,0,.6),1-ln(t,22.6,23));
+}
+render(0);
+</script>
